@@ -3,7 +3,9 @@ using FreeImageAPI;
 using JetEazy.BasicSpace;
 using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Interface;
+using JetEazy.Utils;
 using JzDisplay;
+using JzDisplay.UISpace;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
@@ -23,6 +25,7 @@ namespace LaserAlignDX.FormSpace
 {
     public partial class frmFPIRecipe : Form
     {
+        #region PRIVATE_MEMBERS
         protected IxLineScanCam IScanCam
         {
             get { return Traveller106.Universal.IxLineScan; }
@@ -49,7 +52,9 @@ namespace LaserAlignDX.FormSpace
                 return measureType;
             }
         }
+        #endregion
 
+        #region PRIVATE_GUI_MEMBERS
         int xTabIndex
         {
             get
@@ -57,25 +62,25 @@ namespace LaserAlignDX.FormSpace
                 return tabControl2.SelectedIndex;
             }
         }
-
         Timer xTimer = null;
-        Button btnOK;
-        Button btnCancel;
+        #endregion
 
-        Button btnLoadImage;
-        Button btnSelectRegion;
+        #region GUI_LINKS
+        Button btnOK => button1;
+        Button btnCancel => button2;
+        Button btnLoadImage => button7;
+        Button btnSelectRegion => button3;
         //Button btnRegionBaseForm;
-        Button btnGetRealImage;
-
-        Button btnCreateRegions;
+        Button btnGetRealImage => button5;
+        Button btnCreateRegions => button9;
         //Button btnSelectTemplate;
-        Button btnSelectTemplateForm;
-        Button btnNoTrayTemplateForm;
-        Button btnFlyTemplateForm;
+        Button btnSelectTemplateForm => button6;
+        Button btnNoTrayTemplateForm => button4;
+        Button btnFlyTemplateForm => button10;
+        Button btnControlLight => button8;
+        Button btnSaveImage => button11;
+        #endregion
 
-        Button btnControlLight;
-
-        Button btnSaveImage;
 
         public frmFPIRecipe()
         {
@@ -92,7 +97,9 @@ namespace LaserAlignDX.FormSpace
 
         private void FrmFPIRecipe_FormClosed(object sender, FormClosedEventArgs e)
         {
-
+            // 注意: xTimer 不用之後, 必須調用 Dispose() !!!
+            xTimer?.Dispose();
+            xTimer = null;
         }
 
         private void FrmFPIRecipe_Load(object sender, EventArgs e)
@@ -100,18 +107,17 @@ namespace LaserAlignDX.FormSpace
             init_Display();
             update_Display();
 
-            btnOK = button1;
-            btnCancel = button2;
-
-            btnLoadImage = button7;
-            btnSelectRegion = button3;
-            btnNoTrayTemplateForm = button4;
-            btnCreateRegions = button9;
-            btnGetRealImage = button5;
-            btnSelectTemplateForm = button6;
-            btnControlLight = button8;
-            btnFlyTemplateForm = button10;
-            btnSaveImage = button11;
+            //btnOK = button1;
+            //btnCancel = button2;
+            //btnLoadImage = button7;
+            //btnSelectRegion = button3;
+            //btnNoTrayTemplateForm = button4;
+            //btnCreateRegions = button9;
+            //btnGetRealImage = button5;
+            //btnSelectTemplateForm = button6;
+            //btnControlLight = button8;
+            //btnFlyTemplateForm = button10;
+            //btnSaveImage = button11;
 
             btnOK.Click += BtnOK_Click;
             btnCancel.Click += BtnCancel_Click;
@@ -128,6 +134,7 @@ namespace LaserAlignDX.FormSpace
             btnSaveImage.Click += BtnSaveImage_Click;
             btnNoTrayTemplateForm.Click += BtnNoTrayTemplateForm_Click;
 
+            // 注意: xTimer 不用之後, 必須調用 Dispose() !!!
             xTimer = new Timer();
             xTimer.Interval = 50;
             xTimer.Enabled = true;
@@ -189,22 +196,34 @@ namespace LaserAlignDX.FormSpace
 
         }
 
-        frmFlySetup frmFlySetupX = null;// new frmFlySetup();
+        //>>> 沒有必要的話, 不需要將 frmFlySetup 提升為 member data !!!
+        //>>> frmFlySetup frmFlySetupX = null;// new frmFlySetup();
+
         private void BtnFlyTemplateForm_Click(object sender, EventArgs e)
         {
-            frmFlySetupX = new frmFlySetup();
-            frmFlySetupX.ShowDialog();
-            frmFlySetupX.Dispose();
-            frmFlySetupX = null;
+            //>>> 沒有必要的話, 不需要將 frmFlySetup 提升為 member data !!!
+
+            using (var frmFlySetupX = new frmFlySetup())
+            {
+                frmFlySetupX.ShowDialog();
+                //frmFlySetupX.Dispose();
+                //frmFlySetupX = null;
+            }
         }
 
-        frmLightControl frmLight = null;
+        //>>> 沒有必要的話, 不需要將 frmLightControl 提升為 member data !!!
+        //>>> frmLightControl frmLight = null;
+
         private void BtnControlLight_Click(object sender, EventArgs e)
         {
-            frmLight = new frmLightControl();
-            frmLight.ShowDialog();
-            frmLight.Dispose();
-            frmLight = null;
+            //>>> 沒有必要的話, 不需要將 frmLightControl 提升為 member data !!!
+
+            using (var frmLight = new frmLightControl())
+            {
+                frmLight.ShowDialog();
+                //frmLight.Dispose();
+                //frmLight = null;
+            }
         }
 
         private void BtnGetRealImage_Click(object sender, EventArgs e)
@@ -232,14 +251,18 @@ namespace LaserAlignDX.FormSpace
         {
             showTemplateX3DialogWindow();
         }
-        frmTemplateX3 FrmTemplateX3 = null;
+
+        //>>> 沒有必要的話, 不需要將 FrmTemplateX3 提升為 member data !!!
+        //>>> frmTemplateX3 FrmTemplateX3 = null;
+
         void showTemplateX3DialogWindow()
         {
-            FrmTemplateX3 = new frmTemplateX3();
-            FrmTemplateX3.ShowDialog();
-            FrmTemplateX3.Dispose();
-            FrmTemplateX3 = null;
-
+            using (var frm = new frmTemplateX3())
+            {
+                frm.ShowDialog();
+                //FrmTemplateX3.Dispose();
+                //FrmTemplateX3 = null;
+            }
 
             propertyGrid1.SelectedObject = RecipeParaGridClass.Instance;
         }
@@ -268,10 +291,10 @@ namespace LaserAlignDX.FormSpace
         //    FrmBaseX2.Dispose();
         //    FrmBaseX2 = null;
         //}
-        private void BtnRegionBaseForm_Click(object sender, EventArgs e)
-        {
-            //showBaseX2DialogWindow();
-        }
+        //private void BtnRegionBaseForm_Click(object sender, EventArgs e)
+        //{
+        //    //showBaseX2DialogWindow();
+        //}
 
         private void BtnSelectRegion_Click(object sender, EventArgs e)
         {
@@ -281,10 +304,12 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnLoadImage_Click(object sender, EventArgs e)
         {
-            string _filename = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
-            if (!string.IsNullOrEmpty(_filename))
+            string fileName = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
+
+            if (!string.IsNullOrEmpty(fileName))
             {
-                FreeImageBitmap freeImageBitmap = new FreeImageBitmap(_filename);
+#if (OPT_LEGACY)
+                FreeImageBitmap freeImageBitmap = new FreeImageBitmap(fileName);
 
                 switch (xTabIndex)
                 {
@@ -292,7 +317,7 @@ namespace LaserAlignDX.FormSpace
                         if (freeImageBitmap.PixelFormat == PixelFormat.Format32bppArgb)
                         {
                             xRecipe.bmpOrg.Dispose();
-                            xRecipe.bmpOrg = Convert32bppTo8bpp(freeImageBitmap.ToBitmap());
+                            xRecipe.bmpOrg = EzMvdImageConvertor.Convert32bppTo8bpp(freeImageBitmap.ToBitmap());
 
                             //Bitmap b1 = Convert32bppTo8bpp(freeImageBitmap.ToBitmap());
                             //xRecipe.bmpOrg.Dispose();
@@ -302,7 +327,7 @@ namespace LaserAlignDX.FormSpace
                         }
                         else if (freeImageBitmap.PixelFormat == PixelFormat.Format24bppRgb)
                         {
-                            Bitmap b1 = Convert24bppTo8bpp(freeImageBitmap.ToBitmap());
+                            Bitmap b1 = EzMvdImageConvertor.Convert24bppTo8bpp(freeImageBitmap.ToBitmap());
                             xRecipe.bmpOrg.Dispose();
                             xRecipe.bmpOrg = b1.Clone(new Rectangle(0, 0, b1.Width, b1.Height), PixelFormat.Format8bppIndexed);
                             b1.Dispose();
@@ -320,11 +345,12 @@ namespace LaserAlignDX.FormSpace
                             JetEazy.BasicSpace.VsMSG.Instance.Warning($"加载图片格式不支持！");
                         }
                         break;
+
                     case 1:
                         if (freeImageBitmap.PixelFormat == PixelFormat.Format32bppArgb)
                         {
                             xRecipe.bmpOrgNoTray.Dispose();
-                            xRecipe.bmpOrgNoTray = Convert32bppTo8bpp(freeImageBitmap.ToBitmap());
+                            xRecipe.bmpOrgNoTray = EzMvdImageConvertor.Convert32bppTo8bpp(freeImageBitmap.ToBitmap());
 
                             //Bitmap b1 = Convert32bppTo8bpp(freeImageBitmap.ToBitmap());
                             //xRecipe.bmpOrg.Dispose();
@@ -334,7 +360,7 @@ namespace LaserAlignDX.FormSpace
                         }
                         else if (freeImageBitmap.PixelFormat == PixelFormat.Format24bppRgb)
                         {
-                            Bitmap b1 = Convert24bppTo8bpp(freeImageBitmap.ToBitmap());
+                            Bitmap b1 = EzMvdImageConvertor.Convert24bppTo8bpp(freeImageBitmap.ToBitmap());
                             xRecipe.bmpOrgNoTray.Dispose();
                             xRecipe.bmpOrgNoTray = b1.Clone(new Rectangle(0, 0, b1.Width, b1.Height), PixelFormat.Format8bppIndexed);
                             b1.Dispose();
@@ -354,119 +380,52 @@ namespace LaserAlignDX.FormSpace
                         break;
                 }
 
-
-
                 freeImageBitmap.Dispose();
-            }
-        }
-
-        Bitmap Convert32bppTo8bpp(Bitmap original)
-        {
-            // 创建一个新的8bpp位图
-            Bitmap newBitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format8bppIndexed);
-
-            // 设置调色板（这里使用灰度调色板）
-            ColorPalette palette = newBitmap.Palette;
-            for (int i = 0; i < 256; i++)
-            {
-                palette.Entries[i] = Color.FromArgb(i, i, i);
-            }
-            newBitmap.Palette = palette;
-
-            // 锁定位图数据
-            BitmapData originalData = original.LockBits(
-                new Rectangle(0, 0, original.Width, original.Height),
-                ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-
-            BitmapData newData = newBitmap.LockBits(
-                new Rectangle(0, 0, newBitmap.Width, newBitmap.Height),
-                ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
-
-            // 转换像素数据
-            unsafe
-            {
-                byte* originalPtr = (byte*)originalData.Scan0;
-                byte* newPtr = (byte*)newData.Scan0;
-
-                for (int y = 0; y < original.Height; y++)
+#endif
+                switch (xTabIndex)
                 {
-                    for (int x = 0; x < original.Width; x++)
-                    {
-                        // 获取32bpp像素值
-                        byte b = originalPtr[y * originalData.Stride + x * 4];
-                        byte g = originalPtr[y * originalData.Stride + x * 4 + 1];
-                        byte r = originalPtr[y * originalData.Stride + x * 4 + 2];
-                        byte a = originalPtr[y * originalData.Stride + x * 4 + 3];
-
-                        // 转换为灰度值（8bpp）
-                        byte gray = (byte)((r * 0.299 + g * 0.587 + b * 0.114) * (a / 255.0));
-
-                        // 写入8bpp位图
-                        newPtr[y * newData.Stride + x] = gray;
-                    }
+                    case 0: loadBigImage_for_Measurement(fileName); break;
+                    case 1: loadBigImage_for_EmptyTray(fileName); break;
                 }
             }
-
-            // 解锁位图
-            original.UnlockBits(originalData);
-            newBitmap.UnlockBits(newData);
-
-            return newBitmap;
         }
-        Bitmap Convert24bppTo8bpp(Bitmap original)
+
+        #region BIG_IMAGE_LOADING_FUNCTIONS
+        void loadBigImage_for_Measurement(string fileName)
         {
-            //if (original.PixelFormat != PixelFormat.Format24bppRgb)
-            //    throw new ArgumentException("源图像必须是24位位图");
-
-            // 创建新的8位位图
-            Bitmap newBitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format8bppIndexed);
-
-            // 设置灰度调色板
-            ColorPalette palette = newBitmap.Palette;
-            for (int i = 0; i < 256; i++)
+            try
             {
-                palette.Entries[i] = Color.FromArgb(i, i, i);
-            }
-            newBitmap.Palette = palette;
-
-            // 锁定位图数据进行操作
-            BitmapData originalData = original.LockBits(
-                new Rectangle(0, 0, original.Width, original.Height),
-                ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-
-            BitmapData newData = newBitmap.LockBits(
-                new Rectangle(0, 0, newBitmap.Width, newBitmap.Height),
-                ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
-
-            unsafe
-            {
-                byte* originalPtr = (byte*)originalData.Scan0;
-                byte* newPtr = (byte*)newData.Scan0;
-
-                for (int y = 0; y < original.Height; y++)
+                var newBmp = EzMvdImageConvertor.LoadBigImage(fileName);
+                if (newBmp != null)
                 {
-                    for (int x = 0; x < original.Width; x++)
-                    {
-                        // 获取24bpp像素值
-                        byte b = originalPtr[y * originalData.Stride + x * 3];
-                        byte g = originalPtr[y * originalData.Stride + x * 3 + 1];
-                        byte r = originalPtr[y * originalData.Stride + x * 3 + 2];
-
-                        // 转换为灰度值（8bpp）
-                        byte gray = (byte)(r * 0.299 + g * 0.587 + b * 0.114);
-
-                        // 写入8bpp位图
-                        newPtr[y * newData.Stride + x] = gray;
-                    }
+                    xRecipe.bmpOrg?.Dispose();
+                    xRecipe.bmpOrg = newBmp;
+                    DS1.ReplaceDisplayImage(newBmp);
                 }
             }
-
-            // 解锁位图
-            original.UnlockBits(originalData);
-            newBitmap.UnlockBits(newData);
-
-            return newBitmap;
+            catch (Exception ex)
+            {
+                JetEazy.BasicSpace.VsMSG.Instance.Warning(ex.Message);
+            }
         }
+        void loadBigImage_for_EmptyTray(string fileName)
+        {
+            try
+            {
+                var newBmp = EzMvdImageConvertor.LoadBigImage(fileName);
+                if (newBmp != null)
+                {
+                    xRecipe.bmpOrgNoTray?.Dispose();
+                    xRecipe.bmpOrgNoTray = newBmp;
+                    DS2.ReplaceDisplayImage(newBmp);
+                }
+            }
+            catch (Exception ex)
+            {
+                JetEazy.BasicSpace.VsMSG.Instance.Warning(ex.Message);
+            }
+        }
+        #endregion
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
@@ -486,8 +445,6 @@ namespace LaserAlignDX.FormSpace
             this.DialogResult = DialogResult.OK;
         }
 
-        CviCross _cviCross = new CviCross(Color.Yellow);
-
         void init_Display()
         {
             //DS = dispUI1;
@@ -496,14 +453,16 @@ namespace LaserAlignDX.FormSpace
             DS1.CaptureAction += DS_CaptureAction;
             //m_DispUI.MoverAction += M_DispUI_MoverAction;
             //m_DispUI.AdjustAction += M_DispUI_AdjustAction;
-            DS1.ImageViewer.AddInteractor(_cviCross);
-            _cviCross.Visible = true;
+            CviCross cviCross1 = new CviCross(Color.Yellow);    // 建議: 每一個 Viewer 擁有 獨立的 CviCross
+            DS1.ImageViewer.AddInteractor(cviCross1);
+            cviCross1.Visible = true;
 
             DS2.Initial(100, 0.01f);
             DS2.SetDisplayType(DisplayTypeEnum.NORMAL);
             DS2.CaptureAction += DS_CaptureAction2;
-            DS2.ImageViewer.AddInteractor(_cviCross);
-            _cviCross.Visible = true;
+            CviCross cviCross2 = new CviCross(Color.Yellow);    // 建議: 每一個 Viewer 擁有 獨立的 CviCross
+            DS2.ImageViewer.AddInteractor(cviCross2);
+            cviCross2.Visible = true;
         }
         void update_Display(bool eChangeToDefault = true)
         {
@@ -656,7 +615,6 @@ namespace LaserAlignDX.FormSpace
         }
 
         #region TOOLS
-
         void BoundRect(ref Rectangle InnerRect, Size BoundSize)
         {
             InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
@@ -692,8 +650,6 @@ namespace LaserAlignDX.FormSpace
             Bitmap bmp = eInput.Clone(new RectangleF(0, 0, eInput.Width, eInput.Height), eInput.PixelFormat);
             return bmp;
         }
-
-
         #endregion
 
         private string ToChangeLanguage(string eText)

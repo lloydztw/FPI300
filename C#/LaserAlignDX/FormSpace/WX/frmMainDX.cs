@@ -139,7 +139,16 @@ namespace Traveller106
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            //---------------------------------------------------------------------
+            // 注意:
+            //  使用 dispUI = new DispUI() 動態生成
+            //  必須將其加入 ower form 的 Controls 內,
+            //  ower form closed 的時候,
+            //  才會自動調用 dispUI.Dispose() 
+            //---------------------------------------------------------------------
             JzDisplay.UISpace.DispUI dispUI = new JzDisplay.UISpace.DispUI();
+            this.Controls.Add(dispUI); // Gaara 原來的代碼, 少寫此行 !!!!!
+
             string path = Universal.MAINPATH + @"\WORK\";
             JetEazy.Universal.MYDECODE = path;
             bool bOK = dispUI.DispUIload(this);

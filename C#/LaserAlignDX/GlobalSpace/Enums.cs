@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace Eazy_Project_III
 {
@@ -25,6 +20,7 @@ namespace Eazy_Project_III
         /// </summary>
         MODULE_ADJUST = 2,
     }
+
     public enum MainS1State : int
     {
         [Description("跑綫中")]
@@ -48,6 +44,7 @@ namespace Eazy_Project_III
         [Description("显示结果")]
         M_SHOWRESULT = 8,
     }
+
     public enum ProductMode : int
     {
         [Description("預設模式")]
@@ -206,6 +203,7 @@ namespace Eazy_Project_III
         HBO_XG4 = 23,
 
     }
+
     /// <summary>
     /// 轨道搬运区域
     /// </summary>
@@ -234,9 +232,8 @@ namespace Eazy_Project_III
         /// </summary>
         RIGHT_T4 = 3,
     }
-    class Enums
-    {
-    }
+
+
     public enum LSTestResult : int
     {
         [Browsable(false)]
@@ -265,6 +262,7 @@ namespace Eazy_Project_III
         [Description("未知")]
         ERR_NONE = 10,
     }
+
     public enum BorderTypeEnum : int
     {
         COUNT = 4,
@@ -274,6 +272,7 @@ namespace Eazy_Project_III
         RIGHT = 2,
         BOTTOM = 3,
     }
+
     public enum CornerEnum : int
     {
         COUNT = 4,
@@ -285,6 +284,7 @@ namespace Eazy_Project_III
 
         NONE = -1,
     }
+
     public enum InspectMode : int
     {
         [Description("检测DataMatrix")]
@@ -292,6 +292,7 @@ namespace Eazy_Project_III
         [Description("检测芯片")]
         CHIP = 1,
     }
+
     public enum CornerNoMarkEnum : int
     {
         [Browsable(false)]
@@ -320,6 +321,7 @@ namespace Eazy_Project_III
 
         //NONE = -1,
     }
+
     public enum BlobMode : int
     {
         /// <summary>
@@ -333,6 +335,7 @@ namespace Eazy_Project_III
         [Description("找黑斑")]
         Black = 1,
     }
+
     /// <summary>
     /// 线扫测试模式
     /// </summary>
@@ -349,6 +352,7 @@ namespace Eazy_Project_III
         [Description("线扫不出盘")]
         Ls_NoTray = 1,
     }
+
     /// <summary>
     /// 轨道模组
     /// </summary>
@@ -416,6 +420,7 @@ namespace Eazy_Project_III
         [Description("V2-(FourSide VM)")]
         V11 = 9,
     }
+
     public enum LaserStartPos : int
     {
         /// <summary>
@@ -439,6 +444,7 @@ namespace Eazy_Project_III
         [Description("RightBottom")]
         RightBottom = 3,
     }
+
     public enum LaserOffsetStart : int
     {
 
@@ -453,6 +459,7 @@ namespace Eazy_Project_III
         [Description("Center")]
         Center = 1,
     }
+
     public enum LangIndex : int
     {
         [Description("zh-cn")]
@@ -484,6 +491,7 @@ namespace Eazy_Project_III
         [Description("GOODIMAGE")]
         GOODIMAGE = 2,
     }
+
     /// <summary>
     /// FPI线扫测试状态类型
     /// </summary>
@@ -499,7 +507,7 @@ namespace Eazy_Project_III
 
 #if NO_USE_CHINESE
 
-public enum ProcessImageMode : int
+    public enum ProcessImageMode : int
     {
         [Browsable(false)]
         V1 = 0,

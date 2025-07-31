@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FreeImageAPI;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
@@ -136,6 +137,150 @@ namespace JetEazy.Utils
             // 解锁 Bitmap 数据
             bitmap.UnlockBits(bitmapData);
             return bitmap;
+        }
+
+        /// <summary>
+        /// 利用 FreeImageBitmap 載入 8 bpp 影像檔
+        /// (無法載入時, 會拋出異常!)
+        /// </summary>
+        public static Bitmap LoadBigImage(string fileName)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                throw new Exception($"檔案不存在: {fileName}");
+
+            using (FreeImageBitmap freeImageBitmap = new FreeImageBitmap(fileName))
+            using (Bitmap bigBmp = freeImageBitmap.ToBitmap())
+            {
+                var pixelFormat = bigBmp.PixelFormat;
+                if (pixelFormat == PixelFormat.Format32bppArgb)
+                {
+                    var bmp = Convert32bppTo8bpp(bigBmp);
+                    return bmp;
+                }
+                else if (pixelFormat == PixelFormat.Format24bppRgb)
+                {
+                    var bmp = Convert24bppTo8bpp(bigBmp);
+                    return bmp;
+
+                }
+                else if (pixelFormat == PixelFormat.Format8bppIndexed)
+                {
+                    return (Bitmap)bigBmp.Clone();
+                }
+                else
+                {
+                    throw new Exception("加载图片格式不支持！");
+                }
+            }
+        }
+        
+        public static Bitmap Convert32bppTo8bpp(Bitmap original)
+        {
+            // 创建一个新的8bpp位图
+            Bitmap newBitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format8bppIndexed);
+
+            // 设置调色板（这里使用灰度调色板）
+            ColorPalette palette = newBitmap.Palette;
+            for (int i = 0; i < 256; i++)
+            {
+                palette.Entries[i] = Color.FromArgb(i, i, i);
+            }
+            newBitmap.Palette = palette;
+
+            // 锁定位图数据
+            BitmapData originalData = original.LockBits(
+                new Rectangle(0, 0, original.Width, original.Height),
+                ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
+
+            BitmapData newData = newBitmap.LockBits(
+                new Rectangle(0, 0, newBitmap.Width, newBitmap.Height),
+                ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+
+            // 转换像素数据
+            unsafe
+            {
+                byte* originalPtr = (byte*)originalData.Scan0;
+                byte* newPtr = (byte*)newData.Scan0;
+
+                for (int y = 0; y < original.Height; y++)
+                {
+                    for (int x = 0; x < original.Width; x++)
+                    {
+                        // 获取32bpp像素值
+                        byte b = originalPtr[y * originalData.Stride + x * 4];
+                        byte g = originalPtr[y * originalData.Stride + x * 4 + 1];
+                        byte r = originalPtr[y * originalData.Stride + x * 4 + 2];
+                        byte a = originalPtr[y * originalData.Stride + x * 4 + 3];
+
+                        // 转换为灰度值（8bpp）
+                        byte gray = (byte)((r * 0.299 + g * 0.587 + b * 0.114) * (a / 255.0));
+
+                        // 写入8bpp位图
+                        newPtr[y * newData.Stride + x] = gray;
+                    }
+                }
+            }
+
+            // 解锁位图
+            original.UnlockBits(originalData);
+            newBitmap.UnlockBits(newData);
+
+            return newBitmap;
+        }
+        
+        public static Bitmap Convert24bppTo8bpp(Bitmap original)
+        {
+            //if (original.PixelFormat != PixelFormat.Format24bppRgb)
+            //    throw new ArgumentException("源图像必须是24位位图");
+
+            // 创建新的8位位图
+            Bitmap newBitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format8bppIndexed);
+
+            // 设置灰度调色板
+            ColorPalette palette = newBitmap.Palette;
+            for (int i = 0; i < 256; i++)
+            {
+                palette.Entries[i] = Color.FromArgb(i, i, i);
+            }
+            newBitmap.Palette = palette;
+
+            // 锁定位图数据进行操作
+            BitmapData originalData = original.LockBits(
+                new Rectangle(0, 0, original.Width, original.Height),
+                ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+
+            BitmapData newData = newBitmap.LockBits(
+                new Rectangle(0, 0, newBitmap.Width, newBitmap.Height),
+                ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+
+            unsafe
+            {
+                byte* originalPtr = (byte*)originalData.Scan0;
+                byte* newPtr = (byte*)newData.Scan0;
+
+                for (int y = 0; y < original.Height; y++)
+                {
+                    for (int x = 0; x < original.Width; x++)
+                    {
+                        // 获取24bpp像素值
+                        byte b = originalPtr[y * originalData.Stride + x * 3];
+                        byte g = originalPtr[y * originalData.Stride + x * 3 + 1];
+                        byte r = originalPtr[y * originalData.Stride + x * 3 + 2];
+
+                        // 转换为灰度值（8bpp）
+                        byte gray = (byte)(r * 0.299 + g * 0.587 + b * 0.114);
+
+                        // 写入8bpp位图
+                        newPtr[y * newData.Stride + x] = gray;
+                    }
+                }
+            }
+
+            // 解锁位图
+            original.UnlockBits(originalData);
+            newBitmap.UnlockBits(newData);
+
+            return newBitmap;
         }
     }
 }

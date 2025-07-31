@@ -2,9 +2,7 @@
 //#define FATEK
 //#define FX3U
 
-using Common.RecipeSpace;
 using Eazy_Project_III;
-using Eazy_Project_III.OPSpace;
 using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.CCDSpace;
@@ -19,22 +17,17 @@ using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Windows.Forms;
 using TestDemo.LaserDot;
-using Traveller106.ControlSpace.MachineSpace;
 using TravellerMINIX6.OPSpace;
 
 //using Traveller106.OPSpace;
 //using PhotoMachine.ControlSpace.MachineSpace;
 using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace Traveller106
 {
@@ -73,6 +66,12 @@ namespace Traveller106
                 switch (OPTION)
                 {
                     default:
+                        // 直接指定成 最後佈署的資料夾
+                        //      "D:\\AUTOMATION\\Eazy FPI30\\_BIN_"
+                        // 這樣 原代碼 C# 專案, 
+                        //      才能放在任意資料夾
+                        //      不需要 依附於 最後佈署的資料夾 
+                        return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
                         return $"{Application.StartupPath}";
                 }
             }
@@ -637,6 +636,7 @@ namespace Traveller106
                 return false;
             }
         }
+
         static double GetAngle(PointF xP1World, PointF xP2World)
         {
             double angleOfLine = 0;

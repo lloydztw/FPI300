@@ -83,7 +83,12 @@ namespace Common.RecipeSpace
             get { return m_index.ToString("00000"); }
         }
 
-        public string INIFILE = "";
+        public string INIFILE
+        {
+            get;
+            protected set;
+        } = "";
+
         //public string INI_PATH = "";
 
         public virtual void Initial(string epath, int ercpindex, string enamefile)
@@ -96,6 +101,7 @@ namespace Common.RecipeSpace
         public virtual void ChangeIndex(int eindex)
         {
             m_index = eindex;
+
             if (!System.IO.Directory.Exists(m_path + "\\" + m_index.ToString("00000")))
                 System.IO.Directory.CreateDirectory(m_path + "\\" + m_index.ToString("00000"));
 

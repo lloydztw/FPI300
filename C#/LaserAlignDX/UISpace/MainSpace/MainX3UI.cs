@@ -866,7 +866,8 @@ namespace LaserAlignDX.UISpace.MainSpace
                                 }
                                 else
                                 {
-                                    DSMain.mvdRenderActivex1.AddShape(cell.DrawNoTrayRectF());
+                                    var mvdRect = cell.DrawNoTrayRectF();
+                                    DSMain.mvdRenderActivex1.AddShape(mvdRect);
                                 }
 
                                 break;
