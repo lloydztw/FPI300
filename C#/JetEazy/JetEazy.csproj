@@ -176,6 +176,9 @@
     <Compile Include="ControlSpace\PLCSpace\Mitsubishi_FX3UClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\ModbusTcpFromNNModbus4.cs" />
     <Compile Include="EnumTypeConverter.cs" />
+    <Compile Include="Interface\IAxis.cs" />
+    <Compile Include="Interface\IxLineScanCam.cs" />
+    <Compile Include="Interface\IxTickable.cs" />
     <Compile Include="Interface\ICam.cs" />
     <Compile Include="NumericUpDownTypeConverter.cs" />
     <Compile Include="ControlSpace\CCDClass.cs" />

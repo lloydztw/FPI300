@@ -238,6 +238,7 @@ namespace JetEazy
         /// </summary>
         MAIN_FPIX3 = 12,
     }
+
     public enum LinescanTypeEnum : int
     {
         [Description("华睿线扫")]

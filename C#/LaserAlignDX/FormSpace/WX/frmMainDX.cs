@@ -206,6 +206,9 @@ namespace Traveller106
                     }
                     break;
             }
+            
+            mMainTick?.Dispose();
+            mMainTick = null;
         }
         private void MainForm_SizeChanged(object sender, EventArgs e)
         {
@@ -809,6 +812,7 @@ namespace Traveller106
             MAINUI.OnChangeState += MAINUI_OnChangeState;
         }
 
+        #region EVENT_HANDLERS
         private void MAINUI_OnChangeState(MainS1State status, object tag = null)
         {
             switch (status)
@@ -848,7 +852,6 @@ namespace Traveller106
                     break;
             }
         }
-        
         void ESSUI_TriggerAction(ESSStatusEnum status)
         {
             switch (status)
@@ -1142,6 +1145,7 @@ namespace Traveller106
                     break;
             }
         }
+        #endregion
 
         //主程序扫描时间
         JzTimes JzMainScanTime = new JzTimes();
