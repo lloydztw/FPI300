@@ -551,6 +551,7 @@
     <Compile Include="UISpace\UIMVC\View\PosUI.Designer.cs">
       <DependentUpon>PosUI.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utils\EzMvdImageConvertor.cs" />
     <EmbeddedResource Include="FormSpace\BannerForm.resx">
       <DependentUpon>BannerForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -707,6 +708,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="coconut1.ico" />
+    <None Include="FAQ.md" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
   <ItemGroup />

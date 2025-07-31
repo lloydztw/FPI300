@@ -12,8 +12,10 @@ namespace LaserAlignDX.FormSpace
 {
     public partial class frmSelectScanInspectMode : Form
     {
-        Button btnOK;
-        Button btnCancel;
+        #region PRIVATE_GUI_LINKS
+        Button btnOK => button1;
+        Button btnCancel => button2;
+        #endregion
 
         public int SelectScanMode
         {
@@ -44,13 +46,14 @@ namespace LaserAlignDX.FormSpace
             this.TopMost = true;
         }
 
+        #region EVENT_HANDLERS
+
         private void FrmSelectScanInspectMode_Load(object sender, EventArgs e)
         {
             this.Text = "选择测试模式";
 
-            btnOK = button1;
-            btnCancel = button2;
-
+            //btnOK = button1;
+            //btnCancel = button2;
             btnOK.Click += BtnOK_Click;
             btnCancel.Click += BtnCancel_Click;
         }
@@ -64,5 +67,7 @@ namespace LaserAlignDX.FormSpace
         {
             this.DialogResult = DialogResult.OK;
         }
+
+        #endregion
     }
 }

@@ -37,7 +37,7 @@ namespace NeedleX.ProcessSpace
         protected int _defaultDuration = 100;
         #endregion
 
-        //public event EventHandler OnStateChanged;
+        //>>> public event EventHandler OnStateChanged;
         public event EventHandler<ProcessEventArgs> OnNG;
         public event EventHandler<ProcessEventArgs> OnMessage;
         public event EventHandler<ProcessEventArgs> OnCompleted;
@@ -63,28 +63,6 @@ namespace NeedleX.ProcessSpace
         public abstract void Tick();
 
         protected abstract void InvalidatePlcScanned();
-        private void _changeNextState(int id)
-        {
-            bool isChanged = (base.ID != id);
-            base.ID = id;
-
-            if (isChanged || true)
-            {
-                // 2022/10/22
-                // 改變狀態, 代表 需要等待 plc 更新.
-                // 自動清除 plc scanned 標記. 
-                InvalidatePlcScanned();
-            }
-
-            //if (isChanged)
-            //    OnStateChanged?.Invoke(this, null);
-
-            //// TRACE Delay Time
-            //if (false && NextDuriation >= 300)
-            //{
-            //    GdxGlobal.LOG.Log(GetType().Name, "Delay", NextDuriation, Color.DarkCyan);
-            //}
-        }
         protected void SetNextState(int id, int nextDuration = -1)
         {
             if (nextDuration >= 0)
@@ -93,6 +71,7 @@ namespace NeedleX.ProcessSpace
                 base.NextDuriation = _defaultDuration;
             _changeNextState(id); ;
         }
+
         public new int ID
         {
             get
@@ -135,6 +114,9 @@ namespace NeedleX.ProcessSpace
             }
             OnCompleted?.Invoke(this, e);
         }
+        /// <summary>
+        /// Caller 必須負責 bmp 的 life-cycle !!!
+        /// </summary>
         protected void FireLiveImaging(Bitmap bmp)
         {
             try
@@ -146,6 +128,31 @@ namespace NeedleX.ProcessSpace
                 //_LOG(ex, "FireLiveImaging 異常!");
             }
         }
+
+        #region PRIVATE_FUNCTIONS
+        private void _changeNextState(int id)
+        {
+            bool isChanged = (base.ID != id);
+            base.ID = id;
+
+            if (isChanged || true)
+            {
+                // 2022/10/22
+                // 改變狀態, 代表 需要等待 plc 更新.
+                // 自動清除 plc scanned 標記. 
+                InvalidatePlcScanned();
+            }
+
+            //if (isChanged)
+            //    OnStateChanged?.Invoke(this, null);
+
+            //// TRACE Delay Time
+            //if (false && NextDuriation >= 300)
+            //{
+            //    GdxGlobal.LOG.Log(GetType().Name, "Delay", NextDuriation, Color.DarkCyan);
+            //}
+        }
+        #endregion
     }
 
 

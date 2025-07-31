@@ -1,36 +1,21 @@
-﻿using Common.RecipeSpace;
-using Eazy_Project_III;
-using FreeImageAPI;
+﻿using FreeImageAPI;
 using JetEazy.BasicSpace;
+using JetEazy.Utils;
 using LaserAlignDX.FormSpace;
 using LaserAlignDX.RunSpace;
 using NeedleX.ProcessSpace;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Traveller106;
-using TravellerMINIX6.OPSpace;
-using VisionDesigner;
+
 
 namespace TravellerMINIX6.ProcessSpace
 {
+    /// <summary>
+    /// Process for 單次離線測試
+    /// </summary>
     public class LineScanSingleProcess : BaseProcess
     {
-        #region ACCESS_TO_OTHER_PROCESSES
-
-        //System.Diagnostics.Stopwatch m_Stopwatch = new System.Diagnostics.Stopwatch();
-        //int m_CollectDataIndex = 0;//收集数据的编号
-        //Bitmap m_bmpCacheOrg = new Bitmap(1, 1);
-        //List<AnalyzeClass> m_AutoAssignClassesTmp = new List<AnalyzeClass>();
-
-        frmSelectScanInspectMode frmSelectScan = null;
-
-        #endregion
-
         #region SINGLETON
         static LineScanSingleProcess _singleton = null;
         private LineScanSingleProcess()
@@ -41,6 +26,7 @@ namespace TravellerMINIX6.ProcessSpace
             //});
         }
         #endregion
+
         public static LineScanSingleProcess Instance
         {
             get
@@ -53,150 +39,168 @@ namespace TravellerMINIX6.ProcessSpace
 
         public override void Tick()
         {
-            var Process = this;
+            var process = this;
 
-            if (Process.IsOn)
+            if (!process.IsOn)
+                return;
+
+            switch (process.ID)
             {
-                switch (Process.ID)
-                {
-                    case 5:
+                case 5:
 
-                        FireMessage(new ProcessEventArgs("Record.Start"));
+                    FireMessage(new ProcessEventArgs("Record.Start"));
 
-                        Process.Pause();
-                        string _filename = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("JPG Files (*.jpg)|*.JPG|" + "BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
-                        //_filename = $"{Universal.RCPPATH}\\{xRecipe.IndexStr}\\org.bmp";
-                        Process.Continue();
-                        if (!string.IsNullOrEmpty(_filename))
+                    process.Pause();
+
+                    string fileName = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("JPG Files (*.jpg)|*.JPG|" + "BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
+                    //>>> fileName = $"{Universal.RCPPATH}\\{xRecipe.IndexStr}\\org.bmp";
+
+                    process.Continue();
+
+                    if (!string.IsNullOrEmpty(fileName))
+                    {
+                        using (FreeImageBitmap freeImageBitmap = new FreeImageBitmap(fileName))
+                        using (Bitmap bmp = freeImageBitmap.ToBitmap())
                         {
-                            using (FreeImageBitmap freeImageBitmap = new FreeImageBitmap(_filename))
+                            pRun.cMvdInput?.Dispose();
+                            pRun.cMvdInput = EzMvdImageConvertor.BitmapToCMvdImage(bmp);
+
+                            using (var dummy = new Bitmap(1, 1))
                             {
-                                pRun.cMvdInput = BitmapToCMvdImage(freeImageBitmap.ToBitmap());
-                                FireLiveImaging(new Bitmap(1, 1));
+                                //LETIAN: FireLiveImaging 必須由 caller 負責 bitmap 的 life-cycle
+                                FireLiveImaging(dummy);
                             }
                         }
-                        else
+                    }
+                    else
+                    {
+                        process.Stop();
+                    }
+
+                    //>>> 以後最好統一改成調用
+                    //>>> process.SetNextState(6, 0);
+                    process.NextDuriation = 0;
+                    process.ID = 6;
+
+                    break;
+
+                case 6:
+                    if (process.IsTimeup)
+                    {
+                        process.Pause();
+
+                        using (var selectionDialog = new frmSelectScanInspectMode())
                         {
-                            Process.Stop();
-                        }
-
-                        Process.NextDuriation = 0;
-                        Process.ID = 6;
-
-                        break;
-                    case 6:
-                        if (Process.IsTimeup)
-                        {
-                            Process.Pause();
-
-                            frmSelectScan = new frmSelectScanInspectMode();
-                            if (DialogResult.OK == frmSelectScan.ShowDialog())
+                            if (DialogResult.OK == selectionDialog.ShowDialog())
                             {
-                                pRun.xScanInspectMode = (ScanInspectMode)frmSelectScan.SelectScanMode;
-                                switch(pRun.xScanInspectMode)
+                                pRun.xScanInspectMode = (ScanInspectMode)selectionDialog.SelectScanMode;
+
+                                switch (pRun.xScanInspectMode)
                                 {
                                     case ScanInspectMode.QRCODE:
                                         pRun.QrUsed = true;
                                         break;
                                 }
 
-                                Process.NextDuriation = 0;
-                                Process.ID = 10;
+                                //>>> 以後最好統一改成調用
+                                //>>> process.SetNextState(10, 0);
+                                process.NextDuriation = 0;
+                                process.ID = 10;
 
-                                Process.Continue();
+                                process.Continue();
                             }
                             else
                             {
-                                Process.Stop();
+                                process.Stop();
                             }
-
-                            frmSelectScan.Dispose();
-                            frmSelectScan = null;
                         }
-                        break;
-                    case 10:
-                        if (Process.IsTimeup)
+                    }
+                    break;
+
+                case 10:
+                    if (process.IsTimeup)
+                    {
+                        pRun.FileBarcodeStr = JzTimes.DateTimeSerialString;
+                        pRun.Run();
+
+                        int[] ints0 = pRun.GetSingleResult();
+                        float[] floats0 = pRun.GetScanOffset();
+
+                        StringBuilder sb = new StringBuilder();
+                        foreach (var ix in ints0)
                         {
-                            pRun.FileBarcodeStr = JzTimes.DateTimeSerialString;
-                            pRun.Run();
-
-                            int[] ints0 = pRun.GetSingleResult();
-                            float[] floats0 = pRun.GetScanOffset();
-
-                            StringBuilder sb = new StringBuilder();
-                            foreach (var ix in ints0)
-                            {
-                                sb.Append(ix.ToString() + ",");
-                            }
-                            _LOG("SingleResult:" + sb.ToString(), Color.Black);
-
-                            StringBuilder sb1 = new StringBuilder();
-                            foreach (var ix in floats0)
-                            {
-                                sb1.Append(ix.ToString() + ",");
-                            }
-                            _LOG("ScanOffset:" + sb1.ToString(), Color.Black);
-
-                            switch (pRun.xScanInspectMode)
-                            {
-                                case LaserAlignDX.RunSpace.ScanInspectMode.MEASUREAOI:
-
-                                    //MACHINEx3.PLCIO.iSingleResult(ints0);
-                                    //MACHINEx3.PLCIO.rScanOffset(floats0);
-
-                                    break;
-                                case LaserAlignDX.RunSpace.ScanInspectMode.QRCODE:
-
-                                    int[] ints1 = pRun.GetQrResult();
-
-                                    StringBuilder sb2 = new StringBuilder();
-                                    foreach (var ix in ints1)
-                                    {
-                                        sb2.Append(ix.ToString() + ",");
-                                    }
-                                    _LOG("QrResult:" + sb2.ToString(), Color.Black);
-
-                                    //MACHINEx3.PLCIO.iQRResult(ints1);
-
-                                    //MACHINEx3.PLCIO.iSingleResult(ints0);
-                                    //MACHINEx3.PLCIO.rScanOffset(floats0);
-
-                                    break;
-                                case LaserAlignDX.RunSpace.ScanInspectMode.NOTRAY:
-
-                                    //MACHINEx3.PLCIO.iSingleResult(ints0);
-
-                                    break;
-                            }
-
-                            Process.NextDuriation = 0;
-                            Process.ID = 20;
+                            sb.Append(ix.ToString() + ",");
                         }
-                        break;
-                    case 20:
-                        if (Process.IsTimeup)
+                        _LOG("SingleResult:" + sb.ToString(), Color.Black);
+
+                        StringBuilder sb1 = new StringBuilder();
+                        foreach (var ix in floats0)
                         {
-                            bool ret = !pRun.Running;
-                            if (ret)
-                            {
-                                Process.Stop();
-
-                                //if (Traveller106.Universal.IsNoUseCCD)
-                                //{
-                                //    IsPass = pRun.IsPass;
-                                //    //m_DLResultOK.Start();
-                                //    ResultStart();
-                                //    _LOG($"{ToChangeLanguage("发送结果为")}{(IsPass ? "PASS" : "FAIL")}", Color.Red);
-                                //}
-
-                                FireMessage(new ProcessEventArgs("Show.X", $"{(pRun.ElapsedTime * 1.0 / 1000).ToString("0.0")} s"));
-                            }
+                            sb1.Append(ix.ToString() + ",");
                         }
-                        break;
-                }
+                        _LOG("ScanOffset:" + sb1.ToString(), Color.Black);
+
+                        switch (pRun.xScanInspectMode)
+                        {
+                            case LaserAlignDX.RunSpace.ScanInspectMode.MEASUREAOI:
+
+                                //MACHINEx3.PLCIO.iSingleResult(ints0);
+                                //MACHINEx3.PLCIO.rScanOffset(floats0);
+
+                                break;
+
+                            case LaserAlignDX.RunSpace.ScanInspectMode.QRCODE:
+
+                                int[] ints1 = pRun.GetQrResult();
+
+                                StringBuilder sb2 = new StringBuilder();
+                                foreach (var ix in ints1)
+                                {
+                                    sb2.Append(ix.ToString() + ",");
+                                }
+                                _LOG("QrResult:" + sb2.ToString(), Color.Black);
+
+                                //MACHINEx3.PLCIO.iQRResult(ints1);
+
+                                //MACHINEx3.PLCIO.iSingleResult(ints0);
+                                //MACHINEx3.PLCIO.rScanOffset(floats0);
+
+                                break;
+
+                            case LaserAlignDX.RunSpace.ScanInspectMode.NOTRAY:
+
+                                //MACHINEx3.PLCIO.iSingleResult(ints0);
+
+                                break;
+                        }
+
+                        process.NextDuriation = 0;
+                        process.ID = 20;
+                    }
+                    break;
+
+                case 20:
+                    if (process.IsTimeup)
+                    {
+                        bool ret = !pRun.Running;
+                        if (ret)
+                        {
+                            process.Stop();
+
+                            //if (Traveller106.Universal.IsNoUseCCD)
+                            //{
+                            //    IsPass = pRun.IsPass;
+                            //    //m_DLResultOK.Start();
+                            //    ResultStart();
+                            //    _LOG($"{ToChangeLanguage("发送结果为")}{(IsPass ? "PASS" : "FAIL")}", Color.Red);
+                            //}
+
+                            FireMessage(new ProcessEventArgs("Show.X", $"{(pRun.ElapsedTime * 1.0 / 1000).ToString("0.0")} s"));
+                        }
+                    }
+                    break;
             }
         }
-
     }
 }
 

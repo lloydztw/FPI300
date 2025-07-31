@@ -1,19 +1,15 @@
-﻿using Eazy_Project_III;
-using JetEazy.BasicSpace;
-using LaserAlignDX.OPSpace.RecipeSpace;
+﻿using JetEazy.BasicSpace;
+using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
+using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
-using System.Collections.Generic;
-using System.Drawing.Imaging;
+using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Traveller106;
 using VisionDesigner;
-using System.ComponentModel;
+
 
 namespace LaserAlignDX.RunSpace
 {
@@ -26,6 +22,7 @@ namespace LaserAlignDX.RunSpace
         [Description("空载台检测")]
         NOTRAY = 2,
     }
+
     public class ProcessRunFPIClass
     {
         #region SINGLETON
@@ -46,7 +43,8 @@ namespace LaserAlignDX.RunSpace
             }
         }
 
-        protected RecipeFPIX3Class xRecipe
+        #region PRIVATE_DATA
+        RecipeFPIX3Class xRecipe
         {
             get { return RecipeFPIX3Class.Instance; }
         }
@@ -58,11 +56,14 @@ namespace LaserAlignDX.RunSpace
         //{
         //    get { return InspectX2Class.Instance; }
         //}
+        #endregion
+
 
         public CMvdImage cMvdInput = new CMvdImage();
         public MVD_POINT_F mVD_POINT_F0 = new MVD_POINT_F();
         public MVD_POINT_F mVD_POINT_F1 = new MVD_POINT_F();
 
+        #region PRIVATE_MEMBERS
         //private CMvdImage m_MvdOpeate = new CMvdImage();
         private long m_ElapsedTime = 0;
         private bool m_Running = false;
@@ -74,6 +75,7 @@ namespace LaserAlignDX.RunSpace
 
         private bool m_QrUsed = false;
         private bool m_QrJudged = false;
+        #endregion
 
         public bool QrUsed
         {
@@ -111,6 +113,7 @@ namespace LaserAlignDX.RunSpace
         {
             get { return m_ResultDesc; }
         }
+
         public void Run()
         {
             m_IsPass = true;
@@ -226,6 +229,7 @@ namespace LaserAlignDX.RunSpace
             return states;
         }
 
+        #region PRIVATE_FUNCTIONS
         private void runTest()
         {
             switch (scanInspectMode)
@@ -268,7 +272,7 @@ namespace LaserAlignDX.RunSpace
             //    m_MvdOpeate = new CMvdImage();
 
             //m_MvdOpeate = cMvdInput.Clone();
-            Bitmap bmpInputImage = CMvdImageToBitmap(cMvdInput);
+            Bitmap bmpInputImage = EzMvdImageConvertor.CMvdImageToBitmap(cMvdInput);
 
             //if (cMvdInput.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
             //{
@@ -410,7 +414,7 @@ namespace LaserAlignDX.RunSpace
             //    m_MvdOpeate = new CMvdImage();
 
             //m_MvdOpeate = cMvdInput.Clone();
-            Bitmap bmpInputImage = CMvdImageToBitmap(cMvdInput);
+            Bitmap bmpInputImage = EzMvdImageConvertor.CMvdImageToBitmap(cMvdInput);
 
             //if (cMvdInput.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
             //{
@@ -552,6 +556,7 @@ namespace LaserAlignDX.RunSpace
             xRecipe.AnalyzeDatasData();
             m_ElapsedTime = 0;
             m_Running = true;
+
             System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Restart();
 
@@ -568,7 +573,7 @@ namespace LaserAlignDX.RunSpace
             //    m_MvdOpeate = new CMvdImage();
 
             //m_MvdOpeate = cMvdInput.Clone();
-            Bitmap bmpInputImage = CMvdImageToBitmap(cMvdInput);
+            Bitmap bmpInputImage = EzMvdImageConvertor.CMvdImageToBitmap(cMvdInput);
 
             //if (cMvdInput.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
             //{
@@ -649,6 +654,7 @@ namespace LaserAlignDX.RunSpace
 
                 bmp2.Dispose();
             }
+
             foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
             {
                 //if (cell.ByPass && !INI.Instance.IsForceInspect)
@@ -712,7 +718,7 @@ namespace LaserAlignDX.RunSpace
             //    m_MvdOpeate = new CMvdImage();
 
             //m_MvdOpeate = cMvdInput.Clone();
-            Bitmap bmpInputImage = CMvdImageToBitmap(cMvdInput);
+            Bitmap bmpInputImage = EzMvdImageConvertor.CMvdImageToBitmap(cMvdInput);
 
             //if (cMvdInput.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
             //{
@@ -773,7 +779,9 @@ namespace LaserAlignDX.RunSpace
             GC.WaitForPendingFinalizers();
             GC.Collect();
         }
-        #region
+        #endregion
+
+        #region NOT_USED_CODE
 #if NOUSE_AND_BACKUP
         private void _Inspect002()
         {
@@ -966,6 +974,9 @@ namespace LaserAlignDX.RunSpace
 #endif
         #endregion
 
+        #region PRIVATE_FUNCTIONS
+
+#if (OPT_LEGACY)
         private Bitmap CMvdImageToBitmap(CMvdImage eCMvdImage)
         {
             MVD_IMAGE_DATA_INFO _MvdImage = eCMvdImage.GetImageData();
@@ -1054,6 +1065,7 @@ namespace LaserAlignDX.RunSpace
             bmpInputImg.UnlockBits(bmData);  // 解除锁定
             return cMvdImage;
         }
+#endif
 
         void BoundRect(ref RectangleF InnerRect, Size BoundSize)
         {
@@ -1068,9 +1080,7 @@ namespace LaserAlignDX.RunSpace
         float BoundValue(float Value, float Max, float Min)
         {
             return Math.Max(Math.Min(Value, Max), Min);
-
         }
-
         void SaveData(string DataStr, string FileName)
         {
             System.IO.StreamWriter stm = null;
@@ -1092,5 +1102,7 @@ namespace LaserAlignDX.RunSpace
             if (stm != null)
                 stm.Dispose();
         }
+
+        #endregion
     }
 }

@@ -1,11 +1,5 @@
-﻿using DVPCameraType;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
 using static JetEazy.CCDSpace.CameraPara;
-using static JetEazy.CCDSpace.CamLinkDriver.Linescan_Dvp2;
 
 namespace JetEazy.Interface
 {
@@ -16,10 +10,12 @@ namespace JetEazy.Interface
         bool Open();
         bool Open(string configFile);
         bool Close();
+
         /// <summary>
         /// 正确取得图像标志
         /// </summary>
         bool IsGrapImageOK { get; set; }
+
         /// <summary>
         /// 取像完成的标志
         /// </summary>
@@ -46,6 +42,8 @@ namespace JetEazy.Interface
         event LineTriggerHandler LineTriggerAction;
 
     }
+
+
     public interface ICam
     {
         bool IsSim();
@@ -59,6 +57,8 @@ namespace JetEazy.Interface
         System.Drawing.Bitmap GetSnap(int msec = 1000);
         int RotateAngle { get; set; }
     }
+
+
     public interface IAxis
     {
         bool IsError { get; }

@@ -1,24 +1,16 @@
-﻿using Common.RecipeSpace;
-using Eazy_Project_III;
+﻿using Eazy_Project_III;
 using JetEazy.BasicSpace;
-using JetEazy.ControlSpace.PLCSpace;
 using JetEazy.Interface;
-using JetEazy.PropertyGridSpace;
+using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.RunSpace;
 using System;
-using System.Drawing.Imaging;
 using System.Drawing;
-using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Traveller106;
 using TravellerMINIX6.OPSpace;
-using VisionDesigner;
 using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
-using LaserAlignDX.ControlSpace.MachineSpace;
-using System.Text;
 
 namespace NeedleX.ProcessSpace
 {
@@ -45,6 +37,7 @@ namespace NeedleX.ProcessSpace
         {
             get { return Universal.IsNoUseIO; }
         }
+
         //ICam ICamForCali
         //{
         //    get { return Universal.CAMERAS[0]; }
@@ -53,14 +46,18 @@ namespace NeedleX.ProcessSpace
         //{
         //    get { return Universal.CAMERAS[1]; }
         //}
+
         protected ClientSocket X6_HANDLE_CLIENT
         {
             get { return Universal.X6_HANDLE_CLIENT; }
         }
+
         protected IxLineScanCam IScanCam
         {
             get { return Universal.IxLineScan; }
         }
+
+        #region NOT_USED
         //protected RecipeMiniX6Class myRecipe
         //{
         //    get { return RecipeMiniX6Class.Instance; }
@@ -69,10 +66,16 @@ namespace NeedleX.ProcessSpace
         //{
         //    get { return ProcessRunClass.Instance; }
         //}
+        #endregion
+
+        /// <summary>
+        /// 主要的 Process
+        /// </summary>
         protected ProcessRunFPIClass pRun
         {
             get { return ProcessRunFPIClass.Instance; }
         }
+
         //protected RecipeMainX2Class xRecipe
         //{
         //    get { return RecipeMainX2Class.Instance; }
@@ -137,7 +140,10 @@ namespace NeedleX.ProcessSpace
                 machine.LightONOFF(eOn);
             }
         }
+        #endregion
 
+        #region LEGACY_CODE
+#if (false)
         protected CMvdImage BitmapToCMvdImage(Bitmap bmpInputImg)
         {
             CMvdImage cMvdImage = new CMvdImage();
@@ -238,7 +244,7 @@ namespace NeedleX.ProcessSpace
             bmpInputImg.UnlockBits(bmData);  // 解除锁定
             return cMvdImage;
         }
-
+#endif
         #endregion
 
         #region COMMON_DATA_FOR_STATION_3

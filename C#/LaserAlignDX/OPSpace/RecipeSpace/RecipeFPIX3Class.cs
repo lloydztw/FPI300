@@ -1065,6 +1065,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
     }
+
     public class InspectX3ParaClass : RecipeBaseClass
     {
         public InspectX3ParaClass()
@@ -1134,6 +1135,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
     }
+
     public class NoTrayParaClass : RecipeBaseClass
     {
         public NoTrayParaClass()

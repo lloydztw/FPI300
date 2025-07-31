@@ -1,25 +1,10 @@
-﻿using BSA.ControlSpace;
-using Common.RecipeSpace;
-using Eazy_Project_III;
-using FreeImageAPI;
-using JetEazy;
-using JetEazy.BasicSpace;
-using JetEazy.PropertyGridSpace;
+﻿using JetEazy.BasicSpace;
+using JetEazy.Utils;
 using NeedleX.ProcessSpace;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Traveller106;
-using TravellerMINIX6.OPSpace;
 
 namespace TravellerMINIX6.ProcessSpace
 {
@@ -170,8 +155,13 @@ namespace TravellerMINIX6.ProcessSpace
                                     {
                                         using (Bitmap bitmap = IScanCam.GetFreeImageBitmap().ToBitmap())
                                         {
-                                            pRun.cMvdInput = BitmapToCMvdImage(bitmap);
-                                            FireLiveImaging(new Bitmap(1, 1));
+                                            pRun.cMvdInput = EzMvdImageConvertor.BitmapToCMvdImage(bitmap);
+
+                                            using (var dummy = new Bitmap(1, 1))
+                                            {
+                                                //LETIAN: FireLiveImaging 必須由 caller 負責 bitmap 的 life-cycle
+                                                FireLiveImaging(dummy);
+                                            }
                                         }
                                     }
 
