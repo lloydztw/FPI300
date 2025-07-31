@@ -34,7 +34,7 @@
   <ItemGroup>
     <Reference Include="EzCamera.Interface, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Dlls\EzCamera.Interface.dll</HintPath>
+      <HintPath>C:\Program Files\Common Files\JetEazy\EzCamera.Interface.dll</HintPath>
     </Reference>
     <Reference Include="JetEazy.ImageViewerEx">
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.ImageViewerEx.dll</HintPath>

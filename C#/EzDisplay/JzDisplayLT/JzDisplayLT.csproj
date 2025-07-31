@@ -68,9 +68,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="EzCamera.Interface, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Dlls\EzCamera.Interface.dll</HintPath>
+    <Reference Include="EzCamera.Interface">
+      <HintPath>C:\Program Files\Common Files\JetEazy\EzCamera.Interface.dll</HintPath>
     </Reference>
     <Reference Include="JetEazy.ImageViewerEx, Version=3.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -81,7 +80,7 @@
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.QUtility.dll</HintPath>
     </Reference>
     <Reference Include="MoveGraphLibrary">
-      <HintPath>..\JzASN\bin\Debug\MoveGraphLibrary.dll</HintPath>
+      <HintPath>..\..\Dlls\MoveGraphLibrary.dll</HintPath>
     </Reference>
     <Reference Include="opencv_vbase, Version=2.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
