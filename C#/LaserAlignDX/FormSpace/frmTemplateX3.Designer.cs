@@ -1,0 +1,300 @@
+﻿namespace LaserAlignDX.FormSpace
+{
+    partial class frmTemplateX3
+    {
+        /// <summary>
+        /// Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.label5 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.cboCaliIndex = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.rtbCodeContent = new System.Windows.Forms.RichTextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.button9 = new System.Windows.Forms.Button();
+            this.button8 = new System.Windows.Forms.Button();
+            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.DS1 = new JzDisplay.UISpace.DispUI();
+            this.DS2 = new JzDisplay.UISpace.DispUI();
+            this.DS3 = new JzDisplay.UISpace.DispUI();
+            this.panel1.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // panel1
+            // 
+            this.panel1.Controls.Add(this.label5);
+            this.panel1.Controls.Add(this.button2);
+            this.panel1.Controls.Add(this.label4);
+            this.panel1.Controls.Add(this.cboCaliIndex);
+            this.panel1.Controls.Add(this.label3);
+            this.panel1.Controls.Add(this.textBox2);
+            this.panel1.Controls.Add(this.label2);
+            this.panel1.Controls.Add(this.textBox1);
+            this.panel1.Controls.Add(this.button1);
+            this.panel1.Controls.Add(this.rtbCodeContent);
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.button9);
+            this.panel1.Controls.Add(this.button8);
+            this.panel1.Controls.Add(this.propertyGrid1);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.panel1.Location = new System.Drawing.Point(0, 349);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(1119, 412);
+            this.panel1.TabIndex = 0;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 70);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(29, 12);
+            this.label5.TabIndex = 61;
+            this.label5.Text = "状态";
+            // 
+            // button2
+            // 
+            this.button2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button2.Location = new System.Drawing.Point(12, 7);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(224, 51);
+            this.button2.TabIndex = 60;
+            this.button2.Text = "平台和吸嘴左上角位置写入PLC";
+            this.button2.UseVisualStyleBackColor = false;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(594, 7);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(83, 12);
+            this.label4.TabIndex = 59;
+            this.label4.Text = "校正参数平台:";
+            this.label4.Visible = false;
+            // 
+            // cboCaliIndex
+            // 
+            this.cboCaliIndex.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cboCaliIndex.FormattingEnabled = true;
+            this.cboCaliIndex.Items.AddRange(new object[] {
+            "平台1(第一组吸嘴)",
+            "平台1(第二组吸嘴)",
+            "平台2(第一组吸嘴)",
+            "平台2(第二组吸嘴)"});
+            this.cboCaliIndex.Location = new System.Drawing.Point(596, 22);
+            this.cboCaliIndex.Name = "cboCaliIndex";
+            this.cboCaliIndex.Size = new System.Drawing.Size(195, 20);
+            this.cboCaliIndex.TabIndex = 58;
+            this.cboCaliIndex.Visible = false;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(594, 88);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(47, 12);
+            this.label3.TabIndex = 57;
+            this.label3.Text = "实际点:";
+            this.label3.Visible = false;
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(596, 103);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.ReadOnly = true;
+            this.textBox2.Size = new System.Drawing.Size(194, 21);
+            this.textBox2.TabIndex = 56;
+            this.textBox2.Visible = false;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(594, 46);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(47, 12);
+            this.label2.TabIndex = 55;
+            this.label2.Text = "虚拟点:";
+            this.label2.Visible = false;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(596, 61);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
+            this.textBox1.Size = new System.Drawing.Size(194, 21);
+            this.textBox1.TabIndex = 54;
+            this.textBox1.Visible = false;
+            // 
+            // button1
+            // 
+            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button1.Location = new System.Drawing.Point(14, 103);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(222, 51);
+            this.button1.TabIndex = 53;
+            this.button1.Text = "记录模板实际起点";
+            this.button1.UseVisualStyleBackColor = false;
+            // 
+            // rtbCodeContent
+            // 
+            this.rtbCodeContent.Location = new System.Drawing.Point(149, 293);
+            this.rtbCodeContent.Name = "rtbCodeContent";
+            this.rtbCodeContent.ReadOnly = true;
+            this.rtbCodeContent.Size = new System.Drawing.Size(222, 112);
+            this.rtbCodeContent.TabIndex = 52;
+            this.rtbCodeContent.Text = "";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(147, 277);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(47, 12);
+            this.label1.TabIndex = 51;
+            this.label1.Text = "码内容:";
+            // 
+            // button9
+            // 
+            this.button9.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button9.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button9.Location = new System.Drawing.Point(12, 277);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(129, 51);
+            this.button9.TabIndex = 50;
+            this.button9.Text = "测试读码";
+            this.button9.UseVisualStyleBackColor = false;
+            // 
+            // button8
+            // 
+            this.button8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button8.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button8.Location = new System.Drawing.Point(12, 220);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(129, 51);
+            this.button8.TabIndex = 49;
+            this.button8.Text = "框选读码区域";
+            this.button8.UseVisualStyleBackColor = false;
+            // 
+            // propertyGrid1
+            // 
+            this.propertyGrid1.Location = new System.Drawing.Point(392, 118);
+            this.propertyGrid1.Name = "propertyGrid1";
+            this.propertyGrid1.Size = new System.Drawing.Size(727, 289);
+            this.propertyGrid1.TabIndex = 48;
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
+            this.tableLayoutPanel1.Controls.Add(this.DS1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.DS2, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.DS3, 2, 0);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 1;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1119, 349);
+            this.tableLayoutPanel1.TabIndex = 1;
+            // 
+            // DS1
+            // 
+            this.DS1.Cursor = System.Windows.Forms.Cursors.Default;
+            this.DS1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.DS1.Location = new System.Drawing.Point(3, 3);
+            this.DS1.Name = "DS1";
+            this.DS1.Size = new System.Drawing.Size(367, 343);
+            this.DS1.TabIndex = 0;
+            // 
+            // DS2
+            // 
+            this.DS2.Cursor = System.Windows.Forms.Cursors.Default;
+            this.DS2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.DS2.Location = new System.Drawing.Point(376, 3);
+            this.DS2.Name = "DS2";
+            this.DS2.Size = new System.Drawing.Size(367, 343);
+            this.DS2.TabIndex = 1;
+            // 
+            // DS3
+            // 
+            this.DS3.Cursor = System.Windows.Forms.Cursors.Default;
+            this.DS3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.DS3.Location = new System.Drawing.Point(749, 3);
+            this.DS3.Name = "DS3";
+            this.DS3.Size = new System.Drawing.Size(367, 343);
+            this.DS3.TabIndex = 2;
+            // 
+            // frmTemplateX3
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(1119, 761);
+            this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.panel1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.Name = "frmTemplateX3";
+            this.Text = "frmTemplateX3";
+            this.panel1.ResumeLayout(false);
+            this.panel1.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.ResumeLayout(false);
+
+        }
+
+        #endregion
+
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.RichTextBox rtbCodeContent;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button9;
+        private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.PropertyGrid propertyGrid1;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private JzDisplay.UISpace.DispUI DS1;
+        private JzDisplay.UISpace.DispUI DS2;
+        private JzDisplay.UISpace.DispUI DS3;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ComboBox cboCaliIndex;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Label label5;
+    }
+}
