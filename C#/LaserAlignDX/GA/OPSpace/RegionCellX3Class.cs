@@ -411,9 +411,8 @@ namespace LaserAlignDX.OPSpace
                     if (IsSaveDebugPicture)
                     {
                         cImageBinaryToolObj.Result.OutputImage.SaveImage($"{SaveDebugPath}\\NoTray\\{lblName}_Diff2.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
-                        cBlobFindToolObj.RegionImage.SaveImage($"{SaveDebugPath}\\NoTray\\{lblName}_Diff2_1.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
-                        if (cBlobFindRes.BlobImage != null)
-                            cBlobFindRes.BlobImage.SaveImage($"{SaveDebugPath}\\NoTray\\{lblName}_Diff3.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                        cBlobFindToolObj?.RegionImage?.SaveImage($"{SaveDebugPath}\\NoTray\\{lblName}_Diff2_1.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                        cBlobFindRes?.BlobImage?.SaveImage($"{SaveDebugPath}\\NoTray\\{lblName}_Diff3.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
                     }
                 }
             }

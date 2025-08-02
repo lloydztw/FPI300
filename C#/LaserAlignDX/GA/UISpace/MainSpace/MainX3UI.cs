@@ -3,6 +3,7 @@ using Eazy_Project_III;
 using JetEazy.BasicSpace;
 using JetEazy.CCDSpace;
 using JetEazy.Interface;
+using JetEazy.Utils;
 using JetEazy.XContainer;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
@@ -300,7 +301,7 @@ namespace LaserAlignDX.UISpace.MainSpace
             //        break;
             //}
 
-            CMvdImage cMvdImage = BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
 
             //flystopwatch.Stop();
             //long ms = flystopwatch.ElapsedMilliseconds;
@@ -437,7 +438,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                     break;
             }
 
-            CMvdImage cMvdImage = BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
 
             flystopwatch.Stop();
             long ms = flystopwatch.ElapsedMilliseconds;
@@ -578,7 +579,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                     break;
             }
 
-            CMvdImage cMvdImage = BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
 
             flystopwatch.Stop();
             long ms = flystopwatch.ElapsedMilliseconds;
@@ -770,7 +771,6 @@ namespace LaserAlignDX.UISpace.MainSpace
             m_SingleProcess.OnMessage += process_OnMessage;
             m_LineScanProcess.OnMessage += process_OnMessage;
             m_SingleProcess.OnLiveImage += process_OnLiveImage;
-
         }
 
         private void process_OnMessage(object sender, ProcessEventArgs e)
@@ -848,76 +848,93 @@ namespace LaserAlignDX.UISpace.MainSpace
                         {
                             case ScanInspectMode.NOTRAY:
                                 //填写数据 疑似有料
-                                string strNoTray = cell.GetNoTrayDesc();
-                                //CMvdTextF cMvdTextFShowNoTray = new CMvdTextF(mvdRectangleF.CenterX,
-                                //                                mvdRectangleF.CenterY,
-                                //                                $"{cell.GetNoTrayDesc()}");
-                                if (!string.IsNullOrEmpty(strNoTray))
+                                //try
                                 {
-                                    CMvdTextF cMvdTextFShowNoTray = new CMvdTextF(mvdRectangleF.CenterX,
-                                                                mvdRectangleF.CenterY,
-                                                                $"{strNoTray}");
+                                    string strNoTray = cell.GetNoTrayDesc();
+                                    //CMvdTextF cMvdTextFShowNoTray = new CMvdTextF(mvdRectangleF.CenterX,
+                                    //                                mvdRectangleF.CenterY,
+                                    //                                $"{cell.GetNoTrayDesc()}");
+                                    if (!string.IsNullOrEmpty(strNoTray))
+                                    {
+                                        CMvdTextF cMvdTextFShowNoTray = new CMvdTextF(mvdRectangleF.CenterX,
+                                                                    mvdRectangleF.CenterY,
+                                                                    $"{strNoTray}");
 
-                                    cMvdTextFShowNoTray.BorderColor = new MVD_COLOR(255, 0, 0);
-                                    cMvdTextFShowNoTray.FontWidth = 11;
+                                        cMvdTextFShowNoTray.BorderColor = new MVD_COLOR(255, 0, 0);
+                                        cMvdTextFShowNoTray.FontWidth = 11;
 
-                                    DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowNoTray);
-                                    DSMain.mvdRenderActivex1.AddShape(cell.DrawNoTrayRectF(false));
+                                        DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowNoTray);
+                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawNoTrayRectF(false));
+                                    }
+                                    else
+                                    {
+                                        var mvdRect = cell.DrawNoTrayRectF();
+                                        DSMain.mvdRenderActivex1.AddShape(mvdRect);
+                                    }
                                 }
-                                else
-                                {
-                                    var mvdRect = cell.DrawNoTrayRectF();
-                                    DSMain.mvdRenderActivex1.AddShape(mvdRect);
-                                }
-
+                                //catch (Exception ex)
+                                //{
+                                //    string errMsg = $"顯示結果異常: {ex.Message}\n\r\n\r@{ex.StackTrace}";
+                                //    MessageBox.Show(errMsg);
+                                //    return;
+                                //}
                                 break;
                             case ScanInspectMode.MEASUREAOI:
                             case ScanInspectMode.QRCODE:
                             default:
-                                //显示结果的xy angle
-                                CMvdTextF cMvdTextFShowMain = new CMvdTextF(cell.DrawResultRectF().CenterX,
-                                    cell.DrawResultRectF().CenterY,
-                                    $"{cell.ToShowMainStr()}");
-                                cMvdTextFShowMain.BorderColor = cell.DrawResultRectF().BorderColor;// new MVD_COLOR(0, 255, 0);
-                                cMvdTextFShowMain.FontWidth = 11;
-
-                                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                                //try
                                 {
-                                    //引导数据
-                                    DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowMain);
-                                    //定位框
-                                    DSMain.mvdRenderActivex1.AddShape(cell.DrawResultRectF());
+                                    //显示结果的xy angle
+                                    CMvdTextF cMvdTextFShowMain = new CMvdTextF(cell.DrawResultRectF().CenterX,
+                                        cell.DrawResultRectF().CenterY,
+                                        $"{cell.ToShowMainStr()}");
+                                    cMvdTextFShowMain.BorderColor = cell.DrawResultRectF().BorderColor;// new MVD_COLOR(0, 255, 0);
+                                    cMvdTextFShowMain.FontWidth = 11;
+
+                                    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                                    {
+                                        //引导数据
+                                        DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowMain);
+                                        //定位框
+                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawResultRectF());
+                                    }
+                                    else
+                                    {
+                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawNoTrayRectF(false));
+                                    }
+
+                                    //二维码
+                                    if (cell.DrawBarcodePosition != null)
+                                    {
+                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawBarcodePosition);
+                                        CMvdTextF _CodeText
+                                            = new CMvdTextF(cell.DrawBarcodePosition.GetVertex(2).fX,
+                                                                          cell.DrawBarcodePosition.GetVertex(2).fY + 120,
+                                                                          cell.RunCodeInfo.Content);
+                                        _CodeText.BorderColor = new MVD_COLOR(0, 255, 0);
+                                        //_CodeText.FontWidth = 11;
+                                        _CodeText.FillColor = new MVD_COLOR(0, 0, 0);
+                                        DSMain.mvdRenderActivex1.AddShape(_CodeText);
+
+
+                                        //CollectResultClass collectResult2D = new CollectResultClass();
+                                        //MVD_RECT_F mVD_RECT = cell.DrawBarcodePosition.GetBoundingRect();
+                                        //collectResult2D.loc = new RectangleF(mVD_RECT.fX,
+                                        //        mVD_RECT.fY,
+                                        //        mVD_RECT.fWidth,
+                                        //        mVD_RECT.fHeight);
+                                        //collectResult2D.ispass = true;
+                                        //collectResult2D.desc = cell.RunCodeInfo.Content;
+                                        //collectResultClasses.Add(collectResult2D);
+
+                                    }
                                 }
-                                else
-                                {
-                                    DSMain.mvdRenderActivex1.AddShape(cell.DrawNoTrayRectF(false));
-                                }
-
-                                //二维码
-                                if (cell.DrawBarcodePosition != null)
-                                {
-                                    DSMain.mvdRenderActivex1.AddShape(cell.DrawBarcodePosition);
-                                    CMvdTextF _CodeText
-                                        = new CMvdTextF(cell.DrawBarcodePosition.GetVertex(2).fX,
-                                                                      cell.DrawBarcodePosition.GetVertex(2).fY + 120,
-                                                                      cell.RunCodeInfo.Content);
-                                    _CodeText.BorderColor = new MVD_COLOR(0, 255, 0);
-                                    //_CodeText.FontWidth = 11;
-                                    _CodeText.FillColor = new MVD_COLOR(0, 0, 0);
-                                    DSMain.mvdRenderActivex1.AddShape(_CodeText);
-
-
-                                    //CollectResultClass collectResult2D = new CollectResultClass();
-                                    //MVD_RECT_F mVD_RECT = cell.DrawBarcodePosition.GetBoundingRect();
-                                    //collectResult2D.loc = new RectangleF(mVD_RECT.fX,
-                                    //        mVD_RECT.fY,
-                                    //        mVD_RECT.fWidth,
-                                    //        mVD_RECT.fHeight);
-                                    //collectResult2D.ispass = true;
-                                    //collectResult2D.desc = cell.RunCodeInfo.Content;
-                                    //collectResultClasses.Add(collectResult2D);
-
-                                }
+                                //catch (Exception ex)
+                                //{
+                                //    string errMsg = $"顯示結果異常: {ex.Message}\n\r\n\r@{ex.StackTrace}";
+                                //    MessageBox.Show(errMsg);
+                                //    return;
+                                //}
                                 break;
                         }
                     }
@@ -926,16 +943,14 @@ namespace LaserAlignDX.UISpace.MainSpace
 
                     //_updateDgvData();
                     DSMain.mvdRenderActivex1.Display();
+
                     //MappingUpdate();
                     FireChangeState(MainS1State.M_SHOWRESULT, e.Tag as string);
                     if (ProcessRunFPIClass.Instance.IsPass)
                         FireChangeState(MainS1State.M_PASS);
                     else
                         FireChangeState(MainS1State.M_NG);
-
                     //}));
-
-
                 }
                 else if (e.Message.Contains("ResultX.Code"))
                 {
@@ -953,10 +968,11 @@ namespace LaserAlignDX.UISpace.MainSpace
             catch
             {
             }
-            CGOperate();
 
+            CGOperate();
         }
 
+#if (OPT_MAIN_X6)
         string mainx6_path = "D:\\CollectPictures";
         private void MainX6Save()
         {
@@ -981,6 +997,7 @@ namespace LaserAlignDX.UISpace.MainSpace
             });
             task.Start();
         }
+#endif
 
         void TickAllProcesses()
         {
@@ -1105,6 +1122,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                 lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
                 lblNumberStr.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
             }));
+
             if (MACHINE.PLCIO.bSoftwareReady)
             {
                 if (MACHINE.PLCIO.bScanStart)
@@ -1235,68 +1253,5 @@ namespace LaserAlignDX.UISpace.MainSpace
 #endif
         }
         #endregion
-
-        private CMvdImage BitmapToCMvdImage(Bitmap bmpInputImg)
-        {
-            CMvdImage cMvdImage = new CMvdImage();
-            System.Drawing.Imaging.PixelFormat bitPixelFormat = bmpInputImg.PixelFormat;
-            BitmapData bmData = bmpInputImg.LockBits(new Rectangle(0, 0, bmpInputImg.Width, bmpInputImg.Height), ImageLockMode.ReadOnly, bitPixelFormat);//锁定
-
-            if (bitPixelFormat == System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
-            {
-                Int32 bitmapDataSize = bmData.Stride * bmData.Height;//bitmap图像缓存长度
-                int offset = bmData.Stride - bmData.Width;
-                Int32 ImageBaseDataSize = bmData.Width * bmData.Height;//imageBaseData_V2图像真正的缓存长度
-                byte[] _BitImageBufferBytes = new byte[bitmapDataSize];
-                byte[] _ImageBaseDataBufferBytes = new byte[ImageBaseDataSize];
-                Marshal.Copy(bmData.Scan0, _BitImageBufferBytes, 0, bitmapDataSize);
-                int bitmapIndex = 0;
-                int ImageBaseDataIndex = 0;
-                for (int i = 0; i < bmData.Height; i++)
-                {
-                    for (int j = 0; j < bmData.Width; j++)
-                    {
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex++];
-                    }
-                    bitmapIndex += offset;
-                }
-                MVD_IMAGE_DATA_INFO stImageData = new MVD_IMAGE_DATA_INFO();
-                stImageData.stDataChannel[0].nRowStep = (uint)bmData.Width;
-                stImageData.stDataChannel[0].nLen = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].nSize = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].arrDataBytes = _ImageBaseDataBufferBytes;
-                cMvdImage.InitImage((uint)bmData.Width, (uint)bmData.Height, MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08, stImageData);
-            }
-            else if (bitPixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb)
-            {
-                Int32 bitmapDataSize = bmData.Stride * bmData.Height;//bitmap图像缓存长度
-                int offset = bmData.Stride - bmData.Width * 3;
-                Int32 ImageBaseDataSize = bmData.Width * bmData.Height * 3;//imageBaseData_V2图像真正的缓存长度
-                byte[] _BitImageBufferBytes = new byte[bitmapDataSize];
-                byte[] _ImageBaseDataBufferBytes = new byte[ImageBaseDataSize];
-                Marshal.Copy(bmData.Scan0, _BitImageBufferBytes, 0, bitmapDataSize);
-                int bitmapIndex = 0;
-                int ImageBaseDataIndex = 0;
-                for (int i = 0; i < bmData.Height; i++)
-                {
-                    for (int j = 0; j < bmData.Width; j++)
-                    {
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex + 2];
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex + 1];
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex];
-                        bitmapIndex += 3;
-                    }
-                    bitmapIndex += offset;
-                }
-                MVD_IMAGE_DATA_INFO stImageData = new MVD_IMAGE_DATA_INFO();
-                stImageData.stDataChannel[0].nRowStep = (uint)bmData.Width * 3;
-                stImageData.stDataChannel[0].nLen = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].nSize = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].arrDataBytes = _ImageBaseDataBufferBytes;
-                cMvdImage.InitImage((uint)bmData.Width, (uint)bmData.Height, MVD_PIXEL_FORMAT.MVD_PIXEL_RGB_RGB24_C3, stImageData);
-            }
-            bmpInputImg.UnlockBits(bmData);  // 解除锁定
-            return cMvdImage;
-        }
     }
 }

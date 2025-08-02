@@ -170,6 +170,7 @@
     <Compile Include="CCDSpace\CAM_HIKVISION.cs" />
     <Compile Include="CCDSpace\Dvp2Class.cs" />
     <Compile Include="CCDSpace\CamLinkDriver\Linescan_iTK.cs" />
+    <Compile Include="CCDSpace\GaCameraFactory.cs" />
     <Compile Include="ControlSpace\PLCSpace\CipCompoletClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\CstLightClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\EzBarcodeM3DHelper.cs" />

@@ -57,9 +57,10 @@
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(794, 896);
+            this.tabControl1.Size = new System.Drawing.Size(1059, 1120);
             this.tabControl1.TabIndex = 2;
             // 
             // tabPage1
@@ -67,10 +68,11 @@
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.tableLayoutPanel2);
             this.tabPage1.Controls.Add(this.button6);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Location = new System.Drawing.Point(4, 25);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(786, 870);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage1.Size = new System.Drawing.Size(1051, 1091);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "主界面";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -79,9 +81,10 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.label1.Location = new System.Drawing.Point(3, 3);
+            this.label1.Location = new System.Drawing.Point(4, 4);
+            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(59, 12);
+            this.label1.Size = new System.Drawing.Size(71, 15);
             this.label1.TabIndex = 20;
             this.label1.Text = "飞拍序号:";
             // 
@@ -93,36 +96,40 @@
             this.tableLayoutPanel2.Controls.Add(this.mvsui2, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.mvsui1, 0, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(4, 4);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(780, 864);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(1043, 1083);
             this.tableLayoutPanel2.TabIndex = 21;
             // 
             // mvsui2
             // 
             this.mvsui2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mvsui2.Location = new System.Drawing.Point(393, 3);
+            this.mvsui2.Location = new System.Drawing.Point(526, 5);
+            this.mvsui2.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.mvsui2.Name = "mvsui2";
-            this.mvsui2.Size = new System.Drawing.Size(384, 858);
+            this.mvsui2.Size = new System.Drawing.Size(512, 1073);
             this.mvsui2.TabIndex = 3;
             // 
             // mvsui1
             // 
             this.mvsui1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mvsui1.Location = new System.Drawing.Point(3, 3);
+            this.mvsui1.Location = new System.Drawing.Point(5, 5);
+            this.mvsui1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.mvsui1.Name = "mvsui1";
-            this.mvsui1.Size = new System.Drawing.Size(384, 858);
+            this.mvsui1.Size = new System.Drawing.Size(511, 1073);
             this.mvsui1.TabIndex = 2;
             // 
             // button6
             // 
             this.button6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.button6.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.button6.Location = new System.Drawing.Point(600, 829);
+            this.button6.Location = new System.Drawing.Point(800, 1036);
+            this.button6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(64, 38);
+            this.button6.Size = new System.Drawing.Size(85, 48);
             this.button6.TabIndex = 18;
             this.button6.Text = "测试准备";
             this.button6.UseVisualStyleBackColor = false;
@@ -131,9 +138,10 @@
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.groupBox1);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Location = new System.Drawing.Point(4, 25);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(786, 870);
+            this.tabPage2.Size = new System.Drawing.Size(1051, 1091);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "日志";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -143,8 +151,10 @@
             this.groupBox1.Controls.Add(this.richTextBox1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(0, 0);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(786, 870);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Size = new System.Drawing.Size(1051, 1091);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "日志记录";
@@ -152,9 +162,10 @@
             // richTextBox1
             // 
             this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(3, 17);
+            this.richTextBox1.Location = new System.Drawing.Point(4, 22);
+            this.richTextBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(780, 850);
+            this.richTextBox1.Size = new System.Drawing.Size(1043, 1065);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
@@ -167,57 +178,63 @@
             this.tableLayoutPanel1.Controls.Add(this.DSFly2, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.DSFly3, 0, 3);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(794, 0);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(1059, 0);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(252, 896);
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 25F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(336, 1120);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
             // DSFly0
             // 
             this.DSFly0.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DSFly0.Location = new System.Drawing.Point(3, 3);
+            this.DSFly0.Location = new System.Drawing.Point(5, 5);
+            this.DSFly0.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.DSFly0.Name = "DSFly0";
-            this.DSFly0.Size = new System.Drawing.Size(246, 218);
+            this.DSFly0.Size = new System.Drawing.Size(326, 270);
             this.DSFly0.TabIndex = 1;
             // 
             // DSFly1
             // 
             this.DSFly1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DSFly1.Location = new System.Drawing.Point(3, 227);
+            this.DSFly1.Location = new System.Drawing.Point(5, 285);
+            this.DSFly1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.DSFly1.Name = "DSFly1";
-            this.DSFly1.Size = new System.Drawing.Size(246, 218);
+            this.DSFly1.Size = new System.Drawing.Size(326, 270);
             this.DSFly1.TabIndex = 2;
             // 
             // DSFly2
             // 
             this.DSFly2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DSFly2.Location = new System.Drawing.Point(3, 451);
+            this.DSFly2.Location = new System.Drawing.Point(5, 565);
+            this.DSFly2.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.DSFly2.Name = "DSFly2";
-            this.DSFly2.Size = new System.Drawing.Size(246, 218);
+            this.DSFly2.Size = new System.Drawing.Size(326, 270);
             this.DSFly2.TabIndex = 3;
             // 
             // DSFly3
             // 
             this.DSFly3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DSFly3.Location = new System.Drawing.Point(3, 675);
+            this.DSFly3.Location = new System.Drawing.Point(5, 845);
+            this.DSFly3.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.DSFly3.Name = "DSFly3";
-            this.DSFly3.Size = new System.Drawing.Size(246, 218);
+            this.DSFly3.Size = new System.Drawing.Size(326, 270);
             this.DSFly3.TabIndex = 4;
             // 
             // MainX3UI
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "MainX3UI";
-            this.Size = new System.Drawing.Size(1046, 896);
+            this.Size = new System.Drawing.Size(1395, 1120);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
