@@ -255,358 +255,358 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BasicSpace\ChipClass.cs" />
-    <Compile Include="BasicSpace\CollectResultClass.cs" />
-    <Compile Include="BasicSpace\FindRectByVM.cs" />
-    <Compile Include="BasicSpace\Mvd2DReaderClass.cs" />
-    <Compile Include="BasicSpace\MvdFindClass.cs" />
-    <Compile Include="BasicSpace\ReadBarcode\BarcodeAll_MVD.cs" />
-    <Compile Include="BasicSpace\ReadBarcode\ZXingClass.cs" />
-    <Compile Include="BasicSpace\RecipeParaGridClass.cs" />
-    <Compile Include="BasicSpace\ShowRectClass.cs" />
-    <Compile Include="BasicSpace\TrayClass.cs" />
-    <Compile Include="BasicSpace\XinliFindLineClass.cs" />
-    <Compile Include="ControlSpace\IOSpace\GeoIOClass.cs" />
-    <Compile Include="ControlSpace\IOSpace\MainFPIX3IOClass.cs" />
-    <Compile Include="ControlSpace\IOSpace\MainLSIOClass.cs" />
-    <Compile Include="ControlSpace\IOSpace\MainX1IOClass.cs" />
-    <Compile Include="ControlSpace\IOSpace\MainX2IOClass.cs" />
-    <Compile Include="ControlSpace\IOSpace\MiniX6IOClass.cs" />
-    <Compile Include="ControlSpace\IOSpace\NeedleIOClass.cs" />
-    <Compile Include="ControlSpace\IOSpace\YzBaseIOClass.cs" />
-    <Compile Include="ControlSpace\MachineCollectionClass.cs" />
-    <Compile Include="ControlSpace\MachineSpace\GeoMachineClass.cs" />
-    <Compile Include="ControlSpace\MachineSpace\MainFPIX3MachineClass.cs" />
-    <Compile Include="ControlSpace\MachineSpace\MainLSMachineClass.cs" />
-    <Compile Include="ControlSpace\MachineSpace\MainX1MachineClass.cs" />
-    <Compile Include="ControlSpace\MachineSpace\MainX2MachineClass.cs" />
-    <Compile Include="ControlSpace\MachineSpace\MiniX6MachineClass.cs" />
-    <Compile Include="ControlSpace\MachineSpace\NeedleMachineClass.cs" />
-    <Compile Include="ControlSpace\MachineSpace\YzBaseMachineClass.cs" />
-    <Compile Include="FormSpace\BannerForm.cs">
+    <Compile Include="GA\BasicSpace\ChipClass.cs" />
+    <Compile Include="GA\BasicSpace\CollectResultClass.cs" />
+    <Compile Include="GA\BasicSpace\FindRectByVM.cs" />
+    <Compile Include="GA\BasicSpace\Mvd2DReaderClass.cs" />
+    <Compile Include="GA\BasicSpace\MvdFindClass.cs" />
+    <Compile Include="GA\BasicSpace\ReadBarcode\BarcodeAll_MVD.cs" />
+    <Compile Include="GA\BasicSpace\ReadBarcode\ZXingClass.cs" />
+    <Compile Include="GA\BasicSpace\RecipeParaGridClass.cs" />
+    <Compile Include="GA\BasicSpace\ShowRectClass.cs" />
+    <Compile Include="GA\BasicSpace\TrayClass.cs" />
+    <Compile Include="GA\BasicSpace\XinliFindLineClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\GeoIOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\MainFPIX3IOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\MainLSIOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\MainX1IOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\MainX2IOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\MiniX6IOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\NeedleIOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\YzBaseIOClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineCollectionClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineSpace\GeoMachineClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineSpace\MainFPIX3MachineClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineSpace\MainLSMachineClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineSpace\MainX1MachineClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineSpace\MainX2MachineClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineSpace\MiniX6MachineClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineSpace\NeedleMachineClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineSpace\YzBaseMachineClass.cs" />
+    <Compile Include="GA\FormSpace\BannerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\BannerForm.designer.cs">
+    <Compile Include="GA\FormSpace\BannerForm.designer.cs">
       <DependentUpon>BannerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmBaseX2.cs">
+    <Compile Include="GA\FormSpace\frmBaseX2.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmBaseX2.Designer.cs">
+    <Compile Include="GA\FormSpace\frmBaseX2.Designer.cs">
       <DependentUpon>frmBaseX2.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmFindLine.cs">
+    <Compile Include="GA\FormSpace\frmFindLine.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmFindLine.Designer.cs">
+    <Compile Include="GA\FormSpace\frmFindLine.Designer.cs">
       <DependentUpon>frmFindLine.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmFlySetup.cs">
+    <Compile Include="GA\FormSpace\frmFlySetup.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmFlySetup.Designer.cs">
+    <Compile Include="GA\FormSpace\frmFlySetup.Designer.cs">
       <DependentUpon>frmFlySetup.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmFPIRecipe.cs">
+    <Compile Include="GA\FormSpace\frmFPIRecipe.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmFPIRecipe.Designer.cs">
+    <Compile Include="GA\FormSpace\frmFPIRecipe.Designer.cs">
       <DependentUpon>frmFPIRecipe.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmHandle.cs">
+    <Compile Include="GA\FormSpace\frmHandle.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmHandle.Designer.cs">
+    <Compile Include="GA\FormSpace\frmHandle.Designer.cs">
       <DependentUpon>frmHandle.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmIO.cs">
+    <Compile Include="GA\FormSpace\frmIO.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmIO.Designer.cs">
+    <Compile Include="GA\FormSpace\frmIO.Designer.cs">
       <DependentUpon>frmIO.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmLightControl.cs">
+    <Compile Include="GA\FormSpace\frmLightControl.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmLightControl.Designer.cs">
+    <Compile Include="GA\FormSpace\frmLightControl.Designer.cs">
       <DependentUpon>frmLightControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmMotor.cs">
+    <Compile Include="GA\FormSpace\frmMotor.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmMotor.Designer.cs">
+    <Compile Include="GA\FormSpace\frmMotor.Designer.cs">
       <DependentUpon>frmMotor.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmMSR.cs">
+    <Compile Include="GA\FormSpace\frmMSR.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmMSR.Designer.cs">
+    <Compile Include="GA\FormSpace\frmMSR.Designer.cs">
       <DependentUpon>frmMSR.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmNoTrayX3.cs">
+    <Compile Include="GA\FormSpace\frmNoTrayX3.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmNoTrayX3.Designer.cs">
+    <Compile Include="GA\FormSpace\frmNoTrayX3.Designer.cs">
       <DependentUpon>frmNoTrayX3.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmRecipe.cs">
+    <Compile Include="GA\FormSpace\frmRecipe.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmRecipe.Designer.cs">
+    <Compile Include="GA\FormSpace\frmRecipe.Designer.cs">
       <DependentUpon>frmRecipe.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmSelectScanInspectMode.cs">
+    <Compile Include="GA\FormSpace\frmSelectScanInspectMode.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmSelectScanInspectMode.Designer.cs">
+    <Compile Include="GA\FormSpace\frmSelectScanInspectMode.Designer.cs">
       <DependentUpon>frmSelectScanInspectMode.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmTemplateX2.cs">
+    <Compile Include="GA\FormSpace\frmTemplateX2.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmTemplateX2.Designer.cs">
+    <Compile Include="GA\FormSpace\frmTemplateX2.Designer.cs">
       <DependentUpon>frmTemplateX2.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmTemplateX3.cs">
+    <Compile Include="GA\FormSpace\frmTemplateX3.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmTemplateX3.Designer.cs">
+    <Compile Include="GA\FormSpace\frmTemplateX3.Designer.cs">
       <DependentUpon>frmTemplateX3.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmWaring.cs">
+    <Compile Include="GA\FormSpace\frmWaring.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmWaring.Designer.cs">
+    <Compile Include="GA\FormSpace\frmWaring.Designer.cs">
       <DependentUpon>frmWaring.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\frmX2Recipe.cs">
+    <Compile Include="GA\FormSpace\frmX2Recipe.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\frmX2Recipe.Designer.cs">
+    <Compile Include="GA\FormSpace\frmX2Recipe.Designer.cs">
       <DependentUpon>frmX2Recipe.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\WX\frmFourMark.cs">
+    <Compile Include="GA\FormSpace\WX\frmFourMark.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\WX\frmFourMark.Designer.cs">
+    <Compile Include="GA\FormSpace\WX\frmFourMark.Designer.cs">
       <DependentUpon>frmFourMark.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\WX\frmMainDX.cs">
+    <Compile Include="GA\FormSpace\WX\frmMainDX.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormSpace\WX\frmMainDX.Designer.cs">
+    <Compile Include="GA\FormSpace\WX\frmMainDX.Designer.cs">
       <DependentUpon>frmMainDX.cs</DependentUpon>
     </Compile>
-    <Compile Include="GlobalSpace\Enums.cs" />
-    <Compile Include="GlobalSpace\INI.cs" />
-    <Compile Include="GlobalSpace\Universal.cs" />
-    <Compile Include="OPSpace\AnalyzeClass.cs" />
-    <Compile Include="OPSpace\AUFindClass.cs" />
-    <Compile Include="OPSpace\CameraConfig.cs" />
-    <Compile Include="OPSpace\ChannelBarcodeClass.cs" />
-    <Compile Include="OPSpace\MarkItemClass.cs" />
-    <Compile Include="OPSpace\ModuleClass.cs" />
-    <Compile Include="OPSpace\RecipeSpace\RecipeBaseClass.cs" />
-    <Compile Include="OPSpace\RecipeSpace\RecipeFPIX3Class.cs" />
-    <Compile Include="OPSpace\RecipeSpace\RecipeMainX2Class.cs" />
-    <Compile Include="OPSpace\RecipeSpace\RecipeMiniX6Class.cs" />
-    <Compile Include="OPSpace\RecipeSpace\RecipeNeedleClass.cs" />
-    <Compile Include="OPSpace\RecipeSpace\RecipeTrayClass.cs" />
-    <Compile Include="OPSpace\RegionCellX2Class.cs" />
-    <Compile Include="OPSpace\RegionCellX3Class.cs" />
-    <Compile Include="OPSpace\ResultSpace\GeoResultClass.cs" />
-    <Compile Include="OPSpace\ResultSpace\JzBaseResultClass.cs" />
-    <Compile Include="ProcessSpace\AbsProcess.cs" />
-    <Compile Include="ProcessSpace\BaseProcess.cs" />
-    <Compile Include="ProcessSpace\BuzzerProcess.cs" />
-    <Compile Include="ProcessSpace\FocusProcess.cs" />
-    <Compile Include="ProcessSpace\LineScanProcess.cs" />
-    <Compile Include="ProcessSpace\LineScanProcessMuiltStep.cs" />
-    <Compile Include="ProcessSpace\LineScanSingleProcess.cs" />
-    <Compile Include="ProcessSpace\MainProcess.cs" />
-    <Compile Include="ProcessSpace\ResetProcess.cs" />
+    <Compile Include="GA\GlobalSpace\Enums.cs" />
+    <Compile Include="GA\GlobalSpace\INI.cs" />
+    <Compile Include="GA\GlobalSpace\Universal.cs" />
+    <Compile Include="GA\OPSpace\AnalyzeClass.cs" />
+    <Compile Include="GA\OPSpace\AUFindClass.cs" />
+    <Compile Include="GA\OPSpace\CameraConfig.cs" />
+    <Compile Include="GA\OPSpace\ChannelBarcodeClass.cs" />
+    <Compile Include="GA\OPSpace\MarkItemClass.cs" />
+    <Compile Include="GA\OPSpace\ModuleClass.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\RecipeBaseClass.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\RecipeFPIX3Class.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\RecipeMainX2Class.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\RecipeMiniX6Class.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\RecipeNeedleClass.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\RecipeTrayClass.cs" />
+    <Compile Include="GA\OPSpace\RegionCellX2Class.cs" />
+    <Compile Include="GA\OPSpace\RegionCellX3Class.cs" />
+    <Compile Include="GA\OPSpace\ResultSpace\GeoResultClass.cs" />
+    <Compile Include="GA\OPSpace\ResultSpace\JzBaseResultClass.cs" />
+    <Compile Include="GA\ProcessSpace\AbsProcess.cs" />
+    <Compile Include="GA\ProcessSpace\BaseProcess.cs" />
+    <Compile Include="GA\ProcessSpace\BuzzerProcess.cs" />
+    <Compile Include="GA\ProcessSpace\FocusProcess.cs" />
+    <Compile Include="GA\ProcessSpace\LineScanProcess.cs" />
+    <Compile Include="GA\ProcessSpace\LineScanProcessMuiltStep.cs" />
+    <Compile Include="GA\ProcessSpace\LineScanSingleProcess.cs" />
+    <Compile Include="GA\ProcessSpace\MainProcess.cs" />
+    <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RunSpace\ProcessRunClass.cs" />
-    <Compile Include="RunSpace\ProcessRunFPIClass.cs" />
-    <Compile Include="UISpace\CtrlSpace\MainFPIX3Ctrl.cs">
+    <Compile Include="GA\RunSpace\ProcessRunClass.cs" />
+    <Compile Include="GA\RunSpace\ProcessRunFPIClass.cs" />
+    <Compile Include="GA\UISpace\CtrlSpace\MainFPIX3Ctrl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\CtrlSpace\MainFPIX3Ctrl.Designer.cs">
+    <Compile Include="GA\UISpace\CtrlSpace\MainFPIX3Ctrl.Designer.cs">
       <DependentUpon>MainFPIX3Ctrl.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\CtrlSpace\MainX1Ctrl.cs">
+    <Compile Include="GA\UISpace\CtrlSpace\MainX1Ctrl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\CtrlSpace\MainX1Ctrl.Designer.cs">
+    <Compile Include="GA\UISpace\CtrlSpace\MainX1Ctrl.Designer.cs">
       <DependentUpon>MainX1Ctrl.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\CtrlSpace\MainX2Ctrl.cs">
+    <Compile Include="GA\UISpace\CtrlSpace\MainX2Ctrl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\CtrlSpace\MainX2Ctrl.Designer.cs">
+    <Compile Include="GA\UISpace\CtrlSpace\MainX2Ctrl.Designer.cs">
       <DependentUpon>MainX2Ctrl.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\CtrlSpace\MiniCtrl.cs">
+    <Compile Include="GA\UISpace\CtrlSpace\MiniCtrl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\CtrlSpace\MiniCtrl.Designer.cs">
+    <Compile Include="GA\UISpace\CtrlSpace\MiniCtrl.Designer.cs">
       <DependentUpon>MiniCtrl.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\CtrlSpace\NeedleCtrl.cs">
+    <Compile Include="GA\UISpace\CtrlSpace\NeedleCtrl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\CtrlSpace\NeedleCtrl.Designer.cs">
+    <Compile Include="GA\UISpace\CtrlSpace\NeedleCtrl.Designer.cs">
       <DependentUpon>NeedleCtrl.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\CtrlUI.cs">
+    <Compile Include="GA\UISpace\CtrlUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\CtrlUI.Designer.cs">
+    <Compile Include="GA\UISpace\CtrlUI.Designer.cs">
       <DependentUpon>CtrlUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\IniUI.cs">
+    <Compile Include="GA\UISpace\IniUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\IniUI.Designer.cs">
+    <Compile Include="GA\UISpace\IniUI.Designer.cs">
       <DependentUpon>IniUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\IOSpace\LSIOUI.cs">
+    <Compile Include="GA\UISpace\IOSpace\LSIOUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\IOSpace\LSIOUI.Designer.cs">
+    <Compile Include="GA\UISpace\IOSpace\LSIOUI.Designer.cs">
       <DependentUpon>LSIOUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\IOSpace\LSItemClass.cs" />
-    <Compile Include="UISpace\LSDirUI.cs">
+    <Compile Include="GA\UISpace\IOSpace\LSItemClass.cs" />
+    <Compile Include="GA\UISpace\LSDirUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\LSDirUI.Designer.cs">
+    <Compile Include="GA\UISpace\LSDirUI.Designer.cs">
       <DependentUpon>LSDirUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\MainControlUI.cs">
+    <Compile Include="GA\UISpace\MainControlUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\MainControlUI.Designer.cs">
+    <Compile Include="GA\UISpace\MainControlUI.Designer.cs">
       <DependentUpon>MainControlUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\MainSpace\MainX1UI.cs">
+    <Compile Include="GA\UISpace\MainSpace\MainX1UI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\MainSpace\MainX1UI.Designer.cs">
+    <Compile Include="GA\UISpace\MainSpace\MainX1UI.Designer.cs">
       <DependentUpon>MainX1UI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\MainSpace\MainX2UI.cs">
+    <Compile Include="GA\UISpace\MainSpace\MainX2UI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\MainSpace\MainX2UI.Designer.cs">
+    <Compile Include="GA\UISpace\MainSpace\MainX2UI.Designer.cs">
       <DependentUpon>MainX2UI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\MainSpace\MainX3UI.cs">
+    <Compile Include="GA\UISpace\MainSpace\MainX3UI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\MainSpace\MainX3UI.Designer.cs">
+    <Compile Include="GA\UISpace\MainSpace\MainX3UI.Designer.cs">
       <DependentUpon>MainX3UI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\MainSpace\MiniMainUI.cs">
+    <Compile Include="GA\UISpace\MainSpace\MiniMainUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\MainSpace\MiniMainUI.Designer.cs">
+    <Compile Include="GA\UISpace\MainSpace\MiniMainUI.Designer.cs">
       <DependentUpon>MiniMainUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\MainSpace\NeedleMainUI.cs">
+    <Compile Include="GA\UISpace\MainSpace\NeedleMainUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\MainSpace\NeedleMainUI.Designer.cs">
+    <Compile Include="GA\UISpace\MainSpace\NeedleMainUI.Designer.cs">
       <DependentUpon>NeedleMainUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\MainSpace\TrackItemUI.cs">
+    <Compile Include="GA\UISpace\MainSpace\TrackItemUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\MainSpace\TrackItemUI.Designer.cs">
+    <Compile Include="GA\UISpace\MainSpace\TrackItemUI.Designer.cs">
       <DependentUpon>TrackItemUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\RcpUI.cs">
+    <Compile Include="GA\UISpace\RcpUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\RcpUI.Designer.cs">
+    <Compile Include="GA\UISpace\RcpUI.Designer.cs">
       <DependentUpon>RcpUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\RunUI.cs">
+    <Compile Include="GA\UISpace\RunUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\RunUI.Designer.cs">
+    <Compile Include="GA\UISpace\RunUI.Designer.cs">
       <DependentUpon>RunUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\UIMVC\Controler\CtlPosClass.cs" />
-    <Compile Include="UISpace\UIMVC\MVSUI.cs">
+    <Compile Include="GA\UISpace\UIMVC\Controler\CtlPosClass.cs" />
+    <Compile Include="GA\UISpace\UIMVC\MVSUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\UIMVC\MVSUI.Designer.cs">
+    <Compile Include="GA\UISpace\UIMVC\MVSUI.Designer.cs">
       <DependentUpon>MVSUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="UISpace\UIMVC\View\PosUI.cs">
+    <Compile Include="GA\UISpace\UIMVC\View\PosUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="UISpace\UIMVC\View\PosUI.Designer.cs">
+    <Compile Include="GA\UISpace\UIMVC\View\PosUI.Designer.cs">
       <DependentUpon>PosUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="Utils\EzMvdImageConvertor.cs" />
-    <EmbeddedResource Include="FormSpace\BannerForm.resx">
+    <Compile Include="LT\Utils\EzMvdImageConvertor.cs" />
+    <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">
       <DependentUpon>BannerForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmBaseX2.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmBaseX2.resx">
       <DependentUpon>frmBaseX2.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmFindLine.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmFindLine.resx">
       <DependentUpon>frmFindLine.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmFlySetup.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmFlySetup.resx">
       <DependentUpon>frmFlySetup.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmFPIRecipe.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmFPIRecipe.resx">
       <DependentUpon>frmFPIRecipe.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmHandle.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmHandle.resx">
       <DependentUpon>frmHandle.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmIO.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmIO.resx">
       <DependentUpon>frmIO.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmLightControl.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmLightControl.resx">
       <DependentUpon>frmLightControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmMotor.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmMotor.resx">
       <DependentUpon>frmMotor.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmMSR.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmMSR.resx">
       <DependentUpon>frmMSR.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmNoTrayX3.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmNoTrayX3.resx">
       <DependentUpon>frmNoTrayX3.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmRecipe.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmRecipe.resx">
       <DependentUpon>frmRecipe.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmSelectScanInspectMode.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmSelectScanInspectMode.resx">
       <DependentUpon>frmSelectScanInspectMode.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmTemplateX2.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmTemplateX2.resx">
       <DependentUpon>frmTemplateX2.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmTemplateX3.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmTemplateX3.resx">
       <DependentUpon>frmTemplateX3.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmWaring.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmWaring.resx">
       <DependentUpon>frmWaring.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\frmX2Recipe.resx">
+    <EmbeddedResource Include="GA\FormSpace\frmX2Recipe.resx">
       <DependentUpon>frmX2Recipe.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\WX\frmFourMark.resx">
+    <EmbeddedResource Include="GA\FormSpace\WX\frmFourMark.resx">
       <DependentUpon>frmFourMark.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\WX\frmMainDX.resx">
+    <EmbeddedResource Include="GA\FormSpace\WX\frmMainDX.resx">
       <DependentUpon>frmMainDX.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -619,64 +619,64 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="UISpace\CtrlSpace\MainFPIX3Ctrl.resx">
+    <EmbeddedResource Include="GA\UISpace\CtrlSpace\MainFPIX3Ctrl.resx">
       <DependentUpon>MainFPIX3Ctrl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\CtrlSpace\MainX1Ctrl.resx">
+    <EmbeddedResource Include="GA\UISpace\CtrlSpace\MainX1Ctrl.resx">
       <DependentUpon>MainX1Ctrl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\CtrlSpace\MainX2Ctrl.resx">
+    <EmbeddedResource Include="GA\UISpace\CtrlSpace\MainX2Ctrl.resx">
       <DependentUpon>MainX2Ctrl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\CtrlSpace\MiniCtrl.resx">
+    <EmbeddedResource Include="GA\UISpace\CtrlSpace\MiniCtrl.resx">
       <DependentUpon>MiniCtrl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\CtrlSpace\NeedleCtrl.resx">
+    <EmbeddedResource Include="GA\UISpace\CtrlSpace\NeedleCtrl.resx">
       <DependentUpon>NeedleCtrl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\CtrlUI.resx">
+    <EmbeddedResource Include="GA\UISpace\CtrlUI.resx">
       <DependentUpon>CtrlUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\IniUI.resx">
+    <EmbeddedResource Include="GA\UISpace\IniUI.resx">
       <DependentUpon>IniUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\IOSpace\LSIOUI.resx">
+    <EmbeddedResource Include="GA\UISpace\IOSpace\LSIOUI.resx">
       <DependentUpon>LSIOUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\LSDirUI.resx">
+    <EmbeddedResource Include="GA\UISpace\LSDirUI.resx">
       <DependentUpon>LSDirUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\MainControlUI.resx">
+    <EmbeddedResource Include="GA\UISpace\MainControlUI.resx">
       <DependentUpon>MainControlUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\MainSpace\MainX1UI.resx">
+    <EmbeddedResource Include="GA\UISpace\MainSpace\MainX1UI.resx">
       <DependentUpon>MainX1UI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\MainSpace\MainX2UI.resx">
+    <EmbeddedResource Include="GA\UISpace\MainSpace\MainX2UI.resx">
       <DependentUpon>MainX2UI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\MainSpace\MainX3UI.resx">
+    <EmbeddedResource Include="GA\UISpace\MainSpace\MainX3UI.resx">
       <DependentUpon>MainX3UI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\MainSpace\MiniMainUI.resx">
+    <EmbeddedResource Include="GA\UISpace\MainSpace\MiniMainUI.resx">
       <DependentUpon>MiniMainUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\MainSpace\NeedleMainUI.resx">
+    <EmbeddedResource Include="GA\UISpace\MainSpace\NeedleMainUI.resx">
       <DependentUpon>NeedleMainUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\MainSpace\TrackItemUI.resx">
+    <EmbeddedResource Include="GA\UISpace\MainSpace\TrackItemUI.resx">
       <DependentUpon>TrackItemUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\RcpUI.resx">
+    <EmbeddedResource Include="GA\UISpace\RcpUI.resx">
       <DependentUpon>RcpUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\RunUI.resx">
+    <EmbeddedResource Include="GA\UISpace\RunUI.resx">
       <DependentUpon>RunUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\UIMVC\MVSUI.resx">
+    <EmbeddedResource Include="GA\UISpace\UIMVC\MVSUI.resx">
       <DependentUpon>MVSUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\UIMVC\View\PosUI.resx">
+    <EmbeddedResource Include="GA\UISpace\UIMVC\View\PosUI.resx">
       <DependentUpon>PosUI.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
@@ -708,7 +708,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="coconut1.ico" />
-    <None Include="FAQ.md" />
+    <None Include="ReadMe.md" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
   <ItemGroup />
