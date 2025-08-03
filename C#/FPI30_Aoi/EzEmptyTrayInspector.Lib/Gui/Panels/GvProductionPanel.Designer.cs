@@ -29,69 +29,46 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GvProductionPanel));
-            this.btnHome = new System.Windows.Forms.Button();
-            this.btnSwapMapView = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.lblRecipeInfo = new System.Windows.Forms.Label();
             this.cboRecipeNames = new System.Windows.Forms.ComboBox();
-            this.label10 = new System.Windows.Forms.Label();
             this.panel4 = new System.Windows.Forms.Panel();
             this.gwLogPanel1 = new EzEmptyTrayInspector.Gui.Panels.GwLogPanel();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.btnTryRun = new System.Windows.Forms.Button();
-            this.btnProductionRun = new System.Windows.Forms.Button();
-            this.btnStop = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.panel5 = new System.Windows.Forms.Panel();
-            this.lblUserName = new System.Windows.Forms.Label();
-            this.btnLogin = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
-            this.txtSerialNo = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.lblPassFail = new System.Windows.Forms.Label();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.gwFuncButtonsPanel1 = new EzEmptyTrayInspector.Gui.Panels.GwFuncButtonsPanel();
             this.panel2.SuspendLayout();
             this.panel4.SuspendLayout();
-            this.panel3.SuspendLayout();
             this.panel1.SuspendLayout();
-            this.panel5.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // btnHome
-            // 
-            this.btnHome.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
-            this.btnHome.Font = new System.Drawing.Font("Arial", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnHome.Location = new System.Drawing.Point(514, 265);
-            this.btnHome.Margin = new System.Windows.Forms.Padding(2);
-            this.btnHome.Name = "btnHome";
-            this.btnHome.Size = new System.Drawing.Size(74, 40);
-            this.btnHome.TabIndex = 304;
-            this.btnHome.Text = "Home";
-            this.btnHome.UseVisualStyleBackColor = false;
-            this.btnHome.Visible = false;
-            // 
-            // btnSwapMapView
-            // 
-            this.btnSwapMapView.BackColor = System.Drawing.Color.Yellow;
-            this.btnSwapMapView.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnSwapMapView.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnSwapMapView.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSwapMapView.Location = new System.Drawing.Point(482, 277);
-            this.btnSwapMapView.Name = "btnSwapMapView";
-            this.btnSwapMapView.Size = new System.Drawing.Size(19, 18);
-            this.btnSwapMapView.TabIndex = 305;
-            this.btnSwapMapView.UseVisualStyleBackColor = false;
-            this.btnSwapMapView.Visible = false;
             // 
             // panel2
             // 
-            this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(128)))), ((int)(((byte)(255)))));
+            this.panel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.panel2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel2.Controls.Add(this.cboRecipeNames);
-            this.panel2.Controls.Add(this.label10);
-            this.panel2.Location = new System.Drawing.Point(0, 128);
-            this.panel2.Margin = new System.Windows.Forms.Padding(2);
+            this.panel2.Controls.Add(this.lblRecipeInfo);
+            this.panel2.Location = new System.Drawing.Point(0, 149);
+            this.panel2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(350, 64);
+            this.panel2.Padding = new System.Windows.Forms.Padding(20, 10, 20, 10);
+            this.panel2.Size = new System.Drawing.Size(466, 91);
             this.panel2.TabIndex = 300;
+            // 
+            // lblRecipeInfo
+            // 
+            this.lblRecipeInfo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.lblRecipeInfo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblRecipeInfo.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.lblRecipeInfo.ForeColor = System.Drawing.Color.Black;
+            this.lblRecipeInfo.Location = new System.Drawing.Point(20, 10);
+            this.lblRecipeInfo.Name = "lblRecipeInfo";
+            this.lblRecipeInfo.Padding = new System.Windows.Forms.Padding(9, 0, 0, 0);
+            this.lblRecipeInfo.Size = new System.Drawing.Size(424, 69);
+            this.lblRecipeInfo.TabIndex = 21;
+            this.lblRecipeInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // cboRecipeNames
             // 
@@ -99,34 +76,23 @@
             this.cboRecipeNames.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboRecipeNames.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cboRecipeNames.FormattingEnabled = true;
-            this.cboRecipeNames.Location = new System.Drawing.Point(136, 18);
-            this.cboRecipeNames.Margin = new System.Windows.Forms.Padding(2);
+            this.cboRecipeNames.Location = new System.Drawing.Point(999, 188);
+            this.cboRecipeNames.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cboRecipeNames.Name = "cboRecipeNames";
-            this.cboRecipeNames.Size = new System.Drawing.Size(191, 26);
+            this.cboRecipeNames.Size = new System.Drawing.Size(117, 31);
             this.cboRecipeNames.TabIndex = 306;
-            // 
-            // label10
-            // 
-            this.label10.BackColor = System.Drawing.Color.Transparent;
-            this.label10.Font = new System.Drawing.Font("微軟正黑體", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.label10.ForeColor = System.Drawing.Color.White;
-            this.label10.Location = new System.Drawing.Point(16, 22);
-            this.label10.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(151, 17);
-            this.label10.TabIndex = 305;
-            this.label10.Text = "Recipe (參數)";
+            this.cboRecipeNames.Visible = false;
             // 
             // panel4
             // 
             this.panel4.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel4.Controls.Add(this.gwLogPanel1);
-            this.panel4.Location = new System.Drawing.Point(0, 255);
-            this.panel4.Margin = new System.Windows.Forms.Padding(2);
+            this.panel4.Location = new System.Drawing.Point(0, 309);
+            this.panel4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panel4.Name = "panel4";
-            this.panel4.Padding = new System.Windows.Forms.Padding(9, 0, 9, 10);
-            this.panel4.Size = new System.Drawing.Size(350, 324);
+            this.panel4.Padding = new System.Windows.Forms.Padding(12, 0, 12, 12);
+            this.panel4.Size = new System.Drawing.Size(466, 404);
             this.panel4.TabIndex = 302;
             // 
             // gwLogPanel1
@@ -134,203 +100,94 @@
             this.gwLogPanel1.BackColor = System.Drawing.Color.Transparent;
             this.gwLogPanel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.gwLogPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gwLogPanel1.Location = new System.Drawing.Point(9, 0);
-            this.gwLogPanel1.Margin = new System.Windows.Forms.Padding(2);
+            this.gwLogPanel1.Location = new System.Drawing.Point(12, 0);
+            this.gwLogPanel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.gwLogPanel1.Name = "gwLogPanel1";
-            this.gwLogPanel1.Padding = new System.Windows.Forms.Padding(4, 6, 4, 6);
-            this.gwLogPanel1.Size = new System.Drawing.Size(330, 312);
+            this.gwLogPanel1.Padding = new System.Windows.Forms.Padding(5, 8, 5, 8);
+            this.gwLogPanel1.Size = new System.Drawing.Size(440, 390);
             this.gwLogPanel1.TabIndex = 0;
-            // 
-            // panel3
-            // 
-            this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
-            this.panel3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel3.Controls.Add(this.btnTryRun);
-            this.panel3.Controls.Add(this.btnProductionRun);
-            this.panel3.Controls.Add(this.btnStop);
-            this.panel3.ForeColor = System.Drawing.Color.Black;
-            this.panel3.Location = new System.Drawing.Point(0, 192);
-            this.panel3.Margin = new System.Windows.Forms.Padding(2);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(350, 64);
-            this.panel3.TabIndex = 146;
-            // 
-            // btnTryRun
-            // 
-            this.btnTryRun.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.btnTryRun.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnTryRun.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.btnTryRun.Location = new System.Drawing.Point(27, 12);
-            this.btnTryRun.Margin = new System.Windows.Forms.Padding(2);
-            this.btnTryRun.Name = "btnTryRun";
-            this.btnTryRun.Size = new System.Drawing.Size(88, 40);
-            this.btnTryRun.TabIndex = 305;
-            this.btnTryRun.Text = "Try Run";
-            this.btnTryRun.UseVisualStyleBackColor = false;
-            // 
-            // btnProductionRun
-            // 
-            this.btnProductionRun.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
-            this.btnProductionRun.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnProductionRun.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.btnProductionRun.Location = new System.Drawing.Point(128, 12);
-            this.btnProductionRun.Margin = new System.Windows.Forms.Padding(2);
-            this.btnProductionRun.Name = "btnProductionRun";
-            this.btnProductionRun.Size = new System.Drawing.Size(88, 40);
-            this.btnProductionRun.TabIndex = 0;
-            this.btnProductionRun.Text = "Start";
-            this.btnProductionRun.UseVisualStyleBackColor = false;
-            this.btnProductionRun.Visible = false;
-            // 
-            // btnStop
-            // 
-            this.btnStop.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.btnStop.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.btnStop.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.btnStop.Location = new System.Drawing.Point(230, 12);
-            this.btnStop.Margin = new System.Windows.Forms.Padding(2);
-            this.btnStop.Name = "btnStop";
-            this.btnStop.Size = new System.Drawing.Size(88, 40);
-            this.btnStop.TabIndex = 1;
-            this.btnStop.Text = "Stop";
-            this.btnStop.UseVisualStyleBackColor = false;
-            this.btnStop.Visible = false;
             // 
             // panel1
             // 
             this.panel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel1.Controls.Add(this.panel5);
-            this.panel1.Controls.Add(this.label3);
-            this.panel1.Controls.Add(this.txtSerialNo);
-            this.panel1.Controls.Add(this.label2);
+            this.panel1.Controls.Add(this.lblPassFail);
             this.panel1.Location = new System.Drawing.Point(0, 0);
-            this.panel1.Margin = new System.Windows.Forms.Padding(2);
+            this.panel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(350, 128);
+            this.panel1.Padding = new System.Windows.Forms.Padding(20, 20, 20, 10);
+            this.panel1.Size = new System.Drawing.Size(466, 150);
             this.panel1.TabIndex = 147;
             // 
-            // panel5
+            // lblPassFail
             // 
-            this.panel5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.panel5.BackColor = System.Drawing.Color.Transparent;
-            this.panel5.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panel5.Controls.Add(this.lblUserName);
-            this.panel5.Controls.Add(this.btnLogin);
-            this.panel5.Location = new System.Drawing.Point(136, 63);
-            this.panel5.Margin = new System.Windows.Forms.Padding(2);
-            this.panel5.Name = "panel5";
-            this.panel5.Size = new System.Drawing.Size(191, 52);
-            this.panel5.TabIndex = 311;
+            this.lblPassFail.BackColor = System.Drawing.Color.Black;
+            this.lblPassFail.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblPassFail.Font = new System.Drawing.Font("微軟正黑體", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.lblPassFail.ForeColor = System.Drawing.Color.Blue;
+            this.lblPassFail.Location = new System.Drawing.Point(20, 20);
+            this.lblPassFail.Name = "lblPassFail";
+            this.lblPassFail.Size = new System.Drawing.Size(424, 118);
+            this.lblPassFail.TabIndex = 307;
+            this.lblPassFail.Text = "空盤檢測";
+            this.lblPassFail.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lblUserName
+            // panel3
             // 
-            this.lblUserName.BackColor = System.Drawing.Color.Transparent;
-            this.lblUserName.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblUserName.ForeColor = System.Drawing.Color.Black;
-            this.lblUserName.Location = new System.Drawing.Point(54, 16);
-            this.lblUserName.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.lblUserName.Name = "lblUserName";
-            this.lblUserName.Size = new System.Drawing.Size(120, 20);
-            this.lblUserName.TabIndex = 149;
-            this.lblUserName.Text = "Administrator";
-            this.lblUserName.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.panel3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.panel3.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panel3.Controls.Add(this.gwFuncButtonsPanel1);
+            this.panel3.Location = new System.Drawing.Point(0, 238);
+            this.panel3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(466, 72);
+            this.panel3.TabIndex = 307;
             // 
-            // btnLogin
+            // gwFuncButtonsPanel1
             // 
-            this.btnLogin.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnLogin.BackgroundImage")));
-            this.btnLogin.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnLogin.Location = new System.Drawing.Point(9, 5);
-            this.btnLogin.Margin = new System.Windows.Forms.Padding(2);
-            this.btnLogin.Name = "btnLogin";
-            this.btnLogin.Size = new System.Drawing.Size(40, 42);
-            this.btnLogin.TabIndex = 150;
-            this.btnLogin.UseVisualStyleBackColor = true;
-            // 
-            // label3
-            // 
-            this.label3.BackColor = System.Drawing.Color.Transparent;
-            this.label3.Font = new System.Drawing.Font("微軟正黑體", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.ForeColor = System.Drawing.Color.MediumBlue;
-            this.label3.Location = new System.Drawing.Point(16, 79);
-            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(91, 17);
-            this.label3.TabIndex = 310;
-            this.label3.Text = "OP (帳號)";
-            // 
-            // txtSerialNo
-            // 
-            this.txtSerialNo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSerialNo.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.txtSerialNo.Font = new System.Drawing.Font("Consolas", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.txtSerialNo.Location = new System.Drawing.Point(136, 21);
-            this.txtSerialNo.Margin = new System.Windows.Forms.Padding(2);
-            this.txtSerialNo.Name = "txtSerialNo";
-            this.txtSerialNo.Size = new System.Drawing.Size(191, 26);
-            this.txtSerialNo.TabIndex = 302;
-            this.txtSerialNo.Text = "Auto-0123456789";
-            // 
-            // label2
-            // 
-            this.label2.Font = new System.Drawing.Font("微軟正黑體", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.Color.MediumBlue;
-            this.label2.Location = new System.Drawing.Point(16, 23);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(115, 22);
-            this.label2.TabIndex = 307;
-            this.label2.Text = "Serial (序號)";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.gwFuncButtonsPanel1.BackColor = System.Drawing.Color.Transparent;
+            this.gwFuncButtonsPanel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.gwFuncButtonsPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gwFuncButtonsPanel1.Location = new System.Drawing.Point(0, 0);
+            this.gwFuncButtonsPanel1.Name = "gwFuncButtonsPanel1";
+            this.gwFuncButtonsPanel1.Padding = new System.Windows.Forms.Padding(20, 10, 20, 10);
+            this.gwFuncButtonsPanel1.Size = new System.Drawing.Size(464, 70);
+            this.gwFuncButtonsPanel1.TabIndex = 1;
             // 
             // GvProductionPanel
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.Controls.Add(this.btnSwapMapView);
+            this.Controls.Add(this.panel3);
+            this.Controls.Add(this.cboRecipeNames);
             this.Controls.Add(this.panel2);
-            this.Controls.Add(this.btnHome);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel1);
-            this.Controls.Add(this.panel3);
-            this.Margin = new System.Windows.Forms.Padding(2);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "GvProductionPanel";
-            this.Size = new System.Drawing.Size(418, 734);
+            this.Size = new System.Drawing.Size(1169, 918);
             this.panel2.ResumeLayout(false);
             this.panel4.ResumeLayout(false);
-            this.panel3.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
-            this.panel5.ResumeLayout(false);
+            this.panel3.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
-
-        private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
-        public System.Windows.Forms.Button btnProductionRun;
-        public System.Windows.Forms.Button btnStop;
-        public System.Windows.Forms.TextBox txtSerialNo;
-        private System.Windows.Forms.Label label10;
         private System.Windows.Forms.Panel panel4;
         public System.Windows.Forms.ComboBox cboRecipeNames;
-        public System.Windows.Forms.Button btnHome;
-        public System.Windows.Forms.Button btnTryRun;
-        private System.Windows.Forms.Label label2;
-        public System.Windows.Forms.Button btnSwapMapView;
-        //public JetEazy.ImageViewerEx.CvBmpViewer cvBmpViewer1;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Panel panel5;
-        public System.Windows.Forms.Label lblUserName;
-        public System.Windows.Forms.Button btnLogin;
+        public System.Windows.Forms.Label lblPassFail;
         private EzEmptyTrayInspector.Gui.Panels.GwLogPanel gwLogPanel1;
+        public System.Windows.Forms.Label lblRecipeInfo;
+        private System.Windows.Forms.Panel panel3;
+        private GwFuncButtonsPanel gwFuncButtonsPanel1;
     }
 }

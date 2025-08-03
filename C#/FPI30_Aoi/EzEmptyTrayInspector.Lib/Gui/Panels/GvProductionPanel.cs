@@ -27,7 +27,7 @@ namespace EzEmptyTrayInspector.Gui.Panels
             InitializeComponent();
             _syncBkgndImages();
             _initEventHandlers();
-            btnTryRun.Text = "¤@Áä°õ¦æ";
+            //btnTryRun.Text = "ÀË´ú";
         }
 
         #region PRIVATE_LAYOUT_FUNCTIONS
@@ -41,7 +41,7 @@ namespace EzEmptyTrayInspector.Gui.Panels
         }
         void _syncBkgndImages()
         {
-            panel2.BackgroundImage = this.BackgroundImage;
+            //panel2.BackgroundImage = this.BackgroundImage;
             panel3.BackgroundImage = this.BackgroundImage;
             panel4.BackgroundImage = this.BackgroundImage;
         }
@@ -76,18 +76,18 @@ namespace EzEmptyTrayInspector.Gui.Panels
         }
         void _autoLayoutButtons()
         {
-            var button1 = btnTryRun;
-            var button2 = btnProductionRun;
-            var button3 = btnStop;
-            int w = this.ClientSize.Width;
-            int iGap = button2.Left - button1.Right;
-            iGap = iGap * 3 / 4;
-            w = (w - button1.Left * 2 - iGap * 2) / 3;
-            button1.Width = w;
-            button2.Width = w;
-            button2.Left = button1.Right + iGap;
-            button3.Width = w;
-            button3.Left = button2.Right + iGap;
+            //var button1 = btnTryRun;
+            //var button2 = btnProductionRun;
+            //var button3 = btnStop;
+            //int w = this.ClientSize.Width;
+            //int iGap = button2.Left - button1.Right;
+            //iGap = iGap * 3 / 4;
+            //w = (w - button1.Left * 2 - iGap * 2) / 3;
+            //button1.Width = w;
+            //button2.Width = w;
+            //button2.Left = button1.Right + iGap;
+            //button3.Width = w;
+            //button3.Left = button2.Right + iGap;
         }
         void _autoLayoutListBox()
         {
@@ -98,7 +98,7 @@ namespace EzEmptyTrayInspector.Gui.Panels
         }
         #endregion
 
-        //Form IView.frmOwner => FindForm();
         Control IView.Window => this;
+        public IvFuncButtonsPanel FuncButtonsPanel => gwFuncButtonsPanel1;
     }
 }

@@ -22,8 +22,8 @@ namespace EzEmptyTrayInspector
     /// </summary>
     public class JxAppSettings : JxContainer
     {
-        public JxBool LoginEnabled = new JxBool("Login Enabled", description: "使用登入帳號");
-        public JxBool CreateCombinedFile = new JxBool("Create Combined File", description: "生成合併大圖檔");
+        //>>> public JxBool LoginEnabled = new JxBool("Login Enabled", description: "使用登入帳號");
+        public JxBool OutputResultImageFile = new JxBool("Output Result Image", description: "生成檢測結果圖檔");
         public JxPathFile OutputDataPath = new JxPathFile("Output Data Path", Global.APP_PATH.DumpPath, description: "輸出資料夾", isPathOnly: true);
         public JxVisionSource VisionSrc0 = new JxVisionSource(0);
         public JxVisionSource VisionSrc1 = new JxVisionSource(1);
@@ -42,15 +42,14 @@ namespace EzEmptyTrayInspector
         {
             //綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
-                LoginEnabled,
-                CreateCombinedFile,
+                //LoginEnabled,
+                OutputResultImageFile,
                 OutputDataPath,
                 VisionSrc0,
                 VisionSrc1,
             });
             base.OnBindingSubItems();
         }
-
         public override string NormalizeFile(string fileName)
         {
             //指定默認的保存檔案名稱

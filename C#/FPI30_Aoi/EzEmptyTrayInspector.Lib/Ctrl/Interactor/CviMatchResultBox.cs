@@ -35,6 +35,10 @@ namespace EzEmptyTrayInspector.Ctrl
         ToolTip _toolTip = new ToolTip();
         #endregion
 
+        #region RUNTIME_DATA
+        //string _dumpFileName;
+        #endregion
+
         public void Reset()
         {
             _grid = null;

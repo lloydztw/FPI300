@@ -21,7 +21,7 @@ using JetEazy.ImageViewerEx;
 using LeTian.JxProps;
 using LeTian.JxRecipesTool.Ctrl;
 using System;
-using System.Collections.Generic;
+using System.Drawing;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -77,9 +77,9 @@ namespace EzEmptyTrayInspector.Ctrl
         #endregion
 
         #region COMBINED_FILE_NAME
-        string GET_COMBINED_FILE_NAME(bool checkDir = true)
+        string GET_OUTPUT_IMAGE_FILE_NAME(bool checkDir = true)
         {
-            if (!_appSettings.CreateCombinedFile)
+            if (!_appSettings.OutputResultImageFile)
                 return null;
 
             string path = _appSettings.OutputDataPath;
@@ -127,29 +127,32 @@ namespace EzEmptyTrayInspector.Ctrl
         #region PRIVATE_GUI_MEMBERS
         EzMatchRcpEdittingCtrl _rcpEditCtrl;
         Form _frmOwner;
-        Button _btnRunAll;
+        Control _lblPassFail;
         IvSingleMatchView _view;
+        IvFuncButtonsPanel _funcButtonsPanel;
         CviMatchResultBox _cviMatchResultBox;
-        CviMouseSync _cviSyncBox;
         bool _bypassJxEvents = false;
         #endregion
 
-        public EzMatchCtrl(int sideId, IvSingleMatchView view, IRecipesMgrCtrl recipesMgr, Button btnRunAll = null)
+        public EzMatchCtrl(IvSingleMatchView view, IvFuncButtonsPanel funcButtonsPanel, Control lblPassFail, IRecipesMgrCtrl recipesMgr)
         {
-            ID = (SideID)sideId;
+            ID = SideID.A;
 
-            _TRACE($"{GetType().Name}(view={view.Window.Handle})");
+            //_TRACE($"{GetType().Name}(view={view.Window.Handle})");
             //_instances.Add(this);
             //System.Diagnostics.Debug.Assert(sideId == _instances.Count - 1);
 
             _view = view;
+            _funcButtonsPanel = funcButtonsPanel;
+            _lblPassFail = lblPassFail;
+
             _frmOwner = _view.Window.FindForm();
             _recipesMgr = recipesMgr;
-            _btnRunAll = ID == 0 ? btnRunAll : null;
 
             init_interactors();
             init_event_handlers();
         }
+
         public SideID ID
         {
             get;
@@ -162,7 +165,7 @@ namespace EzEmptyTrayInspector.Ctrl
                 _frmOwner.Refresh();
                 _model.SetRecipe(_activeRecipe);
                 LoadImage(_imgSourceFile?.Value);
-                _rcpEditCtrl = new EzMatchRcpEdittingCtrl((int)ID, _view, _recipesMgr);
+                _rcpEditCtrl = new EzMatchRcpEdittingCtrl((int)ID, _view, _funcButtonsPanel, _recipesMgr);
                 _rcpEditCtrl.AttachImageSource(_largeIMG);
             }));
         }
@@ -183,15 +186,15 @@ namespace EzEmptyTrayInspector.Ctrl
             frmOwner.FormClosing += FrmOwner_FormClosing;
             frmOwner.FormClosed += FrmOwner_FormClosed;
 
-            var btnOpen = view.btnOpen;
-            if (btnOpen != null)
-                btnOpen.Click += BtnOpen_Click;
+            var btnOpenFile = _funcButtonsPanel?.btnOpenFile;
+            if (btnOpenFile != null)
+                btnOpenFile.Click += BtnOpenFile_Click;
 
-            var btnRunMatch = view.btnRunMatch;
-            if (btnRunMatch != null)
-                btnRunMatch.Click += BtnRunMatch_Click;
+            //var btnRunMatch = _funcButtonsPanel?.btnRunMatch;
+            //if (btnRunMatch != null)
+            //    btnRunMatch.Click += BtnRunMatch_Click;
 
-            var btnResetClear = view.btnResetClear;
+            var btnResetClear = _funcButtonsPanel?.btnResetClear;
             if (btnResetClear != null)
                 btnResetClear.Click += BtnClear_Click;
 
@@ -201,8 +204,10 @@ namespace EzEmptyTrayInspector.Ctrl
             //    view.btnCombine.Click += BtnCombine_Click;
             //}
 
-            if (_btnRunAll != null)
-                _btnRunAll.Click += btnRunAll_Click;
+            var btnRunAll = _funcButtonsPanel?.btnRunAll;
+            if (btnRunAll != null)
+                btnRunAll.Click += btnRunAll_Click;
+
             #endregion
 
             #region SYS_SETTINGS_EVENT_HANDLERS
@@ -226,9 +231,6 @@ namespace EzEmptyTrayInspector.Ctrl
             _model.OnFinalResulted += _model_OnFinalResulted;
             #endregion
         }
-
-
-
         void connect_recipe_prop_handlers()
         {
             if (_sideSettings != null)
@@ -254,7 +256,7 @@ namespace EzEmptyTrayInspector.Ctrl
             Dispose();
         }
 
-        private void BtnOpen_Click(object sender, EventArgs e)
+        private void BtnOpenFile_Click(object sender, EventArgs e)
         {
             BrowseFile();
         }
@@ -343,7 +345,7 @@ namespace EzEmptyTrayInspector.Ctrl
             }
             else
             {
-                update_final_result(e, true);
+                update_final_result(e);
             }
         }
         #endregion
@@ -614,13 +616,15 @@ namespace EzEmptyTrayInspector.Ctrl
             if (!_canRunAll(true))
                 return;
 
+            update_pass_fail("檢測中", Color.Yellow);
+
             // 如果 goldenBox 有移動, 則自動抓取最新 golden
             if (_rcpEditCtrl != null && _rcpEditCtrl.IsEditting)
             {
                 _rcpEditCtrl.AutoCatchGolden();
             }
 
-            string outputFile = (_appSettings?.CreateCombinedFile) ? GET_COMBINED_FILE_NAME() : null;
+            string outputFile = (_appSettings?.OutputResultImageFile) ? GET_OUTPUT_IMAGE_FILE_NAME() : null;
             _model.RunAll(_largeIMG, null, outputFile, wait: false);
         }
 
@@ -741,45 +745,6 @@ namespace EzEmptyTrayInspector.Ctrl
                 _bypassJxEvents = false;
             }
         }
-        void update_final_result(AoiResultEventArgs e, bool showMsgBox = true)
-        {
-#if (OPT_DUAL_MATCH)
-            //refresh(_view.ImageViewer);
-            //_instances[0].update_button_status();
-
-            foreach (var ctrl in _instances)
-                refresh(ctrl?._view?.ImageViewer);
-#else
-            refresh(_view.ImageViewer);
-#endif
-
-            var result = e.Result;
-            string msg;
-            if (result != null)
-            {
-                msg = result.ToString();
-                LOG.Info(msg);
-                _view?.UpdateStatusInfo(msg);
-                //LOG.Info($"[{tag}] 總耗時 = {(int)(result.TotalSeconds * 1000)} ms");
-            }
-            else
-            {
-                msg = "無結果!";
-            }
-
-            if (showMsgBox)
-            {
-                var icon = result != null && result.IsPass() ? MessageBoxIcon.Information : MessageBoxIcon.Exclamation;
-                MessageBox.Show(msg.Replace(",", "\n\r"), Global.TITLE, MessageBoxButtons.OK, icon);
-            }
-
-            // 3秒後 狀態自動 顯示 Ready
-            ThreadPool.QueueUserWorkItem(delegate
-            {
-                Thread.Sleep(3000);
-                _view.UpdateMatchState("Ready");
-            });
-        }
         void update_matched_result(MatchResultEventArgs e)
         {
             if (e == null)
@@ -853,16 +818,88 @@ namespace EzEmptyTrayInspector.Ctrl
                     return;
 
                 bool isReady = _model != null ? _model.IsReady() : false;
-                enable(view.btnOpen, isReady);
-                enable(view.btnRunMatch, isReady);
-                enable(view.btnResetClear, true);
 
-                if (ID == SideID.A)
-                {
-                    //enable(view.btnCombine, isReady);
-                    //view.btnCombine.Visible = _canCombine(false);
-                    enable(_btnRunAll, isReady);
-                }
+                //enable(view.btnOpenFile, isReady);
+                //enable(view.btnRunMatch, isReady);
+                //enable(view.btnResetClear, true);
+                //if (ID == SideID.A)
+                //{
+                //    //enable(view.btnCombine, isReady);
+                //    //view.btnCombine.Visible = _canCombine(false);
+                //    enable(_btnRunAll, isReady);
+                //}
+
+                enable(_funcButtonsPanel?.btnRunAll, isReady);
+                enable(_funcButtonsPanel?.btnOpenFile, isReady);
+                enable(_funcButtonsPanel?.btnSnapshot, isReady);
+                enable(_funcButtonsPanel?.btnResetClear, true);
+            }
+        }
+        void update_final_result(AoiResultEventArgs e, bool showMsgBox = false)
+        {
+#if (OPT_DUAL_MATCH)
+            //refresh(_view.ImageViewer);
+            //_instances[0].update_button_status();
+
+            foreach (var ctrl in _instances)
+                refresh(ctrl?._view?.ImageViewer);
+#else
+            refresh(_view.ImageViewer);
+#endif
+
+            // 更新 PASS / FAIL
+            update_pass_fail(e);
+
+            var result = e.Result;
+            string msg;
+
+            if (result != null)
+            {
+                msg = result.ToString();
+                LOG.Info(msg);
+                _view?.UpdateStatusInfo(msg);
+                //>>> LOG.Info($"[{tag}] 總耗時 = {(int)(result.TotalSeconds * 1000)} ms");
+            }
+            else
+            {
+                msg = "無結果!";
+            }
+
+            if (showMsgBox)
+            {
+                var icon = result != null && result.IsPass() ? MessageBoxIcon.Information : MessageBoxIcon.Exclamation;
+                MessageBox.Show(msg.Replace(",", "\n\r"), Global.TITLE, MessageBoxButtons.OK, icon);
+            }
+
+            // 3 秒後 狀態自動 顯示 Ready
+            ThreadPool.QueueUserWorkItem(delegate
+            {
+                Thread.Sleep(3000);
+                _view.UpdateMatchState("Ready");
+            });
+        }
+        void update_pass_fail(AoiResultEventArgs e)
+        {
+            var result = e?.Result;
+            if (result != null)
+            {
+                if (result.IsPass())
+                    update_pass_fail("PASS", Color.Lime);
+                else
+                    update_pass_fail("FAIL", Color.Red);
+            }
+            else
+            {
+                update_pass_fail("無結果", Color.Red);
+            }
+        }
+        void update_pass_fail(string msg, Color color)
+        {
+            if (_lblPassFail != null)
+            {
+                _lblPassFail.Text = msg;
+                _lblPassFail.ForeColor = color;
+                _lblPassFail.Refresh();
             }
         }
         void enable(Control c, bool enable)

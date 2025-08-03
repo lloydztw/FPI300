@@ -74,27 +74,31 @@ namespace EzEmptyTrayInspector.Ctrl
         Control _wndRcpHostPanel;
         Control _imgViewerWindow;
         IvImageViewer _imgViewer;
-        Button _btnGolden;
+        IvFuncButtonsPanel _funcButtonsPanel;
+        Button _btnGolden => _funcButtonsPanel?.btnPickGolden;
         CviGoldenBox _cviGoldenBox;
         CviFiltersBox _cviFiltersBox;
         bool _bypassJxEvents = false;
         #endregion
 
-        public EzMatchRcpEdittingCtrl(int sideId, IvSingleMatchView view, IRecipesMgrCtrl recipesMgr)
+        public EzMatchRcpEdittingCtrl(int sideId, IvSingleMatchView view, IvFuncButtonsPanel funcPanel, IRecipesMgrCtrl recipesMgr)
         {
             ID = (SideID)sideId;
 
-            _TRACE($"{GetType().Name}(view={view.Window.Handle})");
+            //_TRACE($"{GetType().Name}(view={view.Window.Handle})");
+
             _recipesMgr = recipesMgr;
             _frmOwner = view.Window.FindForm();
             _imgViewer = view.ImageViewer;
             _imgViewerWindow = _imgViewer as Control;
-            _btnGolden = view.btnCatchGolden;
+            _funcButtonsPanel = funcPanel;
+            //_btnGolden = funcPanel?.btnPickGolden;
 
             var frmMain = _frmOwner as FormAwMain;
             _wndRcpHostPanel = frmMain?.OpDocker.FindPanel<AwFramework.Gui.DefaultPanels.GvRecipeDockPanel>();
             if (_wndRcpHostPanel == null)
                 _wndRcpHostPanel = view.Window;
+
 
             init_interactors();
             init_event_handlers();
@@ -128,6 +132,7 @@ namespace EzEmptyTrayInspector.Ctrl
         void init_event_handlers()
         {
             #region RECIPE_MGR_EVENT_HANDLERS
+            //_recipesMgr.Window.VisibleChanged += (s, e) => swap_func_buttons_panel();
             _recipesMgr.OnRecipeSelectionChanged += _recipesMgr_OnRecipeSelectionChanged;
             _recipesMgr.OnRecipeBrowsing += _recipesMgr_OnRecipeBrowsing;
             _recipesMgr.OnRecipeEditting += _recipesMgr_OnRecipeEditting;
@@ -175,7 +180,11 @@ namespace EzEmptyTrayInspector.Ctrl
             //update_golden_box();
             //update_rcp_editor_gui_status();
             //refresh(_view.ImageViewer);
+
             leaveEdittingMode();
+
+            swap_func_buttons_panel();
+            _recipesMgr.Window.HandleDestroyed += (s, e2) => swap_func_buttons_panel();
         }
 
         private void BtnGolden_Click(object sender, EventArgs e)
@@ -316,7 +325,7 @@ namespace EzEmptyTrayInspector.Ctrl
             // 回復顏色
             _cviGoldenBox.BoxBrush = oldBrush;
             refresh(_recipesMgr?.Window);
-            // refresh(_view.ImageViewer);
+            refresh(_imgViewerWindow);
         }
         void move_box_to_safe_location(Size boundarySize)
         {
@@ -377,12 +386,18 @@ namespace EzEmptyTrayInspector.Ctrl
             }
             else
             {
+                //setVisible(_btnGolden, _isRcpEdittingMode);
                 enable(_btnGolden, _isRcpEdittingMode);
                 _cviGoldenBox.Visible = _isRcpEdittingMode;
                 _cviGoldenBox.Enabled = _isRcpEdittingMode;
                 _cviFiltersBox.Visible = _isRcpEdittingMode;
                 _cviFiltersBox.Enabled = _isRcpEdittingMode;
             }
+        }
+        void setVisible(Control c, bool visible)
+        {
+            if (c != null)
+                c.Visible = visible;
         }
         void enable(Control c, bool enable)
         {
@@ -402,6 +417,54 @@ namespace EzEmptyTrayInspector.Ctrl
                     wnd.Refresh();
                 }
             }
+        }
+        #endregion
+
+        #region PRIVATE_FUNCTIONS
+#if (OPT_MOVED_TO_EzApp)
+        void adjust_recipe_panel(Control wnd)
+        {
+            //>>> Control wndPanel = panel?.Window;
+            if (wnd == null)
+                return;
+
+            _frmOwner?.BeginInvoke(new Action<Control>((w) =>
+            {
+                var view = AppUtil.SearchGui<GpRecipesMgrView>(w, null);
+                adjust_recipe_panel(view, true);
+            }), wnd);
+        }
+        void adjust_recipe_panel(GpRecipesMgrView panel, bool hookEventHandler)
+        {
+            if (panel == null) 
+                return;
+
+            panel.OptShowList = false;
+            panel.btnAdd.Visible = false;
+            panel.btnCopy.Visible = false;
+            panel.btnDelete.Visible = false;
+            //panel.gwRcpmEditorPanel.txtActiveRecipeName.ReadOnly = true;
+            panel.gwRcpmEditorPanel.txtActiveRecipeName.Enabled = false;
+
+            if (hookEventHandler)
+            {
+                panel.btnOK.Click += (s, e) => adjust_recipe_panel(panel, false);
+                panel.btnCancel.Click += (s, e) => adjust_recipe_panel(panel, false);
+                panel.btnModify.Click += (s, e) => adjust_recipe_panel(panel, false);
+            }
+        }
+#endif
+        void swap_func_buttons_panel()
+        {
+            //var frmAwMain = _frmOwner as FormAwMain;
+            //var logoPanel = frmAwMain?.wndLogoPanel;
+            //if (logoPanel == null)
+            //    return;
+            //var panel = _funcButtonsPanel?.Window;
+            //if (panel != null && logoPanel != null)
+            //{
+            //    AppUtil.SwapGui(panel, logoPanel.picLogo);
+            //}
         }
         #endregion
 

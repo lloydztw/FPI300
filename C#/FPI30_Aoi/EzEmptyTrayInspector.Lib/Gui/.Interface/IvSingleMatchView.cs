@@ -14,7 +14,6 @@
 #endregion
 
 using AwFramework;
-using EzEmptyTrayInspector.Model;
 using JetEazy.ImageViewerEx;
 using JetEazy.OpenCV.Viewer;
 using System.Windows.Forms;
@@ -25,18 +24,16 @@ namespace EzEmptyTrayInspector.Gui
     public interface IvSingleMatchView : IView
     {
         CvzQuickImageViewPanel quickImageViewPanel { get; }
-        //IvLiveImageViewer LiveImageViewer { get; }
         IvImageViewer ImageViewer { get; }
 
-        Button btnOpen { get; }
-        Button btnRunMatch { get; }
-        Button btnResetClear { get; }
-        Button btnCatchGolden { get; }
+        //Button btnOpenFile { get; }
+        //Button btnRunMatch { get; }
+        //Button btnResetClear { get; }
+        //Button btnPickGolden { get; }
         //Button btnCombine { get; }
 
         void UpdateMatchState(object state);
         void UpdateImageSrcName(string srcName);
         void UpdateStatusInfo(string msg);
-        //void UpdateMatchResult(MatchResultEventArgs e);
     }
 }

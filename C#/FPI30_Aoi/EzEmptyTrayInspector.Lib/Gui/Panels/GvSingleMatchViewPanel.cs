@@ -48,10 +48,10 @@ namespace EzEmptyTrayInspector.Gui.Panels
         CvzQuickImageViewPanel IvSingleMatchView.quickImageViewPanel => null;
         IvImageViewer IvSingleMatchView.ImageViewer => cvMatViewer1;
 
-        Button IvSingleMatchView.btnOpen => btnOpen;
-        Button IvSingleMatchView.btnRunMatch => btnMatch;
-        Button IvSingleMatchView.btnResetClear => btnClear;
-        Button IvSingleMatchView.btnCatchGolden => btnCatchGolden;
+        //Button IvSingleMatchView.btnOpenFile => btnOpen;
+        //Button IvSingleMatchView.btnRunMatch => btnMatch;
+        //Button IvSingleMatchView.btnResetClear => btnClear;
+        //Button IvSingleMatchView.btnPickGolden => btnCatchGolden;
         //Button IvSingleMatchView.btnCombine => btnCombine;
 
         void IvSingleMatchView.UpdateMatchState(object state)

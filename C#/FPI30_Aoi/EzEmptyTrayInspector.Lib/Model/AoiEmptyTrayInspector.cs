@@ -863,6 +863,9 @@ namespace EzEmptyTrayInspector.Model
                     FullRows = _recipe.TrayMiscSettings.FullRows,
                     FullCols = _recipe.TrayMiscSettings.FullCols,
                 };
+
+                dump_result_image(outputFileName, imgA, result);
+
             }
             catch (Exception ex)
             {
@@ -873,6 +876,31 @@ namespace EzEmptyTrayInspector.Model
                 _finalResult = result;
                 changeState("Ready");
                 OnFinalResulted?.Invoke(this, new AoiResultEventArgs(_finalResult));
+            }
+        }
+        void dump_result_image(string outputFileName, Mat imgA, EzEmptyTrayResult result)
+        {
+            // 暫時不支援
+            // 原因: 圖形太大, 轉換成 24-bit 太耗資源 !!!
+            return;
+
+            try
+            {
+                if (imgA != null && result != null && !string.IsNullOrEmpty(outputFileName))
+                {
+                    foreach (var bloc in result.IterSuckerBlocs())
+                    {
+                        
+                    }
+                    foreach (var bloc in result.IterAbnormalBlocs())
+                    {
+
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _LOG.Error(ex);
             }
         }
         #endregion

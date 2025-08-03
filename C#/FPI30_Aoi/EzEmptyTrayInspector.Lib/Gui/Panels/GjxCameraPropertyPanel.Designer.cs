@@ -32,7 +32,6 @@ namespace JetEazy.GUI
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(GjxCameraPropertyPanel));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.btnOpenCamera = new System.Windows.Forms.Button();
             this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.cboAvailableCameras = new System.Windows.Forms.ComboBox();
             this.tableLayoutPanel0 = new System.Windows.Forms.TableLayoutPanel();
@@ -45,6 +44,7 @@ namespace JetEazy.GUI
             this.btnClear = new System.Windows.Forms.Button();
             this.gwPanePropsViewer1 = new LeTian.JxProps.Gui.GwPanePropsViewer();
             this.lblDeviceInfo = new System.Windows.Forms.Label();
+            this.btnOpenCamera = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.tableLayoutPanel0.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -77,22 +77,6 @@ namespace JetEazy.GUI
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 36F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(447, 36);
             this.tableLayoutPanel1.TabIndex = 4;
-            // 
-            // btnOpenCamera
-            // 
-            this.btnOpenCamera.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnOpenCamera.Font = new System.Drawing.Font("微軟正黑體", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.btnOpenCamera.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnOpenCamera.ImageIndex = 0;
-            this.btnOpenCamera.ImageList = this.imageList1;
-            this.btnOpenCamera.Location = new System.Drawing.Point(3, 2);
-            this.btnOpenCamera.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.btnOpenCamera.Name = "btnOpenCamera";
-            this.btnOpenCamera.Size = new System.Drawing.Size(217, 32);
-            this.btnOpenCamera.TabIndex = 13;
-            this.btnOpenCamera.TabStop = false;
-            this.btnOpenCamera.Text = "相機 ...";
-            this.btnOpenCamera.UseVisualStyleBackColor = true;
             // 
             // imageList1
             // 
@@ -209,7 +193,7 @@ namespace JetEazy.GUI
             // 
             // btnMatch
             // 
-            this.btnMatch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.btnMatch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnMatch.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnMatch.Font = new System.Drawing.Font("微軟正黑體", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnMatch.Location = new System.Drawing.Point(226, 80);
@@ -235,6 +219,7 @@ namespace JetEazy.GUI
             // 
             // gwPanePropsViewer1
             // 
+            this.gwPanePropsViewer1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.gwPanePropsViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gwPanePropsViewer1.Editable = true;
             this.gwPanePropsViewer1.ImageList = null;
@@ -258,11 +243,27 @@ namespace JetEazy.GUI
             this.lblDeviceInfo.Text = "Info";
             this.lblDeviceInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // btnOpenCamera
+            // 
+            this.btnOpenCamera.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnOpenCamera.Font = new System.Drawing.Font("微軟正黑體", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnOpenCamera.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnOpenCamera.ImageIndex = 0;
+            this.btnOpenCamera.ImageList = this.imageList1;
+            this.btnOpenCamera.Location = new System.Drawing.Point(3, 2);
+            this.btnOpenCamera.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnOpenCamera.Name = "btnOpenCamera";
+            this.btnOpenCamera.Size = new System.Drawing.Size(217, 32);
+            this.btnOpenCamera.TabIndex = 13;
+            this.btnOpenCamera.TabStop = false;
+            this.btnOpenCamera.Text = "相機 ...";
+            this.btnOpenCamera.UseVisualStyleBackColor = true;
+            // 
             // GjxCameraPropertyPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.Controls.Add(this.tableLayoutPanel0);
             this.Name = "GjxCameraPropertyPanel";
             this.Padding = new System.Windows.Forms.Padding(10);

@@ -13,6 +13,7 @@
  */
 #endregion
 
+using AwFramework;
 using LeTian.JxProps;
 using LeTian.JxProps.Gui;
 using System.Windows.Forms;
@@ -20,7 +21,7 @@ using System.Windows.Forms;
 
 namespace JetEazy.GUI
 {
-    public partial class GjxCameraPropertyPanel : UserControl
+    public partial class GjxCameraPropertyPanel : UserControl, IView
     {
         public GjxCameraPropertyPanel()
         {
@@ -34,7 +35,7 @@ namespace JetEazy.GUI
 
         #region GUI_LINKS
         public Form frmOwner { get; private set; }
-        //Control IView.Window => this;
+        Control IView.Window => this;
 
         //Control IvCameraPanel.lblCamDeviceInfo => lblDeviceInfo;
         //CheckBox IvCameraPanel.chkInverse => null;

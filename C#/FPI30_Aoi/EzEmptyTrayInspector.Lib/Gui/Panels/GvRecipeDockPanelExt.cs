@@ -16,21 +16,26 @@
 using System.Windows.Forms;
 using AwFramework;
 
+
 namespace EzEmptyTrayInspector.Gui.Panels
 {
-    public partial class GwLogPanel : UserControl, IView
+    public partial class GvRecipeDockPanelExt : UserControl, IView
     {
-        public GwLogPanel()
+        public GvRecipeDockPanelExt(Control originalRcpPanel = null)
         {
             InitializeComponent();
 
-            btnClear.Visible = false;
-            btnClear.Click += (s, e) =>
+            if (!DesignMode)
             {
-                // 貌似被 NLOG 占用, 無法清除 !!!
-                // richTextBox1.Text = "";
-                richTextBox1.Clear();
-            };
+                var wnd = originalRcpPanel;
+                if (wnd != null)
+                {
+                    panel2.Controls.Add(wnd);
+                    wnd.Parent = panel2;
+                    wnd.Dock = DockStyle.Fill;
+                    wnd.Visible = true;
+                }
+            }
         }
 
         //Form IView.frmOwner => FindForm();

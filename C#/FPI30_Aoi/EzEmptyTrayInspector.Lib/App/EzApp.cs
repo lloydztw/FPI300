@@ -13,6 +13,9 @@
  */
 #endregion
 
+using System;
+using LeTian.JxRecipesTool.Gui;
+using AwFramework.Util;
 using AwFramework;
 using AwFramework.Gui;
 using EzEmptyTrayInspector.Ctrl;
@@ -20,7 +23,6 @@ using EzEmptyTrayInspector.Gui;
 using System.Drawing;
 using System.Windows.Forms;
 using EzEmptyTrayInspector;
-using RESOURCES = EzEmptyTrayInspector.Properties.Resources;
 
 #region TEMPLATES
 // 主要客戶區 目前有兩個 GUI Class 可供 編譯時期 選用
@@ -31,6 +33,7 @@ using MajorClientPanelClassT = EzEmptyTrayInspector.Gui.Panels.GvSingleMatchView
 using ProductionPanelClassT = EzEmptyTrayInspector.Gui.Panels.GvProductionPanel;
 using RecipeClassT = EzEmptyTrayInspector.Model.JxAoiRecipe;
 using AppSettingsClassT = EzEmptyTrayInspector.JxAppSettings;
+using RESOURCES = EzEmptyTrayInspector.Properties.Resources;
 #endregion
 
 
@@ -95,7 +98,7 @@ namespace FPI30_AOI
             // Display Configuration
             frmMain.wndTitlePanel.Visible = false;          // 隱藏 原有的 TitleBar
             frmMain.wndClientStatusBar.Visible = false;     // 隱藏 原有的 StatusBar
-            frmMain.optOpModesPanelVisible = false;         // 隱藏 OpMode
+            //frmMain.optOpModesPanelVisible = false;         // 隱藏 OpMode
         }
 
         /// <summary>
@@ -117,6 +120,29 @@ namespace FPI30_AOI
         }
 
         /// <summary>
+        /// (4.2) 調整 Recipe Editor
+        /// </summary>
+        protected override IView OnCreate_OpPanelOfRecipe(Form frmMain)
+        {
+            var panel = base.OnCreate_OpPanelOfRecipe(frmMain);
+            adjust_recipe_panel(panel);
+            return panel;
+        }
+
+        /// <summary>
+        /// (4.3) 調整 SetupPanel (不顯示)
+        /// </summary>
+        protected override IView OnCreate_OpPanelOfSetup(Form frmMain)
+        {
+            //return base.OnCreate_OpPanelOfSetup(frmMain);
+            frmAwMain.BeginInvoke(new Action(() =>
+            {
+                frmAwMain.GetOpModeButton("Production").PerformClick();
+            }));
+            return null;
+        }
+
+        /// <summary>
         /// (5) 建構 EzDualMatch專案 的 主控模塊 (model-view-control 的 control)
         /// </summary>
         protected override void OnBuild_CustomizedCtrl(Form frmMain, out int splashDelay)
@@ -126,20 +152,20 @@ namespace FPI30_AOI
 
             // 在此直接 return 可以只顯示 GUI, 以方便 DEBUG
             // return;
+            make_one_default_recipe();
 
             var awMain = frmMain as FormAwMain;
 
             // 取得 試跑按鈕 (位於 跑線作業 視窗內)
             var wndProductionPanel = awMain.OpDocker.FindPanel<ProductionPanelClassT>();
-            Button btnRunAll = wndProductionPanel?.btnTryRun;
+            var funcButtonsPanel = wndProductionPanel?.FuncButtonsPanel;
+            Control lblPassFail = wndProductionPanel?.lblPassFail;
 
             // 取得 雙巨圖 視窗 (位於 主要客戶區 視窗內)
             //var wndDualImagePanel = awMain.ClientDocker.FindPanel<MajorClientPanelClassT>();
             //var matchViews = wndDualImagePanel.MatchViews;
-
             //// Mouse Move, ZoomIn, ZoomOut 同步控件
             //var syncBox = wndDualImagePanel.SyncBox;
-
             // 雙巨圖 各別的 MatchView 與 MatchCtrl
             //int sideId = 0;
             //foreach (var matchView in matchViews)
@@ -151,12 +177,22 @@ namespace FPI30_AOI
             //}
 
             // 取得 巨圖視窗 (位於 主要客戶區 視窗內)
-            var view = awMain.ClientDocker.FindPanel<MajorClientPanelClassT>();
-            var matchCtrl = new EzMatchCtrl(0, view, base.recipesMgrCtrl, btnRunAll);
+            var matchView = awMain.ClientDocker.FindPanel<MajorClientPanelClassT>();
+            var matchCtrl = new EzMatchCtrl(matchView, funcButtonsPanel, lblPassFail, base.recipesMgrCtrl);
+
             matchCtrl.PostInit();
 
             // 主視窗 關閉 事件
             awMain.FormClosed += (s,e) => Global.Dispose();
+
+            // OpMode
+            opModesCtrl.OnOpModeChanged += (s, e) =>
+            {
+                System.Diagnostics.Trace.WriteLine(opModesCtrl.OpMode);
+                var opMode = opModesCtrl.OpMode;
+                if (opMode == "Production" || opMode == "Recipe")
+                    swap_func_buttons_panel();
+            };
         }
 
         /// <summary>
@@ -166,5 +202,85 @@ namespace FPI30_AOI
         {
             //Reserved: 可以自行加掛 額外的客製化啟始程序
         }
+
+        #region PRIVATE_RCP_EDITOR_ADJUST_FUNCTIONS
+        /// <summary>
+        /// 強制只顯示 單一特定 Recipe
+        /// </summary>
+        /// <param name="panel"></param>
+        void adjust_recipe_panel(IView panel)
+        {
+            Control wndPanel = panel?.Window;
+            if (wndPanel == null)
+                return;
+
+            frmMain.BeginInvoke(new Action<Control>((wnd) =>
+            {
+                var view = AppUtil.SearchGui<GpRecipesMgrView>(wnd, null);
+                adjust_recipe_panel(view, true);
+            }), wndPanel);
+        }
+        void adjust_recipe_panel(GpRecipesMgrView panel, bool hookEventHandler = false)
+        {
+            if (panel == null)
+                return;
+
+            panel.OptShowList = false;
+            panel.btnAdd.Visible = false;
+            panel.btnCopy.Visible = false;
+            panel.btnDelete.Visible = false;
+            panel.gwRcpmEditorPanel.txtActiveRecipeName.Enabled = false;
+
+            if (hookEventHandler)
+            {
+                panel.btnOK.Click += (s, e) => adjust_recipe_panel(panel, false);
+                panel.btnCancel.Click += (s, e) => adjust_recipe_panel(panel, false);
+                panel.btnModify.Click += (s, e) => adjust_recipe_panel(panel, false);
+            }
+
+            //if (addFuncButtonsPanel)
+            //{
+            //    var panelTop = new GwFuncButtonsPanel();
+            //    panelTop.Dock = DockStyle.Fill;
+            //    panel.Controls.Add(panelTop);
+            //}
+        }
+        void make_one_default_recipe(string name = null)
+        {
+            var ctrl = base.recipesMgrCtrl;
+            var activeRecipe = ctrl.ActiveRecipe as RecipeClassT;
+
+            if (string.IsNullOrEmpty(name))
+                name = "aoi_empty_tray_default";
+
+            if (activeRecipe == null || activeRecipe.Name != name)
+            {
+                var mgr = ctrl.GetManager();
+                var list = mgr.GetRecipeNamesList();
+                if (!list.Contains(name))
+                {
+                    var recipe = mgr.InstanciateRecipe(name);
+                    recipe.Name = name;
+                    mgr.UpdateRecipe(recipe);
+                }
+                ctrl.LoadRecipe(name, false);
+            }
+        }
+        void swap_func_buttons_panel()
+        {
+            //>>> var frmAwMain = _frmOwner as FormAwMain;
+            var logoPanel = frmAwMain?.wndLogoPanel;
+            if (logoPanel == null)
+                return;
+            
+            //>>> var panel = _funcButtonsPanel?.Window;
+            var panelP = frmAwMain.OpDocker.FindPanel<ProductionPanelClassT>();
+            var panel = panelP?.FuncButtonsPanel?.Window;
+            if (panel != null && logoPanel != null)
+            {
+                AppUtil.SwapGui(panel, logoPanel.picLogo);
+            }
+        }
+        #endregion
     }
 }

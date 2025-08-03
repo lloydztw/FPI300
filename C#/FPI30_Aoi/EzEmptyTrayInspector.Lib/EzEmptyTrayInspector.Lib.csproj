@@ -168,6 +168,7 @@
     <Compile Include="Ctrl\Interactor\CviMatchResultBox.cs" />
     <Compile Include="Ctrl\Interactor\CviMouseSync.cs" />
     <Compile Include="AoiFactory.cs" />
+    <Compile Include="Gui\.Interface\IvFuncButtonsPanel.cs" />
     <Compile Include="Gui\Forms\FormSplash.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -187,11 +188,23 @@
     <Compile Include="Gui\Panels\GvSingleMatchViewPanel.Designer.cs">
       <DependentUpon>GvSingleMatchViewPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Gui\Panels\GwFuncButtonsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Panels\GwFuncButtonsPanel.Designer.cs">
+      <DependentUpon>GwFuncButtonsPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Gui\Panels\GwLogPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Gui\Panels\GwLogPanel.Designer.cs">
       <DependentUpon>GwLogPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Panels\GvRecipeDockPanelExt.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Panels\GvRecipeDockPanelExt.Designer.cs">
+      <DependentUpon>GvRecipeDockPanelExt.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\IxCommonModel.cs" />
     <Compile Include="Model\IxEmptyTrayInspector.cs" />
@@ -228,8 +241,14 @@
     <EmbeddedResource Include="Gui\Panels\GvSingleMatchViewPanel.resx">
       <DependentUpon>GvSingleMatchViewPanel.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Panels\GwFuncButtonsPanel.resx">
+      <DependentUpon>GwFuncButtonsPanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Gui\Panels\GwLogPanel.resx">
       <DependentUpon>GwLogPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Panels\GvRecipeDockPanelExt.resx">
+      <DependentUpon>GvRecipeDockPanelExt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -265,6 +284,7 @@
     <None Include="Resources\CommonPageB.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\CommonPanel.jpg" />
     <None Include="ReadMe.md" />
     <Content Include="Resources\camera.ico" />
     <Content Include="icon33.ico" />
