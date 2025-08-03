@@ -1,4 +1,4 @@
-﻿namespace EzEmptyTrayInspector.Gui
+﻿namespace EzAoiEmptyTrayInspector.Gui
 {
     partial class FormSplash
     {

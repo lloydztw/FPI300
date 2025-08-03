@@ -1,7 +1,7 @@
 ﻿using AwFramework;
 using System.Windows.Forms;
 
-namespace EzEmptyTrayInspector.Gui.Panels
+namespace EzAoiEmptyTrayInspector.Gui.Panels
 {
     public partial class GwFuncButtonsPanel : UserControl, IvFuncButtonsPanel
     {

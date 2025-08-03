@@ -15,7 +15,7 @@
 
 using System.Windows.Forms;
 
-namespace FPI30_AOI
+namespace EzAoiEmptyTrayInspector
 {
     public class AoiFactory
     {

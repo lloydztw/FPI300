@@ -17,7 +17,7 @@ using AwFramework;
 using System.Windows.Forms;
 
 
-namespace EzEmptyTrayInspector.Gui
+namespace EzAoiEmptyTrayInspector.Gui
 {
     public partial class FormSplash : Form, IvSplashView
     {

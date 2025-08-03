@@ -14,8 +14,8 @@
 #endregion
 
 using AwFramework.Gui;
-using EzEmptyTrayInspector.Gui;
-using EzEmptyTrayInspector.Model;
+using EzAoiEmptyTrayInspector.Gui;
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
 using LeTian.JxRecipesTool.Ctrl;
@@ -25,7 +25,7 @@ using System.Windows.Forms;
 using CviGoldenBox = JetEazy.ImageViewerEx.Interactors.CvImageViewerRectBox;
 
 
-namespace EzEmptyTrayInspector.Ctrl
+namespace EzAoiEmptyTrayInspector.Ctrl
 {
     internal class EzMatchRcpEdittingCtrl
     {

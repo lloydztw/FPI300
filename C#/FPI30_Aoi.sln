@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aoi_EmptyTrayInspector", "Aoi_EmptyTrayInspector", "{8F93B355-D00A-4FFD-A875-83C880C1E663}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzEmptyTrayInspector.App", "FPI30_Aoi\EzEmptyTrayInspector.App\EzEmptyTrayInspector.App.csproj", "{C2A8E04A-34BB-44C9-A5E0-6E22FBBB0355}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzAoiEmptyTrayInspector.App", "FPI30_Aoi\EzEmptyTrayInspector.App\EzAoiEmptyTrayInspector.App.csproj", "{C2A8E04A-34BB-44C9-A5E0-6E22FBBB0355}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzEmptyTray.SampleCode", "FPI30_Aoi\EzEmptyTrayInspector.SampleCode\EzEmptyTray.SampleCode.csproj", "{2F995D9E-41E4-40E0-82B4-8279D9D218BC}"
 EndProject
@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzEmptyTray.UnitTests", "FP
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTest", "UnitTest", "{CD439A04-A086-4C25-B25D-E9CF462E9EF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzEmptyTrayInspector.Lib", "FPI30_Aoi\EzEmptyTrayInspector.Lib\EzEmptyTrayInspector.Lib.csproj", "{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzAoiEmptyTrayInspector.Lib", "FPI30_Aoi\EzEmptyTrayInspector.Lib\EzAoiEmptyTrayInspector.Lib.csproj", "{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

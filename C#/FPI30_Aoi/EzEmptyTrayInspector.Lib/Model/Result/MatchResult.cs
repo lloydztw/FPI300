@@ -17,7 +17,7 @@ using JetEazy.Match;
 using System.Collections.Generic;
 
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     /// <summary>
     /// To be continued

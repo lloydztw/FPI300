@@ -16,7 +16,7 @@
 using LeTian.JxProps;
 
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     /// <summary>
     /// 旋轉角度定位設定

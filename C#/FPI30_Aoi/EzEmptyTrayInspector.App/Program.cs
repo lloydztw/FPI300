@@ -1,9 +1,8 @@
-﻿using FPI30_AOI;
-using System;
+﻿using System;
 using System.Windows.Forms;
 
 
-namespace EzEmptyTrayInspector
+namespace EzAoiEmptyTrayInspector
 {
     static class Program
     {

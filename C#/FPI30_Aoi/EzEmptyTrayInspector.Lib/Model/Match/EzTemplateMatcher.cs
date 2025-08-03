@@ -22,7 +22,7 @@ using System.Drawing;
 using System.Linq;
 
 
-namespace EzEmptyTrayInspector.Model.Aoi
+namespace EzAoiEmptyTrayInspector.Model.Aoi
 {
     public class EzTemplateMatcher
     {

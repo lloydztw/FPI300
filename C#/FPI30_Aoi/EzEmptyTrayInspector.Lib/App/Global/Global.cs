@@ -1,8 +1,8 @@
 ﻿using AwFramework;
-using EzEmptyTrayInspector.Model;
-using FPI30_AOI;
+using EzAoiEmptyTrayInspector.Model;
+using EzAoiEmptyTrayInspector;
 
-namespace EzEmptyTrayInspector
+namespace EzAoiEmptyTrayInspector
 {
     public class Global
     {

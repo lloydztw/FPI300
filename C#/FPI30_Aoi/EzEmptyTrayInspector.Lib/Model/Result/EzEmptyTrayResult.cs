@@ -17,7 +17,7 @@ using JetEazy.Match;
 using System.Collections.Generic;
 using System.Windows.Media.Converters;
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     public class EzEmptyTrayResult
     {

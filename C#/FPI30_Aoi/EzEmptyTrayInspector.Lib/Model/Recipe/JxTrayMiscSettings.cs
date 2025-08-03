@@ -16,7 +16,7 @@
 using LeTian.JxProps;
 
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     public class JxTrayMiscSettings : JxContainer
     {

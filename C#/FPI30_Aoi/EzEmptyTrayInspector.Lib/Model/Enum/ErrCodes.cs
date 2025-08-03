@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     public enum ErrCodes : int
     {

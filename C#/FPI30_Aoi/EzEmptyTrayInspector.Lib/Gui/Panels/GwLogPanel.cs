@@ -16,7 +16,7 @@
 using System.Windows.Forms;
 using AwFramework;
 
-namespace EzEmptyTrayInspector.Gui.Panels
+namespace EzAoiEmptyTrayInspector.Gui.Panels
 {
     public partial class GwLogPanel : UserControl, IView
     {

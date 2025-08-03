@@ -15,7 +15,7 @@
 
 using LeTian.JxProps;
 
-namespace EzEmptyTrayInspector
+namespace EzAoiEmptyTrayInspector
 {
     /// <summary>
     /// App 全域參數設定

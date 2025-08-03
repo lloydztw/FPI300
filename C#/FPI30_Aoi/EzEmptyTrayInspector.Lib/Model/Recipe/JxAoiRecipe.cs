@@ -17,7 +17,7 @@ using LeTian.JxProps;
 using Newtonsoft.Json;
 
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     /// <summary>
     /// 所有參數設定

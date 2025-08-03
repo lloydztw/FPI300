@@ -13,8 +13,8 @@
  */
 #endregion
 
-using EzEmptyTrayInspector.Gui;
-using EzEmptyTrayInspector.Model;
+using EzAoiEmptyTrayInspector.Gui;
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
@@ -27,7 +27,7 @@ using System.Windows.Forms;
 
 using GvImageViewerClassT = JetEazy.OpenCV.Viewer.CvMatViewer;
 
-namespace EzEmptyTrayInspector.Ctrl
+namespace EzAoiEmptyTrayInspector.Ctrl
 {
     internal class EzMatchCtrl : IDisposable
     {

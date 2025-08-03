@@ -13,7 +13,7 @@
  */
 #endregion
 
-using EzEmptyTrayInspector.Model.Aoi;
+using EzAoiEmptyTrayInspector.Model.Aoi;
 using JetEazy.EzImage;
 using JetEazy.Match;
 using JetEazy.OpenCV;
@@ -23,10 +23,10 @@ using System;
 using System.Drawing;
 using System.Threading;
 using System.Windows.Media.Media3D;
-using AOI_RESULT = EzEmptyTrayInspector.Model.EzEmptyTrayResult;
+using AOI_RESULT = EzAoiEmptyTrayInspector.Model.EzEmptyTrayResult;
 
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     public partial class AoiEmptyTrayInspector : IxEmptyTrayInspector
     {

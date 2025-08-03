@@ -15,7 +15,7 @@
 
 using System;
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     public class MatchStateEventArgs : EventArgs
     {

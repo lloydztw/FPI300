@@ -17,7 +17,7 @@ using LeTian.JxProps;
 using System.Drawing;
 
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     using JxRect = JxBase<Rectangle>;
 

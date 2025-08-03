@@ -22,7 +22,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 
-namespace EzEmptyTrayInspector.Ctrl
+namespace EzAoiEmptyTrayInspector.Ctrl
 {
     public class CviMatchResultBox : CvImageViewerInteractor
     {
@@ -49,7 +49,7 @@ namespace EzEmptyTrayInspector.Ctrl
             _grid = src;
             _blocs = pool;
         }
-        public void UpdateResult(EzEmptyTrayInspector.Model.MatchResult result)
+        public void UpdateResult(EzAoiEmptyTrayInspector.Model.MatchResult result)
         {
             _grid = result?.Grid;
             _blocs = result?.Blocs;

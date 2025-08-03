@@ -18,26 +18,26 @@ using LeTian.JxRecipesTool.Gui;
 using AwFramework.Util;
 using AwFramework;
 using AwFramework.Gui;
-using EzEmptyTrayInspector.Ctrl;
-using EzEmptyTrayInspector.Gui;
+using EzAoiEmptyTrayInspector.Ctrl;
+using EzAoiEmptyTrayInspector.Gui;
 using System.Drawing;
 using System.Windows.Forms;
-using EzEmptyTrayInspector;
+using EzAoiEmptyTrayInspector;
 
 #region TEMPLATES
 // 主要客戶區 目前有兩個 GUI Class 可供 編譯時期 選用
 // (1) GvDualMatchLRView
 // (2) GvDualMatchTabView
 //using MajorClientPanelClassT = EzDualMatch.Gui.Panels.GvDualMatchTabView;
-using MajorClientPanelClassT = EzEmptyTrayInspector.Gui.Panels.GvSingleMatchViewPanel;
-using ProductionPanelClassT = EzEmptyTrayInspector.Gui.Panels.GvProductionPanel;
-using RecipeClassT = EzEmptyTrayInspector.Model.JxAoiRecipe;
-using AppSettingsClassT = EzEmptyTrayInspector.JxAppSettings;
-using RESOURCES = EzEmptyTrayInspector.Properties.Resources;
+using MajorClientPanelClassT = EzAoiEmptyTrayInspector.Gui.Panels.GvSingleMatchViewPanel;
+using ProductionPanelClassT = EzAoiEmptyTrayInspector.Gui.Panels.GvProductionPanel;
+using RecipeClassT = EzAoiEmptyTrayInspector.Model.JxAoiRecipe;
+using AppSettingsClassT = EzAoiEmptyTrayInspector.JxAppSettings;
+using RESOURCES = EzAoiEmptyTrayInspector.Properties.Resources;
 #endregion
 
 
-namespace FPI30_AOI
+namespace EzAoiEmptyTrayInspector
 {
     public class EzApp : AwFramework.AppBase<RecipeClassT>
     {

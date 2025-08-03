@@ -16,7 +16,7 @@
 using LeTian.JxProps;
 
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     /// <summary>
     /// DualMatch 單頭設定參數

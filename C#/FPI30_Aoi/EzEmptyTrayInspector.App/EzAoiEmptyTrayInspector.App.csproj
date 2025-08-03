@@ -7,8 +7,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C2A8E04A-34BB-44C9-A5E0-6E22FBBB0355}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>EzEmptyTrayInspector</RootNamespace>
-    <AssemblyName>EzEmptyTrayInspector.App</AssemblyName>
+    <RootNamespace>EzAoiEmptyTrayInspector</RootNamespace>
+    <AssemblyName>EzAoiEmptyTrayInspector.App</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -189,9 +189,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\EzEmptyTrayInspector.Lib\EzEmptyTrayInspector.Lib.csproj">
+    <ProjectReference Include="..\EzEmptyTrayInspector.Lib\EzAoiEmptyTrayInspector.Lib.csproj">
       <Project>{a1bcdee4-dd9a-43c2-a127-90b727eb0f04}</Project>
-      <Name>EzEmptyTrayInspector.Lib</Name>
+      <Name>EzAoiEmptyTrayInspector.Lib</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

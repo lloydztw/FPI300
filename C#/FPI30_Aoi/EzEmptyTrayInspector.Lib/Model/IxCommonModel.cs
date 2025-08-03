@@ -16,7 +16,7 @@
 using System;
 
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     public interface IxCommonModel : IDisposable
     {

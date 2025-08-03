@@ -14,7 +14,7 @@
 #endregion
 
 using AwFramework;
-using EzEmptyTrayInspector.Model;
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy.ImageViewerEx;
 using JetEazy.OpenCV.Viewer;
 using System;
@@ -22,7 +22,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 
-namespace EzEmptyTrayInspector.Gui.Panels
+namespace EzAoiEmptyTrayInspector.Gui.Panels
 {
     public partial class GvSingleMatchViewPanel : UserControl, IvSingleMatchView
     {

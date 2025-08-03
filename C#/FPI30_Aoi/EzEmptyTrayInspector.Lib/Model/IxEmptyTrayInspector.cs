@@ -18,11 +18,11 @@ using JetEazy.EzImage;
 using System;
 using System.Drawing;
 
-using AOI_RECIPE = EzEmptyTrayInspector.Model.JxAoiRecipe;
-using AOI_RESULT = EzEmptyTrayInspector.Model.EzEmptyTrayResult;
+using AOI_RECIPE = EzAoiEmptyTrayInspector.Model.JxAoiRecipe;
+using AOI_RESULT = EzAoiEmptyTrayInspector.Model.EzEmptyTrayResult;
 
 
-namespace EzEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model
 {
     public interface IxEmptyTrayInspector : IxCommonModel
     {

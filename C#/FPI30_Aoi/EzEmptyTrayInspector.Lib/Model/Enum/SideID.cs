@@ -1,4 +1,4 @@
-﻿namespace EzEmptyTrayInspector.Model
+﻿namespace EzAoiEmptyTrayInspector.Model
 {
     public enum SideID : int
     {

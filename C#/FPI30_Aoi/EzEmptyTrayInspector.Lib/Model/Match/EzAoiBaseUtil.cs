@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using CvPoint = OpenCvSharp.Point;
 
 
-namespace EzEmptyTrayInspector.Model.Aoi
+namespace EzAoiEmptyTrayInspector.Model.Aoi
 {
     public class EzAoiBaseUtil
     {

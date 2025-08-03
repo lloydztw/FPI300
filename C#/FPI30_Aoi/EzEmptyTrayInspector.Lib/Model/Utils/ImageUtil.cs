@@ -24,7 +24,7 @@ using FlipMode = OpenCvSharp.FlipMode;
 using Mat = OpenCvSharp.Mat;
 
 
-namespace EzEmptyTrayInspector
+namespace EzAoiEmptyTrayInspector
 {
     public enum MirrorMode : int
     {

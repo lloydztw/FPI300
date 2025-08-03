@@ -1,4 +1,4 @@
-﻿namespace EzEmptyTrayInspector.Gui.Panels
+﻿namespace EzAoiEmptyTrayInspector.Gui.Panels
 {
     partial class GvProductionPanel
     {
@@ -33,11 +33,11 @@
             this.lblRecipeInfo = new System.Windows.Forms.Label();
             this.cboRecipeNames = new System.Windows.Forms.ComboBox();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.gwLogPanel1 = new EzEmptyTrayInspector.Gui.Panels.GwLogPanel();
+            this.gwLogPanel1 = new EzAoiEmptyTrayInspector.Gui.Panels.GwLogPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblPassFail = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
-            this.gwFuncButtonsPanel1 = new EzEmptyTrayInspector.Gui.Panels.GwFuncButtonsPanel();
+            this.gwFuncButtonsPanel1 = new EzAoiEmptyTrayInspector.Gui.Panels.GwFuncButtonsPanel();
             this.panel2.SuspendLayout();
             this.panel4.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -185,7 +185,7 @@
         private System.Windows.Forms.Panel panel4;
         public System.Windows.Forms.ComboBox cboRecipeNames;
         public System.Windows.Forms.Label lblPassFail;
-        private EzEmptyTrayInspector.Gui.Panels.GwLogPanel gwLogPanel1;
+        private EzAoiEmptyTrayInspector.Gui.Panels.GwLogPanel gwLogPanel1;
         public System.Windows.Forms.Label lblRecipeInfo;
         private System.Windows.Forms.Panel panel3;
         private GwFuncButtonsPanel gwFuncButtonsPanel1;

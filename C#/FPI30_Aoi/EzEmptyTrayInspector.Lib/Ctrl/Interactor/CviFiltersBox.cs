@@ -13,8 +13,8 @@
  */
 #endregion
 
-using EzEmptyTrayInspector.Model;
-using EzEmptyTrayInspector.Model.Aoi;
+using EzAoiEmptyTrayInspector.Model;
+using EzAoiEmptyTrayInspector.Model.Aoi;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
 using OpenCvSharp;
@@ -25,7 +25,7 @@ using System.Threading;
 using System.Windows.Forms;
 
 
-namespace EzEmptyTrayInspector.Ctrl
+namespace EzAoiEmptyTrayInspector.Ctrl
 {
     /// <summary>
     /// 拉框 實時濾波 顯示效果

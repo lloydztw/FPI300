@@ -1,4 +1,4 @@
-﻿namespace EzEmptyTrayInspector.Gui.Panels
+﻿namespace EzAoiEmptyTrayInspector.Gui.Panels
 {
     using GvImageViewerClassT = JetEazy.OpenCV.Viewer.CvMatViewer;
 
@@ -147,7 +147,7 @@
             // 
             // picIcon
             // 
-            this.picIcon.Image = global::EzEmptyTrayInspector.Properties.Resources.file_png_icon;
+            this.picIcon.Image = global::EzAoiEmptyTrayInspector.Properties.Resources.file_png_icon;
             this.picIcon.Location = new System.Drawing.Point(5, 5);
             this.picIcon.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.picIcon.Name = "picIcon";

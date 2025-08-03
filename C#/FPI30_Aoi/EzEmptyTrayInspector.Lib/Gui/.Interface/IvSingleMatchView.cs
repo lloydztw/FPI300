@@ -19,7 +19,7 @@ using JetEazy.OpenCV.Viewer;
 using System.Windows.Forms;
 
 
-namespace EzEmptyTrayInspector.Gui
+namespace EzAoiEmptyTrayInspector.Gui
 {
     public interface IvSingleMatchView : IView
     {

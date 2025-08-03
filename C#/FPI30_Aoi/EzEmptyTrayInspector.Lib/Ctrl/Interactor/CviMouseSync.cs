@@ -20,7 +20,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 
-namespace EzEmptyTrayInspector.Ctrl
+namespace EzAoiEmptyTrayInspector.Ctrl
 {
     public class CviMouseSync : CvImageViewerInteractor
     {

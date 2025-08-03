@@ -1,4 +1,4 @@
-﻿namespace EzEmptyTrayInspector.Gui.Panels
+﻿namespace EzAoiEmptyTrayInspector.Gui.Panels
 {
     partial class GvRecipeDockPanelExt
     {
