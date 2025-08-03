@@ -12,7 +12,7 @@ namespace EzAoiEmptyTrayInspector
 
         public static JxAppSettings AppSettings
         {
-            get => EzApp.Instance.appSettings as JxAppSettings;
+            get => EzAppForDll.Instance.appSettings as JxAppSettings;
         }
 
         public static IxEmptyTrayInspector AoiModel

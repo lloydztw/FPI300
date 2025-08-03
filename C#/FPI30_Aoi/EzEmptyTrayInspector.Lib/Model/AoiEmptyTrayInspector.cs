@@ -17,18 +17,16 @@ using EzAoiEmptyTrayInspector.Model.Aoi;
 using JetEazy.EzImage;
 using JetEazy.Match;
 using JetEazy.OpenCV;
-using NLog.LayoutRenderers;
 using OpenCvSharp;
 using System;
 using System.Drawing;
 using System.Threading;
-using System.Windows.Media.Media3D;
 using AOI_RESULT = EzAoiEmptyTrayInspector.Model.EzEmptyTrayResult;
 
 
 namespace EzAoiEmptyTrayInspector.Model
 {
-    public partial class AoiEmptyTrayInspector : IxEmptyTrayInspector
+    public partial class AoiEmptyTrayInspector : LeTian.JxProps.Ptr.QxPtr, IxEmptyTrayInspector
     {
         #region NLOG
         // NOTE:
@@ -77,7 +75,12 @@ namespace EzAoiEmptyTrayInspector.Model
             }
         }
 
-        public void Dispose()
+        //public void Dispose()
+        //{
+        //    _singleton = null;
+        //}
+
+        protected override void OnDisposing()
         {
             _singleton = null;
         }
@@ -456,6 +459,55 @@ namespace EzAoiEmptyTrayInspector.Model
             if (wait)
                 evCompleted.WaitOne(1000 * 60 * 5);
         }
+        public void RunAll(Bitmap largeBmp, bool wait = false)
+        {
+            //// Async !!!
+            ////>>> System.Diagnostics.Debug.Assert(largeImgA != largeImgB);
+
+            //var err = CanRunAll(largeImgA, largeImgB);
+            //if (err != ErrCodes.OK)
+            //{
+            //    _ERROR(err);
+            //    return;
+            //}
+            //_dumpPath = dumpPath;
+
+            if (largeBmp == null)
+            {
+                _ERROR(ErrCodes.NO_IMAGE);
+                return;
+            }
+
+            changeState("RUN ALL (BMP)", force: true);
+            clear_result(SideID.A, true);
+            clear_result(SideID.B, true);
+
+            var evCompleted = wait ? new ManualResetEvent(false) : null;
+
+            ThreadPool.QueueUserWorkItem((arg) =>
+            {
+                var args = (object[])arg;
+                var bmp = (Bitmap)args[0];
+                //var A = (IEzImage)args[0];
+                //var B = (IEzImage)args[1];
+                //var F = (string)args[2];
+                //run_all(A, A?.Image as Mat, B?.Image as Mat, F);
+
+                using (var bridge = new QxImageBridge(bmp))
+                {
+                    run_all(null, bridge.Image, null, null);
+                }
+
+                evCompleted?.Set();
+            },
+            new object[] {
+                largeBmp,
+            });
+
+            if (wait)
+                evCompleted.WaitOne(1000 * 60 * 5);
+        }
+
         AOI_RESULT IxEmptyTrayInspector.GetResult()
         {
             return _finalResult;

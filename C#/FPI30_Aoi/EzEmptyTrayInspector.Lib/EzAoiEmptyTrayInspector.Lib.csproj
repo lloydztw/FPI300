@@ -159,7 +159,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App\EzApp.cs" />
+    <Compile Include="App\EzAppForDll.cs" />
     <Compile Include="App\Global\Global.cs" />
     <Compile Include="App\Settings\JxAppSettings.cs" />
     <Compile Include="Ctrl\EzMatchCtrl.cs" />

@@ -1,23 +1,15 @@
 ﻿using Eazy_Project_III;
-using FreeImageAPI;
 using JetEazy.BasicSpace;
 using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using JzDisplay;
-using JzDisplay.UISpace;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using WorldOfMoveableObjects;
 
@@ -658,6 +650,5 @@ namespace LaserAlignDX.FormSpace
             retStr = LanguageExClass.Instance.GetLanguageText(eText);
             return retStr;
         }
-
     }
 }

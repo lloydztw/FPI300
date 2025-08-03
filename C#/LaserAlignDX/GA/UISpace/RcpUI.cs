@@ -1,15 +1,12 @@
-﻿using Common.RecipeSpace;
-using JetEazy;
+﻿using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
 using JetEazy.FormSpace;
 using LaserAlignDX.FormSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using NeedleX.FormSpace;
 using System;
 using System.Windows.Forms;
 using Traveller106;
-using Traveller106.FormSpace;
 //using Traveller106.OPSpace;
 
 //using Mist.OPSpace;
@@ -194,7 +191,6 @@ namespace PhotoMachine.UISpace
                     break;
             }
         }
-
         void STPUI_TriggerAction(RCPStatusEnum status)
         {
             switch (status)
@@ -419,19 +415,45 @@ namespace PhotoMachine.UISpace
 
         //frmRecipe frmRecipeSetup = null;
         //frmX2Recipe frmRecipeSetup = null;
-        frmFPIRecipe frmRecipeSetup = null;
+        //frmFPIRecipe frmRecipeSetup = null;
         void showRecipeDialogWindow()
         {
-            frmRecipeSetup = new frmFPIRecipe();
-            frmRecipeSetup.ShowDialog();
-            frmRecipeSetup.Dispose();
-            frmRecipeSetup = null;
+            int mode = -1;
+            using (var frm = new frmSelectScanInspectMode())
+            {
+                if (frm.ShowDialog() != DialogResult.OK)
+                    return;
+                mode = frm.SelectScanMode;
+            }
+
+            if (mode == 2)
+            {
+                openEmptyTrayInspectorTool();
+            }
+            else
+            {
+                using (var frmRecipeSetup = new frmFPIRecipe())
+                {
+                    frmRecipeSetup.ShowDialog();
+                }
+            }
+
+            //frmRecipeSetup = new frmFPIRecipe();
+            //frmRecipeSetup.ShowDialog();
+            //frmRecipeSetup.Dispose();
+            //frmRecipeSetup = null;
+
             //using (var frm = new frmRecipe())
             //{
             //    frm.ShowDialog();
             //}
         }
 
+        void openEmptyTrayInspectorTool()
+        {
+            var frm = FindForm();
+            LtAoiFactory.OpenEmptyTrayInspectorTool(frm);
+        }
 
         #region AUTO_LAYOUT
         void RcpUI_SizeChanged(object sender, EventArgs e)

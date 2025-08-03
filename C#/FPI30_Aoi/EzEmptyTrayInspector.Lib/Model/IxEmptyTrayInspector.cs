@@ -29,6 +29,8 @@ namespace EzAoiEmptyTrayInspector.Model
         event EventHandler<MatchResultEventArgs> OnMatched;
         event EventHandler<AoiResultEventArgs> OnFinalResulted;
 
+        int AddRef();
+
         /// <summary>
         /// 清除上一次結果
         /// </summary>
@@ -62,6 +64,11 @@ namespace EzAoiEmptyTrayInspector.Model
         /// 執行 所有 AOI 運算
         /// </summary>
         void RunAll(IEzImage imgA, IEzImage imgB = null, string outputFile = null, string dumpPath = null, bool wait = false);
+
+        /// <summary>
+        /// 執行 所有 AOI 運算
+        /// </summary>
+        void RunAll(Bitmap bmp, bool wait = true);
 
         ///// <summary>
         ///// 檢測結果

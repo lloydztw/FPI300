@@ -1,4 +1,5 @@
-﻿using JetEazy.BasicSpace;
+﻿using EzAoiEmptyTrayInspector.Model;
+using JetEazy.BasicSpace;
 using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -7,6 +8,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Windows.Forms;
 using Traveller106;
 using VisionDesigner;
 
@@ -241,7 +243,7 @@ namespace LaserAlignDX.RunSpace
                     _Inspect002();
                     break;
                 case ScanInspectMode.NOTRAY:
-                    _Inspect003();
+                    _Inspect003_LT();
                     break;
                 default:
                     _Inspect001();
@@ -704,6 +706,223 @@ namespace LaserAlignDX.RunSpace
             GC.WaitForPendingFinalizers();
             GC.Collect();
         }
+        /// <summary>
+        /// 空载台检测
+        /// </summary>
+        private void _Inspect003_LT()
+        {
+            xRecipe.AnalyzeDatasData();
+            m_ElapsedTime = 0;
+            m_Running = true;
+
+
+            System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+            stopwatch.Restart();
+
+            var aoiModel = LtAoiFactory.InstanceModel();
+
+            string imgPath = $"{Universal.LOG_IMG_PATH}\\{JzTimes.DateSerialString}\\{m_FileBarcodeStr}";
+            if (INI.Instance.IsSaveTestImage)
+            {
+                if (!Directory.Exists(imgPath))
+                    Directory.CreateDirectory(imgPath);
+            }
+
+            Size _bmpInputSize = new Size((int)cMvdInput.Width, (int)cMvdInput.Height);
+
+            //if (m_MvdOpeate == null)
+            //    m_MvdOpeate = new CMvdImage();
+            //m_MvdOpeate = cMvdInput.Clone();
+
+            using (Bitmap bmpInputImage = EzMvdImageConvertor.CMvdImageToBitmap(cMvdInput))
+            {
+                aoiModel.RunAll(bmpInputImage, wait: true);
+
+                var result = aoiModel.GetResult();
+
+                string msg;
+                if (result == null)
+                {
+                    msg = "無結果!";
+                    m_IsPass = false;
+                }
+                else
+                {
+                    m_IsPass = result.IsPass();
+                    msg = result.ToString();
+                }
+
+                if (true)
+                {
+                    CommonLogClass.Instance.LogMessage(msg, m_IsPass ? Color.Green : Color.Red);
+
+                    var frm = System.Windows.Forms.Application.OpenForms[0];
+                    frm.BeginInvoke(new Action(() =>
+                    {
+                        var icon = m_IsPass ? MessageBoxIcon.Information : MessageBoxIcon.Exclamation;
+                        MessageBox.Show(msg, "空盤檢測", MessageBoxButtons.OK, icon);
+                    }));
+                }
+
+                // 要如何繪製 結果?
+                _convert_lt_result_to_gaara(result, bmpInputImage, xRecipe);
+            }
+
+            stopwatch.Stop();
+            m_ElapsedTime = stopwatch.ElapsedMilliseconds;
+            m_Running = false;
+
+
+        }
+        private void _convert_lt_result_to_gaara(EzEmptyTrayResult result, Bitmap bmpInputImage, RecipeFPIX3Class dst)
+        {
+            string imgPath = $"{Universal.LOG_IMG_PATH}\\{JzTimes.DateSerialString}\\{m_FileBarcodeStr}";
+            
+            #region PREPARE_PATH
+            if (INI.Instance.IsSaveTestImage)
+            {
+                if (!Directory.Exists(imgPath))
+                    Directory.CreateDirectory(imgPath);
+            }
+            #endregion
+
+            //foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
+            //{
+            //    int row = cell.CellRow;
+            //    int col = cell.CellCol;
+            //    System.Diagnostics.Trace.WriteLine($"[{row}, {col}]");
+            //}
+            //return;
+
+#if (false)
+            Size _bmpInputSize = new Size((int)cMvdInput.Width, (int)cMvdInput.Height);
+
+            //if (cMvdInput.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
+            //{
+            //    //当前程序仅支持mono8。因此像素格会转换.
+            //    cMvdInput.ConvertImagePixelFormat(MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08);
+            //}
+
+            //Bitmap bmp0 = bmpInputImage.Clone(xRecipe.xRectRegionBase0, PixelFormat.Format8bppIndexed);
+            //Bitmap bmp1 = bmpInputImage.Clone(xRecipe.xRectRegionBase1, PixelFormat.Format8bppIndexed);
+
+            ////计算基准位置 用来检测偏移
+            //mVD_POINT_F0 = _getBasePointF2(bmp0, RegionName.BASE0);
+            //mVD_POINT_F1 = _getBasePointF2(bmp1, RegionName.BASE1);
+
+            //bmp0.Dispose();
+            //bmp1.Dispose();
+
+            //xRecipe.mvdprinttemp_Find.xMvdRun_Image = m_MvdOpeate.Clone();
+            //xRecipe.mvdprinttemp_Find.HikRun4Pre();
+
+            foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
+            {
+                cell.Reset();
+
+                if (INI.Instance.IsSaveTestImage)
+                {
+                    cell.IsSaveDebugPicture = true;
+                    cell.SaveDebugPath = imgPath;
+                }
+
+                //if (cell.ByPass && !INI.Instance.IsForceInspect)
+                //{
+                //    //cell.inspectReason = InspectReason.INS_NOOPEN;
+                //    cell.inspectReasons.Add(InspectReason.INS_NOOPEN);
+                //    continue;
+                //}
+                RectangleF _rectF = new RectangleF(cell.viewRectF.X, cell.viewRectF.Y, cell.viewRectF.Width, cell.viewRectF.Height);
+                _rectF.Inflate(xRecipe.xExtendx, xRecipe.xExtendy);
+                BoundRect(ref _rectF, _bmpInputSize);
+                //xRecipe.mvdprinttemp_Find.bmpRun_Image = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
+                Bitmap bmp2 = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
+                int iOK = xRecipe.PrintTempRun(bmp2);
+
+                //int iOK = xRecipe.PrintTempRun(cMvdInput, _rectF);
+                //xRecipe.mvdprinttemp_Find.xMvdRun_Image = cMvdInput;
+                //int iOK = (xRecipe.mvdprinttemp_Find.HikRun3(_rectF) ? 0 : -1);
+                //int iOK = (xRecipe.mvdprinttemp_Find.HikRun4(_rectF) ? 0 : -1);
+
+                if (iOK == 0)
+                {
+                    cell.xFindResult = xRecipe.mvdprinttemp_Find.xResults[0];
+                    cell.xFindResult.fCenterX += _rectF.X;
+                    cell.xFindResult.fCenterY += _rectF.Y;
+                    RectangleF templaterectf = new RectangleF(0, 0, xRecipe.bmpprinttemplate.Width, xRecipe.bmpprinttemplate.Height);
+                    Rectangle runrectf = new Rectangle(0, 0, _bmpInputSize.Width, _bmpInputSize.Height);
+                    cell.PositionFixRun(templaterectf, runrectf, cell.xFindResult);
+
+                    //判断偏移
+                    //cell.RunX = (cell.DrawResultRectF().CenterX - mVD_POINT_F0.fX - cell.OrgX) * INI.Instance.ImageResolution;
+                    //cell.RunY = (cell.DrawResultRectF().CenterY - mVD_POINT_F0.fY - cell.OrgY) * INI.Instance.ImageResolution;
+
+                    //换算为偏移的位置
+                    //cell.RunX = (cell.DrawResultRectF().CenterX - cell.OrgX) * INI.Instance.ImageResolution;
+                    //cell.RunY = (cell.DrawResultRectF().CenterY - cell.OrgY) * INI.Instance.ImageResolution;
+                    //cell.RunAngle = (cell.DrawResultRectF().Angle - cell.OrgAngle);
+
+                    //计算偏移值
+                    PointF _viewNewRun = new PointF(cell.DrawResultRectF().CenterX, cell.DrawResultRectF().CenterY);
+                    PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
+                    cell.RunX = (_worldNewRun.X - cell.OrgX);
+                    cell.RunY = (_worldNewRun.Y - cell.OrgY);
+                    cell.RunAngle = cell.DrawResultRectF().Angle;
+                    cell.GetOffsetResult();
+                }
+                else
+                {
+                    cell.inspectReason = InspectReason.INS_ALIGNERR;
+                    cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
+                }
+
+                bmp2.Dispose();
+            }
+
+            foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
+            {
+                //if (cell.ByPass && !INI.Instance.IsForceInspect)
+                //    continue;
+                if (cell.inspectReason != InspectReason.INS_ALIGNERR)
+                    continue;
+
+                //cell.xInspectPara = InspectX2Class.Instance;
+                //原始切图
+                RectangleF _rectF = new RectangleF(cell.viewRectF.X, cell.viewRectF.Y, cell.viewRectF.Width, cell.viewRectF.Height);
+                _rectF.Inflate(xRecipe.xExtendx, xRecipe.xExtendy);
+                BoundRect(ref _rectF, _bmpInputSize);
+
+                //xRecipe.mvdprinttemp_Find.bmpRun_Image = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
+                Bitmap bmp2 = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
+                cell.CheckBlobNoTray(bmp2);
+
+                ////原始模板的大小
+                //RectangleF templaterectf = new RectangleF(0, 0, xRecipe.bmpprinttemplate.Width, xRecipe.bmpprinttemplate.Height);
+
+                ////定位完成后裁切位置
+                //RectangleF _crop = new RectangleF(cell.DrawResultRectF().CenterX - templaterectf.Width / 2,
+                //    cell.DrawResultRectF().CenterY - templaterectf.Height / 2,
+                //    templaterectf.Width,
+                //    templaterectf.Height);
+
+                //if (InspectX2Class.Instance.bCheckInspect)
+                //{
+                //    cell.bmpItemRun.Dispose();
+                //    cell.bmpItemRun = bmpInputImage.Clone(_crop, PixelFormat.Format8bppIndexed);
+                //    cell.bmpItemMask.Dispose();
+                //    cell.bmpItemMask = xRecipe.bmpprintmask.Clone(
+                //        new Rectangle(0, 0, xRecipe.bmpprintmask.Width, xRecipe.bmpprintmask.Height),
+                //        PixelFormat.Format8bppIndexed);
+                //    cell.DetectDefects(xRecipe.bmpprinttemplate, cell.bmpItemRun, cell.bmpItemMask);
+                //}
+            }
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+#endif
+        }
+
         private void _InspectRecipe()
         {
             //xRecipe.AnalyzeDatasData();

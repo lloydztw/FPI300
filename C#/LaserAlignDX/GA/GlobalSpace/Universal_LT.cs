@@ -598,7 +598,6 @@ namespace Traveller106
             return false;
 #endif
         }
-
         static void CreateDebugDirectories()
         {
             //if (!Directory.Exists(MAPPINGDATA))
@@ -630,6 +629,8 @@ namespace Traveller106
             IxFlyAreaCam?.Close();
             IxFlyAreaCam?.Dispose();
             IxFlyAreaCam = null;
+
+            LtAoiFactory.DisposeAll();
         }
         public static void Close()
         {

@@ -13,17 +13,39 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model;
 using System.Windows.Forms;
 
 namespace EzAoiEmptyTrayInspector
 {
     public class AoiFactory
     {
-        public static Form OpenEmptyTrayInspectorTool(Form owner = null, string recipeFileName = null)
+        public static Form OpenEmptyTrayInspectorTool(Form parent = null, string recipeFileName = null)
         {
-            var frm = EzApp.Instance.Build();
-            frm.Parent = owner;
+            //if (_aoiModelInUsed != null)
+            //    _aoiModelInUsed.AddRef();
+
+            var frm = EzAppForDll.Instance.Build(recipeFileName);
+            if (parent != null)
+            {
+                var aoiModel = Global.AoiModel;
+                aoiModel.AddRef();
+            }
+
             return frm;
+        }
+
+        public static IxEmptyTrayInspector InstanceModel(string recipeFileName = null)
+        {
+            var model = Global.AoiModel;
+            EzAppForDll.Instance.AssignOneRecipe(recipeFileName);
+            return model;
+        }
+
+        public static void DisposeAll()
+        {
+            EzAppForDll.Instance.Dispose();
+            Global.Dispose();
         }
     }
 }

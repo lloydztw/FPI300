@@ -22,7 +22,6 @@ using EzAoiEmptyTrayInspector.Ctrl;
 using EzAoiEmptyTrayInspector.Gui;
 using System.Drawing;
 using System.Windows.Forms;
-using EzAoiEmptyTrayInspector;
 
 #region TEMPLATES
 // 主要客戶區 目前有兩個 GUI Class 可供 編譯時期 選用
@@ -34,27 +33,34 @@ using ProductionPanelClassT = EzAoiEmptyTrayInspector.Gui.Panels.GvProductionPan
 using RecipeClassT = EzAoiEmptyTrayInspector.Model.JxAoiRecipe;
 using AppSettingsClassT = EzAoiEmptyTrayInspector.JxAppSettings;
 using RESOURCES = EzAoiEmptyTrayInspector.Properties.Resources;
+using LeTian.JxRecipesTool;
+using System.Collections.Generic;
 #endregion
 
 
 namespace EzAoiEmptyTrayInspector
 {
-    public class EzApp : AwFramework.AppBase<RecipeClassT>
+    internal class EzAppForDll : AwFramework.AppBase<RecipeClassT>, IDisposable
     {
         #region SINGLETON
-        static EzApp _singleton = null;
+        static EzAppForDll _singleton = null;
         #endregion
 
-        public static EzApp Instance
+        #region RUNTIME_DATA
+        string _assignedRecipeName;
+        #endregion
+
+        public static EzAppForDll Instance
         {
             get
             {
                 if (_singleton == null)
-                    _singleton = new EzApp();
+                    _singleton = new EzAppForDll();
                 return _singleton;
             }
         }
-        protected EzApp()
+
+        protected EzAppForDll()
         {
             // 設定 路徑
             AppPath = Global.APP_PATH;
@@ -64,6 +70,18 @@ namespace EzAoiEmptyTrayInspector
 
             // 綁定 Splash 啟動畫面
             ConfigSplash<FormSplash>();
+        }
+
+        public Form Build(string assignedRecipeName)
+        {
+            _assignedRecipeName = assignedRecipeName;
+            return base.Build();
+        }
+
+        public void Dispose()
+        {
+            clear_up();
+            _singleton = null;
         }
 
         /// <summary>
@@ -152,29 +170,16 @@ namespace EzAoiEmptyTrayInspector
 
             // 在此直接 return 可以只顯示 GUI, 以方便 DEBUG
             // return;
-            make_one_default_recipe();
+
+            _assignedRecipeName = AssignOneRecipe(_assignedRecipeName);
 
             var awMain = frmMain as FormAwMain;
 
             // 取得 試跑按鈕 (位於 跑線作業 視窗內)
             var wndProductionPanel = awMain.OpDocker.FindPanel<ProductionPanelClassT>();
-            var funcButtonsPanel = wndProductionPanel?.FuncButtonsPanel;
-            Control lblPassFail = wndProductionPanel?.lblPassFail;
 
-            // 取得 雙巨圖 視窗 (位於 主要客戶區 視窗內)
-            //var wndDualImagePanel = awMain.ClientDocker.FindPanel<MajorClientPanelClassT>();
-            //var matchViews = wndDualImagePanel.MatchViews;
-            //// Mouse Move, ZoomIn, ZoomOut 同步控件
-            //var syncBox = wndDualImagePanel.SyncBox;
-            // 雙巨圖 各別的 MatchView 與 MatchCtrl
-            //int sideId = 0;
-            //foreach (var matchView in matchViews)
-            //{
-            //    var matchCtrl = new EzMatchCtrl(sideId, matchView, base.recipesMgrCtrl, btnRunAll);
-            //    matchCtrl.PostInit();
-            //    matchCtrl.Attach(syncBox);
-            //    sideId++;
-            //}
+            var funcButtonsPanel = wndProductionPanel?.FuncButtonsPanel;
+            var lblPassFail = wndProductionPanel?.lblPassFail;
 
             // 取得 巨圖視窗 (位於 主要客戶區 視窗內)
             var matchView = awMain.ClientDocker.FindPanel<MajorClientPanelClassT>();
@@ -193,6 +198,9 @@ namespace EzAoiEmptyTrayInspector
                 if (opMode == "Production" || opMode == "Recipe")
                     swap_func_buttons_panel();
             };
+
+            // 顯示 Recipe 資訊
+            wndProductionPanel.lblRecipeInfo.Text = "參數 = " + _assignedRecipeName;
         }
 
         /// <summary>
@@ -245,27 +253,6 @@ namespace EzAoiEmptyTrayInspector
             //    panel.Controls.Add(panelTop);
             //}
         }
-        void make_one_default_recipe(string name = null)
-        {
-            var ctrl = base.recipesMgrCtrl;
-            var activeRecipe = ctrl.ActiveRecipe as RecipeClassT;
-
-            if (string.IsNullOrEmpty(name))
-                name = "aoi_empty_tray_default";
-
-            if (activeRecipe == null || activeRecipe.Name != name)
-            {
-                var mgr = ctrl.GetManager();
-                var list = mgr.GetRecipeNamesList();
-                if (!list.Contains(name))
-                {
-                    var recipe = mgr.InstanciateRecipe(name);
-                    recipe.Name = name;
-                    mgr.UpdateRecipe(recipe);
-                }
-                ctrl.LoadRecipe(name, false);
-            }
-        }
         void swap_func_buttons_panel()
         {
             //>>> var frmAwMain = _frmOwner as FormAwMain;
@@ -280,6 +267,55 @@ namespace EzAoiEmptyTrayInspector
             {
                 AppUtil.SwapGui(panel, logoPanel.picLogo);
             }
+        }
+        #endregion
+
+        public string AssignOneRecipe(string name = null)
+        {
+            if (string.IsNullOrEmpty(name))
+                name = "aoi_empty_tray_default";
+
+            var rcpCtrl = base.recipesMgrCtrl;
+            if (rcpCtrl == null)
+            {
+                var JB = new JxRecipesMgrBuilder<RecipeClassT>(Global.APP_PATH.RecipePath, ".json");
+                rcpCtrl = JB.InstanceCtrl();
+                add_to_cleanup_list(rcpCtrl);
+            }
+
+            var activeRecipe = rcpCtrl.ActiveRecipe as RecipeClassT;
+            if (activeRecipe == null || activeRecipe.Name != name)
+            {
+                var mgr = rcpCtrl.GetManager();
+                var list = mgr.GetRecipeNamesList(true);
+                if (!list.Contains(name))
+                {
+                    activeRecipe = mgr.InstanciateRecipe(name) as RecipeClassT;
+                    activeRecipe.Name = name;
+                }
+                mgr.UpdateRecipe(activeRecipe);
+                rcpCtrl.LoadRecipe(name, false);
+            }
+
+            Global.AoiModel.SetRecipe(activeRecipe);
+            return name;
+        }
+
+        #region PRIVATE_FUNCIONS
+        List<IDisposable> _disposableObjs;
+        void add_to_cleanup_list(IDisposable obj)
+        {
+            if (_disposableObjs == null)
+                _disposableObjs = new List<IDisposable>();
+            if (_disposableObjs.Contains(obj))
+                _disposableObjs.Add(obj);
+        }
+        void clear_up()
+        {
+            if (_disposableObjs != null)
+                foreach (var obj in _disposableObjs)
+                    obj.Dispose();
+            _disposableObjs = null;
         }
         #endregion
     }

@@ -124,16 +124,43 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\VisionMaster4.2.0\Development\V4.x\ComControls\Assembly\IMVSQuadrangleFindModuCs.dll</HintPath>
     </Reference>
+    <Reference Include="JetEazy.AccountMgr">
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.AccountMgr.dll</HintPath>
+    </Reference>
     <Reference Include="JetEazy.Camera.Viewer">
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.Camera.Viewer.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.CSharp, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.EzImage.Interface, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.EzImage.Interface.dll</HintPath>
     </Reference>
     <Reference Include="JetEazy.ImageViewerEx, Version=3.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.ImageViewerEx.dll</HintPath>
     </Reference>
+    <Reference Include="JetEazy.Lang, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.Lang.dll</HintPath>
+    </Reference>
     <Reference Include="JetEazy.QUtility, Version=2.5.6.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.QUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="LeTian.AwFramework, Version=2.0.7.3, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.AwFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="LeTian.JxProps, Version=2.0.2.2, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.JxProps.dll</HintPath>
+    </Reference>
+    <Reference Include="LeTian.JxProps.Gui, Version=2.0.1.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.JxProps.Gui.dll</HintPath>
     </Reference>
     <Reference Include="MoveGraphLibrary">
       <HintPath>..\Dlls\MoveGraphLibrary.dll</HintPath>
@@ -209,6 +236,9 @@
     <Reference Include="MvRenderActiveX.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=da2fd3581884613a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Common\MvRenderActiveX.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="ObjectListView">
+      <HintPath>C:\Program Files\Common Files\JetEazy\ObjectListView.dll</HintPath>
     </Reference>
     <Reference Include="OpenCvSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -425,6 +455,7 @@
     <Compile Include="GA\ProcessSpace\LineScanSingleProcess.cs" />
     <Compile Include="GA\ProcessSpace\MainProcess.cs" />
     <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
+    <Compile Include="LT\LtAoiFactory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GA\RunSpace\ProcessRunClass.cs" />
@@ -697,6 +728,10 @@
       <Project>{8aa39fb3-6b90-4faa-8183-85a1acfc10b1}</Project>
       <Name>JzDisplayLT</Name>
     </ProjectReference>
+    <ProjectReference Include="..\FPI30_Aoi\EzEmptyTrayInspector.Lib\EzAoiEmptyTrayInspector.Lib.csproj">
+      <Project>{a1bcdee4-dd9a-43c2-a127-90b727eb0f04}</Project>
+      <Name>EzAoiEmptyTrayInspector.Lib</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JetEazy.OpenCv4\JetEazy.OpenCv4.csproj">
       <Project>{ecf19b8d-be9a-4159-8b94-defc25a59507}</Project>
       <Name>JetEazy.OpenCv4</Name>
@@ -714,6 +749,8 @@
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)</PostBuildEvent>
+    <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)
+rem copy $(ProjectDir)NLog.config $(TargetDir)NLog.config
+copy "C:\Program Files\Common Files\JetEazy\JetEazy.Crt.dll" $(TargetDir)JetEazy.Crt.dll</PostBuildEvent>
   </PropertyGroup>
 </Project>
