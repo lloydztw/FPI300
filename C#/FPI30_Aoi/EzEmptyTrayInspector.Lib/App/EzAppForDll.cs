@@ -270,10 +270,10 @@ namespace EzAoiEmptyTrayInspector
         }
         #endregion
 
-        public string AssignOneRecipe(string name = null)
+        public string AssignOneRecipe(string targetName = null)
         {
-            if (string.IsNullOrEmpty(name))
-                name = "aoi_empty_tray_default";
+            //if (string.IsNullOrEmpty(name))
+            //    name = "aoi_empty_tray_default";
 
             var rcpCtrl = base.recipesMgrCtrl;
             if (rcpCtrl == null)
@@ -284,21 +284,35 @@ namespace EzAoiEmptyTrayInspector
             }
 
             var activeRecipe = rcpCtrl.ActiveRecipe as RecipeClassT;
-            if (activeRecipe == null || activeRecipe.Name != name)
+
+            bool needToReload = false;
+            if (activeRecipe != null)
+            {
+                if (!string.IsNullOrEmpty(targetName) && targetName != activeRecipe.Name)
+                    needToReload = true;
+            }
+            else
+            { 
+                if (string.IsNullOrEmpty(targetName))
+                    targetName = "aoi_empty_tray_default";
+                needToReload = true;
+            }
+
+            if (needToReload)
             {
                 var mgr = rcpCtrl.GetManager();
                 var list = mgr.GetRecipeNamesList(true);
-                if (!list.Contains(name))
+                if (!list.Contains(targetName))
                 {
-                    activeRecipe = mgr.InstanciateRecipe(name) as RecipeClassT;
-                    activeRecipe.Name = name;
+                    activeRecipe = mgr.InstanciateRecipe(targetName) as RecipeClassT;
+                    activeRecipe.Name = targetName;
                 }
                 mgr.UpdateRecipe(activeRecipe);
-                rcpCtrl.LoadRecipe(name, false);
+                rcpCtrl.LoadRecipe(targetName, false);
             }
 
             Global.AoiModel.SetRecipe(activeRecipe);
-            return name;
+            return activeRecipe?.Name;
         }
 
         #region PRIVATE_FUNCIONS

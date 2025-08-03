@@ -209,6 +209,7 @@ namespace Traveller106
             
             mMainTick?.Dispose();
             mMainTick = null;
+            Universal.Dispose();
         }
         private void MainForm_SizeChanged(object sender, EventArgs e)
         {
@@ -870,7 +871,10 @@ namespace Traveller106
                         X6_LASER_CLIENT.DisConnectServer();
 
                     MAINUI.Close();
+
+                    //LETIAN: 原代碼有誤: 此處不會被調用到 !!!
                     Universal.Close();
+
                     this.Close();
 
                     break;

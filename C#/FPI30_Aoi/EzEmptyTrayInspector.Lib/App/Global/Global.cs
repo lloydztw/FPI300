@@ -1,14 +1,13 @@
 ﻿using AwFramework;
 using EzAoiEmptyTrayInspector.Model;
-using EzAoiEmptyTrayInspector;
 
 namespace EzAoiEmptyTrayInspector
 {
-    public class Global
+    internal class Global
     {
         public const string TITLE = "FPI30 AOI 空盤檢測";
 
-        public static AppPath APP_PATH = new AppPath(@"D:\AUTOMATION\Eazy FPI30");
+        public static AppPath APP_PATH = new AppPath(@"D:\AUTOMATION\Eazy FPI30\Aoi");
 
         public static JxAppSettings AppSettings
         {

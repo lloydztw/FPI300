@@ -25,12 +25,12 @@ namespace Traveller106
             return Universal.RCPDB?.RCPItemNow?.Name;
         }
 
-        public static void OpenEmptyTrayInspectorTool(Form parent)
+        public static Form OpenEmptyTrayInspectorTool(Form parent)
         {
             var recipeName = GetActiveRecipeNameAtFPI30();
             var frm = EzAoiEmptyTrayInspector.AoiFactory.OpenEmptyTrayInspectorTool(parent, recipeName);
             frm?.Show();
-            //return frm;
+            return frm;
         }
 
         public static IxEmptyTrayInspector InstanceModel()

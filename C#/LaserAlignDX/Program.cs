@@ -1,7 +1,7 @@
-﻿using EzAoiEmptyTrayInspector;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
+using Traveller106;
 
 namespace LaserAlignDX
 {
@@ -16,7 +16,7 @@ namespace LaserAlignDX
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            //var frmMain = AoiFactory.OpenEmptyTrayInspectorTool();
+            //var frmMain = LtAoiFactory.OpenEmptyTrayInspectorTool(null);
             //Application.Run(frmMain);
             //return;
 

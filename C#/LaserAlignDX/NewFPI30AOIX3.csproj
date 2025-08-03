@@ -237,6 +237,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Common\MvRenderActiveX.Net.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.5.2.8\lib\net46\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.Windows.Forms.5.2.3\lib\net35\NLog.Windows.Forms.dll</HintPath>
+    </Reference>
     <Reference Include="ObjectListView">
       <HintPath>C:\Program Files\Common Files\JetEazy\ObjectListView.dll</HintPath>
     </Reference>
@@ -257,7 +263,9 @@
       <HintPath>..\Dlls\ProjectForAllinone.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -710,6 +718,8 @@
     <EmbeddedResource Include="GA\UISpace\UIMVC\View\PosUI.resx">
       <DependentUpon>PosUI.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="NLog.config" />
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -743,6 +753,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="coconut1.ico" />
+    <None Include="ReadMe_errors_list.md" />
     <None Include="ReadMe.md" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
@@ -750,7 +761,7 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)
-rem copy $(ProjectDir)NLog.config $(TargetDir)NLog.config
+copy $(ProjectDir)NLog.config $(TargetDir)NLog.config
 copy "C:\Program Files\Common Files\JetEazy\JetEazy.Crt.dll" $(TargetDir)JetEazy.Crt.dll</PostBuildEvent>
   </PropertyGroup>
 </Project>

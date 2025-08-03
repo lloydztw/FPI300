@@ -83,6 +83,7 @@ namespace EzAoiEmptyTrayInspector.Model
         protected override void OnDisposing()
         {
             _singleton = null;
+            _LOG.Info($"[AOI Model] {GetType().Name} 卸載!");
         }
 
         #region PRIVATE_STATE_MEMBERS
@@ -186,9 +187,11 @@ namespace EzAoiEmptyTrayInspector.Model
 
             if (recipe != null)
             {
+                if (recipe != _recipe || recipe.Name != _recipe?.Name)
+                    _LOG.Debug("[AOI Model] 設定參數 = {0}", recipe.Name);
+
+                // 目前 recipe 的生命週期, 由 RecipeManager 負責處理
                 _recipe = recipe;
-                //_recipe?.Dispose();
-                //_recipe = (JxDualMatchRecipe)recipe.Clone();
             }
         }
 
