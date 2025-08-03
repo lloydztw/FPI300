@@ -7,12 +7,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Aoi_EmptyTrayInspector", "A
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzAoiEmptyTrayInspector.App", "FPI30_Aoi\EzEmptyTrayInspector.App\EzAoiEmptyTrayInspector.App.csproj", "{C2A8E04A-34BB-44C9-A5E0-6E22FBBB0355}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzEmptyTray.SampleCode", "FPI30_Aoi\EzEmptyTrayInspector.SampleCode\EzEmptyTray.SampleCode.csproj", "{2F995D9E-41E4-40E0-82B4-8279D9D218BC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzEmptyTray.UnitTests", "FPI30_Aoi\EzEmptyTrayInspector.UnitTests\EzEmptyTray.UnitTests.csproj", "{79E7E200-3F00-4AA6-82FC-00AECB8A4619}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTest", "UnitTest", "{CD439A04-A086-4C25-B25D-E9CF462E9EF4}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzAoiEmptyTrayInspector.Lib", "FPI30_Aoi\EzEmptyTrayInspector.Lib\EzAoiEmptyTrayInspector.Lib.csproj", "{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04}"
 EndProject
 Global
@@ -25,14 +19,6 @@ Global
 		{C2A8E04A-34BB-44C9-A5E0-6E22FBBB0355}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C2A8E04A-34BB-44C9-A5E0-6E22FBBB0355}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C2A8E04A-34BB-44C9-A5E0-6E22FBBB0355}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2F995D9E-41E4-40E0-82B4-8279D9D218BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2F995D9E-41E4-40E0-82B4-8279D9D218BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2F995D9E-41E4-40E0-82B4-8279D9D218BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2F995D9E-41E4-40E0-82B4-8279D9D218BC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{79E7E200-3F00-4AA6-82FC-00AECB8A4619}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{79E7E200-3F00-4AA6-82FC-00AECB8A4619}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{79E7E200-3F00-4AA6-82FC-00AECB8A4619}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{79E7E200-3F00-4AA6-82FC-00AECB8A4619}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -43,8 +29,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C2A8E04A-34BB-44C9-A5E0-6E22FBBB0355} = {8F93B355-D00A-4FFD-A875-83C880C1E663}
-		{2F995D9E-41E4-40E0-82B4-8279D9D218BC} = {CD439A04-A086-4C25-B25D-E9CF462E9EF4}
-		{79E7E200-3F00-4AA6-82FC-00AECB8A4619} = {CD439A04-A086-4C25-B25D-E9CF462E9EF4}
 		{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04} = {8F93B355-D00A-4FFD-A875-83C880C1E663}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

@@ -1,7 +1,14 @@
-﻿# FPI30AOIX3 專案
+﻿# FPI30 專案群
+	- 主控程式 在 NewFPI30AOIX3 
+		- FPI30_Main.sln
+
+	- AOI 空盤檢測 (LeTian)
+		- EzAoiEmptyTrayInspector.Lib
+		- EzAoiEmptyTrayInspector.App
+		- FPI30_Aoi.sln
 
 # 1. 源代碼問題
-	- 請參見 ReadMe_errors_list.md
+	- 請參見 [ReadMe_errors_list.md](ReadMe_errors_list.md)
 
 # 2. 局部 待改善之處
 ## 2.1 所有的 Error codes 與 Error message 統一集中到 專屬的 Class 或 Enum
@@ -18,4 +25,4 @@
 		-- 於創始階段, 根據 VersionEnum 與 OptionEnum 來生成對應的 實作物件, 就可以避免後續一直重複使用 switch case.
 		-- Object Oriented (台灣:物件導向) (中國:面對對象) 程式設計 的精隨之一, 就是用 繼承 + virtual functions 來取代 四處散落的 switch case.
 ## 3.2 使用 Model-View-Control 架構
-	- 請參考 LeTian 的架構圖
+	- 請參考 ![LeTian 的架構圖](Doc/mvc_diagram.jpg_)  

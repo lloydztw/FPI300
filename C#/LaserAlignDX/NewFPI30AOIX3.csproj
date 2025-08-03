@@ -753,8 +753,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="coconut1.ico" />
-    <None Include="ReadMe_errors_list.md" />
-    <None Include="ReadMe.md" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
   <ItemGroup />
