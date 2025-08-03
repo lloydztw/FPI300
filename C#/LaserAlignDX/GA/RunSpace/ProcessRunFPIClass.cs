@@ -802,12 +802,13 @@ namespace LaserAlignDX.RunSpace
                         if (isOK)
                         {
                             // rest 內有 吸嘴
+                            // 如何將 rect 轉換到 cell ???
                         }
                         else
                         {
                             // rect 內有 雜物
+                            // 如何將 rect 轉換到 cell ???
                         }
-                        // 如何: 將 吸嘴的 rect 
                     }
                     else
                     {
