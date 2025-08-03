@@ -2,6 +2,7 @@
 
 ## 1.1: IxLineScanCam.GetFreeImageBitmap(int size = 0) 所取得的 FreeImageBitmap 是由誰 其維持生命週期?
 ## 1.2: frmFPIRecipe 內的 xTimer 沒有人管理其生命週期! ==> 已修正
+## 1.3: 如何將 空盤檢測結果 傳換到 Gaara 的資料群組?
 
 
 # 2. 局部 待改善之處
