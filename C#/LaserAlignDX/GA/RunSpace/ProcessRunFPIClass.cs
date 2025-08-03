@@ -1,5 +1,6 @@
 ﻿using EzAoiEmptyTrayInspector.Model;
 using JetEazy.BasicSpace;
+using JetEazy.Match;
 using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -786,13 +787,36 @@ namespace LaserAlignDX.RunSpace
             }
             #endregion
 
-            //foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
-            //{
-            //    int row = cell.CellRow;
-            //    int col = cell.CellCol;
-            //    System.Diagnostics.Trace.WriteLine($"[{row}, {col}]");
-            //}
-            //return;
+            if (result != null)
+            {
+                foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
+                {
+                    int row = cell.CellRow;
+                    int col = cell.CellCol;
+                    result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+
+                    if (bloc != null)
+                    {
+                        // 單位: Pixels
+                        var rect = bloc.Rect;
+                        if (isOK)
+                        {
+                            // rest 內有 吸嘴
+                        }
+                        else
+                        {
+                            // rect 內有 雜物
+                        }
+                        // 如何: 將 吸嘴的 rect 
+                    }
+                    else
+                    {
+                        // [row, col] 處 沒有找到 定位格點
+                    }
+
+                    System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                }
+            }
 
 #if (false)
             Size _bmpInputSize = new Size((int)cMvdInput.Width, (int)cMvdInput.Height);

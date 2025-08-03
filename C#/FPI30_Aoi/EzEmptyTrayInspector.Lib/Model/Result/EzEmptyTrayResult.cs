@@ -139,6 +139,21 @@ namespace EzAoiEmptyTrayInspector.Model
             }
         }
 
+        public void GetBlocByRowCol(int row, int col, out EzBloc bloc, out bool isSucker)
+        {
+            if (_grid != null)
+            {
+
+                bloc = _grid.Get(row, col);
+                isSucker = EzBlocsGrid.IsSolidBloc(bloc);
+            }
+            else
+            {
+                bloc = null;
+                isSucker = false;
+            }
+        }
+
         public static string FormatString(EzEmptyTrayResult e, bool isMultiLines)
         {
             var grid = e?._grid;
@@ -171,6 +186,12 @@ namespace EzAoiEmptyTrayInspector.Model
         #region PRIVATE_FUNCTIONS
         int calc_ng_count()
         {
+            if (_grid != null)
+            {
+                _grid.RowMin = 0;
+                _grid.ColMin = 0;
+            }
+
             int ngCount = 0;
             foreach (var b in IterAbnormalBlocs())
             {
