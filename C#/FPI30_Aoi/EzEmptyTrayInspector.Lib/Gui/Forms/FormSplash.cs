@@ -14,6 +14,8 @@
 #endregion
 
 using AwFramework;
+using System;
+using System.Reflection;
 using System.Windows.Forms;
 
 
@@ -24,16 +26,35 @@ namespace EzAoiEmptyTrayInspector.Gui
         public FormSplash()
         {
             InitializeComponent();
-            lblVersion.Text = Application.ProductVersion.ToString();
+            lblVersion.Text = _VERSION();
         }
 
-        //Form IView.frmOwner => this;
         Control IView.Window => this;
         void IvSplashView.TraceProgress(string message)
         {
             this.lblMessage.Text = message;
             this.lblMessage.Visible = message != null;
             this.lblMessage.Refresh();
+        }
+
+        /// <summary>
+        /// 版本號
+        /// </summary>
+        static string _VERSION(bool useOwnerAppVersion = false)
+        {
+            if (useOwnerAppVersion)
+            {
+                return Application.ProductVersion.ToString();
+            }
+            else
+            {
+                // 取得正在執行的組件
+                Assembly assembly = Assembly.GetExecutingAssembly();
+                // 取得組件的版本
+                Version version = assembly.GetName().Version;
+                // 將版本號轉換為字串
+                return version.ToString();
+            }
         }
     }
 }

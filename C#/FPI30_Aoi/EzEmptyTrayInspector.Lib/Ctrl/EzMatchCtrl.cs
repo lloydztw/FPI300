@@ -742,7 +742,9 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 int bits = ImageUtil.GetPixelBits(_largeIMG);
                 if (bits > 0)
                 {
-                    srcName += $" ({bits}bit)";
+                    int w = _largeIMG.Width;
+                    int h = _largeIMG.Height;
+                    srcName += $" ({bits} bit, {w} x {h})";
                     LOG.Info($"[{ID}] srcName= {srcName}");
                 }
 
