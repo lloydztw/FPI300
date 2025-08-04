@@ -13,6 +13,7 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
@@ -24,6 +25,9 @@ using System.Windows.Forms;
 
 namespace EzAoiEmptyTrayInspector.Ctrl
 {
+    /// <summary>
+    /// 畫出 Empty Tray 辨識結果
+    /// </summary>
     public class CviMatchResultBox : CvImageViewerInteractor
     {
         #region PRIVATE_DATA
@@ -41,6 +45,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
         public void Reset()
         {
+            //_result = null;
             _grid = null;
             _blocs = null;
         }
@@ -49,7 +54,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             _grid = src;
             _blocs = pool;
         }
-        public void UpdateResult(EzAoiEmptyTrayInspector.Model.MatchResult result)
+        public void UpdateResult(MatchResult result)
         {
             _grid = result?.Grid;
             _blocs = result?.Blocs;
@@ -65,33 +70,11 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             // 畫出 grid 節點線
             draw_grid_lines(viewer, gxView, _grid);
 
-            // DEBUG
-            //>>> draw_centroids(viewer, gxView, _pool, debug: true);
-
-            // 畫出 沒有分配到 grid 節點的 bloc 外框
-            if (_grid == null )
-            {
-                draw_bloc_rects(viewer, gxView, iter_off_grid_blocs(), Color.Blue, Color.Blue);
-            }
-
-            draw_centroids(viewer, gxView, iter_off_grid_blocs());
-
-#if (false)
-            if (_grid != null)
-            {
-                // 畫出 位於 grid 節點的 bloc 外框
-                draw_centroids(viewer, gxView, _grid.IterBlocs());
-
-                // 畫出 位於 grid 節點的 bloc 中心點
-                draw_bloc_rects(viewer, gxView, _grid.IterBlocs(), Color.Cyan, Color.DarkCyan);
-            }
-#endif
-
-            // 畫出 有吸嘴 Blocs 外框
+            // 畫出 正常 Blocs (有吸嘴)
             draw_bloc_rects(viewer, gxView, _blocs, Color.Lime, Color.DarkGreen);
 
-            // 標記 無吸嘴 Blocs
-            draw_bloc_rects(viewer, gxView, iter_empty_blocs(), Color.Red, Color.DarkRed);
+            // 畫記 異常 Blocs (沒有吸嘴)
+            draw_bloc_rects(viewer, gxView, iter_empty_blocs(), Color.Red, Color.DarkRed, 0.25f);
 
 
             if (!isWorld)
@@ -114,13 +97,13 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             {
                 foreach (var bloc in _blocs)
                 {
-                    if (bloc != null && bloc.Owner == null)
+                    if (bloc != null && !bloc.IsMajorNode())
                         yield return bloc;
                 }
             }
         }
         /// <summary>
-        /// 枚舉 Empty Blocs
+        /// 枚舉 Empty Blocs (沒有吸嘴)
         /// </summary>
         IEnumerable<EzBloc> iter_empty_blocs()
         {
@@ -187,12 +170,16 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 }
             }
         }
-        void draw_bloc_rects(CvImageViewer viewer, Graphics gxView, IEnumerable<EzBloc> blocs, Color color, Color color2)
+        void draw_bloc_rects(CvImageViewer viewer, Graphics gxView, IEnumerable<EzBloc> blocs, Color color, Color color2, float blend = 0)
         {
             if (blocs == null)
                 return;
 
             bool isWorldDrawing = viewer.IsInWorldCoordinate();
+
+            // Blending alpah
+            int alpha = blend > 0 && blend <= 1 ? (int)(255 * blend) : 0;
+            Brush brush = alpha > 0 ? new SolidBrush(Color.FromArgb(alpha, color)) : null;
 
             foreach (var bloc in blocs)
             {
@@ -203,23 +190,25 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
                 if (isWorldDrawing)
                 {
-                    if (bloc.Score < 0.001)
-                    {
-                        using(var br = new SolidBrush(Color.FromArgb(64, 255, 0, 0)))
-                        {
-                            gxView.FillRectangle(br, bloc.Rect);
-                        }
-                    }
+                    if (brush != null)
+                        gxView.FillRectangle(brush, bloc.Rect);
                     gxView.DrawRectangle(pen, bloc.Rect);
                 }
                 else
                 {
                     var rect = bloc.Rect;
                     viewer.TransCoordToView(ref rect);
+
+                    if (brush != null)
+                        gxView.FillRectangle(brush, bloc.Rect);
+
                     gxView.DrawRectangle(pen, rect);
                 }
             }
+
+            brush?.Dispose();
         }
+
         void draw_centroids(CvImageViewer viewer, Graphics gxView, IEnumerable<EzBloc> blocs, bool debug = false)
         {
             if (blocs == null)

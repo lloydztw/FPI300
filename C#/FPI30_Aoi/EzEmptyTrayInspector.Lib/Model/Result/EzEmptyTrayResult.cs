@@ -154,7 +154,7 @@ namespace EzAoiEmptyTrayInspector.Model
             }
         }
 
-        public static string FormatString(EzEmptyTrayResult e, bool isMultiLines)
+        public static string FormatString(EzEmptyTrayResult e, bool usingMultiLines = false)
         {
             var grid = e?._grid;
 
@@ -172,7 +172,7 @@ namespace EzAoiEmptyTrayInspector.Model
             msg = $"[AOI 空盤檢測 = {msg}], 異常數={e.NgCount}, 吸嘴數={e.ActualSuckersNumber}, 滿盤數={e.FullCount}, 耗時={(int)ms}ms";
             //>>> msg = $"{isPass?}格點={grid.Rows}x{grid.Cols}, 滿盤數={e.FullCount}, M={majorCount}, P={predCount}, Time={(int)ms}ms";
 
-            if (isMultiLines)
+            if (usingMultiLines)
                 msg = msg.Replace(", ", "\n\r");
 
             return msg;
@@ -196,7 +196,10 @@ namespace EzAoiEmptyTrayInspector.Model
             foreach (var b in IterAbnormalBlocs())
             {
                 if (b != null)
+                {
+                    b.Score = 0;
                     ngCount++;
+                }
             }
             return ngCount;
         }

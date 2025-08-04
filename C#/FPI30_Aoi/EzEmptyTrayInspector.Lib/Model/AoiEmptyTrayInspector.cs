@@ -83,6 +83,8 @@ namespace EzAoiEmptyTrayInspector.Model
         protected override void OnDisposing()
         {
             _singleton = null;
+            _recipe?.Dispose();
+            _recipe = null;
             _LOG.Info($"[AOI Model] {GetType().Name} 卸載!");
         }
 
@@ -190,8 +192,17 @@ namespace EzAoiEmptyTrayInspector.Model
                 if (recipe != _recipe || recipe.Name != _recipe?.Name)
                     _LOG.Debug("[AOI Model] 設定參數 = {0}", recipe.Name);
 
-                // 目前 recipe 的生命週期, 由 RecipeManager 負責處理
-                _recipe = recipe;
+                //// 之前 recipe 的生命週期, 由 RecipeManager 負責處理
+                //_recipe = recipe;
+                //return;
+
+                if (_recipe != recipe)
+                {
+                    var old = _recipe;
+                    _recipe = recipe;
+                    _recipe?.AddRef();
+                    old?.Release();
+                }
             }
         }
 

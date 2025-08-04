@@ -29,7 +29,7 @@ namespace EzAoiEmptyTrayInspector.Model
         public JxRect GoldenBox = new JxRect("GoldenBox", "參考框(唯讀)(隱藏)");
         public JxBitmap GoldenBmp = new JxBitmap("GoldenBmp", "影像比對樣本");
         public JxNumber GoldenRefAngle = new JxNumber("GoldenRefAngle", "參考角度(唯讀)(隱藏)");
-        public JxNumber ScoreThres = new JxNumber("ScoreThres", "比對閥值", 0.7m, new Range(0m, 1m, 0.01m, 2));
+        public JxNumber ScoreThres = new JxNumber("ScoreThres", "比對閥值", 0.8m, new Range(0m, 1m, 0.01m, 2));
         public JxNumber ScoreThresLow = new JxNumber("ScoreThresLow", "比對閥值(下限)", 0.5m, new Range(0m, 1m, 0.01m, 2));
         public JxInt Iterations = new JxInt("Iterations", "比對疊代次數", 1, new Range(1, 100));
         public JxBool RemoveOverlap = new JxBool("RemoveOverlap", "消除重疊(隱藏)", true);

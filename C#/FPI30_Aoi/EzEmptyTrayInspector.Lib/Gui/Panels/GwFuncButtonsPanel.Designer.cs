@@ -64,16 +64,16 @@
             this.tblButtonsGroup.Size = new System.Drawing.Size(549, 51);
             this.tblButtonsGroup.TabIndex = 20;
             // 
-            // btnRun
+            // btnRunAll
             // 
-            this.btnRunAll.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnRunAll.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(128)))), ((int)(((byte)(255)))), ((int)(((byte)(128)))));
             this.btnRunAll.Dock = System.Windows.Forms.DockStyle.Fill;
             this.btnRunAll.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnRunAll.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnRunAll.ImageKey = "Run";
             this.btnRunAll.Location = new System.Drawing.Point(1, 1);
             this.btnRunAll.Margin = new System.Windows.Forms.Padding(1);
-            this.btnRunAll.Name = "btnRun";
+            this.btnRunAll.Name = "btnRunAll";
             this.btnRunAll.Size = new System.Drawing.Size(107, 49);
             this.btnRunAll.TabIndex = 23;
             this.btnRunAll.TabStop = false;
@@ -110,7 +110,7 @@
             this.btnResetClear.Size = new System.Drawing.Size(107, 49);
             this.btnResetClear.TabIndex = 21;
             this.btnResetClear.TabStop = false;
-            this.btnResetClear.Text = "Reset";
+            this.btnResetClear.Text = "Clear";
             this.btnResetClear.UseVisualStyleBackColor = false;
             // 
             // btnSnapshot

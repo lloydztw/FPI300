@@ -1,4 +1,5 @@
 ﻿using AwFramework;
+using EzAoiEmptyTrayInspector.Ctrl;
 using EzAoiEmptyTrayInspector.Model;
 
 namespace EzAoiEmptyTrayInspector
@@ -21,6 +22,7 @@ namespace EzAoiEmptyTrayInspector
 
         public static void Dispose()
         {
+            EzRcpContraintCtrl.Instance.CleanGarbages();
             var model = AoiModel;
             model?.Dispose();
         }

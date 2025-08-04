@@ -15,6 +15,7 @@
 
 using EzAoiEmptyTrayInspector.Model;
 using System.Windows.Forms;
+using AoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
 
 namespace Traveller106
 {
@@ -28,7 +29,7 @@ namespace Traveller106
         public static Form OpenEmptyTrayInspectorTool(Form parent)
         {
             var recipeName = GetActiveRecipeNameAtFPI30();
-            var frm = EzAoiEmptyTrayInspector.AoiFactory.OpenEmptyTrayInspectorTool(parent, recipeName);
+            var frm = AoiFactory.OpenEmptyTrayInspectorTool(parent, recipeName);
             frm?.Show();
             return frm;
         }
@@ -36,13 +37,13 @@ namespace Traveller106
         public static IxEmptyTrayInspector InstanceModel()
         {
             var recipeName = GetActiveRecipeNameAtFPI30();
-            var aoiModel = EzAoiEmptyTrayInspector.AoiFactory.InstanceModel(recipeName);
+            var aoiModel = AoiFactory.InstanceModel(recipeName);
             return aoiModel;
         }
 
         public static void DisposeAll()
         {
-            EzAoiEmptyTrayInspector.AoiFactory.DisposeAll();
+            AoiFactory.DisposeAll();
         }
     }
 }

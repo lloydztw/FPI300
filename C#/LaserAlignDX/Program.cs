@@ -16,6 +16,7 @@ namespace LaserAlignDX
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
+            //// DEBUG: 單獨跑 EmptyTrayInspector
             //var frmMain = LtAoiFactory.OpenEmptyTrayInspectorTool(null);
             //Application.Run(frmMain);
             //return;

@@ -163,9 +163,10 @@
     <Compile Include="App\Global\Global.cs" />
     <Compile Include="App\Settings\JxAppSettings.cs" />
     <Compile Include="Ctrl\EzMatchCtrl.cs" />
+    <Compile Include="Ctrl\EzRcpContraintCtrl.cs" />
     <Compile Include="Ctrl\EzMatchRcpEditCtrl.cs" />
     <Compile Include="Ctrl\Interactor\CviFiltersBox.cs" />
-    <Compile Include="Ctrl\Interactor\CviMatchResultBox.cs" />
+    <Compile Include="Ctrl\Interactor\CviMatchResultBoxEt.cs" />
     <Compile Include="Ctrl\Interactor\CviMouseSync.cs" />
     <Compile Include="AoiFactory.cs" />
     <Compile Include="Gui\.Interface\IvFuncButtonsPanel.cs" />
@@ -181,6 +182,12 @@
     </Compile>
     <Compile Include="Gui\Panels\GvProductionPanel.Designer.cs">
       <DependentUpon>GvProductionPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Panels\GvSetupPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Panels\GvSetupPanel.Designer.cs">
+      <DependentUpon>GvSetupPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="Gui\Panels\GvSingleMatchViewPanel.cs">
       <SubType>UserControl</SubType>
@@ -199,12 +206,6 @@
     </Compile>
     <Compile Include="Gui\Panels\GwLogPanel.Designer.cs">
       <DependentUpon>GwLogPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\Panels\GvRecipeDockPanelExt.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\Panels\GvRecipeDockPanelExt.Designer.cs">
-      <DependentUpon>GvRecipeDockPanelExt.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\IxCommonModel.cs" />
     <Compile Include="Model\IxEmptyTrayInspector.cs" />
@@ -238,6 +239,9 @@
     <EmbeddedResource Include="Gui\Panels\GvProductionPanel.resx">
       <DependentUpon>GvProductionPanel.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Panels\GvSetupPanel.resx">
+      <DependentUpon>GvSetupPanel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Gui\Panels\GvSingleMatchViewPanel.resx">
       <DependentUpon>GvSingleMatchViewPanel.cs</DependentUpon>
     </EmbeddedResource>
@@ -246,9 +250,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\Panels\GwLogPanel.resx">
       <DependentUpon>GwLogPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Panels\GvRecipeDockPanelExt.resx">
-      <DependentUpon>GvRecipeDockPanelExt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -286,9 +287,9 @@
   <ItemGroup>
     <None Include="Resources\CommonPanel.jpg" />
     <None Include="ReadMe.md" />
+    <None Include="Resources\App_logo.png" />
     <Content Include="Resources\camera.ico" />
     <Content Include="icon33.ico" />
-    <None Include="Resources\JetEazy_logo.png" />
     <None Include="Resources\file_png_icon.png" />
   </ItemGroup>
   <ItemGroup />

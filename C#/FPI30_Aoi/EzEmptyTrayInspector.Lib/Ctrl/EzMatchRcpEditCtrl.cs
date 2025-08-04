@@ -14,6 +14,7 @@
 #endregion
 
 using AwFramework.Gui;
+using AwFramework.Util;
 using EzAoiEmptyTrayInspector.Gui;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
@@ -99,9 +100,9 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             if (_wndRcpHostPanel == null)
                 _wndRcpHostPanel = view.Window;
 
-
             init_interactors();
             init_event_handlers();
+            _frmOwner.BeginInvoke((Action)update_rcp_editor_gui_status);
         }
         public SideID ID
         {
@@ -172,7 +173,9 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             //load_golden_box();
             //update_rcp_editor_gui_status();
             //refresh(_view.ImageViewer);
+
             enterEdittingMode();
+            //swap_func_buttons_panel(true);
         }
         private void _recipesMgr_OnRecipeBrowsing(object sender, EventArgs e)
         {
@@ -182,9 +185,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             //refresh(_view.ImageViewer);
 
             leaveEdittingMode();
-
-            swap_func_buttons_panel();
-            _recipesMgr.Window.HandleDestroyed += (s, e2) => swap_func_buttons_panel();
+            //swap_func_buttons_panel(false);
         }
 
         private void BtnGolden_Click(object sender, EventArgs e)
@@ -388,6 +389,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             {
                 //setVisible(_btnGolden, _isRcpEdittingMode);
                 enable(_btnGolden, _isRcpEdittingMode);
+                _btnGolden.BackColor = _isRcpEdittingMode ? Color.Gold : Color.DarkGray;
                 _cviGoldenBox.Visible = _isRcpEdittingMode;
                 _cviGoldenBox.Enabled = _isRcpEdittingMode;
                 _cviFiltersBox.Visible = _isRcpEdittingMode;
@@ -454,7 +456,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             }
         }
 #endif
-        void swap_func_buttons_panel()
+        void swap_func_buttons_panel_000()
         {
             //var frmAwMain = _frmOwner as FormAwMain;
             //var logoPanel = frmAwMain?.wndLogoPanel;
@@ -465,6 +467,25 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             //{
             //    AppUtil.SwapGui(panel, logoPanel.picLogo);
             //}
+        }
+        void swap_func_buttons_panel(bool toTop)
+        {
+            var frmAwMain = _frmOwner as FormAwMain;
+            var logoPanel = frmAwMain?.wndLogoPanel;
+            var funcPanel = _funcButtonsPanel?.Window;
+            if (logoPanel == null || funcPanel == null)
+                return;
+
+            if (toTop && funcPanel.Parent == logoPanel)
+                return;
+
+            if (!toTop && funcPanel.Parent != logoPanel)
+                return;
+
+            frmAwMain?.BeginInvoke(new Action(() =>
+            {
+                AppUtil.SwapGui(funcPanel, logoPanel.picLogo);
+            }));
         }
         #endregion
 

@@ -267,6 +267,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         private void BtnClear_Click(object sender, EventArgs e)
         {
             ResetAndClear();
+            update_pass_fail("空盤檢測", Color.Blue);
         }
         private void btnRunAll_Click(object sender, EventArgs e)
         {

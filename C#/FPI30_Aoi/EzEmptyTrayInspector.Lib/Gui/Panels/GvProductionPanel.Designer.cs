@@ -33,11 +33,11 @@
             this.lblRecipeInfo = new System.Windows.Forms.Label();
             this.cboRecipeNames = new System.Windows.Forms.ComboBox();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.gwLogPanel1 = new EzAoiEmptyTrayInspector.Gui.Panels.GwLogPanel();
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblPassFail = new System.Windows.Forms.Label();
             this.panel3 = new System.Windows.Forms.Panel();
             this.gwFuncButtonsPanel1 = new EzAoiEmptyTrayInspector.Gui.Panels.GwFuncButtonsPanel();
+            this.gwLogPanel1 = new EzAoiEmptyTrayInspector.Gui.Panels.GwLogPanel();
             this.panel2.SuspendLayout();
             this.panel4.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -76,10 +76,10 @@
             this.cboRecipeNames.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboRecipeNames.Font = new System.Drawing.Font("Arial", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cboRecipeNames.FormattingEnabled = true;
-            this.cboRecipeNames.Location = new System.Drawing.Point(999, 188);
+            this.cboRecipeNames.Location = new System.Drawing.Point(894, 198);
             this.cboRecipeNames.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cboRecipeNames.Name = "cboRecipeNames";
-            this.cboRecipeNames.Size = new System.Drawing.Size(117, 31);
+            this.cboRecipeNames.Size = new System.Drawing.Size(216, 31);
             this.cboRecipeNames.TabIndex = 306;
             this.cboRecipeNames.Visible = false;
             // 
@@ -94,18 +94,6 @@
             this.panel4.Padding = new System.Windows.Forms.Padding(12, 0, 12, 12);
             this.panel4.Size = new System.Drawing.Size(466, 404);
             this.panel4.TabIndex = 302;
-            // 
-            // gwLogPanel1
-            // 
-            this.gwLogPanel1.BackColor = System.Drawing.Color.Transparent;
-            this.gwLogPanel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.gwLogPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gwLogPanel1.Location = new System.Drawing.Point(12, 0);
-            this.gwLogPanel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
-            this.gwLogPanel1.Name = "gwLogPanel1";
-            this.gwLogPanel1.Padding = new System.Windows.Forms.Padding(5, 8, 5, 8);
-            this.gwLogPanel1.Size = new System.Drawing.Size(440, 390);
-            this.gwLogPanel1.TabIndex = 0;
             // 
             // panel1
             // 
@@ -156,6 +144,18 @@
             this.gwFuncButtonsPanel1.Size = new System.Drawing.Size(464, 70);
             this.gwFuncButtonsPanel1.TabIndex = 1;
             // 
+            // gwLogPanel1
+            // 
+            this.gwLogPanel1.BackColor = System.Drawing.Color.Transparent;
+            this.gwLogPanel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.gwLogPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gwLogPanel1.Location = new System.Drawing.Point(12, 0);
+            this.gwLogPanel1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.gwLogPanel1.Name = "gwLogPanel1";
+            this.gwLogPanel1.Padding = new System.Windows.Forms.Padding(5, 8, 5, 8);
+            this.gwLogPanel1.Size = new System.Drawing.Size(440, 390);
+            this.gwLogPanel1.TabIndex = 0;
+            // 
             // GvProductionPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -163,8 +163,8 @@
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.Controls.Add(this.panel3);
             this.Controls.Add(this.cboRecipeNames);
+            this.Controls.Add(this.panel3);
             this.Controls.Add(this.panel2);
             this.Controls.Add(this.panel4);
             this.Controls.Add(this.panel1);

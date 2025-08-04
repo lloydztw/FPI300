@@ -20,7 +20,7 @@ namespace EzAoiEmptyTrayInspector
     /// <summary>
     /// App 全域參數設定
     /// </summary>
-    public class JxAppSettings : JxContainer
+    internal class JxAppSettings : JxContainer
     {
         //>>> public JxBool LoginEnabled = new JxBool("Login Enabled", description: "使用登入帳號");
         public JxBool OutputResultImageFile = new JxBool("Output Result Image", description: "生成檢測結果圖檔");

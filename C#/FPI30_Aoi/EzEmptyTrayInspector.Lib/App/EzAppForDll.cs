@@ -13,15 +13,13 @@
  */
 #endregion
 
-using System;
-using LeTian.JxRecipesTool.Gui;
-using AwFramework.Util;
 using AwFramework;
 using AwFramework.Gui;
 using EzAoiEmptyTrayInspector.Ctrl;
 using EzAoiEmptyTrayInspector.Gui;
 using System.Drawing;
 using System.Windows.Forms;
+
 
 #region TEMPLATES
 // 主要客戶區 目前有兩個 GUI Class 可供 編譯時期 選用
@@ -33,21 +31,22 @@ using ProductionPanelClassT = EzAoiEmptyTrayInspector.Gui.Panels.GvProductionPan
 using RecipeClassT = EzAoiEmptyTrayInspector.Model.JxAoiRecipe;
 using AppSettingsClassT = EzAoiEmptyTrayInspector.JxAppSettings;
 using RESOURCES = EzAoiEmptyTrayInspector.Properties.Resources;
-using LeTian.JxRecipesTool;
-using System.Collections.Generic;
+using EzAoiEmptyTrayInspector.Gui.Panels;
 #endregion
 
 
 namespace EzAoiEmptyTrayInspector
 {
-    internal class EzAppForDll : AwFramework.AppBase<RecipeClassT>, IDisposable
+    internal class EzAppForDll : AwFramework.AppBase<RecipeClassT>
     {
         #region SINGLETON
         static EzAppForDll _singleton = null;
         #endregion
 
         #region RUNTIME_DATA
+#if (OPT_LEGACY)
         string _assignedRecipeName;
+#endif
         #endregion
 
         public static EzAppForDll Instance
@@ -72,17 +71,18 @@ namespace EzAoiEmptyTrayInspector
             ConfigSplash<FormSplash>();
         }
 
+#if (OPT_LEGACY)
         public Form Build(string assignedRecipeName)
         {
             _assignedRecipeName = assignedRecipeName;
             return base.Build();
         }
-
         public void Dispose()
         {
             clear_up();
             _singleton = null;
         }
+#endif
 
         /// <summary>
         /// (1) 建構 Model 與其他硬體裝置, 如 Cameras, PLC IO, Motors 等等
@@ -109,14 +109,14 @@ namespace EzAoiEmptyTrayInspector
             frmMain.Icon = RESOURCES.icon33;
 
             // 設定 LOGO 
-            frmMain.picLogo.BackgroundImage = RESOURCES.JetEazy_logo;
+            frmMain.picLogo.BackgroundImage = RESOURCES.App_logo;
             frmMain.picLogo.BackColor = Color.FromArgb(72, Color.Black);
             frmMain.wndLogoPanel.BackgroundImage = frmMain.wndOpStatusBar.BackgroundImage;
             
             // Display Configuration
-            frmMain.wndTitlePanel.Visible = false;          // 隱藏 原有的 TitleBar
-            frmMain.wndClientStatusBar.Visible = false;     // 隱藏 原有的 StatusBar
-            //frmMain.optOpModesPanelVisible = false;         // 隱藏 OpMode
+            frmMain.wndTitlePanel.Visible = false;              // 隱藏 原有的 TitleBar
+            frmMain.wndClientStatusBar.Visible = false;         // 隱藏 原有的 StatusBar
+            //frmMain.optOpModesPanelVisible = false;           // 隱藏 OpMode
         }
 
         /// <summary>
@@ -143,7 +143,8 @@ namespace EzAoiEmptyTrayInspector
         protected override IView OnCreate_OpPanelOfRecipe(Form frmMain)
         {
             var panel = base.OnCreate_OpPanelOfRecipe(frmMain);
-            adjust_recipe_panel(panel);
+            EzRcpContraintCtrl.Instance.ConstraintRcp(panel);
+            //adjust_recipe_panel(panel);
             return panel;
         }
 
@@ -153,11 +154,8 @@ namespace EzAoiEmptyTrayInspector
         protected override IView OnCreate_OpPanelOfSetup(Form frmMain)
         {
             //return base.OnCreate_OpPanelOfSetup(frmMain);
-            frmAwMain.BeginInvoke(new Action(() =>
-            {
-                frmAwMain.GetOpModeButton("Production").PerformClick();
-            }));
-            return null;
+            var panel = new GvSetupPanel();
+            return panel;
         }
 
         /// <summary>
@@ -171,13 +169,12 @@ namespace EzAoiEmptyTrayInspector
             // 在此直接 return 可以只顯示 GUI, 以方便 DEBUG
             // return;
 
-            _assignedRecipeName = AssignOneRecipe(_assignedRecipeName);
+            //_assignedRecipeName = AssignOneRecipe(_assignedRecipeName);
 
             var awMain = frmMain as FormAwMain;
 
             // 取得 試跑按鈕 (位於 跑線作業 視窗內)
             var wndProductionPanel = awMain.OpDocker.FindPanel<ProductionPanelClassT>();
-
             var funcButtonsPanel = wndProductionPanel?.FuncButtonsPanel;
             var lblPassFail = wndProductionPanel?.lblPassFail;
 
@@ -190,17 +187,8 @@ namespace EzAoiEmptyTrayInspector
             // 主視窗 關閉 事件
             awMain.FormClosed += (s,e) => Global.Dispose();
 
-            // OpMode
-            opModesCtrl.OnOpModeChanged += (s, e) =>
-            {
-                System.Diagnostics.Trace.WriteLine(opModesCtrl.OpMode);
-                var opMode = opModesCtrl.OpMode;
-                if (opMode == "Production" || opMode == "Recipe")
-                    swap_func_buttons_panel();
-            };
-
             // 顯示 Recipe 資訊
-            wndProductionPanel.lblRecipeInfo.Text = "參數 = " + _assignedRecipeName;
+            // wndProductionPanel.lblRecipeInfo.Text = "參數 = " + _assignedRecipeName;
         }
 
         /// <summary>
@@ -208,68 +196,15 @@ namespace EzAoiEmptyTrayInspector
         /// </summary>
         protected override void OnApp_Start(Form frmMain)
         {
-            //Reserved: 可以自行加掛 額外的客製化啟始程序
+            // 加掛 額外的客製化啟始程序
+            EzRcpContraintCtrl.Instance.Constraint(frmMain);
         }
 
-        #region PRIVATE_RCP_EDITOR_ADJUST_FUNCTIONS
+
+#if (OPT_LEGACY)
         /// <summary>
-        /// 強制只顯示 單一特定 Recipe
+        /// 指定 Recipe
         /// </summary>
-        /// <param name="panel"></param>
-        void adjust_recipe_panel(IView panel)
-        {
-            Control wndPanel = panel?.Window;
-            if (wndPanel == null)
-                return;
-
-            frmMain.BeginInvoke(new Action<Control>((wnd) =>
-            {
-                var view = AppUtil.SearchGui<GpRecipesMgrView>(wnd, null);
-                adjust_recipe_panel(view, true);
-            }), wndPanel);
-        }
-        void adjust_recipe_panel(GpRecipesMgrView panel, bool hookEventHandler = false)
-        {
-            if (panel == null)
-                return;
-
-            panel.OptShowList = false;
-            panel.btnAdd.Visible = false;
-            panel.btnCopy.Visible = false;
-            panel.btnDelete.Visible = false;
-            panel.gwRcpmEditorPanel.txtActiveRecipeName.Enabled = false;
-
-            if (hookEventHandler)
-            {
-                panel.btnOK.Click += (s, e) => adjust_recipe_panel(panel, false);
-                panel.btnCancel.Click += (s, e) => adjust_recipe_panel(panel, false);
-                panel.btnModify.Click += (s, e) => adjust_recipe_panel(panel, false);
-            }
-
-            //if (addFuncButtonsPanel)
-            //{
-            //    var panelTop = new GwFuncButtonsPanel();
-            //    panelTop.Dock = DockStyle.Fill;
-            //    panel.Controls.Add(panelTop);
-            //}
-        }
-        void swap_func_buttons_panel()
-        {
-            //>>> var frmAwMain = _frmOwner as FormAwMain;
-            var logoPanel = frmAwMain?.wndLogoPanel;
-            if (logoPanel == null)
-                return;
-            
-            //>>> var panel = _funcButtonsPanel?.Window;
-            var panelP = frmAwMain.OpDocker.FindPanel<ProductionPanelClassT>();
-            var panel = panelP?.FuncButtonsPanel?.Window;
-            if (panel != null && logoPanel != null)
-            {
-                AppUtil.SwapGui(panel, logoPanel.picLogo);
-            }
-        }
-        #endregion
-
         public string AssignOneRecipe(string targetName = null)
         {
             //if (string.IsNullOrEmpty(name))
@@ -332,5 +267,6 @@ namespace EzAoiEmptyTrayInspector
             _disposableObjs = null;
         }
         #endregion
+#endif
     }
 }
