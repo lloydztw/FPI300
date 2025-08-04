@@ -1,4 +1,4 @@
-﻿namespace EzEmptyTrayInspector.Gui.Panels
+﻿namespace EzEmptyTrayInspector.Gui.Panels.Cbo
 {
     partial class GvProductionPanel
     {
@@ -32,7 +32,7 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.cboRecipeNames = new System.Windows.Forms.ComboBox();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.gwLogPanel1 = new EzEmptyTrayInspector.Gui.Panels.GwLogPanel();
+            this.gwLogPanel1 = new EzAoiEmptyTrayInspector.Gui.Panels.GwLogPanel();
             this.panel3 = new System.Windows.Forms.Panel();
             this.btnTryRun = new System.Windows.Forms.Button();
             this.btnProductionRun = new System.Windows.Forms.Button();
@@ -439,7 +439,7 @@
         public System.Windows.Forms.ComboBox cboRecipeNames;
         public System.Windows.Forms.Button btnTryRun;
         private System.Windows.Forms.Label label2;
-        private EzEmptyTrayInspector.Gui.Panels.GwLogPanel gwLogPanel1;
+        private EzAoiEmptyTrayInspector.Gui.Panels.GwLogPanel gwLogPanel1;
         internal System.Windows.Forms.TableLayoutPanel tableLayoutPanel0;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         internal System.Windows.Forms.Button btnBrowse;

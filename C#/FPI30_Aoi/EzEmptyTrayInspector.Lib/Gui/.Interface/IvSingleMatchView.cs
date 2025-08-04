@@ -16,7 +16,6 @@
 using AwFramework;
 using JetEazy.ImageViewerEx;
 using JetEazy.OpenCV.Viewer;
-using System.Windows.Forms;
 
 
 namespace EzAoiEmptyTrayInspector.Gui
@@ -32,8 +31,8 @@ namespace EzAoiEmptyTrayInspector.Gui
         //Button btnPickGolden { get; }
         //Button btnCombine { get; }
 
-        void UpdateMatchState(object state);
         void UpdateImageSrcName(string srcName);
+        void UpdateMatchState(object state);
         void UpdateStatusInfo(string msg);
     }
 }

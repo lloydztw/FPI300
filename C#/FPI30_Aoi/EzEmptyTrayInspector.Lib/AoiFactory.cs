@@ -24,7 +24,7 @@ namespace EzAoiEmptyTrayInspector
     {
         public static Form OpenEmptyTrayInspectorTool(Form parent = null, string recipeFileName = null)
         {
-            //EzRcpContraintCtrl.Instance.Bypass = parent == null;
+            EzRcpContraintCtrl.Instance.Bypass = parent == null;
 
             var frm = EzAppForDll.Instance.Build();
 

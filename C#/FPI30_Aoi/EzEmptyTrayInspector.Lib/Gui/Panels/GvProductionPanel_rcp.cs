@@ -18,7 +18,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 
-namespace EzEmptyTrayInspector.Gui.Panels
+namespace EzEmptyTrayInspector.Gui.Panels.Cbo
 {
     public partial class GvProductionPanel : UserControl, IView
     {

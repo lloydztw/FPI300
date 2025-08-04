@@ -170,6 +170,7 @@
     <Compile Include="Ctrl\Interactor\CviMouseSync.cs" />
     <Compile Include="AoiFactory.cs" />
     <Compile Include="Gui\.Interface\IvFuncButtonsPanel.cs" />
+    <Compile Include="Gui\.Interface\IvRecipeBriefView.cs" />
     <Compile Include="Gui\Forms\FormSplash.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -194,6 +195,12 @@
     </Compile>
     <Compile Include="Gui\Panels\GvSingleMatchViewPanel.Designer.cs">
       <DependentUpon>GvSingleMatchViewPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Gui\Panels\GwRecipeInfo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Panels\GwRecipeInfo.Designer.cs">
+      <DependentUpon>GwRecipeInfo.cs</DependentUpon>
     </Compile>
     <Compile Include="Gui\Panels\GwFuncButtonsPanel.cs">
       <SubType>UserControl</SubType>
@@ -244,6 +251,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\Panels\GvSingleMatchViewPanel.resx">
       <DependentUpon>GvSingleMatchViewPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Panels\GwRecipeInfo.resx">
+      <DependentUpon>GwRecipeInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\Panels\GwFuncButtonsPanel.resx">
       <DependentUpon>GwFuncButtonsPanel.cs</DependentUpon>

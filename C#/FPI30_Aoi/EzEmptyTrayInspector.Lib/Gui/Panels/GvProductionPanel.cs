@@ -1,10 +1,10 @@
-#region AUTHOR
+ï»¿#region AUTHOR
 /*
  * 
  * Copyright (c) 2023 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
- *      2023-08-23 ªì½Z (by LeTian Chang)
+ *      2023-08-23 åˆç¨¿ (by LeTian Chang)
  * 
  * http://www.jeteazy.com
  * https://github.com/lloydztw
@@ -14,9 +14,7 @@
 #endregion
 
 using AwFramework;
-using System.Drawing;
 using System.Windows.Forms;
-
 
 namespace EzAoiEmptyTrayInspector.Gui.Panels
 {
@@ -27,13 +25,13 @@ namespace EzAoiEmptyTrayInspector.Gui.Panels
             InitializeComponent();
             _syncBkgndImages();
             _initEventHandlers();
-            //btnTryRun.Text = "ÀË´ú";
+            tableLayoutPanel1.Dock = DockStyle.Fill;
         }
 
-        #region PRIVATE_LAYOUT_FUNCTIONS
+        #region PRIVATE_FUNCTIONS
         void _initEventHandlers()
         {
-            SizeChanged += (s, e) => _autoLayout();
+            // SizeChanged += (s, e) => _autoLayout();
             if (DesignMode)
             {
                 BackgroundImageChanged += (s, e) => _syncBkgndImages();
@@ -41,38 +39,38 @@ namespace EzAoiEmptyTrayInspector.Gui.Panels
         }
         void _syncBkgndImages()
         {
-            //panel2.BackgroundImage = this.BackgroundImage;
             panel3.BackgroundImage = this.BackgroundImage;
-            panel4.BackgroundImage = this.BackgroundImage;
+            gwLogPanel1.BackgroundImage = this.BackgroundImage;
+            gwRecipeInfo1.BackgroundImage = this.BackgroundImage;
         }
         void _autoLayout()
         {
-            Form frm = FindForm();
-            if (frm != null)
-            {
-                if (frm.WindowState == FormWindowState.Minimized)
-                    return;
-            }
+            //Form frm = FindForm();
+            //if (frm != null)
+            //{
+            //    if (frm.WindowState == FormWindowState.Minimized)
+            //        return;
+            //}
 
-            Rectangle rcc = ClientRectangle;
-            var panels = new Control[]
-            {
-                panel1, panel2, panel3, panel4
-            };
-            int y = 0;
-            foreach ( Control panel in panels )
-            {
-                if (!panel.Visible)
-                    continue;
-                panel.Left = 0;
-                panel.Width = rcc.Width;
-                panel.Top = y;
-                y = panel.Bottom;
-            }
-            panel4.Height = rcc.Bottom - panel4.Top - 1;
+            //Rectangle rcc = ClientRectangle;
+            //var panels = new Control[]
+            //{
+            //    panel1, panel2, panel3, panel4
+            //};
+            //int y = 0;
+            //foreach ( Control panel in panels )
+            //{
+            //    if (!panel.Visible)
+            //        continue;
+            //    panel.Left = 0;
+            //    panel.Width = rcc.Width;
+            //    panel.Top = y;
+            //    y = panel.Bottom;
+            //}
+            //panel4.Height = rcc.Bottom - panel4.Top - 1;
             
-            _autoLayoutButtons();
-            _autoLayoutListBox();
+            //_autoLayoutButtons();
+            //_autoLayoutListBox();
         }
         void _autoLayoutButtons()
         {
@@ -99,6 +97,7 @@ namespace EzAoiEmptyTrayInspector.Gui.Panels
         #endregion
 
         Control IView.Window => this;
+        public IvRecipeBriefView RecipeBriefView => gwRecipeInfo1;
         public IvFuncButtonsPanel FuncButtonsPanel => gwFuncButtonsPanel1;
     }
 }
