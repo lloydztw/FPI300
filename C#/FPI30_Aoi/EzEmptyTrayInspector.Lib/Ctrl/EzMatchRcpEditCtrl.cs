@@ -14,7 +14,6 @@
 #endregion
 
 using AwFramework.Gui;
-using AwFramework.Util;
 using EzAoiEmptyTrayInspector.Gui;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
@@ -28,7 +27,7 @@ using CviGoldenBox = JetEazy.ImageViewerEx.Interactors.CvImageViewerRectBox;
 
 namespace EzAoiEmptyTrayInspector.Ctrl
 {
-    internal class EzMatchRcpEdittingCtrl
+    internal class EzMatchRcpEdittingCtrl : BaseUtil
     {
         #region NLOG
         //// NOTE:
@@ -116,10 +115,12 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             if (_isRcpEdittingMode)
                 move_box_to_safe_location(_imgSource);
         }
+
         public bool IsEditting
         {
             get => _isRcpEdittingMode;
         }
+
         internal void AutoCatchGolden()
         {
             if (_isRcpEdittingMode)
@@ -377,7 +378,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             }
 
             bool isReady = _model != null ? _model.IsReady() : false;
-            enable(_btnGolden, isReady && _isRcpEdittingMode);
+            setEnable(_btnGolden, isReady && _isRcpEdittingMode);
         }
         void update_rcp_editor_gui_status()
         {
@@ -388,23 +389,13 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             else
             {
                 //setVisible(_btnGolden, _isRcpEdittingMode);
-                enable(_btnGolden, _isRcpEdittingMode);
+                setEnable(_btnGolden, _isRcpEdittingMode);
                 _btnGolden.BackColor = _isRcpEdittingMode ? Color.Gold : Color.DarkGray;
                 _cviGoldenBox.Visible = _isRcpEdittingMode;
                 _cviGoldenBox.Enabled = _isRcpEdittingMode;
                 _cviFiltersBox.Visible = _isRcpEdittingMode;
                 _cviFiltersBox.Enabled = _isRcpEdittingMode;
             }
-        }
-        void setVisible(Control c, bool visible)
-        {
-            if (c != null)
-                c.Visible = visible;
-        }
-        void enable(Control c, bool enable)
-        {
-            if (c != null)
-                c.Enabled = enable;
         }
         void refresh(object c)
         {
@@ -419,73 +410,6 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                     wnd.Refresh();
                 }
             }
-        }
-        #endregion
-
-        #region PRIVATE_FUNCTIONS
-#if (OPT_MOVED_TO_EzApp)
-        void adjust_recipe_panel(Control wnd)
-        {
-            //>>> Control wndPanel = panel?.Window;
-            if (wnd == null)
-                return;
-
-            _frmOwner?.BeginInvoke(new Action<Control>((w) =>
-            {
-                var view = AppUtil.SearchGui<GpRecipesMgrView>(w, null);
-                adjust_recipe_panel(view, true);
-            }), wnd);
-        }
-        void adjust_recipe_panel(GpRecipesMgrView panel, bool hookEventHandler)
-        {
-            if (panel == null) 
-                return;
-
-            panel.OptShowList = false;
-            panel.btnAdd.Visible = false;
-            panel.btnCopy.Visible = false;
-            panel.btnDelete.Visible = false;
-            //panel.gwRcpmEditorPanel.txtActiveRecipeName.ReadOnly = true;
-            panel.gwRcpmEditorPanel.txtActiveRecipeName.Enabled = false;
-
-            if (hookEventHandler)
-            {
-                panel.btnOK.Click += (s, e) => adjust_recipe_panel(panel, false);
-                panel.btnCancel.Click += (s, e) => adjust_recipe_panel(panel, false);
-                panel.btnModify.Click += (s, e) => adjust_recipe_panel(panel, false);
-            }
-        }
-#endif
-        void swap_func_buttons_panel_000()
-        {
-            //var frmAwMain = _frmOwner as FormAwMain;
-            //var logoPanel = frmAwMain?.wndLogoPanel;
-            //if (logoPanel == null)
-            //    return;
-            //var panel = _funcButtonsPanel?.Window;
-            //if (panel != null && logoPanel != null)
-            //{
-            //    AppUtil.SwapGui(panel, logoPanel.picLogo);
-            //}
-        }
-        void swap_func_buttons_panel(bool toTop)
-        {
-            var frmAwMain = _frmOwner as FormAwMain;
-            var logoPanel = frmAwMain?.wndLogoPanel;
-            var funcPanel = _funcButtonsPanel?.Window;
-            if (logoPanel == null || funcPanel == null)
-                return;
-
-            if (toTop && funcPanel.Parent == logoPanel)
-                return;
-
-            if (!toTop && funcPanel.Parent != logoPanel)
-                return;
-
-            frmAwMain?.BeginInvoke(new Action(() =>
-            {
-                AppUtil.SwapGui(funcPanel, logoPanel.picLogo);
-            }));
         }
         #endregion
 

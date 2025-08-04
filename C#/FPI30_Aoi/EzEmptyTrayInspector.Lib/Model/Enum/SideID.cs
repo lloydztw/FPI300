@@ -1,5 +1,8 @@
 ﻿namespace EzAoiEmptyTrayInspector.Model
 {
+    /// <summary>
+    /// Tray Side (載盤正反面)
+    /// </summary>
     public enum SideID : int
     {
         All = -1,

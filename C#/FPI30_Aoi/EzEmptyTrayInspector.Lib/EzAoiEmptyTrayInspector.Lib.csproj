@@ -162,6 +162,7 @@
     <Compile Include="App\EzAppForDll.cs" />
     <Compile Include="App\Global\Global.cs" />
     <Compile Include="App\Settings\JxAppSettings.cs" />
+    <Compile Include="Ctrl\BaseUtil.cs" />
     <Compile Include="Ctrl\EzMatchCtrl.cs" />
     <Compile Include="Ctrl\EzRcpContraintCtrl.cs" />
     <Compile Include="Ctrl\EzMatchRcpEditCtrl.cs" />
