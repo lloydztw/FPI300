@@ -144,7 +144,6 @@ namespace EzAoiEmptyTrayInspector
         {
             var panel = base.OnCreate_OpPanelOfRecipe(frmMain);
             EzRcpContraintCtrl.Instance.ConstraintRcp(panel);
-            //adjust_recipe_panel(panel);
             return panel;
         }
 

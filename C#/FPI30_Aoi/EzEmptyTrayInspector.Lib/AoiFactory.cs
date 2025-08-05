@@ -24,7 +24,7 @@ namespace EzAoiEmptyTrayInspector
     {
         public static Form OpenEmptyTrayInspectorTool(Form parent = null, string recipeFileName = null)
         {
-            EzRcpContraintCtrl.Instance.Bypass = parent == null;
+            EzRcpContraintCtrl.Instance.IsContraintEnabled = parent != null;
 
             var frm = EzAppForDll.Instance.Build();
 
@@ -32,12 +32,18 @@ namespace EzAoiEmptyTrayInspector
             {
                 var aoiModel = Global.AoiModel;
                 aoiModel.AddRef();
-            }
 
-            frm.Load += (s, e) =>
-            {
-                EzRcpContraintCtrl.Instance.AssignOneRecipe(recipeFileName);
-            };
+                if (recipeFileName != null)
+                {
+                    frm.Load += (s, e) =>
+                    {
+                        frm.BeginInvoke(new Action(() =>
+                        {
+                            EzRcpContraintCtrl.Instance.AssignOneRecipe(recipeFileName);
+                        }));
+                    };
+                }
+            }
 
             return frm;
         }
@@ -51,7 +57,6 @@ namespace EzAoiEmptyTrayInspector
 
         public static void DisposeAll()
         {
-            //EzAppForDll.Instance.Dispose();
             Global.Dispose();
         }
     }

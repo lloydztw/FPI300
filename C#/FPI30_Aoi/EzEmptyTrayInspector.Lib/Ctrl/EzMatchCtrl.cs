@@ -165,7 +165,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             _frmOwner.BeginInvoke(new Action(() =>
             {
                 _frmOwner.Refresh();
-                _model.SetRecipe(_activeRecipe);
+                //_model.SetRecipe(_activeRecipe);
                 LoadImage(_imgSourceFile?.Value);
                 _rcpEditCtrl = new EzMatchRcpEdittingCtrl((int)ID, _view, _funcButtonsPanel, _recipesMgr);
                 _rcpEditCtrl.AttachImageSource(_largeIMG);
@@ -353,7 +353,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         #endregion
 
-        #region PRIVATE_FUNCTIONS
+        #region PRIVATE_RUN_FUNCTIONS
         void _PROMPT_ERROR(ErrCodes err, bool clearAll = false)
         {
             //if (err == ErrCodes.HAS_BEEN_COMBINED)
@@ -445,7 +445,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
                 // 使用 ImageUtil 載入巨大圖檔
                 //>>> _largeIMG = ImageUtil.LoadLargeImage(fileName, mirror);
-                _largeIMG = await ImageUtil.LoadLargeImageAsync(fileName, mirror);
+                _largeIMG = await ImageUtil.LoadLargeImageAsync(fileName, mirror, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
 
                 var ts = DateTime.Now - tm0;
                 _TRACE($"[讀檔完成 {(int)ts.TotalMilliseconds} ms]");

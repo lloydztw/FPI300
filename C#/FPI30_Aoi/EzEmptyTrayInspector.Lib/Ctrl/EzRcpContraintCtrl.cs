@@ -53,36 +53,28 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
         public static readonly EzRcpContraintCtrl Instance = new EzRcpContraintCtrl();
         
-        public bool Bypass = false;
+        public bool IsContraintEnabled = true;
         public void Constraint(Form frmMain)
         {
             _frmMain = frmMain;
             var app = EzAppForDll.Instance;
             _recipesMgr = app.recipesMgrCtrl;
             _recipesMgr.OnRecipeSelectionChanged += _recipesMgr_OnRecipeSelectionChanged;
-            _recipesMgr.OnRecipeBrowsing += _recipesMgr_OnRecipeBrowsing;
-            _recipesMgr.OnRecipeEditting += _recipesMgr_OnRecipeEditting;
+            _frmMain.BeginInvoke(new Action(() =>
+            {
+                update_recipe_info(_recipesMgr.ActiveRecipe);
+            }));
         }
         public void ConstraintRcp(IView rcpPanel)
         {
-            if (Bypass)
-                return;
-
-            adjust_recipe_panel(rcpPanel);
+            if (IsContraintEnabled)
+                adjust_recipe_panel(rcpPanel);
         }
 
         #region EVENT_HANDLERS
         private void _recipesMgr_OnRecipeSelectionChanged(object sender, EventArgs e)
         {
             update_recipe_info(_recipesMgr?.ActiveRecipe);
-        }
-        private void _recipesMgr_OnRecipeEditting(object sender, EventArgs e)
-        {
-            swap_func_buttons_panel(true);
-        }
-        private void _recipesMgr_OnRecipeBrowsing(object sender, EventArgs e)
-        {
-            swap_func_buttons_panel(false);
         }
         #endregion
 
@@ -123,30 +115,8 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         #endregion
 
-        #region PRIVATE_SWAP_FUNCTIONS
-        void swap_func_buttons_panel(bool toTop)
-        {
-            var funcPanel = _funcButtonsPanel?.Window;
-            var logoPanel = _frmAwMain?.wndLogoPanel;
-
-            if (logoPanel == null || funcPanel == null)
-                return;
-
-            if (toTop && funcPanel.Parent == logoPanel)
-                return;
-
-            if (!toTop && funcPanel.Parent != logoPanel)
-                return;
-
-            _frmAwMain?.BeginInvoke(new Action(() =>
-            {
-                AppUtil.SwapGui(funcPanel, logoPanel.picLogo);
-            }));
-        }
-        #endregion
-
         /// <summary>
-        /// 指定 Recipe
+        /// 外部指定 Recipe
         /// </summary>
         public string AssignOneRecipe(string targetName = null)
         {
@@ -191,7 +161,12 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             Global.AoiModel.SetRecipe(activeRecipe);
             
             var name = activeRecipe?.Name;
-            update_recipe_info(activeRecipe);
+
+            //_frmAwMain?.BeginInvoke(new Action(() =>
+            //{
+            //    update_recipe_info(activeRecipe);
+            //}));
+            
             clean_garbages();
 
             return name;
@@ -228,16 +203,29 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             var cboRecipeNames = view?.cboRecipeNames;
             var picThumbnail = view?.picThumbnail;
 
-            if (Bypass)
+            string info = "";
+            if (recipe != null)
             {
-                set_visible(cboRecipeNames, true);
-                set_text(lblInfo, "參數");
+                int W = recipe.TrayMiscSettings.FovWidth;
+                int H = recipe.TrayMiscSettings.FovHeight;
+                int rows = recipe.TrayMiscSettings.FullRows;
+                int cols = recipe.TrayMiscSettings.FullCols;
+                info += $"目標圖形: {W} x {H}";
+                info += $"\n目標格點: {rows} x {cols}";
             }
-            else
-            {
-                set_visible(cboRecipeNames, false);
-                set_text(lblInfo, "參數 = " + recipe?.Name);
-            }
+
+            setEnable(cboRecipeNames, !IsContraintEnabled);
+            setText(lblInfo, info);
+
+            //if (BypassConstraint)
+            //{
+            //    setText(lblInfo, "參數");
+            //}
+            //else
+            //{
+            //    setEnable(cboRecipeNames, false);
+            //    setText(lblInfo, "參數 = " + recipe?.Name);
+            //}
 
             if (picThumbnail != null)
             {
@@ -247,12 +235,17 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 picThumbnail.Refresh();
             }
         }
-        void set_visible(Control c, bool visible)
+        void setVisible(Control c, bool visible)
         {
             if (c != null)
                 c.Visible = visible;
         }
-        void set_text(Control c, string text)
+        void setEnable(Control c, bool enable)
+        {
+            if (c != null)
+                c.Enabled = enable;
+        }
+        void setText(Control c, string text)
         {
             if (c != null)
             {

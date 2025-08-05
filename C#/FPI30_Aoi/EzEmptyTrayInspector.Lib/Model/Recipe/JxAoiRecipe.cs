@@ -23,16 +23,16 @@ namespace EzAoiEmptyTrayInspector.Model
     /// </summary>
     public class JxAoiRecipe : JxContainer
     {
-        const string _NAME = "EzEmptyTrayAoiRecipe";
         const string _DESC = "空盤檢測參數設定";
+        static int _debugCount = 0;
 
         public JxTrayVisionSettings VisionSettings = new JxTrayVisionSettings();
         public JxTrayMiscSettings TrayMiscSettings = new JxTrayMiscSettings();
 
         public JxAoiRecipe()
         {
-            Name = _NAME;
             Description = _DESC;
+            System.Diagnostics.Debug.WriteLine($"{GetType().Name} [{Name}] 建構 {++_debugCount}");
         }
         public override void OnBindingSubItems()
         {
@@ -42,6 +42,11 @@ namespace EzAoiEmptyTrayInspector.Model
                 TrayMiscSettings,
             });
             base.OnBindingSubItems();
+        }
+        protected override void OnDisposing()
+        {
+            base.OnDisposing();
+            System.Diagnostics.Debug.WriteLine($"{GetType().Name} [{Name}] 卸載 {--_debugCount}");
         }
 
         #region HELPER_FUNCTIONS

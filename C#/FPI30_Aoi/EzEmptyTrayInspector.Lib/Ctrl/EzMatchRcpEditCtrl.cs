@@ -14,6 +14,7 @@
 #endregion
 
 using AwFramework.Gui;
+using AwFramework.Util;
 using EzAoiEmptyTrayInspector.Gui;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
@@ -102,7 +103,11 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
             init_interactors();
             init_event_handlers();
-            _frmOwner.BeginInvoke((Action)update_rcp_editor_gui_status);
+
+            _frmOwner.BeginInvoke(new Action(() =>
+            {
+                update_rcp_editor_gui_status();
+            }));
         }
         public SideID ID
         {
@@ -135,7 +140,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         void init_event_handlers()
         {
             #region RECIPE_MGR_EVENT_HANDLERS
-            //_recipesMgr.Window.VisibleChanged += (s, e) => swap_func_buttons_panel();
+            EzAppForDll.Instance.opModesCtrl.OnOpModeChanged += OpModesCtrl_OnOpModeChanged;
             _recipesMgr.OnRecipeSelectionChanged += _recipesMgr_OnRecipeSelectionChanged;
             _recipesMgr.OnRecipeBrowsing += _recipesMgr_OnRecipeBrowsing;
             _recipesMgr.OnRecipeEditting += _recipesMgr_OnRecipeEditting;
@@ -161,7 +166,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _sideSettings.RotAngle.OnModified += side_RotAngle_OnModified;
             }
         }
-        
+
         private void _recipesMgr_OnRecipeSelectionChanged(object sender, EventArgs e)
         {
             //_model.SetRecipe(_activeRecipe);
@@ -177,7 +182,6 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             //refresh(_view.ImageViewer);
 
             enterEdittingMode();
-            //swap_func_buttons_panel(true);
         }
         private void _recipesMgr_OnRecipeBrowsing(object sender, EventArgs e)
         {
@@ -187,7 +191,6 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             //refresh(_view.ImageViewer);
 
             leaveEdittingMode();
-            //swap_func_buttons_panel(false);
         }
 
         private void BtnGolden_Click(object sender, EventArgs e)
@@ -233,7 +236,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             if (_isRcpEdittingMode)
             {
-                _model.SetRecipe(_activeRecipe);
+                //_model.SetRecipe(_activeRecipe);
                 connect_recipe_prop_handlers();
                 _wndRcpHostPanel?.Invalidate();
             }
@@ -303,7 +306,6 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _matchSettings.GoldenBox.Value = loc;
             _bypassJxEvents = false;
         }
-
         void move_box_to_safe_location(Size boundarySize)
         {
             var rect = _cviGoldenBox.Box;
@@ -430,6 +432,40 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                     wnd.Refresh();
                 }
             }
+        }
+        #endregion
+
+        #region PRIVATE_SWAP_FUNCTIONS
+        private void OpModesCtrl_OnOpModeChanged(object sender, EventArgs e)
+        {
+            if (EzAppForDll.Instance.opModesCtrl.OpMode == "Recipe")
+            {
+                swap_func_buttons_panel(true);
+            }
+            else
+            {
+                swap_func_buttons_panel(false);
+            }
+        }
+        void swap_func_buttons_panel(bool toTop)
+        {
+            var _frmAwMain = _frmOwner as FormAwMain;
+            var funcPanel = _funcButtonsPanel?.Window;
+            var logoPanel = _frmAwMain?.wndLogoPanel;
+
+            if (logoPanel == null || funcPanel == null)
+                return;
+
+            if (toTop && funcPanel.Parent == logoPanel)
+                return;
+
+            if (!toTop && funcPanel.Parent != logoPanel)
+                return;
+
+            _frmAwMain?.BeginInvoke(new Action(() =>
+            {
+                AppUtil.SwapGui(funcPanel, logoPanel.picLogo);
+            }));
         }
         #endregion
 

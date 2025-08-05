@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using AOI_RESULT = EzAoiEmptyTrayInspector.Model.EzEmptyTrayResult;
+using CvPoint = OpenCvSharp.Point;
 
 
 namespace EzAoiEmptyTrayInspector.Model
@@ -78,11 +79,9 @@ namespace EzAoiEmptyTrayInspector.Model
 
         protected override void OnDisposing()
         {
+            clear_golden_grid_cache();
+            ReleaseRecipe();
             _singleton = null;
-            _recipe?.Dispose();
-            _recipe = null;
-            _largeGoldenGridImage?.Dispose();
-            _largeGoldenGridImage = null;
             _LOG.Info($"[AOI Model] {GetType().Name} 卸載!");
         }
 
@@ -155,7 +154,6 @@ namespace EzAoiEmptyTrayInspector.Model
         #endregion
 
         #region PRIVATE_RUNTIME_DATA
-        Mat _largeGoldenGridImage;
         string _dumpPath = null;
         #endregion
 
@@ -186,24 +184,38 @@ namespace EzAoiEmptyTrayInspector.Model
             if (!IsReady())
                 return;
 
+            // 強制清理 Clear Cache (暫時)
+            clear_golden_grid_cache();
+
             if (recipe != null)
             {
                 if (recipe != _recipe || recipe.Name != _recipe?.Name)
                     _LOG.Debug("[AOI Model] 設定參數 = {0}", recipe.Name);
 
-                //// 之前 recipe 的生命週期, 由 RecipeManager 負責處理
-                //_recipe = recipe;
-                //return;
+                //=============================================================================
+                // NOTE:
+                // 舊版: 上層的 RecipeManager 負責處理 recipe 的生命週期.
+                // 目前: 改為 AoiModel 負責 Recipe 生命週期, 以便長時間讓 Gaara 使用 AoiModel
+                //=============================================================================
+                // _recipe = recipe;
+                // return;
 
                 if (_recipe != recipe)
                 {
                     var old = _recipe;
                     _recipe = recipe;
-                    _recipe?.AddRef();
+                    _recipe?.AddRef();  // AddRef 代表 _recipe 被 AoiModel 持有使用中. 
                     old?.Release();
                 }
             }
         }
+
+        void ReleaseRecipe()
+        {
+            _recipe?.Dispose();
+            _recipe = null;
+        }
+
 
         public void TryApplyFilters(SideID sideId, IEzImage largeImg, JxRotAngleSettings settings, out object result)
         {
@@ -240,6 +252,12 @@ namespace EzAoiEmptyTrayInspector.Model
 
         public ErrCodes BuildGoldenGridTemplate(SideID sideId, IEzImage largeImg)
         {
+            if (!_recipe.VisionSettings.Match.UseGrid.Value)
+            {
+                _LOG.Warn("Match.UseGrid 沒啟用");
+                return ErrCodes.OK;
+            }
+
             var err = CanMatch(sideId, largeImg);
             if (err != ErrCodes.OK)
             {
@@ -262,13 +280,13 @@ namespace EzAoiEmptyTrayInspector.Model
             int goldenCols = matchGrid.Cols;
 
             // 更新到 Recipe
-            _recipe.TrayMiscSettings.GoldenGrid = matchGrid;
+            _recipe.TrayMiscSettings.SetGoldenGrid(matchGrid);
             _recipe.TrayMiscSettings.FovWidth.Value = largeImg.Width;
             _recipe.TrayMiscSettings.FovHeight.Value = largeImg.Height;
 
             // large Golden Grid image
             _largeGoldenGridImage?.Dispose();
-            _largeGoldenGridImage = rebuild_large_golden_grid_image();
+            _largeGoldenGridImage = rebuild_golden_grid_image();
             _DUMP_GOLDEN_GRID_MAP(_largeGoldenGridImage, null);
 
             return err;
@@ -678,6 +696,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
 
         #region PRIVATE_POST_PREDICT
+        Mat _largeGoldenGridImage;
         void run_post_grid_predict(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
         {
             Exception errEx = null;
@@ -700,25 +719,26 @@ namespace EzAoiEmptyTrayInspector.Model
                     return;
 
                 // NOTE: goldenGrid 是由 recipe runtime deSerialize 
-                var goldenGrid = _recipe.TrayMiscSettings.GoldenGrid;
+                var goldenGrid = _recipe.TrayMiscSettings.GetGoldenGrid();
                 if (goldenGrid == null)
                     return;
+                _LOG.Info($"GoldenGrid = {goldenGrid.Rows}x{goldenGrid.Cols}");
 
                 // LARGE GOLDEN GRID IMAGE (rebuilt from recipe)
                 if (_largeGoldenGridImage == null)
-                    _largeGoldenGridImage = rebuild_large_golden_grid_image();
+                    _largeGoldenGridImage = rebuild_golden_grid_image();
                 if (_largeGoldenGridImage == null)
                 {
                     _LOG.Warn("[AOI] largetGoldenGridImage 無重建!");
                     return;
                 }
-                _DUMP_GOLDEN_GRID_MAP(_largeGoldenGridImage, dumpPath);
+                _DUMP_GOLDEN_GRID_MAP(_largeGoldenGridImage, goldenGrid, dumpPath);
 
                 // OFFSET 
                 int offset_x = 0;
                 int offset_y = 0;
                 if (inputGrid != null)
-                    find_golden_grid_offset(srcImg, _largeGoldenGridImage, goldenGrid, out offset_x, out offset_y);
+                    find_golden_grid_offset(srcImg, _largeGoldenGridImage, goldenGrid, inputGrid, out offset_x, out offset_y);
 
                 // PSEUDO BLOCs (built by goldGrid + offset)
                 var pseudoBlocs = new List<EzBloc>();
@@ -753,10 +773,13 @@ namespace EzAoiEmptyTrayInspector.Model
                 // 重建 grid
                 var builder = new EzBlocsGridBuilder();
                 var newGrid = builder.Build(pseudoBlocs);
-                foreach (var b in newGrid.IterBlocs())
+                if (newGrid != null)
                 {
-                    if (b != null && b.Score < 0)
-                        b.Tag = "pseudo";
+                    foreach (var b in newGrid.IterBlocs())
+                    {
+                        if (b != null && b.Score < 0)
+                            b.Tag = "pseudo";
+                    }
                 }
 
                 // UPDATE to existing matchResult
@@ -779,7 +802,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 }
             }
         }
-        void find_golden_grid_offset(Mat srcImg, Mat goldenGridImage, EzBlocsGrid goldenGrid, out int offset_x, out int offset_y)
+        void find_golden_grid_offset(Mat srcImg, Mat goldenGridImage, EzBlocsGrid goldenGrid, EzBlocsGrid inputGrid, out int offset_x, out int offset_y)
         {
             // LARGE GOLDEN TEMPLATE
             var ggRect = JetEazy.Qcvt.CV(goldenGrid.GetBoundary());
@@ -793,7 +816,8 @@ namespace EzAoiEmptyTrayInspector.Model
             settings.ScoreThres.Value = 0.2m;
             matcher.SetRecipe(settings);
 
-            var bestBloc = matcher.FindBestBloc(srcImg, ggTemplate);
+            // SEARCHING points
+            var bestBloc = matcher.FindBestBloc(srcImg, ggTemplate, iterate_possible_offsets(goldenGrid,inputGrid));
             if (bestBloc != null && bestBloc.Score > 0.01)
             {
                 var newCenter = bestBloc.Center;
@@ -806,12 +830,30 @@ namespace EzAoiEmptyTrayInspector.Model
                 offset_y = 0;
             }
         }
-        Mat rebuild_large_golden_grid_image(bool useBlackWhite = false)
+        IEnumerable<CvPoint> iterate_possible_offsets(EzBlocsGrid goldenGrid, EzBlocsGrid inputGrid)
+        {
+            int trial = 0;
+            foreach (var ib in inputGrid.IterBlocs())
+            {
+                if(ib == null) continue;
+                foreach(var gb in goldenGrid.IterBlocs())
+                {
+                    if(gb == null) continue;
+                    var offset = ib.Center - gb.Center;
+                    int left = (int)(ib.Rect.Left - offset.X);
+                    int top = (int)(ib.Rect.Top - offset.Y);
+                    yield return new CvPoint(left, top);
+                }
+                if (++trial >= 1000)
+                    break;
+            }
+        }
+        Mat rebuild_golden_grid_image(bool useColorFill = false)
         {
             if (_recipe == null)
                 return null;
 
-            var goldenGrid = _recipe.TrayMiscSettings.GoldenGrid;
+            var goldenGrid = _recipe.TrayMiscSettings.GetGoldenGrid();
             if (goldenGrid == null)
                 return null;
 
@@ -824,7 +866,7 @@ namespace EzAoiEmptyTrayInspector.Model
             largeGG.SetTo(Scalar.White);
 
             var goldenBmp = _recipe.VisionSettings.Match.GoldenBmp.Value as Bitmap;
-            if (goldenBmp == null || useBlackWhite)
+            if (goldenBmp == null || useColorFill)
             {
                 foreach (var bloc in goldenGrid.IterBlocs())
                 {
@@ -832,7 +874,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     {
                         var rc = JetEazy.Qcvt.CV(bloc.Rect);
                         rc.Inflate(-8, -8);
-                        largeGG.Rectangle(rc, Scalar.Black, -1);
+                        largeGG.Rectangle(rc, Scalar.Gray, -1);
                     }
                 }
             }
@@ -869,7 +911,13 @@ namespace EzAoiEmptyTrayInspector.Model
 
             return largeGG;
         }
-        void _DUMP_GOLDEN_GRID_MAP(Mat largeGoldenGridImage, string dumpPath = null)
+        void clear_golden_grid_cache()
+        {
+            _recipe?.TrayMiscSettings.GetGoldenGrid(true);
+            _largeGoldenGridImage?.Dispose();
+            _largeGoldenGridImage = null;
+        }
+        void _DUMP_GOLDEN_GRID_MAP(Mat largeGoldenGridImage, EzBlocsGrid goldenGrid, string dumpPath = null)
         {
             if (largeGoldenGridImage == null)
                 return;
@@ -881,7 +929,6 @@ namespace EzAoiEmptyTrayInspector.Model
 
             largeGoldenGridImage.SaveImage($"{dumpPath}\\large_golden_grid.jpg");
 
-            var goldenGrid = _recipe?.TrayMiscSettings.GoldenGrid;
             if (goldenGrid != null)
             {
                 var roi = JetEazy.Qcvt.CV(goldenGrid.GetBoundary());
@@ -983,7 +1030,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 
                 run_match(SideID.A, imgA, _dumpPath);
 
-                if (_recipe.VisionSettings.FindAllFailBlocs.Value)
+                if (_recipe.VisionSettings.FindAllFailBlocs.Value && _recipe.VisionSettings.Match.UseGrid)
                 {
                     run_post_grid_predict(SideID.A, imgA, _matchResults[0], _dumpPath);
                 }

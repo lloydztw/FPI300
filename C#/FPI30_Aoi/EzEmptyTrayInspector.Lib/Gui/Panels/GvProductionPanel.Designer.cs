@@ -46,7 +46,7 @@
             this.panel3.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.panel3.Controls.Add(this.gwFuncButtonsPanel1);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel3.Location = new System.Drawing.Point(1, 243);
+            this.panel3.Location = new System.Drawing.Point(1, 271);
             this.panel3.Margin = new System.Windows.Forms.Padding(1);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(505, 78);
@@ -77,7 +77,7 @@
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 150F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 92F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 120F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 80F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(507, 918);
@@ -92,7 +92,7 @@
             this.gwRecipeInfo1.Margin = new System.Windows.Forms.Padding(1);
             this.gwRecipeInfo1.Name = "gwRecipeInfo1";
             this.gwRecipeInfo1.Padding = new System.Windows.Forms.Padding(20, 8, 20, 8);
-            this.gwRecipeInfo1.Size = new System.Drawing.Size(505, 90);
+            this.gwRecipeInfo1.Size = new System.Drawing.Size(505, 118);
             this.gwRecipeInfo1.TabIndex = 310;
             // 
             // lblPassFail
@@ -114,11 +114,11 @@
             this.gwLogPanel1.BackColor = System.Drawing.Color.Transparent;
             this.gwLogPanel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.gwLogPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gwLogPanel1.Location = new System.Drawing.Point(1, 323);
+            this.gwLogPanel1.Location = new System.Drawing.Point(1, 351);
             this.gwLogPanel1.Margin = new System.Windows.Forms.Padding(1);
             this.gwLogPanel1.Name = "gwLogPanel1";
             this.gwLogPanel1.Padding = new System.Windows.Forms.Padding(20, 8, 20, 8);
-            this.gwLogPanel1.Size = new System.Drawing.Size(505, 594);
+            this.gwLogPanel1.Size = new System.Drawing.Size(505, 566);
             this.gwLogPanel1.TabIndex = 311;
             // 
             // GvProductionPanel

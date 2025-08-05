@@ -10,7 +10,7 @@ namespace EzAoiEmptyTrayInspector.Gui.Panels
         }
 
         public Control Window => this;
-        public Control lblInfo => label1;
+        public Control lblInfo => label2;
         public PictureBox picThumbnail => pictureBox1;
         ComboBox IvRecipeBriefView.cboRecipeNames => this.cboRecipeNames;
     }

@@ -31,10 +31,15 @@ namespace EzAoiEmptyTrayInspector.Model
 
         public JxTrayMiscSettings() : base("Tray Settings", "空盤 全域設定")
         {
+            //System.Diagnostics.Debug.WriteLine($"{GetType().Name} [{Name}] 建構");
         }
 
         public override void OnBindingSubItems()
         {
+            // clear cache
+            _cacheGoldenGrid?.Dispose();
+            _cacheGoldenGrid = null;
+
             //綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
                 FullRows,
@@ -52,28 +57,31 @@ namespace EzAoiEmptyTrayInspector.Model
             base.OnDisposing();
             _cacheGoldenGrid?.Dispose();
             _cacheGoldenGrid = null;
+            //System.Diagnostics.Debug.WriteLine($"{GetType().Name} [{Name}] 卸載");
         }
 
         /// <summary>
         /// GoldenGrid 的 Json 由 GoldenGridRawData 處理
         /// </summary>
-        [JsonIgnore]
-        public EzBlocsGrid GoldenGrid
+        public EzBlocsGrid GetGoldenGrid(bool reload = false)
         {
-            get
+            if (_cacheGoldenGrid == null || reload)
             {
-                if (_cacheGoldenGrid == null)
-                    _cacheGoldenGrid = get_goldenGrid_from_jx();
-                return _cacheGoldenGrid;
+                var old = _cacheGoldenGrid;
+                _cacheGoldenGrid = get_goldenGrid_from_jx();
             }
-            set
+            return _cacheGoldenGrid;
+        }
+        /// <summary>
+        /// JxTrayMiscSettings 接管 Grid 生命週期
+        /// </summary>
+        public void SetGoldenGrid(EzBlocsGrid grid)
+        {
+            if (_cacheGoldenGrid != grid)
             {
-                if (_cacheGoldenGrid != value)
-                {
-                    _cacheGoldenGrid?.Dispose();
-                    _cacheGoldenGrid = value;
-                    set_goldenGrid_to_jx(_cacheGoldenGrid);
-                }
+                _cacheGoldenGrid?.Dispose();
+                _cacheGoldenGrid = grid;
+                set_goldenGrid_to_jx(_cacheGoldenGrid);
             }
         }
 

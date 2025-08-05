@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using CvPoint = OpenCvSharp.Point;
 
 
 namespace EzAoiEmptyTrayInspector.Model.Aoi
@@ -120,14 +121,14 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 // Runtime Golden
                 using (var bestGolden = find_best_runtime_golden(image, golden, simularity, out double scoreG))
                 {
+                    _NOTIFY($"Matching I : low score = {scoreG:0.00}");
                     if (scoreG < _thresholdLow)
                     {
-                        _NOTIFY($"Matching I : low score = {scoreG:0.00}");
                         return new List<EzBloc>();
                     }
 
                     // Match again
-                    _NOTIFY("Matching II");
+                    _NOTIFY($"Matching II");
                     _DUMP_RUNTIME_GOLDEN(bestGolden);
                     Cv2.MatchTemplate(image, bestGolden, simularity, TemplateMatchModes.CCoeffNormed);
                 }
@@ -146,7 +147,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             }
         }
 
-        public EzBloc FindBestBloc(Mat image, Mat golden)
+        public EzBloc FindBestBloc(Mat image, Mat golden, IEnumerable<CvPoint> anchorsLeftTop = null)
         {
             var boundRect = new Rectangle(0, 0, image.Width, image.Height);
 
@@ -167,18 +168,17 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 _NOTIFY("Matching (bestBloc)");
                 Cv2.MatchTemplate(image, golden, simularity, TemplateMatchModes.CCoeffNormed);
 
+                // Dump simularity
                 _DUMP_SIMULARITY(simularity);
 
                 // max simularity
-                simularity.MinMaxLoc(out double minVal, out double maxVal, out var minLoc, out var maxLoc);
+                MinMaxLoc(simularity, out double minVal, out double maxVal, out var minLoc, out var maxLoc, anchorsLeftTop);
                 double score = maxVal;
                 double x = maxLoc.X;
                 double y = maxLoc.Y;
 
                 // 轉換到 world coordinates
                 var zoomFactor = Math.Max(1, _shrinkFactor);
-                int blobGoldenW = _goldenWidth / zoomFactor;
-                int blobGoldenH = _goldenHeight / zoomFactor;
                 int wX = (int)(x * zoomFactor);
                 int wY = (int)(y * zoomFactor);
 
@@ -193,6 +193,51 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
                 _NOTIFY("Matched (bestBloc)");
                 return bestBloc;
+            }
+        }
+
+        void MinMaxLoc(Mat simularity, out double minVal, out double maxVal, out CvPoint minLoc, out CvPoint maxLoc, IEnumerable<CvPoint> anchorsLeftTop)
+        {
+            bool isFound = false;
+
+            minVal = double.MaxValue;
+            maxVal = double.MinValue;
+            minLoc = new CvPoint(0, 0);
+            maxLoc = new CvPoint(0, 0);
+
+            if (anchorsLeftTop != null)
+            {
+                var bound = new Rect(0, 0, simularity.Width, simularity.Height);
+                var zoomFactor = Math.Max(1, _shrinkFactor);
+                foreach (var pt in anchorsLeftTop)
+                {
+                    int x = pt.X / zoomFactor;
+                    int y = pt.Y / zoomFactor;
+                    if (!bound.Contains(x, y))
+                        continue;
+
+                    var val = simularity.At<float>(y, x);
+                    if(val > maxVal)
+                    {
+                        maxVal = val;
+                        maxLoc.X= x; 
+                        maxLoc.Y = y;
+                    }    
+
+                    if (val < minVal)
+                    {
+                        minVal = val;
+                        minLoc.X= x;
+                        minLoc.Y= y;
+                    }
+
+                    isFound = true;
+                }
+            }
+
+            if (!isFound)
+            {
+                simularity.MinMaxLoc(out minVal, out maxVal, out minLoc, out maxLoc);
             }
         }
 
@@ -391,7 +436,6 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             return nonOverlappingBlocs;
         }
         #endregion
-
 
         public string DumpPath
         {

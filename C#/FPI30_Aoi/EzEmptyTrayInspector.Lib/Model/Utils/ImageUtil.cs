@@ -47,7 +47,8 @@ namespace EzAoiEmptyTrayInspector
         {
             var largeImg = new EzQuickImage();
 
-            largeImg.Load(fileName);
+            int bits = Image.GetPixelFormatSize(fmt);
+            largeImg.Load(fileName, bits);
             auto_dump_to_jpeg(largeImg, fileName);
 
             if (largeImg != null && mirror != MirrorMode.None)

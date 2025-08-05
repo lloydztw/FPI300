@@ -71,7 +71,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             draw_grid_lines(viewer, gxView, _grid);
 
             // 畫出 正常 Blocs (有吸嘴)
-            draw_bloc_rects(viewer, gxView, _blocs, Color.Lime, Color.DarkGreen);
+            draw_bloc_rects(viewer, gxView, _blocs, Color.Lime, Color.DarkGreen, 0.25f);
 
             // 畫記 異常 Blocs (沒有吸嘴)
             draw_bloc_rects(viewer, gxView, iter_empty_blocs(), Color.Red, Color.DarkRed, 0.25f);
