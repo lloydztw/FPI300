@@ -118,8 +118,14 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 Cv2.MatchTemplate(image, golden, simularity, TemplateMatchModes.CCoeffNormed);
 
                 // Runtime Golden
-                using (var bestGolden = find_best_runtime_golden(image, golden, simularity))
+                using (var bestGolden = find_best_runtime_golden(image, golden, simularity, out double scoreG))
                 {
+                    if (scoreG < _thresholdLow)
+                    {
+                        _NOTIFY($"Matching I : low score = {scoreG:0.00}");
+                        return new List<EzBloc>();
+                    }
+
                     // Match again
                     _NOTIFY("Matching II");
                     _DUMP_RUNTIME_GOLDEN(bestGolden);
@@ -269,13 +275,14 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             //return src.GaussianBlur(sz, 1.0);
             return src.Blur(sz);
         }
-        Mat find_best_runtime_golden(Mat image, Mat golden, Mat simularity)
+        Mat find_best_runtime_golden(Mat image, Mat golden, Mat simularity, out double score)
         {
             simularity.MinMaxLoc(out double minVal, out double maxVal, out var minLoc, out var maxLoc);
             var roi = new Rect(maxLoc.X, maxLoc.Y, golden.Width, golden.Height);
             var bound = new Rect(0,0,image.Width,image.Height);
             JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
             var bestGolden = image[roi].Clone();
+            score = maxVal;
             return bestGolden;
         }
         List<EzBloc> find_blocs_iteratively(Mat simularity)

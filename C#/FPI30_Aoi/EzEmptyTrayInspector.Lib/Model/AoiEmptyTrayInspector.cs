@@ -654,6 +654,12 @@ namespace EzAoiEmptyTrayInspector.Model
                 if (errEx != null)
                 {
                     _ERROR(ErrCodes.MATCH_ERROR, sideId, errEx);
+
+                    // For 空盤檢測: 仍然回報 空的 MatchResult
+                    if (matchResult == null)
+                        matchResult = new MatchResult((int)sideId, null, new List<EzBloc>(), 0);
+                    changeState("Ready", sideId);
+                    update_one_match_result(sideId, matchResult, notify: true);
                 }
                 else
                 {
@@ -680,15 +686,17 @@ namespace EzAoiEmptyTrayInspector.Model
             {
                 changeState("POST GRID Matching", sideId);
 
-                // INPUT GRID
-                var runtimeGrid = matchResult?.Grid;
-                if (srcImg == null || runtimeGrid == null || _recipe == null)
+                // Null Condition
+                if (srcImg == null || _recipe == null || matchResult == null)
                     return;
 
+                // FULL rows and cols
                 var fullRows = _recipe.TrayMiscSettings.FullRows;
                 var fullCols = _recipe.TrayMiscSettings.FullCols;
 
-                if (runtimeGrid.Rows >= fullRows && runtimeGrid.Cols >= fullCols && !force)
+                // INPUT GRID 檢查是否已經滿盤定位
+                var inputGrid = matchResult.Grid;
+                if (inputGrid != null && inputGrid.Rows >= fullRows && inputGrid.Cols >= fullCols && !force)
                     return;
 
                 // NOTE: goldenGrid 是由 recipe runtime deSerialize 
@@ -696,7 +704,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 if (goldenGrid == null)
                     return;
 
-                // LARGE GOLDEN IMAGE
+                // LARGE GOLDEN GRID IMAGE (rebuilt from recipe)
                 if (_largeGoldenGridImage == null)
                     _largeGoldenGridImage = rebuild_large_golden_grid_image();
                 if (_largeGoldenGridImage == null)
@@ -706,31 +714,15 @@ namespace EzAoiEmptyTrayInspector.Model
                 }
                 _DUMP_GOLDEN_GRID_MAP(_largeGoldenGridImage, dumpPath);
 
-
-                // LARGE GOLDEN TEMPLATE
-                var boundary = goldenGrid.GetBoundary();
-                var ggRect = JetEazy.Qcvt.CV(boundary);
-                var ggCenter = JetEazy.Qcvt.Center(ref ggRect);
-                var ggTemplate = _largeGoldenGridImage[ggRect];
-
-                // MATCH
-                int shrink = EzAoiBaseUtil.GetShrinkFactor(srcImg.Width, srcImg.Height);
-                var matcher = new EzTemplateMatcher(shrink);
-                var settings = new JxTempMatchSettings();
-                settings.ScoreThres.Value = 0.2m;
-                matcher.SetRecipe(settings);
-                var bestBloc = matcher.FindBestBloc(srcImg, ggTemplate);
-                if (bestBloc == null)
-                {
-                    return;
-                }
-                var newCenter = bestBloc.Center;
+                // OFFSET 
+                int offset_x = 0;
+                int offset_y = 0;
+                if (inputGrid != null)
+                    find_golden_grid_offset(srcImg, _largeGoldenGridImage, goldenGrid, out offset_x, out offset_y);
 
                 // PSEUDO BLOCs (built by goldGrid + offset)
-                var offset_x = (int)(newCenter.X - ggCenter.X);
-                var offset_y = (int)(newCenter.Y - ggCenter.Y);
                 var pseudoBlocs = new List<EzBloc>();
-                foreach(var b in goldenGrid.IterBlocs())
+                foreach (var b in goldenGrid.IterBlocs())
                 {
                     if (b != null)
                     {
@@ -741,8 +733,12 @@ namespace EzAoiEmptyTrayInspector.Model
                     }
                 }
 
-                // PSEUDO BLOCs (remove overlaps)
+                // EXISTING BLOCs (排除 null condition)
                 var existingBlocs = matchResult.Blocs;
+                if (existingBlocs == null)
+                    existingBlocs = matchResult.Blocs = new List<EzBloc>();
+
+                // PSEUDO BLOCs (remove overlaps)
                 pseudoBlocs.RemoveAll(new Predicate<EzBloc>((pseudo) =>
                 {
                     foreach (var bloc in existingBlocs)
@@ -753,6 +749,8 @@ namespace EzAoiEmptyTrayInspector.Model
                     return false;
                 }));
                 pseudoBlocs.AddRange(existingBlocs);
+
+                // 重建 grid
                 var builder = new EzBlocsGridBuilder();
                 var newGrid = builder.Build(pseudoBlocs);
                 foreach (var b in newGrid.IterBlocs())
@@ -761,7 +759,7 @@ namespace EzAoiEmptyTrayInspector.Model
                         b.Tag = "pseudo";
                 }
 
-                // Update to existing matchResult
+                // UPDATE to existing matchResult
                 matchResult.Grid = newGrid;
             }
             catch (Exception ex)
@@ -779,6 +777,33 @@ namespace EzAoiEmptyTrayInspector.Model
                     changeState("Ready", sideId);
                     update_one_match_result(sideId, matchResult, notify: true);
                 }
+            }
+        }
+        void find_golden_grid_offset(Mat srcImg, Mat goldenGridImage, EzBlocsGrid goldenGrid, out int offset_x, out int offset_y)
+        {
+            // LARGE GOLDEN TEMPLATE
+            var ggRect = JetEazy.Qcvt.CV(goldenGrid.GetBoundary());
+            var ggCenter = JetEazy.Qcvt.Center(ref ggRect);
+            var ggTemplate = goldenGridImage[ggRect];
+
+            // MATCH
+            int shrink = EzAoiBaseUtil.GetShrinkFactor(srcImg.Width, srcImg.Height);
+            var matcher = new EzTemplateMatcher(shrink);
+            var settings = new JxTempMatchSettings();
+            settings.ScoreThres.Value = 0.2m;
+            matcher.SetRecipe(settings);
+
+            var bestBloc = matcher.FindBestBloc(srcImg, ggTemplate);
+            if (bestBloc != null && bestBloc.Score > 0.01)
+            {
+                var newCenter = bestBloc.Center;
+                offset_x = (int)(newCenter.X - ggCenter.X);
+                offset_y = (int)(newCenter.Y - ggCenter.Y);
+            }
+            else
+            {
+                offset_x = 0;
+                offset_y = 0;
             }
         }
         Mat rebuild_large_golden_grid_image(bool useBlackWhite = false)

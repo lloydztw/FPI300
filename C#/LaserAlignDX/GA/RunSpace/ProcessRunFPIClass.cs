@@ -722,14 +722,14 @@ namespace LaserAlignDX.RunSpace
 
             var aoiModel = LtAoiFactory.InstanceModel();
 
-            string imgPath = $"{Universal.LOG_IMG_PATH}\\{JzTimes.DateSerialString}\\{m_FileBarcodeStr}";
-            if (INI.Instance.IsSaveTestImage)
-            {
-                if (!Directory.Exists(imgPath))
-                    Directory.CreateDirectory(imgPath);
-            }
+            //string imgPath = $"{Universal.LOG_IMG_PATH}\\{JzTimes.DateSerialString}\\{m_FileBarcodeStr}";
+            //if (INI.Instance.IsSaveTestImage)
+            //{
+            //    if (!Directory.Exists(imgPath))
+            //        Directory.CreateDirectory(imgPath);
+            //}
 
-            Size _bmpInputSize = new Size((int)cMvdInput.Width, (int)cMvdInput.Height);
+            //Size _bmpInputSize = new Size((int)cMvdInput.Width, (int)cMvdInput.Height);
 
             //if (m_MvdOpeate == null)
             //    m_MvdOpeate = new CMvdImage();
