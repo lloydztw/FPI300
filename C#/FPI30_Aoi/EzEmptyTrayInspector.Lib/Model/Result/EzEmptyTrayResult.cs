@@ -50,6 +50,15 @@ namespace EzAoiEmptyTrayInspector.Model
             private set;
         }
 
+        ///// <summary>
+        ///// 異常錯誤碼
+        ///// </summary>
+        //public ErrCodes Error
+        //{
+        //    get;
+        //    internal set;
+        //}
+
         /// <summary>
         /// 滿盤行數
         /// </summary>
@@ -89,6 +98,9 @@ namespace EzAoiEmptyTrayInspector.Model
             get => _suckerBlocs != null ? _suckerBlocs.Count : 0;
         }
 
+        /// <summary>
+        /// PASS or FAIL
+        /// </summary>
         public bool IsPass()
         {
             return ActualSuckersNumber >= FullCount;
@@ -108,7 +120,6 @@ namespace EzAoiEmptyTrayInspector.Model
                 }
             }
         }
-
         /// <summary>
         /// 枚舉 吸嘴區塊 (Sucker Blocs)
         /// </summary>
@@ -123,7 +134,6 @@ namespace EzAoiEmptyTrayInspector.Model
                 }
             }
         }
-
         /// <summary>
         /// 枚舉 格點 (Grid Blocs)
         /// </summary>
@@ -138,12 +148,13 @@ namespace EzAoiEmptyTrayInspector.Model
                 }
             }
         }
-
+        /// <summary>
+        /// 根據 [row, col] 取出定位區塊
+        /// </summary>
         public void GetBlocByRowCol(int row, int col, out EzBloc bloc, out bool isSucker)
         {
             if (_grid != null)
             {
-
                 bloc = _grid.Get(row, col);
                 isSucker = EzBlocsGrid.IsSolidBloc(bloc);
             }
@@ -154,6 +165,7 @@ namespace EzAoiEmptyTrayInspector.Model
             }
         }
 
+        #region DISPLAY_STRING
         public static string FormatString(EzEmptyTrayResult e, bool usingMultiLines = false)
         {
             var grid = e?._grid;
@@ -177,11 +189,11 @@ namespace EzAoiEmptyTrayInspector.Model
 
             return msg;
         }
-
         public override string ToString()
         {
             return FormatString(this, false);
         }
+        #endregion
 
         #region PRIVATE_FUNCTIONS
         int calc_ng_count()

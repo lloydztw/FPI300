@@ -21,6 +21,9 @@ using CvPoint = OpenCvSharp.Point;
 
 namespace EzAoiEmptyTrayInspector.Model.Aoi
 {
+    /// <summary>
+    /// 外廓與角度定位
+    /// </summary>
     public class EzRotAngleFinder
     {
         public bool OptForceFind = false;

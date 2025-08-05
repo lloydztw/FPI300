@@ -26,6 +26,7 @@ namespace EzAoiEmptyTrayInspector.Model
         public JxTempMatchSettings Match = new JxTempMatchSettings(null, "吸嘴比對設定");
         public JxEnum<MirrorMode> Mirror = new JxEnum<MirrorMode>("Miror", description: "鏡像");
         public JxRotAngleSettings RotAngle = new JxRotAngleSettings();
+        public JxBool FindAllFailBlocs = new JxBool("FindAllBlocs", "明確找出所有異常區塊", true);
 
         public JxTrayVisionSettings()
         {
@@ -39,6 +40,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 //Mirror,       // 保留擴充
                 //RotAngle,     // 保留擴充
                 Match,
+                FindAllFailBlocs,
             });
             base.OnBindingSubItems();
         }

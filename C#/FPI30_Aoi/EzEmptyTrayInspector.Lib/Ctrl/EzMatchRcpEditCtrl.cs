@@ -16,6 +16,7 @@
 using AwFramework.Gui;
 using EzAoiEmptyTrayInspector.Gui;
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
 using LeTian.JxRecipesTool.Ctrl;
@@ -192,7 +193,10 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         private void BtnGolden_Click(object sender, EventArgs e)
         {
             if (_isRcpEdittingMode)
+            {
                 catch_golden_image();
+                build_golden_grid_template();
+            }
         }
         private void viewer_KeyDown(object sender, KeyEventArgs e)
         {
@@ -299,36 +303,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _matchSettings.GoldenBox.Value = loc;
             _bypassJxEvents = false;
         }
-        void catch_golden_image()
-        {
-            if (_imgViewer == null || _imgSource == null)
-                return;
 
-            // 閃綠色
-            var oldBrush = _cviGoldenBox.BoxBrush;
-            _cviGoldenBox.BoxBrush = Brushes.Lime;
-            refresh(_imgViewerWindow);
-
-            _bypassJxEvents = true;
-            try
-            {
-                move_box_to_safe_location(_imgSource);
-                //var rect = _cviGoldenBox.Box;
-                //var golden = ImageUtil.CropBmp(_imgSource, rect);
-                //_matchSettings.GoldenBox.Value = rect;
-                //_matchSettings.GoldenBmp.Value = golden;
-                _model.CropGoldenTemplate(ID, _imgSource, _cviGoldenBox.Box);
-            }
-            catch
-            {
-            }
-            _bypassJxEvents = false;
-
-            // 回復顏色
-            _cviGoldenBox.BoxBrush = oldBrush;
-            refresh(_recipesMgr?.Window);
-            refresh(_imgViewerWindow);
-        }
         void move_box_to_safe_location(Size boundarySize)
         {
             var rect = _cviGoldenBox.Box;
@@ -365,6 +340,51 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             int h = (int)boundary.Height / 20;
             int sz = Math.Min(w, h);
             _cviGoldenBox.Box = new Rectangle(x, y, sz, sz);
+        }
+        #endregion
+
+        #region GOLDEN_BUILDING_FUNCTIONS
+        void catch_golden_image()
+        {
+            if (_imgViewer == null || _imgSource == null)
+                return;
+
+            // 閃綠色
+            var oldBrush = _cviGoldenBox.BoxBrush;
+            _cviGoldenBox.BoxBrush = Brushes.Lime;
+            refresh(_imgViewerWindow);
+
+            _bypassJxEvents = true;
+            try
+            {
+                move_box_to_safe_location(_imgSource);
+                //var rect = _cviGoldenBox.Box;
+                //var golden = ImageUtil.CropBmp(_imgSource, rect);
+                //_matchSettings.GoldenBox.Value = rect;
+                //_matchSettings.GoldenBmp.Value = golden;
+                _model.CropGoldenTemplate(ID, _imgSource, _cviGoldenBox.Box);
+            }
+            catch
+            {
+            }
+            _bypassJxEvents = false;
+
+            // 回復顏色
+            _cviGoldenBox.BoxBrush = oldBrush;
+            refresh(_recipesMgr?.Window);
+            refresh(_imgViewerWindow);
+        }
+        void build_golden_grid_template()
+        {
+            if (_imgViewer == null || _imgSource == null || _model == null)
+                return;
+
+            var err = _model.BuildGoldenGridTemplate(SideID.A, _imgSource);
+            if (err != ErrCodes.OK)
+            {
+                var msg = QxNums.GetEnumDescription(err);
+                MessageBox.Show(msg, _frmOwner.Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
         #endregion
 

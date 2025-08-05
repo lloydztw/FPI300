@@ -24,6 +24,9 @@ using System.Linq;
 
 namespace EzAoiEmptyTrayInspector.Model.Aoi
 {
+    /// <summary>
+    /// 通用的 Template Match 
+    /// </summary>
     public class EzTemplateMatcher
     {
         public event EventHandler<ProgressEventArgs> OnProgress;
@@ -137,6 +140,55 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             }
         }
 
+        public EzBloc FindBestBloc(Mat image, Mat golden)
+        {
+            var boundRect = new Rectangle(0, 0, image.Width, image.Height);
+
+            using (var simularity = new Mat())
+            {
+                _goldenWidth = golden.Width;
+                _goldenHeight = golden.Height;
+
+                var garbagesCan = new List<Mat>();
+
+                normalizeGolden(golden, image, out golden, garbagesCan);
+
+                apply_shrink(golden, image, out golden, out image, garbagesCan);
+
+                apply_filters(golden, image, out golden, out image, garbagesCan);
+
+                // Match
+                _NOTIFY("Matching (bestBloc)");
+                Cv2.MatchTemplate(image, golden, simularity, TemplateMatchModes.CCoeffNormed);
+
+                _DUMP_SIMULARITY(simularity);
+
+                // max simularity
+                simularity.MinMaxLoc(out double minVal, out double maxVal, out var minLoc, out var maxLoc);
+                double score = maxVal;
+                double x = maxLoc.X;
+                double y = maxLoc.Y;
+
+                // 轉換到 world coordinates
+                var zoomFactor = Math.Max(1, _shrinkFactor);
+                int blobGoldenW = _goldenWidth / zoomFactor;
+                int blobGoldenH = _goldenHeight / zoomFactor;
+                int wX = (int)(x * zoomFactor);
+                int wY = (int)(y * zoomFactor);
+
+                var bestRect = new Rectangle(wX, wY, _goldenWidth, _goldenHeight);
+                JetEazy.QUtilities.QUtility.ClipBoundary(ref bestRect, ref boundRect);
+                var bestBloc = new EzBloc(bestRect, score);
+
+                #region CLEAN_UP
+                foreach (var obj in garbagesCan)
+                    obj?.Dispose();
+                #endregion
+
+                _NOTIFY("Matched (bestBloc)");
+                return bestBloc;
+            }
+        }
 
         #region PRIVATE_FUNCTIONS
         void normalizeGolden(Mat golden, Mat image, out Mat newGolden, List<Mat> garbagesCan)

@@ -52,6 +52,9 @@ namespace EzAoiEmptyTrayInspector.Model
         //[Description("儲存合併圖檔異常!")]
         //SAVE_COMBINED_FILE_ERROR,
 
+        [Description("無法完成大圖格點比對!")]
+        POST_GRID_MATCH_ERROR,
+
         [Description("一鍵執行異常!")]
         RUN_ALL_EXCEPTION,
     }

@@ -19,6 +19,7 @@ using JetEazy.Match;
 using JetEazy.OpenCV;
 using OpenCvSharp;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using AOI_RESULT = EzAoiEmptyTrayInspector.Model.EzEmptyTrayResult;
@@ -75,16 +76,13 @@ namespace EzAoiEmptyTrayInspector.Model
             }
         }
 
-        //public void Dispose()
-        //{
-        //    _singleton = null;
-        //}
-
         protected override void OnDisposing()
         {
             _singleton = null;
             _recipe?.Dispose();
             _recipe = null;
+            _largeGoldenGridImage?.Dispose();
+            _largeGoldenGridImage = null;
             _LOG.Info($"[AOI Model] {GetType().Name} 卸載!");
         }
 
@@ -157,6 +155,7 @@ namespace EzAoiEmptyTrayInspector.Model
         #endregion
 
         #region PRIVATE_RUNTIME_DATA
+        Mat _largeGoldenGridImage;
         string _dumpPath = null;
         #endregion
 
@@ -213,15 +212,15 @@ namespace EzAoiEmptyTrayInspector.Model
             result = rotRects;
         }
 
-        public bool CropGoldenTemplate(SideID sideId, IEzImage largeImg, Rectangle rect)
+        public bool CropGoldenTemplate(SideID sideId, IEzImage largeImg, Rectangle goldenRect)
         {
             var sideSettings = _recipe.GetSiteSettings((int)sideId);
             if (sideSettings == null)
                 return false;
 
             var matchSettings = sideSettings.Match;
-            var golden = ImageUtil.CropBmp(largeImg, rect);
-            matchSettings.GoldenBox.Value = rect;
+            var golden = ImageUtil.CropBmp(largeImg, goldenRect);
+            matchSettings.GoldenBox.Value = goldenRect;
             matchSettings.GoldenBmp.Value = golden;
 
             try
@@ -237,6 +236,42 @@ namespace EzAoiEmptyTrayInspector.Model
                 matchSettings.GoldenRefAngle.Value = (decimal)0;
                 return false;
             }
+        }
+
+        public ErrCodes BuildGoldenGridTemplate(SideID sideId, IEzImage largeImg)
+        {
+            var err = CanMatch(sideId, largeImg);
+            if (err != ErrCodes.OK)
+            {
+                return err;
+            }
+
+            RunMatch(sideId, largeImg);
+            var matchResult = GetMatchResult(sideId);
+            var matchGrid = matchResult?.Grid;
+            if (matchGrid == null)
+            {
+                err = ErrCodes.NO_MATCH_GRID;
+                return err;
+            }
+
+            _LOG.Info("[AOI] 建立 Golden Grid ... ");
+            int goldenRowsOld = _recipe.TrayMiscSettings.FullRows;
+            int goldenColsOld = _recipe.TrayMiscSettings.FullCols;
+            int goldenRows = matchGrid.Rows;
+            int goldenCols = matchGrid.Cols;
+
+            // 更新到 Recipe
+            _recipe.TrayMiscSettings.GoldenGrid = matchGrid;
+            _recipe.TrayMiscSettings.FovWidth.Value = largeImg.Width;
+            _recipe.TrayMiscSettings.FovHeight.Value = largeImg.Height;
+
+            // large Golden Grid image
+            _largeGoldenGridImage?.Dispose();
+            _largeGoldenGridImage = rebuild_large_golden_grid_image();
+            _DUMP_GOLDEN_GRID_MAP(_largeGoldenGridImage, null);
+
+            return err;
         }
 
 
@@ -412,7 +447,7 @@ namespace EzAoiEmptyTrayInspector.Model
         #endregion
 
 
-        #region PUBLIC_RUN_ALLS
+        #region PUBLIC_RUN_ALLS_DUAL
         public ErrCodes CanRunAll(IEzImage imgA, IEzImage imgB)
         {
             if (_recipe == null)
@@ -473,6 +508,9 @@ namespace EzAoiEmptyTrayInspector.Model
             if (wait)
                 evCompleted.WaitOne(1000 * 60 * 5);
         }
+        #endregion
+
+
         public void RunAll(Bitmap largeBmp, bool wait = false)
         {
             //// Async !!!
@@ -521,12 +559,10 @@ namespace EzAoiEmptyTrayInspector.Model
             if (wait)
                 evCompleted.WaitOne(1000 * 60 * 5);
         }
-
         AOI_RESULT IxEmptyTrayInspector.GetResult()
         {
             return _finalResult;
         }
-        #endregion
 
 
         #region PRIVATE_FUNCTIONS
@@ -635,198 +671,198 @@ namespace EzAoiEmptyTrayInspector.Model
         #endregion
 
 
-        #region PRIVATE_COMBINE_FUNCTIONS
-#if(OPT_RESERVED)
-        int run_combine(IEzImage largeImgA, Bitmap bmpA, Bitmap bmpB)
+        #region PRIVATE_POST_PREDICT
+        void run_post_grid_predict(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
         {
-            using (var bridgeA = new QxImageBridge(bmpA))
-            using (var bridgeB = new QxImageBridge(bmpB))
-            {
-                return run_combine(largeImgA, bridgeA.Image, bridgeB.Image);
-            }
-        }
-        int run_combine(IEzImage largeImgA, Mat imgA, Mat imgB)
-        {
-            if (_matchResults == null)
-                return 0;
-            var gridA = _matchResults[0]?.Grid;
-            var gridB = _matchResults[1]?.Grid;
-            if (gridA == null || gridA == null)
-                return 0;
-
-            // Rotate Angle (此處都用 degree 為單位!)
-            double rotAngleD = 0;
-            bool rotEnabled = _recipe.Vision.RotAngle.Enabled && _recipe.SideB.RotAngle.Enabled;
-            if (rotEnabled)
-            {
-                double goldenAngle = (double)_recipe.Vision.Match.GoldenRefAngle.Value;
-                double angleA = _matchResults[0].RotateAngle - goldenAngle;
-                double angleB = _matchResults[1].RotateAngle;
-                rotAngleD = angleB - angleA;
-            }
-            if (Math.Abs(rotAngleD) <= 0.01)
-            {
-                rotEnabled = false;
-                rotAngleD = 0;
-            }
-
-            //var tm0 = DateTime.Now;
-            int count = 0;
-            if (true)
-            {
-                Mat[] channelsA = null;
-                Mat[] channelsB = null;
-
-                //var boundA = new Rect(0, 0, imgA.Width, imgA.Height);
-                //var boundB = new Rect(0, 0, imgB.Width, imgB.Height);
-
-                int CH = imgA.Channels();
-                if (CH >= 3)
-                {
-                    channelsA = Cv2.Split(imgA);  // imgA 分為 B, G, R 三個通道
-                    channelsB = Cv2.Split(imgB);  // imgB 分為 B, G, R 三個通道
-                    imgA = channelsA[2];
-                    imgB = channelsB[2];
-                }
-
-                void combine_one(int r, int c)
-                {
-                    var blobA = gridA.Get(r, c);
-                    var blobB = gridB.Get(r, c);
-                    if (blobA == null || blobB == null)
-                        return;
-
-                    int ww = Math.Max(blobA.Rect.Width, blobB.Rect.Width);
-                    int hh = Math.Max(blobA.Rect.Height, blobB.Rect.Height);
-                    var roiA = JetEazy.Qcvt.CvCreateCenterRect(blobA.CenterX, blobA.CenterY, ww, hh);
-                    var roiB = JetEazy.Qcvt.CvCreateCenterRect(blobB.CenterX, blobB.CenterY, ww, hh);
-                    var boundA = new Rect(0, 0, imgA.Width, imgA.Height);
-                    var boundB = new Rect(0, 0, imgB.Width, imgB.Height);
-
-                    if (JetEazy.Qcvt.ClipBoundary(ref roiA, ref boundA) ||
-                        JetEazy.Qcvt.ClipBoundary(ref roiB, ref boundB))
-                    {
-                        // 切到邊界 暫時不處理 !!!
-                        return;
-                    }
-
-                    var imgB0 = imgB[roiB];
-                    var imgBR = rotEnabled ? rotate_crop(imgB, roiB, rotAngleD) : imgB0;
-                    if (imgBR == null)
-                        imgBR = imgB0;
-
-                    if (channelsA == null)
-                    {
-                        // 8-bit Single Channel
-                        imgA[roiA] = imgA[roiA] / 3 * 2 + imgBR / 3;
-                    }
-                    else
-                    {
-                        // 24-bit 3-Channel
-                        imgA[roiA] = imgBR;
-                    }
-
-                    // clean up
-                    if (imgBR != imgB0)
-                        imgBR?.Dispose();
-                }
-
-                int rows = gridA.Rows;
-                int cols = gridA.Cols;
-                int rowDelta = 4;
-                int TN = (rows + rowDelta - 1) / rowDelta;
-                TN = Math.Min(TN, 8);
-                System.Diagnostics.Debug.Assert(TN > 0);
-
-                //changeState($"Combining ({rows}x{cols}) [threads={TN}] [A={rotAngleD:0.00}°]", (int)SideID.A);
-                _LOG.Info("Combining ({0}x{1}) [TN={2}] [A={3:0.00}°]", rows, cols, TN, rotAngleD);
-
-                Parallel.For(0, TN, (idx) =>
-                //for (int idx = 0; idx < TN; idx++)
-                {
-                    int rowStart = idx * rowDelta;
-                    int rowEnd = (idx == TN - 1) ? rows : rowStart + rowDelta;
-                    _LOG.Debug($"Combining [row = {rowStart} to {rowEnd}]");
-
-                    for (int ro = rowStart; ro < rowEnd; ro++)
-                    {
-                        for (int co = 0; co < cols; co++)
-                        {
-                            //>>> _LOG.Debug($"Combining [{ro},{co}]");
-                            combine_one(ro, co);
-                            Interlocked.Increment(ref count);
-                        }
-                    }
-                }
-                );
-
-                if (count > 0 && channelsA != null)
-                    Cv2.Merge(channelsA, imgA);
-
-                if (count > 0)
-                    ImageUtil.SetCombinedMark(largeImgA);
-
-                ImageUtil.MarkDirtyPixel(imgA);
-            }
-            return count;
-        }
-        Mat rotate_crop(Mat src, Rect roi, double angleD)
-        {
-            //// 計算中心點
-            //// 建立 RotatedRect，使用 roi 的大小，並旋轉指定角度
-            //// 使用 RotatedRect 的 BoundingRect 方法計算外接矩形
-            Point2f center = new Point2f(roi.X + roi.Width / 2.0f, roi.Y + roi.Height / 2.0f);
-            //RotatedRect rotRect = new RotatedRect(center, new Size2f(roi.Width, roi.Height), (float)angleD);
-            //Rect rotBound = rotRect.BoundingRect();
-            Rect rotBound = roi;
-            // 提取 roiB 區域的子圖像
-            Mat subImg = new Mat(src, rotBound);
-            // 生成旋轉矩陣
-            center = new Point2f(rotBound.Width / 2.0f, rotBound.Height / 2.0f);
-            Mat rotationMatrix = Cv2.GetRotationMatrix2D(center, angleD, 1.0);  // 旋轉角度和縮放比例(1.0 表示不縮放)
-            // 計算旋轉後的整體圖像大小（可以選擇擴展邊界或裁剪）
-            var boundingSize = rotBound.Size;
-            // 進行旋轉並儲存到新影像
-            Mat rotatedImg = new Mat();
-            Cv2.WarpAffine(subImg, rotatedImg, rotationMatrix, boundingSize, InterpolationFlags.Linear, BorderTypes.Constant, Scalar.All(0));
-            subImg?.Dispose();
-            return rotatedImg;
-        }
-
-        void create_combined_file(Bitmap bmp, string fileName)
-        {
-            if (bmp != null)
-            {
-                using (var bridge = new QxImageBridge(bmp))
-                {
-                    create_combined_file(bridge.Image, fileName);
-                }
-            }
-        }
-        void create_combined_file(Mat img, string fileName)
-        {
-            if (img == null || fileName == null)
-                return;
+            Exception errEx = null;
 
             try
             {
-                _LOG.Info("[生成合併圖檔]");
-                var tm0 = DateTime.Now;
+                changeState("POST GRID Matching", sideId);
 
-                string path = System.IO.Path.GetDirectoryName(fileName);
-                JetEazy.IO.QxPathUtility.InitDirectory(path);
+                // INPUT GRID
+                var runtimeGrid = matchResult?.Grid;
+                if (srcImg == null || runtimeGrid == null || _recipe == null)
+                    return;
 
-                img.SaveImage(fileName);
+                var fullRows = _recipe.TrayMiscSettings.FullRows;
+                var fullCols = _recipe.TrayMiscSettings.FullCols;
 
-                var ts = DateTime.Now - tm0;
-                _LOG.Info("[生成合併圖檔完成 {0} ms]", (int)ts.TotalMilliseconds);
+                if (runtimeGrid.Rows >= fullRows && runtimeGrid.Cols >= fullCols && !force)
+                    return;
+
+                // NOTE: goldenGrid 是由 recipe runtime deSerialize 
+                var goldenGrid = _recipe.TrayMiscSettings.GoldenGrid;
+                if (goldenGrid == null)
+                    return;
+
+                // LARGE GOLDEN IMAGE
+                if (_largeGoldenGridImage == null)
+                    _largeGoldenGridImage = rebuild_large_golden_grid_image();
+                if (_largeGoldenGridImage == null)
+                {
+                    _LOG.Warn("[AOI] largetGoldenGridImage 無重建!");
+                    return;
+                }
+                _DUMP_GOLDEN_GRID_MAP(_largeGoldenGridImage, dumpPath);
+
+
+                // LARGE GOLDEN TEMPLATE
+                var boundary = goldenGrid.GetBoundary();
+                var ggRect = JetEazy.Qcvt.CV(boundary);
+                var ggCenter = JetEazy.Qcvt.Center(ref ggRect);
+                var ggTemplate = _largeGoldenGridImage[ggRect];
+
+                // MATCH
+                int shrink = EzAoiBaseUtil.GetShrinkFactor(srcImg.Width, srcImg.Height);
+                var matcher = new EzTemplateMatcher(shrink);
+                var settings = new JxTempMatchSettings();
+                settings.ScoreThres.Value = 0.2m;
+                matcher.SetRecipe(settings);
+                var bestBloc = matcher.FindBestBloc(srcImg, ggTemplate);
+                if (bestBloc == null)
+                {
+                    return;
+                }
+                var newCenter = bestBloc.Center;
+
+                // PSEUDO BLOCs (built by goldGrid + offset)
+                var offset_x = (int)(newCenter.X - ggCenter.X);
+                var offset_y = (int)(newCenter.Y - ggCenter.Y);
+                var pseudoBlocs = new List<EzBloc>();
+                foreach(var b in goldenGrid.IterBlocs())
+                {
+                    if (b != null)
+                    {
+                        var rect = b.Rect;
+                        rect.Offset(offset_x, offset_y);
+                        var bloc = new EzBloc(rect, -1);
+                        pseudoBlocs.Add(bloc);
+                    }
+                }
+
+                // PSEUDO BLOCs (remove overlaps)
+                var existingBlocs = matchResult.Blocs;
+                pseudoBlocs.RemoveAll(new Predicate<EzBloc>((pseudo) =>
+                {
+                    foreach (var bloc in existingBlocs)
+                    {
+                        if (bloc != null && bloc.Rect.Contains(pseudo.CenterX, pseudo.CenterY))
+                            return true;
+                    }
+                    return false;
+                }));
+                pseudoBlocs.AddRange(existingBlocs);
+                var builder = new EzBlocsGridBuilder();
+                var newGrid = builder.Build(pseudoBlocs);
+                foreach (var b in newGrid.IterBlocs())
+                {
+                    if (b != null && b.Score < 0)
+                        b.Tag = "pseudo";
+                }
+
+                // Update to existing matchResult
+                matchResult.Grid = newGrid;
             }
             catch (Exception ex)
             {
-                _ERROR(ErrCodes.SAVE_COMBINED_FILE_ERROR, ex: ex);
+                errEx = ex;
+            }
+            finally
+            {
+                if (errEx != null)
+                {
+                    _ERROR(ErrCodes.POST_GRID_MATCH_ERROR, sideId, errEx);
+                }
+                else
+                {
+                    changeState("Ready", sideId);
+                    update_one_match_result(sideId, matchResult, notify: true);
+                }
             }
         }
-#endif
+        Mat rebuild_large_golden_grid_image(bool useBlackWhite = false)
+        {
+            if (_recipe == null)
+                return null;
+
+            var goldenGrid = _recipe.TrayMiscSettings.GoldenGrid;
+            if (goldenGrid == null)
+                return null;
+
+            var W = _recipe.TrayMiscSettings.FovWidth;
+            var H = _recipe.TrayMiscSettings.FovHeight;
+            if (W < 10 || H < 10)
+                return null;
+
+            var largeGG = new Mat(H, W, MatType.CV_8UC1);
+            largeGG.SetTo(Scalar.White);
+
+            var goldenBmp = _recipe.VisionSettings.Match.GoldenBmp.Value as Bitmap;
+            if (goldenBmp == null || useBlackWhite)
+            {
+                foreach (var bloc in goldenGrid.IterBlocs())
+                {
+                    if (bloc != null)
+                    {
+                        var rc = JetEazy.Qcvt.CV(bloc.Rect);
+                        rc.Inflate(-8, -8);
+                        largeGG.Rectangle(rc, Scalar.Black, -1);
+                    }
+                }
+            }
+            else
+            {
+                using (var bridge = new QxImageBridge(goldenBmp))
+                {
+                    var goldenImg = bridge.Image;
+                    int gw = goldenBmp.Width;
+                    int gh = goldenBmp.Height;
+
+                    foreach (var bloc in goldenGrid.IterBlocs())
+                    {
+                        if (bloc != null)
+                        {
+                            int x = bloc.CenterX - gw / 2;
+                            int y = bloc.CenterY - gh / 2;
+                            int x2 = x + gw;
+                            int y2 = y + gh;
+                            x = Math.Max(x, 0);
+                            y = Math.Max(y, 0);
+                            x2 = Math.Min(x2, W);
+                            y2 = Math.Min(y2, H);
+                            int ww = x2 - x;
+                            int hh = y2 - y;
+                            largeGG[y, y2, x, x2] = goldenImg[0, hh, 0, ww];
+                        }
+                    }
+                }
+            }
+
+            //var ggBoundary = JetEazy.Qcvt.CV(goldenGrid.GetBoundary());
+            //largeGG.Rectangle(ggBoundary, Scalar.Black, 5);
+
+            return largeGG;
+        }
+        void _DUMP_GOLDEN_GRID_MAP(Mat largeGoldenGridImage, string dumpPath = null)
+        {
+            if (largeGoldenGridImage == null)
+                return;
+
+            if (dumpPath == null)
+                return;
+
+            JetEazy.IO.QxPathUtility.InitDirectory(dumpPath);
+
+            largeGoldenGridImage.SaveImage($"{dumpPath}\\large_golden_grid.jpg");
+
+            var goldenGrid = _recipe?.TrayMiscSettings.GoldenGrid;
+            if (goldenGrid != null)
+            {
+                var roi = JetEazy.Qcvt.CV(goldenGrid.GetBoundary());
+                largeGoldenGridImage[roi].SaveImage($"{dumpPath}\\large_golden_grid_template.jpg");
+            }
+        }
         #endregion
 
 
@@ -921,6 +957,11 @@ namespace EzAoiEmptyTrayInspector.Model
                 var tm0 = DateTime.Now;
                 
                 run_match(SideID.A, imgA, _dumpPath);
+
+                if (_recipe.VisionSettings.FindAllFailBlocs.Value)
+                {
+                    run_post_grid_predict(SideID.A, imgA, _matchResults[0], _dumpPath);
+                }
 
                 var ts = DateTime.Now - tm0;
 

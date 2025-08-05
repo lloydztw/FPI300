@@ -13,29 +13,83 @@
  */
 #endregion
 
+using JetEazy.Match;
 using LeTian.JxProps;
+using Newtonsoft.Json;
 
 
 namespace EzAoiEmptyTrayInspector.Model
 {
     public class JxTrayMiscSettings : JxContainer
     {
+        public JxBool DebugDump = new JxBool("Debug Dump", false, description: "輸出調適影像檔");
         public JxInt FullRows = new JxInt("Full Rows", "滿盤 行數", 10, Range.C255);
         public JxInt FullCols = new JxInt("Full Cols", "滿盤 列數", 5, Range.C255);
-        public JxBool DebugDump = new JxBool("Debug Dump", false, description: "輸出調適影像檔");
+        public JxInt FovWidth = new JxInt("FovWidth", description: "取像 寬度 (Hidden)");
+        public JxInt FovHeight = new JxInt("FovHeight", description: "取像 高度 (Hidden)");
+        public JxText GoldenGridRawData = new JxText("GoldenGridRawData", "", description: "(Hidden)");
 
         public JxTrayMiscSettings() : base("Tray Settings", "空盤 全域設定")
         {
         }
+
         public override void OnBindingSubItems()
         {
             //綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
                 FullRows,
                 FullCols,
+                FovWidth,
+                FovHeight,
                 DebugDump,
+                GoldenGridRawData,
             });
             base.OnBindingSubItems();
         }
+
+        protected override void OnDisposing()
+        {
+            base.OnDisposing();
+            _cacheGoldenGrid?.Dispose();
+            _cacheGoldenGrid = null;
+        }
+
+        /// <summary>
+        /// GoldenGrid 的 Json 由 GoldenGridRawData 處理
+        /// </summary>
+        [JsonIgnore]
+        public EzBlocsGrid GoldenGrid
+        {
+            get
+            {
+                if (_cacheGoldenGrid == null)
+                    _cacheGoldenGrid = get_goldenGrid_from_jx();
+                return _cacheGoldenGrid;
+            }
+            set
+            {
+                if (_cacheGoldenGrid != value)
+                {
+                    _cacheGoldenGrid?.Dispose();
+                    _cacheGoldenGrid = value;
+                    set_goldenGrid_to_jx(_cacheGoldenGrid);
+                }
+            }
+        }
+
+        #region PRIVATE_MEMBERS
+        EzBlocsGrid _cacheGoldenGrid = null;
+        EzBlocsGrid get_goldenGrid_from_jx()
+        {
+            var ss = new EzBlocsGridSerializer();
+            ss.Deserialize(GoldenGridRawData.Value, out EzBlocsGrid grid);
+            return grid;
+        }
+        void set_goldenGrid_to_jx(EzBlocsGrid grid)
+        {
+            var ss = new EzBlocsGridSerializer();
+            GoldenGridRawData.Value = ss.Serialize(grid);
+        }
+        #endregion
     }
 }

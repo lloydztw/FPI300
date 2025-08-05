@@ -14,7 +14,6 @@
 #endregion
 
 using LeTian.JxProps;
-using Newtonsoft.Json;
 
 
 namespace EzAoiEmptyTrayInspector.Model
@@ -24,17 +23,20 @@ namespace EzAoiEmptyTrayInspector.Model
     /// </summary>
     public class JxAoiRecipe : JxContainer
     {
+        const string _NAME = "EzEmptyTrayAoiRecipe";
+        const string _DESC = "空盤檢測參數設定";
+
         public JxTrayVisionSettings VisionSettings = new JxTrayVisionSettings();
         public JxTrayMiscSettings TrayMiscSettings = new JxTrayMiscSettings();
 
         public JxAoiRecipe()
         {
-            Name = "DualMatchRecipe";
-            Description = "雙影像比對參數設定";
+            Name = _NAME;
+            Description = _DESC;
         }
         public override void OnBindingSubItems()
         {
-            //綁定以下成員, 會自動顯示在GUI編輯視窗.
+            // 綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
                 VisionSettings,
                 TrayMiscSettings,

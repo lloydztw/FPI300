@@ -108,6 +108,10 @@ namespace JetEazy.Match
                     node.rowCol = new QxRowCol(r, c);
             });
         }
+        public Rectangle GetBoundary()
+        {
+            return _boundary;
+        }
 
         public static bool IsSolidBloc(EzBloc bloc)
         {

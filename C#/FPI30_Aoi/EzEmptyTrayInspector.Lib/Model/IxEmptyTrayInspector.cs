@@ -47,9 +47,15 @@ namespace EzAoiEmptyTrayInspector.Model
         void TryApplyFilters(SideID sideId, IEzImage img, JxRotAngleSettings settings, out object result);
 
         /// <summary>
-        /// 從 巨圖 (IEzImage) 擷取 吸嘴圖形 當 Golden Template 
+        /// 從 巨圖 擷取 吸嘴圖形 當 Golden Template 
+        /// (於 Recipe Editor 中使用)
         /// </summary>
-        bool CropGoldenTemplate(SideID sideId, IEzImage largeImg, Rectangle rect);
+        bool CropGoldenTemplate(SideID sideId, IEzImage largeImg, Rectangle goldenRect);
+
+        /// <summary>
+        /// 根据 吸嘴 golden image 建立 整盤 格線定位點 
+        /// </summary>
+        ErrCodes BuildGoldenGridTemplate(SideID sideId, IEzImage largeImg);
 
         ErrCodes CanMatch(SideID sideId, IEzImage img);
         void RunMatch(SideID sideId, IEzImage img, string dumpPath = null);

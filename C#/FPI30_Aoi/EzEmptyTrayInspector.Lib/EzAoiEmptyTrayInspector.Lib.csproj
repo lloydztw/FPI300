@@ -232,10 +232,11 @@
     <Compile Include="Model\Match\Grid\EzBlocsGridInterpo.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsPool.cs" />
     <Compile Include="Model\Match\Grid\QuadLinkNode.cs" />
+    <Compile Include="Model\Recipe\Serializer\EzBlocsGridSerializer.cs" />
     <Compile Include="Model\Recipe\JxAoiRecipe.cs" />
+    <Compile Include="Model\Recipe\JxRotAngleSettings.cs" />
     <Compile Include="Model\Recipe\JxTrayMiscSettings.cs" />
     <Compile Include="Model\Recipe\JxTrayVisionSettings.cs" />
-    <Compile Include="Model\Recipe\JxRotAngleSettings.cs" />
     <Compile Include="Model\Recipe\JxTempMatchSettings.cs" />
     <Compile Include="Model\Result\EzEmptyTrayResult.cs" />
     <Compile Include="Model\Result\MatchResult.cs" />
