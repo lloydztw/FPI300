@@ -287,7 +287,7 @@ namespace EzAoiEmptyTrayInspector.Model
             // large Golden Grid image
             _largeGoldenGridImage?.Dispose();
             _largeGoldenGridImage = rebuild_golden_grid_image();
-            _DUMP_GOLDEN_GRID_MAP(_largeGoldenGridImage, null);
+            _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, null);
 
             return err;
         }
@@ -732,7 +732,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     _LOG.Warn("[AOI] largetGoldenGridImage 無重建!");
                     return;
                 }
-                _DUMP_GOLDEN_GRID_MAP(_largeGoldenGridImage, goldenGrid, dumpPath);
+                _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, goldenGrid, dumpPath);
 
                 // OFFSET 
                 int offset_x = 0;
@@ -817,7 +817,7 @@ namespace EzAoiEmptyTrayInspector.Model
             matcher.SetRecipe(settings);
 
             // SEARCHING points
-            var bestBloc = matcher.FindBestBloc(srcImg, ggTemplate, iterate_possible_offsets(goldenGrid,inputGrid));
+            var bestBloc = matcher.FindBestBloc(srcImg, ggTemplate, iterate_possible_offsets(goldenGrid, inputGrid));
             if (bestBloc != null && bestBloc.Score > 0.01)
             {
                 var newCenter = bestBloc.Center;
@@ -830,9 +830,9 @@ namespace EzAoiEmptyTrayInspector.Model
                 offset_y = 0;
             }
         }
-        IEnumerable<CvPoint> iterate_possible_offsets(EzBlocsGrid goldenGrid, EzBlocsGrid inputGrid)
+        IEnumerable<CvPoint> iterate_possible_offsets_000(EzBlocsGrid goldenGrid, EzBlocsGrid inputGrid)
         {
-            int trial = 0;
+            int tryCount = 0;
             foreach (var ib in inputGrid.IterBlocs())
             {
                 if(ib == null) continue;
@@ -844,8 +844,61 @@ namespace EzAoiEmptyTrayInspector.Model
                     int top = (int)(ib.Rect.Top - offset.Y);
                     yield return new CvPoint(left, top);
                 }
-                if (++trial >= 1000)
+                if (++tryCount >= 1000)
                     break;
+            }
+        }
+        IEnumerable<CvPoint> iterate_possible_offsets_001(EzBlocsGrid goldenGrid, EzBlocsGrid inputGrid)
+        {
+            int fovWidth = _recipe.TrayMiscSettings.FovWidth;
+            int fovHeight = _recipe.TrayMiscSettings.FovHeight;
+            var boundary = new Rect(0, 0, fovWidth, fovHeight);
+            var roi = JetEazy.Qcvt.CV(goldenGrid.GetBoundary());
+
+            int tryCount = 0;
+            foreach (var ib in inputGrid.IterBlocs())
+            {
+                if (ib == null) continue;
+                foreach (var gb in goldenGrid.IterBlocs())
+                {
+                    if (gb == null) continue;
+                    var offset = ib.Center - gb.Center;
+                    roi.Left = (int)(ib.Rect.Left - offset.X);
+                    roi.Top = (int)(ib.Rect.Top - offset.Y);
+                    if (boundary.Contains(roi))
+                        yield return roi.TopLeft;
+                }
+                if (++tryCount >= 1000)
+                    break;
+            }
+        }
+        IEnumerable<CvPoint> iterate_possible_offsets(EzBlocsGrid goldenGrid, EzBlocsGrid inputGrid)
+        {
+            int deltaRows = goldenGrid.Rows - inputGrid.Rows;
+            int deltaCols = goldenGrid.Cols - inputGrid.Cols;
+            for (int dRow = 0; dRow < deltaRows; dRow++)
+            {
+                for (int dCol = 0; dCol < deltaCols; dCol++)
+                {
+                    for (int inRow = 0; inRow < inputGrid.Rows; inRow++)
+                    {
+                        for (int inCol = 0; inCol < inputGrid.Cols; inCol++)
+                        {
+                            var inBloc = inputGrid.Get(inRow, inCol);
+                            if (inBloc == null) continue;
+
+                            int ggRow = inRow + dRow;
+                            int ggCol = inCol + dCol;
+                            var ggBloc = goldenGrid.Get(inRow, ggCol);
+                            if (ggBloc == null) continue;
+
+                            var offset = inBloc.Center - ggBloc.Center;
+                            int left = (int)(inBloc.Rect.Left - offset.X);
+                            int top = (int)(inBloc.Rect.Top - offset.Y);
+                            yield return new CvPoint(left, top);
+                        }
+                    }
+                }
             }
         }
         Mat rebuild_golden_grid_image(bool useColorFill = false)
@@ -917,7 +970,7 @@ namespace EzAoiEmptyTrayInspector.Model
             _largeGoldenGridImage?.Dispose();
             _largeGoldenGridImage = null;
         }
-        void _DUMP_GOLDEN_GRID_MAP(Mat largeGoldenGridImage, EzBlocsGrid goldenGrid, string dumpPath = null)
+        void _DUMP_GOLDEN_GRID_IMAGE(Mat largeGoldenGridImage, EzBlocsGrid goldenGrid, string dumpPath = null)
         {
             if (largeGoldenGridImage == null)
                 return;
