@@ -789,33 +789,36 @@ namespace LaserAlignDX.RunSpace
 
             if (result != null)
             {
-                foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
+                int fullRows = result.FullRows;
+                int fullCols = result.FullCols;
+                for(int row = 0; row < fullRows; row++)
                 {
-                    int row = cell.CellRow;
-                    int col = cell.CellCol;
-                    result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
-
-                    if (bloc != null)
+                    for (int col = 0; col < fullCols; col++)
                     {
-                        // 單位: Pixels
-                        var rect = bloc.Rect;
-                        if (isOK)
+                        result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+
+                        if (bloc != null)
                         {
-                            // rest 內有 吸嘴
-                            // 如何將 rect 轉換到 cell ???
+                            // 單位: Pixels
+                            var rect = bloc.Rect;
+                            if (isOK)
+                            {
+                                // rest 內有 吸嘴
+                                // 如何將 rect 轉換到 cell ???
+                            }
+                            else
+                            {
+                                // rect 內有 雜物
+                                // 如何將 rect 轉換到 cell ???
+                            }
                         }
                         else
                         {
-                            // rect 內有 雜物
-                            // 如何將 rect 轉換到 cell ???
+                            // [row, col] 處 沒有找到 定位格點
                         }
-                    }
-                    else
-                    {
-                        // [row, col] 處 沒有找到 定位格點
-                    }
 
-                    System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                        System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                    }
                 }
             }
 
