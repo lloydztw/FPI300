@@ -43,7 +43,7 @@
             this.button1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button1.Name = "button1";
             this.button1.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
-            this.button1.Size = new System.Drawing.Size(302, 37);
+            this.button1.Size = new System.Drawing.Size(312, 37);
             this.button1.TabIndex = 0;
             this.button1.Text = "開啟空盤檢測工具視窗";
             this.button1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -58,7 +58,7 @@
             this.cboRecipeNames.Location = new System.Drawing.Point(84, 27);
             this.cboRecipeNames.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.cboRecipeNames.Name = "cboRecipeNames";
-            this.cboRecipeNames.Size = new System.Drawing.Size(302, 31);
+            this.cboRecipeNames.Size = new System.Drawing.Size(312, 31);
             this.cboRecipeNames.TabIndex = 307;
             // 
             // button2
@@ -68,7 +68,7 @@
             this.button2.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button2.Name = "button2";
             this.button2.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
-            this.button2.Size = new System.Drawing.Size(302, 37);
+            this.button2.Size = new System.Drawing.Size(312, 37);
             this.button2.TabIndex = 308;
             this.button2.Text = "直接跑 AoiModel (Quick)";
             this.button2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -81,7 +81,7 @@
             this.button3.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button3.Name = "button3";
             this.button3.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
-            this.button3.Size = new System.Drawing.Size(302, 37);
+            this.button3.Size = new System.Drawing.Size(312, 37);
             this.button3.TabIndex = 309;
             this.button3.Text = "直接跑 AoiModel (FreeImage)";
             this.button3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -108,7 +108,7 @@
             this.button4.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.button4.Name = "button4";
             this.button4.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
-            this.button4.Size = new System.Drawing.Size(302, 37);
+            this.button4.Size = new System.Drawing.Size(312, 37);
             this.button4.TabIndex = 313;
             this.button4.Text = "測試 PushImage";
             this.button4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;

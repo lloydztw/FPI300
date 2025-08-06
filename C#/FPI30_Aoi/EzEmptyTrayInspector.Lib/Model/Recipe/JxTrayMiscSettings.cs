@@ -15,23 +15,25 @@
 
 using JetEazy.Match;
 using LeTian.JxProps;
-using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Documents;
 
 
 namespace EzAoiEmptyTrayInspector.Model
 {
     public class JxTrayMiscSettings : JxContainer
     {
-        public JxBool DebugDump = new JxBool("Debug Dump", false, description: "輸出調適影像檔");
         public JxInt FullRows = new JxInt("Full Rows", "滿盤 行數", 10, Range.C255);
         public JxInt FullCols = new JxInt("Full Cols", "滿盤 列數", 5, Range.C255);
         public JxInt FovWidth = new JxInt("FovWidth", description: "取像 寬度 (Hidden)");
         public JxInt FovHeight = new JxInt("FovHeight", description: "取像 高度 (Hidden)");
+        public JxBool DebugDump = new JxBool("Debug Dump", false, description: "輸出調適影像檔 (Hidden)");
         public JxText GoldenGridRawData = new JxText("GoldenGridRawData", "", description: "(Hidden)");
 
         public JxTrayMiscSettings() : base("Tray Settings", "空盤 全域設定")
         {
-            //System.Diagnostics.Debug.WriteLine($"{GetType().Name} [{Name}] 建構");
+            //>>> System.Diagnostics.Debug.WriteLine($"{GetType().Name} [{Name}] 建構");
         }
 
         public override void OnBindingSubItems()
@@ -50,6 +52,8 @@ namespace EzAoiEmptyTrayInspector.Model
                 GoldenGridRawData,
             });
             base.OnBindingSubItems();
+
+
         }
 
         protected override void OnDisposing()
@@ -57,7 +61,7 @@ namespace EzAoiEmptyTrayInspector.Model
             base.OnDisposing();
             _cacheGoldenGrid?.Dispose();
             _cacheGoldenGrid = null;
-            //System.Diagnostics.Debug.WriteLine($"{GetType().Name} [{Name}] 卸載");
+            //>>> System.Diagnostics.Debug.WriteLine($"{GetType().Name} [{Name}] 卸載");
         }
 
         /// <summary>
@@ -85,7 +89,8 @@ namespace EzAoiEmptyTrayInspector.Model
             }
         }
 
-        #region PRIVATE_MEMBERS
+
+        #region PRIVATE_GRID_MEMBERS
         EzBlocsGrid _cacheGoldenGrid = null;
         EzBlocsGrid get_goldenGrid_from_jx()
         {

@@ -36,6 +36,13 @@ namespace EzAoiEmptyTrayInspector.Model
         {
             get; internal set;
         }
+
+        public IList<EzBloc> OutGridBlocs
+        {
+            get;
+            internal set;
+        }
+
         public double RotateAngle
         {
             // Degrees

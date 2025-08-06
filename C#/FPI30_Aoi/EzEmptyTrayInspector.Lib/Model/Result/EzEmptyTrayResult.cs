@@ -15,31 +15,35 @@
 
 using JetEazy.Match;
 using System.Collections.Generic;
-using System.Windows.Media.Converters;
 
 namespace EzAoiEmptyTrayInspector.Model
 {
     public class EzEmptyTrayResult
     {
         #region PRIVATE_DATA
-        private IList<EzBloc> _suckerBlocs;
-        private EzBlocsGrid _grid;
+        private MatchResult _matchResult;
+        private EzBlocsGrid _grid => _matchResult?.Grid;
+        private IList<EzBloc> _suckerBlocs => _matchResult?.Blocs;
+        private IList<EzBloc> _outGridBlocs => _matchResult?.OutGridBlocs;
         #endregion
 
         public EzEmptyTrayResult(MatchResult matchResult, double totalSconds)
         {
-            _grid = matchResult?.Grid;
-            _suckerBlocs = matchResult?.Blocs;
+            _matchResult = matchResult;
             TotalSeconds = totalSconds;
             NgCount = calc_ng_count();
         }
-        public EzEmptyTrayResult(IList<EzBloc> blocs, EzBlocsGrid grid)
+
+        #region INTERNAL_DATA
+        internal EzBlocsGrid Grid
         {
-            _grid = grid;
-            _suckerBlocs = blocs;
-            TotalSeconds = 0;
-            NgCount = calc_ng_count();
+            get { return _grid; }
         }
+        internal MatchResult MatchResult
+        {
+            get { return _matchResult; }
+        }
+        #endregion
 
         /// <summary>
         /// 辨識耗時秒數
@@ -119,6 +123,14 @@ namespace EzAoiEmptyTrayInspector.Model
                         yield return bloc;
                 }
             }
+            if (_outGridBlocs != null)
+            {
+                foreach (var bloc in _outGridBlocs)
+                {
+                    if (bloc != null) 
+                        yield return bloc;
+                }
+            }
         }
         /// <summary>
         /// 枚舉 吸嘴區塊 (Sucker Blocs)
@@ -164,6 +176,8 @@ namespace EzAoiEmptyTrayInspector.Model
                 isSucker = false;
             }
         }
+
+
 
         #region DISPLAY_STRING
         public static string FormatString(EzEmptyTrayResult e, bool usingMultiLines = false)

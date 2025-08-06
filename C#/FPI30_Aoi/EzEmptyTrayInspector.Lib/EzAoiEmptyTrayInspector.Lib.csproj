@@ -215,6 +215,7 @@
     <Compile Include="Gui\Panels\GwLogPanel.Designer.cs">
       <DependentUpon>GwLogPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Model\Enum\Scores.cs" />
     <Compile Include="Model\IxCommonModel.cs" />
     <Compile Include="Model\IxEmptyTrayInspector.cs" />
     <Compile Include="Model\Enum\ErrCodes.cs" />
@@ -226,12 +227,14 @@
     <Compile Include="Model\Match\Bloc\EzBlocs2.cs" />
     <Compile Include="Model\Match\EzAoiBaseUtil.cs" />
     <Compile Include="Model\Match\EzRotAngleFinder.cs" />
+    <Compile Include="Model\Match\EzOutGridNgBlocsDetector.cs" />
     <Compile Include="Model\Match\EzTemplateMatcher.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsGrid.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsGridBuilder.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsGridInterpo.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsPool.cs" />
     <Compile Include="Model\Match\Grid\QuadLinkNode.cs" />
+    <Compile Include="Model\Recipe\JxTrayPinHoles.cs" />
     <Compile Include="Model\Recipe\Serializer\EzBlocsGridSerializer.cs" />
     <Compile Include="Model\Recipe\JxAoiRecipe.cs" />
     <Compile Include="Model\Recipe\JxRotAngleSettings.cs" />
@@ -273,6 +276,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="Model\Match\ReadMe.md" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -31,8 +31,10 @@ namespace EzAoiEmptyTrayInspector.Ctrl
     public class CviMatchResultBox : CvImageViewerInteractor
     {
         #region PRIVATE_DATA
-        IList<EzBloc> _blocs;
-        EzBlocsGrid _grid;
+        MatchResult _matchResult;
+        EzBlocsGrid _grid => _matchResult?.Grid;
+        IList<EzBloc> _suckerBlocs => _matchResult?.Blocs;
+        IList<EzBloc> _outGridBlocs => _matchResult?.OutGridBlocs;
         #endregion
 
         #region GUI_MEMBERS
@@ -45,36 +47,31 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
         public void Reset()
         {
-            //_result = null;
-            _grid = null;
-            _blocs = null;
-        }
-        public void UpdateResult(EzBlocsGrid src, IList<EzBloc> pool = null)
-        {
-            _grid = src;
-            _blocs = pool;
+            _matchResult = null;
         }
         public void UpdateResult(MatchResult result)
         {
-            _grid = result?.Grid;
-            _blocs = result?.Blocs;
+            _matchResult = result;
         }
 
         #region OVERRIDES
         public override void OnDraw(CvImageViewer viewer, Graphics gxView)
         {
+            if (_matchResult == null)
+                return;
+
             bool isWorld = viewer.IsInWorldCoordinate();
             if (!isWorld)
                 viewer.SwitchToWorldCoordinate(gxView);
 
             // 畫出 grid 節點線
-            draw_grid_lines(viewer, gxView, _grid);
+            draw_grid_lines(viewer, gxView, _matchResult?.Grid);
 
             // 畫出 正常 Blocs (有吸嘴)
-            draw_bloc_rects(viewer, gxView, _blocs, Color.Lime, Color.DarkGreen, 0.25f);
+            draw_bloc_rects(viewer, gxView, _suckerBlocs, Color.Lime, Color.DarkGreen, 0.25f);
 
             // 畫記 異常 Blocs (沒有吸嘴)
-            draw_bloc_rects(viewer, gxView, iter_empty_blocs(), Color.Red, Color.DarkRed, 0.25f);
+            draw_bloc_rects(viewer, gxView, iter_ng_blocs(), Color.Red, Color.DarkRed, 0.25f);
 
 
             if (!isWorld)
@@ -89,27 +86,21 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         #region PRIVATE_FUNCTIONS
 
         /// <summary>
-        /// 枚舉 沒有位於節點的 Blocs
-        /// </summary>
-        IEnumerable<EzBloc> iter_off_grid_blocs()
-        {
-            if (_blocs != null)
-            {
-                foreach (var bloc in _blocs)
-                {
-                    if (bloc != null && !bloc.IsMajorNode())
-                        yield return bloc;
-                }
-            }
-        }
-        /// <summary>
         /// 枚舉 Empty Blocs (沒有吸嘴)
         /// </summary>
-        IEnumerable<EzBloc> iter_empty_blocs()
+        IEnumerable<EzBloc> iter_ng_blocs()
         {
             if (_grid != null)
             {
                 foreach (var bloc in _grid.IterPredictedBlocs())
+                {
+                    if (bloc != null)
+                        yield return bloc;
+                }
+            }
+            if (_outGridBlocs != null)
+            {
+                foreach (var bloc in _outGridBlocs)
                 {
                     if (bloc != null)
                         yield return bloc;
@@ -317,7 +308,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         Size _fetchSize = new Size(100, 100);
         bool handleMouseMove(CvImageViewer viewer, MouseEventArgs e)
         {
-            if ((_grid != null || _blocs != null) && Visible && Enabled)
+            if ((_grid != null || _suckerBlocs != null) && Visible && Enabled)
             {
                 int xx = e.X;
                 int yy = e.Y;
@@ -340,9 +331,15 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 if (blobs != null && blobs.Length > 0)
                     return blobs[0];
             }
-            if (_blocs != null)
+            if (_suckerBlocs != null)
             {
-                var blobs = fetchKNN(x, y, 1, _fetchSize, _blocs);
+                var blobs = fetchKNN(x, y, 1, _fetchSize, _suckerBlocs);
+                if (blobs != null && blobs.Length > 0)
+                    return blobs[0];
+            }
+            if (_outGridBlocs != null)
+            {
+                var blobs = fetchKNN(x, y, 1, _fetchSize, _outGridBlocs);
                 if (blobs != null && blobs.Length > 0)
                     return blobs[0];
             }

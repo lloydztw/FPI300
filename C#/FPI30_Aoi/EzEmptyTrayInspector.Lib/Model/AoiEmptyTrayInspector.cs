@@ -633,14 +633,17 @@ namespace EzAoiEmptyTrayInspector.Model
                 if (goldenBmp == null)
                     return;
 
-                double rotateAngle = 0;
-                var rotSettings = _recipe.GetSiteSettings((int)sideId).RotAngle;
-                if (rotSettings != null && rotSettings.Enabled)
+                double globalRotAngle = 0;
+                if (false)
                 {
-                    changeState("MATCH : finding angle", sideId);
-                    var finder = new EzRotAngleFinder();
-                    rotateAngle = finder.ApplyFilters(srcImg, rotSettings, true, out var rotRects);
-                    _LOG.Info("[{0}] MATCH : angle = {1:0.00}°", sideId, rotateAngle);
+                    var rotSettings = _recipe.GetSiteSettings((int)sideId).RotAngle;
+                    if (rotSettings != null && rotSettings.Enabled)
+                    {
+                        changeState("MATCH : finding angle", sideId);
+                        var finder = new EzRotAngleFinder();
+                        globalRotAngle = finder.ApplyFilters(srcImg, rotSettings, true, out var rotRects);
+                        _LOG.Info("[{0}] MATCH : angle = {1:0.00}°", sideId, globalRotAngle);
+                    }
                 }
 
                 using (var bridge = new QxImageBridge(goldenBmp))
@@ -668,7 +671,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     var ts = DateTime.Now - tm0;
                     double secs = ts.TotalSeconds;
                     matchResult = new MatchResult((int)sideId, grid, blocs: blocs, totalSeconds: secs);
-                    matchResult.RotateAngle = rotateAngle;
+                    matchResult.RotateAngle = globalRotAngle;
                 }
             }
             catch (Exception ex)
@@ -705,7 +708,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
         #region PRIVATE_POST_PREDICT_GRID_NG_BLOCs
         Mat _largeGoldenGridImage;
-        void run_post_grid_predict(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
+        void run_on_grid_ng_predict(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
         {
             Exception errEx = null;
 
@@ -756,7 +759,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     {
                         var rect = b.Rect;
                         rect.Offset(offset_x, offset_y);
-                        var bloc = new EzBloc(rect, score: -1.0);
+                        var bloc = new EzBloc(rect, score: SCORES.NG_PSEUDO);
                         pseudoBlocs.Add(bloc);
                     }
                 }
@@ -785,8 +788,8 @@ namespace EzAoiEmptyTrayInspector.Model
                 {
                     foreach (var b in newGrid.IterBlocs())
                     {
-                        if (b != null && b.Score < 0)
-                            b.Tag = "pseudo";
+                        if (b != null && b.Score <= SCORES.NG_PSEUDO)
+                            b.Tag = "NG_PSEUDO";
                     }
                 }
 
@@ -801,7 +804,7 @@ namespace EzAoiEmptyTrayInspector.Model
             {
                 if (errEx != null)
                 {
-                    _ERROR(ErrCodes.POST_GRID_MATCH_ERROR, sideId, errEx);
+                    _ERROR(ErrCodes.ON_GRID_TEMPLATE_MATCH_ERROR, sideId, errEx);
                 }
                 else
                 {
@@ -1000,96 +1003,32 @@ namespace EzAoiEmptyTrayInspector.Model
 
 
         #region POST_FIND_OUT_GRID_NG_BLOCs
-        void run_post_out_grid_ng_detect(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
+        void run_off_grid_ng_detect(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath, out List<EzBloc> ngBlocs)
         {
-            // 改版中 ...
-            return;
-
+            ngBlocs = null;
             Exception errEx = null;
 
             try
             {
-                changeState("POST OutGrid NG Detecting", sideId);
+                var matchedGrid = matchResult?.Grid;
 
                 // Null Condition
-                if (srcImg == null || _recipe == null || matchResult == null)
+                if (srcImg == null || _recipe == null)
                     return;
 
-                // FULL rows and cols
-                var fullRows = _recipe.TrayMiscSettings.FullRows;
-                var fullCols = _recipe.TrayMiscSettings.FullCols;
+                changeState("檢測 OutGrid NG Blocs", sideId);
 
-                // RESULT GRID
-                var resultGrid = matchResult.Grid;
-                if (resultGrid != null)  // && inputGrid.Rows >= fullRows && inputGrid.Cols >= fullCols && !force)
-                    return;
-
-                // NOTE: goldenGrid 是由 recipe runtime deSerialize 
-                var goldenGrid = _recipe.TrayMiscSettings.GetGoldenGrid();
-                if (goldenGrid == null)
-                    return;
-                _LOG.Info($"GoldenGrid = {goldenGrid.Rows}x{goldenGrid.Cols}");
-
-                // LARGE GOLDEN GRID IMAGE (rebuilt from recipe)
-                if (_largeGoldenGridImage == null)
-                    _largeGoldenGridImage = rebuild_golden_grid_image();
-                if (_largeGoldenGridImage == null)
+                if (matchedGrid == null)
                 {
-                    _LOG.Warn("[AOI] largetGoldenGridImage 無重建!");
+                    _LOG.Warn("matchedGrid is NULL !");
                     return;
                 }
-                _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, goldenGrid, dumpPath);
 
-                // OFFSET 
-                int offset_x = 0;
-                int offset_y = 0;
-                if (resultGrid != null)
-                    find_golden_grid_offset(srcImg, _largeGoldenGridImage, goldenGrid, resultGrid, out offset_x, out offset_y);
+                var detector = new EzOutGridNgBlocsDetector(EzAoiBaseUtil.GetShrinkFactor(srcImg));
+                
+                detector.SetRecipe(_recipe);
 
-                // PSEUDO BLOCs (built by goldGrid + offset)
-                var pseudoBlocs = new List<EzBloc>();
-                foreach (var b in goldenGrid.IterBlocs())
-                {
-                    if (b != null)
-                    {
-                        var rect = b.Rect;
-                        rect.Offset(offset_x, offset_y);
-                        var bloc = new EzBloc(rect, -1);
-                        pseudoBlocs.Add(bloc);
-                    }
-                }
-
-                // EXISTING BLOCs (排除 null condition)
-                var existingBlocs = matchResult.Blocs;
-                if (existingBlocs == null)
-                    existingBlocs = matchResult.Blocs = new List<EzBloc>();
-
-                // PSEUDO BLOCs (remove overlaps)
-                pseudoBlocs.RemoveAll(new Predicate<EzBloc>((pseudo) =>
-                {
-                    foreach (var bloc in existingBlocs)
-                    {
-                        if (bloc != null && bloc.Rect.Contains(pseudo.CenterX, pseudo.CenterY))
-                            return true;
-                    }
-                    return false;
-                }));
-                pseudoBlocs.AddRange(existingBlocs);
-
-                // 重建 grid
-                var builder = new EzBlocsGridBuilder();
-                var newGrid = builder.Build(pseudoBlocs);
-                if (newGrid != null)
-                {
-                    foreach (var b in newGrid.IterBlocs())
-                    {
-                        if (b != null && b.Score < 0)
-                            b.Tag = "pseudo";
-                    }
-                }
-
-                // UPDATE to existing matchResult
-                matchResult.Grid = newGrid;
+                ngBlocs = detector.FindNgBlocs(srcImg, matchedGrid);
             }
             catch (Exception ex)
             {
@@ -1099,7 +1038,7 @@ namespace EzAoiEmptyTrayInspector.Model
             {
                 if (errEx != null)
                 {
-                    _ERROR(ErrCodes.POST_GRID_MATCH_ERROR, sideId, errEx);
+                    _ERROR(ErrCodes.OUT_GRID_NG_BLOCS_DETECT_ERROR, sideId, errEx);
                 }
                 else
                 {
@@ -1195,7 +1134,7 @@ namespace EzAoiEmptyTrayInspector.Model
             }
 #endif
             _LOG.Info("[AOI 空盤檢測] 開始 ... ");
-            AOI_RESULT result = null;
+            AOI_RESULT finalResult = null;
 
             try
             {
@@ -1206,19 +1145,20 @@ namespace EzAoiEmptyTrayInspector.Model
                 var matchResult = _matchResults[0];
                 if (_recipe.VisionSettings.FindAllFailBlocs.Value && _recipe.VisionSettings.Match.UseGrid)
                 {
-                    run_post_grid_predict(SideID.A, imgA, matchResult, _dumpPath);
-                    run_post_out_grid_ng_detect(SideID.A, imgA, matchResult, _dumpPath);
+                    run_on_grid_ng_predict(SideID.A, imgA, matchResult, _dumpPath);
+                    run_off_grid_ng_detect(SideID.A, imgA, matchResult, _dumpPath, out List<EzBloc> ngBloc);
+                    matchResult.OutGridBlocs = ngBloc;
                 }
 
                 var ts = DateTime.Now - tm0;
 
-                result = new AOI_RESULT(matchResult, ts.TotalSeconds)
+                finalResult = new AOI_RESULT(matchResult, ts.TotalSeconds)
                 {
                     FullRows = _recipe.TrayMiscSettings.FullRows,
                     FullCols = _recipe.TrayMiscSettings.FullCols,
                 };
 
-                dump_result_image(outputFileName, imgA, result);
+                dump_result_image(outputFileName, imgA, finalResult);
 
             }
             catch (Exception ex)
@@ -1227,7 +1167,7 @@ namespace EzAoiEmptyTrayInspector.Model
             }
             finally
             {
-                _finalResult = result;
+                _finalResult = finalResult;
                 changeState("Ready");
                 OnFinalResulted?.Invoke(this, new AoiResultEventArgs(_finalResult));
             }

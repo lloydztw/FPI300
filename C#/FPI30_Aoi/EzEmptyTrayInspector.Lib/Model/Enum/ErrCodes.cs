@@ -48,8 +48,11 @@ namespace EzAoiEmptyTrayInspector.Model
         //[Description("儲存合併圖檔異常!")]
         //SAVE_COMBINED_FILE_ERROR,
 
-        [Description("有料之格點樣板比對異常!")]
-        POST_GRID_MATCH_ERROR = 600,
+        [Description("格點樣板比對 異常!")]
+        ON_GRID_TEMPLATE_MATCH_ERROR = 600,
+
+        [Description("格點外圍偵測 異常!")]
+        OUT_GRID_NG_BLOCS_DETECT_ERROR = 600,
 
         [Description("一鍵執行異常!")]
         RUN_ALL_EXCEPTION = 700,

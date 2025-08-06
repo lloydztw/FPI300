@@ -57,6 +57,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
             return img;
         }
+        
         public static int GetShrinkFactor(int imgWidth, int imgHeight)
         {
             int shrinkFactor = 1;
@@ -69,6 +70,12 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 h = imgHeight / shrinkFactor;
             }
             return shrinkFactor;
+        }
+        public static int GetShrinkFactor(Mat img)
+        {
+            if (img == null)
+                return 1;
+            return GetShrinkFactor(img.Width, img.Height);
         }
 
         public static void ApplyZoom(List<RotatedRect> rotRects, double zoomX, double zoomY)
