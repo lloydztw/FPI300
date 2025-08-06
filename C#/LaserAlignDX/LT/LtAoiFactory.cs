@@ -39,8 +39,8 @@ namespace Traveller106
         /// </summary>
         public static string GetActiveRecipeNameAtFPI30()
         {
-            //return Universal.RCPDB?.RCPItemNow?.Name;
-            return "000_default";
+            return Universal.RCPDB?.RCPItemNow?.Name;
+            //return "000_default";
         }
 
         /// <summary>
