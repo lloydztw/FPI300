@@ -15,6 +15,7 @@ using Traveller106;
 using LaserAlignDX.FormSpace;
 using JetEazy.ControlSpace.PLCSpace;
 using System.Threading;
+using LaserAlignDX.FormSpace.FPI30Form;
 
 namespace LaserAlignDX.UISpace.CtrlSpace
 {
@@ -170,10 +171,11 @@ namespace LaserAlignDX.UISpace.CtrlSpace
                 m_ThreadPlc.Start();
             }
         }
-
+        frmCalibration Calibration = null;
         private void BtnCali_Click(object sender, EventArgs e)
         {
-
+            Calibration = new frmCalibration();
+            Calibration.ShowDialog();
         }
 
         private void BtnSIMData_Click(object sender, EventArgs e)

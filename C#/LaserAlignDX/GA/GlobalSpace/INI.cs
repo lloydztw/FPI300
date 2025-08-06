@@ -314,23 +314,23 @@ namespace Traveller106
         [Browsable(false)]
         public int ShowSizeValue { get; set; } = 3;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
-        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("10.调整值x")]
-        [Browsable(false)]
-        public float Cal_Bcx { get; set; } = 0;
+        //[CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        ////[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        //[DisplayName("10.调整值x")]
+        //[Browsable(false)]
+        //public float Cal_Bcx { get; set; } = 0;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
-        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("11.调整值y")]
-        [Browsable(false)]
-        public float Cal_Bcy { get; set; } = 0;
+        //[CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        ////[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        //[DisplayName("11.调整值y")]
+        //[Browsable(false)]
+        //public float Cal_Bcy { get; set; } = 0;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
-        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("12.调整值a")]
-        [Browsable(false)]
-        public float Cal_Bca { get; set; } = 0;
+        //[CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        ////[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        //[DisplayName("12.调整值a")]
+        //[Browsable(false)]
+        //public float Cal_Bca { get; set; } = 0;
 
         [CategoryAttribute(LSCat1), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
@@ -712,6 +712,24 @@ namespace Traveller106
         [Browsable(true)]
         public bool IsForceInspect { get; set; } = true;
 
+        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("07.线扫补偿X")]
+        [Browsable(true)]
+        public float Cal_Bcx { get; set; } = 0;
+
+        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("08.线扫补偿Y")]
+        [Browsable(true)]
+        public float Cal_Bcy { get; set; } = 0;
+
+        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("09.线扫补偿角度")]
+        [Browsable(true)]
+        public float Cal_Bca { get; set; } = 0;
+
         #endregion
 
         #region SQL_SETUP
@@ -818,9 +836,9 @@ namespace Traveller106
             tcp_handle_port = int.Parse(ReadINIValue("Basic", "tcp_handle_port", tcp_handle_port.ToString(), INIFILE));
             handle_delaytime = int.Parse(ReadINIValue("Basic", "handle_delaytime", handle_delaytime.ToString(), INIFILE));
 
-            //Cal_Bcx = float.Parse(ReadINIValue("Basic", "Cal_Bcx", Cal_Bcx.ToString(), INIFILE));
-            //Cal_Bcy = float.Parse(ReadINIValue("Basic", "Cal_Bcy", Cal_Bcy.ToString(), INIFILE));
-            //Cal_Bca = float.Parse(ReadINIValue("Basic", "Cal_Bca", Cal_Bca.ToString(), INIFILE));
+            Cal_Bcx = float.Parse(ReadINIValue("Basic", "Cal_Bcx", Cal_Bcx.ToString(), INIFILE));
+            Cal_Bcy = float.Parse(ReadINIValue("Basic", "Cal_Bcy", Cal_Bcy.ToString(), INIFILE));
+            Cal_Bca = float.Parse(ReadINIValue("Basic", "Cal_Bca", Cal_Bca.ToString(), INIFILE));
             //IsOpenPrintFirst = ReadINIValue("Basic", "IsOpenPrintFirst", (IsOpenPrintFirst ? "1" : "0"), INIFILE) == "1";
             //IsUseFixedMark = ReadINIValue("Basic", "IsUseFixedMark", (IsUseFixedMark ? "1" : "0"), INIFILE) == "1";
 
@@ -921,9 +939,9 @@ namespace Traveller106
             WriteINIValue("Basic", "tcp_handle_port", tcp_handle_port.ToString(), INIFILE);
             WriteINIValue("Basic", "handle_delaytime", handle_delaytime.ToString(), INIFILE);
 
-            //WriteINIValue("Basic", "Cal_Bcx", Cal_Bcx.ToString(), INIFILE);
-            //WriteINIValue("Basic", "Cal_Bcy", Cal_Bcy.ToString(), INIFILE);
-            //WriteINIValue("Basic", "Cal_Bca", Cal_Bca.ToString(), INIFILE);
+            WriteINIValue("Basic", "Cal_Bcx", Cal_Bcx.ToString(), INIFILE);
+            WriteINIValue("Basic", "Cal_Bcy", Cal_Bcy.ToString(), INIFILE);
+            WriteINIValue("Basic", "Cal_Bca", Cal_Bca.ToString(), INIFILE);
             //WriteINIValue("Basic", "IsOpenPrintFirst", (IsOpenPrintFirst ? "1" : "0"), INIFILE);
             //WriteINIValue("Basic", "IsUseFixedMark", (IsUseFixedMark ? "1" : "0"), INIFILE);
 

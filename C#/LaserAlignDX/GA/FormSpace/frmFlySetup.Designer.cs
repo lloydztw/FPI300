@@ -132,9 +132,8 @@
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(90, 25);
             this.button4.TabIndex = 35;
-            this.button4.Text = "飞拍";
+            this.button4.Text = "实时画面";
             this.button4.UseVisualStyleBackColor = false;
-            this.button4.Visible = false;
             // 
             // button3
             // 

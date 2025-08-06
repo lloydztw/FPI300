@@ -1291,8 +1291,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //    return ptview;
         //}
 
-        PointF[] ptsview = new PointF[POINT_COUNT];
-        PointF[] ptsworld = new PointF[POINT_COUNT];
+        public PointF[] ptsview = new PointF[POINT_COUNT];
+        public PointF[] ptsworld = new PointF[POINT_COUNT];
         //public PointF[] pts2view = new PointF[POINT_COUNT];
         //public PointF[] pts2world = new PointF[POINT_COUNT];
 

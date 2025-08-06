@@ -109,51 +109,52 @@ namespace LaserAlignDX.FormSpace
         {
             PointF ptCenter = new PointF(xRecipe.xRectRegionPrint.X + xRecipe.xRectRegionPrint.Width / 2,
                 xRecipe.xRectRegionPrint.Y + xRecipe.xRectRegionPrint.Height / 2);
-            int i = 0;
-            while (i < 4)
-            {
-                LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[i];
-                PointF ptworld = cali.ViewToWorld(ptCenter);
-                switch (i)
-                {
-                    case 0:
-                        MACHINE.PLCIO.SetStage1(0, ptworld, new PointF());
-                        break;
-                    case 1:
-                        MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld);
-                        break;
-                    case 2:
-                        MACHINE.PLCIO.SetStage2(0, ptworld, new PointF());
-                        break;
-                    case 3:
-                        MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld);
-                        break;
-                }
-                i++;
-            }
-            label5.Text = $"{DateTime.Now.ToString()}操作完成";
-
-            //textBox1.Text = PointFtoStringSimple(ptCenter);
-            //PointF ptworld = LineScanCalibrate.ViewToWorld(ptCenter);
-            //textBox2.Text = PointFtoStringSimple(ptworld);
-
-            //switch (cboCaliIndex.SelectedIndex)
+            //int i = 0;
+            //while (i < 4)
             //{
-            //    case 0:
-            //        MACHINE.PLCIO.SetStage1(0, ptworld, new PointF());
-            //        break;
-            //    case 1:
-            //        MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld);
-            //        break;
-            //    case 2:
-            //        MACHINE.PLCIO.SetStage2(0, ptworld, new PointF());
-            //        break;
-            //    case 3:
-            //        MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld);
-            //        break;
+            //    LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[i];
+            //    PointF ptworld = cali.ViewToWorld(ptCenter);
+            //    switch (i)
+            //    {
+            //        case 0:
+            //            MACHINE.PLCIO.SetStage1(0, ptworld, new PointF());
+            //            break;
+            //        case 1:
+            //            MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld);
+            //            break;
+            //        case 2:
+            //            MACHINE.PLCIO.SetStage2(0, ptworld, new PointF());
+            //            break;
+            //        case 3:
+            //            MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld);
+            //            break;
+            //    }
+            //    i++;
             //}
+            //label5.Text = $"{DateTime.Now.ToString()}操作完成";
 
-            //label5.Text = $"{cboCaliIndex.Text}写入PLC成功";
+            LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[cboCaliIndex.SelectedIndex];
+            textBox1.Text = PointFtoStringSimple(ptCenter);
+            PointF ptworld = cali.ViewToWorld(ptCenter);
+            textBox2.Text = PointFtoStringSimple(ptworld);
+
+            switch (cboCaliIndex.SelectedIndex)
+            {
+                case 0:
+                    MACHINE.PLCIO.SetStage1(0, ptworld, new PointF());
+                    break;
+                case 1:
+                    MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld);
+                    break;
+                case 2:
+                    MACHINE.PLCIO.SetStage2(0, ptworld, new PointF());
+                    break;
+                case 3:
+                    MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld);
+                    break;
+            }
+
+            label5.Text = $"{DateTime.Now.ToString()}{cboCaliIndex.Text}操作完成";
         }
 
         private void BtnCalRealPointF_Click(object sender, EventArgs e)

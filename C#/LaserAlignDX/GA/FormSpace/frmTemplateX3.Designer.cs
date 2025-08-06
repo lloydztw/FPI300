@@ -76,7 +76,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(12, 70);
+            this.label5.Location = new System.Drawing.Point(374, 8);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(29, 12);
             this.label5.TabIndex = 61;
@@ -88,7 +88,7 @@
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button2.Location = new System.Drawing.Point(12, 7);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(224, 51);
+            this.button2.Size = new System.Drawing.Size(129, 51);
             this.button2.TabIndex = 60;
             this.button2.Text = "平台和吸嘴左上角位置写入PLC";
             this.button2.UseVisualStyleBackColor = false;
@@ -96,12 +96,11 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(594, 7);
+            this.label4.Location = new System.Drawing.Point(158, 8);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(83, 12);
             this.label4.TabIndex = 59;
             this.label4.Text = "校正参数平台:";
-            this.label4.Visible = false;
             // 
             // cboCaliIndex
             // 
@@ -112,57 +111,52 @@
             "平台1(第二组吸嘴)",
             "平台2(第一组吸嘴)",
             "平台2(第二组吸嘴)"});
-            this.cboCaliIndex.Location = new System.Drawing.Point(596, 22);
+            this.cboCaliIndex.Location = new System.Drawing.Point(160, 23);
             this.cboCaliIndex.Name = "cboCaliIndex";
             this.cboCaliIndex.Size = new System.Drawing.Size(195, 20);
             this.cboCaliIndex.TabIndex = 58;
-            this.cboCaliIndex.Visible = false;
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(594, 88);
+            this.label3.Location = new System.Drawing.Point(158, 89);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(47, 12);
             this.label3.TabIndex = 57;
             this.label3.Text = "实际点:";
-            this.label3.Visible = false;
             // 
             // textBox2
             // 
-            this.textBox2.Location = new System.Drawing.Point(596, 103);
+            this.textBox2.Location = new System.Drawing.Point(160, 104);
             this.textBox2.Name = "textBox2";
             this.textBox2.ReadOnly = true;
             this.textBox2.Size = new System.Drawing.Size(194, 21);
             this.textBox2.TabIndex = 56;
-            this.textBox2.Visible = false;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(594, 46);
+            this.label2.Location = new System.Drawing.Point(158, 47);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(47, 12);
             this.label2.TabIndex = 55;
             this.label2.Text = "虚拟点:";
-            this.label2.Visible = false;
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(596, 61);
+            this.textBox1.Location = new System.Drawing.Point(160, 62);
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
             this.textBox1.Size = new System.Drawing.Size(194, 21);
             this.textBox1.TabIndex = 54;
-            this.textBox1.Visible = false;
             // 
             // button1
             // 
             this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.button1.Location = new System.Drawing.Point(14, 103);
+            this.button1.Location = new System.Drawing.Point(14, 163);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(222, 51);
+            this.button1.Size = new System.Drawing.Size(127, 51);
             this.button1.TabIndex = 53;
             this.button1.Text = "记录模板实际起点";
             this.button1.UseVisualStyleBackColor = false;

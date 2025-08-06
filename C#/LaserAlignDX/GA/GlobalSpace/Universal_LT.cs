@@ -11,6 +11,7 @@ using JetEazy.DBSpace;
 using JetEazy.Interface;
 using JetEazy.OPSpace;
 using JetEazy.PropertyGridSpace;
+using LaserAlignDX.BasicSpace.ParaSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System.IO;
@@ -32,7 +33,7 @@ namespace Traveller106
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/07/24";
+        public const string VersionDate = "2025/08/06";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
@@ -259,6 +260,9 @@ namespace Traveller106
                 LineScanCalibrateClasses[i].Load();
                 i++;
             }
+
+            MvdFindCircleClass.Instance.Initial(WORKPATH, 0, $"CalibrateForm_default_info.ini");
+            MvdFindCircleClass.Instance.Load();
 
             //LineScanCalibrateClass.Instance.Initial(WORKPATH, 0, "Calibrate_default_info.ini");
             //LineScanCalibrateClass.Instance.Load();

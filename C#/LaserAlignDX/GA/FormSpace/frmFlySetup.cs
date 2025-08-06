@@ -19,6 +19,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Traveller106;
@@ -26,6 +27,7 @@ using VisionDesigner.BlobFind;
 using VM.PlatformSDKCS;
 using VsCommon.ControlSpace.MachineSpace;
 using WorldOfMoveableObjects;
+using Timer = System.Windows.Forms.Timer;
 
 namespace LaserAlignDX.FormSpace
 {
@@ -41,11 +43,13 @@ namespace LaserAlignDX.FormSpace
 
         bool bSelectRegion = false;
         bool bOpenFly = false;
+        bool bFlyComplete = false;
         IxLineScanCam IxFlyAreaCam
         {
             get { return Universal.IxFlyAreaCam; }
         }
-
+        Thread th_FlyLive = null;
+        bool m_FlyRunning = false;
         protected RecipeFPIX3Class xRecipe
         {
             get { return RecipeFPIX3Class.Instance; }
@@ -202,14 +206,56 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnOpenFly_Click(object sender, EventArgs e)
         {
-            bOpenFly = !bOpenFly;
+            //bOpenFly = !bOpenFly;
+            //IxFlyAreaCam.TriggerMode(!IxFlyAreaCam.IsTriggerModeOn);
+            if (!m_FlyRunning)
+            {
+                m_FlyRunning = true;
+                th_FlyLive = new Thread(new ThreadStart(flyRunning));
+                th_FlyLive.Start();
+            }
+            else
+            {
+                m_FlyRunning = false;
+                System.Threading.Thread.Sleep(500);
+                if (th_FlyLive != null)
+                {
+                    th_FlyLive.Abort();
+                    th_FlyLive = null;
+                }
+            }
+        }
+
+        void flyRunning()
+        {
+            while (m_FlyRunning)
+            {
+                try
+                {
+                    if (!bFlyComplete)
+                    {
+                        bFlyComplete = true;
+                        bOpenFly = true;
+                        if (MACHINEx3.LightCollection.Length > 1)
+                            MACHINEx3.LightCollection[1].Trigger();
+                    }
+
+                    System.Threading.Thread.Sleep(50);
+
+                }
+                catch
+                {
+
+                }
+            }
         }
 
         private void XTimer_Tick(object sender, EventArgs e)
         {
             btnSelectRegion.BackColor = (bSelectRegion ? Color.Red : Color.FromArgb(192, 255, 192));
             //btnSelectTemplate.BackColor = (bSelectRegion ? Color.Red : Color.FromArgb(192, 255, 192));
-            btnOpenFly.BackColor = (bOpenFly ? Color.Red : Color.FromArgb(192, 255, 192));
+            btnOpenFly.BackColor = (m_FlyRunning ? Color.Red : Color.FromArgb(192, 255, 192));
+
         }
 
         private void BtnSelectRegion_Click(object sender, EventArgs e)
@@ -234,11 +280,23 @@ namespace LaserAlignDX.FormSpace
             switch (iFlyMode)
             {
                 case 0:
-                    //取图
-                    xRecipe.bmpOrgFly.Dispose();
-                    xRecipe.bmpOrgFly = ConvertFromMONO(bmpbytes, iw, ih);
 
-                    DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
+                    if (bFlyComplete)
+                    {
+                        using (Bitmap bmp = ConvertFromMONO(bmpbytes, iw, ih))
+                        {
+                            DS1.ReplaceDisplayImage(bmp);
+                        }
+                        bFlyComplete = false;
+                    }
+                    else
+                    {
+                        //取图
+                        xRecipe.bmpOrgFly.Dispose();
+                        xRecipe.bmpOrgFly = ConvertFromMONO(bmpbytes, iw, ih);
+
+                        DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
+                    }
 
                     break;
                 case 1:
@@ -253,12 +311,23 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
+            if(m_FlyRunning)
+            {
+                JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
+                return;
+            }
+
             xRecipe.Load();
             this.DialogResult = DialogResult.Cancel;
         }
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
+            if (m_FlyRunning)
+            {
+                JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
+                return;
+            }
             this.DialogResult = DialogResult.OK;
         }
 

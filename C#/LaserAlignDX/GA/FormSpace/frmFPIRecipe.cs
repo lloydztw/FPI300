@@ -1,5 +1,6 @@
 ﻿using Eazy_Project_III;
 using JetEazy.BasicSpace;
+using JetEazy.EzImage;
 using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Interface;
 using JetEazy.Utils;
@@ -160,32 +161,33 @@ namespace LaserAlignDX.FormSpace
 #endif
         }
 
-        frmNoTrayX3 frmNoTrayX3x = null;
+        //frmNoTrayX3 frmNoTrayX3x = null;
         private void BtnNoTrayTemplateForm_Click(object sender, EventArgs e)
         {
-            frmNoTrayX3x = new frmNoTrayX3();
-            frmNoTrayX3x.ShowDialog();
-            frmNoTrayX3x.Dispose();
-            frmNoTrayX3x = null;
+            //frmNoTrayX3x = new frmNoTrayX3();
+            //frmNoTrayX3x.ShowDialog();
+            //frmNoTrayX3x.Dispose();
+            //frmNoTrayX3x = null;
+            using (var frmNoTrayX3x = new frmNoTrayX3())
+            {
+                frmNoTrayX3x.ShowDialog();
+            }
         }
 
         private void BtnSaveImage_Click(object sender, EventArgs e)
         {
-
             string _filepath = JetEazy.BasicSpace.JzToolsClass.SaveFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
             if (!string.IsNullOrEmpty(_filepath))
             {
-                Bitmap bmpfuckyou = new Bitmap(xRecipe.bmpOrg,
-                    new Size(xRecipe.bmpOrg.Width >> 1, xRecipe.bmpOrg.Height >> 1));
-                bmpfuckyou.Save(_filepath, ImageFormat.Jpeg);
-
-                //FreeImageBitmap image = new FreeImageBitmap(xRecipe.bmpOrg,
-                //    new Size(xRecipe.bmpOrg.Width >> 1, xRecipe.bmpOrg.Height >> 1));
-                ////image.Rescale(new Size(xRecipe.bmpOrg.Width >> 1, xRecipe.bmpOrg.Height >> 1), FREE_IMAGE_FILTER.FILTER_BILINEAR);
-                //image.Save(_filepath, FreeImageAPI.FREE_IMAGE_FORMAT.FIF_JPEG);
+                using (IEzImage ezImage = new EzFreeBitmap(xRecipe.bmpOrg, true))
+                {
+                    ezImage.Save(_filepath);
+                }
+                //IEzImage ezImage = new EzFreeBitmap(xRecipe.bmpOrg, true);
+                //ezImage.Save(_filepath);
+                //ezImage.Dispose();
                 JetEazy.BasicSpace.VsMSG.Instance.Warning($"{ToChangeLanguage("图片保存完成.路径:")}{Environment.NewLine + _filepath}", false);
             }
-
         }
 
         //>>> 沒有必要的話, 不需要將 frmFlySetup 提升為 member data !!!

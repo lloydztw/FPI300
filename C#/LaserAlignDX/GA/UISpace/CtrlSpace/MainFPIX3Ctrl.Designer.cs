@@ -83,7 +83,6 @@
             this.button2.TabIndex = 248;
             this.button2.Text = "基准校正";
             this.button2.UseVisualStyleBackColor = false;
-            this.button2.Visible = false;
             // 
             // button1
             // 

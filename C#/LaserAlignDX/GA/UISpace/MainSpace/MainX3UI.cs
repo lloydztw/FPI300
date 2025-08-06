@@ -181,54 +181,122 @@ namespace LaserAlignDX.UISpace.MainSpace
                 }));
                 if (bytesFlyDatas.Count >= 4)
                 {
+                    int iflystartindex = MACHINE.PLCIO.iFlyStart;
                     iFlyIndex = 3;
-                    if (MACHINE.PLCIO.iFlyStart == 1)
-                    {
-                        foreach (byte[] bmpdata in bytesFlyDatas)
-                        {
-                            if (FlyParaClass.Instance.xIsOpenMuit)
-                                flyProcessProSpecial(1, iFlyIndex, cameraFrame, bmpdata);
-                            else
-                                flyProcessPro(1, iFlyIndex, cameraFrame, bmpdata);
-                            iFlyIndex--;
-                        }
-                    }
-                    else if (MACHINE.PLCIO.iFlyStart == 2)
-                    {
-                        foreach (byte[] bmpdata in bytesFlyDatas)
-                        {
-                            if (FlyParaClass.Instance.xIsOpenMuit)
-                                flyProcessProSpecial(2, iFlyIndex, cameraFrame, bmpdata);
-                            else
-                                flyProcessPro(2, iFlyIndex, cameraFrame, bmpdata);
-                            iFlyIndex--;
-                        }
-                    }
-                    else
-                    {
-                        foreach (byte[] bmpdata in bytesFlyDatas)
-                        {
-                            if (FlyParaClass.Instance.xIsOpenMuit)
-                                flyProcessProSpecial(2, iFlyIndex, cameraFrame, bmpdata);
-                            else
-                                flyProcessPro(1, iFlyIndex, cameraFrame, bmpdata);
-                            iFlyIndex--;
-                        }
-                    }
+                    flyRunning(iflystartindex, cameraFrame);
 
                     MACHINE.PLCIO.bFlyDone = true;
                     MACHINE.PLCIO.iFlyResult(iFlyResult);
                     MACHINE.PLCIO.rOffset(iFlyOffset);
 
                     bytesFlyDatas.Clear();
+
+                    int[] ints0 = iFlyResult;
+                    float[] floats0 = iFlyOffset;
+
+                    StringBuilder sb = new StringBuilder();
+                    foreach (var ix in ints0)
+                    {
+                        sb.Append(ix.ToString() + ",");
+                    }
+                    _LOG("iFlyResult:" + sb.ToString(), Color.Black);
+
+                    StringBuilder sb1 = new StringBuilder();
+                    foreach (var ix in floats0)
+                    {
+                        sb1.Append(ix.ToString() + ",");
+                    }
+                    _LOG("iFlyOffset:" + sb1.ToString(), Color.Black);
                 }
             }
         }
 
+        /* 备份20250801
+                private void IxFlyAreaCam_LineTriggerAction(JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
+                {
+                    if (Traveller106.Universal.IsOpenFlyForm)
+                    {
+                        return;
+                    }
+
+                    if (MACHINE.PLCIO.bFlyReady)
+                    {
+                        //转换图像
+                        byte[] bmpbytes = new byte[cameraFrame.uBytes];
+                        Marshal.Copy(pBuffer, bmpbytes, 0, bmpbytes.Length);
+                        bytesFlyDatas.Add(bmpbytes);
+                        this.Invoke(new Action(() =>
+                        {
+                            lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
+                        }));
+                        if (bytesFlyDatas.Count >= 4)
+                        {
+                            iFlyIndex = 3;
+                            if (MACHINE.PLCIO.iFlyStart == 1)
+                            {
+                                foreach (byte[] bmpdata in bytesFlyDatas)
+                                {
+                                    if (FlyParaClass.Instance.xIsOpenMuit)
+                                        flyProcessProSpecial(1, iFlyIndex, cameraFrame, bmpdata);
+                                    else
+                                        flyProcessPro(1, iFlyIndex, cameraFrame, bmpdata);
+                                    iFlyIndex--;
+                                }
+                            }
+                            else if (MACHINE.PLCIO.iFlyStart == 2)
+                            {
+                                foreach (byte[] bmpdata in bytesFlyDatas)
+                                {
+                                    if (FlyParaClass.Instance.xIsOpenMuit)
+                                        flyProcessProSpecial(2, iFlyIndex, cameraFrame, bmpdata);
+                                    else
+                                        flyProcessPro(2, iFlyIndex, cameraFrame, bmpdata);
+                                    iFlyIndex--;
+                                }
+                            }
+                            else
+                            {
+                                foreach (byte[] bmpdata in bytesFlyDatas)
+                                {
+                                    if (FlyParaClass.Instance.xIsOpenMuit)
+                                        flyProcessProSpecial(1, iFlyIndex, cameraFrame, bmpdata);
+                                    else
+                                        flyProcessPro(1, iFlyIndex, cameraFrame, bmpdata);
+                                    iFlyIndex--;
+                                }
+                            }
+
+                            MACHINE.PLCIO.bFlyDone = true;
+                            MACHINE.PLCIO.iFlyResult(iFlyResult);
+                            MACHINE.PLCIO.rOffset(iFlyOffset);
+
+                            bytesFlyDatas.Clear();
+                        }
+                    }
+                }
+        */
+
         #region 飞拍测试流程
 
         Stopwatch flystopwatch = new Stopwatch();
+        void flyRunning(int flyStart, JetEazy.CCDSpace.CameraFrame cameraFrame)
+        {
+            int iCount = bytesFlyDatas.Count - 1;
+            int iShowIndex = 0;
+            while (iCount > -1)
+            {
+                byte[] bmpdata = bytesFlyDatas[iCount];
 
+                if (FlyParaClass.Instance.xIsOpenMuit)
+                    flyProcessProSpecial(flyStart, iShowIndex, cameraFrame, bmpdata);
+                else
+                    flyProcessPro(flyStart, iShowIndex, cameraFrame, bmpdata);
+
+                iCount--;
+                iFlyIndex--;
+                iShowIndex++;
+            }
+        }
         void flyProcess(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
         {
             flystopwatch.Restart();
@@ -1253,5 +1321,39 @@ namespace LaserAlignDX.UISpace.MainSpace
 #endif
         }
         #endregion
+
+        protected void _LOG(string msg, params object[] args)
+        {
+#if (true)
+            Color color = Color.Black;
+
+            int N = args.Length;
+            if (N > 0 && args[N - 1] is Color)
+            {
+                color = (Color)args[N - 1];
+                N -= 1;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            sb.Append(Name);
+            sb.Append(", ");
+            sb.Append(msg);
+
+            for (int i = 0; i < N; i++)
+            {
+                sb.Append(", ");
+                sb.Append(args[i]);
+            }
+
+            msg = sb.ToString();
+            CommonLogClass.Instance.LogMessage(msg, color);
+            //if (color == Color.Red)
+            //    GdxGlobal.LOG.Warn(msg);
+            //else
+            //    GdxGlobal.LOG.Debug(msg);
+#endif
+            msg = Name + ", " + msg;
+            //GdxGlobal.LOG.Log(msg, args);
+        }
     }
 }

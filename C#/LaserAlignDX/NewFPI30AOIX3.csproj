@@ -138,6 +138,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.EzImage.Interface.dll</HintPath>
     </Reference>
+    <Reference Include="JetEazy.EzImages, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.EzImages.dll</HintPath>
+    </Reference>
     <Reference Include="JetEazy.ImageViewerEx, Version=3.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.ImageViewerEx.dll</HintPath>
@@ -298,6 +302,7 @@
     <Compile Include="GA\BasicSpace\FindRectByVM.cs" />
     <Compile Include="GA\BasicSpace\Mvd2DReaderClass.cs" />
     <Compile Include="GA\BasicSpace\MvdFindClass.cs" />
+    <Compile Include="GA\BasicSpace\ParaSpace\MvdFindCircleClass.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\BarcodeAll_MVD.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\ZXingClass.cs" />
     <Compile Include="GA\BasicSpace\RecipeParaGridClass.cs" />
@@ -326,6 +331,18 @@
     </Compile>
     <Compile Include="GA\FormSpace\BannerForm.designer.cs">
       <DependentUpon>BannerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA\FormSpace\FPI30Form\CalibrationUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA\FormSpace\FPI30Form\CalibrationUI.Designer.cs">
+      <DependentUpon>CalibrationUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA\FormSpace\FPI30Form\frmCalibration.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA\FormSpace\FPI30Form\frmCalibration.Designer.cs">
+      <DependentUpon>frmCalibration.cs</DependentUpon>
     </Compile>
     <Compile Include="GA\FormSpace\frmBaseX2.cs">
       <SubType>Form</SubType>
@@ -593,6 +610,12 @@
     <Compile Include="LT\Utils\EzMvdImageConvertor.cs" />
     <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">
       <DependentUpon>BannerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\FormSpace\FPI30Form\CalibrationUI.resx">
+      <DependentUpon>CalibrationUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\FormSpace\FPI30Form\frmCalibration.resx">
+      <DependentUpon>frmCalibration.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\frmBaseX2.resx">
       <DependentUpon>frmBaseX2.cs</DependentUpon>

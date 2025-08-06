@@ -252,6 +252,9 @@ namespace Traveller106
                 i++;
             }
 
+            MvdFindCircleClass.Instance.Initial(WORKPATH, 0, $"CalibrateForm_default_info.ini");
+            MvdFindCircleClass.Instance.Load();
+
             //LineScanCalibrateClass.Instance.Initial(WORKPATH, 0, "Calibrate_default_info.ini");
             //LineScanCalibrateClass.Instance.Load();
             //LineScanCalibrateClass.Instance.Save();
