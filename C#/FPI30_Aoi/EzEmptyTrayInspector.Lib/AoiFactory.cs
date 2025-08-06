@@ -22,41 +22,71 @@ namespace EzAoiEmptyTrayInspector
 {
     public class AoiFactory
     {
-        public static Form OpenEmptyTrayInspectorTool(Form parent = null, string recipeFileName = null)
+        #region PRIVATE_DATA
+        static IxEmptyTrayInspector _directModelInstance = null;
+        static Form _frmInstance = null;
+        #endregion
+
+        public static Form OpenEmptyTrayInspectorTool(Form owner = null, string recipeName = null)
         {
-            EzRcpContraintCtrl.Instance.IsContraintEnabled = parent != null;
-
-            var frm = EzAppForDll.Instance.Build();
-
-            if (parent != null)
+            if (_frmInstance == null)
             {
-                var aoiModel = Global.AoiModel;
-                aoiModel.AddRef();
+                EzRcpContraintCtrl.Instance.IsContraintEnabled = owner != null;
 
-                if (recipeFileName != null)
+                var frm = EzAppForDll.Instance.Build();
+
+                frm.FormClosed += (s, e) => 
                 {
-                    frm.Load += (s, e) =>
-                    {
-                        frm.BeginInvoke(new Action(() =>
-                        {
-                            EzRcpContraintCtrl.Instance.AssignOneRecipe(recipeFileName);
-                        }));
-                    };
-                }
-            }
+                    _frmInstance = null;
+                };
 
-            return frm;
+                if (owner != null)
+                {
+                    // 延緩載入指定參數
+                    if (recipeName != null)
+                    {
+                        frm.Load += (s, e) =>
+                        {
+                            frm.BeginInvoke(new Action(() => { EzRcpContraintCtrl.Instance.AssignOneRecipe(recipeName); }));
+                        };
+                    }
+
+                    // 當 aoiModel 已經被 InstanceModel 先啟用.
+                    // 對其 addRef()
+                    if (_directModelInstance != null)
+                    {
+                        _directModelInstance.AddRef();
+                    }
+                }
+
+                _frmInstance = frm;
+                return _frmInstance;
+            }
+            else
+            {
+                return _frmInstance;
+            }
         }
 
-        public static IxEmptyTrayInspector InstanceModel(string recipeFileName = null)
+        public static IxEmptyTrayInspector InstanceModel(string recipeName = null)
         {
+            if (_frmInstance != null)
+            {
+                MessageBox.Show("必須先關掉 Tool!");
+                return null;
+            }
+
             var model = Global.AoiModel;
-            EzRcpContraintCtrl.Instance.AssignOneRecipe(recipeFileName);
+            //載入指定參數
+            EzRcpContraintCtrl.Instance.AssignOneRecipe(recipeName);
+            _directModelInstance = model;
             return model;
         }
 
         public static void DisposeAll()
         {
+            _directModelInstance?.Dispose();
+            _directModelInstance = null;
             Global.Dispose();
         }
     }

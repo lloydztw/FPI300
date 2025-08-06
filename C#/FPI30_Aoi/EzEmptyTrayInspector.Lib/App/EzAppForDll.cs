@@ -43,12 +43,6 @@ namespace EzAoiEmptyTrayInspector
         static EzAppForDll _singleton = null;
         #endregion
 
-        #region RUNTIME_DATA
-#if (OPT_LEGACY)
-        string _assignedRecipeName;
-#endif
-        #endregion
-
         public static EzAppForDll Instance
         {
             get
@@ -70,19 +64,6 @@ namespace EzAoiEmptyTrayInspector
             // 綁定 Splash 啟動畫面
             ConfigSplash<FormSplash>();
         }
-
-#if (OPT_LEGACY)
-        public Form Build(string assignedRecipeName)
-        {
-            _assignedRecipeName = assignedRecipeName;
-            return base.Build();
-        }
-        public void Dispose()
-        {
-            clear_up();
-            _singleton = null;
-        }
-#endif
 
         /// <summary>
         /// (1) 建構 Model 與其他硬體裝置, 如 Cameras, PLC IO, Motors 等等
@@ -184,10 +165,11 @@ namespace EzAoiEmptyTrayInspector
             matchCtrl.PostInit();
 
             // 主視窗 關閉 事件
-            awMain.FormClosed += (s,e) => Global.Dispose();
-
-            // 顯示 Recipe 資訊
-            // wndProductionPanel.lblRecipeInfo.Text = "參數 = " + _assignedRecipeName;
+            awMain.FormClosed += (s, e) =>
+            {
+                Global.Dispose();
+                _singleton = null;
+            };
         }
 
         /// <summary>
@@ -198,74 +180,5 @@ namespace EzAoiEmptyTrayInspector
             // 加掛 額外的客製化啟始程序
             EzRcpContraintCtrl.Instance.Constraint(frmMain);
         }
-
-
-#if (OPT_LEGACY)
-        /// <summary>
-        /// 指定 Recipe
-        /// </summary>
-        public string AssignOneRecipe(string targetName = null)
-        {
-            //if (string.IsNullOrEmpty(name))
-            //    name = "aoi_empty_tray_default";
-
-            var rcpCtrl = base.recipesMgrCtrl;
-            if (rcpCtrl == null)
-            {
-                var JB = new JxRecipesMgrBuilder<RecipeClassT>(Global.APP_PATH.RecipePath, ".json");
-                rcpCtrl = JB.InstanceCtrl();
-                add_to_cleanup_list(rcpCtrl);
-            }
-
-            var activeRecipe = rcpCtrl.ActiveRecipe as RecipeClassT;
-
-            bool needToReload = false;
-            if (activeRecipe != null)
-            {
-                if (!string.IsNullOrEmpty(targetName) && targetName != activeRecipe.Name)
-                    needToReload = true;
-            }
-            else
-            { 
-                if (string.IsNullOrEmpty(targetName))
-                    targetName = "aoi_empty_tray_default";
-                needToReload = true;
-            }
-
-            if (needToReload)
-            {
-                var mgr = rcpCtrl.GetManager();
-                var list = mgr.GetRecipeNamesList(true);
-                if (!list.Contains(targetName))
-                {
-                    activeRecipe = mgr.InstanciateRecipe(targetName) as RecipeClassT;
-                    activeRecipe.Name = targetName;
-                }
-                mgr.UpdateRecipe(activeRecipe);
-                rcpCtrl.LoadRecipe(targetName, false);
-            }
-
-            Global.AoiModel.SetRecipe(activeRecipe);
-            return activeRecipe?.Name;
-        }
-
-        #region PRIVATE_FUNCIONS
-        List<IDisposable> _disposableObjs;
-        void add_to_cleanup_list(IDisposable obj)
-        {
-            if (_disposableObjs == null)
-                _disposableObjs = new List<IDisposable>();
-            if (_disposableObjs.Contains(obj))
-                _disposableObjs.Add(obj);
-        }
-        void clear_up()
-        {
-            if (_disposableObjs != null)
-                foreach (var obj in _disposableObjs)
-                    obj.Dispose();
-            _disposableObjs = null;
-        }
-        #endregion
-#endif
     }
 }

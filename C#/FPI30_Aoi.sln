@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzAoiEmptyTrayInspector.App
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzAoiEmptyTrayInspector.Lib", "FPI30_Aoi\EzEmptyTrayInspector.Lib\EzAoiEmptyTrayInspector.Lib.csproj", "{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzAoiEmptyTrayInspector.TestDemo", "FPI30_Aoi\EzEmptyTrayInspector.TestDemo\EzAoiEmptyTrayInspector.TestDemo.csproj", "{8A30A4F2-222A-498B-9565-6E50103ABF4B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTest", "UnitTest", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,6 +27,10 @@ Global
 		{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A30A4F2-222A-498B-9565-6E50103ABF4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A30A4F2-222A-498B-9565-6E50103ABF4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A30A4F2-222A-498B-9565-6E50103ABF4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A30A4F2-222A-498B-9565-6E50103ABF4B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -30,6 +38,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C2A8E04A-34BB-44C9-A5E0-6E22FBBB0355} = {8F93B355-D00A-4FFD-A875-83C880C1E663}
 		{A1BCDEE4-DD9A-43C2-A127-90B727EB0F04} = {8F93B355-D00A-4FFD-A875-83C880C1E663}
+		{8A30A4F2-222A-498B-9565-6E50103ABF4B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {706379C0-3E5D-4A5B-A4BC-C675C5CC0685}

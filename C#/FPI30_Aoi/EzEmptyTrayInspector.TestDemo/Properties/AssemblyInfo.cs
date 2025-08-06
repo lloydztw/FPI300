@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // 組件的一般資訊是由下列的屬性集控制。
 // 變更這些屬性的值即可修改組件的相關
 // 資訊。
-[assembly: AssemblyTitle("EzDualMatchApp")]
+[assembly: AssemblyTitle("FPI30 Aoi TestDemo")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("EzDualMatchApp")]
-[assembly: AssemblyCopyright("Copyright © 2024")]
+[assembly: AssemblyProduct("EzAoiEmptyTrayInspector")]
+[assembly: AssemblyCopyright("Copyright © 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // 下列 GUID 為專案公開 (Expose) 至 COM 時所要使用的 typelib ID
-[assembly: Guid("F5A112EE-C75C-42F7-AEF4-287F000CF5B5")]
+[assembly: Guid("EEA6E0A6-E04C-4B8C-93D0-03E877CCC9DC")]
 
 // 組件的版本資訊由下列四個值所組成: 
 //
@@ -41,9 +41,10 @@ using System.Runtime.InteropServices;
  *  
  *      < PropertyGroup >
  *          ...
- *          <Deterministic> false </Deterministic>
- *      </PropertyGroup >
+ *          <Deterministic>false</Deterministic >
+ *      </ PropertyGroup >
  * 
  */
 
-[assembly: AssemblyVersion("2.0.0.*")]
+[assembly: AssemblyVersion("1.0.0.*")]
+//[assembly: AssemblyFileVersion("1.0.0.0")]
