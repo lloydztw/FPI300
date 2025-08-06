@@ -155,7 +155,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
                     // 11. CC blocs
                     int goldenSize = Math.Min(_suckerGoldenBmp.Width, _suckerGoldenBmp.Height);
-                    int minSizeW = Math.Max(_recipe.VisionSettings.Match.BlocMinSize.Value, goldenSize / 8);
+                    int minSizeW = Math.Max(_recipe.VisionSettings.OutGridBlocMinSize.Value, goldenSize / 8);
                     var ngBlocs = find_black_ng_blocs(imgWork, minSizeW);
                     return ngBlocs;
                 }

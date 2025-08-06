@@ -22,6 +22,9 @@ using System.Drawing;
 
 namespace JetEazy.Match
 {
+    /// <summary>
+    /// NOTE: 因為 EzBloc 不需要 Dispose, 所以 EzBlocsGrid 也不需要 Dispose
+    /// </summary>
     public class EzBlocsGrid : QxGridMap<EzBloc>
     {
         #region PRIVATE_DATA

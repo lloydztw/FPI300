@@ -172,9 +172,9 @@ namespace EzAoiEmptyTrayInspector.Model
                 bool isErr = IsError();
                 for (id = 0; id < N_SIDES; id++)
                 {
-                    clear_result(sideId, true);
+                    clear_result((SideID)id, true);
                     if (isErr)
-                        changeState("Ready", sideId, force: true);
+                        changeState("Ready", (SideID)id, force: true);
                 }
             }
         }
@@ -288,6 +288,8 @@ namespace EzAoiEmptyTrayInspector.Model
             _largeGoldenGridImage?.Dispose();
             _largeGoldenGridImage = rebuild_golden_grid_image();
             _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, null);
+            
+            ResetAndClear(sideId);      //@<<< BuildGoldenGridTemplate
 
             return err;
         }
@@ -595,7 +597,10 @@ namespace EzAoiEmptyTrayInspector.Model
         void clear_result(SideID sideId, bool notify)
         {
             _finalResult = null;
-            _matchResults[(int)sideId] = null;
+
+            if ((int)sideId < _matchResults.Length)
+                _matchResults[(int)sideId] = null;
+
             if (notify)
                 OnMatched?.Invoke(this, new MatchResultEventArgs(sideId, null));
         }

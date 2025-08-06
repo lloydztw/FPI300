@@ -19,7 +19,7 @@ using LeTian.JxProps;
 namespace EzAoiEmptyTrayInspector.Model
 {
     /// <summary>
-    /// DualMatch 單頭設定參數
+    /// 空盤 像測參數
     /// </summary>
     public class JxTrayVisionSettings : JxContainer
     {
@@ -27,6 +27,7 @@ namespace EzAoiEmptyTrayInspector.Model
         public JxEnum<MirrorMode> Mirror = new JxEnum<MirrorMode>("Miror", description: "鏡像");
         public JxRotAngleSettings RotAngle = new JxRotAngleSettings();
         public JxBool FindAllFailBlocs = new JxBool("FindAllBlocs", "明確找出所有異常區塊", true);
+        public JxInt OutGridBlocMinSize = new JxInt("OutGridBlocMinSize", "外圍區塊最小邊長 (pixel)", 100);
 
         public JxTrayVisionSettings()
         {
@@ -41,6 +42,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 //RotAngle,     // 保留擴充
                 Match,
                 FindAllFailBlocs,
+                OutGridBlocMinSize,
             });
             base.OnBindingSubItems();
         }

@@ -247,6 +247,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             update_golden_box_to_gui();
             update_rcp_editor_gui_status();
             refresh(_imgViewerWindow);
+            _model?.ResetAndClear();        //@<<<  EzMatchRcpEditingCtrl.enterEdittingMode
         }
         void leaveEdittingMode()
         {
@@ -350,6 +351,8 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             if (_imgViewer == null || _imgSource == null)
                 return;
+            
+            _model.ResetAndClear();         //@<<<  EzMatchRcpEditingCtrl.catch_golden_image
 
             // 閃綠色
             var oldBrush = _cviGoldenBox.BoxBrush;

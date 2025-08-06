@@ -195,8 +195,9 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                     name = System.IO.Path.Combine(Global.APP_PATH.DumpPath, name);
                 }
                 _lastPushName = name;
-                update_image_file_name(name);
                 old?.Dispose();
+                update_image_file_name(name);
+                ResetAndClear();
             }
         }
 
@@ -555,7 +556,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
             if (_model != null)
             {
-                _model?.ResetAndClear((SideID)ID);
+                _model?.ResetAndClear((SideID)ID);      //@<<< EzMatchCtrl.ResetAndClear
             }
             else
             {
