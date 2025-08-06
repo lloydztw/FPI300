@@ -24,10 +24,10 @@ namespace EzAoiEmptyTrayInspector.Model
 
     public class JxTrayPinHoles : JxContainer
     {
-        public JxBool Enabled = new JxBool("PinHoles Enabled", "啟用", false);
-        public JxInt PinHolesNumber = new JxInt("PinHoles Number", "定位點數量", 0, Range.C255);
+        public JxBool PinHoleExcluded = new JxBool("PinHole Excluded", "啟用排除", false);
+        public JxInt PinHoleDiameter = new JxInt("PinHole Diameter", "定位孔大小 (pix)", 90);
+        public JxInt PinHolesNumber = new JxInt("PinHoles Number", "定位點數量 (Hidden)");
         public JxListContainer<JxRect> PinHoleRects = new JxListContainer<JxRect>("PinHoles", "(Hidden)");
-        //>>> public JxText PinHolesDawData = new JxText("PinHolesDawData", "", description: "(Hidden)");
 
         public JxTrayPinHoles() : base("Tray PinHoles", "定位孔 設定")
         {
@@ -37,7 +37,7 @@ namespace EzAoiEmptyTrayInspector.Model
         {
             //>>> 綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
-                Enabled,
+                PinHoleExcluded,
                 PinHolesNumber,
                 PinHoleRects
                 //PinHolesNumber,
@@ -51,6 +51,8 @@ namespace EzAoiEmptyTrayInspector.Model
         }
 
 #if (false)
+        public JxText PinHolesDawData = new JxText("PinHolesDawData", "", description: "(Hidden)");
+
         public bool GetPinHole(int index, out Rectangle rect)
         {
             if (index < _cachePinHoleRects.Count)

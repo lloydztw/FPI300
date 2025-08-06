@@ -34,6 +34,7 @@ namespace EzAoiEmptyTrayInspector.Model
         public JxInt Iterations = new JxInt("Iterations", "比對疊代次數", 1, new Range(1, 100));
         public JxBool RemoveOverlap = new JxBool("RemoveOverlap", "消除重疊(隱藏)", true);
         public JxBool UseGrid = new JxBool("UseGrid", "建立網格", true);
+        public JxInt BlocMinSize = new JxInt("BlocMinSize", "區塊最小邊長 (pixel)", 90);
 
         public JxTempMatchSettings() 
             : this(null, null)
@@ -58,6 +59,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
                 RemoveOverlap,
                 UseGrid,
+                BlocMinSize,
             });
             base.OnBindingSubItems();
         }

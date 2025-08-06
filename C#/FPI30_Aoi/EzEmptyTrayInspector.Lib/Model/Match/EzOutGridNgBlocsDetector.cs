@@ -27,7 +27,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
     /// <summary>
     /// 吸嘴格點 之外 異常餘料 偵測
     /// </summary>
-    public class EzOutGridNgBlocsDetector
+    public partial class EzOutGridNgBlocsDetector
     {
         public event EventHandler<ProgressEventArgs> OnProgress;
 
@@ -149,8 +149,14 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                     Cv2.FloodFill(imgWork, new CvPoint(0, 0), Scalar.Black);
                     _DUMP(imgWork, "imgWork_omwb.png");
 
-                    // 10. CC blocs
-                    var ngBlocs = find_black_ng_blocs(imgWork);
+                    //// 10. 除圓 (變異太多)
+                    //exclude_circles(imgWork, Scalar.Black, 80, 100);
+                    //_DUMP(imgWork, "imgWork_omwbc.png");
+
+                    // 11. CC blocs
+                    int goldenSize = Math.Min(_suckerGoldenBmp.Width, _suckerGoldenBmp.Height);
+                    int minSizeW = Math.Max(_recipe.VisionSettings.Match.BlocMinSize.Value, goldenSize / 8);
+                    var ngBlocs = find_black_ng_blocs(imgWork, minSizeW);
                     return ngBlocs;
                 }
             }
@@ -167,7 +173,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             }
         }
 
-        #region PRIVATE_HELPER_FUNCTIONS
+        #region PRIVATE_AOI_FUNCTIONS
         void fill_grid_blocs(Mat img, IEnumerable<EzBloc> blocs, Scalar color, int shrinkFactor)
         {
             foreach(var b in blocs)
@@ -273,7 +279,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             CvPoint[] rectPointsInt = Array.ConvertAll(rectPointsFloat, Point2f => (CvPoint)Point2f);
             Cv2.FillConvexPoly(dst, rectPointsInt, color);
         }
-        List<EzBloc> find_black_ng_blocs(Mat binary, int minLen = 3)
+        List<EzBloc> find_black_ng_blocs(Mat binary, int minLenInWorld = 8, int minAreaInShrink = 16)
         {
             var blocs = new List<EzBloc>();
 
@@ -293,18 +299,21 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             {
                 var blob = cc.Blobs[i];
 
-                int bx = (int)(blob.Rect.X * zoomFactor);
-                int by = (int)(blob.Rect.Y * zoomFactor);
-                int bw = (int)(blob.Rect.Width * zoomFactor);
-                int bh = (int)(blob.Rect.Height * zoomFactor);
-
-                if (bw < minLen || bh < minLen)
+                int bX = (int)(blob.Rect.X * zoomFactor);
+                int bY = (int)(blob.Rect.Y * zoomFactor);
+                int bW = (int)(blob.Rect.Width * zoomFactor);
+                int bH = (int)(blob.Rect.Height * zoomFactor);
+                
+                if (blob.Area < minAreaInShrink)
                     continue;
 
-                if (bw > maxWidth - 2 || bh > maxHeight - 2)
+                if (bW < minLenInWorld && bH < minLenInWorld)
                     continue;
 
-                var worldLoc = new EzBloc(new Rectangle(bx, by, bw, bh), NG_SCORE, NG_TAG);
+                if (bW > maxWidth - 2 || bH > maxHeight - 2)
+                    continue;
+
+                var worldLoc = new EzBloc(new Rectangle(bX, bY, bW, bH), NG_SCORE, NG_TAG);
                 blocs.Add(worldLoc);
             }
 
@@ -433,5 +442,107 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             OnProgress?.Invoke(this, new ProgressEventArgs(message));
         }
         #endregion
+    }
+
+
+    partial class EzOutGridNgBlocsDetector
+    {
+        double MIN_CIRCULARITY_THRESHOLD = 0.85; // 設定一個閾值，圓度大於此值的視為接近圓形
+        void exclude_circles(Mat binary, Scalar fillColor, int dmin, int dmax, int minArea = 25, bool dump = false)
+        {
+            // 用來儲存符合條件的輪廓
+            List<CvPoint[]> filteredContours = new List<CvPoint[]>();
+
+            // 1. 尋找所有輪廓。**必須複製影像，因為 FindContours 會修改它**。
+            using (Mat binaryCopy = binary.Clone())
+            {
+                CvPoint[][] contours;
+                HierarchyIndex[] hierarchy;
+                Cv2.FindContours(binaryCopy, out contours, out hierarchy, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
+
+                // 2. 遍歷每個輪廓，計算圓度並進行篩選
+                for (int i = 0; i < contours.Length; i++)
+                {
+
+                    double area = Cv2.ContourArea(contours[i]);
+                    if (area > minArea) // 排除太小的輪廓
+                    {
+                        // 1. 計算最小外接圓
+                        float radius;
+                        Point2f center;
+                        Cv2.MinEnclosingCircle(contours[i], out center, out radius);
+
+                        double diameter = radius * 2;
+
+                        // 2. 計算圓度
+                        double perimeter = Cv2.ArcLength(contours[i], true);
+                        double circularity = (perimeter > 0) ? (4 * Math.PI * area) / (perimeter * perimeter) : 0;
+
+                        // 3. 檢查直徑和圓度是否符合條件
+                        if (diameter >= dmin &&
+                            diameter <= dmax &&
+                            circularity >= MIN_CIRCULARITY_THRESHOLD)
+                        {
+                            //Console.WriteLine($"輪廓 {i}: 面積={area}, 直徑={diameter:F2}, 圓度={circularity:F3}, 符合條件！");
+                            filteredContours.Add(contours[i]);
+
+                            // 在新的 Mat 上，將符合條件的圓形填滿 fillColor
+                            Cv2.Circle(binary, (CvPoint)center, (int)radius, fillColor, -1);
+                        }
+                        else
+                        {
+                            //Console.WriteLine($"輪廓 {i}: 面積={area}, 直徑={diameter:F2}, 圓度={circularity:F3}, 不符合條件。");
+                        }
+                    }
+                }
+            }
+
+            if (dump)
+            {
+                using (Mat displayImage = binary.CvtColor(ColorConversionCodes.GRAY2BGR))
+                {
+                    // 繪製篩選後的輪廓
+                    Cv2.DrawContours(displayImage, filteredContours.ToArray(), -1, Scalar.Red, 2);
+                    _DUMP(displayImage, "circles.png");
+                    //Cv2.ImShow("Filtered Blobs (Non-Circular)", displayImage);
+                    //Cv2.WaitKey(0);
+                }
+            }
+        }
+        void find_circle_arc(Mat binary)
+        {
+            using (Mat imgWork = binary.Clone())
+            {
+                CvPoint[][] contours;
+                HierarchyIndex[] hierarchy;
+                Cv2.FindContours(imgWork, out contours, out hierarchy, RetrievalModes.List, ContourApproximationModes.ApproxSimple);
+
+                // 用來儲存符合條件 (非凸形) 的輪廓
+                var filteredContours = new List<CvPoint[]>();
+
+                // 3. 遍歷每個輪廓，並使用 IsContourConvex 進行篩選
+                for (int i = 0; i < contours.Length; i++)
+                {
+                    double area = Cv2.ContourArea(contours[i]);
+                    if (area > 50) // 排除太小的輪廓
+                    {
+                        // Cv2.IsContourConvex 會判斷輪廓是否為凸多邊形
+                        bool isConvex = Cv2.IsContourConvex(contours[i]);
+
+                        // 如果輪廓不是凸形 (即 isConvex == false)，則保留它。
+                        // 這是為了排除完整的圓形，因為完整的圓形是凸形。
+                        if (!isConvex)
+                        {
+                            filteredContours.Add(contours[i]);
+                            Console.WriteLine($"輪廓 {i} 是非凸形，已保留。面積: {area}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"輪廓 {i} 是凸形，已排除。面積: {area}");
+                        }
+                    }
+                }
+            }
+        }
     }
 }

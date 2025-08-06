@@ -426,7 +426,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 if (_hitPt.X == vx && _hitPt.Y == vy)
                     return;
 
-                string msg = $"(x,y)=({bloc.CenterX},{bloc.CenterY}), score={bloc.Score:0.00}";
+                string msg = $"(x,y)=({bloc.CenterX},{bloc.CenterY}), score={bloc.Score:0.00}, size={bloc.Rect.Width}x{bloc.Rect.Height}";
                 if (bloc.Tag is QuadLinkNode node && node.rowCol != null)
                     msg = $"[{node.rowCol.Row},{node.rowCol.Col}] " + msg;
 
