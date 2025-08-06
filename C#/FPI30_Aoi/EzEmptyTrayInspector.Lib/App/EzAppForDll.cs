@@ -43,6 +43,10 @@ namespace EzAoiEmptyTrayInspector
         static EzAppForDll _singleton = null;
         #endregion
 
+        #region PRIVATE_DATA
+        EzMatchCtrl _matchCtrl;
+        #endregion
+
         public static EzAppForDll Instance
         {
             get
@@ -63,6 +67,11 @@ namespace EzAoiEmptyTrayInspector
 
             // 綁定 Splash 啟動畫面
             ConfigSplash<FormSplash>();
+        }
+
+        internal EzMatchCtrl MatchCtrl
+        {
+            get => _matchCtrl;
         }
 
         /// <summary>
@@ -163,12 +172,14 @@ namespace EzAoiEmptyTrayInspector
             var matchCtrl = new EzMatchCtrl(matchView, funcButtonsPanel, lblPassFail, base.recipesMgrCtrl);
 
             matchCtrl.PostInit();
+            _matchCtrl = matchCtrl;
 
             // 主視窗 關閉 事件
             awMain.FormClosed += (s, e) =>
             {
                 Global.Dispose();
                 _singleton = null;
+                _matchCtrl = null;
             };
         }
 

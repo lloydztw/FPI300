@@ -1,7 +1,10 @@
 ﻿using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
+using OpenCvSharp.ImgHash;
 using System;
 using System.Windows.Forms;
+using LtAoiFactory = Traveller106.LtAoiFactory;
+
 
 namespace EzAoiEmptyTrayInspector
 {
@@ -15,12 +18,19 @@ namespace EzAoiEmptyTrayInspector
             InitializeComponent();
             updateRecipeNames();
 
-            FormClosed += (s, e) => AoiFactory.DisposeAll();
+            FormClosed += (s, e) => LtAoiFactory.DisposeAll();
             button1.Click += (s, e) => test_OpenTool();
             button2.Click += (s, e) => test_DirectRunAoiModel(0);
             button3.Click += (s, e) => test_DirectRunAoiModel(1);
+            button4.Click += (s, e) => test_PushImage();
+
+            LtAoiFactory.OnLineScanRequested += (s, e) => test_PushImage();
         }
 
+        string getRecipeName()
+        {
+            return cboRecipeNames.Text;
+        }
         void updateRecipeNames()
         {
             var files = System.IO.Directory.GetFiles(PATH_RECIPES);
@@ -30,12 +40,6 @@ namespace EzAoiEmptyTrayInspector
             if (cboRecipeNames.Items.Count > 0)
                 cboRecipeNames.SelectedIndex = 0;
         }
-
-        string getRecipeName()
-        {
-            return cboRecipeNames.Text;
-        }
-
         void updateInfo(string msg)
         {
             label2.Text = msg;
@@ -45,14 +49,13 @@ namespace EzAoiEmptyTrayInspector
         void test_OpenTool()
         {
             string recipeName = getRecipeName();
-            var frm = AoiFactory.OpenEmptyTrayInspectorTool(this, recipeName);
+            var frm = LtAoiFactory.OpenEmptyTrayInspectorTool(this, recipeName);
             frm.Show();
         }
-
         void test_DirectRunAoiModel(int option)
         {
             string recipeName = getRecipeName();
-            var aoiModel = AoiFactory.InstanceModel(recipeName);
+            var aoiModel = LtAoiFactory.InstanceModel(recipeName);
             if (aoiModel == null)
                 return;
 
@@ -78,7 +81,22 @@ namespace EzAoiEmptyTrayInspector
             var result = aoiModel.GetResult();
             show_result(result);
         }
+        void test_PushImage()
+        {
+            string path = System.IO.Path.GetDirectoryName(TEST_IMAGE_FILE);
+            string[] files = System.IO.Directory.GetFiles(path, "*.jpg");
+            if (files.Length == 0)
+                return;
 
+            var rnd = new Random();
+            var fidx = rnd.Next(files.Length);
+            var fileName = files[fidx];
+
+            var img = new EzQuickImage();
+            img.Load(fileName, 8);
+
+            LtAoiFactory.PushImage(img, "LineScan_0");
+        }
         void show_result(EzEmptyTrayResult result)
         { 
             string msg;

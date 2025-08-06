@@ -60,15 +60,24 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             var app = EzAppForDll.Instance;
             _recipesMgr = app.recipesMgrCtrl;
             _recipesMgr.OnRecipeSelectionChanged += _recipesMgr_OnRecipeSelectionChanged;
+
+            _frmAwMain.optOpModesPanelVisible = !IsContraintEnabled;
+
             _frmMain.BeginInvoke(new Action(() =>
             {
                 update_recipe_info(_recipesMgr.ActiveRecipe);
+                if (IsContraintEnabled)
+                {
+                    app.opModesCtrl.OpMode = "Recipe";
+                }
             }));
         }
         public void ConstraintRcp(IView rcpPanel)
         {
             if (IsContraintEnabled)
+            {
                 adjust_recipe_panel(rcpPanel);
+            }
         }
 
         #region EVENT_HANDLERS
@@ -111,6 +120,14 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 panel.btnOK.Click += (s, e) => adjust_recipe_panel(panel, false);
                 panel.btnCancel.Click += (s, e) => adjust_recipe_panel(panel, false);
                 panel.btnModify.Click += (s, e) => adjust_recipe_panel(panel, false);
+            }
+        }
+        void change_op_button_text()
+        {
+            var btn = _frmAwMain.GetOpModeButton("Production");
+            if (btn != null)
+            {
+                btn.Text = "調適模式";
             }
         }
         #endregion

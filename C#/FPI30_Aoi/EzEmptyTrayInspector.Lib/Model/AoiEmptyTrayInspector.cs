@@ -300,15 +300,19 @@ namespace EzAoiEmptyTrayInspector.Model
                 return ErrCodes.NO_RECIPE;
 
             if (largeImg?.Image == null)
+                return ErrCodes.NO_IMAGE;
+
+#if (OPT_DUAL_MATCH)
+            if (largeImg?.Image == null)
                 return (ErrCodes)((int)ErrCodes.NO_IMAGE_A + (int)sideId);
 
-            //if (sideId == SideID.A)
-            //{
-            //    if (ImageUtil.GetCombinedMark(largeImg))
-            //        return ErrCodes.HAS_BEEN_COMBINED;
-            //}
-
-            return ErrCodes.OK;
+            if (sideId == SideID.A)
+            {
+                if (ImageUtil.GetCombinedMark(largeImg))
+                    return ErrCodes.HAS_BEEN_COMBINED;
+            }
+#endif
+                return ErrCodes.OK;
         }
         
         public void RunMatch(SideID sideId, IEzImage largeImg, string dumpPath = null)
@@ -351,7 +355,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     return false;
             return true;
         }
-        #endregion
+#endregion
 
 
         #region PUBLIC_COMBINE_FUNCTIONS
@@ -462,7 +466,7 @@ namespace EzAoiEmptyTrayInspector.Model
             return count;
         }
 #endif
-        #endregion
+#endregion
 
 
         #region PUBLIC_RUN_ALLS_DUAL
@@ -472,12 +476,16 @@ namespace EzAoiEmptyTrayInspector.Model
                 return ErrCodes.NO_RECIPE;
 
             var matA = imgA?.Image as Mat;
+            if (matA == null)
+                return ErrCodes.NO_IMAGE;
+
+#if (OPT_DUAL_MATCH)
+            var matA = imgA?.Image as Mat;
             var matB = imgB?.Image as Mat;
 
             if (matA == null)
                 return ErrCodes.NO_IMAGE_A;
 
-#if (OPT_DUAL_MATCH)
             if (matB == null)
                 return ErrCodes.NO_IMAGE_B;
 
@@ -577,7 +585,7 @@ namespace EzAoiEmptyTrayInspector.Model
             if (wait)
                 evCompleted.WaitOne(1000 * 60 * 5);
         }
-        AOI_RESULT IxEmptyTrayInspector.GetResult()
+        public AOI_RESULT GetResult()
         {
             return _finalResult;
         }
@@ -695,7 +703,7 @@ namespace EzAoiEmptyTrayInspector.Model
         #endregion
 
 
-        #region PRIVATE_POST_PREDICT
+        #region PRIVATE_POST_PREDICT_GRID_NG_BLOCs
         Mat _largeGoldenGridImage;
         void run_post_grid_predict(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
         {
@@ -703,7 +711,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
             try
             {
-                changeState("POST GRID Matching", sideId);
+                changeState("POST Grid NG Matching", sideId);
 
                 // Null Condition
                 if (srcImg == null || _recipe == null || matchResult == null)
@@ -748,7 +756,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     {
                         var rect = b.Rect;
                         rect.Offset(offset_x, offset_y);
-                        var bloc = new EzBloc(rect, -1);
+                        var bloc = new EzBloc(rect, score: -1.0);
                         pseudoBlocs.Add(bloc);
                     }
                 }
@@ -991,6 +999,118 @@ namespace EzAoiEmptyTrayInspector.Model
         #endregion
 
 
+        #region POST_FIND_OUT_GRID_NG_BLOCs
+        void run_post_out_grid_ng_detect(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
+        {
+            // 改版中 ...
+            return;
+
+            Exception errEx = null;
+
+            try
+            {
+                changeState("POST OutGrid NG Detecting", sideId);
+
+                // Null Condition
+                if (srcImg == null || _recipe == null || matchResult == null)
+                    return;
+
+                // FULL rows and cols
+                var fullRows = _recipe.TrayMiscSettings.FullRows;
+                var fullCols = _recipe.TrayMiscSettings.FullCols;
+
+                // RESULT GRID
+                var resultGrid = matchResult.Grid;
+                if (resultGrid != null)  // && inputGrid.Rows >= fullRows && inputGrid.Cols >= fullCols && !force)
+                    return;
+
+                // NOTE: goldenGrid 是由 recipe runtime deSerialize 
+                var goldenGrid = _recipe.TrayMiscSettings.GetGoldenGrid();
+                if (goldenGrid == null)
+                    return;
+                _LOG.Info($"GoldenGrid = {goldenGrid.Rows}x{goldenGrid.Cols}");
+
+                // LARGE GOLDEN GRID IMAGE (rebuilt from recipe)
+                if (_largeGoldenGridImage == null)
+                    _largeGoldenGridImage = rebuild_golden_grid_image();
+                if (_largeGoldenGridImage == null)
+                {
+                    _LOG.Warn("[AOI] largetGoldenGridImage 無重建!");
+                    return;
+                }
+                _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, goldenGrid, dumpPath);
+
+                // OFFSET 
+                int offset_x = 0;
+                int offset_y = 0;
+                if (resultGrid != null)
+                    find_golden_grid_offset(srcImg, _largeGoldenGridImage, goldenGrid, resultGrid, out offset_x, out offset_y);
+
+                // PSEUDO BLOCs (built by goldGrid + offset)
+                var pseudoBlocs = new List<EzBloc>();
+                foreach (var b in goldenGrid.IterBlocs())
+                {
+                    if (b != null)
+                    {
+                        var rect = b.Rect;
+                        rect.Offset(offset_x, offset_y);
+                        var bloc = new EzBloc(rect, -1);
+                        pseudoBlocs.Add(bloc);
+                    }
+                }
+
+                // EXISTING BLOCs (排除 null condition)
+                var existingBlocs = matchResult.Blocs;
+                if (existingBlocs == null)
+                    existingBlocs = matchResult.Blocs = new List<EzBloc>();
+
+                // PSEUDO BLOCs (remove overlaps)
+                pseudoBlocs.RemoveAll(new Predicate<EzBloc>((pseudo) =>
+                {
+                    foreach (var bloc in existingBlocs)
+                    {
+                        if (bloc != null && bloc.Rect.Contains(pseudo.CenterX, pseudo.CenterY))
+                            return true;
+                    }
+                    return false;
+                }));
+                pseudoBlocs.AddRange(existingBlocs);
+
+                // 重建 grid
+                var builder = new EzBlocsGridBuilder();
+                var newGrid = builder.Build(pseudoBlocs);
+                if (newGrid != null)
+                {
+                    foreach (var b in newGrid.IterBlocs())
+                    {
+                        if (b != null && b.Score < 0)
+                            b.Tag = "pseudo";
+                    }
+                }
+
+                // UPDATE to existing matchResult
+                matchResult.Grid = newGrid;
+            }
+            catch (Exception ex)
+            {
+                errEx = ex;
+            }
+            finally
+            {
+                if (errEx != null)
+                {
+                    _ERROR(ErrCodes.POST_GRID_MATCH_ERROR, sideId, errEx);
+                }
+                else
+                {
+                    changeState("Ready", sideId);
+                    update_one_match_result(sideId, matchResult, notify: true);
+                }
+            }
+        }
+        #endregion
+
+
         #region PRIVATE_RUN_ALL
         void run_all(IEzImage largeImgA, Mat imgA, Mat imgB, string outputFileName)
         {
@@ -1083,14 +1203,16 @@ namespace EzAoiEmptyTrayInspector.Model
                 
                 run_match(SideID.A, imgA, _dumpPath);
 
+                var matchResult = _matchResults[0];
                 if (_recipe.VisionSettings.FindAllFailBlocs.Value && _recipe.VisionSettings.Match.UseGrid)
                 {
-                    run_post_grid_predict(SideID.A, imgA, _matchResults[0], _dumpPath);
+                    run_post_grid_predict(SideID.A, imgA, matchResult, _dumpPath);
+                    run_post_out_grid_ng_detect(SideID.A, imgA, matchResult, _dumpPath);
                 }
 
                 var ts = DateTime.Now - tm0;
 
-                result = new AOI_RESULT(_matchResults[0], ts.TotalSeconds)
+                result = new AOI_RESULT(matchResult, ts.TotalSeconds)
                 {
                     FullRows = _recipe.TrayMiscSettings.FullRows,
                     FullCols = _recipe.TrayMiscSettings.FullCols,

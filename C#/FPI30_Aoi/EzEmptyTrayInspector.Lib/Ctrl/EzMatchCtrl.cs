@@ -120,6 +120,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             get => _visionSrc?.ImgFile;
         }
+        string _lastPushName;
         bool _isInitDone = false;
         #endregion
 
@@ -173,8 +174,30 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         public void Dispose()
         {
+            auto_dump_large_image();
             _largeIMG?.Dispose();
             _largeIMG = null;
+        }
+
+        /// <summary>
+        /// img 交給 EzMatchCtrl 負責生命週期
+        /// </summary>
+        public void SetImage(IEzImage img, string name)
+        {
+            if (img != _largeIMG && img != null)
+            {
+                var old = _largeIMG;
+                _largeIMG = img;
+                attach_image_to_viewer(_largeIMG);
+                if (!System.IO.File.Exists(name))
+                {
+                    name = System.IO.Path.ChangeExtension(name, ".jpg");
+                    name = System.IO.Path.Combine(Global.APP_PATH.DumpPath, name);
+                }
+                _lastPushName = name;
+                update_image_file_name(name);
+                old?.Dispose();
+            }
         }
 
         #region EVENT_HANDLERS
@@ -942,6 +965,23 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         #endregion
 
         #region TRACE_AND_LOG
+        void auto_dump_large_image()
+        {
+            if (_largeIMG != null && _lastPushName != null)
+            {
+                try
+                {
+                    string fileName = _lastPushName;
+                    if (!System.IO.File.Exists(fileName))
+                    {
+                        _largeIMG.Save(fileName);
+                    }
+                }
+                catch
+                {
+                }
+            }
+        }
         void _TRACE(string msg, bool isError = false)
         {
             if (isError)

@@ -156,15 +156,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormTestDemo.cs">
+    <Compile Include="Gui\FormTestDemo.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="FormTestDemo.Designer.cs">
+    <Compile Include="Gui\FormTestDemo.Designer.cs">
       <DependentUpon>FormTestDemo.cs</DependentUpon>
     </Compile>
+    <Compile Include="Model\LtAoiFactory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="FormTestDemo.resx">
+    <EmbeddedResource Include="Gui\FormTestDemo.resx">
       <DependentUpon>FormTestDemo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
