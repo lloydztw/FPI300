@@ -128,7 +128,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                     Cv2.BitwiseOr(srcImg, gridMask, imgWork);
                     _DUMP(imgWork, "imgWork.png");
 
-                    // 5. fill mean before otsu
+                    // 5. fill mean color into gridMask before otsu
                     imgWork.SetTo(meanColor, gridMask);
                     _DUMP(imgWork, "imgWork_m.png");
 
@@ -149,11 +149,25 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                     Cv2.FloodFill(imgWork, new CvPoint(0, 0), Scalar.Black);
                     _DUMP(imgWork, "imgWork_omwb.png");
 
-                    //// 10. 除圓 (變異太多)
+                    // 10. 除去 與 gridMask 相接觸的區塊
+                    var firstBloc = grid[0, 0];
+                    if (firstBloc != null)
+                    {
+                        var seedPt = new CvPoint(firstBloc.CenterX / _shrinkFactor, firstBloc.CenterY / _shrinkFactor);
+                        using (Mat whiteCover = new Mat())
+                        {
+                            Cv2.Dilate(gridMask, whiteCover, null, iterations: 2);
+                            Cv2.BitwiseOr(whiteCover, imgWork, imgWork);
+                            Cv2.FloodFill(imgWork, seedPt, Scalar.Black);
+                        }
+                    }
+                    _DUMP(imgWork, "imgWork_omwbb.png");
+
+                    // 11. 除圓孔 (變異太大, 保留)
                     //exclude_circles(imgWork, Scalar.Black, 80, 100);
                     //_DUMP(imgWork, "imgWork_omwbc.png");
 
-                    // 11. CC blocs
+                    // 12. CC blocs
                     int goldenSize = Math.Min(_suckerGoldenBmp.Width, _suckerGoldenBmp.Height);
                     int minSizeW = Math.Max(_recipe.VisionSettings.OutGridBlocMinSize.Value, goldenSize / 8);
                     var ngBlocs = find_black_ng_blocs(imgWork, minSizeW);

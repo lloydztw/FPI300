@@ -111,7 +111,7 @@ namespace EzAoiEmptyTrayInspector.Model
         }
 
         /// <summary>
-        /// 枚舉 異常區塊 (Abnormal Blocs)
+        /// 枚舉 所有 異常區塊 (Abnormal Blocs)
         /// </summary>
         public IEnumerable<EzBloc> IterAbnormalBlocs()
         {
@@ -128,6 +128,20 @@ namespace EzAoiEmptyTrayInspector.Model
                 foreach (var bloc in _outGridBlocs)
                 {
                     if (bloc != null) 
+                        yield return bloc;
+                }
+            }
+        }
+        /// <summary>
+        /// 枚舉 格點外 異常區塊 (OutGrid Abnormal Blocs)
+        /// </summary>
+        public IEnumerable<EzBloc> IterOutGridAbnormalBlocs()
+        {
+            if (_outGridBlocs != null)
+            {
+                foreach (var bloc in _outGridBlocs)
+                {
+                    if (bloc != null)
                         yield return bloc;
                 }
             }
@@ -176,8 +190,6 @@ namespace EzAoiEmptyTrayInspector.Model
                 isSucker = false;
             }
         }
-
-
 
         #region DISPLAY_STRING
         public static string FormatString(EzEmptyTrayResult e, bool usingMultiLines = false)
