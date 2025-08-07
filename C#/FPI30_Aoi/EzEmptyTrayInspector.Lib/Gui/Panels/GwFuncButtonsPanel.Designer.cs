@@ -77,7 +77,7 @@
             this.btnRunAll.Size = new System.Drawing.Size(107, 49);
             this.btnRunAll.TabIndex = 23;
             this.btnRunAll.TabStop = false;
-            this.btnRunAll.Text = "Test";
+            this.btnRunAll.Text = "檢測";
             this.btnRunAll.UseVisualStyleBackColor = false;
             // 
             // btnPickGolden
@@ -94,7 +94,7 @@
             this.btnPickGolden.Size = new System.Drawing.Size(111, 49);
             this.btnPickGolden.TabIndex = 22;
             this.btnPickGolden.TabStop = false;
-            this.btnPickGolden.Text = "Golden";
+            this.btnPickGolden.Text = "擷取樣本";
             this.btnPickGolden.UseVisualStyleBackColor = false;
             // 
             // btnResetClear
@@ -110,7 +110,7 @@
             this.btnResetClear.Size = new System.Drawing.Size(107, 49);
             this.btnResetClear.TabIndex = 21;
             this.btnResetClear.TabStop = false;
-            this.btnResetClear.Text = "Clear";
+            this.btnResetClear.Text = "清除";
             this.btnResetClear.UseVisualStyleBackColor = false;
             // 
             // btnSnapshot
@@ -126,7 +126,7 @@
             this.btnSnapshot.Size = new System.Drawing.Size(107, 49);
             this.btnSnapshot.TabIndex = 20;
             this.btnSnapshot.TabStop = false;
-            this.btnSnapshot.Text = "Scan";
+            this.btnSnapshot.Text = "取像";
             this.btnSnapshot.UseVisualStyleBackColor = false;
             // 
             // btnOpenFile
@@ -142,7 +142,7 @@
             this.btnOpenFile.Size = new System.Drawing.Size(107, 49);
             this.btnOpenFile.TabIndex = 19;
             this.btnOpenFile.TabStop = false;
-            this.btnOpenFile.Text = "File";
+            this.btnOpenFile.Text = "加載圖片";
             this.btnOpenFile.UseVisualStyleBackColor = false;
             // 
             // imageList1

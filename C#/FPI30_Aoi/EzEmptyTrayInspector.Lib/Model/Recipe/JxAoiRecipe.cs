@@ -38,8 +38,8 @@ namespace EzAoiEmptyTrayInspector.Model
         {
             // 綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
-                VisionSettings,
                 TrayMiscSettings,
+                VisionSettings,
             });
             base.OnBindingSubItems();
         }

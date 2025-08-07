@@ -54,11 +54,14 @@ namespace EzAoiEmptyTrayInspector.Model
 
         /// <summary>
         /// 根据 吸嘴 golden image 建立 整盤 格線定位點 
+        /// (於 Recipe Editor 中使用)
         /// </summary>
         ErrCodes BuildGoldenGridTemplate(SideID sideId, IEzImage largeImg);
 
         ErrCodes CanMatch(SideID sideId, IEzImage img);
+
         void RunMatch(SideID sideId, IEzImage img, string dumpPath = null);
+
         MatchResult GetMatchResult(SideID sideId);
 
         /// <summary>

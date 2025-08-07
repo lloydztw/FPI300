@@ -48,13 +48,16 @@ namespace EzAoiEmptyTrayInspector.Model
         //[Description("儲存合併圖檔異常!")]
         //SAVE_COMBINED_FILE_ERROR,
 
+        [Description("取樣出來的 格點數 與 FullRows, FullCols 設定值 不同!")]
+        GRID_ROWS_COLS_ARE_NOT_THE_SAME_AS_USER_INPUT = 500,
+
         [Description("格點樣板比對 異常!")]
         ON_GRID_TEMPLATE_MATCH_ERROR = 600,
 
         [Description("格點外圍偵測 異常!")]
-        OUT_GRID_NG_BLOCS_DETECT_ERROR = 600,
+        OUT_GRID_NG_BLOCS_DETECT_ERROR = 700,
 
         [Description("一鍵執行異常!")]
-        RUN_ALL_EXCEPTION = 700,
+        RUN_ALL_EXCEPTION = 800,
     }
 }

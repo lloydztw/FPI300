@@ -176,21 +176,25 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         private void _recipesMgr_OnRecipeEditting(object sender, EventArgs e)
         {
-            //_isRcpEdittingMode = true;
-            //load_golden_box();
-            //update_rcp_editor_gui_status();
-            //refresh(_view.ImageViewer);
-
-            enterEdittingMode();
+            if (!_isRcpEdittingMode)
+            {
+                //_isRcpEdittingMode = true;
+                //load_golden_box();
+                //update_rcp_editor_gui_status();
+                //refresh(_view.ImageViewer);
+                enterEdittingMode();
+            }
         }
         private void _recipesMgr_OnRecipeBrowsing(object sender, EventArgs e)
         {
-            //_isRcpEdittingMode = false;
-            //update_golden_box();
-            //update_rcp_editor_gui_status();
-            //refresh(_view.ImageViewer);
-
-            leaveEdittingMode();
+            if (_isRcpEdittingMode)
+            {
+                //_isRcpEdittingMode = false;
+                //update_golden_box();
+                //update_rcp_editor_gui_status();
+                //refresh(_view.ImageViewer);
+                leaveEdittingMode();
+            }
         }
 
         private void BtnGolden_Click(object sender, EventArgs e)

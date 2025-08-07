@@ -274,23 +274,31 @@ namespace EzAoiEmptyTrayInspector.Model
             }
 
             _LOG.Info("[AOI] 建立 Golden Grid ... ");
-            int goldenRowsOld = _recipe.TrayMiscSettings.FullRows;
-            int goldenColsOld = _recipe.TrayMiscSettings.FullCols;
+            int goldenRowsByUser = _recipe.TrayMiscSettings.FullRows;
+            int goldenColsByUser = _recipe.TrayMiscSettings.FullCols;
             int goldenRows = matchGrid.Rows;
             int goldenCols = matchGrid.Cols;
 
-            // 更新到 Recipe
-            _recipe.TrayMiscSettings.SetGoldenGrid(matchGrid);
-            _recipe.TrayMiscSettings.FovWidth.Value = largeImg.Width;
-            _recipe.TrayMiscSettings.FovHeight.Value = largeImg.Height;
+            // 防呆檢查 
+            if (goldenRowsByUser != goldenRows || goldenColsByUser != goldenCols)
+            {
+                err = ErrCodes.GRID_ROWS_COLS_ARE_NOT_THE_SAME_AS_USER_INPUT;
+            }
 
-            // large Golden Grid image
-            _largeGoldenGridImage?.Dispose();
-            _largeGoldenGridImage = rebuild_golden_grid_image();
-            _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, null);
-            
+            if (err == ErrCodes.OK)
+            {
+                // 更新到 Recipe
+                _recipe.TrayMiscSettings.SetGoldenGrid(matchGrid);
+                _recipe.TrayMiscSettings.FovWidth.Value = largeImg.Width;
+                _recipe.TrayMiscSettings.FovHeight.Value = largeImg.Height;
+
+                // large Golden Grid image
+                _largeGoldenGridImage?.Dispose();
+                _largeGoldenGridImage = rebuild_golden_grid_image();
+                _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, null);
+            }
+
             ResetAndClear(sideId);      //@<<< BuildGoldenGridTemplate
-
             return err;
         }
 

@@ -118,7 +118,7 @@ namespace JetEazy.Match
 
         public static bool IsSolidBloc(EzBloc bloc)
         {
-            return bloc.Tag is QuadLinkNode;
+            return bloc?.Tag is QuadLinkNode;
         }
         public IEnumerable<EzBloc> IterBlocs()
         {
