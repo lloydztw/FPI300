@@ -119,7 +119,14 @@ namespace NeedleX.ProcessSpace
         {
             get { return Universal.ChannelBarcode[(int)TrackArea.TrackINSPECT]; }
         }
-
+        protected string StripID
+        {
+            get { return MACHINEx3.PLCIO.sStripID; }
+        }
+        protected string LotID
+        {
+            get { return MACHINEx3.PLCIO.sLotID; }
+        }
 
         //protected VsLight LightControl
         //{

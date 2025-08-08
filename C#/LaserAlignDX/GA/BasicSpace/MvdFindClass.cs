@@ -45,6 +45,11 @@ namespace LaserAlignDX.BasicSpace
             xMvdObj_Image = BitmapToCMvdImage(bmpObj_Image);
             return HikTrain2();
         }
+        public bool HikTrainBmp(CMvdRectangleF cMvdRectangleF)
+        {
+            xMvdObj_Image = BitmapToCMvdImage(bmpObj_Image);
+            return HikTrain2(cMvdRectangleF);
+        }
         public bool HikRunBmp()
         {
             xMvdRun_Image = BitmapToCMvdImage(bmpRun_Image);
@@ -100,6 +105,54 @@ namespace LaserAlignDX.BasicSpace
                     cAlmightyPatternObj.BasicParam.FixPoint =
                                     new VisionDesigner.MVD_POINT_F(xMvdFixed.X, xMvdFixed.Y);
                 }
+
+                // Train
+
+                cAlmightyPatternObj.Train();
+                bOK = true;
+            }
+            catch (Exception ex)
+            {
+                errmessage = ex.Message;
+                bOK = false;
+            }
+            #endregion
+
+            return bOK;
+
+        }
+        public bool HikTrain2(CMvdRectangleF cMvdRectangleF)
+        {
+            bool bOK = false;
+            string errmessage = string.Empty;
+
+            #region HIK_TRAIN
+            try
+            {
+                // CreatePatternInstance
+                if (cAlmightyPatternObj == null)
+                    cAlmightyPatternObj = new VisionDesigner.AlmightyPatMatch.CAlmightyPattern();
+
+                //Set type
+                cAlmightyPatternObj.Type = PatMatchAlgorithmType.HPFeature;
+                //cAlmightyPatternObj.Type = PatMatchAlgorithmType.FastFeature;
+
+                if (xMvdObj_Image.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
+                {
+                    //当前程序仅支持mono8。因此像素格会转换.
+                    xMvdObj_Image.ConvertImagePixelFormat(MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08);
+                }
+                cAlmightyPatternObj.InputImage = xMvdObj_Image;
+                // Set ROI region (optional)
+                cAlmightyPatternObj.RegionList.Clear();
+                var region1 = cMvdRectangleF;
+
+                cAlmightyPatternObj.RegionList.Add(new CAlmightyPatMatchRegion(region1, true));
+
+                // Set basic parameter
+
+                cAlmightyPatternObj.BasicParam.FixPoint =
+                    new VisionDesigner.MVD_POINT_F(cMvdRectangleF.CenterX, cMvdRectangleF.CenterY);
 
                 // Train
 

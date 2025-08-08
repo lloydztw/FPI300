@@ -64,6 +64,9 @@ namespace LaserAlignDX.UISpace.MainSpace
         bool m_plcFlyStartOld1 = false;
         bool m_plcFlyStartOld2 = false;
 
+        string m_StripId = "Strip_NONE";
+        string m_LotId = "Lot_NONE";
+
         Button btnReady;
 
         protected RecipeFPIX3Class xRecipe
@@ -425,14 +428,14 @@ namespace LaserAlignDX.UISpace.MainSpace
                     break;
             }
 
-            if (INI.Instance.IsSaveDebugBMP)
-            {
-                string flypath = $"D:\\FlyImage";
-                if (!Directory.Exists(flypath))
-                    Directory.CreateDirectory(flypath);
-                string flyname = $"{DateTime.Now.ToString("yyyyMMddHHmmssfff")}_{flyIndex.ToString()}.jpg";
-                cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
-            }
+            //if (INI.Instance.IsSaveDebugBMP)
+            //{
+            //    string flypath = $"D:\\FlyImage";
+            //    if (!Directory.Exists(flypath))
+            //        Directory.CreateDirectory(flypath);
+            //    string flyname = $"{DateTime.Now.ToString("yyyyMMddHHmmssfff")}_{flyIndex.ToString()}.jpg";
+            //    cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
+            //}
         }
         void flyProcessPro(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, byte[] eBytes)
         {
@@ -579,10 +582,10 @@ namespace LaserAlignDX.UISpace.MainSpace
 
             if (INI.Instance.IsSaveDebugBMP)
             {
-                string flypath = $"D:\\FlyImage";
+                string flypath = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{m_StripId}";
                 if (!Directory.Exists(flypath))
                     Directory.CreateDirectory(flypath);
-                string flyname = $"{DateTime.Now.ToString("yyyyMMddHHmmssfff")}_{flyShowIndex.ToString()}.jpg";
+                string flyname = $"{m_LotId}-[{flyShowIndex.ToString()}]-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.jpg";
                 cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
             }
         }
@@ -743,10 +746,10 @@ namespace LaserAlignDX.UISpace.MainSpace
 
             if (INI.Instance.IsSaveDebugBMP)
             {
-                string flypath = $"D:\\FlyImage";
+                string flypath = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{m_StripId}";
                 if (!Directory.Exists(flypath))
                     Directory.CreateDirectory(flypath);
-                string flyname = $"{DateTime.Now.ToString("yyyyMMddHHmmssfff")}_{flyShowIndex.ToString()}.jpg";
+                string flyname = $"{m_LotId}-[{flyShowIndex.ToString()}]-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.jpg";
                 cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
             }
         }
@@ -882,35 +885,19 @@ namespace LaserAlignDX.UISpace.MainSpace
                     //DSMain.Invoke(new Action(() =>
                     //{
                     collectResultClasses.Clear();
-
-                    //CMvdTextF cMvdTextF = new CMvdTextF(1800, 500, $"耗时:{ProcessRunFPIClass.Instance.ElapsedTime.ToString("0.00")}ms");
-                    //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
-                    //cMvdTextF.FontWidth = 18;
-                    //DSMain.mvdRenderActivex1.AddShape(cMvdTextF);
-
                     //收集所有信息
                     string _collectStrMsg = string.Empty;
+                    DSMain.mvdRenderActivex1.ClearShapes();
 
                     //所有框的显示
                     foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
                     {
+                        RectangleF _rectF = new RectangleF(cell.viewRectF.X, cell.viewRectF.Y, cell.viewRectF.Width, cell.viewRectF.Height);
+                        _rectF.Inflate(xRecipe.xExtendx, xRecipe.xExtendy);
+                        //BoundRect(ref _rectF, new Size((int)ProcessRunClass.Instance.cMvdInput.Width,
+                        //                               (int)ProcessRunClass.Instance.cMvdInput.Height));
+
                         _collectStrMsg += $"({cell.ToResultStr()})";
-                        ////显示结果的xy angle
-                        //CMvdTextF cMvdTextFShowMain = new CMvdTextF(cell.DrawResultRectF().CenterX,
-                        //    cell.DrawResultRectF().CenterY,
-                        //    $"{cell.ToShowMainStr()}");
-                        //cMvdTextFShowMain.BorderColor = cell.DrawResultRectF().BorderColor;// new MVD_COLOR(0, 255, 0);
-                        //cMvdTextFShowMain.FontWidth = 18;
-
-                        //CollectResultClass collectResult = new CollectResultClass();
-                        //collectResult.loc = new RectangleF(cell.DrawResultRectF().LeftTopX,
-                        //        cell.DrawResultRectF().LeftTopY,
-                        //        cell.DrawResultRectF().Width,
-                        //        cell.DrawResultRectF().Height);
-                        //collectResult.ispass = cell.DrawResultRectF().BorderColor.nG == 255;
-                        //collectResult.desc = string.Empty;
-                        //collectResultClasses.Add(collectResult);
-
                         CMvdRectangleF mvdRectangleF = cell.DrawResultRectF();
                         switch (ProcessRunFPIClass.Instance.xScanInspectMode)
                         {
@@ -919,9 +906,6 @@ namespace LaserAlignDX.UISpace.MainSpace
                                 //try
                                 {
                                     string strNoTray = cell.GetNoTrayDesc();
-                                    //CMvdTextF cMvdTextFShowNoTray = new CMvdTextF(mvdRectangleF.CenterX,
-                                    //                                mvdRectangleF.CenterY,
-                                    //                                $"{cell.GetNoTrayDesc()}");
                                     if (!string.IsNullOrEmpty(strNoTray))
                                     {
                                         CMvdTextF cMvdTextFShowNoTray = new CMvdTextF(mvdRectangleF.CenterX,
@@ -952,6 +936,30 @@ namespace LaserAlignDX.UISpace.MainSpace
                             default:
                                 //try
                                 {
+                                    //画直线
+                                    int i = 0;
+                                    while (i < 4)
+                                    {
+                                        CMvdLineSegmentF mLine = cell.cMvdLineSegmentFsOut[i];
+                                        if (mLine != null)
+                                        {
+                                            MVD_POINT_F s0 = new MVD_POINT_F(mLine.StartPoint.fX + _rectF.X,
+                                                mLine.StartPoint.fY + _rectF.Y);
+                                            MVD_POINT_F s1 = new MVD_POINT_F(mLine.EndPoint.fX + _rectF.X,
+                                                mLine.EndPoint.fY + _rectF.Y);
+                                            CMvdLineSegmentF newLine = new CMvdLineSegmentF(s0, s1);
+                                            newLine.BorderColor = new MVD_COLOR(255, 0, 255);
+                                            DSMain.mvdRenderActivex1.AddShape(newLine);
+                                        }
+                                        CMvdShape mvdShape = cell.cMvdShapesForFindLineRegion[i];
+                                        if (mvdShape != null)
+                                        {
+                                            mvdShape.BorderColor = new MVD_COLOR(0, 0, 255);
+                                            DSMain.mvdRenderActivex1.AddShape(mvdShape);
+                                        }
+                                        i++;
+                                    }
+
                                     //显示结果的xy angle
                                     CMvdTextF cMvdTextFShowMain = new CMvdTextF(cell.DrawResultRectF().CenterX,
                                         cell.DrawResultRectF().CenterY,
@@ -984,17 +992,6 @@ namespace LaserAlignDX.UISpace.MainSpace
                                         _CodeText.FillColor = new MVD_COLOR(0, 0, 0);
                                         DSMain.mvdRenderActivex1.AddShape(_CodeText);
 
-
-                                        //CollectResultClass collectResult2D = new CollectResultClass();
-                                        //MVD_RECT_F mVD_RECT = cell.DrawBarcodePosition.GetBoundingRect();
-                                        //collectResult2D.loc = new RectangleF(mVD_RECT.fX,
-                                        //        mVD_RECT.fY,
-                                        //        mVD_RECT.fWidth,
-                                        //        mVD_RECT.fHeight);
-                                        //collectResult2D.ispass = true;
-                                        //collectResult2D.desc = cell.RunCodeInfo.Content;
-                                        //collectResultClasses.Add(collectResult2D);
-
                                     }
                                 }
                                 //catch (Exception ex)
@@ -1008,6 +1005,34 @@ namespace LaserAlignDX.UISpace.MainSpace
                     }
 
                     //CommonLogClass.Instance.LogMessage($"批号:{xRecipe.xLotNoStr}#数据信息:{_collectStrMsg}", Color.Black);
+
+                    #region 显示格点之外的料件
+
+                    switch (ProcessRunFPIClass.Instance.xScanInspectMode)
+                    {
+                        case ScanInspectMode.NOTRAY:
+
+                            foreach (var rect in xRecipe.xOutBlocs)
+                            {
+                                PointF ptCenter = new PointF(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
+                                CMvdTextF cMvdTextFShowNoTray = new CMvdTextF(
+                                                                                ptCenter.X,
+                                                                                ptCenter.Y,
+                                                                                $"疑似有料");
+
+                                cMvdTextFShowNoTray.BorderColor = new MVD_COLOR(255, 0, 0);
+                                cMvdTextFShowNoTray.FontWidth = 11;
+
+                                DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowNoTray);
+                                CMvdRectangleF rectRect = new CMvdRectangleF(ptCenter.X, ptCenter.Y, 200, 200);
+                                rectRect.BorderColor = new MVD_COLOR(255, 0, 0);
+                                DSMain.mvdRenderActivex1.AddShape(rectRect);
+                            }
+
+                            break;
+                    }
+
+                    #endregion
 
                     //_updateDgvData();
                     DSMain.mvdRenderActivex1.Display();
@@ -1202,6 +1227,9 @@ namespace LaserAlignDX.UISpace.MainSpace
                         CommonLogClass.Instance.LogMessage("接收到plc启动信号", Color.Black);
                         if (!m_LineScanProcess.IsOn)
                         {
+                            m_StripId = MACHINE.PLCIO.sStripID;
+                            m_LotId = MACHINE.PLCIO.sLotID;
+
                             m_LineScanProcess.Start();
                         }
                         else

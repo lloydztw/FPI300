@@ -260,6 +260,12 @@ namespace TravellerMINIX6.ProcessSpace
                                 pRun.xScanInspectMode = LaserAlignDX.RunSpace.ScanInspectMode.MEASUREAOI;
                             }
 
+                            pRun.StripId = StripID;
+                            pRun.LotId = LotID;
+
+                            _LOG($"StripID:{pRun.StripId}", Color.Black);
+                            _LOG($"LotID:{pRun.LotId}", Color.Black);
+
                             pRun.FileBarcodeStr = JzTimes.DateTimeSerialString;
                             pRun.Run();
 

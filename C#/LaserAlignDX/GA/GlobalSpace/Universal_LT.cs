@@ -33,7 +33,7 @@ namespace Traveller106
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/08/06";
+        public const string VersionDate = "2025/08/08";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
@@ -627,11 +627,11 @@ namespace Traveller106
             MACHINECollection = null;
 
             IxLineScan?.Close();
-            IxLineScan?.Dispose();
+            //IxLineScan?.Dispose();
             IxLineScan = null;
 
             IxFlyAreaCam?.Close();
-            IxFlyAreaCam?.Dispose();
+            //IxFlyAreaCam?.Dispose();
             IxFlyAreaCam = null;
 
             LtAoiFactory.DisposeAll();

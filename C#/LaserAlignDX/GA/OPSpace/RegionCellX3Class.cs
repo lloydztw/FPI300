@@ -15,6 +15,7 @@ using VisionDesigner.ImageArithmetic;
 using VisionDesigner.PositionFix;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
+using LaserAlignDX.GA.BasicSpace;
 
 namespace LaserAlignDX.OPSpace
 {
@@ -30,6 +31,7 @@ namespace LaserAlignDX.OPSpace
         //C2DCodeReaderTool Code2DReaderTool = new C2DCodeReaderTool();
         //C2DCodeVerifyTool c2DCodeVerifyTool = new C2DCodeVerifyTool();
         Mvd2DReaderClass mvd2DReader = null;// new Mvd2DReaderClass();
+        MvdFindLineClass mvdFindLineClass = null;
 
         private CMvdRectangleF MvdRunPositionFix;
 
@@ -59,6 +61,9 @@ namespace LaserAlignDX.OPSpace
         public float RunY = 0;
         public float RunAngle = 0;
 
+        public float RunWidth = 0;
+        public float RunHeight = 0;
+
         public bool ByPass = false;
         public string SetBarcodeStr = string.Empty;
 
@@ -69,6 +74,10 @@ namespace LaserAlignDX.OPSpace
         public NoTrayParaClass xNoTrayPara
         {
             get { return NoTrayParaClass.Instance; }
+        }
+        public InspectX3ParaClass xInspect
+        {
+            get { return InspectX3ParaClass.Instance; }
         }
 
         public Bitmap bmpItemTemplate = new Bitmap(1, 1);
@@ -82,6 +91,49 @@ namespace LaserAlignDX.OPSpace
         public InspectReason inspectReason = InspectReason.PASS;
         public AUVision.xFindResult xFindResult = new AUVision.xFindResult();
         public List<InspectReason> inspectReasons = new List<InspectReason>();
+
+        /// <summary>
+        /// 外围的直线
+        /// </summary>
+        public CMvdLineSegmentF[] cMvdLineSegmentFsOut = new CMvdLineSegmentF[4];
+        public CMvdShape[] cMvdShapesForFindLineRegion = new CMvdShape[4];
+        /// <summary>
+        /// 寻找直线
+        /// </summary>
+        /// <param name="iSideIndex">哪条边序号</param>
+        /// <param name="bmp">输入图片</param>
+        /// <param name="r">寻找的ROI</param>
+        public void LineSegmentRun(int iSideIndex, Bitmap bmp, CMvdRectangleF r)
+        {
+            if (mvdFindLineClass == null)
+                mvdFindLineClass = new MvdFindLineClass();
+            cMvdLineSegmentFsOut[iSideIndex] = null;
+            if (iSideIndex == 0)
+            {
+                mvdFindLineClass.bPositive = xInspect.bPositive0;
+                mvdFindLineClass.bFindOrient = true;
+                mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity0;
+            }
+            else if (iSideIndex == 1)
+            {
+                mvdFindLineClass.bPositive = xInspect.bPositive1;
+                mvdFindLineClass.bFindOrient = false;
+                mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity1;
+            }
+            else if (iSideIndex == 2)
+            {
+                mvdFindLineClass.bPositive = xInspect.bPositive2;
+                mvdFindLineClass.bFindOrient = true;
+                mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity2;
+            }
+            else if (iSideIndex == 3)
+            {
+                mvdFindLineClass.bPositive = xInspect.bPositive3;
+                mvdFindLineClass.bFindOrient = false;
+                mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity3;
+            }
+            cMvdLineSegmentFsOut[iSideIndex] = mvdFindLineClass.Run(bmp, r);
+        }
 
         public C2DCodeInfo RunCodeInfo = null;
         public CMvdPolygonF DrawBarcodePosition = null;
@@ -237,6 +289,8 @@ namespace LaserAlignDX.OPSpace
             str += $"{RunX.ToString(m_Format)}" + ",";
             str += $"{RunY.ToString(m_Format)}" + ",";
             str += $"{RunAngle.ToString(m_Format)}" + ",";
+            str += $"长[{RunWidth.ToString(m_Format)}]" + ",";
+            str += $"宽[{RunHeight.ToString(m_Format)}]" + ",";
             str += $"{SetBarcodeStr}" + ",";
             if (RunCodeInfo != null)
                 str += $"{RunCodeInfo.Content}" + ";";
@@ -268,7 +322,9 @@ namespace LaserAlignDX.OPSpace
             str += $"{Index}" + "-[";
             str += $"{RunX.ToString(m_Format)}" + ",";
             str += $"{RunY.ToString(m_Format)}" + ",";
-            str += $"{RunAngle.ToString(m_Format)}]";
+            str += $"{RunAngle.ToString(m_Format)}]{Environment.NewLine}";
+            str += $"长[{RunWidth.ToString(m_Format)},";
+            str += $"宽{RunHeight.ToString(m_Format)}]";
 
             //str += Environment.NewLine;
 
@@ -292,6 +348,21 @@ namespace LaserAlignDX.OPSpace
             RunX = 0;
             RunY = 0;
             IsSaveDebugPicture = false;
+
+            int i = 0;
+            while (i < 4)
+            {
+                //CMvdLineSegmentF mLine = cMvdLineSegmentFsOut[i];
+                if (cMvdLineSegmentFsOut[i] != null)
+                    cMvdLineSegmentFsOut[i] = null;
+                //CMvdShape mvdShape = cMvdShapesForFindLineRegion[i];
+                if (cMvdShapesForFindLineRegion[i] != null)
+                    cMvdShapesForFindLineRegion[i] = null;
+                i++;
+            }
+
+            RunWidth = 0;
+            RunHeight = 0;
         }
         /// <summary>
         /// 计算修正后的位置框
@@ -332,6 +403,44 @@ namespace LaserAlignDX.OPSpace
 
             MvdRunPositionFix = cPositionFixToolObj.Result.CorrectedShape as CMvdRectangleF;
 
+        }
+
+        /// <summary>
+        /// 计算修正后的位置框
+        /// </summary>
+        /// <param name="eMVDInput">输入转换的形状</param>
+        /// <param name="templateRectF">模板尺寸</param>
+        /// <param name="runRect">输入图片尺寸</param>
+        /// <param name="templateRunResult">定位的结果</param>
+        /// <returns>返回位置的形状</returns>
+        public CMvdShape PositionFixRun(CMvdShape eMVDInput, RectangleF templateRectF, Rectangle runRect, xFindResult templateRunResult)
+        {
+            // CreateInstance
+            if (cPositionFixToolObj == null)
+                cPositionFixToolObj = new CPositionFixTool();
+
+            // Set basic parameter
+
+            cPositionFixToolObj.BasicParam.BasePoint
+                = new VisionDesigner.PositionFix.MVD_FIDUCIAL_POINT_F(
+                    new MVD_POINT_F(templateRectF.X + templateRectF.Width / 2, templateRectF.Y + templateRectF.Height / 2), 0);
+
+            cPositionFixToolObj.BasicParam.RunningPoint
+                = new VisionDesigner.PositionFix.MVD_FIDUCIAL_POINT_F(
+                    new MVD_POINT_F(templateRunResult.fCenterX, templateRunResult.fCenterY), templateRunResult.fAngle);
+
+            cPositionFixToolObj.BasicParam.RunImageSize = new MVD_SIZE_I(runRect.Width, runRect.Height);
+
+            cPositionFixToolObj.BasicParam.FixMode = MVD_POSFIX_MODE.MVD_POSFIX_MODE_HVA;
+
+            cPositionFixToolObj.BasicParam.InitialShape = eMVDInput;
+
+            // Running
+
+            cPositionFixToolObj.Run();
+
+            // Get the result
+            return cPositionFixToolObj.Result.CorrectedShape;
         }
 
         public CBlobInfo CheckBlobNoTray(Bitmap eBmpRun)

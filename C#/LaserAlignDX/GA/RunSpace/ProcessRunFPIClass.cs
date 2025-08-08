@@ -1,17 +1,21 @@
 ﻿using EzAoiEmptyTrayInspector.Model;
 using JetEazy.BasicSpace;
+using JetEazy.EzImage;
 using JetEazy.Match;
 using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.ComponentModel;
+using System.Data.Common;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Traveller106;
 using VisionDesigner;
+using VisionDesigner.BoxOverlap;
 
 
 namespace LaserAlignDX.RunSpace
@@ -51,6 +55,10 @@ namespace LaserAlignDX.RunSpace
         {
             get { return RecipeFPIX3Class.Instance; }
         }
+        protected InspectX3ParaClass xInspect
+        {
+            get { return InspectX3ParaClass.Instance; }
+        }
         LineScanCalibrateClass LineScanCalibrate
         {
             get { return Traveller106.Universal.LineScanCalibrateClasses[0]; }
@@ -78,7 +86,23 @@ namespace LaserAlignDX.RunSpace
 
         private bool m_QrUsed = false;
         private bool m_QrJudged = false;
+
+        VisionDesigner.BoxOverlap.CBoxOverlapTool cBoxOverlapTool = null;
+        private string m_StripId = "Strip_NONE";
+        private string m_LotId = "Lot_NONE";
+        private string m_PicResultPath = INI.Instance.ResultImagePath;
+        private string m_PicResultOrgPath = INI.Instance.ResultImagePath;
         #endregion
+        public string LotId
+        {
+            get { return m_LotId; }
+            set { m_LotId = value; }
+        }
+        public string StripId
+        {
+            get { return m_StripId; }
+            set { m_StripId = value; }
+        }
 
         public bool QrUsed
         {
@@ -121,6 +145,23 @@ namespace LaserAlignDX.RunSpace
         {
             m_IsPass = true;
             m_ResultDesc = string.Empty;
+
+            if (INI.Instance.IsSaveDebugBMP)
+            {
+                m_PicResultPath = $"{INI.Instance.ResultImagePath}\\linescanImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
+                if (!System.IO.Directory.Exists(m_PicResultPath))
+                {
+                    System.IO.Directory.CreateDirectory(m_PicResultPath);
+                }
+            }
+            if (INI.Instance.IsSaveDebugOrgBmp)
+            {
+                m_PicResultOrgPath = $"{INI.Instance.ResultImagePath}\\linescanImageOrg\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
+                if (!System.IO.Directory.Exists(m_PicResultOrgPath))
+                {
+                    System.IO.Directory.CreateDirectory(m_PicResultOrgPath);
+                }
+            }
 
             //if (!myRecipe.Ischip_open_measure)
             //    return;
@@ -262,6 +303,9 @@ namespace LaserAlignDX.RunSpace
             System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Restart();
 
+            if (cBoxOverlapTool == null)
+                cBoxOverlapTool = new CBoxOverlapTool();
+
             string imgPath = $"{Universal.LOG_IMG_PATH}\\{JzTimes.DateSerialString}\\{m_FileBarcodeStr}";
             if (INI.Instance.IsSaveTestImage)
             {
@@ -270,32 +314,7 @@ namespace LaserAlignDX.RunSpace
             }
 
             Size _bmpInputSize = new Size((int)cMvdInput.Width, (int)cMvdInput.Height);
-
-            //if (m_MvdOpeate == null)
-            //    m_MvdOpeate = new CMvdImage();
-
-            //m_MvdOpeate = cMvdInput.Clone();
             Bitmap bmpInputImage = EzMvdImageConvertor.CMvdImageToBitmap(cMvdInput);
-
-            //if (cMvdInput.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
-            //{
-            //    //当前程序仅支持mono8。因此像素格会转换.
-            //    cMvdInput.ConvertImagePixelFormat(MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08);
-            //}
-
-            //Bitmap bmp0 = bmpInputImage.Clone(xRecipe.xRectRegionBase0, PixelFormat.Format8bppIndexed);
-            //Bitmap bmp1 = bmpInputImage.Clone(xRecipe.xRectRegionBase1, PixelFormat.Format8bppIndexed);
-
-            ////计算基准位置 用来检测偏移
-            //mVD_POINT_F0 = _getBasePointF2(bmp0, RegionName.BASE0);
-            //mVD_POINT_F1 = _getBasePointF2(bmp1, RegionName.BASE1);
-
-            //bmp0.Dispose();
-            //bmp1.Dispose();
-
-            //xRecipe.mvdprinttemp_Find.xMvdRun_Image = m_MvdOpeate.Clone();
-            //xRecipe.mvdprinttemp_Find.HikRun4Pre();
-
             string debugCellCenterStr = string.Empty;
 
             foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
@@ -307,23 +326,12 @@ namespace LaserAlignDX.RunSpace
                     cell.IsSaveDebugPicture = true;
                     cell.SaveDebugPath = imgPath;
                 }
-
-                //if (cell.ByPass && !INI.Instance.IsForceInspect)
-                //{
-                //    //cell.inspectReason = InspectReason.INS_NOOPEN;
-                //    cell.inspectReasons.Add(InspectReason.INS_NOOPEN);
-                //    continue;
-                //}
                 RectangleF _rectF = new RectangleF(cell.viewRectF.X, cell.viewRectF.Y, cell.viewRectF.Width, cell.viewRectF.Height);
                 _rectF.Inflate(xRecipe.xExtendx, xRecipe.xExtendy);
                 BoundRect(ref _rectF, _bmpInputSize);
                 //xRecipe.mvdprinttemp_Find.bmpRun_Image = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
                 Bitmap bmp2 = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
                 int iOK = xRecipe.PrintTempRun(bmp2);
-                //int iOK = xRecipe.PrintTempRun(cMvdInput, _rectF);
-                //xRecipe.mvdprinttemp_Find.xMvdRun_Image = cMvdInput;
-                //int iOK = (xRecipe.mvdprinttemp_Find.HikRun3(_rectF) ? 0 : -1);
-                //int iOK = (xRecipe.mvdprinttemp_Find.HikRun4(_rectF) ? 0 : -1);
 
                 if (cell.IsSaveDebugPicture)
                 {
@@ -347,28 +355,213 @@ namespace LaserAlignDX.RunSpace
 
                     debugCellCenterStr += $"DES:{cell.xFindResult.fCenterX};{cell.xFindResult.fCenterY}{Environment.NewLine}";
 
-                    RectangleF templaterectf = new RectangleF(0, 0, xRecipe.bmpprinttemplate.Width, xRecipe.bmpprinttemplate.Height);
+                    RectangleF templaterectf //= new RectangleF(0, 0, xRecipe.bmpprinttemplate.Width, xRecipe.bmpprinttemplate.Height);
+                            = new RectangleF(0, 0, xRecipe.PrintTemplateSize.Width, xRecipe.PrintTemplateSize.Height);
                     Rectangle runrectf = new Rectangle(0, 0, _bmpInputSize.Width, _bmpInputSize.Height);
                     cell.PositionFixRun(templaterectf, runrectf, cell.xFindResult);
 
-                    //判断偏移
-                    //cell.RunX = (cell.DrawResultRectF().CenterX - mVD_POINT_F0.fX - cell.OrgX) * INI.Instance.ImageResolution;
-                    //cell.RunY = (cell.DrawResultRectF().CenterY - mVD_POINT_F0.fY - cell.OrgY) * INI.Instance.ImageResolution;
+                    //增加重叠区域的判断
+                    cBoxOverlapTool.ROI1 = new CMvdRectangleF(
+                        cell.viewRectF.X + cell.viewRectF.Width / 2,
+                        cell.viewRectF.Y + cell.viewRectF.Height / 2,
+                        cell.viewRectF.Width,
+                        cell.viewRectF.Height);
+                    cBoxOverlapTool.ROI2 = cell.DrawResultRectF();
 
-                    //换算为偏移的位置
-                    //cell.RunX = (cell.DrawResultRectF().CenterX - cell.OrgX) * INI.Instance.ImageResolution;
-                    //cell.RunY = (cell.DrawResultRectF().CenterY - cell.OrgY) * INI.Instance.ImageResolution;
-                    //cell.RunAngle = (cell.DrawResultRectF().Angle - cell.OrgAngle);
+                    cBoxOverlapTool.Run();
+                    if (cBoxOverlapTool.Result.Overlap >= xInspect.xChipOverlap)
+                    {
+                        //计算偏移值
+                        PointF _viewNewRun = new PointF(cell.DrawResultRectF().CenterX,
+                             cell.DrawResultRectF().CenterY);
+                        PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
+                        cell.RunX = (_worldNewRun.X - cell.OrgX);
+                        cell.RunY = (_worldNewRun.Y - cell.OrgY);
+                        cell.RunAngle = cell.DrawResultRectF().Angle;
 
-                    //计算偏移值
-                    PointF _viewNewRun = new PointF(cell.DrawResultRectF().CenterX,
-                        cell.DrawResultRectF().CenterY);
-                    PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
-                    cell.RunX = (_worldNewRun.X - cell.OrgX);
-                    cell.RunY = (_worldNewRun.Y - cell.OrgY);
-                    cell.RunAngle = cell.DrawResultRectF().Angle;
+                        cell.GetOffsetResult();
 
-                    cell.GetOffsetResult();
+
+                        #region 直线寻找
+
+                        //左边
+                        RectangleF r0 = new RectangleF(xRecipe.xLineLeft.X,
+                            xRecipe.xLineLeft.Y,
+                            xRecipe.xLineLeft.Width,
+                            xRecipe.xLineLeft.Height);
+                        CMvdRectangleF mv0 = new CMvdRectangleF(r0.X + r0.Width / 2, r0.Y + r0.Height / 2, r0.Width, r0.Height);
+                        CMvdRectangleF mv0ret = cell.PositionFixRun(mv0, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
+                            xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
+                        cell.LineSegmentRun(0, bmp2, mv0ret);
+                        mv0ret.CenterX += _rectF.X;
+                        mv0ret.CenterY += _rectF.Y;
+                        cell.cMvdShapesForFindLineRegion[0] = (CMvdShape)mv0ret.Clone();
+
+                        //上边
+                        RectangleF r1 = new RectangleF(xRecipe.xLineTop.X,
+                            xRecipe.xLineTop.Y,
+                            xRecipe.xLineTop.Width,
+                            xRecipe.xLineTop.Height);
+                        CMvdRectangleF mv1 = new CMvdRectangleF(r1.X + r1.Width / 2, r1.Y + r1.Height / 2, r1.Width, r1.Height);
+                        CMvdRectangleF mv1ret = cell.PositionFixRun(mv1, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
+                            xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
+                        cell.LineSegmentRun(1, bmp2, mv1ret);
+                        mv1ret.CenterX += _rectF.X;
+                        mv1ret.CenterY += _rectF.Y;
+                        cell.cMvdShapesForFindLineRegion[1] = (CMvdShape)mv1ret.Clone();
+
+                        //右边
+                        RectangleF r2 = new RectangleF(xRecipe.xLineRight.X,
+                            xRecipe.xLineRight.Y,
+                            xRecipe.xLineRight.Width,
+                            xRecipe.xLineRight.Height);
+                        CMvdRectangleF mv2 = new CMvdRectangleF(r2.X + r2.Width / 2, r2.Y + r2.Height / 2, r2.Width, r2.Height);
+                        CMvdRectangleF mv2ret = cell.PositionFixRun(mv2, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
+                            xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
+                        cell.LineSegmentRun(2, bmp2, mv2ret);
+                        mv2ret.CenterX += _rectF.X;
+                        mv2ret.CenterY += _rectF.Y;
+                        cell.cMvdShapesForFindLineRegion[2] = (CMvdShape)mv2ret.Clone();
+
+                        //下边
+                        RectangleF r3 = new RectangleF(xRecipe.xLineBottom.X,
+                            xRecipe.xLineBottom.Y,
+                            xRecipe.xLineBottom.Width,
+                            xRecipe.xLineBottom.Height);
+                        CMvdRectangleF mv3 = new CMvdRectangleF(r3.X + r3.Width / 2, r3.Y + r3.Height / 2, r3.Width, r3.Height);
+                        CMvdRectangleF mv3ret = cell.PositionFixRun(mv3, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
+                            xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
+                        cell.LineSegmentRun(3, bmp2, mv3ret);
+                        mv3ret.CenterX += _rectF.X;
+                        mv3ret.CenterY += _rectF.Y;
+                        cell.cMvdShapesForFindLineRegion[3] = (CMvdShape)mv3ret.Clone();
+
+                        //长度
+
+                        try
+
+                        {
+                            if (cell.cMvdLineSegmentFsOut[0] != null && cell.cMvdLineSegmentFsOut[2] != null)
+                            {
+                                // CreateInstance
+
+                                VisionDesigner.L2LMeasure.CL2LMeasureTool cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool();
+
+                                // Set basic parameter
+                                cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[0];
+                                cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[2];
+                                //cL2LMeasureToolObj.BasicParam.Line1.StartPoint = new MVD_POINT_F(100f, 100f);
+
+                                //cL2LMeasureToolObj.BasicParam.Line1.EndPoint = new MVD_POINT_F(150f, 150f);
+
+                                //cL2LMeasureToolObj.BasicParam.Line2.StartPoint = new MVD_POINT_F(300f, 300f);
+
+                                //cL2LMeasureToolObj.BasicParam.Line2.EndPoint = new MVD_POINT_F(250f, 350f);
+
+                                // Running
+
+                                cL2LMeasureToolObj.Run();
+
+                                // Get the result
+
+                                VisionDesigner.L2LMeasure.CL2LMeasureResult cL2LMeasureRes = cL2LMeasureToolObj.Result;
+
+                                cell.RunWidth = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
+
+                                Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+
+                                Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+
+                                cL2LMeasureToolObj.Dispose();
+                                cL2LMeasureToolObj = null;
+                            }
+                            
+
+                        }
+
+                        catch (MvdException ex)
+
+                        {
+
+                            Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+
+                        }
+
+                        catch (System.Exception ex)
+
+                        {
+
+                            Console.WriteLine("Fail with error " + ex.Message);
+
+                        }
+
+                        //宽度
+
+                        try
+
+                        {
+                            if (cell.cMvdLineSegmentFsOut[1] != null && cell.cMvdLineSegmentFsOut[3] != null)
+                            {
+                                // CreateInstance
+
+                                VisionDesigner.L2LMeasure.CL2LMeasureTool cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool();
+
+                                // Set basic parameter
+                                cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[1];
+                                cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[3];
+                                //cL2LMeasureToolObj.BasicParam.Line1.StartPoint = new MVD_POINT_F(100f, 100f);
+
+                                //cL2LMeasureToolObj.BasicParam.Line1.EndPoint = new MVD_POINT_F(150f, 150f);
+
+                                //cL2LMeasureToolObj.BasicParam.Line2.StartPoint = new MVD_POINT_F(300f, 300f);
+
+                                //cL2LMeasureToolObj.BasicParam.Line2.EndPoint = new MVD_POINT_F(250f, 350f);
+
+                                // Running
+
+                                cL2LMeasureToolObj.Run();
+
+                                // Get the result
+
+                                VisionDesigner.L2LMeasure.CL2LMeasureResult cL2LMeasureRes = cL2LMeasureToolObj.Result;
+
+                                cell.RunHeight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
+
+                                Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+
+                                Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+
+                                cL2LMeasureToolObj.Dispose();
+                                cL2LMeasureToolObj = null;
+                            }
+
+
+                        }
+
+                        catch (MvdException ex)
+
+                        {
+
+                            Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+
+                        }
+
+                        catch (System.Exception ex)
+
+                        {
+
+                            Console.WriteLine("Fail with error " + ex.Message);
+
+                        }
+
+                        #endregion
+
+                    }
+                    else
+                    {
+                        cell.inspectReason = InspectReason.INS_ALIGNERR;
+                        cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
+                    }
                 }
                 else
                 {
@@ -382,8 +575,20 @@ namespace LaserAlignDX.RunSpace
             if (INI.Instance.IsSaveTestImage)
                 SaveData(debugCellCenterStr, imgPath + $"\\PositionFix\\DEBUG_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt");
 
+            
+            if (INI.Instance.IsSaveDebugBMP)
+            {
+                SaveImageWithQuality(bmpInputImage, $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
+            }
+            if (INI.Instance.IsSaveDebugOrgBmp)
+            {
+                //IEzImage ezImage = new EzFreeBitmap(bmpInputImage, false);
+                bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
+                                   ImageFormat.Jpeg);
+            }
+
             bmpInputImage.Dispose();
-            m_IsPass = true;// xRecipe.AnalyzeDatasRun();
+            m_IsPass = true;
 
             stopwatch.Stop();
             m_ElapsedTime = stopwatch.ElapsedMilliseconds;
@@ -540,6 +745,18 @@ namespace LaserAlignDX.RunSpace
                     //cell.DeCode2D(cell.bmpItemCodeRun, _crop.Location, xRecipe.xRectCodeRegion.Location);
                 }
             }
+
+            if (INI.Instance.IsSaveDebugBMP)
+            {
+                SaveImageWithQuality(bmpInputImage, $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
+            }
+            if (INI.Instance.IsSaveDebugOrgBmp)
+            {
+                //IEzImage ezImage = new EzFreeBitmap(bmpInputImage, false);
+                bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
+                                   ImageFormat.Jpeg);
+            }
+
             bmpInputImage.Dispose();
             m_IsPass = true;// xRecipe.AnalyzeDatasRun();
 
@@ -716,59 +933,61 @@ namespace LaserAlignDX.RunSpace
             m_ElapsedTime = 0;
             m_Running = true;
 
-
             System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Restart();
-
             var aoiModel = LtAoiFactory.InstanceModel();
-
-            //string imgPath = $"{Universal.LOG_IMG_PATH}\\{JzTimes.DateSerialString}\\{m_FileBarcodeStr}";
-            //if (INI.Instance.IsSaveTestImage)
-            //{
-            //    if (!Directory.Exists(imgPath))
-            //        Directory.CreateDirectory(imgPath);
-            //}
-
-            //Size _bmpInputSize = new Size((int)cMvdInput.Width, (int)cMvdInput.Height);
-
-            //if (m_MvdOpeate == null)
-            //    m_MvdOpeate = new CMvdImage();
-            //m_MvdOpeate = cMvdInput.Clone();
-
             using (Bitmap bmpInputImage = EzMvdImageConvertor.CMvdImageToBitmap(cMvdInput))
             {
+                xRecipe.xOutBlocs.Clear();
+                //复位所有数据
+                foreach (var cell in xRecipe.xRegionCells)
+                {
+                    cell.Reset();
+                }
                 aoiModel.RunAll(bmpInputImage, wait: true);
-
                 var result = aoiModel.GetResult();
-
                 string msg;
                 if (result == null)
                 {
                     msg = "無結果!";
-                    m_IsPass = false;
+                    //m_IsPass = false;
                 }
                 else
                 {
-                    m_IsPass = result.IsPass();
+                    //m_IsPass = result.IsPass();
                     msg = result.ToString();
                 }
+                CommonLogClass.Instance.LogMessage(msg, m_IsPass ? Color.Green : Color.Red);
+#if (false)
+                
 
-                if (true)
-                {
-                    CommonLogClass.Instance.LogMessage(msg, m_IsPass ? Color.Green : Color.Red);
+                //if (false)
+                //{
+                //    CommonLogClass.Instance.LogMessage(msg, m_IsPass ? Color.Green : Color.Red);
 
-                    var frm = System.Windows.Forms.Application.OpenForms[0];
-                    frm.BeginInvoke(new Action(() =>
-                    {
-                        var icon = m_IsPass ? MessageBoxIcon.Information : MessageBoxIcon.Exclamation;
-                        MessageBox.Show(msg, "空盤檢測", MessageBoxButtons.OK, icon);
-                    }));
-                }
-
+                //    var frm = System.Windows.Forms.Application.OpenForms[0];
+                //    frm.BeginInvoke(new Action(() =>
+                //    {
+                //        var icon = m_IsPass ? MessageBoxIcon.Information : MessageBoxIcon.Exclamation;
+                //        MessageBox.Show(msg, "空盤檢測", MessageBoxButtons.OK, icon);
+                //    }));
+                //}
+#endif
                 // 要如何繪製 結果?
                 _convert_lt_result_to_gaara(result, bmpInputImage, xRecipe);
-            }
 
+                if (INI.Instance.IsSaveDebugBMP)
+                {
+                    SaveImageWithQuality(bmpInputImage, $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
+                }
+                if (INI.Instance.IsSaveDebugOrgBmp)
+                {
+                    //IEzImage ezImage = new EzFreeBitmap(bmpInputImage, false);
+                    bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
+                                   ImageFormat.Jpeg);
+                }
+            }
+            m_IsPass = true;//不需要结果 都是记录单颗的数据
             stopwatch.Stop();
             m_ElapsedTime = stopwatch.ElapsedMilliseconds;
             m_Running = false;
@@ -778,7 +997,7 @@ namespace LaserAlignDX.RunSpace
         private void _convert_lt_result_to_gaara(EzEmptyTrayResult result, Bitmap bmpInputImage, RecipeFPIX3Class dst)
         {
             string imgPath = $"{Universal.LOG_IMG_PATH}\\{JzTimes.DateSerialString}\\{m_FileBarcodeStr}";
-            
+
             #region PREPARE_PATH
             if (INI.Instance.IsSaveTestImage)
             {
@@ -791,36 +1010,89 @@ namespace LaserAlignDX.RunSpace
             {
                 int fullRows = result.FullRows;
                 int fullCols = result.FullCols;
-                for(int row = 0; row < fullRows; row++)
+
+                //Z字型对位资料
+                int _index = 0;
+                for (int row = 0; row < fullRows; row++)
+                {
+                    if (row % 2 == 1)
+                    {
+                        for (int col = fullCols - 1; col > -1; col--)
+                        {
+                            result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+                            var cell = xRecipe.xRegionCells[_index];
+                            InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
+                            //if (bloc == null)
+                            //    reason = InspectReason.INS_DEFECTERR;
+                            cell.inspectReason = reason;
+                            cell.inspectReasons.Add(reason);
+                            System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                            _index++;
+                        }
+                    }
+                    else
+                    {
+                        for (int col = 0; col < fullCols; col++)
+                        {
+                            result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+                            var cell = xRecipe.xRegionCells[_index];
+                            InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
+                            //if (bloc == null)
+                            //    reason = InspectReason.INS_DEFECTERR;
+                            cell.inspectReason = reason;
+                            cell.inspectReasons.Add(reason);
+                            System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                            _index++;
+                        }
+                    }
+                }
+
+                #region 收集阵列之外的料件
+
+                foreach (var bloc in result.IterOutGridAbnormalBlocs())
+                {
+                    xRecipe.xOutBlocs.Add(bloc.Rect);
+                }
+
+                #endregion
+
+            }
+#if (false)
+                for (int row = 0; row < fullRows; row++)
                 {
                     for (int col = 0; col < fullCols; col++)
                     {
                         result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+                        var cell = xRecipe.xRegionCells[row * fullCols + col];
+                        InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
+                        cell.inspectReason = reason;
+                        cell.inspectReasons.Add(reason);
 
-                        if (bloc != null)
-                        {
-                            // 單位: Pixels
-                            var rect = bloc.Rect;
-                            if (isOK)
-                            {
-                                // rest 內有 吸嘴
-                                // 如何將 rect 轉換到 cell ???
-                            }
-                            else
-                            {
-                                // rect 內有 雜物
-                                // 如何將 rect 轉換到 cell ???
-                            }
-                        }
-                        else
-                        {
-                            // [row, col] 處 沒有找到 定位格點
-                        }
+                        //if (bloc != null)
+                        //{
+                        //    // 單位: Pixels
+                        //    var rect = bloc.Rect;
+                        //    if (isOK)
+                        //    {
+                        //        // rest 內有 吸嘴
+                        //        // 如何將 rect 轉換到 cell ???
+                        //    }
+                        //    else
+                        //    {
+                        //        // rect 內有 雜物
+                        //        // 如何將 rect 轉換到 cell ???
+                        //    }
+                        //}
+                        //else
+                        //{
+                        //    // [row, col] 處 沒有找到 定位格點
+                        //}
 
-                        System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
                     }
                 }
-            }
+#endif
+
 
 #if (false)
             Size _bmpInputSize = new Size((int)cMvdInput.Width, (int)cMvdInput.Height);
@@ -1313,6 +1585,36 @@ namespace LaserAlignDX.RunSpace
             return cMvdImage;
         }
 #endif
+
+        void SaveImageWithQuality(Bitmap bmpinput, string outputImagePath, long quality)
+        {
+            //using (Image image =bmpinput)
+            Image image = bmpinput;
+            {
+                // 设置压缩参数
+                EncoderParameters encoderParameters = new EncoderParameters(1);
+                EncoderParameter encoderParameter = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality);
+                encoderParameters.Param[0] = encoderParameter;
+
+                // 获取图像编码信息
+                ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
+
+                // 保存图片，应用压缩参数
+                image.Save(outputImagePath, jpgEncoder, encoderParameters);
+            }
+        }
+        private ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
+        }
 
         void BoundRect(ref RectangleF InnerRect, Size BoundSize)
         {

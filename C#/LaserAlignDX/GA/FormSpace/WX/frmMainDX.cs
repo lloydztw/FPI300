@@ -206,7 +206,7 @@ namespace Traveller106
                     }
                     break;
             }
-            
+            //mMainTick.Enabled = false;
             mMainTick?.Dispose();
             mMainTick = null;
             Universal.Dispose();
@@ -873,7 +873,7 @@ namespace Traveller106
                     MAINUI.Close();
 
                     //LETIAN: 原代碼有誤: 此處不會被調用到 !!!
-                    Universal.Close();
+                    //Universal.Close();
 
                     this.Close();
 

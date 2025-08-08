@@ -12,6 +12,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
+using Traveller106;
 using WorldOfMoveableObjects;
 
 namespace LaserAlignDX.FormSpace
@@ -81,6 +82,8 @@ namespace LaserAlignDX.FormSpace
             this.Load += FrmFPIRecipe_Load;
             this.FormClosed += FrmFPIRecipe_FormClosed;
             this.SizeChanged += FrmFPIRecipe_SizeChanged;
+
+            LtAoiFactory.OnLineScanRequested += (s, e) => test_PushImage();
         }
 
         private void FrmFPIRecipe_SizeChanged(object sender, EventArgs e)
@@ -126,6 +129,7 @@ namespace LaserAlignDX.FormSpace
             btnFlyTemplateForm.Click += BtnFlyTemplateForm_Click;
             btnSaveImage.Click += BtnSaveImage_Click;
             btnNoTrayTemplateForm.Click += BtnNoTrayTemplateForm_Click;
+            
 
             // 注意: xTimer 不用之後, 必須調用 Dispose() !!!
             xTimer = new Timer();
@@ -161,22 +165,41 @@ namespace LaserAlignDX.FormSpace
 #endif
         }
 
+        void test_PushImage()
+        {
+            //IEzImage ezImage = null;
+            //string name = "";
+            //if (IScanCam.GetFreeImageBitmap() != null)
+            //{
+            //    ezImage = new EzFreeBitmap(IScanCam.GetFreeImageBitmap().ToBitmap(), true);
+            //    name = "CamLive";
+            //}
+            //else
+            //{
+            //    ezImage = new EzFreeBitmap(xRecipe.bmpOrg, true);
+            //    name = "RecipeOrg";
+            //}
+            //LtAoiFactory.PushImage(ezImage, name);
+        }
+
         //frmNoTrayX3 frmNoTrayX3x = null;
         private void BtnNoTrayTemplateForm_Click(object sender, EventArgs e)
         {
+            openEmptyTrayInspectorTool();
+
             //frmNoTrayX3x = new frmNoTrayX3();
             //frmNoTrayX3x.ShowDialog();
             //frmNoTrayX3x.Dispose();
             //frmNoTrayX3x = null;
-            using (var frmNoTrayX3x = new frmNoTrayX3())
-            {
-                frmNoTrayX3x.ShowDialog();
-            }
+            //using (var frmNoTrayX3x = new frmNoTrayX3())
+            //{
+            //    frmNoTrayX3x.ShowDialog();
+            //}
         }
 
         private void BtnSaveImage_Click(object sender, EventArgs e)
         {
-            string _filepath = JetEazy.BasicSpace.JzToolsClass.SaveFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
+            string _filepath = JetEazy.BasicSpace.JzToolsClass.SaveFilePicker("JPG Files (*.jpg)|*.JPG|" + "BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
             if (!string.IsNullOrEmpty(_filepath))
             {
                 using (IEzImage ezImage = new EzFreeBitmap(xRecipe.bmpOrg, true))
@@ -437,6 +460,15 @@ namespace LaserAlignDX.FormSpace
             //GraphicalObject grobj1 = myMover[1].Source;
             //myRecipe.rect_end = (grobj1 as JzRectEAG).GetRect;
             this.DialogResult = DialogResult.OK;
+        }
+
+        void openEmptyTrayInspectorTool()
+        {
+            //IEzImage ezImage = new EzFreeBitmap(xRecipe.bmpOrg, true);
+            //LtAoiFactory.PushImage(ezImage, "bmpOrg");
+
+            var frm = FindForm();
+            LtAoiFactory.OpenEmptyTrayInspectorTool(frm);
         }
 
         void init_Display()

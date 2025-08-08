@@ -177,6 +177,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDBlobFind.Net.dll</HintPath>
     </Reference>
+    <Reference Include="MVDBoxOverlap.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=266db6fa12428608, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDBoxOverlap.NET.dll</HintPath>
+    </Reference>
     <Reference Include="MVDCircleFind.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=20e73207c21b5977, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDCircleFind.NET.dll</HintPath>
@@ -220,6 +224,10 @@
     <Reference Include="MVDImageRegionCopy.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=7a3e64db8a1b16f5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDImageRegionCopy.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDL2LMeasure.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=38d351edf25ea0ee, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDL2LMeasure.Net.dll</HintPath>
     </Reference>
     <Reference Include="MVDLineFind.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=f53e9becd799eccd, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -302,6 +310,7 @@
     <Compile Include="GA\BasicSpace\FindRectByVM.cs" />
     <Compile Include="GA\BasicSpace\Mvd2DReaderClass.cs" />
     <Compile Include="GA\BasicSpace\MvdFindClass.cs" />
+    <Compile Include="GA\BasicSpace\MvdFindLineClass.cs" />
     <Compile Include="GA\BasicSpace\ParaSpace\MvdFindCircleClass.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\BarcodeAll_MVD.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\ZXingClass.cs" />

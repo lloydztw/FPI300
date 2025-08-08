@@ -293,7 +293,12 @@ namespace VsCommon.ControlSpace.IOSpace
             get
             {
                 AddressClass address = getCipAdress("sLotID");
-                return PLC[address.SiteNo].ReadVari(address.Address0);
+                string ret = PLC[address.SiteNo].ReadVari(address.Address0);
+                if (string.IsNullOrEmpty(ret))
+                {
+                    ret = "Lot_NONE";
+                }
+                return ret;
             }
             //set
             //{
@@ -306,7 +311,12 @@ namespace VsCommon.ControlSpace.IOSpace
             get
             {
                 AddressClass address = getCipAdress("sStripID");
-                return PLC[address.SiteNo].ReadVari(address.Address0);
+                string ret = PLC[address.SiteNo].ReadVari(address.Address0);
+                if (string.IsNullOrEmpty(ret))
+                {
+                    ret = "Strip_NONE";
+                }
+                return ret;
             }
             //set
             //{

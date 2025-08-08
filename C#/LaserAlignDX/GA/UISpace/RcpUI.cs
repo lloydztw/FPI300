@@ -418,25 +418,30 @@ namespace PhotoMachine.UISpace
         //frmFPIRecipe frmRecipeSetup = null;
         void showRecipeDialogWindow()
         {
-            int mode = -1;
-            using (var frm = new frmSelectScanInspectMode())
+            using (var frmRecipeSetup = new frmFPIRecipe())
             {
-                if (frm.ShowDialog() != DialogResult.OK)
-                    return;
-                mode = frm.SelectScanMode;
+                frmRecipeSetup.ShowDialog();
             }
 
-            if (mode == 2)
-            {
-                openEmptyTrayInspectorTool();
-            }
-            else
-            {
-                using (var frmRecipeSetup = new frmFPIRecipe())
-                {
-                    frmRecipeSetup.ShowDialog();
-                }
-            }
+            //int mode = -1;
+            //using (var frm = new frmSelectScanInspectMode())
+            //{
+            //    if (frm.ShowDialog() != DialogResult.OK)
+            //        return;
+            //    mode = frm.SelectScanMode;
+            //}
+
+            //if (mode == 2)
+            //{
+            //    openEmptyTrayInspectorTool();
+            //}
+            //else
+            //{
+            //    using (var frmRecipeSetup = new frmFPIRecipe())
+            //    {
+            //        frmRecipeSetup.ShowDialog();
+            //    }
+            //}
 
             //frmRecipeSetup = new frmFPIRecipe();
             //frmRecipeSetup.ShowDialog();
@@ -449,11 +454,11 @@ namespace PhotoMachine.UISpace
             //}
         }
 
-        void openEmptyTrayInspectorTool()
-        {
-            var frm = FindForm();
-            LtAoiFactory.OpenEmptyTrayInspectorTool(frm);
-        }
+        //void openEmptyTrayInspectorTool()
+        //{
+        //    var frm = FindForm();
+        //    LtAoiFactory.OpenEmptyTrayInspectorTool(frm);
+        //}
 
         #region AUTO_LAYOUT
         void RcpUI_SizeChanged(object sender, EventArgs e)

@@ -36,7 +36,7 @@ namespace LaserAlignDX.OPSpace
         [Description("印字偏移")]
         INS_OFFSETERR = 2,
         /// <summary>
-        /// 疑似有料
+        /// 疑似有料及切割NG
         /// </summary>
         [Description("疑似有料")]
         //[Description("印字缺失")]

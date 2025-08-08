@@ -1,6 +1,7 @@
 ﻿using Common.RecipeSpace;
 using JetEazy;
 using JzDisplay;
+using LaserAlignDX.GA.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
 using System;
@@ -16,6 +17,7 @@ using System.Windows.Forms;
 using Traveller106;
 using VisionDesigner;
 using VsCommon.ControlSpace.MachineSpace;
+using WorldOfMoveableObjects;
 
 namespace LaserAlignDX.FormSpace
 {
@@ -26,10 +28,26 @@ namespace LaserAlignDX.FormSpace
         //{
         //    get { return Traveller106.Universal.LineScanCalibrateClasses[cboCaliIndex.SelectedIndex]; }
         //}
+        Mover xMovers = new Mover();
 
         protected MainFPIX3MachineClass MACHINE
         {
             get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
+        }
+
+        RectangleF LeftTopRect
+        {
+            get { return xRecipe.xRegionTrain; }
+        }
+        PointF LeftTopRectCenter
+        {
+            get
+            {
+                PointF ptCenter
+                    = new PointF(LeftTopRect.X + LeftTopRect.Width / 2 + xRecipe.xRectRegionPrint.X,
+                                 LeftTopRect.Y + LeftTopRect.Height / 2 + xRecipe.xRectRegionPrint.Y);
+                return ptCenter;
+            }
         }
 
         //int xMoverIndex = 0;
@@ -40,8 +58,8 @@ namespace LaserAlignDX.FormSpace
         //Button btnDeleteRegion;
 
         Mover CodeMovers = new Mover();
-        bool bSelectCodeRegion = false;
-        Button btnSelectCodeRegion;
+        bool bSelectRegion = false;
+        Button btnSelectRegion;
         Button btnCodeTest;
         Button btnCalRealPointF;
         Button btnWritePLCStage;
@@ -54,6 +72,10 @@ namespace LaserAlignDX.FormSpace
         protected RecipeFPIX3Class xRecipe
         {
             get { return RecipeFPIX3Class.Instance; }
+        }
+        protected InspectX3ParaClass xInspectX3
+        {
+            get { return InspectX3ParaClass.Instance; }
         }
 
         public frmTemplateX3()
@@ -83,7 +105,7 @@ namespace LaserAlignDX.FormSpace
             //btnSelectRegion = button4;
             //btnDeleteAllRegion = button5;
             //btnDeleteRegion = button7;
-            btnSelectCodeRegion = button8;
+            btnSelectRegion = button8;
             btnCodeTest = button9;
             btnCalRealPointF = button1;
             btnWritePLCStage = button2;
@@ -95,7 +117,7 @@ namespace LaserAlignDX.FormSpace
             //btnSelectRegion.Click += BtnSelectRegion_Click;
             //btnDeleteAllRegion.Click += BtnDeleteAllRegion_Click;
             //btnDeleteRegion.Click += BtnDeleteRegion_Click;
-            btnSelectCodeRegion.Click += BtnSelectCodeRegion_Click;
+            btnSelectRegion.Click += BtnSelectCodeRegion_Click;
             btnCodeTest.Click += BtnCodeTest_Click;
             btnCalRealPointF.Click += BtnCalRealPointF_Click;
             btnWritePLCStage.Click += BtnWritePLCStage_Click;
@@ -107,8 +129,7 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnWritePLCStage_Click(object sender, EventArgs e)
         {
-            PointF ptCenter = new PointF(xRecipe.xRectRegionPrint.X + xRecipe.xRectRegionPrint.Width / 2,
-                xRecipe.xRectRegionPrint.Y + xRecipe.xRectRegionPrint.Height / 2);
+           
             //int i = 0;
             //while (i < 4)
             //{
@@ -134,8 +155,8 @@ namespace LaserAlignDX.FormSpace
             //label5.Text = $"{DateTime.Now.ToString()}操作完成";
 
             LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[cboCaliIndex.SelectedIndex];
-            textBox1.Text = PointFtoStringSimple(ptCenter);
-            PointF ptworld = cali.ViewToWorld(ptCenter);
+            textBox1.Text = PointFtoStringSimple(LeftTopRectCenter);
+            PointF ptworld = cali.ViewToWorld(LeftTopRectCenter);
             textBox2.Text = PointFtoStringSimple(ptworld);
 
             switch (cboCaliIndex.SelectedIndex)
@@ -160,11 +181,11 @@ namespace LaserAlignDX.FormSpace
         private void BtnCalRealPointF_Click(object sender, EventArgs e)
         {
 
-            //记录模板左上角实际点 用来阵列实际的位置
-            PointF ptCenter = new PointF(xRecipe.xRectRegionPrint.X + xRecipe.xRectRegionPrint.Width / 2,
-                xRecipe.xRectRegionPrint.Y + xRecipe.xRectRegionPrint.Height / 2);
+            ////记录模板左上角实际点 用来阵列实际的位置
+            //PointF ptCenter = new PointF(xRecipe.xRectRegionPrint.X + xRecipe.xRectRegionPrint.Width / 2,
+            //    xRecipe.xRectRegionPrint.Y + xRecipe.xRectRegionPrint.Height / 2);
             LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[0];
-            PointF ptworld = cali.ViewToWorld(ptCenter);
+            PointF ptworld = cali.ViewToWorld(LeftTopRectCenter);
             xRecipe.xRealLeftX = ptworld.X;
             xRecipe.xRealLeftY = ptworld.Y;
 
@@ -195,8 +216,8 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnSelectCodeRegion_Click(object sender, EventArgs e)
         {
-            bSelectCodeRegion = !bSelectCodeRegion;
-            btnSelectCodeRegion.BackColor = (bSelectCodeRegion ? Color.Red : Color.FromArgb(192, 255, 192));
+            bSelectRegion = !bSelectRegion;
+            btnSelectRegion.BackColor = (bSelectRegion ? Color.Red : Color.FromArgb(192, 255, 192));
         }
 
 
@@ -226,24 +247,159 @@ namespace LaserAlignDX.FormSpace
         }
         private void DS_CaptureAction(RectangleF rectf)
         {
-            if (!bSelectCodeRegion)
+            if (!bSelectRegion)
                 return;
             BoundRect(ref rectf, xRecipe.bmpprinttemplate.Size);
             if (rectf.Width > 1 && rectf.Height > 1)
             {
-                Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
-                Graphics g = Graphics.FromImage(bmpx);
-                xRecipe.xRectCodeRegion = rectf;
-                xRecipe.bmpcodetemplate = xRecipe.bmpprinttemplate.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-                xRecipe.SaveCodeTemplate();
+                DS1.ClearStaticMover();
+                //DS2.ClearStaticMover();
+                xMovers.Clear();
+                JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), rectf);
+                _rect.RelateLevel = 1;
+                //_rect.RelateNo = i;
+                _rect.RelatePosition = 0;
+                xMovers.Add(_rect);
 
-                g.DrawRectangles(new Pen(Color.Yellow, 3), new RectangleF[] { rectf });
-                g.Dispose();
-                DS1.ReplaceDisplayImage(bmpx);
-                bmpx.Dispose();
+
+                if (radioButton1.Checked)//template
+                {
+                    xRecipe.xRegionTrain = rectf;
+                    xRecipe.SavePrintTemplateRegionTrain();
+                }
+                else if (radioButton2.Checked)//code
+                {
+                    xRecipe.xRectCodeRegion = rectf;
+                    xRecipe.bmpcodetemplate = xRecipe.bmpprinttemplate.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+                    xRecipe.SaveCodeTemplate();
+                }
+                else if (radioButton3.Checked)//left
+                {
+                    xRecipe.xLineLeft = rectf;
+                    xRecipe.SaveLinesRegion();
+
+                    using (MvdFindLineClass findline = new MvdFindLineClass())
+                    {
+                        findline.bPositive = xInspectX3.bPositive0;
+                        findline.bFindOrient = true;
+                        findline.bEdgePolarity = xInspectX3.bEdgePolarity0;
+                        CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
+                        if (lineSegmentF != null)
+                        {
+                            Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                            Graphics g = Graphics.FromImage(bmpx);
+                            g.DrawLine(new Pen(Color.Lime, 3),
+                                lineSegmentF.StartPoint.fX,
+                                lineSegmentF.StartPoint.fY,
+                                lineSegmentF.EndPoint.fX,
+                                lineSegmentF.EndPoint.fY);
+                            g.Dispose();
+                            DS1.ReplaceDisplayImage(bmpx);
+                            bmpx.Dispose();
+                        }
+                    }
+                }
+                else if (radioButton4.Checked)//top
+                {
+                    xRecipe.xLineTop = rectf;
+                    xRecipe.SaveLinesRegion();
+
+
+                    using (MvdFindLineClass findline = new MvdFindLineClass())
+                    {
+                        findline.bPositive = xInspectX3.bPositive1;
+                        findline.bFindOrient = false;
+                        findline.bEdgePolarity = xInspectX3.bEdgePolarity1;
+                        CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
+                        if (lineSegmentF != null)
+                        {
+                            Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                            Graphics g = Graphics.FromImage(bmpx);
+                            g.DrawLine(new Pen(Color.Lime, 3),
+                                lineSegmentF.StartPoint.fX,
+                                lineSegmentF.StartPoint.fY,
+                                lineSegmentF.EndPoint.fX,
+                                lineSegmentF.EndPoint.fY);
+                            g.Dispose();
+                            DS1.ReplaceDisplayImage(bmpx);
+                            bmpx.Dispose();
+                        }
+                    }
+
+                }
+                else if (radioButton5.Checked)//right
+                {
+                    xRecipe.xLineRight = rectf;
+                    xRecipe.SaveLinesRegion();
+
+                    using (MvdFindLineClass findline = new MvdFindLineClass())
+                    {
+                        findline.bPositive = xInspectX3.bPositive2;
+                        findline.bFindOrient = true;
+                        findline.bEdgePolarity = xInspectX3.bEdgePolarity2;
+                        CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
+                        if (lineSegmentF != null)
+                        {
+                            Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                            Graphics g = Graphics.FromImage(bmpx);
+                            g.DrawLine(new Pen(Color.Lime, 3),
+                                lineSegmentF.StartPoint.fX,
+                                lineSegmentF.StartPoint.fY,
+                                lineSegmentF.EndPoint.fX,
+                                lineSegmentF.EndPoint.fY);
+                            g.Dispose();
+                            DS1.ReplaceDisplayImage(bmpx);
+                            bmpx.Dispose();
+                        }
+                    }
+
+                }
+                else if (radioButton6.Checked)//bottom
+                {
+                    xRecipe.xLineBottom = rectf;
+                    xRecipe.SaveLinesRegion();
+
+                    using (MvdFindLineClass findline = new MvdFindLineClass())
+                    {
+                        findline.bPositive = xInspectX3.bPositive3;
+                        findline.bFindOrient = false;
+                        findline.bEdgePolarity = xInspectX3.bEdgePolarity3;
+                        CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
+                        if (lineSegmentF != null)
+                        {
+                            Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                            Graphics g = Graphics.FromImage(bmpx);
+                            g.DrawLine(new Pen(Color.Lime, 3),
+                                lineSegmentF.StartPoint.fX,
+                                lineSegmentF.StartPoint.fY,
+                                lineSegmentF.EndPoint.fX,
+                                lineSegmentF.EndPoint.fY);
+                            g.Dispose();
+                            DS1.ReplaceDisplayImage(bmpx);
+                            bmpx.Dispose();
+                        }
+                    }
+                }
+
+                DS1.SetStaticMover(xMovers);
+                DS1.RefreshDisplayShape();
+                DS1.MappingSelect();
+
+                update_Display(false);
+
+                //Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                //Graphics g = Graphics.FromImage(bmpx);
+                //xRecipe.xRectCodeRegion = rectf;
+                //xRecipe.bmpcodetemplate = xRecipe.bmpprinttemplate.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+                //xRecipe.SaveCodeTemplate();
+
+                //g.DrawRectangles(new Pen(Color.Yellow, 3), new RectangleF[] { rectf });
+                //g.Dispose();
+                //DS1.ReplaceDisplayImage(bmpx);
+                //bmpx.Dispose();
             }
-            bSelectCodeRegion = false;
-            btnSelectCodeRegion.BackColor = (bSelectCodeRegion ? Color.Red : Color.FromArgb(192, 255, 192));
+            bSelectRegion = false;
+            btnSelectRegion.BackColor = (bSelectRegion ? Color.Red : Color.FromArgb(192, 255, 192));
         }
 
         #region TOOLS

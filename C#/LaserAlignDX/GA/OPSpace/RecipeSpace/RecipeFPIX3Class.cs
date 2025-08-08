@@ -43,6 +43,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
         public List<RegionCellX3Class> xRegionCells = new List<RegionCellX3Class>();
+        public List<Rectangle> xOutBlocs = new List<Rectangle>();
 
         public Bitmap bmpOrg = new Bitmap(1, 1);
         public Bitmap bmpOrgNoTray = new Bitmap(1, 1);
@@ -58,6 +59,15 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public RectangleF xRectRegionPrint = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpprinttemplate = new Bitmap(1, 1);
         //public Bitmap bmpprintmask = new Bitmap(1, 1);
+        /// <summary>
+        /// 训练的区域
+        /// </summary>
+        public RectangleF xRegionTrain = new RectangleF(0, 0, 100, 100);
+
+        public RectangleF xLineLeft = new RectangleF(0, 0, 100, 100);
+        public RectangleF xLineTop = new RectangleF(0, 0, 100, 100);
+        public RectangleF xLineRight = new RectangleF(0, 0, 100, 100);
+        public RectangleF xLineBottom = new RectangleF(0, 0, 100, 100);
 
         public RectangleF xRectRegionPrintNoTray = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpprintNoTraytemplate = new Bitmap(1, 1);
@@ -143,6 +153,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //template1Center = StringtoPointF(ReadINIValue("Recipe Basic", "template1Center", PointFtoStringSimple(new System.Drawing.PointF(0, 0)), INIFILE));
             //distancebase0tobase1 = StringtoPointF(ReadINIValue("Recipe Basic", "distancebase0tobase1", PointFtoStringSimple(new System.Drawing.PointF(0, 0)), INIFILE));
             xRectRegionPrint = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrint", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            xRegionTrain = StringtoRectF(ReadINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+
             xRectRegionPrintNoTray = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             xRectRegionPrintFly = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrintFly", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
 
@@ -150,8 +162,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             ptPrinttemp = StringtoPointF(ReadINIValue("Recipe Basic", "ptPrinttemp", PointFtoStringSimple(new PointF(-1, -1)), INIFILE));
             ptPrintFlytemp = StringtoPointF(ReadINIValue("Recipe Basic", "ptPrintFlytemp", PointFtoStringSimple(new PointF(-1, -1)), INIFILE));
-            
-            
+
+
+            xLineLeft = StringtoRectF(ReadINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            xLineTop = StringtoRectF(ReadINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            xLineRight = StringtoRectF(ReadINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            xLineBottom = StringtoRectF(ReadINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+
+
             //xRow = int.Parse(ReadINIValue("Recipe Basic", "xRow", xRow.ToString(), INIFILE));
             //xColumn = int.Parse(ReadINIValue("Recipe Basic", "xColumn", xColumn.ToString(), INIFILE));
             //xLeftTopX = int.Parse(ReadINIValue("Recipe Basic", "xLeftTopX", xLeftTopX.ToString(), INIFILE));
@@ -370,6 +388,17 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //InspectX2Class.Instance.SaveRoi();
             //SaveCodeTemplate();
         }
+        public void SavePrintTemplateRegionTrain()
+        {
+            WriteINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(xRegionTrain), INIFILE);
+        }
+        public void SaveLinesRegion()
+        {
+            WriteINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(xLineLeft), INIFILE);
+            WriteINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(xLineTop), INIFILE);
+            WriteINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(xLineRight), INIFILE);
+            WriteINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(xLineBottom), INIFILE);
+        }
         public void SavePrintNoTrayTemplate()
         {
             WriteINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(xRectRegionPrintNoTray), INIFILE);
@@ -403,10 +432,22 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         #region 定位TRAIN&RUN
-        
+
+        public Size PrintTemplateSize
+        {
+            get { return mvdprinttemp_Find.bmpObj_Image.Size; }
+        }
+
         public int PrintTempTrain()
         {
-            mvdprinttemp_Find.bmpObj_Image = bmpprinttemplate;
+            mvdprinttemp_Find.bmpObj_Image = (Bitmap)bmpprinttemplate.Clone(xRegionTrain, bmpprinttemplate.PixelFormat);
+
+            //CMvdRectangleF cMvd = new CMvdRectangleF(
+            //    xRegionTrain.Width / 2,
+            //    xRegionTrain.Height / 2,
+            //    xRegionTrain.Width,
+            //    xRegionTrain.Height);
+
             bool bOK = mvdprinttemp_Find.HikTrainBmp();
             return (bOK ? 0 : -1);
         }
@@ -1115,6 +1156,56 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public int xMaxOverlap { get; set; } = 80;
 
+        [CategoryAttribute(_Cat1), DescriptionAttribute("在搜索范围内重合的比例")]
+        [DisplayName("A06.格点重叠率")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1)]
+        [Browsable(true)]
+        public float xChipOverlap { get; set; } = 0.5f;
+
+
+        #region 找直线的参数
+
+        const string _Cat2 = "A02.直线参数设置";
+        [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
+        [DisplayName("A01.左边查找方向")]
+        [Browsable(true)]
+        public bool bPositive0 { get; set; } = true;
+        [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
+        [DisplayName("A02.左边极性")]
+        [Browsable(true)]
+        public bool bEdgePolarity0 { get; set; } = true;
+
+        [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
+        [DisplayName("A03.上边查找方向")]
+        [Browsable(true)]
+        public bool bPositive1 { get; set; } = true;
+        [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
+        [DisplayName("A04.上边极性")]
+        [Browsable(true)]
+        public bool bEdgePolarity1 { get; set; } = true;
+
+        [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
+        [DisplayName("A05.右边查找方向")]
+        [Browsable(true)]
+        public bool bPositive2 { get; set; } = true;
+        [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
+        [DisplayName("A06.右边极性")]
+        [Browsable(true)]
+        public bool bEdgePolarity2 { get; set; } = true;
+
+        [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
+        [DisplayName("A07.下边查找方向")]
+        [Browsable(true)]
+        public bool bPositive3 { get; set; } = true;
+        [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
+        [DisplayName("A08.下边极性")]
+        [Browsable(true)]
+        public bool bEdgePolarity3 { get; set; } = true;
+
+
+        #endregion
+
 
 
         public override void Load(bool eCancel = false)
@@ -1124,6 +1215,17 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xExtendx = int.Parse(ReadINIValue("Basic", "xExtendx", "20", INIFILE));
             xExtendy = int.Parse(ReadINIValue("Basic", "xExtendy", "20", INIFILE));
             xMaxOverlap = int.Parse(ReadINIValue("Basic", "xMaxOverlap", "80", INIFILE));
+            xChipOverlap = float.Parse(ReadINIValue("Basic", "xChipOverlap", "0.5", INIFILE));
+
+            bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
+            bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
+            bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
+            bPositive3 = ReadINIValue("Basic", "bPositive3", "1", INIFILE) == "1";
+
+            bEdgePolarity0 = ReadINIValue("Basic", "bEdgePolarity0", "1", INIFILE) == "1";
+            bEdgePolarity1 = ReadINIValue("Basic", "bEdgePolarity1", "1", INIFILE) == "1";
+            bEdgePolarity2 = ReadINIValue("Basic", "bEdgePolarity2", "1", INIFILE) == "1";
+            bEdgePolarity3 = ReadINIValue("Basic", "bEdgePolarity3", "1", INIFILE) == "1";
         }
         public override void Save()
         {
@@ -1132,6 +1234,18 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "xExtendx", xExtendx.ToString(), INIFILE);
             WriteINIValue("Basic", "xExtendy", xExtendy.ToString(), INIFILE);
             WriteINIValue("Basic", "xMaxOverlap", xMaxOverlap.ToString(), INIFILE);
+            WriteINIValue("Basic", "xChipOverlap", xChipOverlap.ToString(), INIFILE);
+
+            WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "bPositive2", (bPositive2 ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "bPositive3", (bPositive3 ? "1" : "0"), INIFILE);
+
+            WriteINIValue("Basic", "bEdgePolarity0", (bEdgePolarity0 ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "bEdgePolarity1", (bEdgePolarity1 ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "bEdgePolarity2", (bEdgePolarity2 ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "bEdgePolarity3", (bEdgePolarity3 ? "1" : "0"), INIFILE);
+
         }
 
     }

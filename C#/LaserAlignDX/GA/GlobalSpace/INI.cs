@@ -257,19 +257,7 @@ namespace Traveller106
         //[Browsable(false)]
         //public bool IsSaveResultImage { get; set; } = false;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
-        [Editor(typeof(SetFilePathPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("01A.结果图路径")]
-        [Browsable(false)]
-        public string ResultImagePath { get; set; } = "D:\\01LaserImagePath";
-
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
-        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("01B.结果图质量")]
-        [Browsable(false)]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100)]
-        public long ImageQuality { get; set; } = 100;
+        
 
         
 
@@ -690,9 +678,27 @@ namespace Traveller106
 
         [CategoryAttribute(LSCat1), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("03.是否存图")]
+        [DisplayName("03.存储压缩图片")]
         [Browsable(true)]
         public bool IsSaveDebugBMP { get; set; } = false;
+        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        [Editor(typeof(SetFilePathPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("03A.结果图路径")]
+        [Browsable(true)]
+        public string ResultImagePath { get; set; } = "D:\\01FPI30ImagePath";
+        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("03B.存储原始图片")]
+        [Browsable(true)]
+        public bool IsSaveDebugOrgBmp { get; set; } = false;
+
+        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("03B.结果图质量")]
+        [Browsable(true)]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100)]
+        public long ImageQuality { get; set; } = 10;
 
         [CategoryAttribute(LSCat1), DescriptionAttribute("true开 false关")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
@@ -810,6 +816,7 @@ namespace Traveller106
             IsSaveStripImage = ReadINIValue("Basic", "IsSaveStripImage", (IsSaveStripImage ? "1" : "0"), INIFILE) == "1";
             IsSaveTestImage = ReadINIValue("Basic", "IsSaveTestImage", (IsSaveTestImage ? "1" : "0"), INIFILE) == "1";
             IsSaveDebugBMP = ReadINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBMP ? "1" : "0"), INIFILE) == "1";
+            IsSaveDebugOrgBmp = ReadINIValue("Basic", "IsSaveDebugOrgBmp", (IsSaveDebugOrgBmp ? "1" : "0"), INIFILE) == "1";
             //IsOnlyUseLeft = ReadINIValue("Basic", "IsOnlyUseLeft", (IsOnlyUseLeft ? "1" : "0"), INIFILE) == "1";
             //BoundaryValue = int.Parse(ReadINIValue("Basic", "BoundaryValue", BoundaryValue.ToString(), INIFILE));
             //LaserSharePath = ReadINIValue("Basic", "LaserSharePath", LaserSharePath.ToString(), INIFILE);
@@ -845,8 +852,8 @@ namespace Traveller106
             //DIRRES_X = float.Parse(ReadINIValue("Basic", "DIRRES_X", DIRRES_X.ToString(), INIFILE));
             //DIRRES_Y = float.Parse(ReadINIValue("Basic", "DIRRES_Y", DIRRES_Y.ToString(), INIFILE));
 
-            //ImageQuality = long.Parse(ReadINIValue("Basic", "ImageQuality", ImageQuality.ToString(), INIFILE));
-            //ResultImagePath = ReadINIValue("Basic", "ResultImagePath", ResultImagePath.ToString(), INIFILE);
+            ImageQuality = long.Parse(ReadINIValue("Basic", "ImageQuality", ImageQuality.ToString(), INIFILE));
+            ResultImagePath = ReadINIValue("Basic", "ResultImagePath", ResultImagePath.ToString(), INIFILE);
 
             //GC_Angle = float.Parse(ReadINIValue("Basic", "GC_Angle", GC_Angle.ToString(), INIFILE));
             //LedControlCount = int.Parse(ReadINIValue("Basic", "LedControlCount", LedControlCount.ToString(), INIFILE));
@@ -913,6 +920,7 @@ namespace Traveller106
             WriteINIValue("Basic", "IsSaveStripImage", (IsSaveStripImage ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsSaveTestImage", (IsSaveTestImage ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBMP ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "IsSaveDebugOrgBmp", (IsSaveDebugOrgBmp ? "1" : "0"), INIFILE);
             //WriteINIValue("Basic", "IsOnlyUseLeft", (IsOnlyUseLeft ? "1" : "0"), INIFILE);
             //WriteINIValue("Basic", "BoundaryValue", BoundaryValue.ToString(), INIFILE);
             //WriteINIValue("Basic", "LaserSharePath", LaserSharePath.ToString(), INIFILE);
@@ -948,8 +956,8 @@ namespace Traveller106
             //WriteINIValue("Basic", "DIRRES_X", DIRRES_X.ToString(), INIFILE);
             //WriteINIValue("Basic", "DIRRES_Y", DIRRES_Y.ToString(), INIFILE);
 
-            //WriteINIValue("Basic", "ImageQuality", ImageQuality.ToString(), INIFILE);
-            //WriteINIValue("Basic", "ResultImagePath", ResultImagePath.ToString(), INIFILE);
+            WriteINIValue("Basic", "ImageQuality", ImageQuality.ToString(), INIFILE);
+            WriteINIValue("Basic", "ResultImagePath", ResultImagePath.ToString(), INIFILE);
 
             //WriteINIValue("Basic", "GC_Angle", GC_Angle.ToString(), INIFILE);
             //WriteINIValue("Basic", "LedControlCount", LedControlCount.ToString(), INIFILE);

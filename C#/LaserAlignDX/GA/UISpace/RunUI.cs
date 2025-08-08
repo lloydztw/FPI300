@@ -553,7 +553,7 @@ namespace PhotoMachine.UISpace
 
             if (MACHINE.PLCIO.bSoftwareReady)
             {
-                if(MACHINE.PLCIO.sRecipeName != RCPDB.RCPItemNow.Name)
+                if (MACHINE.PLCIO.sRecipeName != RCPDB.RCPItemNow.Name)
                 {
                     MACHINE.PLCIO.iRecipeNum = 0;
                     OnTrigger(RunStatusEnum.CHANGERECIPE);
