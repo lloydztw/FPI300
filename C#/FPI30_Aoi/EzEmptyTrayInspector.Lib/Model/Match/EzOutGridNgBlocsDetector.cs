@@ -150,18 +150,21 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                     _DUMP(imgWork, "imgWork_omwb.png");
 
                     // 10. 除去 與 gridMask 相接觸的區塊
-                    var firstBloc = grid[0, 0];
-                    if (firstBloc != null)
+                    if (false)
                     {
-                        var seedPt = new CvPoint(firstBloc.CenterX / _shrinkFactor, firstBloc.CenterY / _shrinkFactor);
-                        using (Mat whiteCover = new Mat())
+                        var firstBloc = grid[0, 0];
+                        if (firstBloc != null)
                         {
-                            Cv2.Dilate(gridMask, whiteCover, null, iterations: 2);
-                            Cv2.BitwiseOr(whiteCover, imgWork, imgWork);
-                            Cv2.FloodFill(imgWork, seedPt, Scalar.Black);
+                            var seedPt = new CvPoint(firstBloc.CenterX / _shrinkFactor, firstBloc.CenterY / _shrinkFactor);
+                            using (Mat whiteCover = new Mat())
+                            {
+                                Cv2.Dilate(gridMask, whiteCover, null, iterations: 2);
+                                Cv2.BitwiseOr(whiteCover, imgWork, imgWork);
+                                Cv2.FloodFill(imgWork, seedPt, Scalar.Black);
+                            }
                         }
+                        _DUMP(imgWork, "imgWork_omwbb.png");
                     }
-                    _DUMP(imgWork, "imgWork_omwbb.png");
 
                     // 11. 除圓孔 (變異太大, 保留)
                     //exclude_circles(imgWork, Scalar.Black, 80, 100);
