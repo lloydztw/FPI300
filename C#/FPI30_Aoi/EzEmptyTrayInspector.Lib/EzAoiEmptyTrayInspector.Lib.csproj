@@ -225,6 +225,7 @@
     <Compile Include="Model\AoiEmptyTrayInspector.cs" />
     <Compile Include="Model\Match\Bloc\EzBlocs.cs" />
     <Compile Include="Model\Match\Bloc\EzBlocs2.cs" />
+    <Compile Include="Model\Match\EzAoiBase.cs" />
     <Compile Include="Model\Match\EzAoiBaseUtil.cs" />
     <Compile Include="Model\Match\EzRotAngleFinder.cs" />
     <Compile Include="Model\Match\EzOutGridNgBlocsDetector.cs" />
@@ -242,6 +243,7 @@
     <Compile Include="Model\Recipe\JxTrayVisionSettings.cs" />
     <Compile Include="Model\Recipe\JxTempMatchSettings.cs" />
     <Compile Include="Model\Result\EzEmptyTrayResult.cs" />
+    <Compile Include="Model\Result\ResultDebug.cs" />
     <Compile Include="Model\Result\MatchResult.cs" />
     <Compile Include="Model\Utils\ImageUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

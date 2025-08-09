@@ -19,9 +19,6 @@ using System.Collections.Generic;
 
 namespace EzAoiEmptyTrayInspector.Model
 {
-    /// <summary>
-    /// To be continued
-    /// </summary>
     public class MatchResult
     {
         public int ID

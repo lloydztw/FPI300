@@ -94,7 +94,7 @@
             this.btnPickGolden.Size = new System.Drawing.Size(111, 49);
             this.btnPickGolden.TabIndex = 22;
             this.btnPickGolden.TabStop = false;
-            this.btnPickGolden.Text = "擷取樣本";
+            this.btnPickGolden.Text = "擷取\r\n樣本";
             this.btnPickGolden.UseVisualStyleBackColor = false;
             // 
             // btnResetClear
@@ -142,7 +142,7 @@
             this.btnOpenFile.Size = new System.Drawing.Size(107, 49);
             this.btnOpenFile.TabIndex = 19;
             this.btnOpenFile.TabStop = false;
-            this.btnOpenFile.Text = "加載圖片";
+            this.btnOpenFile.Text = "加載\r\n圖片";
             this.btnOpenFile.UseVisualStyleBackColor = false;
             // 
             // imageList1

@@ -174,6 +174,9 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                     int goldenSize = Math.Min(_suckerGoldenBmp.Width, _suckerGoldenBmp.Height);
                     int minSizeW = Math.Max(_recipe.VisionSettings.OutGridBlocMinSize.Value, goldenSize / 8);
                     var ngBlocs = find_black_ng_blocs(imgWork, minSizeW);
+
+                    // 13. 除去 與 gridMask 相接觸 的 小區塊
+                    remove_slim_out_grid_blocs(ngBlocs, grid);
                     return ngBlocs;
                 }
             }
@@ -189,6 +192,71 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 #endregion
             }
         }
+
+        #region POST_PROCESS_FOR_OUT_GRID_BLOCS
+        void remove_slim_out_grid_blocs(List<EzBloc> outGridNgBlocs, EzBlocsGrid grid)
+        {
+            if (grid == null || outGridNgBlocs == null)
+                return;
+
+            int dilate = 8 * _shrinkFactor;
+
+            // 剔除 小的 off-grid ng blocs 且與 on-grid ng blocs 邊緣 相交
+            outGridNgBlocs.RemoveAll((ng) =>
+            {
+                if (ng == null)
+                    return true;
+
+                var dilateRect = ng.Rect;
+                dilateRect.Inflate(dilate, dilate);
+
+                // 掃描 grid 邊緣 (for each row)
+                for (int row = grid.RowMin; row < grid.RowMax; row++)
+                {
+                    var cols = new int[] { grid.ColMin, grid.ColMax - 1 };
+                    foreach (var col in cols)
+                    {
+                        var onGridBloc = grid.Get(row, col);
+                        bool isNG = EzEmptyTrayResult.IsSolidNG(onGridBloc);
+
+                        if (isNG)
+                        {
+                            if (dilateRect.IntersectsWith(onGridBloc.Rect))
+                            {
+                                if (ng.Rect.Width < onGridBloc.Rect.Width / 4)
+                                    return true;
+                                if (onGridBloc.Rect.Contains(ng.CenterX, ng.CenterY))
+                                    return true;
+                            }
+                        }
+                    }
+                }
+
+                // 掃描 grid 邊緣 (for each col)
+                for (int col = grid.ColMin; col < grid.ColMax; col++)
+                {
+                    var rows = new int[] { grid.RowMin, grid.RowMax - 1 };
+                    foreach (var row in rows)
+                    {
+                        var onGridBloc = grid.Get(row, col);
+                        bool isNG = EzEmptyTrayResult.IsSolidNG(onGridBloc);
+
+                        if (isNG)
+                        {
+                            if (dilateRect.IntersectsWith(onGridBloc.Rect))
+                            {
+                                if (ng.Rect.Height < onGridBloc.Rect.Height / 4)
+                                    return true;
+                                if (onGridBloc.Rect.Contains(ng.CenterX, ng.CenterY))
+                                    return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            });
+        }
+        #endregion
 
         #region PRIVATE_AOI_FUNCTIONS
         void fill_grid_blocs(Mat img, IEnumerable<EzBloc> blocs, Scalar color, int shrinkFactor)

@@ -182,7 +182,7 @@ namespace EzAoiEmptyTrayInspector.Model
             if (_grid != null)
             {
                 bloc = _grid.Get(row, col);
-                isSucker = EzBlocsGrid.IsSolidBloc(bloc);
+                isSucker = IsSucker(bloc);
             }
             else
             {
@@ -242,5 +242,15 @@ namespace EzAoiEmptyTrayInspector.Model
             return ngCount;
         }
         #endregion
+
+
+        internal static bool IsSucker(EzBloc bloc)
+        {
+            return bloc != null && bloc.IsMajorNode();
+        }
+        internal static bool IsSolidNG(EzBloc bloc)
+        {
+            return bloc != null && !IsSucker(bloc);
+        }
     }
 }
