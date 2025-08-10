@@ -166,11 +166,11 @@ namespace LaserAlignDX.RunSpace
             //if (!myRecipe.Ischip_open_measure)
             //    return;
 
-            runTest();
+            //runTest();
 
-            //System.Threading.Thread thread = new System.Threading.Thread(runTest);
-            //thread.IsBackground = true;
-            //thread.Start();
+            System.Threading.Thread thread = new System.Threading.Thread(runTest);
+            thread.IsBackground = true;
+            thread.Start();
         }
         public void RunRecipe()
         {
@@ -278,12 +278,12 @@ namespace LaserAlignDX.RunSpace
         {
             switch (scanInspectMode)
             {
-                case ScanInspectMode.MEASUREAOI:
-                    _Inspect001();
-                    break;
-                case ScanInspectMode.QRCODE:
-                    _Inspect002();
-                    break;
+                //case ScanInspectMode.MEASUREAOI:
+                //    _Inspect001();
+                //    break;
+                //case ScanInspectMode.QRCODE:
+                //    _Inspect002();
+                //    break;
                 case ScanInspectMode.NOTRAY:
                     _Inspect003_LT();
                     break;
@@ -381,181 +381,182 @@ namespace LaserAlignDX.RunSpace
 
                         cell.GetOffsetResult();
 
-
-                        #region 直线寻找
-
-                        //左边
-                        RectangleF r0 = new RectangleF(xRecipe.xLineLeft.X,
-                            xRecipe.xLineLeft.Y,
-                            xRecipe.xLineLeft.Width,
-                            xRecipe.xLineLeft.Height);
-                        CMvdRectangleF mv0 = new CMvdRectangleF(r0.X + r0.Width / 2, r0.Y + r0.Height / 2, r0.Width, r0.Height);
-                        CMvdRectangleF mv0ret = cell.PositionFixRun(mv0, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
-                            xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
-                        cell.LineSegmentRun(0, bmp2, mv0ret);
-                        mv0ret.CenterX += _rectF.X;
-                        mv0ret.CenterY += _rectF.Y;
-                        cell.cMvdShapesForFindLineRegion[0] = (CMvdShape)mv0ret.Clone();
-
-                        //上边
-                        RectangleF r1 = new RectangleF(xRecipe.xLineTop.X,
-                            xRecipe.xLineTop.Y,
-                            xRecipe.xLineTop.Width,
-                            xRecipe.xLineTop.Height);
-                        CMvdRectangleF mv1 = new CMvdRectangleF(r1.X + r1.Width / 2, r1.Y + r1.Height / 2, r1.Width, r1.Height);
-                        CMvdRectangleF mv1ret = cell.PositionFixRun(mv1, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
-                            xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
-                        cell.LineSegmentRun(1, bmp2, mv1ret);
-                        mv1ret.CenterX += _rectF.X;
-                        mv1ret.CenterY += _rectF.Y;
-                        cell.cMvdShapesForFindLineRegion[1] = (CMvdShape)mv1ret.Clone();
-
-                        //右边
-                        RectangleF r2 = new RectangleF(xRecipe.xLineRight.X,
-                            xRecipe.xLineRight.Y,
-                            xRecipe.xLineRight.Width,
-                            xRecipe.xLineRight.Height);
-                        CMvdRectangleF mv2 = new CMvdRectangleF(r2.X + r2.Width / 2, r2.Y + r2.Height / 2, r2.Width, r2.Height);
-                        CMvdRectangleF mv2ret = cell.PositionFixRun(mv2, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
-                            xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
-                        cell.LineSegmentRun(2, bmp2, mv2ret);
-                        mv2ret.CenterX += _rectF.X;
-                        mv2ret.CenterY += _rectF.Y;
-                        cell.cMvdShapesForFindLineRegion[2] = (CMvdShape)mv2ret.Clone();
-
-                        //下边
-                        RectangleF r3 = new RectangleF(xRecipe.xLineBottom.X,
-                            xRecipe.xLineBottom.Y,
-                            xRecipe.xLineBottom.Width,
-                            xRecipe.xLineBottom.Height);
-                        CMvdRectangleF mv3 = new CMvdRectangleF(r3.X + r3.Width / 2, r3.Y + r3.Height / 2, r3.Width, r3.Height);
-                        CMvdRectangleF mv3ret = cell.PositionFixRun(mv3, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
-                            xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
-                        cell.LineSegmentRun(3, bmp2, mv3ret);
-                        mv3ret.CenterX += _rectF.X;
-                        mv3ret.CenterY += _rectF.Y;
-                        cell.cMvdShapesForFindLineRegion[3] = (CMvdShape)mv3ret.Clone();
-
-                        //长度
-
-                        try
-
+                        if (xInspect.bOpenLineMeasure)
                         {
-                            if (cell.cMvdLineSegmentFsOut[0] != null && cell.cMvdLineSegmentFsOut[2] != null)
+                            #region 直线寻找
+
+                            //左边
+                            RectangleF r0 = new RectangleF(xRecipe.xLineLeft.X,
+                                xRecipe.xLineLeft.Y,
+                                xRecipe.xLineLeft.Width,
+                                xRecipe.xLineLeft.Height);
+                            CMvdRectangleF mv0 = new CMvdRectangleF(r0.X + r0.Width / 2, r0.Y + r0.Height / 2, r0.Width, r0.Height);
+                            CMvdRectangleF mv0ret = cell.PositionFixRun(mv0, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
+                                xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
+                            cell.LineSegmentRun(0, bmp2, mv0ret);
+                            mv0ret.CenterX += _rectF.X;
+                            mv0ret.CenterY += _rectF.Y;
+                            cell.cMvdShapesForFindLineRegion[0] = (CMvdShape)mv0ret.Clone();
+
+                            //上边
+                            RectangleF r1 = new RectangleF(xRecipe.xLineTop.X,
+                                xRecipe.xLineTop.Y,
+                                xRecipe.xLineTop.Width,
+                                xRecipe.xLineTop.Height);
+                            CMvdRectangleF mv1 = new CMvdRectangleF(r1.X + r1.Width / 2, r1.Y + r1.Height / 2, r1.Width, r1.Height);
+                            CMvdRectangleF mv1ret = cell.PositionFixRun(mv1, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
+                                xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
+                            cell.LineSegmentRun(1, bmp2, mv1ret);
+                            mv1ret.CenterX += _rectF.X;
+                            mv1ret.CenterY += _rectF.Y;
+                            cell.cMvdShapesForFindLineRegion[1] = (CMvdShape)mv1ret.Clone();
+
+                            //右边
+                            RectangleF r2 = new RectangleF(xRecipe.xLineRight.X,
+                                xRecipe.xLineRight.Y,
+                                xRecipe.xLineRight.Width,
+                                xRecipe.xLineRight.Height);
+                            CMvdRectangleF mv2 = new CMvdRectangleF(r2.X + r2.Width / 2, r2.Y + r2.Height / 2, r2.Width, r2.Height);
+                            CMvdRectangleF mv2ret = cell.PositionFixRun(mv2, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
+                                xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
+                            cell.LineSegmentRun(2, bmp2, mv2ret);
+                            mv2ret.CenterX += _rectF.X;
+                            mv2ret.CenterY += _rectF.Y;
+                            cell.cMvdShapesForFindLineRegion[2] = (CMvdShape)mv2ret.Clone();
+
+                            //下边
+                            RectangleF r3 = new RectangleF(xRecipe.xLineBottom.X,
+                                xRecipe.xLineBottom.Y,
+                                xRecipe.xLineBottom.Width,
+                                xRecipe.xLineBottom.Height);
+                            CMvdRectangleF mv3 = new CMvdRectangleF(r3.X + r3.Width / 2, r3.Y + r3.Height / 2, r3.Width, r3.Height);
+                            CMvdRectangleF mv3ret = cell.PositionFixRun(mv3, xRecipe.xRegionTrain, Rectangle.Round(_rectF),
+                                xRecipe.mvdprinttemp_Find.xResults[0]) as CMvdRectangleF;
+                            cell.LineSegmentRun(3, bmp2, mv3ret);
+                            mv3ret.CenterX += _rectF.X;
+                            mv3ret.CenterY += _rectF.Y;
+                            cell.cMvdShapesForFindLineRegion[3] = (CMvdShape)mv3ret.Clone();
+
+                            //长度
+
+                            try
+
                             {
-                                // CreateInstance
+                                if (cell.cMvdLineSegmentFsOut[0] != null && cell.cMvdLineSegmentFsOut[2] != null)
+                                {
+                                    // CreateInstance
 
-                                VisionDesigner.L2LMeasure.CL2LMeasureTool cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool();
+                                    VisionDesigner.L2LMeasure.CL2LMeasureTool cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool();
 
-                                // Set basic parameter
-                                cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[0];
-                                cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[2];
-                                //cL2LMeasureToolObj.BasicParam.Line1.StartPoint = new MVD_POINT_F(100f, 100f);
+                                    // Set basic parameter
+                                    cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[0];
+                                    cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[2];
+                                    //cL2LMeasureToolObj.BasicParam.Line1.StartPoint = new MVD_POINT_F(100f, 100f);
 
-                                //cL2LMeasureToolObj.BasicParam.Line1.EndPoint = new MVD_POINT_F(150f, 150f);
+                                    //cL2LMeasureToolObj.BasicParam.Line1.EndPoint = new MVD_POINT_F(150f, 150f);
 
-                                //cL2LMeasureToolObj.BasicParam.Line2.StartPoint = new MVD_POINT_F(300f, 300f);
+                                    //cL2LMeasureToolObj.BasicParam.Line2.StartPoint = new MVD_POINT_F(300f, 300f);
 
-                                //cL2LMeasureToolObj.BasicParam.Line2.EndPoint = new MVD_POINT_F(250f, 350f);
+                                    //cL2LMeasureToolObj.BasicParam.Line2.EndPoint = new MVD_POINT_F(250f, 350f);
 
-                                // Running
+                                    // Running
 
-                                cL2LMeasureToolObj.Run();
+                                    cL2LMeasureToolObj.Run();
 
-                                // Get the result
+                                    // Get the result
 
-                                VisionDesigner.L2LMeasure.CL2LMeasureResult cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                                    VisionDesigner.L2LMeasure.CL2LMeasureResult cL2LMeasureRes = cL2LMeasureToolObj.Result;
 
-                                cell.RunWidth = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
+                                    cell.RunWidth = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
 
-                                Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+                                    Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
 
-                                Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+                                    Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
 
-                                cL2LMeasureToolObj.Dispose();
-                                cL2LMeasureToolObj = null;
-                            }
-                            
+                                    cL2LMeasureToolObj.Dispose();
+                                    cL2LMeasureToolObj = null;
+                                }
 
-                        }
 
-                        catch (MvdException ex)
-
-                        {
-
-                            Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-
-                        }
-
-                        catch (System.Exception ex)
-
-                        {
-
-                            Console.WriteLine("Fail with error " + ex.Message);
-
-                        }
-
-                        //宽度
-
-                        try
-
-                        {
-                            if (cell.cMvdLineSegmentFsOut[1] != null && cell.cMvdLineSegmentFsOut[3] != null)
-                            {
-                                // CreateInstance
-
-                                VisionDesigner.L2LMeasure.CL2LMeasureTool cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool();
-
-                                // Set basic parameter
-                                cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[1];
-                                cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[3];
-                                //cL2LMeasureToolObj.BasicParam.Line1.StartPoint = new MVD_POINT_F(100f, 100f);
-
-                                //cL2LMeasureToolObj.BasicParam.Line1.EndPoint = new MVD_POINT_F(150f, 150f);
-
-                                //cL2LMeasureToolObj.BasicParam.Line2.StartPoint = new MVD_POINT_F(300f, 300f);
-
-                                //cL2LMeasureToolObj.BasicParam.Line2.EndPoint = new MVD_POINT_F(250f, 350f);
-
-                                // Running
-
-                                cL2LMeasureToolObj.Run();
-
-                                // Get the result
-
-                                VisionDesigner.L2LMeasure.CL2LMeasureResult cL2LMeasureRes = cL2LMeasureToolObj.Result;
-
-                                cell.RunHeight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
-
-                                Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
-
-                                Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-
-                                cL2LMeasureToolObj.Dispose();
-                                cL2LMeasureToolObj = null;
                             }
 
+                            catch (MvdException ex)
 
+                            {
+
+                                Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+
+                            }
+
+                            catch (System.Exception ex)
+
+                            {
+
+                                Console.WriteLine("Fail with error " + ex.Message);
+
+                            }
+
+                            //宽度
+
+                            try
+
+                            {
+                                if (cell.cMvdLineSegmentFsOut[1] != null && cell.cMvdLineSegmentFsOut[3] != null)
+                                {
+                                    // CreateInstance
+
+                                    VisionDesigner.L2LMeasure.CL2LMeasureTool cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool();
+
+                                    // Set basic parameter
+                                    cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[1];
+                                    cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[3];
+                                    //cL2LMeasureToolObj.BasicParam.Line1.StartPoint = new MVD_POINT_F(100f, 100f);
+
+                                    //cL2LMeasureToolObj.BasicParam.Line1.EndPoint = new MVD_POINT_F(150f, 150f);
+
+                                    //cL2LMeasureToolObj.BasicParam.Line2.StartPoint = new MVD_POINT_F(300f, 300f);
+
+                                    //cL2LMeasureToolObj.BasicParam.Line2.EndPoint = new MVD_POINT_F(250f, 350f);
+
+                                    // Running
+
+                                    cL2LMeasureToolObj.Run();
+
+                                    // Get the result
+
+                                    VisionDesigner.L2LMeasure.CL2LMeasureResult cL2LMeasureRes = cL2LMeasureToolObj.Result;
+
+                                    cell.RunHeight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
+
+                                    Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+
+                                    Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+
+                                    cL2LMeasureToolObj.Dispose();
+                                    cL2LMeasureToolObj = null;
+                                }
+
+
+                            }
+
+                            catch (MvdException ex)
+
+                            {
+
+                                Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+
+                            }
+
+                            catch (System.Exception ex)
+
+                            {
+
+                                Console.WriteLine("Fail with error " + ex.Message);
+
+                            }
+
+                            #endregion
                         }
-
-                        catch (MvdException ex)
-
-                        {
-
-                            Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-
-                        }
-
-                        catch (System.Exception ex)
-
-                        {
-
-                            Console.WriteLine("Fail with error " + ex.Message);
-
-                        }
-
-                        #endregion
-
                     }
                     else
                     {
@@ -572,10 +573,42 @@ namespace LaserAlignDX.RunSpace
                 bmp2.Dispose();
             }
 
+            #region 读码测试
+
+            if (m_QrUsed)
+            {
+                foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
+                {
+                    if (cell.ByPass && !INI.Instance.IsForceInspect)
+                        continue;
+                    if (cell.inspectReason == InspectReason.INS_ALIGNERR)
+                        continue;
+                    //原始模板的大小
+                    RectangleF templaterectf = new RectangleF(0, 0, xRecipe.bmpprinttemplate.Width, xRecipe.bmpprinttemplate.Height);
+
+                    //定位完成后裁切位置
+                    RectangleF _crop = new RectangleF(cell.DrawResultRectF().CenterX - templaterectf.Width / 2,
+                        cell.DrawResultRectF().CenterY - templaterectf.Height / 2,
+                        templaterectf.Width,
+                        templaterectf.Height);
+                    //if (m_QrUsed)
+                    {
+                        RectangleF _cropCode = new RectangleF(xRecipe.xRectCodeRegion.X + _crop.X,
+                            xRecipe.xRectCodeRegion.Y + _crop.Y,
+                            xRecipe.xRectCodeRegion.Width,
+                            xRecipe.xRectCodeRegion.Height);
+                        cell.bmpItemCodeRun.Dispose();
+                        cell.bmpItemCodeRun = bmpInputImage.Clone(_cropCode, PixelFormat.Format8bppIndexed);
+                        cell.DeCode2D(cell.bmpItemCodeRun, _cropCode.Location, m_QrJudged);
+                    }
+                }
+            }
+
+            #endregion
+
             if (INI.Instance.IsSaveTestImage)
                 SaveData(debugCellCenterStr, imgPath + $"\\PositionFix\\DEBUG_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt");
 
-            
             if (INI.Instance.IsSaveDebugBMP)
             {
                 SaveImageWithQuality(bmpInputImage, $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
@@ -617,31 +650,7 @@ namespace LaserAlignDX.RunSpace
             }
 
             Size _bmpInputSize = new Size((int)cMvdInput.Width, (int)cMvdInput.Height);
-
-            //if (m_MvdOpeate == null)
-            //    m_MvdOpeate = new CMvdImage();
-
-            //m_MvdOpeate = cMvdInput.Clone();
             Bitmap bmpInputImage = EzMvdImageConvertor.CMvdImageToBitmap(cMvdInput);
-
-            //if (cMvdInput.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
-            //{
-            //    //当前程序仅支持mono8。因此像素格会转换.
-            //    cMvdInput.ConvertImagePixelFormat(MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08);
-            //}
-
-            //Bitmap bmp0 = bmpInputImage.Clone(xRecipe.xRectRegionBase0, PixelFormat.Format8bppIndexed);
-            //Bitmap bmp1 = bmpInputImage.Clone(xRecipe.xRectRegionBase1, PixelFormat.Format8bppIndexed);
-
-            ////计算基准位置 用来检测偏移
-            //mVD_POINT_F0 = _getBasePointF2(bmp0, RegionName.BASE0);
-            //mVD_POINT_F1 = _getBasePointF2(bmp1, RegionName.BASE1);
-
-            //bmp0.Dispose();
-            //bmp1.Dispose();
-
-            //xRecipe.mvdprinttemp_Find.xMvdRun_Image = m_MvdOpeate.Clone();
-            //xRecipe.mvdprinttemp_Find.HikRun4Pre();
             foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
             {
                 cell.Reset();
@@ -663,10 +672,6 @@ namespace LaserAlignDX.RunSpace
                 //xRecipe.mvdprinttemp_Find.bmpRun_Image = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
                 Bitmap bmp2 = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
                 int iOK = xRecipe.PrintTempRun(bmp2);
-                //int iOK = xRecipe.PrintTempRun(cMvdInput, _rectF);
-                //xRecipe.mvdprinttemp_Find.xMvdRun_Image = cMvdInput;
-                //int iOK = (xRecipe.mvdprinttemp_Find.HikRun3(_rectF) ? 0 : -1);
-                //int iOK = (xRecipe.mvdprinttemp_Find.HikRun4(_rectF) ? 0 : -1);
                 if (iOK == 0)
                 {
                     cell.xFindResult = xRecipe.mvdprinttemp_Find.xResults[0];

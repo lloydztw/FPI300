@@ -1167,6 +1167,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #region 找直线的参数
 
         const string _Cat2 = "A02.直线参数设置";
+        [CategoryAttribute(_Cat2), DescriptionAttribute("")]
+        [DisplayName("A00.开启尺寸测量")]
+        [Browsable(true)]
+        public bool bOpenLineMeasure { get; set; } = false;
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
         [DisplayName("A01.左边查找方向")]
         [Browsable(true)]
@@ -1216,6 +1220,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xExtendy = int.Parse(ReadINIValue("Basic", "xExtendy", "20", INIFILE));
             xMaxOverlap = int.Parse(ReadINIValue("Basic", "xMaxOverlap", "80", INIFILE));
             xChipOverlap = float.Parse(ReadINIValue("Basic", "xChipOverlap", "0.5", INIFILE));
+            bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
 
             bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
             bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
@@ -1235,6 +1240,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "xExtendy", xExtendy.ToString(), INIFILE);
             WriteINIValue("Basic", "xMaxOverlap", xMaxOverlap.ToString(), INIFILE);
             WriteINIValue("Basic", "xChipOverlap", xChipOverlap.ToString(), INIFILE);
+            WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
 
             WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);

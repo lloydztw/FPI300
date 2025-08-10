@@ -269,59 +269,6 @@ namespace TravellerMINIX6.ProcessSpace
                             pRun.FileBarcodeStr = JzTimes.DateTimeSerialString;
                             pRun.Run();
 
-                            //这里待添加发送数据结果
-
-                            int[] ints0 = pRun.GetSingleResult();
-                            float[] floats0 = pRun.GetScanOffset();
-
-                            StringBuilder sb = new StringBuilder();
-                            foreach (var ix in ints0)
-                            {
-                                sb.Append(ix.ToString() + ",");
-                            }
-                            _LOG("SingleResult:" + sb.ToString(), Color.Black);
-
-                            StringBuilder sb1 = new StringBuilder();
-                            foreach (var ix in floats0)
-                            {
-                                sb1.Append(ix.ToString() + ",");
-                            }
-                            _LOG("ScanOffset:" + sb1.ToString(), Color.Black);
-
-                            switch (pRun.xScanInspectMode)
-                            {
-                                case LaserAlignDX.RunSpace.ScanInspectMode.MEASUREAOI:
-
-                                    MACHINEx3.PLCIO.iSingleResult(ints0);
-                                    MACHINEx3.PLCIO.rScanOffset(floats0);
-
-                                    break;
-                                case LaserAlignDX.RunSpace.ScanInspectMode.QRCODE:
-
-                                    int[] ints1 = pRun.GetQrResult();
-
-                                    StringBuilder sb2 = new StringBuilder();
-                                    foreach (var ix in ints1)
-                                    {
-                                        sb2.Append(ix.ToString() + ",");
-                                    }
-                                    _LOG("QrResult:" + sb2.ToString(), Color.Black);
-
-                                    MACHINEx3.PLCIO.iQRResult(ints1);
-
-                                    MACHINEx3.PLCIO.iSingleResult(ints0);
-                                    MACHINEx3.PLCIO.rScanOffset(floats0);
-
-                                    break;
-                                case LaserAlignDX.RunSpace.ScanInspectMode.NOTRAY:
-
-                                    MACHINEx3.PLCIO.iSingleResult(ints0);
-
-                                    break;
-                            }
-
-                            MACHINEx3.PLCIO.bScanDone = true;
-
                             Process.NextDuriation = 0;
                             Process.ID = 30;
                         }
@@ -334,16 +281,66 @@ namespace TravellerMINIX6.ProcessSpace
                             {
                                 Process.Stop();
                                 m_IsPass = pRun.IsPass;
-                                //m_DLResultOK.Start();
-                                //ResultStart();
 
-                                MACHINEx3.PLCIO.iScanResult = 1;// (m_IsPass ? 1 : 2);
+                                #region 发送数据到plc
+
+                                //这里待添加发送数据结果
+
+                                int[] ints0 = pRun.GetSingleResult();
+                                float[] floats0 = pRun.GetScanOffset();
+
+                                StringBuilder sb = new StringBuilder();
+                                foreach (var ix in ints0)
+                                {
+                                    sb.Append(ix.ToString() + ",");
+                                }
+                                _LOG("SingleResult:" + sb.ToString(), Color.Black);
+
+                                StringBuilder sb1 = new StringBuilder();
+                                foreach (var ix in floats0)
+                                {
+                                    sb1.Append(ix.ToString() + ",");
+                                }
+                                _LOG("ScanOffset:" + sb1.ToString(), Color.Black);
+
+                                switch (pRun.xScanInspectMode)
+                                {
+                                    case LaserAlignDX.RunSpace.ScanInspectMode.MEASUREAOI:
+
+                                        MACHINEx3.PLCIO.iSingleResult(ints0);
+                                        MACHINEx3.PLCIO.rScanOffset(floats0);
+
+                                        break;
+                                    case LaserAlignDX.RunSpace.ScanInspectMode.QRCODE:
+
+                                        int[] ints1 = pRun.GetQrResult();
+
+                                        StringBuilder sb2 = new StringBuilder();
+                                        foreach (var ix in ints1)
+                                        {
+                                            sb2.Append(ix.ToString() + ",");
+                                        }
+                                        _LOG("QrResult:" + sb2.ToString(), Color.Black);
+
+                                        MACHINEx3.PLCIO.iQRResult(ints1);
+
+                                        MACHINEx3.PLCIO.iSingleResult(ints0);
+                                        MACHINEx3.PLCIO.rScanOffset(floats0);
+
+                                        break;
+                                    case LaserAlignDX.RunSpace.ScanInspectMode.NOTRAY:
+
+                                        MACHINEx3.PLCIO.iSingleResult(ints0);
+
+                                        break;
+                                }
+
+                                MACHINEx3.PLCIO.bScanDone = true;
+
+                                #endregion
+
+                                MACHINEx3.PLCIO.iScanResult = 1;
                                 _LOG($"{ToChangeLanguage("发送结果为")}{(m_IsPass ? "PASS" : "FAIL")}", Color.Red);
-                                //Task task = new Task(() =>
-                                //{
-                                //    m_DLResultOK.Start();
-                                //});
-                                //task.Start();
                                 FireMessage(new ProcessEventArgs("Show.X", $"{(pRun.ElapsedTime * 1.0 / 1000).ToString("0.0")} s"));
                             }
                         }
