@@ -58,7 +58,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         public RectangleF xRectRegionPrint = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpprinttemplate = new Bitmap(1, 1);
-        //public Bitmap bmpprintmask = new Bitmap(1, 1);
+        public Bitmap bmpprintmask = new Bitmap(1, 1);
+        public Bitmap bmpDefectTemplate
+        {
+            get
+            {
+                return (Bitmap)bmpprinttemplate.Clone(xRegionTrain, bmpprinttemplate.PixelFormat);
+            }
+        }
         /// <summary>
         /// 训练的区域
         /// </summary>
@@ -294,16 +301,16 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                                                                freeImageBitmap.PixelFormat);
                     freeImageBitmap.Dispose();
                 }
-                //string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
-                //if (System.IO.File.Exists(bmpprintmaskpath))
-                //{
-                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprintmaskpath);
-                //    bmpprintmask.Dispose();
-                //    bmpprintmask = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                //                                               freeImageBitmap.PixelFormat);
-                //    freeImageBitmap.Dispose();
-                //}
+                string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
+                if (System.IO.File.Exists(bmpprintmaskpath))
+                {
+                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprintmaskpath);
+                    bmpprintmask.Dispose();
+                    bmpprintmask = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                                                               freeImageBitmap.PixelFormat);
+                    freeImageBitmap.Dispose();
+                }
                 string bmpcodepath = $"{PathIndexStr}\\bmpcode.bmp";
                 if (System.IO.File.Exists(bmpcodepath))
                 {
@@ -383,10 +390,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "xRectRegionPrint", RectFtoStringSimple(xRectRegionPrint), INIFILE);
             string bmpprinttemplatepath = $"{PathIndexStr}\\bmpprinttemplate.bmp";
             bmpprinttemplate.Save(bmpprinttemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
-            //string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
-            //bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
-            //InspectX2Class.Instance.SaveRoi();
-            //SaveCodeTemplate();
+            string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
+            bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
+            InspectX3ParaClass.Instance.SaveRoi();
+            SaveCodeTemplate();
         }
         public void SavePrintTemplateRegionTrain()
         {
@@ -440,7 +447,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         public int PrintTempTrain()
         {
-            mvdprinttemp_Find.bmpObj_Image = (Bitmap)bmpprinttemplate.Clone(xRegionTrain, bmpprinttemplate.PixelFormat);
+            mvdprinttemp_Find.bmpObj_Image = bmpDefectTemplate;// (Bitmap)bmpprinttemplate.Clone(xRegionTrain, bmpprinttemplate.PixelFormat);
 
             //CMvdRectangleF cMvd = new CMvdRectangleF(
             //    xRegionTrain.Width / 2,
@@ -1124,6 +1131,19 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
 
+        const string _Cat0 = "A00.启用设置";
+        [CategoryAttribute(_Cat0), DescriptionAttribute("")]
+        [DisplayName("A01.开启尺寸测量")]
+        [Browsable(true)]
+        public bool bOpenLineMeasure { get; set; } = false;
+        [CategoryAttribute(_Cat0), DescriptionAttribute("")]
+        [DisplayName("A02.开启缺陷检测")]
+        //[TypeConverter(typeof(NumericUpDownTypeConverter))]
+        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
+        [Browsable(true)]
+        public bool bCheckInspect { get; set; } = false;
+        
+
         const string _Cat1 = "A01.基础设置";
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的相似程度")]
         [DisplayName("A01.相似度")]
@@ -1166,11 +1186,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         #region 找直线的参数
 
-        const string _Cat2 = "A02.直线参数设置";
-        [CategoryAttribute(_Cat2), DescriptionAttribute("")]
-        [DisplayName("A00.开启尺寸测量")]
-        [Browsable(true)]
-        public bool bOpenLineMeasure { get; set; } = false;
+        const string _Cat2 = "A02.尺寸检测参数设置";
+        
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
         [DisplayName("A01.左边查找方向")]
         [Browsable(true)]
@@ -1210,6 +1227,61 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         #endregion
 
+        #region 缺陷检测设置
+
+        const string _Cat3 = "A03.缺陷检测参数设置";
+
+        [CategoryAttribute(_Cat3), DescriptionAttribute("")]
+        [DisplayName("A00.二值化阈值")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
+        [Browsable(true)]
+        public int xThresholdValue { get; set; } = 128;
+
+        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
+        [DisplayName("A01.缺陷宽度")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
+        [Browsable(true)]
+        public float xCharWidth { get; set; } = 15.1f;
+        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
+        [DisplayName("A02.缺陷高度")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
+        [Browsable(true)]
+        public float xCharHeight { get; set; } = 15.1f;
+        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
+        [DisplayName("A03.缺陷面积")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
+        [Browsable(true)]
+        public float xCharArea { get; set; } = 30.1f;
+        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
+        [DisplayName("A04.背景缺陷宽度")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
+        [Browsable(false)]
+        public float xBackgroudWidth { get; set; } = 15.1f;
+        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
+        [DisplayName("A05.背景缺陷高度")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
+        [Browsable(false)]
+        public float xBackgroudHeight { get; set; } = 15.1f;
+        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
+        [DisplayName("A06.背景缺陷面积")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
+        [Browsable(false)]
+        public float xBackgroudArea { get; set; } = 30.1f;
+
+        [Browsable(false)]
+        public int RoiCount { get; set; } = 0;
+        [Browsable(false)]
+        public List<RectangleF> rectangles { get; set; } = new List<RectangleF>();
+
+        #endregion
+
 
 
         public override void Load(bool eCancel = false)
@@ -1220,13 +1292,32 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xExtendy = int.Parse(ReadINIValue("Basic", "xExtendy", "20", INIFILE));
             xMaxOverlap = int.Parse(ReadINIValue("Basic", "xMaxOverlap", "80", INIFILE));
             xChipOverlap = float.Parse(ReadINIValue("Basic", "xChipOverlap", "0.5", INIFILE));
-            bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
 
+            bCheckInspect = ReadINIValue("Inspect", "bCheckInspect", "1", INIFILE) == "1";
+            xThresholdValue = int.Parse(ReadINIValue("Inspect", "xThresholdValue", "128", INIFILE));
+            xCharWidth = float.Parse(ReadINIValue("Inspect", "xCharWidth", "15.1", INIFILE));
+            xCharHeight = float.Parse(ReadINIValue("Inspect", "xCharHeight", "15.1", INIFILE));
+            xCharArea = float.Parse(ReadINIValue("Inspect", "xCharArea", "30.1", INIFILE));
+            xBackgroudWidth = float.Parse(ReadINIValue("Inspect", "xBackgroudWidth", "15.1", INIFILE));
+            xBackgroudHeight = float.Parse(ReadINIValue("Inspect", "xBackgroudHeight", "15.1", INIFILE));
+            xBackgroudArea = float.Parse(ReadINIValue("Inspect", "xBackgroudArea", "30.1", INIFILE));
+
+            RoiCount = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
+            int i = 0;
+            rectangles.Clear();
+            while (i < RoiCount)
+            {
+                RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
+                rectangles.Add(rectf);
+
+                i++;
+            }
+
+            bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
             bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
             bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
             bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
             bPositive3 = ReadINIValue("Basic", "bPositive3", "1", INIFILE) == "1";
-
             bEdgePolarity0 = ReadINIValue("Basic", "bEdgePolarity0", "1", INIFILE) == "1";
             bEdgePolarity1 = ReadINIValue("Basic", "bEdgePolarity1", "1", INIFILE) == "1";
             bEdgePolarity2 = ReadINIValue("Basic", "bEdgePolarity2", "1", INIFILE) == "1";
@@ -1240,18 +1331,39 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "xExtendy", xExtendy.ToString(), INIFILE);
             WriteINIValue("Basic", "xMaxOverlap", xMaxOverlap.ToString(), INIFILE);
             WriteINIValue("Basic", "xChipOverlap", xChipOverlap.ToString(), INIFILE);
-            WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
 
+            WriteINIValue("Inspect", "bCheckInspect", (bCheckInspect ? "1" : "0"), INIFILE);
+            WriteINIValue("Inspect", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
+            WriteINIValue("Inspect", "xCharWidth", xCharWidth.ToString(), INIFILE);
+            WriteINIValue("Inspect", "xCharHeight", xCharHeight.ToString(), INIFILE);
+            WriteINIValue("Inspect", "xCharArea", xCharArea.ToString(), INIFILE);
+            WriteINIValue("Inspect", "xBackgroudWidth", xBackgroudWidth.ToString(), INIFILE);
+            WriteINIValue("Inspect", "xBackgroudHeight", xBackgroudHeight.ToString(), INIFILE);
+            WriteINIValue("Inspect", "xBackgroudArea", xBackgroudArea.ToString(), INIFILE);
+
+            WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive2", (bPositive2 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive3", (bPositive3 ? "1" : "0"), INIFILE);
-
             WriteINIValue("Basic", "bEdgePolarity0", (bEdgePolarity0 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bEdgePolarity1", (bEdgePolarity1 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bEdgePolarity2", (bEdgePolarity2 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bEdgePolarity3", (bEdgePolarity3 ? "1" : "0"), INIFILE);
 
+        }
+
+        public void SaveRoi()
+        {
+            RoiCount = rectangles.Count;
+            WriteINIValue("Inspect", "RoiCount", RoiCount.ToString(), INIFILE);
+            int i = 0;
+            while (i < RoiCount)
+            {
+                WriteINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(rectangles[i]), INIFILE);
+
+                i++;
+            }
         }
 
     }

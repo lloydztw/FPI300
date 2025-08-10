@@ -26,7 +26,7 @@ namespace LaserAlignDX.OPSpace
         //CImageRegionCopyTool copyToolObj = new VisionDesigner.ImageRegionCopy.CImageRegionCopyTool();
         CImageArithmeticTool cImageArithmeticToolObj = null;// new CImageArithmeticTool();
         VisionDesigner.ImageBinary.CImageBinaryTool cImageBinaryToolObj = null;// new VisionDesigner.ImageBinary.CImageBinaryTool();
-        //VisionDesigner.ImageMorph.CImageMorphTool cImageMorphToolObj = null;// new VisionDesigner.ImageMorph.CImageMorphTool();
+        VisionDesigner.ImageMorph.CImageMorphTool cImageMorphToolObj = null;// new VisionDesigner.ImageMorph.CImageMorphTool();
         VisionDesigner.BlobFind.CBlobFindTool cBlobFindToolObj = null;// new VisionDesigner.BlobFind.CBlobFindTool();
         //C2DCodeReaderTool Code2DReaderTool = new C2DCodeReaderTool();
         //C2DCodeVerifyTool c2DCodeVerifyTool = new C2DCodeVerifyTool();
@@ -70,7 +70,7 @@ namespace LaserAlignDX.OPSpace
         public bool IsSaveDebugPicture = false;
         public string SaveDebugPath = $"D:\\log\\DebugImage";
 
-        //public InspectX2Class xInspectPara = new InspectX2Class();
+        //public InspectX3ParaClass xInspectPara = new InspectX3ParaClass();
         public NoTrayParaClass xNoTrayPara
         {
             get { return NoTrayParaClass.Instance; }
@@ -181,12 +181,12 @@ namespace LaserAlignDX.OPSpace
         /// </summary>
         /// <param name="bNoTray">无料true 疑似有料false</param>
         /// <returns></returns>
-        public CMvdRectangleF DrawNoTrayRectF(bool bNoTray = true)
+        public CMvdRectangleF DrawBaseRectFFixSize(bool bNoTray = true, float fFixSize = 200)
         {
             CMvdRectangleF noTrayRectF = new CMvdRectangleF(viewRectF.X + viewRectF.Width / 2,
                 viewRectF.Y + viewRectF.Height / 2,
-                200,
-                200);
+                fFixSize,
+                fFixSize);
             if (bNoTray)
                 noTrayRectF.BorderColor = new MVD_COLOR(0, 0, 255);
             else
@@ -323,8 +323,11 @@ namespace LaserAlignDX.OPSpace
             str += $"{RunX.ToString(m_Format)}" + ",";
             str += $"{RunY.ToString(m_Format)}" + ",";
             str += $"{RunAngle.ToString(m_Format)}]{Environment.NewLine}";
-            str += $"长[{RunWidth.ToString(m_Format)},";
-            str += $"宽{RunHeight.ToString(m_Format)}]";
+            if (xInspect.bOpenLineMeasure)
+            {
+                str += $"长[{RunWidth.ToString(m_Format)},";
+                str += $"宽{RunHeight.ToString(m_Format)}]";
+            }
 
             //str += Environment.NewLine;
 
@@ -526,6 +529,107 @@ namespace LaserAlignDX.OPSpace
                 }
             }
             return cBlobInfo;
+        }
+        public void DetectDefects(Bitmap eTemplate, Bitmap eBmpRun, Bitmap eBmpMask)
+        {
+            //string _path = $"D:\\LOA\\{DateTime.Now.ToString("yyyyMMddHH")}";
+            if (IsSaveDebugPicture)
+            {
+                if (!System.IO.Directory.Exists(SaveDebugPath + "\\Detect"))
+                    System.IO.Directory.CreateDirectory(SaveDebugPath + "\\Detect");
+            }
+
+            CMvdRectangleF _roi = new CMvdRectangleF(eTemplate.Width / 2, eTemplate.Height / 2, eTemplate.Width, eTemplate.Height);
+
+            if (cImageArithmeticToolObj == null)
+                cImageArithmeticToolObj = new CImageArithmeticTool();
+            if (cImageBinaryToolObj == null)
+                cImageBinaryToolObj = new VisionDesigner.ImageBinary.CImageBinaryTool();
+            if (cImageMorphToolObj == null)
+                cImageMorphToolObj = new VisionDesigner.ImageMorph.CImageMorphTool();
+            if (cBlobFindToolObj == null)
+                cBlobFindToolObj = new VisionDesigner.BlobFind.CBlobFindTool();
+
+            cImageArithmeticToolObj.InputImage1 = BitmapToCMvdImage(eTemplate);
+            cImageArithmeticToolObj.InputImage2 = BitmapToCMvdImage(eBmpRun);
+            cImageArithmeticToolObj.SetRunParam("ArithmeticType", "Subtract");
+
+            cImageArithmeticToolObj.ROI = _roi;
+            //= new VisionDesigner.CMvdRectangleF(eTemplate.Width / 2, eTemplate.Height / 2, eTemplate.Width, eTemplate.Height);
+            cImageArithmeticToolObj.Run();
+            VisionDesigner.CMvdImage OutputImage = cImageArithmeticToolObj.Result.OutputImage;
+
+            //OutputImage.SaveImage($"{_path}\\{lblName}_Diff.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+
+            //二值化
+            cImageBinaryToolObj.InputImage = OutputImage;
+            cImageBinaryToolObj.ROI = null;
+            //= new CMvdRectangleF(OutputImage.Width / 2, OutputImage.Height / 2, OutputImage.Width / 4, OutputImage.Height / 4);
+            cImageBinaryToolObj.SetRunParam("LowThreshold", xInspect.xThresholdValue.ToString());
+            //cImageArithmeticToolObj.SetRunParam("HighThreshold", BlobHighThreshold.ToString());
+            cImageBinaryToolObj.Run();
+            //cImageBinaryToolObj.Result.OutputImage.SaveImage($"{_path}\\{lblName}_Diff2.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+
+            ////形态学
+            //cImageMorphToolObj.InputImage = cImageBinaryToolObj.Result.OutputImage;
+            //cImageMorphToolObj.SetRunParam("Type", "Open");
+            //cImageMorphToolObj.ROI = _roi;
+            ////= new VisionDesigner.CMvdRectangleF(cInputImg.Width / 2, cInputImg.Height / 2, cInputImg.Width / 4, cInputImg.Height / 4);
+            //cImageMorphToolObj.Run();
+
+            //blob
+            cBlobFindToolObj.InputImage = cImageBinaryToolObj.Result.OutputImage;
+            cBlobFindToolObj.RegionImage = BitmapToCMvdImage(eBmpMask);
+            cBlobFindToolObj.ROI = _roi;
+            //= new CMvdRectangleF(OutputImage.Width / 2, OutputImage.Height / 2, OutputImage.Width, OutputImage.Height);
+            cBlobFindToolObj.SetRunParam("Polarity", "BrightObject");
+
+            cBlobFindToolObj.BasicParam.ShowBlobImageStatus = true;
+            cBlobFindToolObj.Run();
+            VisionDesigner.BlobFind.CBlobFindResult cBlobFindRes = cBlobFindToolObj.Result;
+
+            //cBlobFindToolObj.RegionImage.SaveImage($"{_path}\\{lblName}_Diff2_1.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+
+            //if (cBlobFindRes.BlobImage != null)
+            //    cBlobFindRes.BlobImage.SaveImage($"{_path}\\{lblName}_Diff3.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+
+            //Console.WriteLine("Blob Num: {0}", cBlobFindRes.BlobInfo.Count);
+            //bool bOK = true;
+
+            blobMvdRectFNGList.Clear();
+            foreach (var item in cBlobFindToolObj.Result.BlobInfo)
+            {
+                //Console.WriteLine("Index: {0}, Angle {1}", item.DomainIndex, item.BoxInfo.Angle);
+                if (item.AreaF > xInspect.xCharArea)
+                {
+                    blobMvdRectFNGList.Add(item.BoxInfo);
+                }
+                else if (item.LongAxis > xInspect.xCharWidth && item.ShortAxis > xInspect.xCharHeight)
+                {
+                    blobMvdRectFNGList.Add(item.BoxInfo);
+                }
+                //else if (item.LongAxis > xInspectPara.xCharWidth)
+                //{
+                //    blobMvdRectFNGList.Add(item.BoxInfo);
+                //}
+                //else if (item.ShortAxis > xInspectPara.xCharHeight)
+                //{
+                //    blobMvdRectFNGList.Add(item.BoxInfo);
+                //}
+            }
+
+            if (blobMvdRectFNGList.Count > 0)
+            {
+                inspectReasons.Add(InspectReason.INS_DEFECTERR);
+                if (IsSaveDebugPicture)
+                {
+                    cImageBinaryToolObj?.Result?.OutputImage?.SaveImage($"{SaveDebugPath}\\Detect\\{lblName}_Diff2.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    cBlobFindToolObj?.RegionImage?.SaveImage($"{SaveDebugPath}\\Detect\\{lblName}_Diff2_1.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    //if (cBlobFindRes.BlobImage != null)
+                    cBlobFindRes?.BlobImage?.SaveImage($"{SaveDebugPath}\\Detect\\{lblName}_Diff3.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                }
+            }
+
         }
         public void DeCode2D(Bitmap eBmpRun, PointF Poi_CodeBase, bool eJudged = false)
         {

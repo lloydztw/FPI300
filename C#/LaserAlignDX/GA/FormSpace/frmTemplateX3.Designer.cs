@@ -53,12 +53,22 @@
             this.DS1 = new JzDisplay.UISpace.DispUI();
             this.DS2 = new JzDisplay.UISpace.DispUI();
             this.DS3 = new JzDisplay.UISpace.DispUI();
+            this.button7 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
             // 
+            this.panel1.Controls.Add(this.button7);
+            this.panel1.Controls.Add(this.button5);
+            this.panel1.Controls.Add(this.button4);
+            this.panel1.Controls.Add(this.button3);
+            this.panel1.Controls.Add(this.button6);
             this.panel1.Controls.Add(this.radioButton6);
             this.panel1.Controls.Add(this.radioButton5);
             this.panel1.Controls.Add(this.radioButton4);
@@ -282,9 +292,9 @@
             // 
             // propertyGrid1
             // 
-            this.propertyGrid1.Location = new System.Drawing.Point(392, 47);
+            this.propertyGrid1.Location = new System.Drawing.Point(392, 142);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(727, 360);
+            this.propertyGrid1.Size = new System.Drawing.Size(727, 265);
             this.propertyGrid1.TabIndex = 48;
             // 
             // tableLayoutPanel1
@@ -331,6 +341,61 @@
             this.DS3.Size = new System.Drawing.Size(367, 343);
             this.DS3.TabIndex = 2;
             // 
+            // button7
+            // 
+            this.button7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button7.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button7.Location = new System.Drawing.Point(527, 28);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(129, 51);
+            this.button7.TabIndex = 72;
+            this.button7.Text = "缺陷区域删除";
+            this.button7.UseVisualStyleBackColor = false;
+            // 
+            // button5
+            // 
+            this.button5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button5.Location = new System.Drawing.Point(662, 28);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(129, 51);
+            this.button5.TabIndex = 71;
+            this.button5.Text = "清空";
+            this.button5.UseVisualStyleBackColor = false;
+            // 
+            // button4
+            // 
+            this.button4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button4.Location = new System.Drawing.Point(392, 28);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(129, 51);
+            this.button4.TabIndex = 70;
+            this.button4.Text = "缺陷区域添加";
+            this.button4.UseVisualStyleBackColor = false;
+            // 
+            // button3
+            // 
+            this.button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button3.Location = new System.Drawing.Point(978, 28);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(129, 51);
+            this.button3.TabIndex = 69;
+            this.button3.Text = "保存模板和参数";
+            this.button3.UseVisualStyleBackColor = false;
+            // 
+            // button6
+            // 
+            this.button6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button6.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button6.Location = new System.Drawing.Point(843, 28);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(129, 51);
+            this.button6.TabIndex = 68;
+            this.button6.Text = "创建模板";
+            this.button6.UseVisualStyleBackColor = false;
+            // 
             // frmTemplateX3
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -375,5 +440,10 @@
         private System.Windows.Forms.RadioButton radioButton6;
         private System.Windows.Forms.RadioButton radioButton5;
         private System.Windows.Forms.RadioButton radioButton4;
+        private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button button6;
     }
 }

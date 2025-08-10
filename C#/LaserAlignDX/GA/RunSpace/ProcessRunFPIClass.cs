@@ -201,9 +201,9 @@ namespace LaserAlignDX.RunSpace
                     states[i] = 1;
                 else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
                     states[i] = 3;
-                else if (cell.inspectReason == InspectReason.INS_2DERR)
+                else if (cell.inspectReason == InspectReason.INS_2DERR || cell.inspectReason == InspectReason.INS_2DMAPNG)
                     states[i] = 4;
-                else if (cell.inspectReason == InspectReason.INS_DEFECTERR)
+                else if (cell.inspectReason == InspectReason.INS_CUTTINGERR)
                     states[i] = 9;
                 else
                     states[i] = 2;
@@ -575,7 +575,7 @@ namespace LaserAlignDX.RunSpace
 
             #region 读码测试
 
-            if (m_QrUsed)
+            if (m_QrUsed || xInspect.bCheckInspect)
             {
                 foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
                 {
@@ -591,7 +591,23 @@ namespace LaserAlignDX.RunSpace
                         cell.DrawResultRectF().CenterY - templaterectf.Height / 2,
                         templaterectf.Width,
                         templaterectf.Height);
-                    //if (m_QrUsed)
+
+                    if (xInspect.bCheckInspect)
+                    {
+                        RectangleF _cropDefect = new RectangleF(xRecipe.xRegionTrain.X + _crop.X,
+                            xRecipe.xRegionTrain.Y + _crop.Y,
+                            xRecipe.xRegionTrain.Width,
+                            xRecipe.xRegionTrain.Height);
+                        cell.bmpItemRun.Dispose();
+                        cell.bmpItemRun = bmpInputImage.Clone(_cropDefect, PixelFormat.Format8bppIndexed);
+                        cell.bmpItemMask.Dispose();
+                        cell.bmpItemMask = xRecipe.bmpprintmask.Clone(
+                            new Rectangle(0, 0, xRecipe.bmpprintmask.Width, xRecipe.bmpprintmask.Height),
+                            PixelFormat.Format8bppIndexed);
+                        cell.DetectDefects(xRecipe.bmpDefectTemplate, cell.bmpItemRun, cell.bmpItemMask);
+                    }
+
+                    if (m_QrUsed)
                     {
                         RectangleF _cropCode = new RectangleF(xRecipe.xRectCodeRegion.X + _crop.X,
                             xRecipe.xRectCodeRegion.Y + _crop.Y,

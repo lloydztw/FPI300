@@ -33,10 +33,10 @@ namespace LaserAlignDX.OPSpace
         [Description("空料")]
         //[Description("印字错误")]
         INS_ALIGNERR = 1,
-        [Description("印字偏移")]
-        INS_OFFSETERR = 2,
+        [Description("切割NG")]
+        INS_CUTTINGERR = 2,
         /// <summary>
-        /// 疑似有料及切割NG
+        /// 疑似有料及外观NG
         /// </summary>
         [Description("疑似有料")]
         //[Description("印字缺失")]
@@ -158,12 +158,12 @@ namespace LaserAlignDX.OPSpace
             if (Math.Abs(RunX) > xInspectPara.xOffsetX)
             {
                 bOK = false;
-                inspectReasons.Add(InspectReason.INS_OFFSETERR);
+                inspectReasons.Add(InspectReason.INS_CUTTINGERR);
             }
             else if (Math.Abs(RunY) > xInspectPara.xOffsetY)
             {
                 bOK = false;
-                inspectReasons.Add(InspectReason.INS_OFFSETERR);
+                inspectReasons.Add(InspectReason.INS_CUTTINGERR);
             }
             return bOK;
         }

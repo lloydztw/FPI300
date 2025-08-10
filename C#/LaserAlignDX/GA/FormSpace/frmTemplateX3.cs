@@ -30,6 +30,8 @@ namespace LaserAlignDX.FormSpace
         //}
         Mover xMovers = new Mover();
 
+        Mover xMoversDs1 = new Mover();
+
         protected MainFPIX3MachineClass MACHINE
         {
             get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
@@ -64,6 +66,14 @@ namespace LaserAlignDX.FormSpace
         Button btnCalRealPointF;
         Button btnWritePLCStage;
 
+
+        Button btnAddRegion => button4;
+        Button btnDeleteAllRegion => button7;
+        Button btnDeleteRegion => button5;
+
+        Button btnCreateImageTemplate => button6;
+        Button btnSaveInspectPara => button3;
+
         //Button btnOpenImage;
         //Button btnTestImage;
         //Button btnCreateImageTemplate;
@@ -93,38 +103,31 @@ namespace LaserAlignDX.FormSpace
             //xBmpTemplate = xRecipe.bmpOrg.Clone(xRect_Image, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
 
             DS1.ReplaceDisplayImage(xRecipe.bmpprinttemplate);
+            DS2.ReplaceDisplayImage(xRecipe.bmpDefectTemplate);
 
             propertyGrid1.SelectedObject = InspectX3ParaClass.Instance;
 
             this.Text = "设定模板界面";
 
-            //btnOpenImage = button6;
-            //btnTestImage = button1;
-            //btnCreateImageTemplate = button2;
-            //btnSaveInspectPara = button3;
-            //btnSelectRegion = button4;
-            //btnDeleteAllRegion = button5;
-            //btnDeleteRegion = button7;
             btnSelectRegion = button8;
             btnCodeTest = button9;
             btnCalRealPointF = button1;
             btnWritePLCStage = button2;
 
-            //btnOpenImage.Click += BtnOpenImage_Click;
-            //btnTestImage.Click += BtnTestImage_Click;
-            //btnCreateImageTemplate.Click += BtnCreateImageTemplate_Click;
-            //btnSaveInspectPara.Click += BtnSaveInspectPara_Click;
-            //btnSelectRegion.Click += BtnSelectRegion_Click;
-            //btnDeleteAllRegion.Click += BtnDeleteAllRegion_Click;
-            //btnDeleteRegion.Click += BtnDeleteRegion_Click;
             btnSelectRegion.Click += BtnSelectCodeRegion_Click;
             btnCodeTest.Click += BtnCodeTest_Click;
             btnCalRealPointF.Click += BtnCalRealPointF_Click;
             btnWritePLCStage.Click += BtnWritePLCStage_Click;
 
+            btnAddRegion.Click += BtnAddRegion_Click;
+            btnDeleteAllRegion.Click += BtnDeleteAllRegion_Click;
+            btnDeleteRegion.Click += BtnDeleteRegion_Click;
+            btnCreateImageTemplate.Click += BtnCreateImageTemplate_Click;
+            btnSaveInspectPara.Click += BtnSaveInspectPara_Click;
+
             cboCaliIndex.SelectedIndex = 0;
 
-            //_addCharRegion();
+            _addCharRegion();
         }
 
         private void BtnWritePLCStage_Click(object sender, EventArgs e)
@@ -220,6 +223,159 @@ namespace LaserAlignDX.FormSpace
             btnSelectRegion.BackColor = (bSelectRegion ? Color.Red : Color.FromArgb(192, 255, 192));
         }
 
+        private void BtnAddRegion_Click(object sender, EventArgs e)
+        {
+            //bSelectRegion = !bSelectRegion;
+            //btnSelectRegion.BackColor = (bSelectRegion ? Color.Red : Color.FromArgb(192, 255, 192));
+
+            Rectangle rectangle = new Rectangle(0, 0, 50, 50);
+            if (xMovers.Count == 0)
+            {
+                JzRectEAG RatioRectEAG = new JzRectEAG(Color.FromArgb(0, Color.Red), rectangle);
+                RatioRectEAG.RelateNo = 2;
+                xMovers.Add(RatioRectEAG);
+            }
+            else
+            {
+                bool bFound = false;
+                int i = 0;
+                while (i < xMovers.Count)
+                {
+                    GraphicalObject grobj_t0 = xMovers[i].Source;
+
+                    if ((grobj_t0 as JzRectEAG).IsSelected)
+                    {
+                        bFound = true;
+                        (grobj_t0 as JzRectEAG).IsSelected = false;
+                        break;
+                    }
+
+                    i++;
+                }
+
+                if (!bFound)
+                {
+                    GraphicalObject grobj = xMovers[xMovers.Count - 1].Source;
+
+                    JzRectEAG RatioRectEAG = new JzRectEAG(Color.FromArgb(0, Color.Red), (grobj as JzRectEAG).RealRectangleAround(0, 0));
+                    RatioRectEAG.RelateNo = 2;
+                    RatioRectEAG.SetOffset(new Point(20, 20));
+
+                    xMovers.Add(RatioRectEAG);
+                }
+                else
+                {
+                    GraphicalObject grobj = xMovers[i].Source;
+
+                    JzRectEAG RatioRectEAG = new JzRectEAG(Color.FromArgb(0, Color.Red), (grobj as JzRectEAG).RealRectangleAround(0, 0));
+                    RatioRectEAG.RelateNo = 2;
+                    RatioRectEAG.SetOffset(new Point(20, 20));
+                    //RatioRectEAG.IsSelected = true;
+
+                    xMovers.Add(RatioRectEAG);
+                }
+            }
+
+            DS2.SetMover(xMovers);
+            DS2.RefreshDisplayShape();
+            DS2.MappingSelect();
+        }
+        private void _addCharRegion()
+        {
+            DS2.ClearMover();
+            xMovers.Clear();
+
+            int i = 0;
+            while (i < xInspectX3.rectangles.Count)
+            {
+                JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), xInspectX3.rectangles[i]);
+                _rect.RelateLevel = 2;
+                _rect.RelateNo = i;
+                _rect.RelatePosition = 0;
+                xMovers.Add(_rect);
+
+                i++;
+            }
+
+            DS2.SetMover(xMovers);
+            DS2.RefreshDisplayShape();
+            DS2.MappingSelect();
+        }
+        private void BtnDeleteRegion_Click(object sender, EventArgs e)
+        {
+            Mover xMoversTemp = new Mover();
+            xMoversTemp.Clear();
+            int i = 0;
+            while (i < xMovers.Count)
+            {
+                GraphicalObject grobj = xMovers[i].Source;
+
+                if (!(grobj as JzRectEAG).IsSelected)
+                {
+                    xMoversTemp.Add(grobj as JzRectEAG);
+                }
+
+                i++;
+            }
+            xMovers.Clear();
+            DS2.ClearMover();
+            xInspectX3.rectangles.Clear();
+            i = 0;
+            while (i < xMoversTemp.Count)
+            {
+                GraphicalObject grobj = xMoversTemp[i].Source;
+                xMovers.Add(grobj as JzRectEAG);
+                i++;
+            }
+
+            DS2.SetMover(xMovers);
+            DS2.RefreshDisplayShape();
+            DS2.MappingSelect();
+        }
+
+        private void BtnDeleteAllRegion_Click(object sender, EventArgs e)
+        {
+            xMovers.Clear();
+            DS2.ClearMover();
+            //xMoverIndex = 0;
+            InspectX2Class.Instance.rectangles.Clear();
+        }
+        private void BtnCreateImageTemplate_Click(object sender, EventArgs e)
+        {
+            int iOK = 0;
+            iOK = xRecipe.PrintTempTrain();
+            JetEazy.BasicSpace.VsMSG.Instance.Warning($"{(iOK == 0 ? "创建成功" : "创建失败")}", false);
+        }
+        private void BtnSaveInspectPara_Click(object sender, EventArgs e)
+        {
+            xRecipe.bmpprintmask.Dispose();
+            xRecipe.bmpprintmask = new Bitmap(xRecipe.bmpDefectTemplate);
+            Graphics graphics = Graphics.FromImage(xRecipe.bmpprintmask);
+            graphics.Clear(Color.Black);
+
+            xInspectX3.rectangles.Clear();
+
+            int i = 0;
+            while (i < xMovers.Count)
+            {
+                GraphicalObject grobj = xMovers[i].Source;
+                RectangleF rectF = (grobj as JzRectEAG).GetRectF;
+                graphics.FillRectangle(Brushes.White, rectF);
+                xInspectX3.rectangles.Add(rectF);
+                i++;
+            }
+
+            graphics.Dispose();
+            AForge.Imaging.Filters.Grayscale grayscale = new AForge.Imaging.Filters.Grayscale(0.299, 0.587, 0.114);
+            xRecipe.bmpprintmask = grayscale.Apply(xRecipe.bmpprintmask);
+
+            DS3.ReplaceDisplayImage(xRecipe.bmpprintmask);
+            xRecipe.SavePrintTemplate();
+            JetEazy.BasicSpace.VsMSG.Instance.Warning($"保存成功", false);
+        }
+
+
+
 
         void init_Display()
         {
@@ -254,18 +410,19 @@ namespace LaserAlignDX.FormSpace
             {
                 DS1.ClearStaticMover();
                 //DS2.ClearStaticMover();
-                xMovers.Clear();
+                xMoversDs1.Clear();
                 JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), rectf);
                 _rect.RelateLevel = 1;
                 //_rect.RelateNo = i;
                 _rect.RelatePosition = 0;
-                xMovers.Add(_rect);
+                xMoversDs1.Add(_rect);
 
 
                 if (radioButton1.Checked)//template
                 {
                     xRecipe.xRegionTrain = rectf;
                     xRecipe.SavePrintTemplateRegionTrain();
+                    DS2.ReplaceDisplayImage(xRecipe.bmpDefectTemplate);
                 }
                 else if (radioButton2.Checked)//code
                 {
@@ -381,7 +538,7 @@ namespace LaserAlignDX.FormSpace
                     }
                 }
 
-                DS1.SetStaticMover(xMovers);
+                DS1.SetStaticMover(xMoversDs1);
                 DS1.RefreshDisplayShape();
                 DS1.MappingSelect();
 

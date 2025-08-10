@@ -12,6 +12,7 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.RunSpace;
 using LaserAlignDX.UISpace.UIMVC;
 using NeedleX.ProcessSpace;
+using OpenCvSharp.XFeatures2D;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -76,6 +77,14 @@ namespace LaserAlignDX.UISpace.MainSpace
         protected FlyParaClass xFlyPara
         {
             get { return FlyParaClass.Instance; }
+        }
+        protected InspectX3ParaClass InspectPara
+        {
+            get { return InspectX3ParaClass.Instance; }
+        }
+        protected ProcessRunFPIClass pRun
+        {
+            get { return ProcessRunFPIClass.Instance; }
         }
 
         IxLineScanCam IxFlyAreaCam
@@ -899,7 +908,7 @@ namespace LaserAlignDX.UISpace.MainSpace
 
                         _collectStrMsg += $"({cell.ToResultStr()})";
                         CMvdRectangleF mvdRectangleF = cell.DrawResultRectF();
-                        switch (ProcessRunFPIClass.Instance.xScanInspectMode)
+                        switch (pRun.xScanInspectMode)
                         {
                             case ScanInspectMode.NOTRAY:
                                 //填写数据 疑似有料
@@ -916,11 +925,11 @@ namespace LaserAlignDX.UISpace.MainSpace
                                         cMvdTextFShowNoTray.FontWidth = 11;
 
                                         DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowNoTray);
-                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawNoTrayRectF(false));
+                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(false));
                                     }
                                     else
                                     {
-                                        var mvdRect = cell.DrawNoTrayRectF();
+                                        var mvdRect = cell.DrawBaseRectFFixSize();
                                         DSMain.mvdRenderActivex1.AddShape(mvdRect);
                                     }
                                 }
@@ -936,28 +945,31 @@ namespace LaserAlignDX.UISpace.MainSpace
                             default:
                                 //try
                                 {
-                                    //画直线
-                                    int i = 0;
-                                    while (i < 4)
+                                    if (InspectPara.bOpenLineMeasure)
                                     {
-                                        CMvdLineSegmentF mLine = cell.cMvdLineSegmentFsOut[i];
-                                        if (mLine != null)
+                                        //画直线
+                                        int i = 0;
+                                        while (i < 4)
                                         {
-                                            MVD_POINT_F s0 = new MVD_POINT_F(mLine.StartPoint.fX + _rectF.X,
-                                                mLine.StartPoint.fY + _rectF.Y);
-                                            MVD_POINT_F s1 = new MVD_POINT_F(mLine.EndPoint.fX + _rectF.X,
-                                                mLine.EndPoint.fY + _rectF.Y);
-                                            CMvdLineSegmentF newLine = new CMvdLineSegmentF(s0, s1);
-                                            newLine.BorderColor = new MVD_COLOR(255, 0, 255);
-                                            DSMain.mvdRenderActivex1.AddShape(newLine);
+                                            CMvdLineSegmentF mLine = cell.cMvdLineSegmentFsOut[i];
+                                            if (mLine != null)
+                                            {
+                                                MVD_POINT_F s0 = new MVD_POINT_F(mLine.StartPoint.fX + _rectF.X,
+                                                    mLine.StartPoint.fY + _rectF.Y);
+                                                MVD_POINT_F s1 = new MVD_POINT_F(mLine.EndPoint.fX + _rectF.X,
+                                                    mLine.EndPoint.fY + _rectF.Y);
+                                                CMvdLineSegmentF newLine = new CMvdLineSegmentF(s0, s1);
+                                                newLine.BorderColor = new MVD_COLOR(255, 0, 255);
+                                                DSMain.mvdRenderActivex1.AddShape(newLine);
+                                            }
+                                            CMvdShape mvdShape = cell.cMvdShapesForFindLineRegion[i];
+                                            if (mvdShape != null)
+                                            {
+                                                mvdShape.BorderColor = new MVD_COLOR(0, 0, 255);
+                                                DSMain.mvdRenderActivex1.AddShape(mvdShape);
+                                            }
+                                            i++;
                                         }
-                                        CMvdShape mvdShape = cell.cMvdShapesForFindLineRegion[i];
-                                        if (mvdShape != null)
-                                        {
-                                            mvdShape.BorderColor = new MVD_COLOR(0, 0, 255);
-                                            DSMain.mvdRenderActivex1.AddShape(mvdShape);
-                                        }
-                                        i++;
                                     }
 
                                     //显示结果的xy angle
@@ -973,10 +985,11 @@ namespace LaserAlignDX.UISpace.MainSpace
                                         DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowMain);
                                         //定位框
                                         DSMain.mvdRenderActivex1.AddShape(cell.DrawResultRectF());
+                                        //DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(true));
                                     }
                                     else
                                     {
-                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawNoTrayRectF(false));
+                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(false));
                                     }
 
                                     //二维码
@@ -1004,11 +1017,13 @@ namespace LaserAlignDX.UISpace.MainSpace
                         }
                     }
 
-                    //CommonLogClass.Instance.LogMessage($"批号:{xRecipe.xLotNoStr}#数据信息:{_collectStrMsg}", Color.Black);
+                    _LOG($"StripID:{pRun.StripId}", Color.Black);
+                    _LOG($"LotID:{pRun.LotId}", Color.Black);
+                    _LOG($"#数据信息:{_collectStrMsg}", Color.Black);
 
                     #region 显示格点之外的料件
 
-                    switch (ProcessRunFPIClass.Instance.xScanInspectMode)
+                    switch (pRun.xScanInspectMode)
                     {
                         case ScanInspectMode.NOTRAY:
 
@@ -1039,7 +1054,7 @@ namespace LaserAlignDX.UISpace.MainSpace
 
                     //MappingUpdate();
                     FireChangeState(MainS1State.M_SHOWRESULT, e.Tag as string);
-                    if (ProcessRunFPIClass.Instance.IsPass)
+                    if (pRun.IsPass)
                         FireChangeState(MainS1State.M_PASS);
                     else
                         FireChangeState(MainS1State.M_NG);
@@ -1120,7 +1135,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                         //Bitmap bmp = (Bitmap)e.Tag;
                         //dispUI1.UpdateLiveImage(bmp);
                         //DS1.ReplaceDisplayImage(bmp);
-                        DSMain.mvdRenderActivex1.LoadImageFromObject(ProcessRunFPIClass.Instance.cMvdInput.Clone());
+                        DSMain.mvdRenderActivex1.LoadImageFromObject(pRun.cMvdInput.Clone());
                         DSMain.mvdRenderActivex1.ClearShapes();
                         DSMain.AddCross();
                         DSMain.mvdRenderActivex1.Display();
