@@ -1,17 +1,29 @@
 ﻿using FreeImageAPI;
+using JetEazy.EzImage;
 using JetEazy.OpenCV;
 using OpenCvSharp;
+using OpenCvSharp.Extensions;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using Traveller106;
 using VisionDesigner;
 
 
 namespace JetEazy.Utils
 {
-    public class EzMvdImageConvertor
+    public class EzMvdImageConvertor : GaImageUtil
     {
+        // 準備 全部改用 GaImageUtil 取代之 (比較好記)
+    }
+
+    public class GaImageUtil
+    {
+        /// <summary>
+        /// 會生成新的 CMvdImage.
+        /// Caller 必須接管其生命週期 !!!
+        /// </summary>
         public static CMvdImage BitmapToCMvdImage(Bitmap srcBmp)
         {
             CMvdImage cMvdImage = new CMvdImage();
@@ -113,6 +125,10 @@ namespace JetEazy.Utils
             return cMvdImage;
         }
 
+        /// <summary>
+        /// 會生成新的 Bitmap.
+        /// Caller 必須接管其生命週期 !!!
+        /// </summary>
         public static Bitmap CMvdImageToBitmap(CMvdImage mvdImage)
         {
             MVD_IMAGE_DATA_INFO _MvdImage = mvdImage.GetImageData();
@@ -121,6 +137,10 @@ namespace JetEazy.Utils
             return ByteArrayToBitmap(ch0.arrDataBytes, (int)ch0.nRowStep, (int)(ch0.nLen / ch0.nRowStep));
         }
 
+        /// <summary>
+        /// 會生成新的 Bitmap.
+        /// Caller 必須接管其生命週期 !!!
+        /// </summary>
         public static Bitmap ByteArrayToBitmap(byte[] srcArray, int width, int height)
         {
             // 创建 Bitmap 对象
@@ -142,12 +162,64 @@ namespace JetEazy.Utils
         }
 
         /// <summary>
+        /// 載入巨圖
+        public static Bitmap LoadBigImage(string fileName, int option = 0)
+        {
+            if (string.IsNullOrEmpty(fileName))
+                throw new Exception($"檔案不存在: {fileName}");
+
+            Bitmap bigBmp = null;
+
+            if (option == 0)
+            {
+                //NOTE: 使用 QuickImage (IEzImage) 載入圖檔 耗時 1.2 seconds
+                bigBmp = loadBigImageViaQuickImage(fileName, false);
+            }
+            else
+            {
+                //NOTE: 使用 FreeImageBitmap 載入圖檔 耗時 2.7 s
+                bigBmp = loadBigImageViaFreeImageBitmap(fileName, false);
+            }
+
+            return bigBmp;
+        }
+
+        #region PRIVATE_FUNCTIONS
+        /// <summary>
+        /// 利用 EzQuickImage (IEzImage) (OpenCvSharp) 載入 8 bpp 影像檔
+        /// (無法載入時, 會拋出異常!)
+        /// </summary>
+        static Bitmap loadBigImageViaQuickImage(string fileName, bool check = true)
+        {
+            if (check && string.IsNullOrEmpty(fileName))
+                throw new Exception($"檔案不存在: {fileName}");
+
+            var _TM = new EzTiming();
+            _TM.Trace("LoadBigImage (via EzQuickImage)");
+
+            using (EzQuickImage ezImage = new EzQuickImage())
+            {
+                ezImage.Load(fileName, bits: 8);
+                Mat img = ezImage.Image as Mat;
+                if (img != null)
+                {
+                    Bitmap bmp = BitmapConverter.ToBitmap(img);
+                    return bmp;
+                }
+            }
+
+            _TM.Trace("LoadBigImage (via EzQuickImage)");
+            Bitmap bigBmp = loadBigImageViaFreeImageBitmap(fileName);
+            _TM.Dump();
+            return bigBmp;
+        }
+        /// <summary>
         /// 利用 FreeImageBitmap 載入 8 bpp 影像檔
         /// (無法載入時, 會拋出異常!)
         /// </summary>
-        public static Bitmap LoadBigImage(string fileName)
+        static Bitmap loadBigImageViaFreeImageBitmap(string fileName, bool check = true)
         {
-            if (string.IsNullOrEmpty(fileName))
+            if (check && string.IsNullOrEmpty(fileName))
                 throw new Exception($"檔案不存在: {fileName}");
 
             using (FreeImageBitmap freeImageBitmap = new FreeImageBitmap(fileName))
@@ -175,9 +247,11 @@ namespace JetEazy.Utils
                 }
             }
         }
-        
+        #endregion
+
         /// <summary>
         /// caller 負責 original 的生命
+        /// (直接調用 ToU8)
         /// </summary>
         public static Bitmap Convert32bppTo8bpp(Bitmap original)
         {
@@ -236,7 +310,8 @@ namespace JetEazy.Utils
         }
 
         /// <summary>
-        /// caller 負責 original 的生命
+        /// caller 負責 original 的生命.
+        /// (直接調用 ToU8)
         /// </summary>
         public static Bitmap Convert24bppTo8bpp(Bitmap original)
         {
@@ -334,6 +409,9 @@ namespace JetEazy.Utils
             }
         }
 
+        /// <summary>
+        /// 設定 8 bpp 調色盤
+        /// </summary>
         public static void SetGrayPalete(Bitmap bmpU8)
         {
             if (bmpU8.PixelFormat == PixelFormat.Format8bppIndexed)
@@ -347,5 +425,43 @@ namespace JetEazy.Utils
                 bmpU8.Palette = palette;
             }
         }
+
+        /// <summary>
+        /// 可指定 壓縮品質 之 jpg 存檔函式
+        /// (將 Gaara 代碼 集中至此) 
+        /// </summary>
+        public static void SaveImageWithQuality(Bitmap bmpinput, string outputImagePath, long quality)
+        {
+            using (Bitmap image =
+                (Bitmap)bmpinput.Clone(new Rectangle(0, 0, bmpinput.Width, bmpinput.Height), bmpinput.PixelFormat))
+            //Image image = bmpinput;
+            {
+                // 设置压缩参数
+                EncoderParameters encoderParameters = new EncoderParameters(1);
+                EncoderParameter encoderParameter = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, quality);
+                encoderParameters.Param[0] = encoderParameter;
+
+                // 获取图像编码信息
+                ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
+
+                // 保存图片，应用压缩参数
+                image.Save(outputImagePath, jpgEncoder, encoderParameters);
+            }
+        }
+
+        #region PRIVATE_FUNCTIONS
+        private static ImageCodecInfo GetEncoder(ImageFormat format)
+        {
+            ImageCodecInfo[] codecs = ImageCodecInfo.GetImageDecoders();
+            foreach (ImageCodecInfo codec in codecs)
+            {
+                if (codec.FormatID == format.Guid)
+                {
+                    return codec;
+                }
+            }
+            return null;
+        }
+        #endregion
     }
 }

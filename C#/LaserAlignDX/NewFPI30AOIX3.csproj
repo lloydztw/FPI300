@@ -493,6 +493,7 @@
     <Compile Include="GA\ProcessSpace\LineScanSingleProcess.cs" />
     <Compile Include="GA\ProcessSpace\MainProcess.cs" />
     <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
+    <Compile Include="LT\DebugUtil\EzTiming.cs" />
     <Compile Include="LT\LtAoiFactory.cs" />
     <Compile Include="LT\Utils\GaUtil.cs" />
     <Compile Include="Program.cs" />

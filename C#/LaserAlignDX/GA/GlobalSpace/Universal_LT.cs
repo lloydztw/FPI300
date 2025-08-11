@@ -27,7 +27,7 @@ namespace Traveller106
 {
     public class Universal : JetEazy.Universal
     {
-        public static bool IsNoUseCCD = false;
+        public static bool IsNoUseCCD = true;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;

@@ -1,10 +1,5 @@
-﻿using AForge.Imaging.Filters;
-using FreeImageAPI;
-using System;
+﻿using System;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using VisionDesigner;
 
 
 namespace JetEazy.Utils
@@ -60,6 +55,28 @@ namespace JetEazy.Utils
         {
             return Math.Max(Math.Min(Value, Max), Min);
 
+        }
+        
+        public static void SaveData(string DataStr, string fileName)
+        {
+            System.IO.StreamWriter stm = null;
+
+            try
+            {
+                stm = new System.IO.StreamWriter(fileName, false, System.Text.Encoding.Default);
+                stm.WriteLine(DataStr);
+                stm.Flush();
+                stm.Close();
+                stm.Dispose();
+                stm = null;
+            }
+            catch (Exception ex)
+            {
+                //JetEazy.LoggerClass.Instance.WriteException(ex);
+            }
+
+            if (stm != null)
+                stm.Dispose();
         }
     }
 
