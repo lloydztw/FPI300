@@ -59,13 +59,15 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public RectangleF xRectRegionPrint = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpprinttemplate = new Bitmap(1, 1);
         public Bitmap bmpprintmask = new Bitmap(1, 1);
-        public Bitmap bmpDefectTemplate
-        {
-            get
-            {
-                return (Bitmap)bmpprinttemplate.Clone(xRegionTrain, bmpprinttemplate.PixelFormat);
-            }
-        }
+        public Bitmap bmpDefectTemplate = new Bitmap(1, 1);
+        //{
+        //    get
+        //    {
+        //        var rectF = xRegionTrain;
+        //        BoundRect(ref rectF, bmpprinttemplate.Size);
+        //        return (Bitmap)bmpprinttemplate.Clone(rectF, bmpprinttemplate.PixelFormat);
+        //    }
+        //}
         /// <summary>
         /// 训练的区域
         /// </summary>
@@ -281,6 +283,16 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                                                                freeImageBitmap.PixelFormat);
                     freeImageBitmap.Dispose();
                 }
+                string bmpDefectTemplatepath = $"{PathIndexStr}\\bmpDefectTemplate.bmp";
+                if (System.IO.File.Exists(bmpDefectTemplatepath))
+                {
+                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpDefectTemplatepath);
+                    bmpDefectTemplate.Dispose();
+                    bmpDefectTemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                                                               freeImageBitmap.PixelFormat);
+                    freeImageBitmap.Dispose();
+                }
                 string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
                 if (System.IO.File.Exists(bmpprintNoTraytemplatepath))
                 {
@@ -398,6 +410,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public void SavePrintTemplateRegionTrain()
         {
             WriteINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(xRegionTrain), INIFILE);
+            string bmpDefectTemplatepath = $"{PathIndexStr}\\bmpDefectTemplate.bmp";
+            bmpDefectTemplate.Save(bmpDefectTemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
         }
         public void SaveLinesRegion()
         {
@@ -447,7 +461,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         public int PrintTempTrain()
         {
-            mvdprinttemp_Find.bmpObj_Image = bmpDefectTemplate;// (Bitmap)bmpprinttemplate.Clone(xRegionTrain, bmpprinttemplate.PixelFormat);
+            mvdprinttemp_Find.bmpObj_Image?.Dispose();
+            mvdprinttemp_Find.bmpObj_Image = (Bitmap)bmpDefectTemplate.Clone();
 
             //CMvdRectangleF cMvd = new CMvdRectangleF(
             //    xRegionTrain.Width / 2,
@@ -463,33 +478,37 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
             mvdprinttemp_Find.xMvdTolerance = InspectX3ParaClass.Instance.xTolerance;
             mvdprinttemp_Find.xMaxOverlap = InspectX3ParaClass.Instance.xMaxOverlap;
-            mvdprinttemp_Find.bmpRun_Image = ebmpInput;
+            mvdprinttemp_Find.bmpRun_Image?.Dispose();
+            mvdprinttemp_Find.bmpRun_Image = (Bitmap)ebmpInput.Clone();
             bool bOK = mvdprinttemp_Find.HikRunBmp();
             return (bOK ? 0 : -1);
         }
-        public int PrintTempRun(CMvdImage eMvdInput)
-        {
-            mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
-            mvdprinttemp_Find.xMvdTolerance = InspectX3ParaClass.Instance.xTolerance;
-            mvdprinttemp_Find.xMaxOverlap = InspectX3ParaClass.Instance.xMaxOverlap;
-            mvdprinttemp_Find.xMvdRun_Image = eMvdInput;
-            bool bOK = mvdprinttemp_Find.HikRun2();
-            return (bOK ? 0 : -1);
-        }
-        public int PrintTempRun(CMvdImage eMvdInput, RectangleF eRectF)
-        {
-            mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
-            mvdprinttemp_Find.xMvdTolerance = InspectX3ParaClass.Instance.xTolerance;
-            mvdprinttemp_Find.xMaxOverlap = InspectX3ParaClass.Instance.xMaxOverlap;
-            mvdprinttemp_Find.xMvdRun_Image = eMvdInput;
-            bool bOK = mvdprinttemp_Find.HikRun3(eRectF);
-            return (bOK ? 0 : -1);
-        }
+        //public int PrintTempRun(CMvdImage eMvdInput)
+        //{
+        //    mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
+        //    mvdprinttemp_Find.xMvdTolerance = InspectX3ParaClass.Instance.xTolerance;
+        //    mvdprinttemp_Find.xMaxOverlap = InspectX3ParaClass.Instance.xMaxOverlap;
+        //    mvdprinttemp_Find.xMvdRun_Image?.Dispose();
+        //    mvdprinttemp_Find.xMvdRun_Image = (CMvdImage)eMvdInput.Clone();
+        //    bool bOK = mvdprinttemp_Find.HikRun2();
+        //    return (bOK ? 0 : -1);
+        //}
+        //public int PrintTempRun(CMvdImage eMvdInput, RectangleF eRectF)
+        //{
+        //    mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
+        //    mvdprinttemp_Find.xMvdTolerance = InspectX3ParaClass.Instance.xTolerance;
+        //    mvdprinttemp_Find.xMaxOverlap = InspectX3ParaClass.Instance.xMaxOverlap;
+        //    mvdprinttemp_Find.xMvdRun_Image?.Dispose();
+        //    mvdprinttemp_Find.xMvdRun_Image = (CMvdImage)eMvdInput.Clone();
+        //    bool bOK = mvdprinttemp_Find.HikRun3(eRectF);
+        //    return (bOK ? 0 : -1);
+        //}
 
 
         public int PrintTempFlyTrain()
         {
-            mvdprintFlytemp_Find.bmpObj_Image = bmpprintFlytemplate;
+            mvdprintFlytemp_Find.bmpObj_Image?.Dispose();
+            mvdprintFlytemp_Find.bmpObj_Image = (Bitmap)bmpprintFlytemplate.Clone();
             bool bOK = mvdprintFlytemp_Find.HikTrainBmp();
             return (bOK ? 0 : -1);
         }
@@ -497,26 +516,29 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         {
             mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
             mvdprintFlytemp_Find.xMvdTolerance = FlyParaClass.Instance.xTolerance;
-            mvdprintFlytemp_Find.bmpRun_Image = ebmpInput;
+            mvdprintFlytemp_Find.bmpRun_Image?.Dispose();
+            mvdprintFlytemp_Find.bmpRun_Image = (Bitmap)ebmpInput.Clone();
             bool bOK = mvdprintFlytemp_Find.HikRunBmp();
             return (bOK ? 0 : -1);
         }
-        public int PrintTempFlyRun(CMvdImage eMvdInput)
-        {
-            mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
-            mvdprintFlytemp_Find.xMvdTolerance = FlyParaClass.Instance.xTolerance;
-            mvdprintFlytemp_Find.xMvdRun_Image = eMvdInput;
-            bool bOK = mvdprintFlytemp_Find.HikRun2();
-            return (bOK ? 0 : -1);
-        }
-        public int PrintTempFlyRun(CMvdImage eMvdInput, RectangleF eRectF)
-        {
-            mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
-            mvdprintFlytemp_Find.xMvdTolerance = FlyParaClass.Instance.xTolerance;
-            mvdprintFlytemp_Find.xMvdRun_Image = eMvdInput;
-            bool bOK = mvdprintFlytemp_Find.HikRun3(eRectF);
-            return (bOK ? 0 : -1);
-        }
+        //public int PrintTempFlyRun(CMvdImage eMvdInput)
+        //{
+        //    mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
+        //    mvdprintFlytemp_Find.xMvdTolerance = FlyParaClass.Instance.xTolerance;
+        //    mvdprintFlytemp_Find.xMvdRun_Image?.Dispose();
+        //    mvdprintFlytemp_Find.xMvdRun_Image = eMvdInput;
+        //    bool bOK = mvdprintFlytemp_Find.HikRun2();
+        //    return (bOK ? 0 : -1);
+        //}
+        //public int PrintTempFlyRun(CMvdImage eMvdInput, RectangleF eRectF)
+        //{
+        //    mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
+        //    mvdprintFlytemp_Find.xMvdTolerance = FlyParaClass.Instance.xTolerance;
+        //    mvdprintFlytemp_Find.xMvdRun_Image?.Dispose();
+        //    mvdprintFlytemp_Find.xMvdRun_Image = eMvdInput;
+        //    bool bOK = mvdprintFlytemp_Find.HikRun3(eRectF);
+        //    return (bOK ? 0 : -1);
+        //}
 
 
         public bool CheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> m_list,out float retAngle,out PointF retCenter)
@@ -535,6 +557,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 cBlobFindToolObj = new VisionDesigner.BlobFind.CBlobFindTool();
 
             //二值化
+            cImageBinaryToolObj.InputImage?.Dispose();
             cImageBinaryToolObj.InputImage = BitmapToCMvdImage(ebmpInput);
             cImageBinaryToolObj.ROI = null;
             cImageBinaryToolObj.SetRunParam("LowThreshold", FlyParaClass.Instance.xThresholdValue.ToString());
@@ -542,6 +565,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             cImageBinaryToolObj.Run();
 
             //blob
+            cBlobFindToolObj.InputImage?.Dispose();
             cBlobFindToolObj.InputImage = cImageBinaryToolObj.Result.OutputImage;
             //cBlobFindToolObj.RegionImage = BitmapToCMvdImage(eBmpMask);
             cBlobFindToolObj.ROI = null;
@@ -994,7 +1018,21 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             bmpInputImg.UnlockBits(bmData);  // 解除锁定
             return cMvdImage;
         }
+        public void BoundRect(ref RectangleF InnerRect, Size BoundSize)
+        {
+            InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
+            InnerRect.Y = Math.Min(Math.Max(InnerRect.Y, 0), (BoundSize.Height - InnerRect.Height < 0 ? 0 : BoundSize.Height - InnerRect.Height));
 
+            if (BoundSize.Width <= InnerRect.X + InnerRect.Width)
+                InnerRect.Width = BoundValue(InnerRect.Width, BoundSize.Width - InnerRect.X, 1);
+            if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
+                InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
+        }
+        public float BoundValue(float Value, float Max, float Min)
+        {
+            return Math.Max(Math.Min(Value, Max), Min);
+
+        }
     }
 
     public class FlyParaClass : RecipeBaseClass

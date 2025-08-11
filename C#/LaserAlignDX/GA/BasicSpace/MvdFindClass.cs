@@ -42,16 +42,19 @@ namespace LaserAlignDX.BasicSpace
         }
         public bool HikTrainBmp()
         {
+            xMvdObj_Image?.Dispose();
             xMvdObj_Image = BitmapToCMvdImage(bmpObj_Image);
             return HikTrain2();
         }
         public bool HikTrainBmp(CMvdRectangleF cMvdRectangleF)
         {
+            xMvdObj_Image?.Dispose();
             xMvdObj_Image = BitmapToCMvdImage(bmpObj_Image);
             return HikTrain2(cMvdRectangleF);
         }
         public bool HikRunBmp()
         {
+            xMvdRun_Image?.Dispose();
             xMvdRun_Image = BitmapToCMvdImage(bmpRun_Image);
             return HikRun2();
         }

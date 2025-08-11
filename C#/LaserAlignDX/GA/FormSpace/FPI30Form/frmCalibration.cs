@@ -113,6 +113,7 @@ namespace LaserAlignDX.FormSpace.FPI30Form
             int i = 0;
             while (i < BTNCOUNT)
             {
+                calibrationUIs[i].GetViewWorldPoints();
                 //LineScanCalibrateClasses[i] = new LineScanCalibrateClass();
                 //LineScanCalibrateClasses[i].Initial(WORKPATH, 0, $"Calibrate_default_info{i}.ini");
                 Traveller106.Universal.LineScanCalibrateClasses[i].Save();

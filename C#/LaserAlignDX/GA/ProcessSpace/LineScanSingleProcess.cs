@@ -59,8 +59,8 @@ namespace TravellerMINIX6.ProcessSpace
 
                     if (!string.IsNullOrEmpty(fileName))
                     {
-                        using (FreeImageBitmap freeImageBitmap = new FreeImageBitmap(fileName))
-                        using (Bitmap bmp = freeImageBitmap.ToBitmap())
+                        //using (EzMvdImageConvertor.LoadBigImage(fileName))
+                        using (Bitmap bmp = EzMvdImageConvertor.LoadBigImage(fileName))
                         {
                             pRun.cMvdInput?.Dispose();
                             pRun.cMvdInput = EzMvdImageConvertor.BitmapToCMvdImage(bmp);

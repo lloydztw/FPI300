@@ -289,8 +289,11 @@ namespace LaserAlignDX.OPSpace
             str += $"{RunX.ToString(m_Format)}" + ",";
             str += $"{RunY.ToString(m_Format)}" + ",";
             str += $"{RunAngle.ToString(m_Format)}" + ",";
-            str += $"长[{RunWidth.ToString(m_Format)}]" + ",";
-            str += $"宽[{RunHeight.ToString(m_Format)}]" + ",";
+            if (xInspect.bOpenLineMeasure)
+            {
+                str += $"长[{RunWidth.ToString(m_Format)}]" + ",";
+                str += $"宽[{RunHeight.ToString(m_Format)}]" + ",";
+            }
             str += $"{SetBarcodeStr}" + ",";
             if (RunCodeInfo != null)
                 str += $"{RunCodeInfo.Content}" + ";";

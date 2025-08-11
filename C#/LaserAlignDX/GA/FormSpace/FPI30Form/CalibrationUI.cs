@@ -37,7 +37,8 @@ namespace LaserAlignDX.FormSpace.FPI30Form
             m_Name = eName;
             m_Index = eIndex;
             InitializeDataGridView();
-            UpdateDatas();
+            UpdateDataViews();
+            UpdateDataWorlds();
         }
         /// <summary>
         /// 写入当前点位
@@ -47,15 +48,39 @@ namespace LaserAlignDX.FormSpace.FPI30Form
         public void SetViewPoints(int eCurrentIndex, PointF ePtf)
         {
             m_Calibration.ptsview[eCurrentIndex] = new PointF(ePtf.X, ePtf.Y);
-            UpdateDatas();
+            UpdateDataViews();
         }
-        void UpdateDatas()
+        public void GetViewWorldPoints()
+        {
+            int i = 0;
+            while (i < 4)
+            {
+                m_Calibration.ptsview[i].X = float.Parse(dgv.Rows[i].Cells[1].Value.ToString());
+                m_Calibration.ptsview[i].Y = float.Parse(dgv.Rows[i].Cells[2].Value.ToString());
+                m_Calibration.ptsworld[i].X = float.Parse(dgv.Rows[i].Cells[3].Value.ToString());
+                m_Calibration.ptsworld[i].Y =  float.Parse(dgv.Rows[i].Cells[4].Value.ToString());
+                i++;
+            }
+        }
+        void UpdateDataViews()
         {
             int i = 0;
             while (i < 4)
             {
                 dgv.Rows[i].Cells[1].Value = m_Calibration.ptsview[i].X;
                 dgv.Rows[i].Cells[2].Value = m_Calibration.ptsview[i].Y;
+                //dgv.Rows[i].Cells[3].Value = m_Calibration.ptsworld[i].X;
+                //dgv.Rows[i].Cells[4].Value = m_Calibration.ptsworld[i].Y;
+                i++;
+            }
+        }
+        void UpdateDataWorlds()
+        {
+            int i = 0;
+            while (i < 4)
+            {
+                //dgv.Rows[i].Cells[1].Value = m_Calibration.ptsview[i].X;
+                //dgv.Rows[i].Cells[2].Value = m_Calibration.ptsview[i].Y;
                 dgv.Rows[i].Cells[3].Value = m_Calibration.ptsworld[i].X;
                 dgv.Rows[i].Cells[4].Value = m_Calibration.ptsworld[i].Y;
                 i++;

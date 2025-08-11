@@ -622,19 +622,34 @@ namespace LaserAlignDX.RunSpace
 
             #endregion
 
-            if (INI.Instance.IsSaveTestImage)
-                SaveData(debugCellCenterStr, imgPath + $"\\PositionFix\\DEBUG_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt");
+            IEzImage ezImage = new EzFreeBitmap(bmpInputImage, true);
 
-            if (INI.Instance.IsSaveDebugBMP)
+            Task task = new Task(() =>
             {
-                SaveImageWithQuality(bmpInputImage, $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
-            }
-            if (INI.Instance.IsSaveDebugOrgBmp)
-            {
-                //IEzImage ezImage = new EzFreeBitmap(bmpInputImage, false);
-                bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
-                                   ImageFormat.Jpeg);
-            }
+                try
+                {
+                    if (INI.Instance.IsSaveTestImage)
+                        SaveData(debugCellCenterStr, imgPath + $"\\PositionFix\\DEBUG_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt");
+
+                    if (INI.Instance.IsSaveDebugBMP)
+                    {
+                        SaveImageWithQuality(ezImage.Bitmap, $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
+                    }
+                    if (INI.Instance.IsSaveDebugOrgBmp)
+                    {
+
+                        ezImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg");
+                        //bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
+                        //                   ImageFormat.Jpeg);
+                    }
+                    ezImage?.Dispose();
+                }
+                catch (Exception e)
+                {
+                    _LOG($"异常捕获:{e.Message}", Color.Red);
+                }
+            });
+            task.Start();
 
             bmpInputImage.Dispose();
             m_IsPass = true;
@@ -773,9 +788,10 @@ namespace LaserAlignDX.RunSpace
             }
             if (INI.Instance.IsSaveDebugOrgBmp)
             {
-                //IEzImage ezImage = new EzFreeBitmap(bmpInputImage, false);
-                bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
-                                   ImageFormat.Jpeg);
+                IEzImage ezImage = new EzFreeBitmap(bmpInputImage, false);
+                ezImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg");
+                //bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
+                //                   ImageFormat.Jpeg);
             }
 
             bmpInputImage.Dispose();
@@ -997,16 +1013,29 @@ namespace LaserAlignDX.RunSpace
                 // 要如何繪製 結果?
                 _convert_lt_result_to_gaara(result, bmpInputImage, xRecipe);
 
-                if (INI.Instance.IsSaveDebugBMP)
+                IEzImage ezImage = new EzFreeBitmap(bmpInputImage, true);
+                Task task = new Task(() =>
                 {
-                    SaveImageWithQuality(bmpInputImage, $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
-                }
-                if (INI.Instance.IsSaveDebugOrgBmp)
-                {
-                    //IEzImage ezImage = new EzFreeBitmap(bmpInputImage, false);
-                    bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
-                                   ImageFormat.Jpeg);
-                }
+                    try
+                    {
+                        if (INI.Instance.IsSaveDebugBMP)
+                        {
+                            SaveImageWithQuality(ezImage.Bitmap, $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
+                        }
+                        if (INI.Instance.IsSaveDebugOrgBmp)
+                        {
+                            ezImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg");
+                            //bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
+                            //                   ImageFormat.Jpeg);
+                        }
+                        ezImage?.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        _LOG($"异常捕获:{e.Message}", Color.Red);
+                    }
+                });
+                task.Start();
             }
             m_IsPass = true;//不需要结果 都是记录单颗的数据
             stopwatch.Stop();
@@ -1609,8 +1638,9 @@ namespace LaserAlignDX.RunSpace
 
         void SaveImageWithQuality(Bitmap bmpinput, string outputImagePath, long quality)
         {
-            //using (Image image =bmpinput)
-            Image image = bmpinput;
+            using (Bitmap image =
+                (Bitmap)bmpinput.Clone(new Rectangle(0, 0, bmpinput.Width, bmpinput.Height), bmpinput.PixelFormat))
+            //Image image = bmpinput;
             {
                 // 设置压缩参数
                 EncoderParameters encoderParameters = new EncoderParameters(1);
@@ -1672,7 +1702,39 @@ namespace LaserAlignDX.RunSpace
             if (stm != null)
                 stm.Dispose();
         }
+        protected void _LOG(string msg, params object[] args)
+        {
+#if (true)
+            Color color = Color.Black;
 
+            int N = args.Length;
+            if (N > 0 && args[N - 1] is Color)
+            {
+                color = (Color)args[N - 1];
+                N -= 1;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            //sb.Append(Name);
+            sb.Append(", ");
+            sb.Append(msg);
+
+            for (int i = 0; i < N; i++)
+            {
+                sb.Append(", ");
+                sb.Append(args[i]);
+            }
+
+            msg = sb.ToString();
+            CommonLogClass.Instance.LogMessage(msg, color);
+            //if (color == Color.Red)
+            //    GdxGlobal.LOG.Warn(msg);
+            //else
+            //    GdxGlobal.LOG.Debug(msg);
+#endif
+            //msg = Name + ", " + msg;
+            //GdxGlobal.LOG.Log(msg, args);
+        }
         #endregion
     }
 }

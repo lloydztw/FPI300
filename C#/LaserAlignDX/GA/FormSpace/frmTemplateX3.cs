@@ -3,6 +3,7 @@ using JetEazy;
 using JzDisplay;
 using LaserAlignDX.GA.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LeTian.JxRecipesTool;
 using MoveGraphLibrary;
 using System;
 using System.Collections.Generic;
@@ -348,7 +349,7 @@ namespace LaserAlignDX.FormSpace
         }
         private void BtnSaveInspectPara_Click(object sender, EventArgs e)
         {
-            xRecipe.bmpprintmask.Dispose();
+            xRecipe.bmpprintmask?.Dispose();
             xRecipe.bmpprintmask = new Bitmap(xRecipe.bmpDefectTemplate);
             Graphics graphics = Graphics.FromImage(xRecipe.bmpprintmask);
             graphics.Clear(Color.Black);
@@ -421,12 +422,15 @@ namespace LaserAlignDX.FormSpace
                 if (radioButton1.Checked)//template
                 {
                     xRecipe.xRegionTrain = rectf;
+                    xRecipe.bmpDefectTemplate?.Dispose();
+                    xRecipe.bmpDefectTemplate = xRecipe.bmpprinttemplate.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
                     xRecipe.SavePrintTemplateRegionTrain();
                     DS2.ReplaceDisplayImage(xRecipe.bmpDefectTemplate);
                 }
                 else if (radioButton2.Checked)//code
                 {
                     xRecipe.xRectCodeRegion = rectf;
+                    xRecipe.bmpcodetemplate?.Dispose();
                     xRecipe.bmpcodetemplate = xRecipe.bmpprinttemplate.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
                     xRecipe.SaveCodeTemplate();
                 }
