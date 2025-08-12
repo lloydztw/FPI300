@@ -33,7 +33,16 @@ namespace LaserAlignDX.BasicSpace
         }
 
         const string cat1 = "00.基础设定";
-
+        [CategoryAttribute(cat1), DescriptionAttribute("阵列角度")]
+        [DisplayName("A00.阵列角度")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(-180, 180)]
+        [Browsable(true)]
+        public float xAngle
+        {
+            get { return xRecipe.xAngle; }
+            set { xRecipe.xAngle = value; }
+        }
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵行数")]
         [DisplayName("A01.行数")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]

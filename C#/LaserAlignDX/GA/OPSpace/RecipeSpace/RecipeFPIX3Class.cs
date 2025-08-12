@@ -3,8 +3,11 @@ using Eazy_Project_III;
 using FreeImageAPI;
 using JetEazy;
 using JetEazy.BasicSpace;
+using JetEazy.QxCollections2;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.RunSpace;
+using LeTian.JxRecipesTool;
+using MoveGraphLibrary;
 using OpenCvSharp.Flann;
 using System;
 using System.Collections.Generic;
@@ -23,6 +26,7 @@ using Traveller106;
 using TravellerMINIX6.OPSpace;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
+using WorldOfMoveableObjects;
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
 {
@@ -111,6 +115,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public float xChipHeight = 10;
         public int xExtendx = 100;
         public int xExtendy = 100;
+        public float xAngle = 0;
 
         public int xChNum = 1;
         public int xChValue = 255;
@@ -138,6 +143,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xColumn = int.Parse(ReadINIValue("Recipe Basic", "xColumn", "1", INIFILE));
             xLeftTopX = int.Parse(ReadINIValue("Recipe Basic", "xLeftTopX", "1", INIFILE));
             xLeftTopY = int.Parse(ReadINIValue("Recipe Basic", "xLeftTopY", "1", INIFILE));
+            xAngle = float.Parse(ReadINIValue("Recipe Basic", "xAngle", "0", INIFILE));
             xRowOffset = float.Parse(ReadINIValue("Recipe Basic", "xRowOffset", "2", INIFILE));
             xColumnOffset = float.Parse(ReadINIValue("Recipe Basic", "xColumnOffset", "2", INIFILE));
             xChipWidth = float.Parse(ReadINIValue("Recipe Basic", "xChipWidth", "10", INIFILE));
@@ -360,6 +366,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "xColumn", xColumn.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xLeftTopX", xLeftTopX.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xLeftTopY", xLeftTopY.ToString(), INIFILE);
+            WriteINIValue("Recipe Basic", "xAngle", xAngle.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xRowOffset", xRowOffset.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xColumnOffset", xColumnOffset.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xChipWidth", xChipWidth.ToString(), INIFILE);
@@ -541,7 +548,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //}
 
 
-        public bool CheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> m_list,out float retAngle,out PointF retCenter)
+        public bool CheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> m_list, out float retAngle, out PointF retCenter)
         {
 
             bool bOK = false;
@@ -875,6 +882,98 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                         _cell.lblName = "ROW" + i.ToString("000") + "-COL" + j.ToString("000");
                         _cell.viewRectF = new RectangleF(_baserect.X + j * _coloffset, _baserect.Y + i * _rowoffset, _baserect.Width, _baserect.Height);
 
+                        //_cell.OrgX = xRealLeftX + j * xRealOffsetX;
+                        //_cell.OrgY = xRealLeftY + i * xRealOffsetY;
+
+                        xRegionCells.Add(_cell);
+                        _index++;
+                    }
+                }
+                else
+                {
+                    for (int j = 0; j < xColumn; j++)
+                    {
+                        RegionCellX3Class _cell = new RegionCellX3Class();
+                        _cell.Index = _index;
+                        _cell.CellRow = i;
+                        _cell.CellCol = j;
+                        _cell.lblName = "ROW" + i.ToString("000") + "-COL" + j.ToString("000");
+                        _cell.viewRectF = new RectangleF(_baserect.X + j * _coloffset, _baserect.Y + i * _rowoffset, _baserect.Width, _baserect.Height);
+
+                        //_cell.OrgX = xRealLeftX + j * xRealOffsetX;
+                        //_cell.OrgY = xRealLeftY + i * xRealOffsetY;
+
+                        xRegionCells.Add(_cell);
+                        _index++;
+                    }
+                }
+            }
+
+            float a = _baserect.X;
+            float b = _baserect.Y;
+
+            var cellBase = xRegionCells[0];
+            int ix = 0;
+            while (ix < xRegionCells.Count)
+            {
+                var cell = xRegionCells[ix];
+                var pt = RotatePointAroundPivot(cell.viewRectF.Location,
+                                                cellBase.viewRectF.Location,
+                                                xAngle);
+
+                cell.viewRectF.X = pt.X;
+                cell.viewRectF.Y = pt.Y;
+
+                ix++;
+            }
+
+            //AnalyzeDatasData();
+
+            //原始的顺序排列
+            //int _index = 0;
+            //for (int i = 0; i < xRow; i++)
+            //{
+            //    for (int j = 0; j < xColumn; j++)
+            //    {
+            //        RegionCellX3Class _cell = new RegionCellX3Class();
+            //        _cell.Index = _index;
+            //        _cell.CellRow = i;
+            //        _cell.CellCol = j;
+            //        _cell.lblName = "ROW" + i.ToString("000") + "-COL" + j.ToString("000");
+            //        _cell.viewRectF = new RectangleF(_baserect.X + j * _coloffset, _baserect.Y + i * _rowoffset, _baserect.Width, _baserect.Height);
+            //        xRegionCells.Add(_cell);
+            //        _index++;
+            //    }
+            //}
+
+        }
+#if MY_BACKUP
+
+public void CreateViews()
+        {
+            xRegionCells.Clear();
+
+            RectangleF _baserect = new RectangleF(xLeftTopX,
+                xLeftTopY,
+                xChipWidth / INI.Instance.ImageResolution,
+                xChipHeight / INI.Instance.ImageResolution);
+            float _rowoffset = xRowOffset / INI.Instance.ImageResolution;
+            float _coloffset = xColumnOffset / INI.Instance.ImageResolution;
+
+            int _index = 0;
+            for (int i = 0; i < xRow; i++)
+            {
+                if (i % 2 == 1)
+                {
+                    for (int j = xColumn - 1; j > -1; j--)
+                    {
+                        RegionCellX3Class _cell = new RegionCellX3Class();
+                        _cell.Index = _index;
+                        _cell.CellRow = i;
+                        _cell.CellCol = j;
+                        _cell.lblName = "ROW" + i.ToString("000") + "-COL" + j.ToString("000");
+                        _cell.viewRectF = new RectangleF(_baserect.X + j * _coloffset, _baserect.Y + i * _rowoffset, _baserect.Width, _baserect.Height);
+
                         _cell.OrgX = xRealLeftX + j * xRealOffsetX;
                         _cell.OrgY = xRealLeftY + i * xRealOffsetY;
 
@@ -922,6 +1021,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //}
 
         }
+
+#endif
         protected CMvdImage BitmapToCMvdImage(Bitmap bmpInputImg)
         {
             CMvdImage cMvdImage = new CMvdImage();
@@ -1032,6 +1133,37 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         {
             return Math.Max(Math.Min(Value, Max), Min);
 
+        }
+        /// <summary>
+        /// 绕任意点旋转一个点
+        /// </summary>
+        /// <param name="pointToRotate">要旋转的点</param>
+        /// <param name="pivotPoint">旋转中心点</param>
+        /// <param name="angleDegrees">旋转角度(度)</param>
+        /// <returns>旋转后的新点</returns>
+        PointF RotatePointAroundPivot(PointF pointToRotate, PointF pivotPoint, double angleDegrees)
+        {
+            // 将角度转换为弧度
+            double angleRadians = angleDegrees * Math.PI / 180.0;
+            double cosTheta = Math.Cos(angleRadians);
+            double sinTheta = Math.Sin(angleRadians);
+
+            // 将点平移到原点周围
+            PointF translatedPoint = new PointF(
+                pointToRotate.X - pivotPoint.X,
+                pointToRotate.Y - pivotPoint.Y);
+
+            // 执行旋转
+            PointF rotatedPoint = new PointF(
+                (float)(translatedPoint.X * cosTheta - translatedPoint.Y * sinTheta),
+                (float)(translatedPoint.X * sinTheta + translatedPoint.Y * cosTheta));
+
+            // 平移回原位置
+            PointF finalPoint = new PointF(
+                rotatedPoint.X + pivotPoint.X,
+                rotatedPoint.Y + pivotPoint.Y);
+
+            return finalPoint;
         }
     }
 

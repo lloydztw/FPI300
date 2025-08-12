@@ -172,20 +172,20 @@ namespace LaserAlignDX.RunSpace
             thread.Start();
         }
 
-        public void RunRecipe()
-        {
-            m_IsPass = true;
-            m_ResultDesc = string.Empty;
+        //public void RunRecipe()
+        //{
+        //    m_IsPass = true;
+        //    m_ResultDesc = string.Empty;
 
-            //if (!myRecipe.Ischip_open_measure)
-            //    return;
+        //    //if (!myRecipe.Ischip_open_measure)
+        //    //    return;
 
-            _InspectRecipe();
+        //    _InspectRecipe();
 
-            //System.Threading.Thread thread = new System.Threading.Thread(runTest);
-            //thread.IsBackground = true;
-            //thread.Start();
-        }
+        //    //System.Threading.Thread thread = new System.Threading.Thread(runTest);
+        //    //thread.IsBackground = true;
+        //    //thread.Start();
+        //}
 
         /// <summary>
         /// 单颗的线扫结果(预留300个) PLC用此信号来将每颗产品放到对应的Tray盘
@@ -286,8 +286,8 @@ namespace LaserAlignDX.RunSpace
                 //    _Inspect002();
                 //    break;
                 case ScanInspectMode.NOTRAY:
-                    _Inspect001();
-                    //_Inspect003_LT();
+                    //_Inspect001();
+                    _Inspect003_LT();
                     break;
                 default:
                     _Inspect001_LT();
@@ -379,6 +379,14 @@ namespace LaserAlignDX.RunSpace
                         PointF _viewNewRun = new PointF(cell.DrawResultRectF().CenterX,
                              cell.DrawResultRectF().CenterY);
                         PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
+
+                        //原来基础位置的world坐标
+                        PointF _viewOrg = new PointF(cell.viewRectF.X + cell.viewRectF.Width / 2,
+                                                     cell.viewRectF.Y + cell.viewRectF.Height / 2);
+                        PointF _worldOrg = LineScanCalibrate.ViewToWorld(_viewOrg);
+                        cell.OrgX = _worldOrg.X;
+                        cell.OrgY = _worldOrg.Y;
+
                         cell.RunX = (_worldNewRun.X - cell.OrgX);
                         cell.RunY = (_worldNewRun.Y - cell.OrgY);
                         cell.RunAngle = cell.DrawResultRectF().Angle;
@@ -668,6 +676,8 @@ namespace LaserAlignDX.RunSpace
             GC.WaitForPendingFinalizers();
             GC.Collect();
         }
+
+#if NO_USE_20250812
         /// <summary>
         /// 读码检测
         /// </summary>
@@ -1046,6 +1056,9 @@ namespace LaserAlignDX.RunSpace
             GC.WaitForPendingFinalizers();
             GC.Collect();
         }
+
+#endif
+
         #endregion
 
         #region INSPECT_001
@@ -1461,6 +1474,14 @@ namespace LaserAlignDX.RunSpace
                         PointF _viewNewRun = new PointF(cell.DrawResultRectF().CenterX,
                              cell.DrawResultRectF().CenterY);
                         PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
+
+                        //原来基础位置的world坐标
+                        PointF _viewOrg = new PointF(cell.viewRectF.X + cell.viewRectF.Width / 2,
+                                                     cell.viewRectF.Y + cell.viewRectF.Height / 2);
+                        PointF _worldOrg = LineScanCalibrate.ViewToWorld(_viewOrg);
+                        cell.OrgX = _worldOrg.X;
+                        cell.OrgY = _worldOrg.Y;
+
                         cell.RunX = (_worldNewRun.X - cell.OrgX);
                         cell.RunY = (_worldNewRun.Y - cell.OrgY);
                         cell.RunAngle = cell.DrawResultRectF().Angle;

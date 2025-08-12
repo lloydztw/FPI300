@@ -594,8 +594,9 @@ namespace LaserAlignDX.FormSpace
         }
         private void _autoRowCol()
         {
-            var fullfovBmp = DS2.GetOrgBMP();
-            var grid = LtAoiFactory.DetectGrid(fullfovBmp);
+            //var fullfovBmp = DS2.GetOrgBMP();
+            //var fullfovBmp = xRecipe.bmpOrg;
+            //var grid = LtAoiFactory.DetectGrid(fullfovBmp);
             xRecipe.CreateViews();
 
             DS1.ClearStaticMover();
@@ -606,11 +607,11 @@ namespace LaserAlignDX.FormSpace
             while (i < xRecipe.xRegionCells.Count)
             {
                 var cell = xRecipe.xRegionCells[i];
-                EzBloc bloc = grid.Get(cell.CellRow, cell.CellCol);
-                if (bloc != null)
-                {
-                    JetEazy.Qcvt.SetCenter(ref cell.viewRectF, bloc.CenterX, bloc.CenterY);
-                }
+                //EzBloc bloc = grid.Get(cell.CellRow, cell.CellCol);
+                //if (bloc != null)
+                //{
+                //    JetEazy.Qcvt.SetCenter(ref cell.viewRectF, bloc.CenterX, bloc.CenterY);
+                //}
                 JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), cell.viewRectF);
                 _rect.RelateLevel = 2;
                 _rect.RelateNo = i;

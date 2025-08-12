@@ -269,7 +269,7 @@ namespace TravellerMINIX6.ProcessSpace
                             pRun.FileBarcodeStr = JzTimes.DateTimeSerialString;
                             pRun.Run();
 
-                            Process.NextDuriation = 0;
+                            Process.NextDuriation = 100;
                             Process.ID = 30;
                         }
                         break;
