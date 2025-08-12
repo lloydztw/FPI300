@@ -158,6 +158,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.QUtility.dll</HintPath>
     </Reference>
+    <Reference Include="JetEazy.QxCollections, Version=3.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.QxCollections.dll</HintPath>
+    </Reference>
     <Reference Include="LeTian.AwFramework, Version=2.0.7.3, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.AwFramework.dll</HintPath>
@@ -495,6 +499,7 @@
     <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
     <Compile Include="LT\DebugUtil\EzTiming.cs" />
     <Compile Include="LT\LtAoiFactory.cs" />
+    <Compile Include="LT\Utils\GaImageUtil.cs" />
     <Compile Include="LT\Utils\GaUtil.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -622,7 +627,6 @@
     <Compile Include="GA\UISpace\UIMVC\View\PosUI.Designer.cs">
       <DependentUpon>PosUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="LT\Utils\EzMvdImageConvertor.cs" />
     <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">
       <DependentUpon>BannerForm.cs</DependentUpon>
     </EmbeddedResource>

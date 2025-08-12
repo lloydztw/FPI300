@@ -13,12 +13,7 @@ using VisionDesigner;
 
 namespace JetEazy.Utils
 {
-    public class EzMvdImageConvertor : GaImageUtil
-    {
-        // 準備 全部改用 GaImageUtil 取代之 (比較好記)
-    }
-
-    public class GaImageUtil
+    public class GaMvdConvertor
     {
         /// <summary>
         /// 會生成新的 CMvdImage.
@@ -137,6 +132,7 @@ namespace JetEazy.Utils
             return ByteArrayToBitmap(ch0.arrDataBytes, (int)ch0.nRowStep, (int)(ch0.nLen / ch0.nRowStep));
         }
 
+        #region PRIVATE_FUNCTIONS
         /// <summary>
         /// 會生成新的 Bitmap.
         /// Caller 必須接管其生命週期 !!!
@@ -160,7 +156,29 @@ namespace JetEazy.Utils
             bitmap.UnlockBits(bitmapData);
             return bitmap;
         }
+        #endregion
 
+        public static CMvdRectangleF ToCMvdRectangleF(ref RectangleF viewRectF)
+        {
+            return new CMvdRectangleF(
+                            viewRectF.X + viewRectF.Width / 2,
+                            viewRectF.Y + viewRectF.Height / 2,
+                            viewRectF.Width,
+                            viewRectF.Height
+                        );
+        }
+
+        public static RectangleF ToRectangleF(CMvdRectangleF cMvdRectangleF)
+        {
+            if (cMvdRectangleF != null)
+                return new RectangleF(0, 0, cMvdRectangleF.Width, cMvdRectangleF.Height);
+            return RectangleF.Empty;
+        }
+    }
+
+
+    public class GaImageUtil : GaMvdConvertor
+    {
         /// <summary>
         /// 載入巨圖
         public static Bitmap LoadBigImage(string fileName, int option = 0)
@@ -194,8 +212,8 @@ namespace JetEazy.Utils
             if (check && string.IsNullOrEmpty(fileName))
                 throw new Exception($"檔案不存在: {fileName}");
 
-            var _TM = new EzTiming();
-            _TM.Trace("LoadBigImage (via EzQuickImage)");
+            //var _TM = new EzTiming();
+            //_TM.Trace("LoadBigImage (via EzQuickImage)");
 
             using (EzQuickImage ezImage = new EzQuickImage())
             {
@@ -208,9 +226,9 @@ namespace JetEazy.Utils
                 }
             }
 
-            _TM.Trace("LoadBigImage (via EzQuickImage)");
+            //_TM.Trace("LoadBigImage (via EzQuickImage)");
             Bitmap bigBmp = loadBigImageViaFreeImageBitmap(fileName);
-            _TM.Dump();
+            //_TM.Dump();
             return bigBmp;
         }
         /// <summary>
@@ -308,7 +326,6 @@ namespace JetEazy.Utils
 
             return ToU8(original, false);
         }
-
         /// <summary>
         /// caller 負責 original 的生命.
         /// (直接調用 ToU8)
@@ -369,7 +386,6 @@ namespace JetEazy.Utils
 
             return ToU8(original, false);
         }
-
         /// <summary>
         /// 使用 OpenCvSharp 轉比較快 !!!
         /// </summary>
@@ -408,7 +424,6 @@ namespace JetEazy.Utils
                 return newBmp;
             }
         }
-
         /// <summary>
         /// 設定 8 bpp 調色盤
         /// </summary>
@@ -425,16 +440,16 @@ namespace JetEazy.Utils
                 bmpU8.Palette = palette;
             }
         }
-
         /// <summary>
         /// 可指定 壓縮品質 之 jpg 存檔函式
         /// (將 Gaara 代碼 集中至此) 
         /// </summary>
         public static void SaveImageWithQuality(Bitmap bmpinput, string outputImagePath, long quality)
         {
-            using (Bitmap image =
-                (Bitmap)bmpinput.Clone(new Rectangle(0, 0, bmpinput.Width, bmpinput.Height), bmpinput.PixelFormat))
-            //Image image = bmpinput;
+            if (bmpinput == null)
+                return;
+
+            using (Bitmap image = (Bitmap)bmpinput.Clone(new Rectangle(0, 0, bmpinput.Width, bmpinput.Height), bmpinput.PixelFormat))
             {
                 // 设置压缩参数
                 EncoderParameters encoderParameters = new EncoderParameters(1);
@@ -446,6 +461,30 @@ namespace JetEazy.Utils
 
                 // 保存图片，应用压缩参数
                 image.Save(outputImagePath, jpgEncoder, encoderParameters);
+            }
+        }
+        /// <summary>
+        /// 可指定 壓縮品質 之 jpg 存檔函式
+        /// (將 Gaara 代碼 集中至此) 
+        /// </summary>
+        public static void SaveImageWithQuality(IEzImage ezImage, string outputImagePath, long quality)
+        {
+            if (ezImage == null)
+                return;
+
+            if(ezImage.IsOpenCV)
+            {
+                if (ezImage.Image is Mat mat)
+                {
+                    using (Bitmap bmp = BitmapConverter.ToBitmap(mat))
+                    {
+                        SaveImageWithQuality(bmp, outputImagePath, quality);
+                    }
+                }
+            }
+            else
+            {
+                SaveImageWithQuality(ezImage.Bitmap, outputImagePath, quality);
             }
         }
 
@@ -463,5 +502,11 @@ namespace JetEazy.Utils
             return null;
         }
         #endregion
+    }
+
+
+    public class EzMvdImageConvertor : GaImageUtil
+    {
+
     }
 }

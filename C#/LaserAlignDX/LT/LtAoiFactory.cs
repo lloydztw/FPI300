@@ -16,7 +16,9 @@
 
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
+using JetEazy.Match;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using AoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
 
@@ -76,6 +78,14 @@ namespace Traveller106
         public static void PushImage(IEzImage image, string name)
         {
             AoiFactory.PushImage(image, name);
+        }
+
+        public static EzBlocsGrid DetectGrid(Bitmap fullfovBmp)
+        {
+            var aoiModel = InstanceModel();
+            aoiModel.RunAll(fullfovBmp, wait: true);
+            var result = aoiModel.GetResult();
+            return result?.Grid;
         }
 
         /// <summary>

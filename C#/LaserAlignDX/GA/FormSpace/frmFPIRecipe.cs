@@ -3,6 +3,7 @@ using JetEazy.BasicSpace;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Interface;
+using JetEazy.Match;
 using JetEazy.Utils;
 using JzDisplay;
 using LaserAlignDX.BasicSpace;
@@ -593,6 +594,8 @@ namespace LaserAlignDX.FormSpace
         }
         private void _autoRowCol()
         {
+            var fullfovBmp = DS2.GetOrgBMP();
+            var grid = LtAoiFactory.DetectGrid(fullfovBmp);
             xRecipe.CreateViews();
 
             DS1.ClearStaticMover();
@@ -602,7 +605,13 @@ namespace LaserAlignDX.FormSpace
             int i = 0;
             while (i < xRecipe.xRegionCells.Count)
             {
-                JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), xRecipe.xRegionCells[i].viewRectF);
+                var cell = xRecipe.xRegionCells[i];
+                EzBloc bloc = grid.Get(cell.CellRow, cell.CellCol);
+                if (bloc != null)
+                {
+                    JetEazy.Qcvt.SetCenter(ref cell.viewRectF, bloc.CenterX, bloc.CenterY);
+                }
+                JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), cell.viewRectF);
                 _rect.RelateLevel = 2;
                 _rect.RelateNo = i;
                 _rect.RelatePosition = 0;

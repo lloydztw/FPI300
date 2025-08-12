@@ -35,7 +35,7 @@ namespace EzAoiEmptyTrayInspector.Model
         }
 
         #region INTERNAL_DATA
-        internal EzBlocsGrid Grid
+        public EzBlocsGrid Grid
         {
             get { return _grid; }
         }
