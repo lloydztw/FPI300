@@ -349,6 +349,12 @@
     <Compile Include="GA\FormSpace\BannerForm.designer.cs">
       <DependentUpon>BannerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA\FormSpace\FormProgressing.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA\FormSpace\FormProgressing.designer.cs">
+      <DependentUpon>FormProgressing.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA\FormSpace\FPI30Form\CalibrationUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -497,14 +503,24 @@
     <Compile Include="GA\ProcessSpace\LineScanSingleProcess.cs" />
     <Compile Include="GA\ProcessSpace\MainProcess.cs" />
     <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
+    <Compile Include="GA\RunSpace\X2\ProcessRunClass.cs" />
+    <Compile Include="GA\RunSpace\X3\IProcessRunFPI.cs" />
+    <Compile Include="GA\RunSpace\X3\ProcessRunFPIClass.cs" />
+    <Compile Include="GA\RunSpace\X3\ProcessRunFPIClass_v0.cs" />
+    <Compile Include="GA\RunSpace\X3\ProcessRunFPIClass_v1.cs" />
+    <Compile Include="GA\RunSpace\X3\ProcessRunFPIClass_v2.cs" />
+    <Compile Include="GA\RunSpace\X3\ScanInspectModeEnum.cs" />
+    <Compile Include="GA\RunSpace\X3\Supports\GaCellsGroup.cs" />
+    <Compile Include="GA\RunSpace\X3\Supports\GaProgressEventArgs.cs" />
+    <Compile Include="GA\RunSpace\X3\Supports\MvdChipMatcher.cs" />
+    <Compile Include="GA\RunSpace\X3\Supports\MvdCompositeChipMatcher.cs" />
     <Compile Include="LT\DebugUtil\EzTiming.cs" />
+    <Compile Include="LT\DebugUtil\LtDebug.cs" />
     <Compile Include="LT\LtAoiFactory.cs" />
     <Compile Include="LT\Utils\GaImageUtil.cs" />
     <Compile Include="LT\Utils\GaUtil.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="GA\RunSpace\ProcessRunClass.cs" />
-    <Compile Include="GA\RunSpace\ProcessRunFPIClass.cs" />
     <Compile Include="GA\UISpace\CtrlSpace\MainFPIX3Ctrl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -629,6 +645,9 @@
     </Compile>
     <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">
       <DependentUpon>BannerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\FormSpace\FormProgressing.resx">
+      <DependentUpon>FormProgressing.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\FPI30Form\CalibrationUI.resx">
       <DependentUpon>CalibrationUI.cs</DependentUpon>
@@ -760,6 +779,7 @@
     <EmbeddedResource Include="GA\UISpace\UIMVC\View\PosUI.resx">
       <DependentUpon>PosUI.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="GA\RunSpace\X2\Readme.md" />
     <None Include="NLog.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">

@@ -14,6 +14,7 @@ using JetEazy.PropertyGridSpace;
 using LaserAlignDX.BasicSpace.ParaSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LaserAlignDX.RunSpace;
 using System.IO;
 using System.Windows.Forms;
 using TravellerMINIX6.OPSpace;
@@ -27,13 +28,16 @@ namespace Traveller106
 {
     public class Universal : JetEazy.Universal
     {
-        public static bool IsNoUseCCD = false;
+        public static readonly bool N_THREADS_ENABLED = true;
+        public static readonly int N_THREADS = 16;
+
+        public static bool IsNoUseCCD = true;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/08/13";
+        public const string VersionDate = "2025/08/14";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
@@ -634,6 +638,8 @@ namespace Traveller106
             //IxFlyAreaCam?.Dispose();
             IxFlyAreaCam = null;
 
+            RecipeFPIX3Class.DisposeAll();
+            ProcessRunFPIClass.DisposeAll();
             LtAoiFactory.DisposeAll();
         }
         public static void Close()

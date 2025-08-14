@@ -1,5 +1,6 @@
 ﻿using Common.RecipeSpace;
 using Eazy_Project_III;
+using Eazy_Project_III.FormSpace;
 using JetEazy.BasicSpace;
 using JetEazy.CCDSpace;
 using JetEazy.Interface;
@@ -851,7 +852,13 @@ namespace LaserAlignDX.UISpace.MainSpace
             m_SingleProcess.OnMessage += process_OnMessage;
             m_LineScanProcess.OnMessage += process_OnMessage;
             m_SingleProcess.OnLiveImage += process_OnLiveImage;
+
+            var aoiEngine = ProcessRunFPIClass.Instance;
+            aoiEngine.OnAoiProgressing += AoiEngine_OnAoiProgressing;
+            aoiEngine.OnAoiBegin += AoiEngine_OnAoiBegin;
+            aoiEngine.OnAoiEnd += AoiEngine_OnAoiEnd;
         }
+
 
         private void process_OnMessage(object sender, ProcessEventArgs e)
         {
@@ -1197,6 +1204,51 @@ namespace LaserAlignDX.UISpace.MainSpace
                 else
                 {
                 }
+            }
+        }
+
+        FormProgressing _frmAoiProgressing = null;
+        private void AoiEngine_OnAoiBegin(object sender, GaProgressEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiBegin, sender, e);
+            }
+            else
+            {
+                if (_frmAoiProgressing == null)
+                {
+                    _frmAoiProgressing = new FormProgressing();
+                    //_frmAoiProgressing.TopMost = true;
+                    _frmAoiProgressing.SetTotalSteps(e.TotalSteps);
+                    _frmAoiProgressing.UpdateProgress(e.CurrentStep);
+                    _frmAoiProgressing.Show(this);
+                    _frmAoiProgressing.BringToFront();
+                }
+            }
+        }
+        private void AoiEngine_OnAoiProgressing(object sender, GaProgressEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiProgressing, sender, e);
+            }
+            else
+            {
+                _frmAoiProgressing?.UpdateProgress(e.CurrentStep);
+            }
+        }
+        private void AoiEngine_OnAoiEnd(object sender, GaProgressEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiEnd, sender, e);
+            }
+            else
+            {
+                _frmAoiProgressing?.Close();
+                _frmAoiProgressing?.Dispose();
+                _frmAoiProgressing = null;
             }
         }
 

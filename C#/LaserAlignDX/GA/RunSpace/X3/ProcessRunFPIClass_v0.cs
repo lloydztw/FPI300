@@ -17,23 +17,24 @@ using VisionDesigner.BoxOverlap;
 using _TM = Traveller106.LtDebug;
 
 
-namespace LaserAlignDX.RunSpace
+namespace LaserAlignDX.RunSpace.V0
 {
-    public enum ScanInspectMode : int
-    {
-        [Description("外观及尺寸检测")]
-        MEASUREAOI = 0,
-        [Description("QR检测")]
-        QRCODE = 1,
-        [Description("空载台检测")]
-        NOTRAY = 2,
-    }
+    //public enum ScanInspectMode : int
+    //{
+    //    [Description("外观及尺寸检测")]
+    //    MEASUREAOI = 0,
+    //    [Description("QR检测")]
+    //    QRCODE = 1,
+    //    [Description("空载台检测")]
+    //    NOTRAY = 2,
+    //}
 
     public class ProcessRunFPIClass : IProcessRunFPI
     {
         public event EventHandler<GaProgressEventArgs> OnAoiBegin;
         public event EventHandler<GaProgressEventArgs> OnAoiEnd;
         public event EventHandler<GaProgressEventArgs> OnAoiProgressing;
+
         #region SINGLETON
         protected ProcessRunFPIClass()
         {
@@ -58,6 +59,7 @@ namespace LaserAlignDX.RunSpace
         }
         public void Dispose()
         {
+            // To DO: 請把自己清乾淨
         }
 
         #region PRIVATE_DATA
@@ -393,7 +395,7 @@ namespace LaserAlignDX.RunSpace
                              cell.DrawResultRectF().CenterY);
                         PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
 
-                        ////原来基础位置的world坐标
+                        //原来基础位置的world坐标
                         //PointF _viewOrg = new PointF(cell.viewRectF.X + cell.viewRectF.Width / 2,
                         //                             cell.viewRectF.Y + cell.viewRectF.Height / 2);
                         //PointF _worldOrg = LineScanCalibrate.ViewToWorld(_viewOrg);
@@ -1487,7 +1489,7 @@ namespace LaserAlignDX.RunSpace
                              cell.DrawResultRectF().CenterY);
                         PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
 
-                        ////原来基础位置的world坐标
+                        //原来基础位置的world坐标
                         //PointF _viewOrg = new PointF(cell.viewRectF.X + cell.viewRectF.Width / 2,
                         //                             cell.viewRectF.Y + cell.viewRectF.Height / 2);
                         //PointF _worldOrg = LineScanCalibrate.ViewToWorld(_viewOrg);

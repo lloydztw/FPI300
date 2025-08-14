@@ -357,8 +357,6 @@ namespace LaserAlignDX.OPSpace
             DrawBarcodePosition = null;
             RunX = 0;
             RunY = 0;
-            //OrgX = 0;
-            //OrgY = 0;
             IsSaveDebugPicture = false;
 
             int i = 0;

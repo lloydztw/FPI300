@@ -111,6 +111,55 @@ namespace Traveller106
             printFunc(msg);
             printFunc("");
         }
+
+
+        #region ACCUMULATION
+        class AccumItem
+        {
+            public DateTime Tm0;
+            public double TotalSeconds;
+        }
+        static Dictionary<string, AccumItem> _accumDict = new Dictionary<string, AccumItem>();
+        #endregion
+
+        public void RESET_ACCUM()
+        {
+            _accumDict?.Clear();
+        }
+        public void BEGIN(string remark)
+        {
+            if (_bypass) return;
+            if (!_accumDict.ContainsKey(remark))
+            {
+                var item = new AccumItem() { Tm0 = DateTime.Now, TotalSeconds = 0 };
+                _accumDict.Add(remark, item);
+            }
+            else
+            {
+                var item = _accumDict[remark];
+                item.Tm0 = DateTime.Now;
+            }
+        }
+        public void END(string remark)
+        {
+            if (_bypass) return;
+            if (_accumDict.ContainsKey(remark))
+            {
+                var item = _accumDict[remark];
+                var ts = DateTime.Now - item.Tm0;
+                item.TotalSeconds += ts.TotalSeconds;
+            }
+        }
+        public void DUMP_ACCUM()
+        {
+            if (_bypass) return;
+
+            if (_logger != null)
+            {
+                foreach (var kp in _accumDict)
+                    _logger.Debug("[{0}] = {1:0.00} s", kp.Key, kp.Value.TotalSeconds);
+            }
+        }
     }
 }
 

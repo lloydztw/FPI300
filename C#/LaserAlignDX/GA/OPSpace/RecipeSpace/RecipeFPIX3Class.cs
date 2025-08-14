@@ -2,41 +2,33 @@
 using Eazy_Project_III;
 using FreeImageAPI;
 using JetEazy;
-using JetEazy.BasicSpace;
-using JetEazy.QxCollections2;
 using LaserAlignDX.BasicSpace;
-using LaserAlignDX.RunSpace;
-using LeTian.JxRecipesTool;
-using MoveGraphLibrary;
-using OpenCvSharp.Flann;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Runtime;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 using Traveller106;
-using TravellerMINIX6.OPSpace;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
-using WorldOfMoveableObjects;
+//using MvdChipMatcher = LaserAlignDX.RunSpace.Supports.MvdChipMatcher;
+using MvdChipMatcher = LaserAlignDX.RunSpace.Supports.MvdCompositeChipMatcher;
+
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
 {
     public class RecipeFPIX3Class : RecipeBaseClass
     {
+        #region SINGLETON
         protected RecipeFPIX3Class()
         {
 
         }
         private static RecipeFPIX3Class _instance = null;
+        #endregion
+
         public static RecipeFPIX3Class Instance
         {
             get
@@ -46,6 +38,18 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 return _instance;
             }
         }
+        public static void DisposeAll()
+        {
+            _instance?.dispose();
+            _instance = null;
+        }
+        void dispose()
+        {
+            // To DO: 請把自己清乾淨
+            mvdprinttemp_Find?.Dispose();
+            mvdprinttemp_Find = null;
+        }
+
         public List<RegionCellX3Class> xRegionCells = new List<RegionCellX3Class>();
         public List<Rectangle> xOutBlocs = new List<Rectangle>();
 
@@ -72,6 +76,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //        return (Bitmap)bmpprinttemplate.Clone(rectF, bmpprinttemplate.PixelFormat);
         //    }
         //}
+
         /// <summary>
         /// 训练的区域
         /// </summary>
@@ -95,8 +100,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         //public MvdFindClass mvdbase0_Find = new MvdFindClass();
         //public MvdFindClass mvdbase1_Find = new MvdFindClass();
+
         public PointF ptPrinttemp = new PointF(-1, -1);
-        public MvdFindClass mvdprinttemp_Find = new MvdFindClass();
+        public MvdChipMatcher mvdprinttemp_Find = new MvdChipMatcher();
+
         public PointF ptPrintFlytemp = new PointF(-1, -1);
         public MvdFindClass mvdprintFlytemp_Find = new MvdFindClass();
 
@@ -133,7 +140,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public float xRealOffsetY = 1;
 
         #endregion
-
 
         public override void Load(bool eCancel = false)
         {
@@ -460,14 +466,19 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         #region 定位TRAIN&RUN
-
         public Size PrintTemplateSize
         {
-            get { return mvdprinttemp_Find.bmpObj_Image.Size; }
+            get
+            {
+                // LETIAN: Revised for multithread
+                if (mvdprinttemp_Find != null)
+                    return mvdprinttemp_Find.TemplateSize;
+                return new Size(1, 1);
+            }
         }
-
         public int PrintTempTrain()
         {
+#if (OPT_OLD)
             mvdprinttemp_Find.bmpObj_Image?.Dispose();
             mvdprinttemp_Find.bmpObj_Image = (Bitmap)bmpDefectTemplate.Clone();
 
@@ -478,18 +489,27 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //    xRegionTrain.Height);
 
             bool bOK = mvdprinttemp_Find.HikTrainBmp();
+#endif
+            // LETIAN: Revised for multithread
+            bool bOK = mvdprinttemp_Find.Train(this.bmpDefectTemplate);
             return (bOK ? 0 : -1);
         }
         public int PrintTempRun(Bitmap ebmpInput)
         {
+#if (OPT_OLD)
             mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
             mvdprinttemp_Find.xMvdTolerance = InspectX3ParaClass.Instance.xTolerance;
             mvdprinttemp_Find.xMaxOverlap = InspectX3ParaClass.Instance.xMaxOverlap;
+
             mvdprinttemp_Find.bmpRun_Image?.Dispose();
             mvdprinttemp_Find.bmpRun_Image = (Bitmap)ebmpInput.Clone();
+
             bool bOK = mvdprinttemp_Find.HikRunBmp();
+#endif
+            bool bOK = mvdprinttemp_Find.RunMatch(ebmpInput);
             return (bOK ? 0 : -1);
         }
+
         //public int PrintTempRun(CMvdImage eMvdInput)
         //{
         //    mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
@@ -1134,6 +1154,7 @@ public void CreateViews()
             return Math.Max(Math.Min(Value, Max), Min);
 
         }
+
         /// <summary>
         /// 绕任意点旋转一个点
         /// </summary>
