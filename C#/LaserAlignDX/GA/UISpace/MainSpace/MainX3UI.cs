@@ -976,7 +976,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                                     CMvdTextF cMvdTextFShowMain = new CMvdTextF(cell.DrawResultRectF().CenterX,
                                         cell.DrawResultRectF().CenterY,
                                         $"{cell.ToShowMainStr()}");
-                                    cMvdTextFShowMain.BorderColor = cell.DrawResultRectF().BorderColor;// new MVD_COLOR(0, 255, 0);
+                                    cMvdTextFShowMain.BorderColor = new MVD_COLOR(0, 0, 255);// cell.DrawResultRectF().BorderColor;// new MVD_COLOR(0, 255, 0);
                                     cMvdTextFShowMain.FontWidth = 11;
 
                                     if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)

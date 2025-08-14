@@ -18,6 +18,7 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
 using VsCommon.ControlSpace.MachineSpace;
 using JetEazy.DBSpace;
+using JetEazy.EzImage;
 
 //using Mist.OPSpace;
 //using Mist.DBSpace;
@@ -264,7 +265,11 @@ namespace PhotoMachine.UISpace
                 string _filepath = SaveFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
                 if (!string.IsNullOrEmpty(_filepath))
                 {
-                    IScanCam.GetFreeImageBitmap().Save(_filepath, FreeImageAPI.FREE_IMAGE_FORMAT.FIF_BMP);
+                    using (IEzImage ezImage = new EzFreeBitmap(IScanCam.GetFreeImageBitmap().ToBitmap(), true))
+                    {
+                        ezImage.Save(_filepath);
+                    }
+                    //IScanCam.GetFreeImageBitmap().Save(_filepath, FreeImageAPI.FREE_IMAGE_FORMAT.FIF_BMP);
                     JetEazy.BasicSpace.VsMSG.Instance.Warning($"{ToChangeLanguage("图片保存完成.路径:")}{Environment.NewLine + _filepath}", false);
                 }
             }

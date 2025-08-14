@@ -286,6 +286,8 @@ namespace LaserAlignDX.OPSpace
             str += $"{Index}" + ",";
             str += $"{lblName}" + ",";
             str += $"{(ByPass ? (INI.Instance.IsForceInspect ? "1强制检测" : "0不检测") : "1检测")}" + ",";
+            str += $"[{OrgX.ToString(m_Format)}" + ",";
+            str += $"{OrgY.ToString(m_Format)}]" + ",";
             str += $"{RunX.ToString(m_Format)}" + ",";
             str += $"{RunY.ToString(m_Format)}" + ",";
             str += $"{RunAngle.ToString(m_Format)}" + ",";
@@ -322,8 +324,10 @@ namespace LaserAlignDX.OPSpace
         {
             string str = string.Empty;
 
-            str += $"{Index}" + "-[";
-            str += $"{RunX.ToString(m_Format)}" + ",";
+            str += $"{Index}" + "";
+            str += $"[{OrgX.ToString(m_Format)}" + ",";
+            str += $"{OrgY.ToString(m_Format)}]{Environment.NewLine}";
+            str += $"[{RunX.ToString(m_Format)}" + ",";
             str += $"{RunY.ToString(m_Format)}" + ",";
             str += $"{RunAngle.ToString(m_Format)}]{Environment.NewLine}";
             if (xInspect.bOpenLineMeasure)
@@ -353,6 +357,8 @@ namespace LaserAlignDX.OPSpace
             DrawBarcodePosition = null;
             RunX = 0;
             RunY = 0;
+            //OrgX = 0;
+            //OrgY = 0;
             IsSaveDebugPicture = false;
 
             int i = 0;

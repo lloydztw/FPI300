@@ -882,8 +882,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                         _cell.lblName = "ROW" + i.ToString("000") + "-COL" + j.ToString("000");
                         _cell.viewRectF = new RectangleF(_baserect.X + j * _coloffset, _baserect.Y + i * _rowoffset, _baserect.Width, _baserect.Height);
 
-                        //_cell.OrgX = xRealLeftX + j * xRealOffsetX;
-                        //_cell.OrgY = xRealLeftY + i * xRealOffsetY;
+                        _cell.OrgX = xRealLeftX + j * xRealOffsetX;
+                        _cell.OrgY = xRealLeftY + i * xRealOffsetY;
 
                         xRegionCells.Add(_cell);
                         _index++;
@@ -900,8 +900,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                         _cell.lblName = "ROW" + i.ToString("000") + "-COL" + j.ToString("000");
                         _cell.viewRectF = new RectangleF(_baserect.X + j * _coloffset, _baserect.Y + i * _rowoffset, _baserect.Width, _baserect.Height);
 
-                        //_cell.OrgX = xRealLeftX + j * xRealOffsetX;
-                        //_cell.OrgY = xRealLeftY + i * xRealOffsetY;
+                        _cell.OrgX = xRealLeftX + j * xRealOffsetX;
+                        _cell.OrgY = xRealLeftY + i * xRealOffsetY;
 
                         xRegionCells.Add(_cell);
                         _index++;

@@ -380,12 +380,12 @@ namespace LaserAlignDX.RunSpace
                              cell.DrawResultRectF().CenterY);
                         PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
 
-                        //原来基础位置的world坐标
-                        PointF _viewOrg = new PointF(cell.viewRectF.X + cell.viewRectF.Width / 2,
-                                                     cell.viewRectF.Y + cell.viewRectF.Height / 2);
-                        PointF _worldOrg = LineScanCalibrate.ViewToWorld(_viewOrg);
-                        cell.OrgX = _worldOrg.X;
-                        cell.OrgY = _worldOrg.Y;
+                        ////原来基础位置的world坐标
+                        //PointF _viewOrg = new PointF(cell.viewRectF.X + cell.viewRectF.Width / 2,
+                        //                             cell.viewRectF.Y + cell.viewRectF.Height / 2);
+                        //PointF _worldOrg = LineScanCalibrate.ViewToWorld(_viewOrg);
+                        //cell.OrgX = _worldOrg.X;
+                        //cell.OrgY = _worldOrg.Y;
 
                         cell.RunX = (_worldNewRun.X - cell.OrgX);
                         cell.RunY = (_worldNewRun.Y - cell.OrgY);
@@ -1475,12 +1475,12 @@ namespace LaserAlignDX.RunSpace
                              cell.DrawResultRectF().CenterY);
                         PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
 
-                        //原来基础位置的world坐标
-                        PointF _viewOrg = new PointF(cell.viewRectF.X + cell.viewRectF.Width / 2,
-                                                     cell.viewRectF.Y + cell.viewRectF.Height / 2);
-                        PointF _worldOrg = LineScanCalibrate.ViewToWorld(_viewOrg);
-                        cell.OrgX = _worldOrg.X;
-                        cell.OrgY = _worldOrg.Y;
+                        ////原来基础位置的world坐标
+                        //PointF _viewOrg = new PointF(cell.viewRectF.X + cell.viewRectF.Width / 2,
+                        //                             cell.viewRectF.Y + cell.viewRectF.Height / 2);
+                        //PointF _worldOrg = LineScanCalibrate.ViewToWorld(_viewOrg);
+                        //cell.OrgX = _worldOrg.X;
+                        //cell.OrgY = _worldOrg.Y;
 
                         cell.RunX = (_worldNewRun.X - cell.OrgX);
                         cell.RunY = (_worldNewRun.Y - cell.OrgY);

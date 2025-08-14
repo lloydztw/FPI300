@@ -30,12 +30,19 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.button8 = new System.Windows.Forms.Button();
+            this.button7 = new System.Windows.Forms.Button();
             this.tabControl3 = new System.Windows.Forms.TabControl();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.calibrationUI1 = new LaserAlignDX.FormSpace.FPI30Form.CalibrationUI();
             this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.calibrationUI2 = new LaserAlignDX.FormSpace.FPI30Form.CalibrationUI();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.calibrationUI3 = new LaserAlignDX.FormSpace.FPI30Form.CalibrationUI();
             this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.calibrationUI4 = new LaserAlignDX.FormSpace.FPI30Form.CalibrationUI();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button9 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.pgPara = new System.Windows.Forms.PropertyGrid();
@@ -48,13 +55,8 @@
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.DS = new JzDisplay.UISpace.DispUI();
-            this.button7 = new System.Windows.Forms.Button();
-            this.button8 = new System.Windows.Forms.Button();
-            this.button9 = new System.Windows.Forms.Button();
-            this.calibrationUI1 = new LaserAlignDX.FormSpace.FPI30Form.CalibrationUI();
-            this.calibrationUI2 = new LaserAlignDX.FormSpace.FPI30Form.CalibrationUI();
-            this.calibrationUI3 = new LaserAlignDX.FormSpace.FPI30Form.CalibrationUI();
-            this.calibrationUI4 = new LaserAlignDX.FormSpace.FPI30Form.CalibrationUI();
+            this.button10 = new System.Windows.Forms.Button();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabControl3.SuspendLayout();
@@ -79,6 +81,8 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.richTextBox1);
+            this.tabPage1.Controls.Add(this.button10);
             this.tabPage1.Controls.Add(this.button8);
             this.tabPage1.Controls.Add(this.button7);
             this.tabPage1.Controls.Add(this.tabControl3);
@@ -91,6 +95,30 @@
             this.tabPage1.Text = "校正设定";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // button8
+            // 
+            this.button8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.button8.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button8.Location = new System.Drawing.Point(563, 691);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(111, 41);
+            this.button8.TabIndex = 24;
+            this.button8.Text = "退出";
+            this.button8.UseVisualStyleBackColor = false;
+            // 
+            // button7
+            // 
+            this.button7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button7.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button7.Location = new System.Drawing.Point(446, 691);
+            this.button7.Name = "button7";
+            this.button7.Size = new System.Drawing.Size(111, 41);
+            this.button7.TabIndex = 23;
+            this.button7.Text = "保存资料";
+            this.button7.UseVisualStyleBackColor = false;
+            // 
             // tabControl3
             // 
             this.tabControl3.Controls.Add(this.tabPage5);
@@ -98,7 +126,7 @@
             this.tabControl3.Controls.Add(this.tabPage2);
             this.tabControl3.Controls.Add(this.tabPage4);
             this.tabControl3.Dock = System.Windows.Forms.DockStyle.Top;
-            this.tabControl3.Location = new System.Drawing.Point(3, 347);
+            this.tabControl3.Location = new System.Drawing.Point(3, 286);
             this.tabControl3.Name = "tabControl3";
             this.tabControl3.SelectedIndex = 0;
             this.tabControl3.Size = new System.Drawing.Size(671, 321);
@@ -115,36 +143,68 @@
             this.tabPage5.Text = "载台一(第一排吸嘴)";
             this.tabPage5.UseVisualStyleBackColor = true;
             // 
+            // calibrationUI1
+            // 
+            this.calibrationUI1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.calibrationUI1.Location = new System.Drawing.Point(3, 3);
+            this.calibrationUI1.Name = "calibrationUI1";
+            this.calibrationUI1.Size = new System.Drawing.Size(657, 289);
+            this.calibrationUI1.TabIndex = 0;
+            // 
             // tabPage6
             // 
             this.tabPage6.Controls.Add(this.calibrationUI2);
             this.tabPage6.Location = new System.Drawing.Point(4, 22);
             this.tabPage6.Name = "tabPage6";
             this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage6.Size = new System.Drawing.Size(509, 295);
+            this.tabPage6.Size = new System.Drawing.Size(663, 295);
             this.tabPage6.TabIndex = 1;
             this.tabPage6.Text = "载台一(第二排吸嘴)";
             this.tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // calibrationUI2
+            // 
+            this.calibrationUI2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.calibrationUI2.Location = new System.Drawing.Point(3, 3);
+            this.calibrationUI2.Name = "calibrationUI2";
+            this.calibrationUI2.Size = new System.Drawing.Size(657, 289);
+            this.calibrationUI2.TabIndex = 1;
             // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.calibrationUI3);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(509, 295);
+            this.tabPage2.Size = new System.Drawing.Size(663, 295);
             this.tabPage2.TabIndex = 2;
             this.tabPage2.Text = "载台二(第一排吸嘴)";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // calibrationUI3
+            // 
+            this.calibrationUI3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.calibrationUI3.Location = new System.Drawing.Point(0, 0);
+            this.calibrationUI3.Name = "calibrationUI3";
+            this.calibrationUI3.Size = new System.Drawing.Size(663, 295);
+            this.calibrationUI3.TabIndex = 1;
             // 
             // tabPage4
             // 
             this.tabPage4.Controls.Add(this.calibrationUI4);
             this.tabPage4.Location = new System.Drawing.Point(4, 22);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(509, 295);
+            this.tabPage4.Size = new System.Drawing.Size(663, 295);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "载台二(第二排吸嘴)";
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // calibrationUI4
+            // 
+            this.calibrationUI4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.calibrationUI4.Location = new System.Drawing.Point(0, 0);
+            this.calibrationUI4.Name = "calibrationUI4";
+            this.calibrationUI4.Size = new System.Drawing.Size(663, 295);
+            this.calibrationUI4.TabIndex = 1;
             // 
             // groupBox1
             // 
@@ -161,10 +221,22 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(671, 344);
+            this.groupBox1.Size = new System.Drawing.Size(671, 283);
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "操作";
+            // 
+            // button9
+            // 
+            this.button9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.button9.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.button9.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button9.Location = new System.Drawing.Point(24, 236);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(228, 41);
+            this.button9.TabIndex = 25;
+            this.button9.Text = "重新校正";
+            this.button9.UseVisualStyleBackColor = false;
             // 
             // button6
             // 
@@ -193,7 +265,7 @@
             this.pgPara.Dock = System.Windows.Forms.DockStyle.Right;
             this.pgPara.Location = new System.Drawing.Point(258, 17);
             this.pgPara.Name = "pgPara";
-            this.pgPara.Size = new System.Drawing.Size(410, 324);
+            this.pgPara.Size = new System.Drawing.Size(410, 263);
             this.pgPara.TabIndex = 20;
             // 
             // button4
@@ -291,73 +363,25 @@
             this.DS.Size = new System.Drawing.Size(385, 729);
             this.DS.TabIndex = 7;
             // 
-            // button7
+            // button10
             // 
-            this.button7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.button7.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.button7.Location = new System.Drawing.Point(446, 691);
-            this.button7.Name = "button7";
-            this.button7.Size = new System.Drawing.Size(111, 41);
-            this.button7.TabIndex = 23;
-            this.button7.Text = "保存资料";
-            this.button7.UseVisualStyleBackColor = false;
+            this.button10.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button10.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button10.Location = new System.Drawing.Point(27, 609);
+            this.button10.Name = "button10";
+            this.button10.Size = new System.Drawing.Size(111, 41);
+            this.button10.TabIndex = 26;
+            this.button10.Text = "框选验证";
+            this.button10.UseVisualStyleBackColor = false;
             // 
-            // button8
+            // richTextBox1
             // 
-            this.button8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button8.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
-            this.button8.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.button8.Location = new System.Drawing.Point(563, 691);
-            this.button8.Name = "button8";
-            this.button8.Size = new System.Drawing.Size(111, 41);
-            this.button8.TabIndex = 24;
-            this.button8.Text = "退出";
-            this.button8.UseVisualStyleBackColor = false;
-            // 
-            // button9
-            // 
-            this.button9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button9.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.button9.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.button9.Location = new System.Drawing.Point(24, 297);
-            this.button9.Name = "button9";
-            this.button9.Size = new System.Drawing.Size(228, 41);
-            this.button9.TabIndex = 25;
-            this.button9.Text = "重新校正";
-            this.button9.UseVisualStyleBackColor = false;
-            // 
-            // calibrationUI1
-            // 
-            this.calibrationUI1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.calibrationUI1.Location = new System.Drawing.Point(3, 3);
-            this.calibrationUI1.Name = "calibrationUI1";
-            this.calibrationUI1.Size = new System.Drawing.Size(657, 289);
-            this.calibrationUI1.TabIndex = 0;
-            // 
-            // calibrationUI2
-            // 
-            this.calibrationUI2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.calibrationUI2.Location = new System.Drawing.Point(3, 3);
-            this.calibrationUI2.Name = "calibrationUI2";
-            this.calibrationUI2.Size = new System.Drawing.Size(503, 289);
-            this.calibrationUI2.TabIndex = 1;
-            // 
-            // calibrationUI3
-            // 
-            this.calibrationUI3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.calibrationUI3.Location = new System.Drawing.Point(0, 0);
-            this.calibrationUI3.Name = "calibrationUI3";
-            this.calibrationUI3.Size = new System.Drawing.Size(509, 295);
-            this.calibrationUI3.TabIndex = 1;
-            // 
-            // calibrationUI4
-            // 
-            this.calibrationUI4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.calibrationUI4.Location = new System.Drawing.Point(0, 0);
-            this.calibrationUI4.Name = "calibrationUI4";
-            this.calibrationUI4.Size = new System.Drawing.Size(509, 295);
-            this.calibrationUI4.TabIndex = 1;
+            this.richTextBox1.Location = new System.Drawing.Point(144, 609);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.ReadOnly = true;
+            this.richTextBox1.Size = new System.Drawing.Size(296, 118);
+            this.richTextBox1.TabIndex = 27;
+            this.richTextBox1.Text = "";
             // 
             // frmCalibration
             // 
@@ -412,5 +436,7 @@
         private System.Windows.Forms.Button button8;
         private System.Windows.Forms.Button button7;
         private System.Windows.Forms.Button button9;
+        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.Button button10;
     }
 }

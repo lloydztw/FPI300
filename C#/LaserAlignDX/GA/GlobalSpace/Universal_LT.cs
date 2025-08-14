@@ -27,13 +27,13 @@ namespace Traveller106
 {
     public class Universal : JetEazy.Universal
     {
-        public static bool IsNoUseCCD = true;
+        public static bool IsNoUseCCD = false;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/08/11";
+        public const string VersionDate = "2025/08/13";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;

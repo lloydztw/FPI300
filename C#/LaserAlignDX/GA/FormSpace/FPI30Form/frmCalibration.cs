@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Traveller106;
 using WorldOfMoveableObjects;
 
 namespace LaserAlignDX.FormSpace.FPI30Form
@@ -32,12 +33,19 @@ namespace LaserAlignDX.FormSpace.FPI30Form
             get { return Traveller106.Universal.IxLineScan; }
         }
 
+        LineScanCalibrateClass lineScanCalibrate
+        {
+            get { return Universal.LineScanCalibrateClasses[tabControl3.SelectedIndex]; }
+        }
+
         Button btnGetImage;
         Button btnLoadImage;
         Button btnOK;
         Button btnCancel;
         Button btnReCalibration;
+        Button btnYzCali => button10;
 
+        bool bYzSelect = false;
         Button[] btnPointPos = new Button[BTNCOUNT];
         CalibrationUI[] calibrationUIs = new CalibrationUI[BTNCOUNT];
         bool[] btnSelect = new bool[BTNCOUNT];
@@ -91,6 +99,7 @@ namespace LaserAlignDX.FormSpace.FPI30Form
             btnOK.Click += BtnOK_Click;
             btnCancel.Click += BtnCancel_Click;
             btnReCalibration.Click += BtnReCalibration_Click;
+            btnYzCali.Click += BtnYzCali_Click;
 
             pgPara.SelectedObject = MvdFindCircleClass.Instance;
             cboStage.SelectedIndex = 0;
@@ -106,6 +115,12 @@ namespace LaserAlignDX.FormSpace.FPI30Form
                 i++;
             }
 
+        }
+
+        private void BtnYzCali_Click(object sender, EventArgs e)
+        {
+            bYzSelect = !bYzSelect;
+            btnYzCali.BackColor = bYzSelect ? Color.Red : Color.FromArgb(192, 255, 192);
         }
 
         private void BtnReCalibration_Click(object sender, EventArgs e)
@@ -281,6 +296,76 @@ namespace LaserAlignDX.FormSpace.FPI30Form
                     update_Display(false);
                 }
             }
+            else if(bYzSelect)
+            {
+                BoundRect(ref rectf, bmpOperate.Size);
+                if (rectf.Width > 1 && rectf.Height > 1)
+                {
+                    DS.ClearStaticMover();
+                    xMovers.Clear();
+                    JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), rectf);
+                    _rect.RelateLevel = 2;
+                    //_rect.RelateNo = i;
+                    _rect.RelatePosition = 0;
+                    xMovers.Add(_rect);
+
+                    bYzSelect = false;
+
+                    Bitmap bmp0 = bmpOperate.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                    PointF ptf1 = MvdFindCircleClass.Instance.GetImageMarkCenter(
+                                        bmp0,
+                                        true,
+                                        out RectangleF maxrecttemp,
+                                        out Bitmap bmpouputtemp,
+                                        out int maxareatemp);
+
+                    rectf_des = new RectangleF(maxrecttemp.X + rectf.X,
+                                                       maxrecttemp.Y + rectf.Y,
+                                                       maxrecttemp.Width,
+                                                       maxrecttemp.Height);
+
+                    ptf1.X += rectf.X;
+                    ptf1.Y += rectf.Y;
+
+                    PointF ptfResult = lineScanCalibrate.ViewToWorld(ptf1);
+                    richTextBox1.Text = $"图像点:{PointF000ToString(ptf1)}";
+                    richTextBox1.Text += Environment.NewLine;
+                    richTextBox1.Text += $"轴XY点:{PointF000ToString(ptfResult)}";
+
+                    switch (MvdFindCircleClass.Instance.mFindType)
+                    {
+                        case OPSpace.FindType.CIRCLE:
+
+                            JzCircleEAG jzCircleEAG = new JzCircleEAG(Color.FromArgb(0, Color.Blue), rectf_des);
+                            jzCircleEAG.RelateLevel = 3;
+                            //_rect.RelateNo = i;
+                            jzCircleEAG.RelatePosition = 0;
+                            xMovers.Add(jzCircleEAG);
+
+                            break;
+                        case OPSpace.FindType.BLOB:
+                        default:
+
+                            _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), rectf_des);
+                            _rect.RelateLevel = 3;
+                            //_rect.RelateNo = i;
+                            _rect.RelatePosition = 0;
+                            xMovers.Add(_rect);
+
+                            break;
+                    }
+
+                    btnYzCali.BackColor = bYzSelect ? Color.Red : Color.FromArgb(192, 255, 192);
+
+                    bmp0.Dispose();
+
+                    DS.SetStaticMover(xMovers);
+                    DS.RefreshDisplayShape();
+                    DS.MappingSelect();
+
+                    update_Display(false);
+                }
+            }
         }
 
         void update_Display(bool eRefresh = true)
@@ -431,6 +516,10 @@ namespace LaserAlignDX.FormSpace.FPI30Form
         {
             return Math.Max(Math.Min(Value, Max), Min);
 
+        }
+        public string PointF000ToString(PointF PTF)
+        {
+            return PTF.X.ToString("0.000") + "," + PTF.Y.ToString("0.000");
         }
     }
 }
