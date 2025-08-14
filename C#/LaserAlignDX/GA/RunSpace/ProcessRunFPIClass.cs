@@ -6,7 +6,6 @@ using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
-using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -17,23 +16,24 @@ using VisionDesigner.BoxOverlap;
 using _TM = Traveller106.LtDebug;
 
 
-namespace LaserAlignDX.RunSpace
+namespace LaserAlignDX.RunSpace.Old
 {
-    public enum ScanInspectMode : int
-    {
-        [Description("外观及尺寸检测")]
-        MEASUREAOI = 0,
-        [Description("QR检测")]
-        QRCODE = 1,
-        [Description("空载台检测")]
-        NOTRAY = 2,
-    }
+    //public enum ScanInspectMode : int
+    //{
+    //    [Description("外观及尺寸检测")]
+    //    MEASUREAOI = 0,
+    //    [Description("QR检测")]
+    //    QRCODE = 1,
+    //    [Description("空载台检测")]
+    //    NOTRAY = 2,
+    //}
 
     public class ProcessRunFPIClass : IProcessRunFPI
     {
         public event EventHandler<GaProgressEventArgs> OnAoiBegin;
         public event EventHandler<GaProgressEventArgs> OnAoiEnd;
         public event EventHandler<GaProgressEventArgs> OnAoiProgressing;
+
         #region SINGLETON
         protected ProcessRunFPIClass()
         {
