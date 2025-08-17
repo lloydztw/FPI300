@@ -1231,7 +1231,7 @@ namespace LaserAlignDX.UISpace.MainSpace
         {
             if (InvokeRequired)
             {
-                Invoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiProgressing, sender, e);
+                BeginInvoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiProgressing, sender, e);
             }
             else
             {

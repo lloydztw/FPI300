@@ -1,7 +1,7 @@
-﻿using System;
+﻿using LeTian.Match;
+using System;
 using System.Diagnostics;
 using System.Windows.Forms;
-using Traveller106;
 
 namespace LaserAlignDX
 {
@@ -16,9 +16,8 @@ namespace LaserAlignDX
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            //// DEBUG: 單獨跑 EmptyTrayInspector
-            //var frmMain = LtAoiFactory.OpenEmptyTrayInspectorTool(null);
-            //Application.Run(frmMain);
+            //// UNIT_TEST_CHIP_LOCATOR
+            //Test.Run();
             //return;
 
             if (AppInstance())

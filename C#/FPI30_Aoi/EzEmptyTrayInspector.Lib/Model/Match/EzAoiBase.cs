@@ -13,16 +13,14 @@
  */
 #endregion
 
-using JetEazy.Match;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
-using CvPoint = OpenCvSharp.Point;
 
 
 namespace EzAoiEmptyTrayInspector.Model.Aoi
 {
-    internal abstract class EzAoiBase
+    public abstract class EzAoiBase
     {
         public event EventHandler<ProgressEventArgs> OnProgress;
 

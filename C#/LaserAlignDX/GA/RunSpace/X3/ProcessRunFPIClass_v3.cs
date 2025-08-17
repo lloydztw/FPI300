@@ -8,6 +8,7 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.RunSpace.Supports;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -16,10 +17,11 @@ using System.Threading.Tasks;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BoxOverlap;
-using _TM = LeTian.Match.LtDebug;
+using _TM = Traveller106.LtDebug;
+using MvdChipMatcher = LaserAlignDX.BasicSpace.MvdFindClass;
 
 
-namespace LaserAlignDX.RunSpace.V2
+namespace LaserAlignDX.RunSpace.V3
 {
     public class ProcessRunFPIClass : IProcessRunFPI
     {
@@ -358,7 +360,7 @@ namespace LaserAlignDX.RunSpace.V2
             }
             catch (Exception ex)
             {
-                _TM.LOG.Error(ex);
+                LtDebug.LOG.Error(ex);
                 // 釋放巨圖
                 bmpInputImage?.Dispose();
                 bmpInputImage = null;
@@ -366,8 +368,8 @@ namespace LaserAlignDX.RunSpace.V2
             }
             finally
             {
-                // 以後如果 其他內部 IDisposable 物件生命週期管理 優化完成
-                // 可以 移除 GC 
+                //// 以後如果 其他內部 IDisposable 物件生命週期管理 優化完成
+                //// 可以 移除 GC 
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();
@@ -615,7 +617,7 @@ namespace LaserAlignDX.RunSpace.V2
             }
             catch (Exception ex)
             {
-                _TM.LOG.Error(ex, $"{borderName} 量測異常");
+                LtDebug.LOG.Error(ex, $"{borderName} 量測異常");
                 //throw ex;
             }
 #else
@@ -695,20 +697,20 @@ namespace LaserAlignDX.RunSpace.V2
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        _TM.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        _TM.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                        LtDebug.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        LtDebug.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
             }
             catch (MvdException ex)
             {
                 //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-                _TM.LOG.Error(ex, "長度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                LtDebug.LOG.Error(ex, "長度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
             }
             catch (System.Exception ex)
             {
                 //Console.WriteLine("Fail with error " + ex.Message);
-                _TM.LOG.Error(ex, "長度量測 異常");
+                LtDebug.LOG.Error(ex, "長度量測 異常");
             }
             #endregion
 
@@ -741,20 +743,20 @@ namespace LaserAlignDX.RunSpace.V2
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        _TM.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        _TM.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                        LtDebug.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        LtDebug.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
             }
             catch (MvdException ex)
             {
                 //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-                _TM.LOG.Error(ex, "寬度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                LtDebug.LOG.Error(ex, "寬度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
             }
             catch (System.Exception ex)
             {
                 //Console.WriteLine("Fail with error " + ex.Message);
-                _TM.LOG.Error(ex, "寬度量測 異常");
+                LtDebug.LOG.Error(ex, "寬度量測 異常");
             }
             #endregion
         }

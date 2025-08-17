@@ -41,7 +41,7 @@ namespace JetEazy.Match
             Center = new QVector(xCenter, yCenter);
         }
         uint IxBlob.Bin { get; set; }
-        int IxBlob.Pixels => 0;
+        public int Pixels { get; set; }
         public int CenterX => (int)Center.X;
         public int CenterY => (int)Center.Y;
         #endregion

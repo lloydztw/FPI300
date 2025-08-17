@@ -17,10 +17,7 @@
  *
  ***************************************************************************/
 
-using System;
-using System.Collections.Generic;
-
-namespace Traveller106
+namespace LeTian.Match
 {
     public class LtDebug
     {

@@ -21,7 +21,6 @@ namespace LaserAlignDX.OPSpace
 {
     public class RegionCellX3Class : IDisposable
     {
-
         VisionDesigner.PositionFix.CPositionFixTool cPositionFixToolObj = null;// new VisionDesigner.PositionFix.CPositionFixTool();
         //CImageRegionCopyTool copyToolObj = new VisionDesigner.ImageRegionCopy.CImageRegionCopyTool();
         CImageArithmeticTool cImageArithmeticToolObj = null;// new CImageArithmeticTool();

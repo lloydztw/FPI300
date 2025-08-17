@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BoxOverlap;
-using _TM = Traveller106.LtDebug;
+using _TM = LeTian.Match.LtDebug;
 
 
 namespace LaserAlignDX.RunSpace.V0
@@ -1768,6 +1768,7 @@ namespace LaserAlignDX.RunSpace.V0
                     _LOG($"异常捕获:{e.Message}", Color.Red);
                 }
             });
+            task.Start();
         }
         #endregion
 

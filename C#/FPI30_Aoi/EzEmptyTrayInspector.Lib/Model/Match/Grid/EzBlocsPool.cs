@@ -18,6 +18,9 @@ using JetEazy.QxCollections2;
 
 namespace JetEazy.Match
 {
+    /// <summary>
+    /// RESERVED
+    /// </summary>
     public class EzBlocsPool : QxGridMapXY<QxCell<EzBloc>, EzBloc>
     {
     }

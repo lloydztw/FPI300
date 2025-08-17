@@ -13,8 +13,7 @@ using System.Runtime.InteropServices;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
-//using MvdChipMatcher = LaserAlignDX.RunSpace.Supports.MvdChipMatcher;
-using MvdChipMatcher = LaserAlignDX.RunSpace.Supports.MvdCompositeChipMatcher;
+using MVD_CHIP_MATCHER = LaserAlignDX.RunSpace.Supports.MvdCompositeChipMatcher;
 
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
@@ -102,7 +101,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //public MvdFindClass mvdbase1_Find = new MvdFindClass();
 
         public PointF ptPrinttemp = new PointF(-1, -1);
-        public MvdChipMatcher mvdprinttemp_Find = new MvdChipMatcher();
+        public MVD_CHIP_MATCHER mvdprinttemp_Find = new MVD_CHIP_MATCHER();
 
         public PointF ptPrintFlytemp = new PointF(-1, -1);
         public MvdFindClass mvdprintFlytemp_Find = new MvdFindClass();

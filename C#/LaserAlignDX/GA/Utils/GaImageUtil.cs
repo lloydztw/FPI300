@@ -7,7 +7,6 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using Traveller106;
 using VisionDesigner;
 
 
@@ -505,8 +504,11 @@ namespace JetEazy.Utils
     }
 
 
+    /// <summary>
+    /// 即將 把 EzMvdImageConvertor 改名成 GaImageUtil 或 GaMvdConvertor
+    /// </summary>
     public class EzMvdImageConvertor : GaImageUtil
     {
-
+        
     }
 }

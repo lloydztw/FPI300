@@ -84,6 +84,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.QxGridMapBuilder.dll</HintPath>
     </Reference>
+    <Reference Include="JetEazyLibEx">
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazyLibEx.dll</HintPath>
+    </Reference>
     <Reference Include="LeTian.AwFramework, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.AwFramework.dll</HintPath>
@@ -231,7 +234,9 @@
     <Compile Include="Model\Match\EzOutGridNgBlocsDetector.cs" />
     <Compile Include="Model\Match\EzTemplateMatcher.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsGrid.cs" />
+    <Compile Include="Model\Match\Grid\EzBlocsGridAnalyzer.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsGridBuilder.cs" />
+    <Compile Include="Model\Match\Grid\EzBlocsGridSlice.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsGridInterpo.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsPool.cs" />
     <Compile Include="Model\Match\Grid\QuadLinkNode.cs" />

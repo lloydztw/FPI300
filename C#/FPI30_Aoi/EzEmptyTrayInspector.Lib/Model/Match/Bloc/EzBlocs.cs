@@ -25,6 +25,7 @@ namespace JetEazy.Match
         public Rectangle Rect;
         public QVector Center;
         public double Score;
+        public double SQRatio;
         public object Owner;
         public object Tag
         {

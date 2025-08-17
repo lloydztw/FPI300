@@ -115,6 +115,10 @@ namespace JetEazy.Match
         {
             return _boundary;
         }
+        public QVector GetPitch()
+        {
+            return _pitch;
+        }
 
         public static bool IsSolidBloc(EzBloc bloc)
         {
@@ -143,6 +147,35 @@ namespace JetEazy.Match
                 if (bloc != null && !IsSolidBloc(bloc))
                     yield return bloc;
             }
+        }
+        public int GetMajorCount()
+        {
+            int count = 0; 
+            foreach(var bloc in IterMajorBlocs())
+                count++;
+            return count;
+        }
+
+        public EzBlocsGrid Slice(int r0, int c0, int r1, int c1)
+        {
+            var rows = r1 - r0;
+            var cols = c1 - c0;
+            if (rows <= 0 || cols <= 0)
+                return null;
+            
+            System.Diagnostics.Debug.Assert(r0 >= RowMin || c0 >= ColMin);
+            System.Diagnostics.Debug.Assert(r1 <= RowMax || c1 >= ColMax);
+
+            var subGrid = new EzBlocsGrid(_boundary, _pitch, rows, cols);
+            for (int r = r0; r < r1; r++)
+                for (int c = c0; c < c1; c++)
+                    subGrid.Set(r - r0, c - c0, this.Get(r, c));
+
+            var bound = EzBlocsGridBuilder.get_boundary(subGrid.IterBlocs());
+            subGrid._boundary = bound;
+            subGrid.RowMin = 0;
+            subGrid.ColMin = 0;
+            return subGrid;
         }
     }
 }

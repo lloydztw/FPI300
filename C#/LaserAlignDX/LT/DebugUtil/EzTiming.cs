@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 
 
-namespace Traveller106
+namespace LeTian.Match
 {
     /// <summary>
     /// 效能追蹤計時

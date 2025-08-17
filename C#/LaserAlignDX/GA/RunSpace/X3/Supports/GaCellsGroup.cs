@@ -20,6 +20,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Windows.Forms;
 
 
 namespace LaserAlignDX.RunSpace
@@ -129,6 +130,40 @@ namespace LaserAlignDX.RunSpace
 
             return groups;
         }
+        /// <summary>
+        /// caller 負責 fullFovBmp 生命週期
+        /// </summary>
+        public static GaCellsGroup[] CollectGroups_001_simple(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
+        {
+            var allSrcCells = xRecipe.xRegionCells;
+            int totalCount = allSrcCells.Count;
+            if (totalCount == 0)
+                return new GaCellsGroup[0];
+
+            int span = totalCount >= N ? totalCount / N : 1;
+            while( N * span < totalCount)
+                span++; 
+
+            var groups = new GaCellsGroup[N];
+            for (int gid = 0; gid < N; gid++)
+            {
+                var collection = new List<RegionCellX3Class>();
+                int idx = gid * span;
+                int idx2 = Math.Min(idx + span, totalCount);
+                for (int i = idx; i < idx2; i++)
+                {
+                    collection.Add(allSrcCells[i]);
+                }
+                //>>> collection.Sort((c1, c2) => (int)(c1.viewRectF.Y - c2.viewRectF.Y));
+                var inflate = new Size(xRecipe.xExtendx, xRecipe.xExtendy);
+                var grp = groups[gid] = new GaCellsGroup();
+                grp.buildGaCells(fullFovBmp, inflate, collection);
+            }
+
+            verify(groups, alert: false);
+
+            return groups;
+        }
 
         #region PRIVATE_BUILD_FUNCTIONS
         void buildGaCells(Bitmap fullFovBmp, Size inflate, IEnumerable<RegionCellX3Class> srcCells)
@@ -157,7 +192,7 @@ namespace LaserAlignDX.RunSpace
         #endregion
 
         #region PRIVATE_DEBUG_FUNCTIONS
-        static void verify(GaCellsGroup[] groups)
+        static void verify(GaCellsGroup[] groups, bool alert = true)
         {
             for (int ig = 0; ig < groups.Length; ig++)
             {
@@ -172,17 +207,10 @@ namespace LaserAlignDX.RunSpace
                     int count2 = get_roi_boundary(grp2, out Rectangle rect2);
                     System.Diagnostics.Debug.WriteLine("GRP[{0}] ymin={1}, ymax={2}, count={3}",
                                                         ig2, rect2.Y, rect2.Bottom, count2);
-                    System.Diagnostics.Debug.Assert(!rect0.IntersectsWith(rect2), "跳號的 2 個 Groups 不能相交!");
+                    if (alert)
+                        System.Diagnostics.Debug.Assert(!rect0.IntersectsWith(rect2), "跳號的 2 個 Groups 不能相交!");
                 }
             }
-            //int ig = 0;
-            //foreach (var grp in groups)
-            //{
-            //    get_min_max_y(grp, out int y_min, out int y_max, out int count);
-            //    System.Diagnostics.Debug.WriteLine("GRP[{0}] ymin={1}, ymax={2}, count={3}", 
-            //                                        ig, y_min, y_max, count);
-            //    ig++;
-            //}
         }
         static int get_roi_boundary(GaCellsGroup grp, out Rectangle boundaryRect)
         {
