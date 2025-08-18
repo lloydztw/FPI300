@@ -16,7 +16,6 @@
 
 using JetEazy.Match;
 using JetEazy.OpenCV;
-using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.QxCollections;
 using OpenCvSharp;
@@ -102,7 +101,21 @@ namespace LeTian.Match
                 _LOG.Debug("Scene Pitch = {0}", scenePitch);
                 _LOG.Debug("Scene Pitch Ratio = {0:0.000}, {1:0.000}", pitchRatioX, pitchRatioY);
                 if (pitchRatioX >= 1.4 || pitchRatioY >= 1.4)
+                {
                     needsRebuild = true;
+                }
+                else
+                {
+                    if (sceneGrid.Rows < _goldenGrid.Rows || sceneGrid.Cols < _goldenGrid.Cols)
+                    {
+                        var boundary = new Rectangle(0, 0, imgScene.Width, imgScene.Height);
+                        var rect = sceneGrid.GetBoundary();
+                        rect.Inflate(2, 2);
+                        bool is_clipped = JetEazy.QUtilities.QUtility.ClipBoundary(ref rect, ref boundary);
+                        if (is_clipped)
+                            needsRebuild = true;
+                    }
+                }
             }
             else
             {
