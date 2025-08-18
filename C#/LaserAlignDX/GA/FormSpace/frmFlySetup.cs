@@ -6,6 +6,7 @@ using JetEazy.ImageViewer.Interactors;
 using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Interface;
 using JzDisplay;
+using LaserAlignDX.GA.FormSpace.FPI30Form;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
 using OpenCvSharp.Flann;
@@ -67,6 +68,8 @@ namespace LaserAlignDX.FormSpace
         Button btnOpenFly;
         Button btnLightTrigger;
         Button btnSpecialCal;
+
+        FlyOffsetUI flyOffsetUI => flyOffsetUI1;
 
         /// <summary>
         /// 飞拍模式 0-取像 1-测试
@@ -134,6 +137,8 @@ namespace LaserAlignDX.FormSpace
             this.FormBorderStyle = FormBorderStyle.None;
 
             LanguageExClass.Instance.EnumControls(this);
+
+            flyOffsetUI.Init();
 
             xTimer = new Timer();
             xTimer.Interval = 50;
@@ -328,6 +333,7 @@ namespace LaserAlignDX.FormSpace
                 JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
                 return;
             }
+            flyOffsetUI.GetPoints();
             this.DialogResult = DialogResult.OK;
         }
 

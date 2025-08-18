@@ -1242,6 +1242,8 @@ public void CreateViews()
 
     public class FlyParaClass : RecipeBaseClass
     {
+        const int POINT_COUNT = 8;
+
         public FlyParaClass()
         {
 
@@ -1324,7 +1326,7 @@ public void CreateViews()
         [Browsable(true)]
         public bool xIsShuiPing { get; set; } = true;
 
-
+        public PointF[] ptsOffset = new PointF[POINT_COUNT];
 
         public override void Load(bool eCancel = false)
         {
@@ -1339,6 +1341,14 @@ public void CreateViews()
             xBlobAreaMin = int.Parse(ReadINIValue("Basic", "xBlobAreaMin", "10", INIFILE));
             xBlobAreaMax = int.Parse(ReadINIValue("Basic", "xBlobAreaMax", "20000", INIFILE));
             xIsShuiPing = ReadINIValue("Basic", "xIsShuiPing", "1", INIFILE) == "1";
+
+            int i = 0;
+            while (i < POINT_COUNT)
+            {
+                ptsOffset[i] = StringtoPointF(ReadINIValue("FlyOffset", $"ptsOffset_{i}", $"0,0", INIFILE));
+
+                i++;
+            }
         }
         public override void Save()
         {
@@ -1353,6 +1363,15 @@ public void CreateViews()
             WriteINIValue("Basic", "xBlobAreaMin", xBlobAreaMin.ToString(), INIFILE);
             WriteINIValue("Basic", "xBlobAreaMax", xBlobAreaMax.ToString(), INIFILE);
             WriteINIValue("Basic", "xIsShuiPing", (xIsShuiPing ? "1" : "0"), INIFILE);
+
+            int i = 0;
+            while (i < POINT_COUNT)
+            {
+                WriteINIValue("FlyOffset", $"ptsOffset_{i}", PointFtoStringSimple(ptsOffset[i]), INIFILE);
+
+                i++;
+            }
+
         }
 
     }

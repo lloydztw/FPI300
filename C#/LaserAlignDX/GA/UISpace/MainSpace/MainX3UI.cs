@@ -194,13 +194,18 @@ namespace LaserAlignDX.UISpace.MainSpace
                 }));
                 if (bytesFlyDatas.Count >= 4)
                 {
+                    MACHINE.PLCIO.bFlyReady = false;
+
                     int iflystartindex = MACHINE.PLCIO.iFlyStart;
                     iFlyIndex = 3;
                     flyRunning(iflystartindex, cameraFrame);
 
-                    MACHINE.PLCIO.bFlyDone = true;
+                    //MACHINE.PLCIO.bFlyDone = true;
+
                     MACHINE.PLCIO.iFlyResult(iFlyResult);
                     MACHINE.PLCIO.rOffset(iFlyOffset);
+
+                    MACHINE.PLCIO.bFlyDone = true;
 
                     bytesFlyDatas.Clear();
 
@@ -220,6 +225,8 @@ namespace LaserAlignDX.UISpace.MainSpace
                         sb1.Append(ix.ToString() + ",");
                     }
                     _LOG("iFlyOffset:" + sb1.ToString(), Color.Black);
+
+                    MACHINE.PLCIO.bFlyReady = true;
                 }
             }
         }
@@ -473,6 +480,17 @@ namespace LaserAlignDX.UISpace.MainSpace
 
             float _resolutionFly = INI.Instance.FlyImageResolution;
 
+            int flyShowIndex = flyIndex + 1;
+            switch (flyStart)
+            {
+                case 1:
+                    flyShowIndex = flyIndex + 1;
+                    break;
+                case 2:
+                    flyShowIndex = flyIndex + 1 + 4;
+                    break;
+            }
+
             switch (flyStart)
             {
                 case 1:
@@ -484,8 +502,8 @@ namespace LaserAlignDX.UISpace.MainSpace
                            xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + _rectF.Y);
 
                         //算出的pix需加入解析度
-                        iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly;
-                        iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly;
+                        iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].X;
+                        iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].Y;
                         iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
                     }
                     else
@@ -505,8 +523,8 @@ namespace LaserAlignDX.UISpace.MainSpace
                           xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + _rectF.Y);
 
                         //算出的pix需加入解析度
-                        iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly;
-                        iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly;
+                        iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].X;
+                        iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].Y;
                         iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
                     }
                     else
@@ -535,16 +553,7 @@ namespace LaserAlignDX.UISpace.MainSpace
             //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
             //cMvdTextF.FontWidth = 20;
 
-            int flyShowIndex = flyIndex + 1;
-            switch (flyStart)
-            {
-                case 1:
-                    flyShowIndex = flyIndex + 1;
-                    break;
-                case 2:
-                    flyShowIndex = flyIndex + 1 + 4;
-                    break;
-            }
+
 
             CMvdTextF cMvdTextFResult = new CMvdTextF(RectangleShape.CenterX,
                 RectangleShape.CenterY,
@@ -620,6 +629,17 @@ namespace LaserAlignDX.UISpace.MainSpace
 
             bool bOK = xRecipe.CheckSpecialAngle(bmptemp, out List<CBlobInfo> list, out float angle, out System.Drawing.PointF Center);
 
+            int flyShowIndex = flyIndex + 1;
+            switch (flyStart)
+            {
+                case 1:
+                    flyShowIndex = flyIndex + 1;
+                    break;
+                case 2:
+                    flyShowIndex = flyIndex + 1 + 4;
+                    break;
+            }
+
             switch (flyStart)
             {
                 case 1:
@@ -672,13 +692,13 @@ namespace LaserAlignDX.UISpace.MainSpace
             {
                 RectangleShape1 =
                    new CMvdRectangleF(list[0].RectInfo.CenterX + _rectF.X,
-                   list[0].RectInfo.CenterY + _rectF.Y, 
-                   list[0].RectInfo.Width, 
+                   list[0].RectInfo.CenterY + _rectF.Y,
+                   list[0].RectInfo.Width,
                    list[0].RectInfo.Height);
                 RectangleShape2 =
-                    new CMvdRectangleF(list[1].RectInfo.CenterX + _rectF.X, 
-                    list[1].RectInfo.CenterY + _rectF.Y, 
-                    list[1].RectInfo.Width, 
+                    new CMvdRectangleF(list[1].RectInfo.CenterX + _rectF.X,
+                    list[1].RectInfo.CenterY + _rectF.Y,
+                    list[1].RectInfo.Width,
                     list[1].RectInfo.Height);
             }
 
@@ -695,16 +715,7 @@ namespace LaserAlignDX.UISpace.MainSpace
             //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
             //cMvdTextF.FontWidth = 20;
 
-            int flyShowIndex = flyIndex + 1;
-            switch (flyStart)
-            {
-                case 1:
-                    flyShowIndex = flyIndex + 1;
-                    break;
-                case 2:
-                    flyShowIndex = flyIndex + 1 + 4;
-                    break;
-            }
+
 
             CMvdTextF cMvdTextFResult = new CMvdTextF(Center.X + _rectF.X,
                Center.Y + _rectF.Y,
@@ -999,7 +1010,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                                             }
                                         }
                                     }
-                                    
+
 
                                     //显示结果的xy angle
                                     CMvdTextF cMvdTextFShowMain = new CMvdTextF(cell.DrawResultRectF().CenterX,
