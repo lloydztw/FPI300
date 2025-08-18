@@ -16,6 +16,8 @@ using VisionDesigner.PositionFix;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
 using LaserAlignDX.GA.BasicSpace;
+using VisionDesigner.PairLineFind;
+using LeTian.Match;
 
 namespace LaserAlignDX.OPSpace
 {
@@ -31,6 +33,7 @@ namespace LaserAlignDX.OPSpace
         //C2DCodeVerifyTool c2DCodeVerifyTool = new C2DCodeVerifyTool();
         Mvd2DReaderClass mvd2DReader = null;// new Mvd2DReaderClass();
         MvdFindLineClass mvdFindLineClass = null;
+        MvdPairLineClass mvdPairLineClass = null;
 
         private CMvdRectangleF MvdRunPositionFix;
 
@@ -60,8 +63,30 @@ namespace LaserAlignDX.OPSpace
         public float RunY = 0;
         public float RunAngle = 0;
 
+        /// <summary>
+        /// 测量结果宽度
+        /// </summary>
         public float RunWidth = 0;
+        /// <summary>
+        /// 测量结果高度
+        /// </summary>
         public float RunHeight = 0;
+        /// <summary>
+        /// 测量X方向偏移
+        /// </summary>
+        public float RunXOffset = 0;
+        /// <summary>
+        /// 测量Y方向偏移
+        /// </summary>
+        public float RunYOffset = 0;
+
+        public float DisLeft = 0;
+        public float DisTop = 0;
+        public float DisRight = 0;
+        public float DisBottom = 0;
+
+        public PointF Sur1 = new PointF();
+        public PointF Sur2 = new PointF();
 
         public bool ByPass = false;
         public string SetBarcodeStr = string.Empty;
@@ -95,6 +120,10 @@ namespace LaserAlignDX.OPSpace
         /// 外围的直线
         /// </summary>
         public CMvdLineSegmentF[] cMvdLineSegmentFsOut = new CMvdLineSegmentF[4];
+        /// <summary>
+        /// 内围的直线
+        /// </summary>
+        public CMvdLineSegmentF[] cMvdLineSegmentFsInSide = new CMvdLineSegmentF[4];
         public CMvdShape[] cMvdShapesForFindLineRegion = new CMvdShape[4];
         /// <summary>
         /// 寻找直线
@@ -132,6 +161,219 @@ namespace LaserAlignDX.OPSpace
                 mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity3;
             }
             cMvdLineSegmentFsOut[iSideIndex] = mvdFindLineClass.Run(bmp, r);
+        }
+        /// <summary>
+        /// 寻找平行线
+        /// </summary>
+        /// <param name="iSideIndex">哪条边序号</param>
+        /// <param name="bmp">输入图片</param>
+        /// <param name="r">寻找的ROI</param>
+        public void pairLineSegmentRun(int iSideIndex, Bitmap bmp, CMvdRectangleF r)
+        {
+            if (mvdPairLineClass == null)
+                mvdPairLineClass = new MvdPairLineClass();
+            cMvdLineSegmentFsOut[iSideIndex] = null;
+            CPairLineFindResult cPairLineFindResult = null;
+            if (iSideIndex == 0)
+            {
+                mvdPairLineClass.bPositive = xInspect.bPositive0;
+                mvdPairLineClass.bFindOrient = true;
+                //mvdPairLineClass.bEdgePolarity = xInspect.bEdgePolarity0;
+                cPairLineFindResult = mvdPairLineClass.Run(bmp, r);
+                if (cPairLineFindResult != null)
+                {
+                    #region 左边距
+
+                    try
+                    {
+                        if (cPairLineFindResult.Line0 != null && cPairLineFindResult.Line1 != null)
+                        {
+                            // 使用 MVD VisionDesigner Tool
+                            using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                            {
+                                cL2LMeasureToolObj.BasicParam.Line1 = cPairLineFindResult.Line0;
+                                cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
+                                cL2LMeasureToolObj.Run();
+                                var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                                DisLeft = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX;
+                            }
+                        }
+                    }
+                    catch (MvdException ex)
+                    {
+                        //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+                        LtDebug.LOG.Error(ex, "左边距 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        //Console.WriteLine("Fail with error " + ex.Message);
+                        LtDebug.LOG.Error(ex, "左边距 異常");
+                    }
+
+                    #endregion
+
+                    if (xInspect.bPositive0)
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line0;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line1;
+                    }
+                    else
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line1;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line0;
+                    }
+                }
+            }
+            else if (iSideIndex == 1)
+            {
+                mvdPairLineClass.bPositive = xInspect.bPositive1;
+                mvdPairLineClass.bFindOrient = false;
+                //mvdPairLineClass.bEdgePolarity = xInspect.bEdgePolarity1;
+                cPairLineFindResult = mvdPairLineClass.Run(bmp, r);
+                if (cPairLineFindResult != null)
+                {
+                    #region 上边距
+
+                    try
+                    {
+                        if (cPairLineFindResult.Line0 != null && cPairLineFindResult.Line1 != null)
+                        {
+                            // 使用 MVD VisionDesigner Tool
+                            using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                            {
+                                cL2LMeasureToolObj.BasicParam.Line1 = cPairLineFindResult.Line0;
+                                cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
+                                cL2LMeasureToolObj.Run();
+                                var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                                DisTop = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY;
+                            }
+                        }
+                    }
+                    catch (MvdException ex)
+                    {
+                        //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+                        LtDebug.LOG.Error(ex, "上边距 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        //Console.WriteLine("Fail with error " + ex.Message);
+                        LtDebug.LOG.Error(ex, "上边距 異常");
+                    }
+
+                    #endregion
+                    if (xInspect.bPositive1)
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line0;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line1;
+                    }
+                    else
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line1;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line0;
+                    }
+                }
+            }
+            else if (iSideIndex == 2)
+            {
+                mvdPairLineClass.bPositive = xInspect.bPositive2;
+                mvdPairLineClass.bFindOrient = true;
+                //mvdPairLineClass.bEdgePolarity = xInspect.bEdgePolarity2;
+                cPairLineFindResult = mvdPairLineClass.Run(bmp, r);
+                if (cPairLineFindResult != null)
+                {
+                    #region 右边距
+
+                    try
+                    {
+                        if (cPairLineFindResult.Line0 != null && cPairLineFindResult.Line1 != null)
+                        {
+                            // 使用 MVD VisionDesigner Tool
+                            using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                            {
+                                cL2LMeasureToolObj.BasicParam.Line1 = cPairLineFindResult.Line0;
+                                cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
+                                cL2LMeasureToolObj.Run();
+                                var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                                DisRight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX;
+                            }
+                        }
+                    }
+                    catch (MvdException ex)
+                    {
+                        //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+                        LtDebug.LOG.Error(ex, "右边距 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        //Console.WriteLine("Fail with error " + ex.Message);
+                        LtDebug.LOG.Error(ex, "右边距 異常");
+                    }
+
+                    #endregion
+                    if (xInspect.bPositive2)
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line1;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line0;
+                    }
+                    else
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line0;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line1;
+                    }
+                }
+            }
+            else if (iSideIndex == 3)
+            {
+                mvdPairLineClass.bPositive = xInspect.bPositive3;
+                mvdPairLineClass.bFindOrient = false;
+                //mvdPairLineClass.bEdgePolarity = xInspect.bEdgePolarity3;
+                cPairLineFindResult = mvdPairLineClass.Run(bmp, r);
+                if (cPairLineFindResult != null)
+                {
+                    #region 下边距
+
+                    try
+                    {
+                        if (cPairLineFindResult.Line0 != null && cPairLineFindResult.Line1 != null)
+                        {
+                            // 使用 MVD VisionDesigner Tool
+                            using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                            {
+                                cL2LMeasureToolObj.BasicParam.Line1 = cPairLineFindResult.Line0;
+                                cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
+                                cL2LMeasureToolObj.Run();
+                                var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                                DisBottom = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY;
+                            }
+                        }
+                    }
+                    catch (MvdException ex)
+                    {
+                        //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+                        LtDebug.LOG.Error(ex, "下边距 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        //Console.WriteLine("Fail with error " + ex.Message);
+                        LtDebug.LOG.Error(ex, "下边距 異常");
+                    }
+
+                    #endregion
+                    if (xInspect.bPositive3)
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line1;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line0;
+                    }
+                    else
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line0;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line1;
+                    }
+                }
+            }
+
+            
+
         }
 
         public C2DCodeInfo RunCodeInfo = null;
@@ -277,7 +519,45 @@ namespace LaserAlignDX.OPSpace
             }
             return cMvdRectangleFs;
         }
+        /// <summary>
+        /// 获取尺寸计算的结果
+        /// </summary>
+        /// <returns>true:OK false:NG</returns>
+        public bool GetMeasureResult()
+        {
+            bool bOK = true;
+            if (xInspect.bOpenLineMeasure)
+            {
+                if (RunWidth < xInspect.mWidthStand - xInspect.mWidthLower || RunWidth > xInspect.mWidthStand + xInspect.mWidthUpper)
+                {
+                    bOK = false;
+                }
+                else if (RunHeight < xInspect.mHeightStand - xInspect.mHeightLower || RunHeight > xInspect.mHeightStand + xInspect.mHeightUpper)
+                {
+                    bOK = false;
+                }
 
+                if (xInspect.bCheckMeasureOffset)
+                {
+                    RunXOffset = Math.Abs(DisLeft - DisRight);
+                    RunYOffset = Math.Abs(DisTop - DisBottom);
+                    if (RunXOffset > xInspect.XOffset)
+                    {
+                        bOK = false;
+                    }
+                    else if (RunYOffset > xInspect.YOffset)
+                    {
+                        bOK = false;
+                    }
+                }
+                if (!bOK)
+                {
+                    inspectReason = InspectReason.INS_CUTTINGERR;
+                    inspectReasons.Add(InspectReason.INS_CUTTINGERR);
+                }
+            }
+            return bOK;
+        }
         public string ToResultStr()
         {
             string str = string.Empty;
@@ -292,8 +572,13 @@ namespace LaserAlignDX.OPSpace
             str += $"{RunAngle.ToString(m_Format)}" + ",";
             if (xInspect.bOpenLineMeasure)
             {
-                str += $"长[{RunWidth.ToString(m_Format)}]" + ",";
-                str += $"宽[{RunHeight.ToString(m_Format)}]" + ",";
+                str += $"宽度[{RunWidth.ToString(m_Format)}]" + ",";
+                str += $"高度[{RunHeight.ToString(m_Format)}]" + ",";
+            }
+            if (xInspect.bCheckMeasureOffset)
+            {
+                str += $"X方向偏移[{RunXOffset.ToString(m_Format)}]" + ",";
+                str += $"Y方向偏移[{RunYOffset.ToString(m_Format)}]" + ",";
             }
             str += $"{SetBarcodeStr}" + ",";
             if (RunCodeInfo != null)
@@ -329,10 +614,17 @@ namespace LaserAlignDX.OPSpace
             str += $"[{RunX.ToString(m_Format)}" + ",";
             str += $"{RunY.ToString(m_Format)}" + ",";
             str += $"{RunAngle.ToString(m_Format)}]{Environment.NewLine}";
+            str += $"马达1=[{PointF000ToString(Sur1)}]{Environment.NewLine}";
+            str += $"马达2=[{PointF000ToString(Sur2)}]{Environment.NewLine}";
             if (xInspect.bOpenLineMeasure)
             {
-                str += $"长[{RunWidth.ToString(m_Format)},";
-                str += $"宽{RunHeight.ToString(m_Format)}]";
+                str += $"尺寸宽度X[{RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"尺寸高度Y[{RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
+            }
+            if (xInspect.bCheckMeasureOffset)
+            {
+                str += $"尺寸偏移X[{RunXOffset.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"尺寸偏移Y[{RunYOffset.ToString(m_Format)}mm]{Environment.NewLine}";
             }
 
             //str += Environment.NewLine;
@@ -364,6 +656,8 @@ namespace LaserAlignDX.OPSpace
                 //CMvdLineSegmentF mLine = cMvdLineSegmentFsOut[i];
                 if (cMvdLineSegmentFsOut[i] != null)
                     cMvdLineSegmentFsOut[i] = null;
+                if (cMvdLineSegmentFsInSide[i] != null)
+                    cMvdLineSegmentFsInSide[i] = null;
                 //CMvdShape mvdShape = cMvdShapesForFindLineRegion[i];
                 if (cMvdShapesForFindLineRegion[i] != null)
                     cMvdShapesForFindLineRegion[i] = null;
@@ -372,6 +666,13 @@ namespace LaserAlignDX.OPSpace
 
             RunWidth = 0;
             RunHeight = 0;
+            RunXOffset = 0;
+            RunYOffset = 0;
+
+            DisLeft = 0;
+            DisTop = 0;
+            DisRight = 0;
+            DisBottom = 0;
         }
         /// <summary>
         /// 计算修正后的位置框
@@ -747,7 +1048,10 @@ namespace LaserAlignDX.OPSpace
             bmpInputImg.UnlockBits(bmData);  // 解除锁定
             return cMvdImage;
         }
-
+        public string PointF000ToString(PointF PTF)
+        {
+            return PTF.X.ToString("0.000") + "," + PTF.Y.ToString("0.000");
+        }
         public void Dispose()
         {
             if (cPositionFixToolObj != null)

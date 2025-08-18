@@ -665,7 +665,21 @@ namespace Traveller106
         [CategoryAttribute(LSCat1), DescriptionAttribute("单位(mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
-        [DisplayName("01A.飞拍图像解析度")]
+        [DisplayName("01a.图像X方向精度")]
+        [Browsable(true)]
+        public float ImageResolutionX { get; set; } = 0.0073f;
+
+        [CategoryAttribute(LSCat1), DescriptionAttribute("单位(mm/pixel)")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
+        [DisplayName("01b.图像Y方向精度")]
+        [Browsable(true)]
+        public float ImageResolutionY { get; set; } = 0.00715f;
+
+        [CategoryAttribute(LSCat1), DescriptionAttribute("单位(mm/pixel)")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
+        [DisplayName("01c.飞拍图像解析度")]
         [Browsable(true)]
         public float FlyImageResolution { get; set; } = 0.034f;
 
@@ -736,6 +750,12 @@ namespace Traveller106
         [Browsable(true)]
         public float Cal_Bca { get; set; } = 0;
 
+        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("10.结果显示数据")]
+        [Browsable(true)]
+        public bool IsResultShowChar { get; set; } = false;
+
         #endregion
 
         #region SQL_SETUP
@@ -796,7 +816,8 @@ namespace Traveller106
             ImageResolution = float.Parse(ReadINIValue("Basic", "ImageResolution", ImageResolution.ToString(), INIFILE));
             FlyImageResolution = float.Parse(ReadINIValue("Basic", "FlyImageResolution", FlyImageResolution.ToString(), INIFILE));
             DelayImageTime = int.Parse(ReadINIValue("Basic", "DelayImageTime", DelayImageTime.ToString(), INIFILE));
-
+            ImageResolutionX = float.Parse(ReadINIValue("Basic", "ImageResolutionX", ImageResolutionX.ToString(), INIFILE));
+            ImageResolutionY = float.Parse(ReadINIValue("Basic", "ImageResolutionY", ImageResolutionY.ToString(), INIFILE));
             mysql_server_ip = ReadINIValue("sql", "mysql_server_ip", mysql_server_ip.ToString(), INIFILE);
             mysql_server_port = int.Parse(ReadINIValue("sql", "mysql_server_port", mysql_server_port.ToString(), INIFILE));
             mysql_server_user = ReadINIValue("sql", "mysql_server_user", mysql_server_user.ToString(), INIFILE);
@@ -821,7 +842,7 @@ namespace Traveller106
             //BoundaryValue = int.Parse(ReadINIValue("Basic", "BoundaryValue", BoundaryValue.ToString(), INIFILE));
             //LaserSharePath = ReadINIValue("Basic", "LaserSharePath", LaserSharePath.ToString(), INIFILE);
             //IsUseStandBoard = ReadINIValue("Basic", "IsUseStandBoard", (IsUseStandBoard ? "1" : "0"), INIFILE) == "1";
-
+            IsResultShowChar = ReadINIValue("Basic", "IsResultShowChar", (IsResultShowChar ? "1" : "0"), INIFILE) == "1";
             //mark_rect = StringtoRect(ReadINIValue("Basic", "mark_rect", RecttoString(mark_rect), INIFILE));
             //mark_org = StringToPointF(ReadINIValue("Basic", "mark_org", PointFtoString(mark_org), INIFILE));
             //mark_thresholdvalue = int.Parse(ReadINIValue("Basic", "mark_thresholdvalue", mark_thresholdvalue.ToString(), INIFILE));
@@ -899,6 +920,8 @@ namespace Traveller106
             WriteINIValue("Basic", "ImageResolution", ImageResolution.ToString(), INIFILE);
             WriteINIValue("Basic", "FlyImageResolution", FlyImageResolution.ToString(), INIFILE);
             WriteINIValue("Basic", "DelayImageTime", DelayImageTime.ToString(), INIFILE);
+            WriteINIValue("Basic", "ImageResolutionX", ImageResolutionX.ToString(), INIFILE);
+            WriteINIValue("Basic", "ImageResolutionY", ImageResolutionY.ToString(), INIFILE);
 
             WriteINIValue("sql", "mysql_server_ip", mysql_server_ip.ToString(), INIFILE);
             WriteINIValue("sql", "mysql_server_port", mysql_server_port.ToString(), INIFILE);
@@ -925,7 +948,7 @@ namespace Traveller106
             //WriteINIValue("Basic", "BoundaryValue", BoundaryValue.ToString(), INIFILE);
             //WriteINIValue("Basic", "LaserSharePath", LaserSharePath.ToString(), INIFILE);
             //WriteINIValue("Basic", "IsUseStandBoard", (IsUseStandBoard ? "1" : "0"), INIFILE);
-
+            WriteINIValue("Basic", "IsResultShowChar", (IsResultShowChar ? "1" : "0"), INIFILE);
             //WriteINIValue("Basic", "mark_rect", RecttoString(mark_rect), INIFILE);
             //WriteINIValue("Basic", "mark_org", PointFtoString(mark_org), INIFILE);
             //WriteINIValue("Basic", "mark_thresholdvalue", mark_thresholdvalue.ToString(), INIFILE);

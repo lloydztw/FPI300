@@ -3,6 +3,7 @@ using Eazy_Project_III;
 using FreeImageAPI;
 using JetEazy;
 using LaserAlignDX.BasicSpace;
+using LeTian.JxRecipesTool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -125,6 +126,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         public int xChNum = 1;
         public int xChValue = 255;
+        //public int xUseStageNo = 0;
+        public StageNumber xStageNumber = StageNumber.N0;
 
         public string xLotNoStr = "NONE";
 
@@ -155,11 +158,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xChipHeight = float.Parse(ReadINIValue("Recipe Basic", "xChipHeight", "10", INIFILE));
             xExtendx = int.Parse(ReadINIValue("Recipe Basic", "xExtendx", "100", INIFILE));
             xExtendy = int.Parse(ReadINIValue("Recipe Basic", "xExtendy", "100", INIFILE));
-            xRealLeftX = float.Parse(ReadINIValue("Recipe Basic", "xRealLeftX", "0", INIFILE));
-            xRealLeftY = float.Parse(ReadINIValue("Recipe Basic", "xRealLeftY", "0", INIFILE));
+            //xRealLeftX = float.Parse(ReadINIValue("Recipe Basic", "xRealLeftX", "0", INIFILE));
+            //xRealLeftY = float.Parse(ReadINIValue("Recipe Basic", "xRealLeftY", "0", INIFILE));
             xRealOffsetX = float.Parse(ReadINIValue("Recipe Basic", "xRealOffsetX", "1", INIFILE));
             xRealOffsetY = float.Parse(ReadINIValue("Recipe Basic", "xRealOffsetY", "1", INIFILE));
-
+            xStageNumber = (StageNumber)int.Parse(ReadINIValue("Recipe Basic", "xStageNumber", "0", INIFILE));
 
             PassCount = int.Parse(ReadINIValue("Recipe Basic", "PassCount", "0", INIFILE));
             NGCount = int.Parse(ReadINIValue("Recipe Basic", "NGCount", "0", INIFILE));
@@ -378,10 +381,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "xChipHeight", xChipHeight.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xExtendx", xExtendx.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xExtendy", xExtendy.ToString(), INIFILE);
-            WriteINIValue("Recipe Basic", "xRealLeftX", xRealLeftX.ToString(), INIFILE);
-            WriteINIValue("Recipe Basic", "xRealLeftY", xRealLeftY.ToString(), INIFILE);
+            //WriteINIValue("Recipe Basic", "xRealLeftX", xRealLeftX.ToString(), INIFILE);
+            //WriteINIValue("Recipe Basic", "xRealLeftY", xRealLeftY.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xRealOffsetX", xRealOffsetX.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xRealOffsetY", xRealOffsetY.ToString(), INIFILE);
+            WriteINIValue("Recipe Basic", "xStageNumber", ((int)xStageNumber).ToString(), INIFILE);
 
             WriteINIValue("Recipe Basic", "ptPrinttemp", PointFtoStringSimple(ptPrinttemp), INIFILE);
             WriteINIValue("Recipe Basic", "ptPrintFlytemp", PointFtoStringSimple(ptPrintFlytemp), INIFILE);
@@ -845,6 +849,51 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         #endregion
 
+        public LineScanCalibrateClass lineScanCalibrate
+        {
+            get
+            {
+                switch (xStageNumber)
+                {
+                    case StageNumber.N1:
+                        return Traveller106.Universal.LineScanCalibrateClasses[2];
+                        //break;
+                    default:
+                        return Traveller106.Universal.LineScanCalibrateClasses[0];
+                        //break;
+                }
+            }
+        }
+        public LineScanCalibrateClass lineScanCalibrate2
+        {
+            get
+            {
+                switch (xStageNumber)
+                {
+                    case StageNumber.N1:
+                        return Traveller106.Universal.LineScanCalibrateClasses[3];
+                    //break;
+                    default:
+                        return Traveller106.Universal.LineScanCalibrateClasses[1];
+                        //break;
+                }
+            }
+        }
+        RectangleF LeftTopRect
+        {
+            get { return xRegionTrain; }
+        }
+        PointF LeftTopRectCenter
+        {
+            get
+            {
+                PointF ptCenter
+                    = new PointF(LeftTopRect.X + LeftTopRect.Width / 2 + xRectRegionPrint.X,
+                                 LeftTopRect.Y + LeftTopRect.Height / 2 + xRectRegionPrint.Y);
+                return ptCenter;
+            }
+        }
+
 
         public int ViewTrainLoad()
         {
@@ -879,6 +928,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public void CreateViews()
         {
             xRegionCells.Clear();
+
+            PointF ptworld = lineScanCalibrate.ViewToWorld(LeftTopRectCenter);
+            xRealLeftX = ptworld.X;
+            xRealLeftY = ptworld.Y;
 
             RectangleF _baserect = new RectangleF(xLeftTopX,
                 xLeftTopY,
@@ -1332,8 +1385,14 @@ public void CreateViews()
         //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
         [Browsable(true)]
         public bool bCheckInspect { get; set; } = false;
-        
+        [CategoryAttribute(_Cat0), DescriptionAttribute("")]
+        [DisplayName("A03.开启尺寸偏移检测")]
+        //[TypeConverter(typeof(JzEnumConverter))]
+        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
+        [Browsable(true)]
+        public bool bCheckMeasureOffset { get; set; } = false;
 
+        #region 基础设置
         const string _Cat1 = "A01.基础设置";
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的相似程度")]
         [DisplayName("A01.相似度")]
@@ -1372,19 +1431,25 @@ public void CreateViews()
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1)]
         [Browsable(true)]
         public float xChipOverlap { get; set; } = 0.5f;
-
+        #endregion
 
         #region 找直线的参数
 
         const string _Cat2 = "A02.尺寸检测参数设置";
-        
+
+        [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
+        [DisplayName("A00.测量方式")]
+        [TypeConverter(typeof(JzEnumConverter))]
+        [Browsable(true)]
+        public MeasureFindLineType MFLType { get; set; } = MeasureFindLineType.FindLineType_v1;
+
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
         [DisplayName("A01.左边查找方向")]
         [Browsable(true)]
         public bool bPositive0 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A02.左边极性")]
-        [Browsable(true)]
+        [Browsable(false)]
         public bool bEdgePolarity0 { get; set; } = true;
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
@@ -1393,7 +1458,7 @@ public void CreateViews()
         public bool bPositive1 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A04.上边极性")]
-        [Browsable(true)]
+        [Browsable(false)]
         public bool bEdgePolarity1 { get; set; } = true;
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
@@ -1402,7 +1467,7 @@ public void CreateViews()
         public bool bPositive2 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A06.右边极性")]
-        [Browsable(true)]
+        [Browsable(false)]
         public bool bEdgePolarity2 { get; set; } = true;
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
@@ -1411,7 +1476,7 @@ public void CreateViews()
         public bool bPositive3 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A08.下边极性")]
-        [Browsable(true)]
+        [Browsable(false)]
         public bool bEdgePolarity3 { get; set; } = true;
 
 
@@ -1472,7 +1537,73 @@ public void CreateViews()
 
         #endregion
 
+        #region 尺寸宽度spec
 
+        const string _Cat4 = "A04.尺寸规格设置";
+
+        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
+        [DisplayName("A01.标准宽度")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Browsable(true)]
+        public float mWidthStand { get; set; } = 9f;
+
+        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
+        [DisplayName("A01a.宽度上公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Browsable(true)]
+        public float mWidthUpper { get; set; } = 0.05f;
+
+        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
+        [DisplayName("A01b.宽度下公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Browsable(true)]
+        public float mWidthLower { get; set; } = 0.05f;
+
+        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
+        [DisplayName("A02.标准高度")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Browsable(true)]
+        public float mHeightStand { get; set; } = 9.9f;
+
+        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
+        [DisplayName("A02a.高度上公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Browsable(true)]
+        public float mHeightUpper { get; set; } = 0.05f;
+
+        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
+        [DisplayName("A02b.高度下公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Browsable(true)]
+        public float mHeightLower { get; set; } = 0.05f;
+
+        #endregion
+
+        #region 尺寸偏移spec
+
+        const string _Cat5 = "A05.尺寸偏移规格设置";
+
+        [CategoryAttribute(_Cat5), DescriptionAttribute("单位mm")]
+        [DisplayName("A01.X方向偏移")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Browsable(true)]
+        public float XOffset { get; set; } = 0.05f;
+
+        [CategoryAttribute(_Cat5), DescriptionAttribute("单位mm")]
+        [DisplayName("A02.Y方向偏移")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Browsable(true)]
+        public float YOffset { get; set; } = 0.05f;
+
+        #endregion
 
         public override void Load(bool eCancel = false)
         {
@@ -1504,6 +1635,8 @@ public void CreateViews()
             }
 
             bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
+            bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", INIFILE) == "1";
+            MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
             bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
             bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
             bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
@@ -1512,6 +1645,16 @@ public void CreateViews()
             bEdgePolarity1 = ReadINIValue("Basic", "bEdgePolarity1", "1", INIFILE) == "1";
             bEdgePolarity2 = ReadINIValue("Basic", "bEdgePolarity2", "1", INIFILE) == "1";
             bEdgePolarity3 = ReadINIValue("Basic", "bEdgePolarity3", "1", INIFILE) == "1";
+
+            mWidthStand = float.Parse(ReadINIValue("Basic", "mWidthStand", "9", INIFILE));
+            mWidthUpper = float.Parse(ReadINIValue("Basic", "mWidthUpper", "0.05", INIFILE));
+            mWidthLower = float.Parse(ReadINIValue("Basic", "mWidthLower", "0.05", INIFILE));
+            mHeightStand = float.Parse(ReadINIValue("Basic", "mHeightStand", "9.9", INIFILE));
+            mHeightUpper = float.Parse(ReadINIValue("Basic", "mHeightUpper", "0.05", INIFILE));
+            mHeightLower = float.Parse(ReadINIValue("Basic", "mHeightLower", "0.05", INIFILE));
+            XOffset = float.Parse(ReadINIValue("Basic", "XOffset", "0.05", INIFILE));
+            YOffset = float.Parse(ReadINIValue("Basic", "YOffset", "0.05", INIFILE));
+
         }
         public override void Save()
         {
@@ -1532,6 +1675,9 @@ public void CreateViews()
             WriteINIValue("Inspect", "xBackgroudArea", xBackgroudArea.ToString(), INIFILE);
 
             WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
+
             WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive2", (bPositive2 ? "1" : "0"), INIFILE);
@@ -1540,6 +1686,15 @@ public void CreateViews()
             WriteINIValue("Basic", "bEdgePolarity1", (bEdgePolarity1 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bEdgePolarity2", (bEdgePolarity2 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bEdgePolarity3", (bEdgePolarity3 ? "1" : "0"), INIFILE);
+
+            WriteINIValue("Basic", "mWidthStand", mWidthStand.ToString(), INIFILE);
+            WriteINIValue("Basic", "mWidthUpper", mWidthUpper.ToString(), INIFILE);
+            WriteINIValue("Basic", "mWidthLower", mWidthLower.ToString(), INIFILE);
+            WriteINIValue("Basic", "mHeightStand", mHeightStand.ToString(), INIFILE);
+            WriteINIValue("Basic", "mHeightUpper", mHeightUpper.ToString(), INIFILE);
+            WriteINIValue("Basic", "mHeightLower", mHeightLower.ToString(), INIFILE);
+            WriteINIValue("Basic", "XOffset", XOffset.ToString(), INIFILE);
+            WriteINIValue("Basic", "YOffset", YOffset.ToString(), INIFILE);
 
         }
 

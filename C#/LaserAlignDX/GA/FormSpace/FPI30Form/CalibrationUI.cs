@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -67,8 +68,8 @@ namespace LaserAlignDX.FormSpace.FPI30Form
             int i = 0;
             while (i < 4)
             {
-                dgv.Rows[i].Cells[1].Value = m_Calibration.ptsview[i].X;
-                dgv.Rows[i].Cells[2].Value = m_Calibration.ptsview[i].Y;
+                dgv.Rows[i].Cells[2].Value = m_Calibration.ptsview[i].X;
+                dgv.Rows[i].Cells[3].Value = m_Calibration.ptsview[i].Y;
                 //dgv.Rows[i].Cells[3].Value = m_Calibration.ptsworld[i].X;
                 //dgv.Rows[i].Cells[4].Value = m_Calibration.ptsworld[i].Y;
                 i++;
@@ -81,8 +82,8 @@ namespace LaserAlignDX.FormSpace.FPI30Form
             {
                 //dgv.Rows[i].Cells[1].Value = m_Calibration.ptsview[i].X;
                 //dgv.Rows[i].Cells[2].Value = m_Calibration.ptsview[i].Y;
-                dgv.Rows[i].Cells[3].Value = m_Calibration.ptsworld[i].X;
-                dgv.Rows[i].Cells[4].Value = m_Calibration.ptsworld[i].Y;
+                dgv.Rows[i].Cells[4].Value = m_Calibration.ptsworld[i].X;
+                dgv.Rows[i].Cells[5].Value = m_Calibration.ptsworld[i].Y;
                 i++;
             }
         }
@@ -94,13 +95,15 @@ namespace LaserAlignDX.FormSpace.FPI30Form
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgv.RowHeadersVisible = false;
 
-            dgv.Columns.Add("col0", "名称");
+            dgv.Columns.Add("col0", "载台");
+            dgv.Columns.Add("col01", "吸嘴");
             dgv.Columns.Add("col1", "图像虚拟点X");
             dgv.Columns.Add("col2", "图像虚拟点Y");
             dgv.Columns.Add("col3", "实际点X");
             dgv.Columns.Add("col4", "实际点Y");
 
             dgv.Columns["col0"].SortMode = DataGridViewColumnSortMode.NotSortable;
+            dgv.Columns["col01"].SortMode = DataGridViewColumnSortMode.NotSortable;
             dgv.Columns["col1"].SortMode = DataGridViewColumnSortMode.NotSortable;
             dgv.Columns["col2"].SortMode = DataGridViewColumnSortMode.NotSortable;
             dgv.Columns["col3"].SortMode = DataGridViewColumnSortMode.NotSortable;
@@ -115,7 +118,23 @@ namespace LaserAlignDX.FormSpace.FPI30Form
             int i = 0;
             while (i < 4)
             {
-                dgv.Rows[i].Cells[0].Value = $"{m_Name}点{i+1}";
+                switch (m_Index)
+                {
+                    case 0:
+                        dgv.Rows[i].Cells[0].Value = $"载台一";
+                        break;
+                    case 1:
+                        dgv.Rows[i].Cells[0].Value = $"载台一";
+                        break;
+                    case 2:
+                        dgv.Rows[i].Cells[0].Value = $"载台二";
+                        break;
+                    case 3:
+                        dgv.Rows[i].Cells[0].Value = $"载台二";
+                        break;
+                }
+                dgv.Rows[i].Cells[1].Value = $"吸嘴{i + 1}点{i + 1}";
+                //dgv.Rows[i].Cells[0].Value = $"{m_Name}点{i+1}";
                 i++;
             }
 

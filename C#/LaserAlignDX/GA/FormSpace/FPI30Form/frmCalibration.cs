@@ -103,6 +103,7 @@ namespace LaserAlignDX.FormSpace.FPI30Form
 
             pgPara.SelectedObject = MvdFindCircleClass.Instance;
             cboStage.SelectedIndex = 0;
+            cboStage.SelectedIndexChanged += CboStage_SelectedIndexChanged;
 
             int i = 0;
             while (i < BTNCOUNT)
@@ -115,6 +116,25 @@ namespace LaserAlignDX.FormSpace.FPI30Form
                 i++;
             }
 
+        }
+
+        private void CboStage_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (cboStage.SelectedIndex)
+            {
+                case 0:
+                    calibrationUIs[0].Visible = true;
+                    calibrationUIs[1].Visible = true;
+                    calibrationUIs[2].Visible = false;
+                    calibrationUIs[3].Visible = false;
+                    break;
+                case 1:
+                    calibrationUIs[0].Visible = false;
+                    calibrationUIs[1].Visible = false;
+                    calibrationUIs[2].Visible = true;
+                    calibrationUIs[3].Visible = true;
+                    break;
+            }
         }
 
         private void BtnYzCali_Click(object sender, EventArgs e)
@@ -486,7 +506,7 @@ namespace LaserAlignDX.FormSpace.FPI30Form
 
             return newBitmap;
         }
-
+        
         public void BoundRect(ref Rectangle InnerRect, Size BoundSize)
         {
             InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));

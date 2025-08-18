@@ -248,6 +248,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDP2PMeasure.Net.dll</HintPath>
     </Reference>
+    <Reference Include="MVDPairLineFind.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=167793acc9680f60, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDPairLineFind.Net.dll</HintPath>
+    </Reference>
     <Reference Include="MVDPositionFix.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=0dabd5a0cd753dff, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDPositionFix.Net.dll</HintPath>
@@ -322,6 +326,7 @@
     <Compile Include="GA\BasicSpace\Mvd2DReaderClass.cs" />
     <Compile Include="GA\BasicSpace\MvdFindClass.cs" />
     <Compile Include="GA\BasicSpace\MvdFindLineClass.cs" />
+    <Compile Include="GA\BasicSpace\MvdPairLineClass.cs" />
     <Compile Include="GA\BasicSpace\ParaSpace\MvdFindCircleClass.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\BarcodeAll_MVD.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\ZXingClass.cs" />

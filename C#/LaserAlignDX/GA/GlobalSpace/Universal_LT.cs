@@ -251,10 +251,6 @@ namespace Traveller106
             //RCPDB = new RCPDBClass(DBPATH + @"\RCPDB.jdb", RCPPATH, 1);//總是加載第一個參數 即為正常模式
             RUNDB = new RUNDBClass(DBPATH + @"\RUNDB.jdb");
 
-            RecipeFPIX3Class.Instance.Initial(RCPPATH, ESSDB.LastRecipeIndex, "Strip_default_info.ini");
-            RecipeFPIX3Class.Instance.Load();
-            //CaliClass.FromingStr(INI.Instance.cali_paras);
-
             LineScanCalibrateClasses = new LineScanCalibrateClass[4];
             int i = 0;
             while (i < 4)
@@ -264,6 +260,10 @@ namespace Traveller106
                 LineScanCalibrateClasses[i].Load();
                 i++;
             }
+
+            RecipeFPIX3Class.Instance.Initial(RCPPATH, ESSDB.LastRecipeIndex, "Strip_default_info.ini");
+            RecipeFPIX3Class.Instance.Load();
+            //CaliClass.FromingStr(INI.Instance.cali_paras);
 
             MvdFindCircleClass.Instance.Initial(WORKPATH, 0, $"CalibrateForm_default_info.ini");
             MvdFindCircleClass.Instance.Load();

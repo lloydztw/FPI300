@@ -6,6 +6,7 @@ using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.RunSpace.Supports;
+using LeTian.Match;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -66,9 +67,13 @@ namespace LaserAlignDX.RunSpace.V2
         {
             get { return InspectX3ParaClass.Instance; }
         }
-        LineScanCalibrateClass LineScanCalibrate
+        LineScanCalibrateClass LineScanCalibrate1
         {
-            get { return Traveller106.Universal.LineScanCalibrateClasses[0]; }
+            get { return xRecipe.lineScanCalibrate; }
+        }
+        LineScanCalibrateClass LineScanCalibrate2
+        {
+            get { return xRecipe.lineScanCalibrate2; }
         }
         //protected InspectX2Class xInspect
         //{
@@ -494,7 +499,11 @@ namespace LaserAlignDX.RunSpace.V2
                     {
                         //计算偏移值
                         PointF _viewNewRun = new PointF(cellmvdRectF.CenterX, cellmvdRectF.CenterY);
-                        PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
+                        PointF _worldNewRun = LineScanCalibrate1.ViewToWorld(_viewNewRun);
+                        PointF _worldNewRun2 = LineScanCalibrate1.ViewToWorld(_viewNewRun);
+
+                        PointF ptOffset = new PointF(LineScanCalibrate2.ptsworld[0].X - LineScanCalibrate1.ptsworld[0].X,
+                                                     LineScanCalibrate2.ptsworld[1].Y - LineScanCalibrate1.ptsworld[1].Y);
 
                         // GAARA 2025-08-14
                         ////原来基础位置的world坐标
@@ -504,16 +513,32 @@ namespace LaserAlignDX.RunSpace.V2
                         //cell.OrgX = _worldOrg.X;
                         //cell.OrgY = _worldOrg.Y;
 
-                        cell.RunX = (_worldNewRun.X - cell.OrgX);
-                        cell.RunY = (_worldNewRun.Y - cell.OrgY);
-                        cell.RunAngle = cellmvdRectF.Angle;
+                        cell.Sur1 = new PointF(_worldNewRun.X, _worldNewRun.Y);
+                        cell.Sur2 = new PointF(_worldNewRun.X + ptOffset.X, _worldNewRun.Y + ptOffset.Y);
+
+                        cell.RunX = (_worldNewRun.X - cell.OrgX) + INI.Instance.Cal_Bcx;
+                        cell.RunY = (_worldNewRun.Y - cell.OrgY) + INI.Instance.Cal_Bcy;
+                        cell.RunAngle = cellmvdRectF.Angle + INI.Instance.Cal_Bca;
 
                         cell.GetOffsetResult();
 
                         if (xInspect.bOpenLineMeasure)
                         {
                             //_TM.BEGIN("OneChipMeasurement");
-                            _Inspect001_One_Chip_Measurement(cell, cellBmp, cellRoi, chipMatcher);
+
+                            switch(xInspect.MFLType)
+                            {
+                                case Eazy_Project_III.MeasureFindLineType.FindLineType_v2:
+                                    _Inspect001_One_Chip_Measurement_pairLine(cell, cellBmp, cellRoi, chipMatcher);
+                                    break;
+                                default:
+                                    _Inspect001_One_Chip_Measurement(cell, cellBmp, cellRoi, chipMatcher);
+                                    break;
+                            }
+
+                            //判断尺寸结果
+                            cell.GetMeasureResult();
+
                             //_TM.END("OneChipMeasurement");
                         }
                     }
@@ -669,6 +694,7 @@ namespace LaserAlignDX.RunSpace.V2
             #region 長度量測
             try
             {
+#if OPT_OLD
                 if (cell.cMvdLineSegmentFsOut[0] != null && cell.cMvdLineSegmentFsOut[2] != null)
                 {
                     // 使用 MVD VisionDesigner Tool
@@ -699,6 +725,37 @@ namespace LaserAlignDX.RunSpace.V2
                         _TM.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
+#else
+                if (cell.cMvdLineSegmentFsOut[0] != null && cell.cMvdLineSegmentFsOut[2] != null)
+                {
+                    // 使用 MVD VisionDesigner Tool
+                    using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                    {
+                        // Set basic parameter
+                        //cL2LMeasureToolObj.BasicParam.Line1 = getRealLine(cell.cMvdLineSegmentFsOut[0]);
+                        //cL2LMeasureToolObj.BasicParam.Line2 = getRealLine(cell.cMvdLineSegmentFsOut[2]);
+
+                        cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[0];
+                        cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[2];
+
+                        // Running
+                        cL2LMeasureToolObj.Run();
+
+                        // Get the result
+                        var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+
+                        // Update result to cell (pixels to physical)
+                        // 目前只是簡單假設: 線掃 與 載盤 在同一平面
+                        // ToDO: 必須處理透視投影引進的誤差 !!!
+                        cell.RunWidth = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX;
+
+                        //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+                        //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+                        LtDebug.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        LtDebug.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                    }
+                }
+#endif
             }
             catch (MvdException ex)
             {
@@ -715,6 +772,7 @@ namespace LaserAlignDX.RunSpace.V2
             #region 寬度量測
             try
             {
+#if OPT_OLD
                 if (cell.cMvdLineSegmentFsOut[1] != null && cell.cMvdLineSegmentFsOut[3] != null)
                 {
                     // 使用 MVD VisionDesigner Tool
@@ -745,6 +803,324 @@ namespace LaserAlignDX.RunSpace.V2
                         _TM.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
+#else
+                if (cell.cMvdLineSegmentFsOut[1] != null && cell.cMvdLineSegmentFsOut[3] != null)
+                {
+                    // 使用 MVD VisionDesigner Tool
+                    using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                    {
+                        // Set basic parameter
+                        //cL2LMeasureToolObj.BasicParam.Line1 = getRealLine(cell.cMvdLineSegmentFsOut[1]);
+                        //cL2LMeasureToolObj.BasicParam.Line2 = getRealLine(cell.cMvdLineSegmentFsOut[3]);
+
+                        cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[1];
+                        cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[3];
+
+                        // Running
+                        cL2LMeasureToolObj.Run();
+
+                        // Get the result
+                        var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+
+                        // Update result to Cell (pixels to physic)
+                        // 目前只是簡單假設: 線掃 與 載盤 在同一平面
+                        // ToDO: 必須處理透視投影引進的誤差 !!!
+                        cell.RunHeight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY;
+
+                        //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+                        //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+                        LtDebug.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        LtDebug.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                    }
+                }
+#endif
+            }
+            catch (MvdException ex)
+            {
+                //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+                LtDebug.LOG.Error(ex, "寬度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+            }
+            catch (System.Exception ex)
+            {
+                //Console.WriteLine("Fail with error " + ex.Message);
+                LtDebug.LOG.Error(ex, "寬度量測 異常");
+            }
+            #endregion
+        }
+        /// <summary>
+        /// 量測單一晶粒 (平行线寻找)
+        /// </summary>
+        private void _Inspect001_One_Chip_Measurement_pairLine(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi, IMvdTemplateMatcher matcher = null)
+        {
+            // 取得 上一輪 晶粒定位 的結果
+            var chipLocationResult = matcher.xResults[0];
+            //var chipLocationResult = cell.xFindResult;
+
+            #region 邊線處理
+#if (OPT_OLD || true)
+            string borderName = "";
+            try
+            {
+                //左边
+                borderName = "左邊線";
+                RectangleF r0 = new RectangleF(xRecipe.xLineLeft.X,
+                                                xRecipe.xLineLeft.Y,
+                                                xRecipe.xLineLeft.Width,
+                                                xRecipe.xLineLeft.Height);
+                CMvdRectangleF mv0 = new CMvdRectangleF(r0.X + r0.Width / 2, r0.Y + r0.Height / 2, r0.Width, r0.Height);
+                CMvdRectangleF mv0ret = cell.PositionFixRun(mv0,
+                                            xRecipe.xRegionTrain,
+                                            Rectangle.Round(cellRoi),
+                                            chipLocationResult) as CMvdRectangleF;
+                cell.pairLineSegmentRun(0, cellBmp, mv0ret);
+                mv0ret.CenterX += cellRoi.X;
+                mv0ret.CenterY += cellRoi.Y;
+                cell.cMvdShapesForFindLineRegion[0] = (CMvdShape)mv0ret.Clone();
+
+                //上边
+                borderName = "上邊線";
+                RectangleF r1 = new RectangleF(xRecipe.xLineTop.X,
+                                                xRecipe.xLineTop.Y,
+                                                xRecipe.xLineTop.Width,
+                                                xRecipe.xLineTop.Height);
+                CMvdRectangleF mv1 = new CMvdRectangleF(r1.X + r1.Width / 2, r1.Y + r1.Height / 2, r1.Width, r1.Height);
+                CMvdRectangleF mv1ret = cell.PositionFixRun(mv1,
+                                                xRecipe.xRegionTrain,
+                                                Rectangle.Round(cellRoi),
+                                                chipLocationResult) as CMvdRectangleF;
+                cell.pairLineSegmentRun(1, cellBmp, mv1ret);
+                mv1ret.CenterX += cellRoi.X;
+                mv1ret.CenterY += cellRoi.Y;
+                cell.cMvdShapesForFindLineRegion[1] = (CMvdShape)mv1ret.Clone();
+
+                //右边
+                borderName = "右邊線";
+                RectangleF r2 = new RectangleF(xRecipe.xLineRight.X,
+                                                xRecipe.xLineRight.Y,
+                                                xRecipe.xLineRight.Width,
+                                                xRecipe.xLineRight.Height);
+                CMvdRectangleF mv2 = new CMvdRectangleF(r2.X + r2.Width / 2, r2.Y + r2.Height / 2, r2.Width, r2.Height);
+                CMvdRectangleF mv2ret = cell.PositionFixRun(mv2,
+                                                xRecipe.xRegionTrain,
+                                                Rectangle.Round(cellRoi),
+                                                chipLocationResult) as CMvdRectangleF;
+                cell.pairLineSegmentRun(2, cellBmp, mv2ret);
+                mv2ret.CenterX += cellRoi.X;
+                mv2ret.CenterY += cellRoi.Y;
+                cell.cMvdShapesForFindLineRegion[2] = (CMvdShape)mv2ret.Clone();
+
+                //下边
+                borderName = "下邊線";
+                RectangleF r3 = new RectangleF(xRecipe.xLineBottom.X,
+                                                xRecipe.xLineBottom.Y,
+                                                xRecipe.xLineBottom.Width,
+                                                xRecipe.xLineBottom.Height);
+                CMvdRectangleF mv3 = new CMvdRectangleF(r3.X + r3.Width / 2, r3.Y + r3.Height / 2, r3.Width, r3.Height);
+                CMvdRectangleF mv3ret = cell.PositionFixRun(mv3,
+                                                xRecipe.xRegionTrain,
+                                                Rectangle.Round(cellRoi),
+                                                chipLocationResult) as CMvdRectangleF;
+                cell.pairLineSegmentRun(3, cellBmp, mv3ret);
+                mv3ret.CenterX += cellRoi.X;
+                mv3ret.CenterY += cellRoi.Y;
+                cell.cMvdShapesForFindLineRegion[3] = (CMvdShape)mv3ret.Clone();
+            }
+            catch (Exception ex)
+            {
+                LtDebug.LOG.Error(ex, $"{borderName} 量測異常");
+                //throw ex;
+            }
+#else
+            string borderName = "";
+            try
+            {
+                string[] borderNames = new string[] { "左邊線", "上邊線", "右邊線", "下邊線" };
+                RectangleF[] borderRects = new RectangleF[]
+                {
+                    xRecipe.xLineLeft,
+                    xRecipe.xLineTop,
+                    xRecipe.xLineRight,
+                    xRecipe.xLineBottom,
+                };
+
+                for (int borderIdx = 0; borderIdx < borderNames.Length; borderIdx++)
+                {
+                    borderName = borderNames[borderIdx];
+                    //RectangleF r0 = new RectangleF(xRecipe.xLineLeft.X,
+                    //                                xRecipe.xLineLeft.Y,
+                    //                                xRecipe.xLineLeft.Width,
+                    //                                xRecipe.xLineLeft.Height);
+                    //CMvdRectangleF mv0 = new CMvdRectangleF(r0.X + r0.Width / 2, r0.Y + r0.Height / 2, r0.Width, r0.Height);
+                    
+                    RectangleF borderRectF = borderRects[borderIdx];
+                    CMvdRectangleF mv0 = GaImageUtil.ToCMvdRectangleF(ref borderRectF);
+                    CMvdRectangleF mvdRet = cell.PositionFixRun(
+                                                    mv0,
+                                                    xRecipe.xRegionTrain,
+                                                    Rectangle.Round(cellRoi),
+                                                    chipLocationResult ) as CMvdRectangleF;
+
+                    cell.LineSegmentRun(borderIdx, cellBmp, mvdRet);
+
+                    // Offset
+                    mvdRet.CenterX += cellRoi.X;
+                    mvdRet.CenterY += cellRoi.Y;
+
+                    // 更新到 cell
+                    cell.cMvdShapesForFindLineRegion[borderIdx] = (CMvdShape)mvdRet.Clone();
+                }
+            }
+            catch (Exception ex)
+            {
+                LtDebug.LOG.Error(ex, $"{borderName} 定位異常");
+                throw ex;
+            }
+#endif
+            #endregion
+
+            #region 長度量測
+            try
+            {
+#if OPT_OLD
+                if (cell.cMvdLineSegmentFsOut[0] != null && cell.cMvdLineSegmentFsOut[2] != null)
+                {
+                    // 使用 MVD VisionDesigner Tool
+                    using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                    {
+                        // Set basic parameter
+                        cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[0];
+                        cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[2];
+                        //cL2LMeasureToolObj.BasicParam.Line1.StartPoint = new MVD_POINT_F(100f, 100f);
+                        //cL2LMeasureToolObj.BasicParam.Line1.EndPoint = new MVD_POINT_F(150f, 150f);
+                        //cL2LMeasureToolObj.BasicParam.Line2.StartPoint = new MVD_POINT_F(300f, 300f);
+                        //cL2LMeasureToolObj.BasicParam.Line2.EndPoint = new MVD_POINT_F(250f, 350f);
+
+                        // Running
+                        cL2LMeasureToolObj.Run();
+
+                        // Get the result
+                        var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+
+                        // Update result to cell (pixels to physical)
+                        // 目前只是簡單假設: 線掃 與 載盤 在同一平面
+                        // ToDO: 必須處理透視投影引進的誤差 !!!
+                        cell.RunWidth = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
+
+                        //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+                        //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+                        LtDebug.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        LtDebug.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                    }
+                }
+#else
+                if (cell.cMvdLineSegmentFsOut[0] != null && cell.cMvdLineSegmentFsOut[2] != null)
+                {
+                    // 使用 MVD VisionDesigner Tool
+                    using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                    {
+                        // Set basic parameter
+                        //cL2LMeasureToolObj.BasicParam.Line1 = getRealLine(cell.cMvdLineSegmentFsOut[0]);
+                        //cL2LMeasureToolObj.BasicParam.Line2 = getRealLine(cell.cMvdLineSegmentFsOut[2]);
+
+                        cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[0];
+                        cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[2];
+
+                        // Running
+                        cL2LMeasureToolObj.Run();
+
+                        // Get the result
+                        var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+
+                        // Update result to cell (pixels to physical)
+                        // 目前只是簡單假設: 線掃 與 載盤 在同一平面
+                        // ToDO: 必須處理透視投影引進的誤差 !!!
+                        cell.RunWidth = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX;
+
+                        //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+                        //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+                        LtDebug.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        LtDebug.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                    }
+                }
+#endif
+            }
+            catch (MvdException ex)
+            {
+                //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+                LtDebug.LOG.Error(ex, "長度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+            }
+            catch (System.Exception ex)
+            {
+                //Console.WriteLine("Fail with error " + ex.Message);
+                LtDebug.LOG.Error(ex, "長度量測 異常");
+            }
+            #endregion
+
+            #region 寬度量測
+            try
+            {
+#if OPT_OLD
+                if (cell.cMvdLineSegmentFsOut[1] != null && cell.cMvdLineSegmentFsOut[3] != null)
+                {
+                    // 使用 MVD VisionDesigner Tool
+                    using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                    {
+                        // Set basic parameter
+                        cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[1];
+                        cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[3];
+                        //cL2LMeasureToolObj.BasicParam.Line1.StartPoint = new MVD_POINT_F(100f, 100f);
+                        //cL2LMeasureToolObj.BasicParam.Line1.EndPoint = new MVD_POINT_F(150f, 150f);
+                        //cL2LMeasureToolObj.BasicParam.Line2.StartPoint = new MVD_POINT_F(300f, 300f);
+                        //cL2LMeasureToolObj.BasicParam.Line2.EndPoint = new MVD_POINT_F(250f, 350f);
+
+                        // Running
+                        cL2LMeasureToolObj.Run();
+
+                        // Get the result
+                        var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+
+                        // Update result to Cell (pixels to physic)
+                        // 目前只是簡單假設: 線掃 與 載盤 在同一平面
+                        // ToDO: 必須處理透視投影引進的誤差 !!!
+                        cell.RunHeight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
+
+                        //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+                        //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+                        LtDebug.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        LtDebug.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                    }
+                }
+#else
+                if (cell.cMvdLineSegmentFsOut[1] != null && cell.cMvdLineSegmentFsOut[3] != null)
+                {
+                    // 使用 MVD VisionDesigner Tool
+                    using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                    {
+                        // Set basic parameter
+                        //cL2LMeasureToolObj.BasicParam.Line1 = getRealLine(cell.cMvdLineSegmentFsOut[1]);
+                        //cL2LMeasureToolObj.BasicParam.Line2 = getRealLine(cell.cMvdLineSegmentFsOut[3]);
+
+                        cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[1];
+                        cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[3];
+
+                        // Running
+                        cL2LMeasureToolObj.Run();
+
+                        // Get the result
+                        var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+
+                        // Update result to Cell (pixels to physic)
+                        // 目前只是簡單假設: 線掃 與 載盤 在同一平面
+                        // ToDO: 必須處理透視投影引進的誤差 !!!
+                        cell.RunHeight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY;
+
+                        //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+                        //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+                        LtDebug.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        LtDebug.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                    }
+                }
+#endif
             }
             catch (MvdException ex)
             {
@@ -1282,6 +1658,21 @@ namespace LaserAlignDX.RunSpace.V2
 
         #region RUNTIME_TOOLS
         List<CBoxOverlapTool> _boxOverlapTools = new List<CBoxOverlapTool>();
+        /// <summary>
+        /// 转换虚拟的直线
+        /// </summary>
+        /// <param name="viewLine">输入虚拟直线</param>
+        /// <returns>返回实体直线</returns>
+        CMvdLineSegmentF getRealLine(CMvdLineSegmentF viewLine)
+        {
+            PointF p1view = new PointF(viewLine.StartPoint.fX, viewLine.StartPoint.fY);
+            PointF p2view = new PointF(viewLine.EndPoint.fX, viewLine.EndPoint.fY);
+
+            PointF p1world = LineScanCalibrate1.ViewToWorld(p1view);
+            PointF p2world = LineScanCalibrate1.ViewToWorld(p2view);
+
+            return new CMvdLineSegmentF(new MVD_POINT_F(p1world.X, p1world.Y), new MVD_POINT_F(p2world.X, p2world.Y));
+        }
         #endregion
 
         void _PrepareChipMatcher(int threadIdx, out IMvdTemplateMatcher chipMatcher)

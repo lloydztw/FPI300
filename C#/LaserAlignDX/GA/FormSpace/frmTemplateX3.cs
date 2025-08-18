@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Traveller106;
 using VisionDesigner;
+using VisionDesigner.PairLineFind;
 using VsCommon.ControlSpace.MachineSpace;
 using WorldOfMoveableObjects;
 
@@ -62,10 +63,10 @@ namespace LaserAlignDX.FormSpace
 
         Mover CodeMovers = new Mover();
         bool bSelectRegion = false;
-        Button btnSelectRegion;
-        Button btnCodeTest;
-        Button btnCalRealPointF;
-        Button btnWritePLCStage;
+        Button btnSelectRegion => button8;
+        Button btnCodeTest => button9;
+        Button btnCalRealPointF => button1;
+        Button btnWritePLCStage => button2;
 
 
         Button btnAddRegion => button4;
@@ -110,10 +111,12 @@ namespace LaserAlignDX.FormSpace
 
             this.Text = "设定模板界面";
 
-            btnSelectRegion = button8;
-            btnCodeTest = button9;
-            btnCalRealPointF = button1;
-            btnWritePLCStage = button2;
+            btnCalRealPointF.Visible = false;
+
+            //btnSelectRegion = button8;
+            //btnCodeTest = button9;
+            //btnCalRealPointF = button1;
+            //btnWritePLCStage = button2;
 
             btnSelectRegion.Click += BtnSelectCodeRegion_Click;
             btnCodeTest.Click += BtnCodeTest_Click;
@@ -169,13 +172,25 @@ namespace LaserAlignDX.FormSpace
                     MACHINE.PLCIO.SetStage1(0, ptworld, new PointF());
                     break;
                 case 1:
-                    MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld);
+                    LineScanCalibrateClass c0 = Traveller106.Universal.LineScanCalibrateClasses[0];
+                    PointF ptOffset = new PointF(cali.ptsworld[0].X - c0.ptsworld[0].X,
+                                                 cali.ptsworld[1].Y - c0.ptsworld[1].Y);
+                    PointF ptworld1 = c0.ViewToWorld(LeftTopRectCenter);
+                    PointF ptworld2 = new PointF(ptworld1.X + ptOffset.X, ptworld1.Y + ptOffset.Y);
+                    textBox2.Text = PointFtoStringSimple(ptworld2);
+                    MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld2);
                     break;
                 case 2:
                     MACHINE.PLCIO.SetStage2(0, ptworld, new PointF());
                     break;
                 case 3:
-                    MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld);
+                    c0 = Traveller106.Universal.LineScanCalibrateClasses[2];
+                    ptOffset = new PointF(cali.ptsworld[0].X - c0.ptsworld[0].X,
+                                                 cali.ptsworld[1].Y - c0.ptsworld[1].Y);
+                    ptworld1 = c0.ViewToWorld(LeftTopRectCenter);
+                    ptworld2 = new PointF(ptworld1.X + ptOffset.X, ptworld1.Y + ptOffset.Y);
+                    textBox2.Text = PointFtoStringSimple(ptworld2);
+                    MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld2);
                     break;
             }
 
@@ -184,24 +199,25 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnCalRealPointF_Click(object sender, EventArgs e)
         {
+            //这里不用了
 
-            ////记录模板左上角实际点 用来阵列实际的位置
-            //PointF ptCenter = new PointF(xRecipe.xRectRegionPrint.X + xRecipe.xRectRegionPrint.Width / 2,
-            //    xRecipe.xRectRegionPrint.Y + xRecipe.xRectRegionPrint.Height / 2);
-            LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[0];
-            PointF ptworld = cali.ViewToWorld(LeftTopRectCenter);
-            xRecipe.xRealLeftX = ptworld.X;
-            xRecipe.xRealLeftY = ptworld.Y;
+            //////记录模板左上角实际点 用来阵列实际的位置
+            ////PointF ptCenter = new PointF(xRecipe.xRectRegionPrint.X + xRecipe.xRectRegionPrint.Width / 2,
+            ////    xRecipe.xRectRegionPrint.Y + xRecipe.xRectRegionPrint.Height / 2);
+            //LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[0];
+            //PointF ptworld = cali.ViewToWorld(LeftTopRectCenter);
+            //xRecipe.xRealLeftX = ptworld.X;
+            //xRecipe.xRealLeftY = ptworld.Y;
 
-            //textBox1.Text = PointFtoStringSimple(ptCenter);
-            //PointF ptworld = LineScanCalibrate.ViewToWorld(ptCenter);
-            //textBox2.Text = PointFtoStringSimple(ptworld);
+            ////textBox1.Text = PointFtoStringSimple(ptCenter);
+            ////PointF ptworld = LineScanCalibrate.ViewToWorld(ptCenter);
+            ////textBox2.Text = PointFtoStringSimple(ptworld);
 
-            //if (cboCaliIndex.SelectedIndex == 0)
-            //{
-            //    xRecipe.xRealLeftX = ptworld.X;
-            //    xRecipe.xRealLeftY = ptworld.Y;
-            //}
+            ////if (cboCaliIndex.SelectedIndex == 0)
+            ////{
+            ////    xRecipe.xRealLeftX = ptworld.X;
+            ////    xRecipe.xRealLeftY = ptworld.Y;
+            ////}
         }
 
         private void BtnCodeTest_Click(object sender, EventArgs e)
@@ -439,107 +455,277 @@ namespace LaserAlignDX.FormSpace
                     xRecipe.xLineLeft = rectf;
                     xRecipe.SaveLinesRegion();
 
-                    using (MvdFindLineClass findline = new MvdFindLineClass())
+                    switch(xInspectX3.MFLType)
                     {
-                        findline.bPositive = xInspectX3.bPositive0;
-                        findline.bFindOrient = true;
-                        findline.bEdgePolarity = xInspectX3.bEdgePolarity0;
-                        CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
-                        if (lineSegmentF != null)
-                        {
-                            Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
-                            Graphics g = Graphics.FromImage(bmpx);
-                            g.DrawLine(new Pen(Color.Lime, 3),
-                                lineSegmentF.StartPoint.fX,
-                                lineSegmentF.StartPoint.fY,
-                                lineSegmentF.EndPoint.fX,
-                                lineSegmentF.EndPoint.fY);
-                            g.Dispose();
-                            DS1.ReplaceDisplayImage(bmpx);
-                            bmpx.Dispose();
-                        }
+                        case Eazy_Project_III.MeasureFindLineType.FindLineType_v2:
+
+                            #region 找平行线
+
+                            using (MvdPairLineClass pairLine = new MvdPairLineClass())
+                            {
+                                pairLine.bPositive = xInspectX3.bPositive0;
+                                pairLine.bFindOrient = true;
+                                CPairLineFindResult pair = pairLine.Run(xRecipe.bmpprinttemplate, rectf);
+                                if (pair != null)
+                                {
+                                    Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                                    Graphics g = Graphics.FromImage(bmpx);
+                                    g.DrawLine(new Pen(Color.Lime, 3),
+                                        pair.Line0.StartPoint.fX,
+                                           pair.Line0.StartPoint.fY,
+                                           pair.Line0.EndPoint.fX,
+                                           pair.Line0.EndPoint.fY);
+
+                                    g.DrawLine(new Pen(Color.Yellow, 3),
+                                        pair.Line1.StartPoint.fX,
+                                           pair.Line1.StartPoint.fY,
+                                           pair.Line1.EndPoint.fX,
+                                           pair.Line1.EndPoint.fY);
+
+                                    g.Dispose();
+                                    DS1.ReplaceDisplayImage(bmpx);
+                                    bmpx.Dispose();
+                                }
+                            }
+
+                            #endregion
+
+                            break;
+                        default:
+                            #region 找直线
+
+                            using (MvdFindLineClass findline = new MvdFindLineClass())
+                            {
+                                findline.bPositive = xInspectX3.bPositive0;
+                                findline.bFindOrient = true;
+                                findline.bEdgePolarity = xInspectX3.bEdgePolarity0;
+                                CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
+                                if (lineSegmentF != null)
+                                {
+                                    Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                                    Graphics g = Graphics.FromImage(bmpx);
+                                    g.DrawLine(new Pen(Color.Lime, 3),
+                                        lineSegmentF.StartPoint.fX,
+                                        lineSegmentF.StartPoint.fY,
+                                        lineSegmentF.EndPoint.fX,
+                                        lineSegmentF.EndPoint.fY);
+                                    g.Dispose();
+                                    DS1.ReplaceDisplayImage(bmpx);
+                                    bmpx.Dispose();
+                                }
+                            }
+
+                            #endregion
+                            break;
                     }
+                    
                 }
                 else if (radioButton4.Checked)//top
                 {
                     xRecipe.xLineTop = rectf;
                     xRecipe.SaveLinesRegion();
-
-
-                    using (MvdFindLineClass findline = new MvdFindLineClass())
+                    switch (xInspectX3.MFLType)
                     {
-                        findline.bPositive = xInspectX3.bPositive1;
-                        findline.bFindOrient = false;
-                        findline.bEdgePolarity = xInspectX3.bEdgePolarity1;
-                        CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
-                        if (lineSegmentF != null)
-                        {
-                            Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
-                            Graphics g = Graphics.FromImage(bmpx);
-                            g.DrawLine(new Pen(Color.Lime, 3),
-                                lineSegmentF.StartPoint.fX,
-                                lineSegmentF.StartPoint.fY,
-                                lineSegmentF.EndPoint.fX,
-                                lineSegmentF.EndPoint.fY);
-                            g.Dispose();
-                            DS1.ReplaceDisplayImage(bmpx);
-                            bmpx.Dispose();
-                        }
-                    }
+                        case Eazy_Project_III.MeasureFindLineType.FindLineType_v2:
 
+                            #region 找平行线
+
+                            using (MvdPairLineClass pairLine = new MvdPairLineClass())
+                            {
+                                pairLine.bPositive = xInspectX3.bPositive1;
+                                pairLine.bFindOrient = false;
+                                CPairLineFindResult pair = pairLine.Run(xRecipe.bmpprinttemplate, rectf);
+                                if (pair != null)
+                                {
+                                    Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                                    Graphics g = Graphics.FromImage(bmpx);
+                                    g.DrawLine(new Pen(Color.Lime, 3),
+                                        pair.Line0.StartPoint.fX,
+                                           pair.Line0.StartPoint.fY,
+                                           pair.Line0.EndPoint.fX,
+                                           pair.Line0.EndPoint.fY);
+
+                                    g.DrawLine(new Pen(Color.Yellow, 3),
+                                        pair.Line1.StartPoint.fX,
+                                           pair.Line1.StartPoint.fY,
+                                           pair.Line1.EndPoint.fX,
+                                           pair.Line1.EndPoint.fY);
+
+                                    g.Dispose();
+                                    DS1.ReplaceDisplayImage(bmpx);
+                                    bmpx.Dispose();
+                                }
+                            }
+
+                            #endregion
+
+                            break;
+                        default:
+                            #region 找直线
+
+                            using (MvdFindLineClass findline = new MvdFindLineClass())
+                            {
+                                findline.bPositive = xInspectX3.bPositive1;
+                                findline.bFindOrient = false;
+                                findline.bEdgePolarity = xInspectX3.bEdgePolarity1;
+                                CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
+                                if (lineSegmentF != null)
+                                {
+                                    Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                                    Graphics g = Graphics.FromImage(bmpx);
+                                    g.DrawLine(new Pen(Color.Lime, 3),
+                                        lineSegmentF.StartPoint.fX,
+                                        lineSegmentF.StartPoint.fY,
+                                        lineSegmentF.EndPoint.fX,
+                                        lineSegmentF.EndPoint.fY);
+                                    g.Dispose();
+                                    DS1.ReplaceDisplayImage(bmpx);
+                                    bmpx.Dispose();
+                                }
+                            }
+
+                            #endregion
+                            break;
+                    }
                 }
                 else if (radioButton5.Checked)//right
                 {
                     xRecipe.xLineRight = rectf;
                     xRecipe.SaveLinesRegion();
-
-                    using (MvdFindLineClass findline = new MvdFindLineClass())
+                    switch (xInspectX3.MFLType)
                     {
-                        findline.bPositive = xInspectX3.bPositive2;
-                        findline.bFindOrient = true;
-                        findline.bEdgePolarity = xInspectX3.bEdgePolarity2;
-                        CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
-                        if (lineSegmentF != null)
-                        {
-                            Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
-                            Graphics g = Graphics.FromImage(bmpx);
-                            g.DrawLine(new Pen(Color.Lime, 3),
-                                lineSegmentF.StartPoint.fX,
-                                lineSegmentF.StartPoint.fY,
-                                lineSegmentF.EndPoint.fX,
-                                lineSegmentF.EndPoint.fY);
-                            g.Dispose();
-                            DS1.ReplaceDisplayImage(bmpx);
-                            bmpx.Dispose();
-                        }
-                    }
+                        case Eazy_Project_III.MeasureFindLineType.FindLineType_v2:
 
+                            #region 找平行线
+
+                            using (MvdPairLineClass pairLine = new MvdPairLineClass())
+                            {
+                                pairLine.bPositive = xInspectX3.bPositive2;
+                                pairLine.bFindOrient = true;
+                                CPairLineFindResult pair = pairLine.Run(xRecipe.bmpprinttemplate, rectf);
+                                if (pair != null)
+                                {
+                                    Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                                    Graphics g = Graphics.FromImage(bmpx);
+                                    g.DrawLine(new Pen(Color.Lime, 3),
+                                        pair.Line0.StartPoint.fX,
+                                           pair.Line0.StartPoint.fY,
+                                           pair.Line0.EndPoint.fX,
+                                           pair.Line0.EndPoint.fY);
+
+                                    g.DrawLine(new Pen(Color.Yellow, 3),
+                                        pair.Line1.StartPoint.fX,
+                                           pair.Line1.StartPoint.fY,
+                                           pair.Line1.EndPoint.fX,
+                                           pair.Line1.EndPoint.fY);
+
+                                    g.Dispose();
+                                    DS1.ReplaceDisplayImage(bmpx);
+                                    bmpx.Dispose();
+                                }
+                            }
+
+                            #endregion
+
+                            break;
+                        default:
+                            #region 找直线
+
+                            using (MvdFindLineClass findline = new MvdFindLineClass())
+                            {
+                                findline.bPositive = xInspectX3.bPositive2;
+                                findline.bFindOrient = true;
+                                findline.bEdgePolarity = xInspectX3.bEdgePolarity2;
+                                CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
+                                if (lineSegmentF != null)
+                                {
+                                    Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                                    Graphics g = Graphics.FromImage(bmpx);
+                                    g.DrawLine(new Pen(Color.Lime, 3),
+                                        lineSegmentF.StartPoint.fX,
+                                        lineSegmentF.StartPoint.fY,
+                                        lineSegmentF.EndPoint.fX,
+                                        lineSegmentF.EndPoint.fY);
+                                    g.Dispose();
+                                    DS1.ReplaceDisplayImage(bmpx);
+                                    bmpx.Dispose();
+                                }
+                            }
+
+
+                            #endregion
+                            break;
+                    }
+                    
                 }
                 else if (radioButton6.Checked)//bottom
                 {
                     xRecipe.xLineBottom = rectf;
                     xRecipe.SaveLinesRegion();
-
-                    using (MvdFindLineClass findline = new MvdFindLineClass())
+                    switch (xInspectX3.MFLType)
                     {
-                        findline.bPositive = xInspectX3.bPositive3;
-                        findline.bFindOrient = false;
-                        findline.bEdgePolarity = xInspectX3.bEdgePolarity3;
-                        CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
-                        if (lineSegmentF != null)
-                        {
-                            Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
-                            Graphics g = Graphics.FromImage(bmpx);
-                            g.DrawLine(new Pen(Color.Lime, 3),
-                                lineSegmentF.StartPoint.fX,
-                                lineSegmentF.StartPoint.fY,
-                                lineSegmentF.EndPoint.fX,
-                                lineSegmentF.EndPoint.fY);
-                            g.Dispose();
-                            DS1.ReplaceDisplayImage(bmpx);
-                            bmpx.Dispose();
-                        }
+                        case Eazy_Project_III.MeasureFindLineType.FindLineType_v2:
+
+                            #region 找平行线
+
+                            using (MvdPairLineClass pairLine = new MvdPairLineClass())
+                            {
+                                pairLine.bPositive = xInspectX3.bPositive3;
+                                pairLine.bFindOrient = false;
+                                CPairLineFindResult pair = pairLine.Run(xRecipe.bmpprinttemplate, rectf);
+                                if (pair != null)
+                                {
+                                    Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                                    Graphics g = Graphics.FromImage(bmpx);
+                                    g.DrawLine(new Pen(Color.Lime, 3),
+                                        pair.Line0.StartPoint.fX,
+                                           pair.Line0.StartPoint.fY,
+                                           pair.Line0.EndPoint.fX,
+                                           pair.Line0.EndPoint.fY);
+
+                                    g.DrawLine(new Pen(Color.Yellow, 3),
+                                        pair.Line1.StartPoint.fX,
+                                           pair.Line1.StartPoint.fY,
+                                           pair.Line1.EndPoint.fX,
+                                           pair.Line1.EndPoint.fY);
+
+                                    g.Dispose();
+                                    DS1.ReplaceDisplayImage(bmpx);
+                                    bmpx.Dispose();
+                                }
+                            }
+
+                            #endregion
+
+                            break;
+                        default:
+                            #region 找直线
+
+                            using (MvdFindLineClass findline = new MvdFindLineClass())
+                            {
+                                findline.bPositive = xInspectX3.bPositive3;
+                                findline.bFindOrient = false;
+                                findline.bEdgePolarity = xInspectX3.bEdgePolarity3;
+                                CMvdLineSegmentF lineSegmentF = findline.Run(xRecipe.bmpprinttemplate, rectf);
+                                if (lineSegmentF != null)
+                                {
+                                    Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
+                                    Graphics g = Graphics.FromImage(bmpx);
+                                    g.DrawLine(new Pen(Color.Lime, 3),
+                                        lineSegmentF.StartPoint.fX,
+                                        lineSegmentF.StartPoint.fY,
+                                        lineSegmentF.EndPoint.fX,
+                                        lineSegmentF.EndPoint.fY);
+                                    g.Dispose();
+                                    DS1.ReplaceDisplayImage(bmpx);
+                                    bmpx.Dispose();
+                                }
+                            }
+
+                            #endregion
+                            break;
                     }
+                    
                 }
 
                 DS1.SetStaticMover(xMoversDs1);

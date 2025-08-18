@@ -63,7 +63,7 @@ namespace LaserAlignDX.RunSpace.V1
         }
         LineScanCalibrateClass LineScanCalibrate
         {
-            get { return Traveller106.Universal.LineScanCalibrateClasses[0]; }
+            get { return xRecipe.lineScanCalibrate; }
         }
         //protected InspectX2Class xInspect
         //{

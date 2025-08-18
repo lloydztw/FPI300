@@ -930,8 +930,8 @@ namespace LaserAlignDX.UISpace.MainSpace
 
                                         cMvdTextFShowNoTray.BorderColor = new MVD_COLOR(255, 0, 0);
                                         cMvdTextFShowNoTray.FontWidth = 11;
-
-                                        DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowNoTray);
+                                        if (INI.Instance.IsResultShowChar)
+                                            DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowNoTray);
                                         DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(false));
                                     }
                                     else
@@ -972,24 +972,47 @@ namespace LaserAlignDX.UISpace.MainSpace
                                             CMvdShape mvdShape = cell.cMvdShapesForFindLineRegion[i];
                                             if (mvdShape != null)
                                             {
-                                                mvdShape.BorderColor = new MVD_COLOR(0, 0, 255);
+                                                mvdShape.BorderColor = new MVD_COLOR(38, 127, 0);
                                                 DSMain.mvdRenderActivex1.AddShape(mvdShape);
                                             }
                                             i++;
                                         }
+
+                                        if (InspectPara.bCheckMeasureOffset)
+                                        {
+                                            //画直线
+                                            i = 0;
+                                            while (i < 4)
+                                            {
+                                                CMvdLineSegmentF mLine = cell.cMvdLineSegmentFsInSide[i];
+                                                if (mLine != null)
+                                                {
+                                                    MVD_POINT_F s0 = new MVD_POINT_F(mLine.StartPoint.fX + _rectF.X,
+                                                        mLine.StartPoint.fY + _rectF.Y);
+                                                    MVD_POINT_F s1 = new MVD_POINT_F(mLine.EndPoint.fX + _rectF.X,
+                                                        mLine.EndPoint.fY + _rectF.Y);
+                                                    CMvdLineSegmentF newLine = new CMvdLineSegmentF(s0, s1);
+                                                    newLine.BorderColor = new MVD_COLOR(112, 48, 160);
+                                                    DSMain.mvdRenderActivex1.AddShape(newLine);
+                                                }
+                                                i++;
+                                            }
+                                        }
                                     }
+                                    
 
                                     //显示结果的xy angle
                                     CMvdTextF cMvdTextFShowMain = new CMvdTextF(cell.DrawResultRectF().CenterX,
                                         cell.DrawResultRectF().CenterY,
                                         $"{cell.ToShowMainStr()}");
-                                    cMvdTextFShowMain.BorderColor = new MVD_COLOR(0, 0, 255);// cell.DrawResultRectF().BorderColor;// new MVD_COLOR(0, 255, 0);
+                                    cMvdTextFShowMain.BorderColor = new MVD_COLOR(0, 255, 0);// cell.DrawResultRectF().BorderColor;// new MVD_COLOR(0, 255, 0);
                                     cMvdTextFShowMain.FontWidth = 11;
 
                                     if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                                     {
                                         //引导数据
-                                        DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowMain);
+                                        if (INI.Instance.IsResultShowChar)
+                                            DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowMain);
                                         //定位框
                                         DSMain.mvdRenderActivex1.AddShape(cell.DrawResultRectF());
                                         //DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(true));

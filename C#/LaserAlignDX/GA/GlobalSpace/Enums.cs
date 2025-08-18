@@ -505,6 +505,27 @@ namespace Eazy_Project_III
         MeasureNoTray = 2,
     }
 
+    /// <summary>
+    /// FPI尺寸测量抓边方式
+    /// </summary>
+    public enum MeasureFindLineType : int
+    {
+        [Description("V1-找直线")]
+        FindLineType_v1 = 0,
+        [Description("V2-找平行线")]
+        FindLineType_v2 = 1,
+    }
+    /// <summary>
+    /// FPI载台选择
+    /// </summary>
+    public enum StageNumber : int
+    {
+        [Description("载台一")]
+        N0 = 0,
+        [Description("载台二")]
+        N1 = 1,
+    }
+
 #if NO_USE_CHINESE
 
     public enum ProcessImageMode : int
