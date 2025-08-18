@@ -1019,7 +1019,24 @@ namespace LaserAlignDX.UISpace.MainSpace
                                     }
                                     else
                                     {
-                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(false));
+                                        //引导数据
+                                        if (cell.inspectReason != InspectReason.INS_ALIGNERR)
+                                        {
+                                            if (INI.Instance.IsResultShowChar)
+                                            {
+
+                                                cMvdTextFShowMain = new CMvdTextF(cell.DrawResultRectF().CenterX,
+                                            cell.DrawResultRectF().CenterY,
+                                            $"{cell.ToShowMainStr()}{Environment.NewLine}{GaUtil.GetEnumDescription(cell.inspectReason)}");
+                                                cMvdTextFShowMain.BorderColor = new MVD_COLOR(255, 0, 0);
+                                                DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowMain);
+
+                                                //定位框
+                                                DSMain.mvdRenderActivex1.AddShape(cell.DrawResultRectF());
+                                            }
+                                        }
+                                        else
+                                            DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(false));
                                     }
 
                                     //二维码

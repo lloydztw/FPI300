@@ -623,8 +623,12 @@ namespace LaserAlignDX.OPSpace
             }
             if (xInspect.bCheckMeasureOffset)
             {
-                str += $"尺寸偏移X[{RunXOffset.ToString(m_Format)}mm]{Environment.NewLine}";
-                str += $"尺寸偏移Y[{RunYOffset.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"位置偏移X[{RunXOffset.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"位置偏移Y[{RunYOffset.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"左边距[{DisLeft.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"右边距[{DisRight.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"上边距[{DisTop.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"下边距[{DisBottom.ToString(m_Format)}mm]{Environment.NewLine}";
             }
 
             //str += Environment.NewLine;

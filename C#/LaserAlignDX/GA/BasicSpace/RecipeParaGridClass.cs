@@ -1,4 +1,5 @@
-﻿using JetEazy;
+﻿using Eazy_Project_III;
+using JetEazy;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Collections.Generic;
@@ -169,6 +170,18 @@ namespace LaserAlignDX.BasicSpace
         }
 
         const string cat3 = "03.位置矩阵设定";
+
+        [CategoryAttribute(cat3), DescriptionAttribute("")]
+        [DisplayName("A00.平台选择")]
+        [TypeConverter(typeof(JzEnumConverter))]
+        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(-99999999, 99999999)]
+        [Browsable(true)]
+        [ReadOnly(false)]
+        public StageNumber xStageNumber
+        {
+            get { return xRecipe.xStageNumber; }
+            set { xRecipe.xStageNumber = value; }
+        }
 
         [CategoryAttribute(cat3), DescriptionAttribute("矩阵左上角实际位置X")]
         [DisplayName("A01.起点X(mm)")]
