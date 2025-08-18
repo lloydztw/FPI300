@@ -1,16 +1,21 @@
 ﻿using JetEazy.EzImage;
-using JetEazy.Match;
 using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 
 namespace LeTian.Match
 {
     public static class Test
     {
-        //static string PATH_IMAGE_LOG_ROOT => "D:\\log\\MAIN_FPIX3\\Images";
-        //static string PATH_IMAGE_LOG_ONE => "D:\\log\\MAIN_FPIX3\\Images\\20250816\\20250816183713\\PositionFix";
-        //static string PATH_IMAGE_LOG_ONE => "D:\\log\\MAIN_FPIX3\\Images\\20250817\\20250817205033\\PositionFix";
-        static string PATH_IMAGE_LOG_ONE => @"D:\log\MAIN_FPIX3\Images\20250817\20250817212911\PositionFix";
+        static string PATH_IMAGE_LOG_ROOT => "D:\\log\\MAIN_FPIX3\\Images";
+        static string PATH_IMAGE_LOG(string timeTag, DateTime? date = null)
+        {
+            DateTime dt = date == null ? DateTime.Now : date.Value;
+            string dateStr = dt.ToString("yyyyMMdd");
+            return System.IO.Path.Combine(PATH_IMAGE_LOG_ROOT, dateStr, dateStr + timeTag, "PositionFix");
+        }
+        //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("102050");
+        static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("105312");
         static string FILE_GOLDEN_IMG => "D:\\AUTOMATION\\Eazy FPI30\\_BIN_\\LASER-MAIN_FPIX3\\PIC\\00003\\bmpDefectTemplate.bmp";
         static string[] NG_FNAMES =
         {
@@ -18,6 +23,10 @@ namespace LeTian.Match
             //"Fix_151",
             //"Fix_100"
             //"Fix_24"
+
+            //"Fix_101",
+            //"Fix_102",
+            //"Fix_43",
         };
 
         static bool IsGoFor(string file)

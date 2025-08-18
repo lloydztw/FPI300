@@ -18,11 +18,9 @@ using JetEazy.QxCollections;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
-using EzAoiBase = EzAoiEmptyTrayInspector.Model.Aoi.EzAoiBase;
-using CvSize = OpenCvSharp.Size;
-using System.ComponentModel;
-using AForge.Imaging;
 using System.Linq;
+using CvSize = OpenCvSharp.Size;
+using EzAoiBase = EzAoiEmptyTrayInspector.Model.Aoi.EzAoiBase;
 
 namespace LeTian.Match
 {
@@ -33,7 +31,7 @@ namespace LeTian.Match
         #endregion
 
         #region BLOB_FILTER_PARAMETERS
-        bool _optFillOffBorder = false;
+        bool _optFillOffBorder = true;
         #endregion
 
         public EzPadsGridFinder(int shrink = 1)
@@ -331,8 +329,8 @@ namespace LeTian.Match
 
             grid.RowMin = 0;
             grid.ColMin = 0;
-            int[] rowss = new int[] { 0, grid.Rows - 1 };
-            int[] colss = new int[] { 0, grid.Cols - 1 };
+            int[] rowss = new int[] { grid.Rows - 1, 0 };
+            int[] colss = new int[] { grid.Cols - 1, 0 };
 
             var boundary = new Rect(0, 0, image.Width, image.Height);
             var bestRatio = double.MaxValue;
@@ -346,6 +344,8 @@ namespace LeTian.Match
                     if (!bloc.IsMajorNode()) continue;
 
                     var roi = JetEazy.Qcvt.CV(bloc.Rect);
+                    roi.Inflate(2, 2);
+
                     bool is_clipped = JetEazy.Qcvt.ClipBoundary(ref roi, ref boundary);
 
                     var ratio = is_clipped ? 1 : calcSQRatio(image, ref roi, true);
@@ -371,11 +371,13 @@ namespace LeTian.Match
                 else
                     image.CopyTo(otsu);
 
-                int whitePixels = otsu[roi].CountNonZero();
+                var padImage = otsu[roi];
+
+                int whitePixels = padImage.CountNonZero();
 
                 int area = roi.Width * roi.Height;
 
-                if (findMinAreaRect(otsu, area / 8, out RotatedRect rotRect))
+                if (findMinAreaRect(padImage, area / 8, out RotatedRect rotRect))
                 {
                     area = (int)(rotRect.Size.Width * rotRect.Size.Height);
                 }
