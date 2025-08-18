@@ -24,8 +24,9 @@ namespace LeTian.Match
             //"Fix_100"
             //"Fix_24"
 
-            //"Fix_101",
-            //"Fix_102",
+            "Fix_101",
+            "Fix_102",
+
             //"Fix_43",
         };
 
@@ -63,6 +64,8 @@ namespace LeTian.Match
 
         public static void Run()
         {
+            EzPadsGridFinder.VISUAL_DEBUG = false;
+
             var matcher = new EzRigidBodyGridMatcher(shrink: 1);
 
             // === 1) 準備 Golden 資料 ==================================================================

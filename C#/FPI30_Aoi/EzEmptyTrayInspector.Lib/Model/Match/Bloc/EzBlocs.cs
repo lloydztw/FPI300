@@ -42,10 +42,21 @@ namespace JetEazy.Match
             var yCenter = Math.Round((rect.Y + rect.Bottom) / 2.0);
             Center = new QVector(xCenter, yCenter);
         }
-        public object Clone()
+        public EzBloc Clone()
         {
-            return new EzBloc(Rect, Score, Owner, null);
+            var blob = new EzBloc(Rect, Score, Owner, null)
+            {
+                SQRatio = SQRatio,
+                Pixels = Pixels
+            };
+            ((IxBlob)blob).Bin = ((IxBlob)this).Bin;
+            return blob;
         }
+        object ICloneable.Clone()
+        {
+            return Clone();
+        }
+
         public bool IsMajorNode()
         {
             return Tag is QuadLinkNode;

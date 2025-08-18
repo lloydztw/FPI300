@@ -17,8 +17,8 @@ namespace LaserAlignDX
             Application.SetCompatibleTextRenderingDefault(false);
 
             //// UNIT_TEST_CHIP_LOCATOR
-            Test.Run();
-            return;
+            //Test.Run();
+            //return;
 
             if (AppInstance())
             {

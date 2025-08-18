@@ -26,6 +26,8 @@ namespace LeTian.Match
 {
     public class EzPadsGridFinder : EzAoiBase
     {
+        internal static bool VISUAL_DEBUG = false;
+
         #region PRIVATE_DATA
         List<EzBloc> _blocs;
         #endregion
@@ -83,7 +85,6 @@ namespace LeTian.Match
             else
             {
                 rebuild(_blocs, out grid, angle, img);
-                //FindSpecialKeyPad(grid, out keyRow, out keyCol, out int px);
                 FindSpecialKeyPad(img, grid, out keyRow, out keyCol, out keySQRatio);
             }
         }
@@ -128,6 +129,20 @@ namespace LeTian.Match
         void findWhiteRigidGrid(Mat img, out EzBlocsGrid gridPoints)
         {
             findWhiteKeyPoints(img, out _blocs);
+
+            //// 以中心點排序
+            //int cx = img.Width / 2;
+            //int cy = img.Height / 2;
+            //_blocs?.Sort((b1, b2) =>
+            //{
+            //    int dx1 = b1.CenterX - cx;
+            //    int dy1 = b1.CenterY - cy;
+            //    int dd1 = dx1 * dx1 + dy1 * dy1;
+            //    int dx2 = b2.CenterX - cx;
+            //    int dy2 = b2.CenterY - cy;
+            //    int dd2 = dx2 * dx2 + dy2 * dy2;
+            //    return dd1 - dd2;
+            //});
 
             var builder = new EzBlocsGridBuilder();
             gridPoints = builder.Build(_blocs);
@@ -219,17 +234,21 @@ namespace LeTian.Match
                 return;
             }
 
-            if (imgDebug != null && false)
+            if (imgDebug != null && VISUAL_DEBUG)
                 VxDebugDrawer.Draw(imgDebug, blocs, true, Scalar.Pink, $"OLD BLOCs {(int)angle}");
 
-            getCentroid(blocs, out var center);
-            rotateBlocs(blocs, angle, center, null, true);
+            var center = imgDebug != null ?
+                            new Point2f(imgDebug.Width / 2, imgDebug.Height / 2) :
+                            new Point2f(0, 0);
 
-            if (imgDebug != null && false)
-                VxDebugDrawer.Draw(imgDebug, blocs, true, Scalar.Pink, $"ROTATED BLOCs {(int)angle}");
+            var blocsR = Clone(blocs);
+            rotateBlocs(blocsR, angle, center, null, true);
+
+            if (imgDebug != null && VISUAL_DEBUG)
+                VxDebugDrawer.Draw(imgDebug, blocsR, true, Scalar.Pink, $"ROTATED BLOCs {(int)angle}");
 
             var builder = new EzBlocsGridBuilder();
-            grid2 = builder.Build(blocs);
+            grid2 = builder.Build(blocsR);
          
             if (grid2 != null)
                 rotateBlocs(grid2.IterBlocs(), -angle, center, grid2);
@@ -274,9 +293,19 @@ namespace LeTian.Match
                 center.Y /= count;
             }
         }
+        IList<EzBloc> Clone(IList<EzBloc> blocs)
+        {
+            var clone = new List<EzBloc>();
+            foreach (var b in blocs)
+            {
+                if (b == null) continue;
+                clone.Add(b.Clone());
+            }
+            return clone;
+        }
         #endregion
 
-
+        #region RESERVED
         static void __FindSpecialKeyPad(IxGridMap<EzBloc> grid, out int keyRow, out int keyCol, out int keyPixels)
         {
             keyRow = -1;
@@ -318,6 +347,8 @@ namespace LeTian.Match
                 }
             }
         }
+        #endregion
+
         internal static void FindSpecialKeyPad(Mat image, IxGridMap<EzBloc> grid, out int keyRow, out int keyCol, out double keySQRatio)
         {
             keyRow = -1;
