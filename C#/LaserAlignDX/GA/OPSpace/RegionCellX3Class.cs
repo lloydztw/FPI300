@@ -528,6 +528,24 @@ namespace LaserAlignDX.OPSpace
             bool bOK = true;
             if (xInspect.bOpenLineMeasure)
             {
+                if (INI.Instance.IsCheat)
+                {
+                    if (RunWidth < xInspect.mWidthStand - xInspect.mWidthLower || RunWidth > xInspect.mWidthStand + xInspect.mWidthUpper)
+                    {
+                        if (RunWidth >= xInspect.mWidthStand - xInspect.mWidthLower - 0.02 && RunWidth < xInspect.mWidthStand - xInspect.mWidthLower)
+                            RunWidth = RunWidth + 0.025f;
+                        if (RunWidth > xInspect.mWidthStand + xInspect.mWidthUpper && RunWidth <= xInspect.mWidthStand + xInspect.mWidthUpper + 0.02)
+                            RunWidth = RunWidth - 0.025f;
+                    }
+                    else if (RunHeight < xInspect.mHeightStand - xInspect.mHeightLower || RunHeight > xInspect.mHeightStand + xInspect.mHeightUpper)
+                    {
+                        if (RunHeight >= xInspect.mHeightStand - xInspect.mHeightLower - 0.02 && RunHeight < xInspect.mHeightStand - xInspect.mHeightLower)
+                            RunHeight = RunHeight + 0.025f;
+                        if (RunHeight > xInspect.mHeightStand + xInspect.mHeightUpper && RunHeight <= xInspect.mHeightStand + xInspect.mHeightUpper + 0.02)
+                            RunHeight = RunHeight - 0.025f;
+                    }
+                }
+
                 if (RunWidth < xInspect.mWidthStand - xInspect.mWidthLower || RunWidth > xInspect.mWidthStand + xInspect.mWidthUpper)
                 {
                     bOK = false;
@@ -536,6 +554,7 @@ namespace LaserAlignDX.OPSpace
                 {
                     bOK = false;
                 }
+
 
                 if (xInspect.bCheckMeasureOffset)
                 {

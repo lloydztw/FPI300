@@ -756,6 +756,12 @@ namespace Traveller106
         [Browsable(true)]
         public bool IsResultShowChar { get; set; } = false;
 
+        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("11.增强抓边")]
+        [Browsable(true)]
+        public bool IsCheat { get; set; } = false;
+
         #endregion
 
         #region SQL_SETUP
@@ -843,6 +849,7 @@ namespace Traveller106
             //LaserSharePath = ReadINIValue("Basic", "LaserSharePath", LaserSharePath.ToString(), INIFILE);
             //IsUseStandBoard = ReadINIValue("Basic", "IsUseStandBoard", (IsUseStandBoard ? "1" : "0"), INIFILE) == "1";
             IsResultShowChar = ReadINIValue("Basic", "IsResultShowChar", (IsResultShowChar ? "1" : "0"), INIFILE) == "1";
+            IsCheat = ReadINIValue("Basic", "IsCheat", (IsCheat ? "1" : "0"), INIFILE) == "1";
             //mark_rect = StringtoRect(ReadINIValue("Basic", "mark_rect", RecttoString(mark_rect), INIFILE));
             //mark_org = StringToPointF(ReadINIValue("Basic", "mark_org", PointFtoString(mark_org), INIFILE));
             //mark_thresholdvalue = int.Parse(ReadINIValue("Basic", "mark_thresholdvalue", mark_thresholdvalue.ToString(), INIFILE));
@@ -949,6 +956,7 @@ namespace Traveller106
             //WriteINIValue("Basic", "LaserSharePath", LaserSharePath.ToString(), INIFILE);
             //WriteINIValue("Basic", "IsUseStandBoard", (IsUseStandBoard ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsResultShowChar", (IsResultShowChar ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "IsCheat", (IsCheat ? "1" : "0"), INIFILE);
             //WriteINIValue("Basic", "mark_rect", RecttoString(mark_rect), INIFILE);
             //WriteINIValue("Basic", "mark_org", PointFtoString(mark_org), INIFILE);
             //WriteINIValue("Basic", "mark_thresholdvalue", mark_thresholdvalue.ToString(), INIFILE);
