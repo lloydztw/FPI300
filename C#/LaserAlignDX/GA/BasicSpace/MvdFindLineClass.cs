@@ -83,6 +83,7 @@ namespace LaserAlignDX.GA.BasicSpace
                 //cLineFindToolObj.SetRunParam("EdgePolarity", (bEdgePolarity ? "WhiteToBlack" : "BlackToWhite"));//边缘极性
                 cLineFindToolObj.SetRunParam("EdgeStrength", iEdgeStrength.ToString());//边缘强度
                 cLineFindToolObj.SetRunParam("LineFindMode", "Best");//查找模式
+                //cLineFindToolObj.SetRunParam("KernelSize", "5");
 
                 // Running
 
