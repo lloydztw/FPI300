@@ -15,6 +15,7 @@
 
 
 using AUVision;
+using JetEazy.Match;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -51,5 +52,10 @@ namespace LaserAlignDX.RunSpace.Supports
         /// 執行匹配 
         /// </summary>
         bool RunMatch(Bitmap bmpScene);
+
+        /// <summary>
+        /// 取得定位後 Chip 上面 PAD 的資訊
+        /// </summary>
+        EzBlocsGrid GetResultPadsGrid();
     }
 }

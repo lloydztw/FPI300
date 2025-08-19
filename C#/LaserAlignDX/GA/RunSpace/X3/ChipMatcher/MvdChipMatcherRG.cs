@@ -106,6 +106,14 @@ namespace LaserAlignDX.RunSpace.Supports
             return bOK;
         }
 
+        /// <summary>
+        /// 取得定位後 Chip 上面 PAD 的資訊
+        /// </summary>
+        public EzBlocsGrid GetResultPadsGrid()
+        {
+
+        }
+
         #region PRIVATE_HELPER_FUNCTIONS
         void convert_to_gaara_result(EzRigidBodyGridMatcher.RigidBody rigidBody, List<xFindResult> results)
         {

@@ -369,6 +369,12 @@
     <Compile Include="GA\FormSpace\FPI30Form\CalibrationUI.Designer.cs">
       <DependentUpon>CalibrationUI.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA\FormSpace\FPI30Form\FlyOffsetUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA\FormSpace\FPI30Form\FlyOffsetUI.Designer.cs">
+      <DependentUpon>FlyOffsetUI.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA\FormSpace\FPI30Form\frmCalibration.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -664,6 +670,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\FPI30Form\CalibrationUI.resx">
       <DependentUpon>CalibrationUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\FormSpace\FPI30Form\FlyOffsetUI.resx">
+      <DependentUpon>FlyOffsetUI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\FPI30Form\frmCalibration.resx">
       <DependentUpon>frmCalibration.cs</DependentUpon>

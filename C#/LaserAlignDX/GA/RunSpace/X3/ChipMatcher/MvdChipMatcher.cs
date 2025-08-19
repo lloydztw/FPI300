@@ -15,6 +15,7 @@
 
 
 using AUVision;
+using JetEazy.Match;
 using JetEazy.Utils;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
@@ -154,6 +155,15 @@ namespace LaserAlignDX.RunSpace.Supports
             bOK = HikRun2(xMvdRun_Image);
 
             return bOK;
+        }
+
+        /// <summary>
+        /// 取得定位後 Chip 上面 PAD 的資訊
+        /// </summary>
+        public EzBlocsGrid GetResultPadsGrid()
+        {
+            // 海康版的 template match 不支援
+            return null;
         }
 
         #region PRIVATE_HIK_FUNCTIONS

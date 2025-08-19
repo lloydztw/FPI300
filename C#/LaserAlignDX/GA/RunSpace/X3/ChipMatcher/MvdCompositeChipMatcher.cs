@@ -14,6 +14,7 @@
 #endregion
 
 using AUVision;
+using JetEazy.Match;
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -121,6 +122,10 @@ namespace LaserAlignDX.RunSpace.Supports
         {
             throw new System.Exception("請用個別的 _matchers[i] !");
             return _matchers[0].RunMatch(bmpScene);
+        }
+        public EzBlocsGrid GetResultPadsGrid()
+        {
+            return _matchers[0]?.GetResultPadsGrid();
         }
     }
 }

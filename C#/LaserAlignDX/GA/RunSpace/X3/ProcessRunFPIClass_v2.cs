@@ -565,9 +565,25 @@ namespace LaserAlignDX.RunSpace.V2
         /// </summary>
         private void _Inspect001_One_Chip_Measurement(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi, IMvdTemplateMatcher matcher = null)
         {
-            // 取得 上一輪 晶粒定位 的結果
+            // 取得 上一輪 晶粒定位 的結果 (xResult)
             var chipLocationResult = matcher.xResults[0];
-            //var chipLocationResult = cell.xFindResult;
+            // 取得 上一輪 晶粒定位 的 PADs 資訊
+            var padsGrid = matcher.GetResultPadsGrid();
+
+            // 枚舉 每一個 pad 的 bloc
+            int rows = padsGrid.Rows;
+            int cols = padsGrid.Cols;
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    var bloc = padsGrid.Get(r, c);
+                    //var bloc = padsGrid[r, c];  <<< 也可以
+                    int x = bloc.CenterX;
+                    int y = bloc.CenterY;
+                    // blah blah
+                }
+            }
 
             #region 邊線處理
 #if (OPT_OLD || true)
