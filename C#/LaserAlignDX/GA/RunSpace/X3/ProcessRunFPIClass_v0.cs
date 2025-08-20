@@ -494,7 +494,7 @@ namespace LaserAlignDX.RunSpace.V0
 
                                     VisionDesigner.L2LMeasure.CL2LMeasureResult cL2LMeasureRes = cL2LMeasureToolObj.Result;
 
-                                    cell.RunWidth = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
+                                    cell.RunWidth = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution, 3);
 
                                     Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
 
@@ -553,7 +553,7 @@ namespace LaserAlignDX.RunSpace.V0
 
                                     VisionDesigner.L2LMeasure.CL2LMeasureResult cL2LMeasureRes = cL2LMeasureToolObj.Result;
 
-                                    cell.RunHeight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
+                                    cell.RunHeight = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution, 3);
 
                                     Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
 
@@ -1587,7 +1587,7 @@ namespace LaserAlignDX.RunSpace.V0
 
                                     VisionDesigner.L2LMeasure.CL2LMeasureResult cL2LMeasureRes = cL2LMeasureToolObj.Result;
 
-                                    cell.RunWidth = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
+                                    cell.RunWidth = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution, 3);
 
                                     Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
 
@@ -1638,7 +1638,7 @@ namespace LaserAlignDX.RunSpace.V0
 
                                     VisionDesigner.L2LMeasure.CL2LMeasureResult cL2LMeasureRes = cL2LMeasureToolObj.Result;
 
-                                    cell.RunHeight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution;
+                                    cell.RunHeight = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolution, 3);
 
                                     Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
 

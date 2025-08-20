@@ -586,20 +586,20 @@ namespace LaserAlignDX.RunSpace.V2
             // 取得 上一輪 晶粒定位 的 PADs 資訊
             var padsGrid = matcher.GetResultPadsGrid();
 
-            // 枚舉 每一個 pad 的 bloc
-            int rows = padsGrid.Rows;
-            int cols = padsGrid.Cols;
-            for (int r = 0; r < rows; r++)
-            {
-                for (int c = 0; c < cols; c++)
-                {
-                    var bloc = padsGrid.Get(r, c);
-                    //var bloc = padsGrid[r, c];  <<< 也可以
-                    int x = bloc.CenterX;
-                    int y = bloc.CenterY;
-                    // blah blah
-                }
-            }
+            //// 枚舉 每一個 pad 的 bloc
+            //int rows = padsGrid.Rows;
+            //int cols = padsGrid.Cols;
+            //for (int r = 0; r < rows; r++)
+            //{
+            //    for (int c = 0; c < cols; c++)
+            //    {
+            //        var bloc = padsGrid.Get(r, c);
+            //        //var bloc = padsGrid[r, c];  <<< 也可以
+            //        int x = bloc.CenterX;
+            //        int y = bloc.CenterY;
+            //        // blah blah
+            //    }
+            //}
 
             #region 邊線處理
 #if (OPT_OLD || true)
@@ -779,7 +779,7 @@ namespace LaserAlignDX.RunSpace.V2
                         // Update result to cell (pixels to physical)
                         // 目前只是簡單假設: 線掃 與 載盤 在同一平面
                         // ToDO: 必須處理透視投影引進的誤差 !!!
-                        cell.RunWidth = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX;
+                        cell.RunWidth = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX, 3);
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
@@ -857,7 +857,7 @@ namespace LaserAlignDX.RunSpace.V2
                         // Update result to Cell (pixels to physic)
                         // 目前只是簡單假設: 線掃 與 載盤 在同一平面
                         // ToDO: 必須處理透視投影引進的誤差 !!!
-                        cell.RunHeight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY;
+                        cell.RunHeight = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY, 3);
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
@@ -1066,7 +1066,7 @@ namespace LaserAlignDX.RunSpace.V2
                         // Update result to cell (pixels to physical)
                         // 目前只是簡單假設: 線掃 與 載盤 在同一平面
                         // ToDO: 必須處理透視投影引進的誤差 !!!
-                        cell.RunWidth = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX;
+                        cell.RunWidth = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX, 3);
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
@@ -1144,7 +1144,7 @@ namespace LaserAlignDX.RunSpace.V2
                         // Update result to Cell (pixels to physic)
                         // 目前只是簡單假設: 線掃 與 載盤 在同一平面
                         // ToDO: 必須處理透視投影引進的誤差 !!!
-                        cell.RunHeight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY;
+                        cell.RunHeight = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY, 3);
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);

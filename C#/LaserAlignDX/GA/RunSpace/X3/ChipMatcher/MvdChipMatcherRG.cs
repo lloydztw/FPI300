@@ -42,6 +42,7 @@ namespace LaserAlignDX.RunSpace.Supports
 
         #region PRIVATE_RUNTIME_DATA
         bool _isMvdParamsChanged = false;
+        EzRigidBodyGridMatcher.RigidBody _resultChipInfo;
         #endregion
 
         #region PUBLIC_PARAMEMTERS
@@ -101,6 +102,8 @@ namespace LaserAlignDX.RunSpace.Supports
 
             if (rigidBody != null)
                 convert_to_gaara_result(rigidBody, xResults);
+            
+            _resultChipInfo = rigidBody;
 
             bool bOK = xResults.Count > 0;
             return bOK;
@@ -111,7 +114,7 @@ namespace LaserAlignDX.RunSpace.Supports
         /// </summary>
         public EzBlocsGrid GetResultPadsGrid()
         {
-            return null;
+            return _resultChipInfo?.Grid;
         }
 
         #region PRIVATE_HELPER_FUNCTIONS
