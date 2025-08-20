@@ -18,6 +18,7 @@ using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QvMath;
 using JetEazy.QxCollections;
+using JetEazy.Utils;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -55,10 +56,13 @@ namespace LeTian.Match
 
         public void SetGoldenTemplate(Bitmap bmpGolden)
         {
-            using (var bridge = new QxImageBridge(bmpGolden))
+            var bmpGoldenU8 = GaImageUtil.ToU8(bmpGolden);
+            using (var bridge = new QxImageBridge(bmpGoldenU8))
             {
                 analyzeGoldenTemplate(bridge.Image);
             }
+            if (bmpGoldenU8 != bmpGolden)
+                bmpGoldenU8?.Dispose();
         }
         public void SetGoldenTemplate(Mat imgGolden)
         {
@@ -67,10 +71,17 @@ namespace LeTian.Match
 
         public RigidBody FindBestMatch(Bitmap bmpScene, string debugDumpFile = null)
         {
-            using (var bridge = new QxImageBridge(bmpScene))
+            RigidBody result;
+            var bmpSceneU8 = GaImageUtil.ToU8(bmpScene);
+            
+            using (var bridge = new QxImageBridge(bmpSceneU8))
             {
-                return FindBestMatch(bridge.Image, debugDumpFile);
+                result = FindBestMatch(bridge.Image, debugDumpFile);
             }
+
+            if (bmpSceneU8 != bmpScene)
+                bmpSceneU8?.Dispose();
+            return result;
         }
         public RigidBody FindBestMatch(Mat imgScene, string debugDumpFile = null)
         {
