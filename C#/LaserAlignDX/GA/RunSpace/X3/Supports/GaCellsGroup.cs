@@ -126,7 +126,7 @@ namespace LaserAlignDX.RunSpace
                 grp.buildGaCells(fullFovBmp, inflate, srcCells);
             }
 
-            verify(groups);
+            verify(groups, alert: false);
 
             return groups;
         }

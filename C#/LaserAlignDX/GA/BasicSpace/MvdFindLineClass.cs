@@ -72,9 +72,12 @@ namespace LaserAlignDX.GA.BasicSpace
                     eRecf.CenterY,
                     eRecf.Width,
                     eRecf.Height);
-                cMvd.Angle = (bPositive ? 0 : 180);
+                if (eRecf.Angle > 0)
+                    cMvd.Angle = (bPositive ? eRecf.Angle : eRecf.Angle - 180);
+                else
+                    cMvd.Angle = (bPositive ? eRecf.Angle + 180 : eRecf.Angle);
                 cLineFindToolObj.ROI = cMvd;
-
+                iRayNum = (int)(cMvd.Width / 3);
                 cLineFindToolObj.SetRunParam("RayNum", iRayNum.ToString());//卡尺数量
                 //cLineFindToolObj.SetRunParam("RejectNum", "30");//剔除点数
                 //cLineFindToolObj.SetRunParam("RejectDist", "10");//剔除距离

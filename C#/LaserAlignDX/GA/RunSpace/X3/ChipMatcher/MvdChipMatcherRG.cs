@@ -111,7 +111,7 @@ namespace LaserAlignDX.RunSpace.Supports
         /// </summary>
         public EzBlocsGrid GetResultPadsGrid()
         {
-
+            return null;
         }
 
         #region PRIVATE_HELPER_FUNCTIONS

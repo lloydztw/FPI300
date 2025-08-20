@@ -72,7 +72,10 @@ namespace LaserAlignDX.GA.BasicSpace
                     eRecf.CenterY,
                     eRecf.Width,
                     eRecf.Height);
-                cMvd.Angle = (bPositive ? 0 : 180);
+                if (eRecf.Angle > 0)
+                    cMvd.Angle = (bPositive ? eRecf.Angle : eRecf.Angle - 180);
+                else
+                    cMvd.Angle = (bPositive ? eRecf.Angle + 180 : eRecf.Angle);
                 cPairLineFindTool.ROI = cMvd;
 
                 cPairLineFindTool.SetRunParam("CaliperNum", CaliperNum.ToString());//卡尺数量

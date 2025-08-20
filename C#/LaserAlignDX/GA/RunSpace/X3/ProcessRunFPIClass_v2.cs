@@ -533,6 +533,22 @@ namespace LaserAlignDX.RunSpace.V2
                                     break;
                                 default:
                                     _Inspect001_One_Chip_Measurement(cell, cellBmp, cellRoi, chipMatcher);
+                                    //Bitmap bmp = cellBmp.Clone(new Rectangle(0, 0, cellBmp.Width, cellBmp.Height), cellBmp.PixelFormat);
+                                    //AForge.Imaging.Filters.SobelEdgeDetector detector = new AForge.Imaging.Filters.SobelEdgeDetector();
+                                    //Bitmap bmp1 = detector.Apply(bmp);
+                                    //AForge.Imaging.Filters.Closing closing = new AForge.Imaging.Filters.Closing();
+                                    //Bitmap bmp2 = closing.Apply(bmp1);
+                                    //AForge.Imaging.Filters.SISThreshold sISThreshold = new AForge.Imaging.Filters.SISThreshold();
+                                    //Bitmap bmp3 = sISThreshold.Apply(bmp2);
+                                    //Bitmap bmp4 = GaImageUtil.ToU8(bmp3, true);
+                                    //_Inspect001_One_Chip_Measurement(cell, bmp4, cellRoi, chipMatcher);
+
+                                    //bmp.Dispose();
+                                    //bmp1.Dispose();
+                                    //bmp2.Dispose();
+                                    //bmp3.Dispose();
+                                    //bmp4.Dispose();
+
                                     break;
                             }
 
