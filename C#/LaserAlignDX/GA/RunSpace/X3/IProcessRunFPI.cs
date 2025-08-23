@@ -20,6 +20,7 @@ namespace LaserAlignDX.RunSpace
         string ResultDesc { get; }
         bool Running { get; }
         string StripId { get; set; }
+        string FileName { get; set; }
 
         int[] GetQrResult();
         float[] GetScanOffset();

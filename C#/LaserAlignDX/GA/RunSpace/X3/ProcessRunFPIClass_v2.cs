@@ -103,8 +103,13 @@ namespace LaserAlignDX.RunSpace.V2
         private string m_LotId = "Lot_NONE";
         private string m_PicResultPath = INI.Instance.ResultImagePath;
         private string m_PicResultOrgPath = INI.Instance.ResultImagePath;
+        private string m_FileName = string.Empty;
         #endregion
-
+        public string FileName
+        {
+            get { return m_FileName; }
+            set { m_FileName = value; }
+        }
         public string LotId
         {
             get { return m_LotId; }
@@ -1234,7 +1239,7 @@ namespace LaserAlignDX.RunSpace.V2
                 try
                 {
                     IEzImage ezImage = arg as IEzImage;
-
+                    m_FileName = $"{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg";
                     if (INI.Instance.IsSaveTestImage)
                     {
                         GaUtil.SaveData(debugCellCenterStr,
@@ -1244,13 +1249,13 @@ namespace LaserAlignDX.RunSpace.V2
                     if (INI.Instance.IsSaveDebugBMP)
                     {
                         GaImageUtil.SaveImageWithQuality(ezImage.Bitmap,
-                            $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
+                            $"{m_PicResultPath}\\{m_FileName}",
                             INI.Instance.ImageQuality);
                     }
 
                     if (INI.Instance.IsSaveDebugOrgBmp)
                     {
-                        ezImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg");
+                        ezImage.Save($"{m_PicResultOrgPath}\\{m_FileName}");
                         //bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
                         //                   ImageFormat.Jpeg);
                     }

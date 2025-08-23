@@ -457,14 +457,14 @@ namespace LaserAlignDX.OPSpace
         public string GetNoTrayDesc()
         {
             string str = string.Empty;
-            if (inspectReason != InspectReason.INS_ALIGNERR)
+            if (inspectReason == InspectReason.INS_DEFECTERR)
             {
                 str = "疑似有料";
                 return str;
             }
             foreach (var reason in inspectReasons)
             {
-                if (reason != InspectReason.INS_ALIGNERR)
+                if (reason == InspectReason.INS_DEFECTERR)
                 {
                     str = "疑似有料";
                     //str = "Maybe.P";
@@ -663,6 +663,71 @@ namespace LaserAlignDX.OPSpace
 
             return str;
         }
+        public string ToReport1HeadStr()
+        {
+            string str = string.Empty;
+
+            str += $"编号" + ",";
+            str += $"名称" + ",";
+            str += $"是否检测" + ",";
+            str += $"尺寸宽度X" + ",";
+            str += $"尺寸高度Y" + ",";
+            str += $"位置偏移X" + ",";
+            str += $"位置偏移Y" + ",";
+            str += $"原始X" + ",";
+            str += $"原始Y" + ",";
+            str += $"引导偏移X" + ",";
+            str += $"引导偏移Y" + ",";
+            str += $"引导偏移角度" + ",";
+
+            str += $"左边距" + ",";
+            str += $"右边距" + ",";
+            str += $"上边距" + ",";
+            str += $"下边距" + ",";
+
+            str += $"马达1-X" + ",";
+            str += $"马达1-Y" + ",";
+            str += $"马达2-X" + ",";
+            str += $"马达2-Y" + ",";
+            str += $"条码设定值" + ",";
+            str += $"读取码" + ",";
+            str += $"{Environment.NewLine}";
+
+            return str;
+        }
+        public string ToReport1Str()
+        {
+            string str = string.Empty;
+
+            str += $"{Index}" + ",";
+            str += $"{lblName}" + ",";
+            str += $"{(ByPass ? (INI.Instance.IsForceInspect ? "1强制检测" : "0不检测") : "1检测")}" + ",";
+            str += $"{RunWidth.ToString(m_Format)}" + ",";
+            str += $"{RunHeight.ToString(m_Format)}" + ",";
+            str += $"{RunXOffset.ToString(m_Format)}" + ",";
+            str += $"{RunYOffset.ToString(m_Format)}" + ",";
+            str += $"{OrgX.ToString(m_Format)}" + ",";
+            str += $"{OrgY.ToString(m_Format)}" + ",";
+            str += $"{RunX.ToString(m_Format)}" + ",";
+            str += $"{RunY.ToString(m_Format)}" + ",";
+            str += $"{RunAngle.ToString(m_Format)}" + ",";
+
+            str += $"{DisLeft.ToString(m_Format)}" + ",";
+            str += $"{DisRight.ToString(m_Format)}" + ",";
+            str += $"{DisTop.ToString(m_Format)}" + ",";
+            str += $"{DisBottom.ToString(m_Format)}" + ",";
+
+            str += $"{PointF000ToString(Sur1)}" + ",";
+            str += $"{PointF000ToString(Sur2)}" + ",";
+            str += $"{SetBarcodeStr}" + ",";
+            if (RunCodeInfo != null)
+                str += $"{RunCodeInfo.Content}" + ",";
+            else
+                str += $"" + ",";
+            str += $"{Environment.NewLine}";
+
+            return str;
+        }
         public void Reset()
         {
             inspectReason = InspectReason.PASS;
@@ -674,6 +739,7 @@ namespace LaserAlignDX.OPSpace
             DrawBarcodePosition = null;
             RunX = 0;
             RunY = 0;
+            RunAngle = 0;
             IsSaveDebugPicture = false;
 
             int i = 0;

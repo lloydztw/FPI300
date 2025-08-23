@@ -140,10 +140,11 @@ namespace NeedleX.ProcessSpace
                 machine.CstLightValue = eVal;
             }
         }
-        protected void LightOnOff(bool eOn)
+        protected void LightOnOff(bool eOn, int eChnum = 1)
         {
             foreach (var machine in MACHINEx3.LightCollection)
             {
+                machine.ChNum = eChnum;
                 machine.LightONOFF(eOn);
             }
         }

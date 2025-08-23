@@ -84,6 +84,7 @@ namespace LaserAlignDX.RunSpace
         public string ResultDesc => _imp.ResultDesc;
         public bool Running => _imp.Running;
         public string StripId { get => _imp.StripId; set => _imp.StripId = value; }
+        public string FileName { get => _imp.FileName; set => _imp.FileName = value; }
 
         public CMvdImage cMvdInput
         { 

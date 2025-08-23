@@ -148,7 +148,7 @@ namespace LaserAlignDX.BasicSpace
 
         const string cat2 = "01.其他设定";
 
-        [CategoryAttribute(cat2), DescriptionAttribute("1-红光 2-白光")]
+        [CategoryAttribute(cat2), DescriptionAttribute("1-红光 2-白光 3-红白光")]
         [DisplayName("A01.灯光通道")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(1, 4)]

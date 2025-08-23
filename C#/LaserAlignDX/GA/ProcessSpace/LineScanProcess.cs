@@ -80,9 +80,21 @@ namespace TravellerMINIX6.ProcessSpace
                             //if (MACHINE.PLCIO.LineScanStart)
                             {
                                 int _lightValue = xRecipe.xChValue;
-
-                                LightValue(_lightValue, xRecipe.xChNum);
-                                LightOnOff(true);
+                                switch (xRecipe.xChNum)
+                                {
+                                    case 4:
+                                    case 3:
+                                        LightValue(_lightValue, 1);
+                                        LightOnOff(true);
+                                        LightValue(_lightValue, 2);
+                                        LightOnOff(true);
+                                        break;
+                                    default:
+                                        LightValue(_lightValue, xRecipe.xChNum);
+                                        LightOnOff(true);
+                                        break;
+                                }
+                                
                                 _LOG($"{ToChangeLanguage("打开灯光")}[{_lightValue}]", Color.Black);
                                 //CommonLogClass.Instance.LogMessage($"{ToChangeLanguage("打开灯光")}[{_lightValue}]... ", Color.Black);
 
@@ -215,6 +227,7 @@ namespace TravellerMINIX6.ProcessSpace
                                     _LOG($"{ToChangeLanguage("StopGrab")}", Color.Black);
                                 }
                                 LightOnOff(false);
+                                LightOnOff(false, 2);
                                 _LOG($"{ToChangeLanguage("关闭灯光")}", Color.Black);
 
                             }
@@ -238,6 +251,7 @@ namespace TravellerMINIX6.ProcessSpace
                                     _LOG($"{ToChangeLanguage("StopGrab")}", Color.Black);
                                 }
                                 LightOnOff(false);
+                                LightOnOff(false, 2);
                                 _LOG($"{ToChangeLanguage("关闭灯光")}", Color.Black);
                             }
                         }

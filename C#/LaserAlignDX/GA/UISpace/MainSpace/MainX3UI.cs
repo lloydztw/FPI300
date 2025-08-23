@@ -915,6 +915,9 @@ namespace LaserAlignDX.UISpace.MainSpace
                     //收集所有信息
                     string _collectStrMsg = string.Empty;
                     DSMain.mvdRenderActivex1.ClearShapes();
+                    //string _reportStr = string.Empty;
+                    StringBuilder reportBuilder = new StringBuilder();
+                    reportBuilder.Append(ToReport1HeadStr());
 
                     //所有框的显示
                     foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
@@ -923,6 +926,8 @@ namespace LaserAlignDX.UISpace.MainSpace
                         _rectF.Inflate(xRecipe.xExtendx, xRecipe.xExtendy);
                         //BoundRect(ref _rectF, new Size((int)ProcessRunClass.Instance.cMvdInput.Width,
                         //                               (int)ProcessRunClass.Instance.cMvdInput.Height));
+
+                        reportBuilder.Append(cell.ToReport1Str());
 
                         _collectStrMsg += $"({cell.ToResultStr()})";
                         CMvdRectangleF mvdRectangleF = cell.DrawResultRectF();
@@ -941,8 +946,8 @@ namespace LaserAlignDX.UISpace.MainSpace
 
                                         cMvdTextFShowNoTray.BorderColor = new MVD_COLOR(255, 0, 0);
                                         cMvdTextFShowNoTray.FontWidth = 11;
-                                        if (INI.Instance.IsResultShowChar)
-                                            DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowNoTray);
+                                        //if (INI.Instance.IsResultShowChar)
+                                        DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowNoTray);
                                         DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(false));
                                     }
                                     else
@@ -1018,6 +1023,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                                         $"{cell.ToShowMainStr()}");
                                     cMvdTextFShowMain.BorderColor = new MVD_COLOR(0, 255, 0);// cell.DrawResultRectF().BorderColor;// new MVD_COLOR(0, 255, 0);
                                     cMvdTextFShowMain.FontWidth = 11;
+                                    cMvdTextFShowMain.FillColor = new MVD_COLOR(0, 0, 0, 50);
 
                                     if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                                     {
@@ -1079,6 +1085,15 @@ namespace LaserAlignDX.UISpace.MainSpace
                     _LOG($"LotID:{pRun.LotId}", Color.Black);
                     _LOG($"#数据信息:{_collectStrMsg}", Color.Black);
 
+
+                    //存储report
+                    string reportPath = $"{INI.Instance.ResultImagePath}\\report\\{DateTime.Now.ToString("yyyyMMdd")}\\{pRun.StripId}";
+                    if (!System.IO.Directory.Exists(reportPath))
+                    {
+                        System.IO.Directory.CreateDirectory(reportPath);
+                    }
+                    GaUtil.SaveData(reportBuilder.ToString(), reportPath + $"\\{pRun.FileName.Replace(".jpg", ".csv")}");
+
                     #region 显示格点之外的料件
 
                     switch (pRun.xScanInspectMode)
@@ -1136,6 +1151,38 @@ namespace LaserAlignDX.UISpace.MainSpace
             }
 
             CGOperate();
+        }
+        public string ToReport1HeadStr()
+        {
+            string str = string.Empty;
+
+            str += $"编号" + ",";
+            str += $"名称" + ",";
+            str += $"是否检测" + ",";
+            str += $"尺寸宽度X" + ",";
+            str += $"尺寸高度Y" + ",";
+            str += $"位置偏移X" + ",";
+            str += $"位置偏移Y" + ",";
+            str += $"原始X" + ",";
+            str += $"原始Y" + ",";
+            str += $"引导偏移X" + ",";
+            str += $"引导偏移Y" + ",";
+            str += $"引导偏移角度" + ",";
+
+            str += $"左边距" + ",";
+            str += $"右边距" + ",";
+            str += $"上边距" + ",";
+            str += $"下边距" + ",";
+
+            str += $"马达1-X" + ",";
+            str += $"马达1-Y" + ",";
+            str += $"马达2-X" + ",";
+            str += $"马达2-Y" + ",";
+            str += $"条码设定值" + ",";
+            str += $"读取码" + ",";
+            str += $"{Environment.NewLine}";
+
+            return str;
         }
 
 #if (OPT_MAIN_X6)

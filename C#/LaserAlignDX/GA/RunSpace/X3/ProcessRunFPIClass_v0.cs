@@ -103,8 +103,14 @@ namespace LaserAlignDX.RunSpace.V0
         private string m_LotId = "Lot_NONE";
         private string m_PicResultPath = INI.Instance.ResultImagePath;
         private string m_PicResultOrgPath = INI.Instance.ResultImagePath;
+        private string m_FileName = string.Empty;
         #endregion
 
+        public string FileName
+        {
+            get { return m_FileName; }
+            set { m_FileName = value; }
+        }
         public string LotId
         {
             get { return m_LotId; }
