@@ -1,5 +1,4 @@
-﻿using LeTian.Match;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
 
@@ -16,9 +15,9 @@ namespace LaserAlignDX
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            //// UNIT_TEST_CHIP_LOCATOR
-            //Test.Run();
-            //return;
+            // 只跑單元測試
+            if (run_unit_tests())
+                return;
 
             if (AppInstance())
             {
@@ -29,7 +28,6 @@ namespace LaserAlignDX
             //Application.Run(new frmMain());
             Application.Run(new Traveller106.frmMainDX());
         }
-
 
         public static bool AppInstance()
         {
@@ -45,5 +43,11 @@ namespace LaserAlignDX
             return (i > 1) ? true : false;
         }
 
+        static bool run_unit_tests()
+        {
+            //LeTian.Match.Test.Run();
+            //return true;
+            return false;
+        }
     }
 }

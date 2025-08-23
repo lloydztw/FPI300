@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\OpenCvSharp4.runtime.win.4.8.0.20230708\build\net48\OpenCvSharp4.runtime.win.props" Condition="Exists('..\packages\OpenCvSharp4.runtime.win.4.8.0.20230708\build\net48\OpenCvSharp4.runtime.win.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -13,6 +14,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -31,9 +34,11 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>TRACE;xFX3U | FATEK | OPT_LETIAN_AUTO_LAYOUT | xOPT_BYPASS_DONGLE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>coconut1.ico</ApplicationIcon>
@@ -274,25 +279,50 @@
       <HintPath>C:\Program Files\Common Files\JetEazy\ObjectListView.dll</HintPath>
     </Reference>
     <Reference Include="OpenCvSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\OpenCvSharp4.4.5.3.20211228\lib\net461\OpenCvSharp.dll</HintPath>
+      <HintPath>..\packages\OpenCvSharp4.4.8.0.20230708\lib\net48\OpenCvSharp.dll</HintPath>
     </Reference>
     <Reference Include="OpenCvSharp.Extensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\OpenCvSharp4.Extensions.4.5.3.20211228\lib\net461\OpenCvSharp.Extensions.dll</HintPath>
+      <HintPath>..\packages\OpenCvSharp4.Extensions.4.8.0.20230708\lib\net48\OpenCvSharp.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCvSharp.WpfExtensions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCvSharp4.WpfExtensions.4.8.0.20230708\lib\net48\OpenCvSharp.WpfExtensions.dll</HintPath>
     </Reference>
     <Reference Include="opencv_vbase, Version=2.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\opencv_vbase.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="ProjectForAllinone, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Dlls\ProjectForAllinone.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing.Common, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Drawing.Common.7.0.0\lib\net462\System.Drawing.Common.dll</HintPath>
+    </Reference>
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -310,6 +340,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\VisionMaster4.2.0\Development\V4.x\ComControls\Assembly\VM.PlatformSDKCS.dll</HintPath>
     </Reference>
+    <Reference Include="WindowsBase" />
     <Reference Include="zxing, Version=0.16.8.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Dlls\zxing.dll</HintPath>
@@ -320,6 +351,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GA.mvc\AoiModel\ChipLocator\IMvdTemplateMatcher.cs" />
+    <Compile Include="GA.mvc\AoiModel\ChipLocator\MvdChipMatcher.cs" />
+    <Compile Include="GA.mvc\AoiModel\ChipLocator\MvdChipMatcherRG.cs" />
+    <Compile Include="GA.mvc\AoiModel\ChipLocator\MvdCompositeChipMatcher.cs" />
+    <Compile Include="GA.mvc\AoiModel\IProcessRunFPI.cs" />
+    <Compile Include="GA.mvc\AoiModel\ProcessRunFPIClass.cs" />
+    <Compile Include="GA.mvc\AoiModel\ProcessRunFPIClass_v0.cs" />
+    <Compile Include="GA.mvc\AoiModel\ProcessRunFPIClass_v2.cs" />
+    <Compile Include="GA.mvc\AoiModel\ScanInspectModeEnum.cs" />
+    <Compile Include="GA.mvc\AoiModel\Supports\GaCellsGroup.cs" />
+    <Compile Include="GA.mvc\AoiModel\Supports\GaProgressEventArgs.cs" />
     <Compile Include="GA\BasicSpace\ChipClass.cs" />
     <Compile Include="GA\BasicSpace\CollectResultClass.cs" />
     <Compile Include="GA\BasicSpace\FindRectByVM.cs" />
@@ -518,17 +560,6 @@
     <Compile Include="GA\ProcessSpace\MainProcess.cs" />
     <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
     <Compile Include="GA\RunSpace\X2\ProcessRunClass.cs" />
-    <Compile Include="GA\RunSpace\X3\ChipMatcher\IMvdTemplateMatcher.cs" />
-    <Compile Include="GA\RunSpace\X3\ChipMatcher\MvdChipMatcherRG.cs" />
-    <Compile Include="GA\RunSpace\X3\IProcessRunFPI.cs" />
-    <Compile Include="GA\RunSpace\X3\ProcessRunFPIClass.cs" />
-    <Compile Include="GA\RunSpace\X3\ProcessRunFPIClass_v0.cs" />
-    <Compile Include="GA\RunSpace\X3\ProcessRunFPIClass_v2.cs" />
-    <Compile Include="GA\RunSpace\X3\ScanInspectModeEnum.cs" />
-    <Compile Include="GA\RunSpace\X3\Supports\GaCellsGroup.cs" />
-    <Compile Include="GA\RunSpace\X3\Supports\GaProgressEventArgs.cs" />
-    <Compile Include="GA\RunSpace\X3\ChipMatcher\MvdChipMatcher.cs" />
-    <Compile Include="GA\RunSpace\X3\ChipMatcher\MvdCompositeChipMatcher.cs" />
     <Compile Include="LT\DebugUtil\EzTiming.cs" />
     <Compile Include="LT\DebugUtil\LtDebug.cs" />
     <Compile Include="LT\LtAoiFactory.cs" />
@@ -658,9 +689,9 @@
     <Compile Include="GA\UISpace\UIMVC\View\PosUI.Designer.cs">
       <DependentUpon>PosUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="LT\AoiChipMatcher\EzPadsGridFinder.cs" />
-    <Compile Include="LT\AoiChipMatcher\EzRigidBodyGridMatcher.cs" />
-    <Compile Include="LT\AoiChipMatcher\VxDebugDrawer.cs" />
+    <Compile Include="GA.mvc\AoiModel\AoiLib\EzPadsGridFinder.cs" />
+    <Compile Include="GA.mvc\AoiModel\AoiLib\EzRigidBodyGridMatcher.cs" />
+    <Compile Include="LT\DebugUtil\VxDebugDrawer.cs" />
     <Compile Include="LT\UnitTest\UnitTest_ChipMatcher.cs" />
     <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">
       <DependentUpon>BannerForm.cs</DependentUpon>
@@ -801,8 +832,9 @@
     <EmbeddedResource Include="GA\UISpace\UIMVC\View\PosUI.resx">
       <DependentUpon>PosUI.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="GA.mvc\AoiModel\.Readme\Readme_ProcessRunFPIClass_就是_AoiEngine_的角色.md" />
+    <None Include="GA.mvc\AoiModel\ChipMeasurer\Readme.md" />
     <None Include="GA\RunSpace\X2\Readme.md" />
-    <None Include="GA\RunSpace\X3\.Readme\Readme_ProcessRunFPIClass_就是_AoiEngine_的角色.md" />
     <None Include="NLog.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
@@ -827,9 +859,9 @@
       <Project>{a1bcdee4-dd9a-43c2-a127-90b727eb0f04}</Project>
       <Name>EzAoiEmptyTrayInspector.Lib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\JetEazy.OpenCv4\JetEazy.OpenCv4.csproj">
+    <ProjectReference Include="..\JetEazy.Calib\JetEazy.Calib.csproj">
       <Project>{ecf19b8d-be9a-4159-8b94-defc25a59507}</Project>
-      <Name>JetEazy.OpenCv4</Name>
+      <Name>JetEazy.Calib</Name>
     </ProjectReference>
     <ProjectReference Include="..\JetEazy\JetEazy.csproj">
       <Project>{a24458c1-b3ac-462a-8b42-dafd1d420e19}</Project>
@@ -847,4 +879,10 @@
 copy $(ProjectDir)NLog.config $(TargetDir)NLog.config
 copy "C:\Program Files\Common Files\JetEazy\JetEazy.Crt.dll" $(TargetDir)JetEazy.Crt.dll</PostBuildEvent>
   </PropertyGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>此專案參考這部電腦上所缺少的 NuGet 套件。請啟用 NuGet 套件還原，以下載該套件。如需詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的檔案是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\OpenCvSharp4.runtime.win.4.8.0.20230708\build\net48\OpenCvSharp4.runtime.win.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCvSharp4.runtime.win.4.8.0.20230708\build\net48\OpenCvSharp4.runtime.win.props'))" />
+  </Target>
 </Project>
