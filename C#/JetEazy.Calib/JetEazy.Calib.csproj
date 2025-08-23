@@ -6,8 +6,8 @@
     <ProjectGuid>{ECF19B8D-BE9A-4159-8B94-DEFC25A59507}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>JetEazy.OpenCv4</RootNamespace>
-    <AssemblyName>JetEazy.OpenCv4</AssemblyName>
+    <RootNamespace>JetEazy.Calib</RootNamespace>
+    <AssemblyName>JetEazy.Calib</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>

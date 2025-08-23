@@ -29,7 +29,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;OPT_LETIAN_AUTO_LAYOUT</DefineConstants>
+    <DefineConstants>TRACE;OPT_LETIAN_AUTO_LAYOUT | xFX3U | xFATEK | CIP</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
