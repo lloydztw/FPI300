@@ -13,20 +13,14 @@
  */
 #endregion
 
-using JetEazy.Match;
-using JetEazy.QxCollections;
-using OpenCvSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using CvSize = OpenCvSharp.Size;
 using EzAoiBase = EzAoiEmptyTrayInspector.Model.Aoi.EzAoiBase;
 
-namespace LeTian.Match
+namespace LeTian.AoiLib
 {
     public class EzPadsGridFinder : EzAoiBase
     {
-        internal static bool VISUAL_DEBUG = false;
+        public static bool VISUAL_DEBUG = false;
 
         #region PRIVATE_DATA
         List<EzBloc> _blocs;

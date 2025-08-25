@@ -14,18 +14,7 @@
 #endregion
 
 
-using AUVision;
-using JetEazy.Match;
-using JetEazy.Utils;
-using LaserAlignDX.OPSpace.RecipeSpace;
-using LeTian.Match;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using VisionDesigner;
-using VisionDesigner.AlmightyPatMatch;
-using CvMat = OpenCvSharp.Mat;
-using LtDebug = LeTian.Match.LtDebug;
+using LeTian.AoiLib;
 
 
 namespace LaserAlignDX.RunSpace.Supports
