@@ -2,19 +2,18 @@
 using Eazy_Project_III;
 using FreeImageAPI;
 using JetEazy;
+using JetEazy.Utils;
+using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
-using LeTian.JxRecipesTool;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
-using MVD_CHIP_MATCHER = LaserAlignDX.RunSpace.Supports.MvdCompositeChipMatcher;
+using MVD_CHIP_MATCHER = LaserAlignDX.AoiModel.MvdCompositeChipMatcher;
 
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
@@ -24,7 +23,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #region SINGLETON
         protected RecipeFPIX3Class()
         {
-
         }
         private static RecipeFPIX3Class _instance = null;
         #endregion
@@ -494,6 +492,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             bool bOK = mvdprinttemp_Find.HikTrainBmp();
 #endif
             // LETIAN: Revised for multithread
+            mvdprinttemp_Find.SetRecipeParams(InspectX3ParaClass.Instance);
             bool bOK = mvdprinttemp_Find.Train(this.bmpDefectTemplate);
             return (bOK ? 0 : -1);
         }
@@ -588,7 +587,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             //二值化
             cImageBinaryToolObj.InputImage?.Dispose();
-            cImageBinaryToolObj.InputImage = BitmapToCMvdImage(ebmpInput);
+            cImageBinaryToolObj.InputImage = GaImageUtil.BitmapToCMvdImage(ebmpInput);
             cImageBinaryToolObj.ROI = null;
             cImageBinaryToolObj.SetRunParam("LowThreshold", FlyParaClass.Instance.xThresholdValue.ToString());
             //cImageArithmeticToolObj.SetRunParam("HighThreshold", BlobHighThreshold.ToString());
@@ -894,7 +893,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
 
-
         public int ViewTrainLoad()
         {
             int iret = 0;// Base0Train();
@@ -1019,9 +1017,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //}
 
         }
-#if MY_BACKUP
 
-public void CreateViews()
+#if (MY_BACKUP)
+
+        public void CreateViews()
         {
             xRegionCells.Clear();
 
@@ -1095,6 +1094,8 @@ public void CreateViews()
         }
 
 #endif
+
+#if(OPT_REPLACED_BY_GA_IMAGE_UTIL)
         protected CMvdImage BitmapToCMvdImage(Bitmap bmpInputImg)
         {
             CMvdImage cMvdImage = new CMvdImage();
@@ -1206,6 +1207,7 @@ public void CreateViews()
             return Math.Max(Math.Min(Value, Max), Min);
 
         }
+#endif
 
         /// <summary>
         /// 绕任意点旋转一个点
@@ -1378,11 +1380,13 @@ public void CreateViews()
 
     public class InspectX3ParaClass : RecipeBaseClass
     {
-        public InspectX3ParaClass()
+        #region SINGLETON
+        protected InspectX3ParaClass()
         {
 
         }
         private static InspectX3ParaClass _instance = null;
+        #endregion
         public static InspectX3ParaClass Instance
         {
             get
@@ -1413,6 +1417,11 @@ public void CreateViews()
 
         #region 基础设置
         const string _Cat1 = "A01.基础设置";
+        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的演算法")]
+        [DisplayName("A00.演算法")]
+        [TypeConverter(typeof(EnumConverter))]
+        [Browsable(true)]
+        public MatchAlgorithmEnum xAlgorithm { get; set; } = MatchAlgorithmEnum.GridMatch;
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的相似程度")]
         [DisplayName("A01.相似度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -1450,21 +1459,31 @@ public void CreateViews()
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1)]
         [Browsable(true)]
         public float xChipOverlap { get; set; } = 0.5f;
+        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的格點門限")]
+        [DisplayName("A07.格點門限")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
+        [Browsable(true)]
+        public int xGridPadThreshold { get; set; } = 0;
         #endregion
 
         #region 找直线的参数
 
         const string _Cat2 = "A02.尺寸检测参数设置";
-
-        [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
+        [CategoryAttribute(_Cat2)]
         [DisplayName("A00.测量方式")]
         [TypeConverter(typeof(JzEnumConverter))]
-        [Browsable(true)]
+        [Browsable(false)]
         public MeasureFindLineType MFLType { get; set; } = MeasureFindLineType.FindLineType_v1;
 
+        [CategoryAttribute(_Cat2)]
+        [DisplayName("A00.載台背景")]
+        [TypeConverter(typeof(JzEnumConverter))]
+        [Browsable(true)]
+        public EdgeBackGroundType CarrierBackground { get; set; }
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
         [DisplayName("A01.左边查找方向")]
-        [Browsable(true)]
+        [Browsable(false)]
         public bool bPositive0 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A02.左边极性")]
@@ -1473,7 +1492,7 @@ public void CreateViews()
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
         [DisplayName("A03.上边查找方向")]
-        [Browsable(true)]
+        [Browsable(false)]
         public bool bPositive1 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A04.上边极性")]
@@ -1482,7 +1501,7 @@ public void CreateViews()
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
         [DisplayName("A05.右边查找方向")]
-        [Browsable(true)]
+        [Browsable(false)]
         public bool bPositive2 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A06.右边极性")]
@@ -1491,7 +1510,7 @@ public void CreateViews()
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
         [DisplayName("A07.下边查找方向")]
-        [Browsable(true)]
+        [Browsable(false)]
         public bool bPositive3 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A08.下边极性")]
@@ -1626,12 +1645,14 @@ public void CreateViews()
 
         public override void Load(bool eCancel = false)
         {
+            xAlgorithm = (MatchAlgorithmEnum)int.Parse(ReadINIValue("Basic", "xAlgorithm", "0", INIFILE));
             xTolerance = float.Parse(ReadINIValue("Basic", "xTolerance", "0.5", INIFILE));
             xAngle = float.Parse(ReadINIValue("Basic", "xAngle", "30", INIFILE));
             xExtendx = int.Parse(ReadINIValue("Basic", "xExtendx", "20", INIFILE));
             xExtendy = int.Parse(ReadINIValue("Basic", "xExtendy", "20", INIFILE));
             xMaxOverlap = int.Parse(ReadINIValue("Basic", "xMaxOverlap", "80", INIFILE));
             xChipOverlap = float.Parse(ReadINIValue("Basic", "xChipOverlap", "0.5", INIFILE));
+            xGridPadThreshold = int.Parse(ReadINIValue("Basic", "xGridPadThreshold", "0", INIFILE));
 
             bCheckInspect = ReadINIValue("Inspect", "bCheckInspect", "1", INIFILE) == "1";
             xThresholdValue = int.Parse(ReadINIValue("Inspect", "xThresholdValue", "128", INIFILE));
@@ -1656,6 +1677,7 @@ public void CreateViews()
             bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
             bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", INIFILE) == "1";
             MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
+            CarrierBackground = (EdgeBackGroundType)int.Parse(ReadINIValue("Basic", "CarrierBackground", "0", INIFILE));
             bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
             bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
             bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
@@ -1677,12 +1699,14 @@ public void CreateViews()
         }
         public override void Save()
         {
+            WriteINIValue("Basic", "xAlgorithm", ((int)xAlgorithm).ToString(), INIFILE);
             WriteINIValue("Basic", "xTolerance", xTolerance.ToString(), INIFILE);
             WriteINIValue("Basic", "xAngle", xAngle.ToString(), INIFILE);
             WriteINIValue("Basic", "xExtendx", xExtendx.ToString(), INIFILE);
             WriteINIValue("Basic", "xExtendy", xExtendy.ToString(), INIFILE);
             WriteINIValue("Basic", "xMaxOverlap", xMaxOverlap.ToString(), INIFILE);
             WriteINIValue("Basic", "xChipOverlap", xChipOverlap.ToString(), INIFILE);
+            WriteINIValue("Basic", "xGridPadThreshold", xGridPadThreshold.ToString(), INIFILE);
 
             WriteINIValue("Inspect", "bCheckInspect", (bCheckInspect ? "1" : "0"), INIFILE);
             WriteINIValue("Inspect", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
@@ -1696,6 +1720,7 @@ public void CreateViews()
             WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
+            WriteINIValue("Basic", "CarrierBackground", ((int)CarrierBackground).ToString(), INIFILE);
 
             WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);

@@ -17,7 +17,7 @@
  *
  ***************************************************************************/
 
-namespace LeTian.Match
+namespace LeTian.AoiLib
 {
     public class LtDebug
     {
@@ -25,6 +25,11 @@ namespace LeTian.Match
         static NLog.Logger _NLOG = NLog.LogManager.GetCurrentClassLogger();
         static EzTiming _TM = new EzTiming(_NLOG);
         #endregion
+        
+        public static NLog.Logger LOG
+        {
+            get => _NLOG;
+        }
 
         public static void Reset()
         {
@@ -54,11 +59,6 @@ namespace LeTian.Match
         public static void DUMP_ACCUM()
         {
             _TM?.DUMP_ACCUM();
-        }
-
-        public static NLog.Logger LOG
-        {
-            get => _NLOG;
         }
     }
 }

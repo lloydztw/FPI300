@@ -1,6 +1,7 @@
 ﻿using FreeImageAPI;
 using JetEazy.BasicSpace;
 using JetEazy.Utils;
+using LaserAlignDX.AoiModel;
 using LaserAlignDX.FormSpace;
 using LaserAlignDX.RunSpace;
 using NeedleX.ProcessSpace;
@@ -59,18 +60,21 @@ namespace TravellerMINIX6.ProcessSpace
 
                     if (!string.IsNullOrEmpty(fileName))
                     {
-                        //using (EzMvdImageConvertor.LoadBigImage(fileName))
-                        using (Bitmap bmp = EzMvdImageConvertor.LoadBigImage(fileName))
-                        {
-                            pRun.cMvdInput?.Dispose();
-                            pRun.cMvdInput = EzMvdImageConvertor.BitmapToCMvdImage(bmp);
+                        ////using (EzMvdImageConvertor.LoadBigImage(fileName))
+                        //using (Bitmap bmp = EzMvdImageConvertor.LoadBigImage(fileName))
+                        //{
+                        //    pRun.cMvdInput?.Dispose();
+                        //    pRun.cMvdInput = EzMvdImageConvertor.BitmapToCMvdImage(bmp);
 
-                            using (var dummy = new Bitmap(1, 1))
-                            {
-                                //LETIAN: FireLiveImaging 必須由 caller 負責 bitmap 的 life-cycle
-                                FireLiveImaging(dummy);
-                            }
-                        }
+                        //    using (var dummy = new Bitmap(1, 1))
+                        //    {
+                        //        //LETIAN: FireLiveImaging 必須由 caller 負責 bitmap 的 life-cycle
+                        //        FireLiveImaging(dummy);
+                        //    }
+                        //}
+                        Bitmap bitmap = IScanCam.GetFreeImageBitmap().ToBitmap();
+                        pRun.LineScanCamImageHolder.TakeOver(bitmap);
+                        FireLiveImaging(bitmap);
                     }
                     else
                     {
@@ -157,10 +161,10 @@ namespace TravellerMINIX6.ProcessSpace
 
                             switch (pRun.xScanInspectMode)
                             {
-                                case LaserAlignDX.RunSpace.ScanInspectMode.MEASUREAOI:
+                                case ScanInspectMode.MEASUREAOI:
                                     break;
 
-                                case LaserAlignDX.RunSpace.ScanInspectMode.QRCODE:
+                                case ScanInspectMode.QRCODE:
 
                                     int[] ints1 = pRun.GetQrResult();
 
@@ -172,7 +176,7 @@ namespace TravellerMINIX6.ProcessSpace
                                     _LOG("QrResult:" + sb2.ToString(), Color.Black);
                                     break;
 
-                                case LaserAlignDX.RunSpace.ScanInspectMode.NOTRAY:
+                                case ScanInspectMode.NOTRAY:
                                     break;
                             }
 

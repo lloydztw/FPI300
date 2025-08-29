@@ -11,6 +11,7 @@ using JetEazy.DBSpace;
 using JetEazy.Interface;
 using JetEazy.OPSpace;
 using JetEazy.PropertyGridSpace;
+using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace.ParaSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;

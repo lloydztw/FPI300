@@ -1,6 +1,7 @@
 ﻿using Eazy_Project_III;
 using JetEazy.BasicSpace;
 using JetEazy.Interface;
+using LaserAlignDX.AoiModel;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.RunSpace;

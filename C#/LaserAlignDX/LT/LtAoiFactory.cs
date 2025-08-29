@@ -17,6 +17,7 @@
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
 using JetEazy.Match;
+using JetEazy.OpenCV;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -60,24 +61,42 @@ namespace Traveller106
         /// <summary>
         /// 開啟 Tool Window
         /// </summary>
-        public static Form OpenEmptyTrayInspectorTool(Form owner, string recipeName = null)
+        public static Form OpenEmptyTrayInspectorTool(Form owner, string recipeName = null, Bitmap bmpToShow = null)
         {
             if (recipeName == null)
                 recipeName = GetActiveRecipeNameAtFPI30();
 
             var frm = AoiFactory.OpenEmptyTrayInspectorTool(owner, recipeName);
-            frm?.Show();
+            if (frm == null)
+                return null;
+
+            if (bmpToShow != null)
+            {
+                frm.Load += (s, e) =>
+                {
+                    frm.BeginInvoke(new Action(() =>
+                    {
+                        PushBitmap(bmpToShow, "RecipeOrg");
+                    }));
+                };
+            }
+
+            frm.Show();
             return frm;
         }
 
         /// <summary>
         /// 推送影像到 Tool Window
-        /// - AoiFactory 負責接手管控 image 生命週期
+        /// - AoiFactory 負責接手管控 bmp 生命週期
         /// - name 為標記名稱
         /// </summary>
-        public static void PushImage(IEzImage image, string name)
+        public static void PushBitmap(Bitmap bmp, string name)
         {
-            AoiFactory.PushImage(image, name);
+            using (var bridge = new QxImageBridge(bmp))
+            {
+                var qImg = new EzQuickImage(bridge.Image, true);
+                AoiFactory.PushImage(qImg, name);
+            }
         }
 
         public static EzBlocsGrid DetectGrid(Bitmap fullfovBmp)

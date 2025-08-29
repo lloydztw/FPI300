@@ -1,5 +1,6 @@
 ﻿using JetEazy.BasicSpace;
 using JetEazy.Utils;
+using LaserAlignDX.AoiModel;
 using NeedleX.ProcessSpace;
 using System;
 using System.Drawing;
@@ -165,16 +166,19 @@ namespace TravellerMINIX6.ProcessSpace
                                     }
                                     else
                                     {
-                                        using (Bitmap bitmap = IScanCam.GetFreeImageBitmap().ToBitmap())
-                                        {
-                                            pRun.cMvdInput = EzMvdImageConvertor.BitmapToCMvdImage(bitmap);
+                                        //using (Bitmap bitmap = IScanCam.GetFreeImageBitmap().ToBitmap())
+                                        //{
+                                        //    pRun.cMvdInput = EzMvdImageConvertor.BitmapToCMvdImage(bitmap);
+                                        //    using (var dummy = new Bitmap(1, 1))
+                                        //    {
+                                        //        //LETIAN: FireLiveImaging 必須由 caller 負責 bitmap 的 life-cycle
+                                        //        FireLiveImaging(dummy);
+                                        //    }
+                                        //}
 
-                                            using (var dummy = new Bitmap(1, 1))
-                                            {
-                                                //LETIAN: FireLiveImaging 必須由 caller 負責 bitmap 的 life-cycle
-                                                FireLiveImaging(dummy);
-                                            }
-                                        }
+                                        Bitmap bitmap = IScanCam.GetFreeImageBitmap().ToBitmap();
+                                        pRun.LineScanCamImageHolder.TakeOver(bitmap);
+                                        FireLiveImaging(bitmap);
                                     }
 
                                     switch(Process.RelateString)
@@ -261,17 +265,17 @@ namespace TravellerMINIX6.ProcessSpace
                         {
                             if (MACHINEx3.PLCIO.iScanStatus == 3)
                             {
-                                pRun.xScanInspectMode = LaserAlignDX.RunSpace.ScanInspectMode.NOTRAY;
+                                pRun.xScanInspectMode = ScanInspectMode.NOTRAY;
                             }
                             else if (MACHINEx3.PLCIO.iScanStatus == 2)
                             {
-                                pRun.xScanInspectMode = LaserAlignDX.RunSpace.ScanInspectMode.QRCODE;
+                                pRun.xScanInspectMode = ScanInspectMode.QRCODE;
                                 pRun.QrUsed = MACHINEx3.PLCIO.bQRUsed;
                                 pRun.QrJudged = MACHINEx3.PLCIO.bQRJudgeUsed;
                             }
                             else
                             {
-                                pRun.xScanInspectMode = LaserAlignDX.RunSpace.ScanInspectMode.MEASUREAOI;
+                                pRun.xScanInspectMode = ScanInspectMode.MEASUREAOI;
                             }
 
                             pRun.StripId = StripID;
@@ -319,13 +323,13 @@ namespace TravellerMINIX6.ProcessSpace
 
                                 switch (pRun.xScanInspectMode)
                                 {
-                                    case LaserAlignDX.RunSpace.ScanInspectMode.MEASUREAOI:
+                                    case ScanInspectMode.MEASUREAOI:
 
                                         MACHINEx3.PLCIO.iSingleResult(ints0);
                                         MACHINEx3.PLCIO.rScanOffset(floats0);
 
                                         break;
-                                    case LaserAlignDX.RunSpace.ScanInspectMode.QRCODE:
+                                    case ScanInspectMode.QRCODE:
 
                                         int[] ints1 = pRun.GetQrResult();
 
@@ -342,7 +346,7 @@ namespace TravellerMINIX6.ProcessSpace
                                         MACHINEx3.PLCIO.rScanOffset(floats0);
 
                                         break;
-                                    case LaserAlignDX.RunSpace.ScanInspectMode.NOTRAY:
+                                    case ScanInspectMode.NOTRAY:
 
                                         MACHINEx3.PLCIO.iSingleResult(ints0);
 

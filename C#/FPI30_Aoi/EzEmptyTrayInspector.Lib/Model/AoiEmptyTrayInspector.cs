@@ -207,6 +207,8 @@ namespace EzAoiEmptyTrayInspector.Model
                     _recipe?.AddRef();  // AddRef 代表 _recipe 被 AoiModel 持有使用中. 
                     old?.Release();
                 }
+
+                _recipe.VisionSettings.Inverse.OnModified += (s, e) => clear_golden_grid_cache();
             }
         }
 
@@ -293,8 +295,9 @@ namespace EzAoiEmptyTrayInspector.Model
                 _recipe.TrayMiscSettings.FovHeight.Value = largeImg.Height;
 
                 // large Golden Grid image
+                var backColor = true || _recipe.VisionSettings.Inverse.Value ? Scalar.Black : Scalar.White;
                 _largeGoldenGridImage?.Dispose();
-                _largeGoldenGridImage = rebuild_golden_grid_image();
+                _largeGoldenGridImage = rebuild_golden_grid_image(backColor);
                 _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, null);
             }
 
@@ -647,6 +650,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     return;
 
                 double globalRotAngle = 0;
+
                 if (false)
                 {
                     var rotSettings = _recipe.GetSiteSettings((int)sideId).RotAngle;
@@ -750,7 +754,10 @@ namespace EzAoiEmptyTrayInspector.Model
 
                 // LARGE GOLDEN GRID IMAGE (rebuilt from recipe)
                 if (_largeGoldenGridImage == null)
-                    _largeGoldenGridImage = rebuild_golden_grid_image();
+                {
+                    var backColor = true || _recipe.VisionSettings.Inverse.Value ? Scalar.Black : Scalar.White;
+                    _largeGoldenGridImage = rebuild_golden_grid_image(backColor);
+                }
                 if (_largeGoldenGridImage == null)
                 {
                     _LOG.Warn("[AOI] largetGoldenGridImage 無重建!");
@@ -925,7 +932,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 }
             }
         }
-        Mat rebuild_golden_grid_image(bool useColorFill = false)
+        Mat rebuild_golden_grid_image(Scalar backColor, bool useSimpleColorBlock = false)
         {
             if (_recipe == null)
                 return null;
@@ -940,10 +947,10 @@ namespace EzAoiEmptyTrayInspector.Model
                 return null;
 
             var largeGG = new Mat(H, W, MatType.CV_8UC1);
-            largeGG.SetTo(Scalar.White);
+            largeGG.SetTo(backColor);
 
             var goldenBmp = _recipe.VisionSettings.Match.GoldenBmp.Value as Bitmap;
-            if (goldenBmp == null || useColorFill)
+            if (goldenBmp == null || useSimpleColorBlock)
             {
                 foreach (var bloc in goldenGrid.IterBlocs())
                 {
@@ -1152,16 +1159,24 @@ namespace EzAoiEmptyTrayInspector.Model
             try
             {
                 var tm0 = DateTime.Now;
-                
+
+                auto_inverse(imgA, (Bitmap)_recipe.VisionSettings.Match.GoldenBmp.Value);
+
                 run_match(SideID.A, imgA, _dumpPath);
 
                 var matchResult = _matchResults[0];
-                if (_recipe.VisionSettings.FindAllFailBlocs.Value && _recipe.VisionSettings.Match.UseGrid)
+
+                if (matchResult != null)
                 {
-                    run_on_grid_ng_predict(SideID.A, imgA, matchResult, _dumpPath);
-                    run_off_grid_ng_detect(SideID.A, imgA, matchResult, _dumpPath, out List<EzBloc> ngBloc);
-                    matchResult.OutGridBlocs = ngBloc;
+                    if (_recipe.VisionSettings.FindAllFailBlocs.Value && _recipe.VisionSettings.Match.UseGrid)
+                    {
+                        run_on_grid_ng_predict(SideID.A, imgA, matchResult, _dumpPath);
+                        run_off_grid_ng_detect(SideID.A, imgA, matchResult, _dumpPath, out List<EzBloc> ngBloc);
+                        matchResult.OutGridBlocs = ngBloc;
+                    }
                 }
+
+                auto_inverse(imgA, (Bitmap)_recipe.VisionSettings.Match.GoldenBmp.Value);
 
                 var ts = DateTime.Now - tm0;
 
@@ -1183,6 +1198,24 @@ namespace EzAoiEmptyTrayInspector.Model
                 _finalResult = finalResult;
                 changeState("Ready");
                 OnFinalResulted?.Invoke(this, new AoiResultEventArgs(_finalResult));
+            }
+        }
+        void auto_inverse(Mat sceneImg, Bitmap bmpGolden)
+        {
+            bool inverse = _recipe.VisionSettings.Inverse;
+            if (!inverse)
+                return;
+
+            if (sceneImg != null)
+            {
+                Cv2.BitwiseNot(sceneImg, sceneImg);
+            }
+            if (bmpGolden != null)
+            {
+                using (var bridge = new QxImageBridge(bmpGolden))
+                {
+                    Cv2.BitwiseNot(bridge.Image, bridge.Image);
+                }
             }
         }
         void dump_result_image(string outputFileName, Mat imgA, EzEmptyTrayResult result)

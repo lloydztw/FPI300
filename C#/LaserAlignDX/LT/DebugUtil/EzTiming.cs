@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 
 
-namespace LeTian.Match
+namespace LeTian.AoiLib
 {
     /// <summary>
     /// 效能追蹤計時

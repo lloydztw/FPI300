@@ -6,6 +6,7 @@ using JetEazy.CCDSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using JetEazy.XContainer;
+using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace;
@@ -1223,7 +1224,7 @@ namespace LaserAlignDX.UISpace.MainSpace
 
         private void process_OnLiveImage(object sender, ProcessEventArgs e)
         {
-            if (e.Tag != null && e.Tag is Bitmap)
+            if (e.Tag != null && e.Tag is Bitmap bmp)
             {
                 try
                 {
@@ -1234,13 +1235,10 @@ namespace LaserAlignDX.UISpace.MainSpace
                     }
                     else
                     {
-                        //@LETIAN: 2022/07/01 改用 GdxDispUI 增加一些 fps
-                        // bmp 由 Sender maintains life cycle.
-                        // 在此不用 Dispose
-                        //Bitmap bmp = (Bitmap)e.Tag;
-                        //dispUI1.UpdateLiveImage(bmp);
-                        //DS1.ReplaceDisplayImage(bmp);
-                        DSMain.mvdRenderActivex1.LoadImageFromObject(pRun.cMvdInput.Clone());
+                        //NOTE: bmp 由 sender 維持其生命周期. 在此不用調用 Dispose !!!
+                        //2025-08-28 @LETIAN: 巨圖 Bitmap 統一由 LineScanCamImageHolder 保管其生命週期 !!!
+                        CMvdImage mvdImage = pRun.LineScanCamImageHolder.PeekMvdImage();
+                        DSMain.mvdRenderActivex1.LoadImageFromObject(mvdImage);
                         DSMain.mvdRenderActivex1.ClearShapes();
                         DSMain.AddCross();
                         DSMain.mvdRenderActivex1.Display();

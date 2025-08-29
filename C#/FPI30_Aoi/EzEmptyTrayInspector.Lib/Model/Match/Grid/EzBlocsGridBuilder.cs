@@ -73,6 +73,21 @@ namespace JetEazy.Match
             return globalGrid;
         }
 
+        public EzBlocsGrid BuildEmptyGrid(IList<EzBloc> blocs, int rows, int cols)
+        {
+            if (blocs == null)
+                return null;
+
+            var bound = get_boundary(blocs);
+            var aveSize = get_ave_size(blocs);
+            var pitch = search_best_pitches(blocs, aveSize);
+            if (pitch.X <= 0) pitch.X = bound.Width;
+            if (pitch.Y <= 0) pitch.Y = bound.Height;
+
+            var grid = new EzBlocsGrid(bound, pitch, rows, cols);
+            return grid;
+        }
+
         #region PRIVATE_BUILD_FUNCTIONS
         internal static Rectangle get_boundary(IEnumerable<EzBloc> blocs)
         {

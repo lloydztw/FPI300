@@ -1,4 +1,19 @@
-﻿using FreeImageAPI;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-08-01 初稿 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using FreeImageAPI;
 using JetEazy.EzImage;
 using JetEazy.OpenCV;
 using OpenCvSharp;
@@ -16,7 +31,7 @@ namespace JetEazy.Utils
     {
         /// <summary>
         /// 會生成新的 CMvdImage.
-        /// Caller 必須接管其生命週期 !!!
+        /// Caller 必須接管 mvdImage 與 srcBmp 之生命週期 !!!
         /// </summary>
         public static CMvdImage BitmapToCMvdImage(Bitmap srcBmp)
         {
@@ -157,6 +172,42 @@ namespace JetEazy.Utils
         }
         #endregion
 
+        /// <summary>
+        /// 暫時性使用 C# Bitmap 來觀察 mvdImage 內容.
+        /// Caller 不得釋放 此函式所取的取得的 Bitmap !!!
+        /// </summary>
+        public static Bitmap PeekBmp(CMvdImage mvdImage)
+        {
+            //if (mvdImage == null)
+            //    return null;
+            var mat = PeekMat(mvdImage);
+            if (mat == null)
+                return null;
+            IntPtr dataPtr = mat.Data;
+            Bitmap bmp = new Bitmap(mat.Width, mat.Height, (int)mat.Step(), PixelFormat.Format8bppIndexed, dataPtr);
+            return bmp;
+        }
+
+        /// <summary>
+        /// 暫時性使用 OpenCvSharp Mat 來觀察 mvdImage 內容.
+        /// Caller 不得釋放 此函式所取的取得的 Mat !!!
+        /// </summary>
+        public static Mat PeekMat(CMvdImage mvdImage)
+        {
+            if (mvdImage == null)
+                return null;
+
+            MVD_IMAGE_DATA_INFO info = mvdImage.GetImageData();
+            MVD_DATA_CHANNEL_INFO ch0 = info.stDataChannel[0];
+            var dataBytes = ch0.arrDataBytes;
+            int width = (int)ch0.nRowStep;
+            int height = (int)(ch0.nLen / ch0.nRowStep);
+            int stride = width;
+            Mat mat = new Mat(height, width, MatType.CV_8UC1, dataBytes, stride);
+
+            return mat;
+        }
+
         public static CMvdRectangleF ToCMvdRectangleF(ref RectangleF viewRectF)
         {
             return new CMvdRectangleF(
@@ -166,7 +217,6 @@ namespace JetEazy.Utils
                             viewRectF.Height
                         );
         }
-
         public static RectangleF ToRectangleF(CMvdRectangleF cMvdRectangleF)
         {
             if (cMvdRectangleF != null)
