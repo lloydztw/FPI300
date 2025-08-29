@@ -32,6 +32,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
     /// </summary>
     public partial class GaMainCtrl : Abs.GaMainCtrl, IxTickable
     {
+        static bool OPT_USE_LETIAN_NEW_VIEWER = true;
+
         #region MACHINE
         //List<CollectResultClass> collectResultClasses = new List<CollectResultClass>();
         //protected MachineCollectionClass MACHINECollection
@@ -105,16 +107,22 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
 
         IvChipCellsViewer buildChipCellsViewer(MVSUI mvsui)
         {
-            //>>> return new MvsChipCellsViewer(mvsui);
-            var parent = mvsui.Parent;
-            var viewer = new JezChipCellsViewPanel();
-            viewer.Location = mvsui.Location;
-            viewer.Size = mvsui.Size;
-            viewer.Dock = mvsui.Dock;
-            viewer.Visible = true;
-            mvsui.Visible = false;
-            parent.Controls.Add(viewer);
-            return viewer;
+            if (OPT_USE_LETIAN_NEW_VIEWER)
+            {
+                var parent = mvsui.Parent;
+                var viewer = new JezChipCellsViewPanel();
+                viewer.Location = mvsui.Location;
+                viewer.Size = mvsui.Size;
+                viewer.Dock = mvsui.Dock;
+                viewer.Visible = true;
+                mvsui.Visible = false;
+                parent.Controls.Add(viewer);
+                return viewer;
+            }
+            else
+            {
+                return new MvsChipCellsViewer(mvsui);
+            }
         }
 
         #region PROCESSES_這以後要納入_SYS_MODEL

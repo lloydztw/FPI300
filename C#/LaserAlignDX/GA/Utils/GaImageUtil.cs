@@ -482,7 +482,10 @@ namespace JetEazy.Utils
             {
                 // 設置調色板
                 ColorPalette palette = bmpU8.Palette;
-                for (int i = 0; i < 256; i++)
+                int N = palette.Entries.Length;
+                if (N != 256)
+                    return;
+                for (int i = 0; i < 256 && i < N; i++)
                 {
                     palette.Entries[i] = Color.FromArgb(i, i, i); // 設置灰度調色板
                 }

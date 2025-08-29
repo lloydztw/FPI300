@@ -65,14 +65,17 @@ namespace TravellerMINIX6.ProcessSpace
                         //{
                         //    pRun.cMvdInput?.Dispose();
                         //    pRun.cMvdInput = EzMvdImageConvertor.BitmapToCMvdImage(bmp);
-
                         //    using (var dummy = new Bitmap(1, 1))
                         //    {
                         //        //LETIAN: FireLiveImaging 必須由 caller 負責 bitmap 的 life-cycle
                         //        FireLiveImaging(dummy);
                         //    }
                         //}
-                        Bitmap bitmap = IScanCam.GetFreeImageBitmap().ToBitmap();
+
+                        // 2025-08-28 LETIAN:
+                        //  巨圖 統一由 LineScanCamImageHolder 保管其生命週期
+                        //  不再使用不安全的 cMvdInput !!!
+                        Bitmap bitmap = GaImageUtil.LoadBigImage(fileName);
                         pRun.LineScanCamImageHolder.TakeOver(bitmap);
                         FireLiveImaging(bitmap);
                     }

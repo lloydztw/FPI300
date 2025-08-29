@@ -67,8 +67,9 @@ namespace LaserAlignDX.AoiModel
         }
 
         /// <summary>
-        /// 暫時性使用 C# Bitmap 來觀察 mvdImage 內容.
+        /// Runtime 使用 C# Bitmap 來觀察 mvdImage 內容.
         /// Caller 不得釋放 此函式所取的取得的 Bitmap !!!
+        /// 由於沒有 data copy, 此函式可以大幅增進效能.
         /// </summary>
         public Bitmap PeekBitmap()
         {
@@ -82,8 +83,9 @@ namespace LaserAlignDX.AoiModel
         }
 
         /// <summary>
-        /// 暫時性使用 OpenCvSharp Mat 來觀察 mvdImage 內容.
+        /// Runtime 使用 OpenCvSharp Mat 來觀察 mvdImage 內容.
         /// Caller 不得釋放 此函式所取的取得的 Mat !!!
+        /// 由於沒有 data copy, 此函式可以大幅增進效能.
         /// </summary>
         public CMvdImage PeekMvdImage()
         {

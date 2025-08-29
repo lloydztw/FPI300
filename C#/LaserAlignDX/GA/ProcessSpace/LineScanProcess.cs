@@ -176,6 +176,9 @@ namespace TravellerMINIX6.ProcessSpace
                                         //    }
                                         //}
 
+                                        // 2025-08-28 LETIAN:
+                                        //  巨圖 統一由 LineScanCamImageHolder 保管其生命週期
+                                        //  不再使用不安全的 cMvdInput !!!
                                         Bitmap bitmap = IScanCam.GetFreeImageBitmap().ToBitmap();
                                         pRun.LineScanCamImageHolder.TakeOver(bitmap);
                                         FireLiveImaging(bitmap);
