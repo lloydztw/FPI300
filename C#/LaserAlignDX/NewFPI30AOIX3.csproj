@@ -381,7 +381,7 @@
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\MvdChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\MvdChipMatcherRG.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\MvdCompositeChipMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\FpiBigImagesHolder.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\TravellerBigImagesHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v2.cs" />

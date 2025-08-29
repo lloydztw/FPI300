@@ -80,7 +80,7 @@ namespace LaserAlignDX.AoiModel.V2
         /// </summary>
         public GaBigImageHolder LineScanCamImageHolder
         {
-            get => FpiBigImagesHolder.Instance.LineScanImageHolder;
+            get => TravellerBigImagesHolder.Instance.LineScanImageHolder;
         }
         Bitmap PeekLineScanBitmap()
         {

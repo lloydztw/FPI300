@@ -27,11 +27,11 @@ namespace LaserAlignDX.BasicSpace
             _imp = null;
         }
 
-        public CMvdLineSegmentF Run(Bitmap bmpInput, RectangleF roi, int borderId = -1)
+        public CMvdLineSegmentF Run(Bitmap bmpInput, RectangleF roi, int borderId)
         {
             return _imp?.Run(bmpInput, roi, borderId);
         }
-        public CMvdLineSegmentF Run(Bitmap bmpInput, CMvdRectangleF roi, int borderId = -1)
+        public CMvdLineSegmentF Run(Bitmap bmpInput, CMvdRectangleF roi, int borderId)
         {
             return _imp?.Run(bmpInput, roi, borderId);
         }

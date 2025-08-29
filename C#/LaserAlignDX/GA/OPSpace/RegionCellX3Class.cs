@@ -126,8 +126,8 @@ namespace LaserAlignDX.OPSpace
         /// </summary>
         /// <param name="iSideIndex">哪条边序号</param>
         /// <param name="bmp">输入图片</param>
-        /// <param name="r">寻找的ROI</param>
-        public void LineSegmentRun(int iSideIndex, Bitmap bmp, CMvdRectangleF r)
+        /// <param name="roi">寻找的ROI</param>
+        public void LineSegmentRun(int iSideIndex, Bitmap bmp, CMvdRectangleF roi)
         {
             if (mvdFindLineClass == null)
                 mvdFindLineClass = new MvdFindLineClass();
@@ -156,7 +156,7 @@ namespace LaserAlignDX.OPSpace
                 mvdFindLineClass.bFindOrient = false;
                 mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity3;
             }
-            cMvdLineSegmentFsOut[iSideIndex] = mvdFindLineClass.Run(bmp, r);
+            cMvdLineSegmentFsOut[iSideIndex] = mvdFindLineClass.Run(bmp, roi, iSideIndex);
         }
         /// <summary>
         /// 寻找平行线

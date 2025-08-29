@@ -1,4 +1,5 @@
-﻿using JzDisplay;
+﻿using JetEazy.Utils;
+using JzDisplay;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
@@ -10,6 +11,7 @@ using VisionDesigner;
 using VisionDesigner.PairLineFind;
 using VsCommon.ControlSpace.MachineSpace;
 using WorldOfMoveableObjects;
+
 
 namespace LaserAlignDX.FormSpace
 {
@@ -381,9 +383,6 @@ namespace LaserAlignDX.FormSpace
             JetEazy.BasicSpace.VsMSG.Instance.Warning($"保存成功", false);
         }
 
-
-
-
         void init_Display()
         {
             DS1.Initial(100, 0.01f);
@@ -408,11 +407,13 @@ namespace LaserAlignDX.FormSpace
             if (eChangeToDefault)
                 DS3.DefaultView();
         }
-        private void DS_CaptureAction(RectangleF rectf)
+        void DS_CaptureAction(RectangleF rectf)
         {
             if (!bSelectRegion)
                 return;
-            BoundRect(ref rectf, xRecipe.bmpprinttemplate.Size);
+
+            GaUtil.BoundRect(ref rectf, xRecipe.bmpprinttemplate.Size);
+
             if (rectf.Width > 1 && rectf.Height > 1)
             {
                 DS1.ClearStaticMover();
@@ -425,7 +426,7 @@ namespace LaserAlignDX.FormSpace
                 xMoversDs1.Add(_rect);
 
 
-                if (radioButton1.Checked)//template
+                if (radioButton1.Checked)       //template
                 {
                     xRecipe.xRegionTrain = rectf;
                     xRecipe.bmpDefectTemplate?.Dispose();
@@ -433,15 +434,16 @@ namespace LaserAlignDX.FormSpace
                     xRecipe.SavePrintTemplateRegionTrain();
                     DS2.ReplaceDisplayImage(xRecipe.bmpDefectTemplate);
                 }
-                else if (radioButton2.Checked)//code
+                else if (radioButton2.Checked)  //code
                 {
                     xRecipe.xRectCodeRegion = rectf;
                     xRecipe.bmpcodetemplate?.Dispose();
                     xRecipe.bmpcodetemplate = xRecipe.bmpprinttemplate.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
                     xRecipe.SaveCodeTemplate();
                 }
-                else if (radioButton3.Checked)//left
+                else if (radioButton3.Checked)  //left
                 {
+#if (OLD_MESS_CODE)
                     xRecipe.xLineLeft = rectf;
                     xRecipe.SaveLinesRegion();
 
@@ -508,23 +510,25 @@ namespace LaserAlignDX.FormSpace
                             #endregion
                             break;
                     }
-                    
+#endif
+                    //@LETIAN: 2025-08-29 以後應該統一由 AoiModel 處理找線
+                    tryRunFindLineSegment(EdgeBorder.Left, xRecipe.bmpprinttemplate, rectf);
+
                 }
-                else if (radioButton4.Checked)//top
+                else if (radioButton4.Checked)  //top
                 {
+#if (OLD_MESS_CODE)
                     xRecipe.xLineTop = rectf;
                     xRecipe.SaveLinesRegion();
                     switch (xInspectX3.MFLType)
                     {
                         case Eazy_Project_III.MeasureFindLineType.FindLineType_v2:
-
                             #region 找平行线
-
                             using (MvdPairLineClass pairLine = new MvdPairLineClass())
                             {
                                 pairLine.bPositive = xInspectX3.bPositive1;
                                 pairLine.bFindOrient = false;
-                                CPairLineFindResult pair = pairLine.Run(xRecipe.bmpprinttemplate, rectf);
+                                var pair = pairLine.Run(xRecipe.bmpprinttemplate, rectf);
                                 if (pair != null)
                                 {
                                     Bitmap bmpx = new Bitmap(xRecipe.bmpprinttemplate);
@@ -548,7 +552,6 @@ namespace LaserAlignDX.FormSpace
                             }
 
                             #endregion
-
                             break;
                         default:
                             #region 找直线
@@ -577,9 +580,13 @@ namespace LaserAlignDX.FormSpace
                             #endregion
                             break;
                     }
+#endif
+                    //@LETIAN: 2025-08-29 以後應該統一由 AoiModel 處理找線
+                    tryRunFindLineSegment(EdgeBorder.Top, xRecipe.bmpprinttemplate, rectf);
                 }
-                else if (radioButton5.Checked)//right
+                else if (radioButton5.Checked)  //right
                 {
+#if (OLD_MESS_CODE)
                     xRecipe.xLineRight = rectf;
                     xRecipe.SaveLinesRegion();
                     switch (xInspectX3.MFLType)
@@ -646,10 +653,13 @@ namespace LaserAlignDX.FormSpace
                             #endregion
                             break;
                     }
-                    
+#endif
+                    //@LETIAN: 2025-08-29 以後應該統一由 AoiModel 處理找線
+                    tryRunFindLineSegment(EdgeBorder.Right, xRecipe.bmpprinttemplate, rectf);
                 }
                 else if (radioButton6.Checked)//bottom
                 {
+#if (OLD_MESS_CODE)
                     xRecipe.xLineBottom = rectf;
                     xRecipe.SaveLinesRegion();
                     switch (xInspectX3.MFLType)
@@ -715,7 +725,9 @@ namespace LaserAlignDX.FormSpace
                             #endregion
                             break;
                     }
-                    
+#endif
+                    //@LETIAN: 2025-08-29 以後應該統一由 AoiModel 處理找線
+                    tryRunFindLineSegment(EdgeBorder.Bottom, xRecipe.bmpprinttemplate, rectf);
                 }
 
                 DS1.SetStaticMover(xMoversDs1);
@@ -735,12 +747,120 @@ namespace LaserAlignDX.FormSpace
                 //DS1.ReplaceDisplayImage(bmpx);
                 //bmpx.Dispose();
             }
+
             bSelectRegion = false;
             btnSelectRegion.BackColor = (bSelectRegion ? Color.Red : Color.FromArgb(192, 255, 192));
         }
 
-        #region TOOLS
+        #region AOI_FUNCTIONS
+        void tryRunFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF boxRect)
+        {
+            updateBorderBoxToRecipe(eBorder, boxRect, save: true);
 
+            bool bPositive, bEdgePolarity, bFindOrient;
+
+            #region 方向與極性
+            switch (eBorder)
+            {
+                case EdgeBorder.Left:
+                    bPositive = xInspectX3.bPositive0;
+                    bEdgePolarity = xInspectX3.bEdgePolarity0;
+                    bFindOrient = true;
+                    break;
+                case EdgeBorder.Right:
+                    bPositive = xInspectX3.bPositive1;
+                    bEdgePolarity = xInspectX3.bEdgePolarity1;
+                    bFindOrient = false;
+                    break;
+                case EdgeBorder.Top:
+                    bPositive = xInspectX3.bPositive2;
+                    bEdgePolarity = xInspectX3.bEdgePolarity2;
+                    bFindOrient = true;
+                    break;
+                case EdgeBorder.Bottom:
+                    bPositive = xInspectX3.bPositive3;
+                    bEdgePolarity = xInspectX3.bEdgePolarity3;
+                    bFindOrient = false;
+                    break;
+                default:
+                    return;
+            }
+            #endregion
+
+            var mflType = xInspectX3.MFLType;
+
+            // 目前黑色背景 暫時強制用 FindLineType_v1
+            mflType = Eazy_Project_III.MeasureFindLineType.FindLineType_v1;
+
+            switch (mflType)
+            {
+                case Eazy_Project_III.MeasureFindLineType.FindLineType_v2:
+                    #region 找平行线
+                    using (MvdPairLineClass pairLine = new MvdPairLineClass())
+                    {
+                        pairLine.bPositive = bPositive;
+                        pairLine.bFindOrient = bFindOrient;
+                        CPairLineFindResult pair = pairLine.Run(bmpSrc, boxRect, (int)eBorder);
+                        if (pair != null)
+                            drawMvdLinesToDisp(bmpSrc, pair.Line0, pair.Line1);
+                    }
+                    #endregion
+                    break;
+                default:
+                    #region 找直线
+                    using (MvdFindLineClass finder = new MvdFindLineClass())
+                    {
+                        finder.bPositive = bPositive;
+                        finder.bFindOrient = bFindOrient;
+                        finder.bEdgePolarity = bEdgePolarity;
+                        var mvdLine = finder.Run(bmpSrc, boxRect, (int)eBorder);
+                        drawMvdLinesToDisp(bmpSrc, mvdLine);
+                    }
+                    #endregion
+                    break;
+            }
+        }
+        void updateBorderBoxToRecipe(EdgeBorder eBorder, RectangleF boxRect, bool save)
+        {
+            switch (eBorder)
+            {
+                case EdgeBorder.Left:
+                    xRecipe.xLineLeft = boxRect;
+                    break;
+                case EdgeBorder.Top:
+                    xRecipe.xLineTop = boxRect;
+                    break;
+                case EdgeBorder.Right:
+                    xRecipe.xLineRight = boxRect;
+                    break;
+                case EdgeBorder.Bottom:
+                    xRecipe.xLineBottom = boxRect;
+                    break;
+            }
+
+            if (save)
+                xRecipe.SaveLinesRegion();
+        }
+        void drawMvdLinesToDisp(Bitmap bmpSrc, params CMvdLineSegmentF[] mvdLines)
+        {
+            using (Bitmap bmpx = new Bitmap(bmpSrc))
+            {
+                using (Graphics gx = Graphics.FromImage(bmpx))
+                {
+                    foreach (var mvdLine in mvdLines)
+                        if (mvdLine != null)
+                            gx.DrawLine(new Pen(Color.Lime, 3),
+                                mvdLine.StartPoint.fX,
+                                mvdLine.StartPoint.fY,
+                                mvdLine.EndPoint.fX,
+                                mvdLine.EndPoint.fY);
+                }
+                DS1.ReplaceDisplayImage(bmpx);
+            }
+        }
+        #endregion
+
+        #region HELPER_FUNCTIONS
         public string PointFtoStringSimple(PointF ptf)
         {
             string Str = "";
@@ -762,8 +882,7 @@ namespace LaserAlignDX.FormSpace
 
 
         }
-
-
+#if(false)
         void BoundRect(ref Rectangle InnerRect, Size BoundSize)
         {
             InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
@@ -818,7 +937,7 @@ namespace LaserAlignDX.FormSpace
             bitmap.UnlockBits(bitmapData);
             return bitmap;
         }
-
+#endif
         #endregion
     }
 }

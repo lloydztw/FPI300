@@ -20,18 +20,18 @@ namespace LaserAlignDX.AoiModel
     /// <summary>
     /// 統一管理 巨圖 生命週期
     /// </summary>
-    public class FpiBigImagesHolder : IDisposable
+    public class TravellerBigImagesHolder : IDisposable
     {
         const int N_FLY_CAMERAS = 4;
 
         #region SINGLETON
-        static FpiBigImagesHolder _instance;
-        FpiBigImagesHolder()
+        static TravellerBigImagesHolder _instance;
+        TravellerBigImagesHolder()
         {
         }
         #endregion
         
-        public static FpiBigImagesHolder Instance
+        public static TravellerBigImagesHolder Instance
         {
             get
             {
@@ -42,7 +42,7 @@ namespace LaserAlignDX.AoiModel
                     for (int i = 0; i < N_FLY_CAMERAS; i++)
                         flyCamImages[i] = new GaBigImageHolder();
 
-                    _instance = new FpiBigImagesHolder()
+                    _instance = new TravellerBigImagesHolder()
                     {
                         FlyCamImages = flyCamImages,
                         LineScanImageHolder = lineScanImage,
@@ -75,11 +75,18 @@ namespace LaserAlignDX.AoiModel
             _instance = null;
         }
 
+        /// <summary>
+        /// 線掃相機巨圖持管者
+        /// </summary>
         public GaBigImageHolder LineScanImageHolder
         {
             get;
             private set;
         }
+
+        /// <summary>
+        /// 保留以後納入 Fly Cam 的 Image 管理
+        /// </summary>
         protected GaBigImageHolder[] FlyCamImages
         {
             get;

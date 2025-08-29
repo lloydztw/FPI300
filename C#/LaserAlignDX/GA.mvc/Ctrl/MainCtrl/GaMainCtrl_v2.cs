@@ -162,7 +162,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             //m_SingleProcess.OnLiveImage += process_OnLiveImage;
             m_SingleProcess.OnMessage += handle_aoi_run_message;
 
-            var lineScanImagegHolder = FpiBigImagesHolder.Instance.LineScanImageHolder;
+            var lineScanImagegHolder = TravellerBigImagesHolder.Instance.LineScanImageHolder;
             lineScanImagegHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
 
             var aoiEngine = ProcessRunFPIClass.Instance;
@@ -348,7 +348,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             // NOTE: 目前 cMvdInput 生命週期由 _FpiBigImagesHolder 保管 !!!
             //       不用重複 Clone() 來餵給 MVS
             //------------------------------------------------------------------------
-            var lineScanImageHolder = FpiBigImagesHolder.Instance.LineScanImageHolder;
+            var lineScanImageHolder = TravellerBigImagesHolder.Instance.LineScanImageHolder;
             //>>> CMvdImage mvdImage = lineScanImageHolder.PeekMvdImage();
             DSMain.UpdateImageSrc(lineScanImageHolder);
         }
