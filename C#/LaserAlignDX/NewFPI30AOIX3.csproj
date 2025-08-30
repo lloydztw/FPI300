@@ -588,6 +588,7 @@
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeTrayClass.cs" />
     <Compile Include="GA\OPSpace\RegionCellX2Class.cs" />
     <Compile Include="GA\OPSpace\RegionCellX3Class.cs" />
+    <Compile Include="GA\OPSpace\RegionCellX3Class_Texts.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\GeoResultClass.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\JzBaseResultClass.cs" />
     <Compile Include="GA\ProcessSpace\AbsProcess.cs" />
