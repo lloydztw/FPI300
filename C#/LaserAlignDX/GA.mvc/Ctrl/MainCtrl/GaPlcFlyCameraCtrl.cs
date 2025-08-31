@@ -641,44 +641,52 @@ namespace LaserAlignDX.Mvc.Ctrl
                     cMvdTextFResult.BorderColor = new MVD_COLOR(0, 255, 0);
                     cMvdTextFResult.FontWidth = 20;
 
-                    switch (flyIndex)
-                    {
-                        case 0:
-                            DSFly0.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-                            //DSFly0.mvdRenderActivex1.AddShape(cMvdTextF);
-                            DSFly0.mvdRenderActivex1.AddShape(cMvdTextFResult);
-                            DSFly0.mvdRenderActivex1.AddShape(RectangleShape);
-                            DSFly0.AddCross();
-                            DSFly0.mvdRenderActivex1.Display();
-                            break;
-                        case 1:
-                            DSFly1.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-                            //DSFly1.mvdRenderActivex1.AddShape(cMvdTextF);
-                            DSFly1.mvdRenderActivex1.AddShape(cMvdTextFResult);
-                            DSFly1.mvdRenderActivex1.AddShape(RectangleShape);
-                            DSFly1.AddCross();
-                            DSFly1.mvdRenderActivex1.Display();
-                            break;
-                        case 2:
-                            DSFly2.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-                            //DSFly2.mvdRenderActivex1.AddShape(cMvdTextF);
-                            DSFly2.mvdRenderActivex1.AddShape(cMvdTextFResult);
-                            DSFly2.mvdRenderActivex1.AddShape(RectangleShape);
-                            DSFly2.AddCross();
-                            DSFly2.mvdRenderActivex1.Display();
-                            break;
-                        case 3:
-                            DSFly3.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-                            //DSFly3.mvdRenderActivex1.AddShape(cMvdTextF);
-                            DSFly3.mvdRenderActivex1.AddShape(cMvdTextFResult);
-                            DSFly3.mvdRenderActivex1.AddShape(RectangleShape);
-                            DSFly3.AddCross();
-                            DSFly3.mvdRenderActivex1.Display();
-                            break;
-                    }
-
+                    //-------------------------------------------------------------------------------------------------------------------
                     // 超過多行字數很多的 "重複" 的代碼, 請拉出成為 function
                     // 不要用複製貼上 !!!
+                    //-------------------------------------------------------------------------------------------------------------------
+                    //switch (flyIndex)
+                    //{
+                    //    case 0:
+                    //        DSFly0.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    //        //DSFly0.mvdRenderActivex1.AddShape(cMvdTextF);
+                    //        DSFly0.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    //        DSFly0.mvdRenderActivex1.AddShape(RectangleShape);
+                    //        DSFly0.AddCross();
+                    //        DSFly0.mvdRenderActivex1.Display();
+                    //        break;
+                    //    case 1:
+                    //        DSFly1.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    //        //DSFly1.mvdRenderActivex1.AddShape(cMvdTextF);
+                    //        DSFly1.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    //        DSFly1.mvdRenderActivex1.AddShape(RectangleShape);
+                    //        DSFly1.AddCross();
+                    //        DSFly1.mvdRenderActivex1.Display();
+                    //        break;
+                    //    case 2:
+                    //        DSFly2.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    //        //DSFly2.mvdRenderActivex1.AddShape(cMvdTextF);
+                    //        DSFly2.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    //        DSFly2.mvdRenderActivex1.AddShape(RectangleShape);
+                    //        DSFly2.AddCross();
+                    //        DSFly2.mvdRenderActivex1.Display();
+                    //        break;
+                    //    case 3:
+                    //        DSFly3.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    //        //DSFly3.mvdRenderActivex1.AddShape(cMvdTextF);
+                    //        DSFly3.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    //        DSFly3.mvdRenderActivex1.AddShape(RectangleShape);
+                    //        DSFly3.AddCross();
+                    //        DSFly3.mvdRenderActivex1.Display();
+                    //        break;
+                    //}
+                    if (flyIndex >= 0 && flyIndex < _DSFLYs.Length)
+                        updateToMvdDisplay(_DSFLYs[flyIndex], cMvdImage, cMvdTextFResult, RectangleShape);
+
+                    //-------------------------------------------------------------------------------------------------------------------
+                    // 超過多行字數很多的 "重複" 的代碼, 請拉出成為 function
+                    // 不要用複製貼上 !!!
+                    //-------------------------------------------------------------------------------------------------------------------
                     //if (INI.Instance.IsSaveDebugBMP)
                     //{
                     //    string flypath = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{m_StripId}";
@@ -806,49 +814,56 @@ namespace LaserAlignDX.Mvc.Ctrl
                     cMvdTextFResult.BorderColor = new MVD_COLOR(0, 255, 0);
                     cMvdTextFResult.FontWidth = 15;
 
-                    switch (flyIndex)
-                    {
-                        case 0:
-                            DSFly0.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-                            //DSFly0.mvdRenderActivex1.AddShape(cMvdTextF);
-                            DSFly0.mvdRenderActivex1.AddShape(cMvdTextFResult);
-                            DSFly0.mvdRenderActivex1.AddShape(RectangleShape1);
-                            DSFly0.mvdRenderActivex1.AddShape(RectangleShape2);
-                            DSFly0.AddCross();
-                            DSFly0.mvdRenderActivex1.Display();
-                            break;
-                        case 1:
-                            DSFly1.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-                            //DSFly1.mvdRenderActivex1.AddShape(cMvdTextF);
-                            DSFly1.mvdRenderActivex1.AddShape(cMvdTextFResult);
-                            DSFly1.mvdRenderActivex1.AddShape(RectangleShape1);
-                            DSFly1.mvdRenderActivex1.AddShape(RectangleShape2);
-                            DSFly1.AddCross();
-                            DSFly1.mvdRenderActivex1.Display();
-                            break;
-                        case 2:
-                            DSFly2.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-                            //DSFly2.mvdRenderActivex1.AddShape(cMvdTextF);
-                            DSFly2.mvdRenderActivex1.AddShape(cMvdTextFResult);
-                            DSFly2.mvdRenderActivex1.AddShape(RectangleShape1);
-                            DSFly2.mvdRenderActivex1.AddShape(RectangleShape2);
-                            DSFly2.AddCross();
-                            DSFly2.mvdRenderActivex1.Display();
-                            break;
-                        case 3:
-                            DSFly3.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-                            //DSFly3.mvdRenderActivex1.AddShape(cMvdTextF);
-                            DSFly3.mvdRenderActivex1.AddShape(cMvdTextFResult);
-                            DSFly3.mvdRenderActivex1.AddShape(RectangleShape1);
-                            DSFly3.mvdRenderActivex1.AddShape(RectangleShape2);
-                            DSFly3.AddCross();
-                            DSFly3.mvdRenderActivex1.Display();
-                            break;
-                    }
-
+                    //-------------------------------------------------------------------------------------------------------------------
                     // 超過多行字數很多的 "重複" 的代碼, 請拉出成為 function
                     // 不要用複製貼上 !!!
+                    //-------------------------------------------------------------------------------------------------------------------
+                    //switch (flyIndex)
+                    //{
+                    //    case 0:
+                    //        DSFly0.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    //        //DSFly0.mvdRenderActivex1.AddShape(cMvdTextF);
+                    //        DSFly0.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    //        DSFly0.mvdRenderActivex1.AddShape(RectangleShape1);
+                    //        DSFly0.mvdRenderActivex1.AddShape(RectangleShape2);
+                    //        DSFly0.AddCross();
+                    //        DSFly0.mvdRenderActivex1.Display();
+                    //        break;
+                    //    case 1:
+                    //        DSFly1.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    //        //DSFly1.mvdRenderActivex1.AddShape(cMvdTextF);
+                    //        DSFly1.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    //        DSFly1.mvdRenderActivex1.AddShape(RectangleShape1);
+                    //        DSFly1.mvdRenderActivex1.AddShape(RectangleShape2);
+                    //        DSFly1.AddCross();
+                    //        DSFly1.mvdRenderActivex1.Display();
+                    //        break;
+                    //    case 2:
+                    //        DSFly2.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    //        //DSFly2.mvdRenderActivex1.AddShape(cMvdTextF);
+                    //        DSFly2.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    //        DSFly2.mvdRenderActivex1.AddShape(RectangleShape1);
+                    //        DSFly2.mvdRenderActivex1.AddShape(RectangleShape2);
+                    //        DSFly2.AddCross();
+                    //        DSFly2.mvdRenderActivex1.Display();
+                    //        break;
+                    //    case 3:
+                    //        DSFly3.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    //        //DSFly3.mvdRenderActivex1.AddShape(cMvdTextF);
+                    //        DSFly3.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    //        DSFly3.mvdRenderActivex1.AddShape(RectangleShape1);
+                    //        DSFly3.mvdRenderActivex1.AddShape(RectangleShape2);
+                    //        DSFly3.AddCross();
+                    //        DSFly3.mvdRenderActivex1.Display();
+                    //        break;
+                    //}
+                    if (flyIndex >= 0 && flyIndex < _DSFLYs.Length)
+                        updateToMvdDisplay(_DSFLYs[flyIndex], cMvdImage, cMvdTextFResult, RectangleShape1, RectangleShape2);
 
+                    //-------------------------------------------------------------------------------------------------------------------
+                    // 超過多行字數很多的 "重複" 的代碼, 請拉出成為 function
+                    // 不要用複製貼上 !!!
+                    //-------------------------------------------------------------------------------------------------------------------
                     //if (INI.Instance.IsSaveDebugBMP)
                     //{
                     //    string flypath = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{m_StripId}";
@@ -861,6 +876,18 @@ namespace LaserAlignDX.Mvc.Ctrl
                     saveFlyCameraImage(flyShowIndex, cMvdImage);
                 }
             }
+        }
+        void updateToMvdDisplay(MVSUI dispUI, CMvdImage mvdImage, params CMvdShape[] shapes)
+        {
+            var render = dispUI.mvdRenderActivex1;
+            render.LoadImageFromObject(mvdImage);
+
+            foreach (var shape in shapes)
+                if (shape != null)
+                    render.AddShape(shape);
+
+            dispUI.AddCross();
+            render.Display();
         }
         void saveFlyCameraImage(int flyShowIndex, CMvdImage cMvdImage)
         {

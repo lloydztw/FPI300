@@ -358,6 +358,8 @@
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_abs.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v2.cs" />
+    <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
+    <Compile Include="GA.mvc\Ctrl\MainCtrl\GaPlcFlyCameraCtrl.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\IMainUI.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.cs">
       <SubType>UserControl</SubType>
@@ -365,6 +367,11 @@
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\CviCellsResultBoxes v0.cs" />
+    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\CviLineSegmentsBox.cs" />
+    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\IvDrawItem.cs" />
+    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\MvdConvertor.cs" />
+    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\CviRotRectBox.cs" />
     <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\CviCellsResultBoxes.cs" />
     <Compile Include="GA.mvc\Gui\UIChipCellsViewer\IvChipCellsViewer.cs" />
     <Compile Include="GA.mvc\Gui\UIChipCellsViewer\JezChipCellsViewPanel.cs">

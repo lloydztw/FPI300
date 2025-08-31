@@ -15,7 +15,6 @@ using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace.ParaSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LaserAlignDX.RunSpace;
 using System.IO;
 using System.Windows.Forms;
 using TravellerMINIX6.OPSpace;
@@ -38,7 +37,7 @@ namespace Traveller106
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/08/22";
+        public const string VersionDate = "2025/08/31";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;

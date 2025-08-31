@@ -32,6 +32,7 @@ namespace JetEazy.Utils
         /// <summary>
         /// 會生成新的 CMvdImage.
         /// Caller 必須接管 mvdImage 與 srcBmp 之生命週期 !!!
+        /// (有用到 Data Copy, 耗時)
         /// </summary>
         public static CMvdImage BitmapToCMvdImage(Bitmap srcBmp)
         {
@@ -137,6 +138,7 @@ namespace JetEazy.Utils
         /// <summary>
         /// 會生成新的 Bitmap.
         /// Caller 必須接管其生命週期 !!!
+        /// (有用到 Data Copy, 耗時)
         /// </summary>
         public static Bitmap CMvdImageToBitmap(CMvdImage mvdImage)
         {
@@ -173,7 +175,7 @@ namespace JetEazy.Utils
         #endregion
 
         /// <summary>
-        /// 暫時性使用 C# Bitmap 來觀察 mvdImage 內容.
+        /// Runtime 使用 C# Bitmap 來觀察 mvdImage 內容.
         /// Caller 不得釋放 此函式所取的取得的 Bitmap !!!
         /// </summary>
         public static Bitmap PeekBmp(CMvdImage mvdImage)
@@ -189,7 +191,7 @@ namespace JetEazy.Utils
         }
 
         /// <summary>
-        /// 暫時性使用 OpenCvSharp Mat 來觀察 mvdImage 內容.
+        /// Runtime 使用 OpenCvSharp Mat 來觀察 mvdImage 內容.
         /// Caller 不得釋放 此函式所取的取得的 Mat !!!
         /// </summary>
         public static Mat PeekMat(CMvdImage mvdImage)
@@ -217,6 +219,7 @@ namespace JetEazy.Utils
                             viewRectF.Height
                         );
         }
+
         public static RectangleF ToRectangleF(CMvdRectangleF cMvdRectangleF)
         {
             if (cMvdRectangleF != null)

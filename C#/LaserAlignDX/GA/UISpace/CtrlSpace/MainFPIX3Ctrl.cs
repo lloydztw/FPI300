@@ -430,6 +430,9 @@ namespace LaserAlignDX.UISpace.CtrlSpace
         }
         private void _updateUI()
         {
+            if (!this.IsHandleCreated)
+                return;
+
             this.Invoke(new Action(() =>
             {
                 if (myTimeForHeart.msDuriation >= 1000)

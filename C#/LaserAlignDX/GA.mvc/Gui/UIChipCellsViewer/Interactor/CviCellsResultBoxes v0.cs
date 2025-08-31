@@ -15,6 +15,7 @@
 
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
+using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
@@ -29,7 +30,7 @@ using CELL = LaserAlignDX.OPSpace.RegionCellX3Class;
 using InspectParams = LaserAlignDX.OPSpace.RecipeSpace.InspectX3ParaClass;
 using RECIPE = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
 
-namespace LaserAlignDX.UISpace.ChipCellsViewer
+namespace LaserAlignDX.UISpace.ChipCellsViewer.V0
 {
     public class CviCellsResultBoxes : CvImageViewerInteractor
     {
@@ -80,12 +81,11 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         IxDispTextFormatter _formatter = new MainDispTextFormatter();
         ToolTip _toolTip = new ToolTip();
         Font _font = null;
-        #endregion
-
-        #region GUI_DRAW_ITEMS
-        //List<CviRotRectBox> _boxes = new List<CviRotRectBox>();
-        //List<CviLineSegmentsBox> _lineSegBoxes = new List<CviLineSegmentsBox>();
-        List<IvDrawItem> _drawItems = new List<IvDrawItem>();
+        StringFormat _sformat = new StringFormat()
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center,
+        };
         #endregion
 
         public Control lblSummaryTitle
@@ -99,7 +99,6 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
             _grid?.Dispose();
             _grid = null;
             _outGridBlocs = null;
-            _drawItems.Clear();
         }
         public void UpdateResult(IEnumerable<CELL> cells, int mode)
         {
@@ -115,7 +114,6 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
             }
 
             updatePassNgEmptyCount(cells);
-            updateDrawItems();
         }
 
         #region OVERRIDES
@@ -131,10 +129,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
             if (!isWorld)
                 viewer.SwitchToWorldCoordinate(gxView);
 
-            foreach(var item in _drawItems) 
-                item.OnDraw(viewer, gxView);
-
-            draw_All_QrCodes(viewer, gxView);
+            Draw_Contents(viewer, gxView);
 
             if (!isWorld)
                 viewer.SwitchToViewportCoordinate(gxView);
@@ -466,118 +461,203 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         }
         #endregion
 
-        #region DRAW_ITEMS_FUNCTIONS
-        void updateDrawItems()
+        #region DRAW_FUNCTIONS
+        void Draw_Contents(CvImageViewer viewer, Graphics gxView)
         {
-            if (_mode == ScanInspectMode.NOTRAY)
+            switch (_mode)
             {
-                updateDrawItems_For_EmptyTray();
+                case ScanInspectMode.NOTRAY:
+                    Draw_EmptyTray_Cells(viewer, gxView);
+                    break;
+                case ScanInspectMode.MEASUREAOI:
+                case ScanInspectMode.QRCODE:
+                default:
+                    Draw_ProductionTray_Cells(viewer, gxView);
+                    break;
+            }
+        }
+        void Draw_EmptyTray_Cells(CvImageViewer viewer, Graphics gxView)
+        {
+            var size = new Size(200, 200);
+            draw_blocs(viewer, gxView, iterEmptyBlocs(), Color.Lime, size, 0.25f);
+            draw_blocs(viewer, gxView, iterNonEmptyBlocs(), Color.Red, size, 0.25f);
+        }
+        void Draw_ProductionTray_Cells(CvImageViewer viewer, Graphics gxView)
+        {
+            foreach (CellBloc bloc in _grid)
+            {
+                draw_OneCellData(viewer, gxView, bloc);
+            }
+        }
+
+        void draw_OneCellData(CvImageViewer viewer, Graphics gxView, CellBloc bloc)
+        {
+            var cell = bloc?.Cell;
+            if (cell == null)
+                return;
+
+            RectangleF cellRect = cell.viewRectF;
+            cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
+            var offset = cellRect.Location;
+
+            if (_inspectParams.bOpenLineMeasure)
+            {
+                // 繪製 找到的邊線
+                draw_OneCellData_LinesOutSide(viewer, gxView, cell, offset);
+
+                // 繪製 邊線手拉框
+                draw_OneCellData_LinesOutsideBoxes(viewer, gxView, cell);
+
+                if (_inspectParams.bCheckMeasureOffset)
+                {
+                    // 繪製 cMvdLineSegmentFsInSide
+                    draw_OneCellData_LinesInSide(viewer, gxView, cell, offset);
+                }
+            }
+
+            // 晶粒定位
+            draw_OneCellData_ChipLoc(viewer, gxView, cell);
+
+            //二维码
+            draw_OneCellData_Barcode(viewer, gxView, cell);
+        }
+        void draw_OneCellData_LinesOutsideBoxes(CvImageViewer viewer, Graphics gxView, CELL cell)
+        {
+            //var color = Color.FromArgb(38, 127, 0);
+            var color = Color.DarkBlue;
+
+            //if (_inspectParams.bOpenLineMeasure)
+            {
+                // 繪製 邊線手拉框
+                foreach (var mvdShape in cell.cMvdShapesForFindLineRegion)
+                {
+                    if (mvdShape is CMvdRectangleF mvdRectF)
+                    {
+                        //var cx = mvdRectF.CenterX;
+                        //var cy = mvdRectF.CenterY;
+                        //var cw = mvdRectF.Width;
+                        //var ch = mvdRectF.Height;
+                        //var angle = mvdRectF.Angle;
+                        //var box2D = new QvBox2D();
+                        //box2D.SetBox(new PointF(cx,cy), new SizeF(cw, ch));
+                        //box2D.SetCenter(cx, cy);
+                        //box2D.SetTheta(angle * Math.PI / 180);
+                        //gxView.DrawPolygon(pen, box2D.Corners);
+                        draw_mvdRectF(viewer, gxView, color, mvdRectF);
+                    }
+                }
+            }
+        }
+        void draw_OneCellData_LinesOutSide(CvImageViewer viewer, Graphics gxView, CELL cell, PointF offset)
+        {
+            var pen = viewer.GetOnePixelPen(Color.Cyan);
+
+            foreach (var mLine in cell.cMvdLineSegmentFsOut)
+            {
+                if (mLine != null)
+                {
+                    var p1 = mLine.StartPoint;
+                    var p2 = mLine.EndPoint;
+                    p1.fX += offset.X;
+                    p1.fY += offset.Y;
+                    p2.fX += offset.X;
+                    p2.fY += offset.Y;
+                    ////MVD_POINT_F s0 = new MVD_POINT_F(mLine.StartPoint.fX + offset.X,
+                    ////    mLine.StartPoint.fY + offset.Y);
+                    ////MVD_POINT_F s1 = new MVD_POINT_F(mLine.EndPoint.fX + offset.X,
+                    ////    mLine.EndPoint.fY + offset.Y);
+                    ////CMvdLineSegmentF newLine = new CMvdLineSegmentF(s0, s1);
+                    //CMvdLineSegmentF newLine = new CMvdLineSegmentF(p1, p2);
+                    //newLine.BorderColor = new MVD_COLOR(255, 0, 255);
+                    //_mvsUI.mvdRenderActivex1.AddShape(newLine);
+                    gxView.DrawLine(pen, p1.fX, p1.fY, p2.fX, p2.fY);
+                }
+            }
+        }
+        void draw_OneCellData_LinesInSide(CvImageViewer viewer, Graphics gxView, CELL cell, PointF offset)
+        {
+            //if (_inspectParams.bOpenLineMeasure && _inspectParams.bCheckMeasureOffset)
+            {
+                var pen = viewer.GetOnePixelPen(Color.FromArgb(112, 48, 160));
+
+                foreach (CMvdLineSegmentF mLine in cell.cMvdLineSegmentFsInSide)
+                {
+                    if (mLine != null)
+                    {
+                        var p1 = mLine.StartPoint;
+                        var p2 = mLine.EndPoint;
+                        p1.fX += offset.X;
+                        p1.fY += offset.Y;
+                        p2.fX += offset.X;
+                        p2.fY += offset.Y;
+                        ////MVD_POINT_F s0 = new MVD_POINT_F(
+                        ////      mLine.StartPoint.fX + offset.X,
+                        ////      mLine.StartPoint.fY + offset.Y);
+                        ////MVD_POINT_F s1 = new MVD_POINT_F(
+                        ////      mLine.EndPoint.fX + offset.X,
+                        ////      mLine.EndPoint.fY + offset.Y);
+                        //CMvdLineSegmentF newLine = new CMvdLineSegmentF(p1, p2);
+                        //newLine.BorderColor = new MVD_COLOR(112, 48, 160);
+                        //_mvsUI.mvdRenderActivex1.AddShape(newLine);
+                        gxView.DrawLine(pen, p1.fX, p1.fY, p2.fX, p2.fY);
+                    }
+                }
+            }
+        }
+        void draw_OneCellData_ChipLoc(CvImageViewer viewer, Graphics gxView, CELL cell)
+        {
+            //// 使用 toolTip 顯示文字
+            //var formatter = new MainDispTextFormatter();
+            //string cellInfoStr = formatter.Format(cell);
+
+            var mvdDrawResultRectF = cell.DrawResultRectF();
+
+            ////显示结果的xy angle
+            //CMvdTextF cMvdTextFShowMain = new CMvdTextF(
+            //                                mvdDrawResultRectF.CenterX,
+            //                                mvdDrawResultRectF.CenterY,
+            //                                cellInfoStr);
+
+            //cMvdTextFShowMain.BorderColor = new MVD_COLOR(0, 255, 0);// cell.DrawResultRectF().BorderColor;// new MVD_COLOR(0, 255, 0);
+            //cMvdTextFShowMain.FontWidth = 11;
+            //cMvdTextFShowMain.FillColor = new MVD_COLOR(0, 0, 0, 50);
+
+            if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+            {
+                ////引导数据
+                //if (INI.Instance.IsResultShowChar)
+                //    _mvsUI.mvdRenderActivex1.AddShape(cMvdTextFShowMain);
+                ////定位框
+                //_mvsUI.mvdRenderActivex1.AddShape(mvdDrawResultRectF);
+                ////DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(true));
+                draw_mvdRectF(viewer, gxView, Color.Lime, mvdDrawResultRectF);
+            }
+            else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
+            {
+                //if (INI.Instance.IsResultShowChar)
+                //{
+                //    cMvdTextFShowMain = new CMvdTextF(
+                //        mvdDrawResultRectF.CenterX,
+                //        mvdDrawResultRectF.CenterY,
+                //        $"{cellInfoStr}{Environment.NewLine}{GaUtil.GetEnumDescription(cell.inspectReason)}");
+                //    cMvdTextFShowMain.BorderColor = new MVD_COLOR(255, 0, 0);
+                //    _mvsUI.mvdRenderActivex1.AddShape(cMvdTextFShowMain);
+                //    //定位框
+                //    _mvsUI.mvdRenderActivex1.AddShape(mvdDrawResultRectF);
+                //}
+
+                draw_mvdRectF(viewer, gxView, Color.Red, mvdDrawResultRectF, "NG", 0.10f);
             }
             else
             {
-                updateDrawItems_For_ChipLocate();
-                updateDrawItems_For_ChipMeasure();
-                //updateDrawItems_For_QrCode();
+                //>>> _mvsUI.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(false));
+
+                // 吸盤空位
+                var rect = cell.DrawBaseRectFFixSize(false);
+                draw_mvdRectF(viewer, gxView, Color.Red, rect);
             }
         }
-        void updateDrawItems_For_EmptyTray()
-        {
-            var size = new SizeF(200, 200);
-            foreach (var cBloc in iterEmptyBlocs())
-            {
-                var rect = JetEazy.Qcvt.CreateCenterRect((float)cBloc.CenterX, (float)cBloc.CenterY, size.Width, size.Height);
-                var item = new CviRotRectBox(ref rect, Color.Lime, 0.25f);
-                _drawItems.Add(item);
-            }
-            foreach ((var cBloc, string text) in iterNonEmptyBlocs())
-            {
-                var rect = JetEazy.Qcvt.CreateCenterRect((float)cBloc.CenterX, (float)cBloc.CenterY, size.Width, size.Height);
-                var item = new CviRotRectBox(ref rect, Color.Red, 0.25f) { Text = text };
-                _drawItems.Add(item);
-            }
-        }
-        void updateDrawItems_For_ChipLocate()
-        {
-            foreach (CellBloc bloc in _grid)
-            {
-                var cell = bloc?.Cell;
-                if (cell == null) continue;
-
-                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-                {
-                    // PASS
-                    var mvdRect = cell.DrawResultRectF();
-                    var item = new CviRotRectBox(mvdRect.ToBox2D(), Color.Lime, 0.10f);
-                    _drawItems.Add(item);
-                }
-                else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
-                {
-                    // NG
-                    var mvdDrawResultRectF = cell.DrawResultRectF();
-                    var item = new CviRotRectBox(mvdDrawResultRectF.ToBox2D(), Color.Red, 0.10f) { Text = "NG" };
-                    _drawItems.Add(item);
-                }
-                else
-                {
-                    // 吸盤空位
-                    var mvdRect = cell.DrawBaseRectFFixSize(false);
-                    var item = new CviRotRectBox(mvdRect.ToBox2D(), Color.Red);
-                    _drawItems.Add(item);
-                }
-            }
-        }
-        void updateDrawItems_For_ChipMeasure()
-        {
-            if (!_inspectParams.bOpenLineMeasure)
-                return;
-
-            var drawItemsOfBorderBoxes = new List<IvDrawItem>();
-            var drawItemsOfLinesOutSide = new List<IvDrawItem>();
-            var drawItemsOfLinesInSide = new List<IvDrawItem>();
-
-            foreach (CellBloc bloc in _grid)
-            {
-                var cell = bloc?.Cell;
-                RectangleF cellRect = cell.viewRectF;
-                cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
-                var offset = cellRect.Location;
-
-                // 繪件: 找到的邊線
-                var linesOut = MvdConvertor.ToCSharpLines(offset, cell.cMvdLineSegmentFsOut);
-                if (linesOut != null && linesOut.Length > 0)
-                    drawItemsOfLinesOutSide.Add(new CviLineSegmentsBox(Color.Cyan, linesOut));
-
-                // 繪件: 邊線手拉框
-                foreach (var mvdShape in cell.cMvdShapesForFindLineRegion)
-                {
-                    if (mvdShape is CMvdRectangleF mvdRect)
-                        drawItemsOfBorderBoxes.Add(new CviRotRectBox(mvdRect.ToBox2D(), Color.DarkBlue));
-                }
-
-                // 繪件: cMvdLineSegmentFsInSide
-                if (_inspectParams.bCheckMeasureOffset)
-                {
-                    var linesIn = MvdConvertor.ToCSharpLines(offset, cell.cMvdLineSegmentFsInSide);
-                    if (linesIn != null && linesIn.Length > 0)
-                        drawItemsOfLinesInSide.Add(new CviLineSegmentsBox(Color.FromArgb(112, 48, 160), linesIn));
-                }
-            }
-
-            _drawItems.AddRange(drawItemsOfLinesOutSide);
-            _drawItems.AddRange(drawItemsOfBorderBoxes);
-            _drawItems.AddRange(drawItemsOfLinesInSide);
-        }
-        #endregion
-
-        #region DRAW_QRCODE_FUNCTIONS
-        void draw_All_QrCodes(CvImageViewer viewer, Graphics gxView)
-        {
-            foreach (CellBloc bloc in _grid)
-            {
-                draw_OneCellData_QrCode(viewer, gxView, bloc?.Cell);
-            }
-        }
-        void draw_OneCellData_QrCode(CvImageViewer viewer, Graphics gxView, CELL cell)
+        void draw_OneCellData_Barcode(CvImageViewer viewer, Graphics gxView, CELL cell)
         {
             ////二维码
             if (cell.DrawBarcodePosition != null)
@@ -600,6 +680,106 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
                 gxView.DrawString(text, _font, Brushes.Black, x, y);
 
             }
+        }
+
+        void draw_blocs(CvImageViewer viewer, Graphics gxView, IEnumerable<(EzBloc,string)> blocs, Color color, Size? size, float blend = 0)
+        {
+            if (blocs == null)
+                return;
+
+            bool isWorldDrawing = viewer.IsInWorldCoordinate();
+
+            // Blending alpha
+            int alpha = blend > 0 && blend <= 1 ? (int)(255 * blend) : 0;
+            Brush bkBrush = alpha > 0 ? new SolidBrush(Color.FromArgb(alpha, color)) : null;
+            Brush txtBrush = new SolidBrush(color);
+
+            foreach ((EzBloc bloc, string text) in blocs)
+            {
+                if (bloc == null)
+                    continue;
+
+                var pen = viewer.GetOnePixelPen(color);
+
+                var rect = bloc.Rect;
+
+                if (size != null)
+                {
+                    int dx = (size.Value.Width - rect.Width) / 2;
+                    int dy = (size.Value.Height - rect.Height) / 2;
+                    rect.Inflate(dx, dy);
+                }
+
+                if (isWorldDrawing)
+                {
+                    if (bkBrush != null)
+                        gxView.FillRectangle(bkBrush, rect);
+
+                    gxView.DrawRectangle(pen, rect);
+
+                    if (!string.IsNullOrEmpty(text))
+                        gxView.DrawString(text, _font, txtBrush, bloc.Rect, _sformat);
+                }
+                else
+                {
+                    var txtRect = bloc.Rect;
+                    viewer.TransCoordToView(ref txtRect);
+                    viewer.TransCoordToView(ref rect);
+
+                    if (bkBrush != null)
+                        gxView.FillRectangle(bkBrush, rect);
+
+                    gxView.DrawRectangle(pen, rect);
+
+                    if (!string.IsNullOrEmpty(text))
+                        gxView.DrawString(text, _font, txtBrush, txtRect, _sformat);
+                }
+            }
+
+            bkBrush?.Dispose();
+            txtBrush?.Dispose();
+        }
+        void draw_blocs(CvImageViewer viewer, Graphics gxView, IEnumerable<EzBloc> blocs, Color color, Size? size, float blend = 0)
+        {
+            IEnumerable<(EzBloc, string)> iter()
+            {
+                foreach (var b in blocs)
+                    if (b != null)
+                        yield return (b, "");
+            };
+            draw_blocs(viewer, gxView, iter(), color, size, blend);
+        }
+        void draw_mvdRectF(CvImageViewer viewer, Graphics gxView, Color color, CMvdRectangleF mvdRectF, string text = null, float blend = 0)
+        {
+            var pen = viewer.GetOnePixelPen(color);
+
+            // Blending alpha
+            int alpha = blend > 0 && blend <= 1 ? (int)(255 * blend) : 0;
+            Brush bkBrush = alpha > 0 ? new SolidBrush(Color.FromArgb(alpha, color)) : null;
+
+            var cx = mvdRectF.CenterX;
+            var cy = mvdRectF.CenterY;
+            var cw = mvdRectF.Width;
+            var ch = mvdRectF.Height;
+            var angle = mvdRectF.Angle;
+            var box2D = new QvBox2D();
+            box2D.SetBox(new PointF(cx, cy), new SizeF(cw, ch));
+            box2D.SetCenter(cx, cy);
+            box2D.SetTheta(angle * Math.PI / 180);
+
+            if (bkBrush != null)
+                gxView.FillPolygon(bkBrush, box2D.Corners);
+            gxView.DrawPolygon(pen, box2D.Corners);
+
+            if(!string.IsNullOrEmpty(text))
+            {
+                using (var br = new SolidBrush(color))
+                {
+                    gxView.DrawString(text, _font, br, box2D.BoundaryRect, _sformat);
+                }
+            }
+
+            bkBrush?.Dispose();
         }
         #endregion
     }

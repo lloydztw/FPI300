@@ -132,7 +132,7 @@ namespace LaserAlignDX.BasicSpace.LineFinder.V1
                         //inverse = true;
                         break;
                     case EdgeBorder.Bottom:
-                        //MVD 沒有 DownToUp, 只能用 LeftToRight 搭配 反向 polarity
+                        //MVD 沒有 DownToUp, 只能用 UpToDown 搭配 反向 polarity
                         //orient = "DownToUp";
                         orient = "UpToDown";
                         polarity = invert(polarity);
