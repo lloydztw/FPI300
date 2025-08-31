@@ -56,10 +56,10 @@ namespace LaserAlignDX.FormSpace.FPI30Form
             int i = 0;
             while (i < 4)
             {
-                m_Calibration.ptsview[i].X = float.Parse(dgv.Rows[i].Cells[1].Value.ToString());
-                m_Calibration.ptsview[i].Y = float.Parse(dgv.Rows[i].Cells[2].Value.ToString());
-                m_Calibration.ptsworld[i].X = float.Parse(dgv.Rows[i].Cells[3].Value.ToString());
-                m_Calibration.ptsworld[i].Y =  float.Parse(dgv.Rows[i].Cells[4].Value.ToString());
+                m_Calibration.ptsview[i].X = float.Parse(dgv.Rows[i].Cells[2].Value.ToString());
+                m_Calibration.ptsview[i].Y = float.Parse(dgv.Rows[i].Cells[3].Value.ToString());
+                m_Calibration.ptsworld[i].X = float.Parse(dgv.Rows[i].Cells[4].Value.ToString());
+                m_Calibration.ptsworld[i].Y =  float.Parse(dgv.Rows[i].Cells[5].Value.ToString());
                 i++;
             }
         }
