@@ -33,11 +33,19 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("2.2.0.1")]
-[assembly: AssemblyFileVersion("2.2.0.1")]
+[assembly: AssemblyVersion("2.2.1.0")]
+[assembly: AssemblyFileVersion("2.2.1.0")]
 
 
 /*
+ * 
+第一碼 是 大改
+第二碼 是 中改
+第三碼 是功能增加
+第四碼 是功能沒增加, 但是有 bug 修正
+ * 
+ * 
+ * 
  * 待办
  * 1.AOI检测功能待加
  * 2.尺寸功能待加
