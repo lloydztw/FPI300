@@ -165,6 +165,7 @@
     <Compile Include="CCDSpace\CamLinkDriver\LINESCAN_HUARUI.cs" />
     <Compile Include="CCDSpace\CamLinkDriver\Euresys\MultiCam.cs" />
     <Compile Include="CCDSpace\CamLinkDriver\Linescan_Mind.cs" />
+    <Compile Include="CCDSpace\CamLinkDriver\Linescan_Sim.cs" />
     <Compile Include="CCDSpace\CAM_DAHUA.cs" />
     <Compile Include="CCDSpace\CAM_HIKVISION.cs" />
     <Compile Include="CCDSpace\Dvp2Class.cs" />

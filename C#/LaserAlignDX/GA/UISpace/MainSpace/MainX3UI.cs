@@ -51,7 +51,7 @@ namespace LaserAlignDX.UISpace.MainSpace
         }
         protected MainFPIX3MachineClass MACHINE
         {
-            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
+            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
         }
 
         const int FLYCOUNT = 4;
@@ -166,6 +166,7 @@ namespace LaserAlignDX.UISpace.MainSpace
 
             IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
 
+            HandleDestroyed += (s, e) => IxFlyAreaCam?.StopGrab();
         }
 
         private void DSFly0_DoubleClick(object sender, EventArgs e)
@@ -200,7 +201,11 @@ namespace LaserAlignDX.UISpace.MainSpace
                 return;
             }
 
-            if (MACHINE.PLCIO.bFlyReady)
+            var plcIO = MACHINE?.PLCIO;
+            if (plcIO == null)
+                return;
+
+            if (plcIO.bFlyReady)
             {
                 //转换图像
                 byte[] bmpbytes = new byte[cameraFrame.uBytes];
@@ -212,18 +217,18 @@ namespace LaserAlignDX.UISpace.MainSpace
                 }));
                 if (bytesFlyDatas.Count >= 4)
                 {
-                    MACHINE.PLCIO.bFlyReady = false;
+                    plcIO.bFlyReady = false;
 
-                    int iflystartindex = MACHINE.PLCIO.iFlyStart;
+                    int iflystartindex = plcIO.iFlyStart;
                     iFlyIndex = 3;
                     flyRunning(iflystartindex, cameraFrame);
 
-                    //MACHINE.PLCIO.bFlyDone = true;
+                    //plcIO.bFlyDone = true;
 
-                    MACHINE.PLCIO.iFlyResult(iFlyResult);
-                    MACHINE.PLCIO.rOffset(iFlyOffset);
+                    plcIO.iFlyResult(iFlyResult);
+                    plcIO.rOffset(iFlyOffset);
 
-                    MACHINE.PLCIO.bFlyDone = true;
+                    plcIO.bFlyDone = true;
 
                     bytesFlyDatas.Clear();
 
@@ -244,7 +249,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                     }
                     _LOG("iFlyOffset:" + sb1.ToString(), Color.Black);
 
-                    MACHINE.PLCIO.bFlyReady = true;
+                    plcIO.bFlyReady = true;
                 }
             }
         }
