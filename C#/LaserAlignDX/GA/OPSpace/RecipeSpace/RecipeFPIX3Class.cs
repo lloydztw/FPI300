@@ -1327,6 +1327,7 @@ public void CreateViews()
         public bool xIsShuiPing { get; set; } = true;
 
         public PointF[] ptsOffset = new PointF[POINT_COUNT];
+        public PointF[] ptsOffset2 = new PointF[POINT_COUNT];
 
         public override void Load(bool eCancel = false)
         {
@@ -1346,6 +1347,7 @@ public void CreateViews()
             while (i < POINT_COUNT)
             {
                 ptsOffset[i] = StringtoPointF(ReadINIValue("FlyOffset", $"ptsOffset_{i}", $"0,0", INIFILE));
+                ptsOffset2[i] = StringtoPointF(ReadINIValue("FlyOffset2", $"ptsOffset2_{i}", $"0,0", INIFILE));
 
                 i++;
             }
@@ -1368,6 +1370,7 @@ public void CreateViews()
             while (i < POINT_COUNT)
             {
                 WriteINIValue("FlyOffset", $"ptsOffset_{i}", PointFtoStringSimple(ptsOffset[i]), INIFILE);
+                WriteINIValue("FlyOffset2", $"ptsOffset2_{i}", PointFtoStringSimple(ptsOffset2[i]), INIFILE);
 
                 i++;
             }

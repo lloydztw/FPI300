@@ -1,4 +1,5 @@
-﻿using LaserAlignDX.OPSpace.RecipeSpace;
+﻿using Eazy_Project_III;
+using LaserAlignDX.OPSpace.RecipeSpace;
 using OpenCvSharp.Flann;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,8 @@ namespace LaserAlignDX.GA.FormSpace.FPI30Form
             get { return FlyParaClass.Instance; }
         }
 
+        StageNumber m_StageNumber = StageNumber.N0;
+
         public FlyOffsetUI()
         {
             InitializeComponent();
@@ -29,8 +32,10 @@ namespace LaserAlignDX.GA.FormSpace.FPI30Form
         /// <summary>
         /// 初始化
         /// </summary>
-        public void Init()
+        public void Init(StageNumber eStage)
         {
+            m_StageNumber = eStage;
+
             InitializeDataGridView();
             UpdateData();
         }
@@ -39,8 +44,18 @@ namespace LaserAlignDX.GA.FormSpace.FPI30Form
             int i = 0;
             while (i < POINT_COUNT)
             {
-                flyPara.ptsOffset[i].X = float.Parse(dgv.Rows[i].Cells[1].Value.ToString());
-                flyPara.ptsOffset[i].Y = float.Parse(dgv.Rows[i].Cells[2].Value.ToString());
+                switch(m_StageNumber)
+                {
+                    case StageNumber.N1:
+                        flyPara.ptsOffset2[i].X = float.Parse(dgv.Rows[i].Cells[1].Value.ToString());
+                        flyPara.ptsOffset2[i].Y = float.Parse(dgv.Rows[i].Cells[2].Value.ToString());
+                        break;
+                    default:
+                        flyPara.ptsOffset[i].X = float.Parse(dgv.Rows[i].Cells[1].Value.ToString());
+                        flyPara.ptsOffset[i].Y = float.Parse(dgv.Rows[i].Cells[2].Value.ToString());
+                        break;
+                }
+                
                 i++;
             }
         }
@@ -49,8 +64,19 @@ namespace LaserAlignDX.GA.FormSpace.FPI30Form
             int i = 0;
             while (i < POINT_COUNT)
             {
-                dgv.Rows[i].Cells[1].Value = flyPara.ptsOffset[i].X;
-                dgv.Rows[i].Cells[2].Value = flyPara.ptsOffset[i].Y;
+                switch(m_StageNumber)
+                {
+                    case StageNumber.N1:
+
+                        dgv.Rows[i].Cells[1].Value = flyPara.ptsOffset2[i].X;
+                        dgv.Rows[i].Cells[2].Value = flyPara.ptsOffset2[i].Y;
+                        break;
+                    default:
+
+                        dgv.Rows[i].Cells[1].Value = flyPara.ptsOffset[i].X;
+                        dgv.Rows[i].Cells[2].Value = flyPara.ptsOffset[i].Y;
+                        break;
+                }
                 i++;
             }
         }

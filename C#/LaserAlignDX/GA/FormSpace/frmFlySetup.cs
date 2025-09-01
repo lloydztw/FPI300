@@ -70,6 +70,7 @@ namespace LaserAlignDX.FormSpace
         Button btnSpecialCal;
 
         FlyOffsetUI flyOffsetUI => flyOffsetUI1;
+        FlyOffsetUI flyOffset2UI => flyOffsetUI2;
 
         /// <summary>
         /// 飞拍模式 0-取像 1-测试
@@ -138,7 +139,8 @@ namespace LaserAlignDX.FormSpace
 
             LanguageExClass.Instance.EnumControls(this);
 
-            flyOffsetUI.Init();
+            flyOffsetUI.Init(StageNumber.N0);
+            flyOffset2UI.Init(StageNumber.N1);
 
             xTimer = new Timer();
             xTimer.Interval = 50;
@@ -341,6 +343,7 @@ namespace LaserAlignDX.FormSpace
                 return;
             }
             flyOffsetUI.GetPoints();
+            flyOffset2UI.GetPoints();
             this.DialogResult = DialogResult.OK;
         }
 
