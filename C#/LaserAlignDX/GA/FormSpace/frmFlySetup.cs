@@ -288,19 +288,26 @@ namespace LaserAlignDX.FormSpace
 
                     if (bFlyComplete)
                     {
-                        using (Bitmap bmp = ConvertFromMONO(bmpbytes, iw, ih))
+                        //using (Bitmap bmp = ConvertFromMONO(bmpbytes, iw, ih))
+                        //{
+                        //    DS1.ReplaceDisplayImage(bmp);
+                        //}
+                        Bitmap bmpNew = ConvertFromMONO(bmpbytes, iw, ih);
+                        BeginInvoke(new Action<Bitmap>((bmp) =>
                         {
-                            DS1.ReplaceDisplayImage(bmp);
-                        }
+                            DS1.ReplaceDisplayImage(bmp); 
+                            bmp?.Dispose();
+                        }), bmpNew);
                         bFlyComplete = false;
                     }
                     else
                     {
                         //取图
-                        xRecipe.bmpOrgFly.Dispose();
+                        xRecipe.bmpOrgFly?.Dispose();
                         xRecipe.bmpOrgFly = ConvertFromMONO(bmpbytes, iw, ih);
 
-                        DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
+                        //DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
+                        BeginInvoke((Action<Bitmap>)DS1.ReplaceDisplayImage, xRecipe.bmpOrgFly);
                     }
 
                     break;
