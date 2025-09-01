@@ -1,18 +1,14 @@
-﻿using Eazy_Project_III;
-using LaserAlignDX.UISpace.UIMVC;
-using System;
+﻿using LaserAlignDX.UISpace.UIMVC;
 using System.Windows.Forms;
 
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
-    using IMPLEMENT = V2.GaMainCtrl;
-
     public class GaMainCtrl : Abs.GaMainCtrl
     {
-        IMPLEMENT _imp = new IMPLEMENT();
+        Abs.GaMainCtrl _imp = GaMvcConfig.CreateMainCtrl();
 
-        public void Attach(MVSUI[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
+        public override void Attach(Control[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
         {
             _imp.Attach(DsMains, DsFlys, lblFlyCameraSerialNo);
         }

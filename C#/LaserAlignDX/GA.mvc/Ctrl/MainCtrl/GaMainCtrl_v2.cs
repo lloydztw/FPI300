@@ -32,7 +32,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
     /// </summary>
     public partial class GaMainCtrl : Abs.GaMainCtrl, IxTickable
     {
-        static bool OPT_USE_LETIAN_NEW_VIEWER = true;
+        static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER => GaMvcConfig.OPT_USE_LETIAN_CHIP_CELL_VIEWER;
 
         #region MACHINE
         //List<CollectResultClass> collectResultClasses = new List<CollectResultClass>();
@@ -84,7 +84,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         }
         #endregion
 
-        public void Attach(MVSUI[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
+        public override void Attach(Control[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
         {
             // CHIP_CELLS_VIEWERS
             _DSMains = new[]
@@ -98,30 +98,53 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
 
             // Owner Window
             _wndOwner = _DSMains[0].Window.Parent;
-            System.Diagnostics.Debug.Assert(_wndOwner != null);
-            _wndOwner.HandleCreated += (s, e) => _LOG("GaMailCtrl (v2)", Color.Blue);
+            System.Diagnostics.Debug.Assert(_wndOwner != null, "_wndOwner 不能為 null !");
+
+            _wndOwner.HandleCreated += (s, e) => _wndOwner.BeginInvoke(new Action(() => _LOG("GaMailCtrl [V2]", Color.Blue)));
 
             // Processes
             InitAllProcesses();
         }
 
-        IvChipCellsViewer buildChipCellsViewer(MVSUI mvsui)
+        IvChipCellsViewer buildChipCellsViewer(Control panel)
         {
-            if (OPT_USE_LETIAN_NEW_VIEWER)
+            //(1) 使用新的 ChipCellsViewer
+            if (OPT_USE_LETIAN_CHIP_CELL_VIEWER)
             {
-                var parent = mvsui.Parent;
-                var viewer = new JezChipCellsViewPanel();
-                viewer.Location = mvsui.Location;
-                viewer.Size = mvsui.Size;
-                viewer.Dock = mvsui.Dock;
-                viewer.Visible = true;
-                mvsui.Visible = false;
-                parent.Controls.Add(viewer);
-                return viewer;
+                //(1.1) 如果傳進來的已經是 JezChipCellsViewPanel
+                if (panel is JezChipCellsViewPanel jezViewer)
+                {
+                    // 直接返回
+                    return jezViewer;
+                }
+                //(1.2) 如果傳進來的是其他視窗控件
+                else if (panel is Control childWnd)
+                {
+                    // 生成新的 JezChipCellsViewPanel
+                    var viewer = new JezChipCellsViewPanel
+                    {
+                        Location = childWnd.Location,
+                        Size = childWnd.Size,
+                        Dock = childWnd.Dock,
+                        Visible = true
+                    };
+                    // 與舊的 childWnd 互換角色
+                    var parent = childWnd.Parent;
+                    childWnd.Visible = false;
+                    parent.Controls.Add(viewer);
+                    return viewer;
+                }
+                else
+                {
+                    return null;
+                }
             }
+            // (2) 使用舊有的 MVSUI
             else
             {
-                return new MvsChipCellsViewer(mvsui);
+                if (panel is MVSUI mvsui)
+                    return new MvsChipCellsViewer(mvsui);
+                return null;
             }
         }
 
@@ -353,7 +376,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
 
             //------------------------------------------------------------------------
             // 新代碼
-            // NOTE: 目前 cMvdInput 生命週期由 _FpiBigImagesHolder 保管 !!!
+            // NOTE: 目前 cMvdInput 生命週期由 TravellerBigImagesHolder 保管 !!!
             //       不用重複 Clone() 來餵給 MVS
             //------------------------------------------------------------------------
             var lineScanImageHolder = TravellerBigImagesHolder.Instance.LineScanImageHolder;
@@ -398,8 +421,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             string fileName = _aoiModel.FileName;
 
             // 報表
-            //IxReportBuilder report = Universal.GetReportBuilder();
-            IxReportBuilder report = new PowerTechReportBuilder();
+            IxReportBuilder report = GaMvcConfig.CreateReportBuilder();
             report.GenerateReport(stripId, fileName);
 
             // LOG
@@ -854,7 +876,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             //        break;
             //}
 
-            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFlyOperate);
 
             //flystopwatch.Stop();
             //long ms = flystopwatch.ElapsedMilliseconds;
@@ -1002,7 +1024,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     break;
             }
 
-            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFlyOperate);
 
             flystopwatch.Stop();
             long ms = flystopwatch.ElapsedMilliseconds;
@@ -1145,7 +1167,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     break;
             }
 
-            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFlyOperate);
 
             flystopwatch.Stop();
             long ms = flystopwatch.ElapsedMilliseconds;

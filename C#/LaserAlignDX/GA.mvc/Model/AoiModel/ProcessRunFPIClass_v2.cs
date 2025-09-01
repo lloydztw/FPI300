@@ -5,7 +5,6 @@ using JetEazy.Match;
 using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LaserAlignDX.AoiModel;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
@@ -76,7 +75,7 @@ namespace LaserAlignDX.AoiModel.V2
         #endregion
 
         /// <summary>
-        /// 2025-08-28 LETIAN: 巨圖 統一由 FpiBigImagesHolder 保管其生命週期
+        /// 2025-08-28 LETIAN: 巨圖 統一由 TravellerBigImagesHolder 保管其生命週期
         /// </summary>
         public GaBigImageHolder LineScanCamImageHolder
         {

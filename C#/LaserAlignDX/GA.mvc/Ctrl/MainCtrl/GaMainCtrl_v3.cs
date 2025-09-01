@@ -25,6 +25,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     /// </summary>
     public partial class GaMainCtrl : Abs.GaMainCtrl, IxTickable
     {
+        static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER => GaMvcConfig.OPT_USE_LETIAN_CHIP_CELL_VIEWER;
+
         #region MACHINE
         protected MainFPIX3MachineClass MACHINE
         {
@@ -63,10 +65,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         GaPlcFlyCameraCtrl _plcFlyCameraCtrl = new GaPlcFlyCameraCtrl();
         #endregion
 
-        public void Attach(MVSUI[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
+        public override void Attach(Control[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
         {
-            _LOG("GaMailCtrl (v3)", Color.Blue);
-
             // CHIP_CELLS_VIEWERS
             _DSMains = new[]
             {
@@ -78,26 +78,56 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             _plcFlyCameraCtrl.Attach(DsFlys, lblFlyCameraSerialNo);
 
             // Owner Window
-            _wndOwner = DsFlys[0].Parent;
-            System.Diagnostics.Debug.Assert(_wndOwner != null);
-            _wndOwner.HandleCreated += (s, e) => _LOG("GaMailCtrl (v3)", Color.Blue);
+            _wndOwner = DsMains[0].Parent;
+            System.Diagnostics.Debug.Assert(_wndOwner != null, "_wndOwner 不能為 null !");
+
+            _wndOwner.HandleCreated += (s, e) => _wndOwner.BeginInvoke(new Action(() => _LOG("GaMailCtrl [V3]", Color.Blue)));
+            _wndOwner.HandleDestroyed += (s, e) => _plcFlyCameraCtrl?.Dispose();
 
             // Processes
             InitAllProcesses();
         }
 
-        IvChipCellsViewer buildChipCellsViewer(MVSUI mvsui)
+        IvChipCellsViewer buildChipCellsViewer(Control panel)
         {
-            //>>> return new MvsChipCellsViewer(mvsui);
-            var parent = mvsui.Parent;
-            var viewer = new JezChipCellsViewPanel();
-            viewer.Location = mvsui.Location;
-            viewer.Size = mvsui.Size;
-            viewer.Dock = mvsui.Dock;
-            viewer.Visible = true;
-            mvsui.Visible = false;
-            parent.Controls.Add(viewer);
-            return viewer;
+            //(1) 使用新的 ChipCellsViewer
+            if (OPT_USE_LETIAN_CHIP_CELL_VIEWER)
+            {
+                //(1.1) 如果傳進來的已經是 JezChipCellsViewPanel
+                if (panel is JezChipCellsViewPanel jezViewer)
+                {
+                    // 直接返回
+                    return jezViewer;
+                }
+                //(1.2) 如果傳進來的是其他視窗控件
+                else if (panel is Control childWnd)
+                {
+                    // 生成新的 JezChipCellsViewPanel
+                    var viewer = new JezChipCellsViewPanel
+                    {
+                        Location = childWnd.Location,
+                        Size = childWnd.Size,
+                        Dock = childWnd.Dock,
+                        Visible = true
+                    };
+                    // 與舊的 childWnd 互換角色
+                    var parent = childWnd.Parent;
+                    childWnd.Visible = false;
+                    parent.Controls.Add(viewer);
+                    return viewer;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            // (2) 使用舊有的 MVSUI
+            else
+            {
+                if (panel is MVSUI mvsui)
+                    return new MvsChipCellsViewer(mvsui);
+                return null;
+            }
         }
 
         #region PROCESSES_這以後要納入_SYS_MODEL
@@ -325,11 +355,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
             //------------------------------------------------------------------------
             // 新代碼
-            // NOTE: 目前 cMvdInput 生命週期由 _FpiBigImagesHolder 保管 !!!
+            // NOTE: 目前 cMvdInput 生命週期由 TravellerBigImagesHolder 保管 !!!
             //       不用重複 Clone() 來餵給 MVS
             //------------------------------------------------------------------------
             var lineScanImageHolder = TravellerBigImagesHolder.Instance.LineScanImageHolder;
-            //CMvdImage mvdImage = lineScanImageHolder.PeekMvdImage();
             DSMain.UpdateImageSrc(lineScanImageHolder);
         }
         void updateMvd_AoiResultData(ProcessEventArgs e)
@@ -355,7 +384,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             string fileName = _aoiModel.FileName;
 
             // 報表
-            IxReportBuilder report = new PowerTechReportBuilder();
+            IxReportBuilder report = GaMvcConfig.CreateReportBuilder();
             report.GenerateReport(stripId, fileName);
 
             // LOG

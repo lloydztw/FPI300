@@ -3,6 +3,7 @@
 將 MainSpace.MainX3UI 的 主控制邏輯 拉出來
 
 # GaMainCtrl 面對上層的 class
+	目前由其內的 using IMPLEMENT = V2.GaMainCtrl 來組態用哪一個優化階段的版本 
 
 ## 其內, 會根據優化版本階段, 會各自調用以下 模塊
 	GaMainCtrl_v0

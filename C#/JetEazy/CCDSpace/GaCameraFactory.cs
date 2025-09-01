@@ -33,7 +33,10 @@ namespace JetEazy.CCDSpace
                     camera = new LINESCAN_HUARUI();
                     break;
                 case "DVP2":
-                    camera = new Linescan_Dvp2();
+                    if (isDebug)
+                        camera = new Linescan_Sim();
+                    else
+                        camera = new Linescan_Dvp2();
                     break;
                 case "ITK":
                     camera = new Linescan_iTK();

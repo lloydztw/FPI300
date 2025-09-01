@@ -34,7 +34,6 @@ namespace LaserAlignDX.FormSpace
 {
     public partial class frmFlySetup : Form
     {
-
         CviCross _cviCross = new CviCross(Color.Yellow);
         Mover xMovers = new Mover();
         protected MainFPIX3MachineClass MACHINEx3
@@ -98,12 +97,22 @@ namespace LaserAlignDX.FormSpace
             InitializeComponent();
 
             this.Load += FrmFlySetup_Load;
+            this.FormClosing += FrmFlySetup_FormClosing;
             this.FormClosed += FrmFlySetup_FormClosed;
 
         }
 
+        private void FrmFlySetup_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if(!makeSureNotLiveMode())
+                e.Cancel = true;
+        }
+
         private void FrmFlySetup_FormClosed(object sender, FormClosedEventArgs e)
         {
+            // 2025-09-02 @LETIAN 視窗消滅前, 必須要卸載 對 camera 的 Event Handler
+            IxFlyAreaCam.LineTriggerAction -= IxFlyAreaCam_LineTriggerAction;
+
             Traveller106.Universal.IsOpenFlyForm = false;
         }
 
@@ -323,11 +332,14 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
-            if(m_FlyRunning)
-            {
-                JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
+            //if(m_FlyRunning)
+            //{
+            //    JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
+            //    return;
+            //}
+
+            if (!makeSureNotLiveMode())
                 return;
-            }
 
             xRecipe.Load();
             this.DialogResult = DialogResult.Cancel;
@@ -335,11 +347,15 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
-            if (m_FlyRunning)
-            {
-                JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
+            //if (m_FlyRunning)
+            //{
+            //    JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
+            //    return;
+            //}
+
+            if (!makeSureNotLiveMode())
                 return;
-            }
+
             flyOffsetUI.GetPoints();
             this.DialogResult = DialogResult.OK;
         }
@@ -454,6 +470,16 @@ namespace LaserAlignDX.FormSpace
 
                 freeImageBitmap.Dispose();
             }
+        }
+
+        bool makeSureNotLiveMode()
+        {
+            if (m_FlyRunning)
+            {
+                JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
+                return false;
+            }
+            return true;
         }
 
         void init_Display()

@@ -2,8 +2,10 @@
 using JetEazy.BasicSpace;
 using JetEazy.Interface;
 using LaserAlignDX.UISpace;
+using LaserAlignDX.UISpace.UIMVC;
 using System;
 using System.Drawing;
+using System.Windows.Forms;
 
 
 namespace LaserAlignDX.Mvc.Ctrl.Abs
@@ -13,6 +15,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Abs
         public event EventHandler<MainUIStateChangedEventArgs> OnStateChanged;
 
         public abstract void Tick();
+
+        public abstract void Attach(Control[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo);
 
         #region 對上層 MainControlUI 所需要的接口
         public virtual void ChangeRecipe()

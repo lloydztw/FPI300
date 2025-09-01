@@ -1,9 +1,9 @@
 ﻿using System;
-using VisionDesigner;
 
 namespace LaserAlignDX.AoiModel
 {
-    using IMPLEMENT = V2.ProcessRunFPIClass;
+    //改由 GaMvcFactory 集中管理所使用的優化階段版本
+    //using IMPLEMENT = V2.ProcessRunFPIClass;
 
     public class ProcessRunFPIClass : IProcessRunFPI
     {
@@ -15,7 +15,8 @@ namespace LaserAlignDX.AoiModel
         #region SINGLETON
         protected ProcessRunFPIClass()
         {
-            _imp = IMPLEMENT.Instance;
+            //_imp = IMPLEMENT.Instance;
+            _imp = GaMvcConfig.InstanceAoiModel();
         }
         #endregion
 

@@ -367,7 +367,6 @@
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\CviCellsResultBoxes v0.cs" />
     <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\CviLineSegmentsBox.cs" />
     <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\IvDrawItem.cs" />
     <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\MvdConvertor.cs" />
@@ -404,6 +403,7 @@
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\IxReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\PowerTechReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\XxxCompanyReportBuilder.cs" />
+    <Compile Include="GA.mvc\GaMvcConfig.cs" />
     <Compile Include="GA\BasicSpace\ChipClass.cs" />
     <Compile Include="GA\BasicSpace\CollectResultClass.cs" />
     <Compile Include="GA\BasicSpace\FindRectByVM.cs" />

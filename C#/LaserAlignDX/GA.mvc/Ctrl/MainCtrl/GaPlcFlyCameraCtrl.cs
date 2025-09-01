@@ -36,7 +36,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region MACHINE
         MainFPIX3MachineClass MACHINE
         {
-            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
+            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
         }
         #endregion
 
@@ -495,7 +495,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             //        break;
             //}
 
-            using (CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpOnTheFly))
+            using (CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpOnTheFly))
             {
                 //flystopwatch.Stop();
                 //long ms = flystopwatch.ElapsedMilliseconds;
@@ -643,7 +643,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                     break;
             }
 
-            using (CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpOnTheFly))
+            using (CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpOnTheFly))
             {
                 m_flyStopWatch.Stop();
                 long ms = m_flyStopWatch.ElapsedMilliseconds;

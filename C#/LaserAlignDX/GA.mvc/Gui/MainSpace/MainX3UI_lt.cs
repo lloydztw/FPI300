@@ -1,6 +1,5 @@
 ﻿using Eazy_Project_III;
 using JetEazy.BasicSpace;
-using System;
 using System.Windows.Forms;
 
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.GaMainCtrl;
@@ -28,6 +27,7 @@ namespace LaserAlignDX.UISpace.MainSpace
             CommonLogClass.Instance.SetRichTextBox(richTextBox1);
 
             _mainCtrl = new GaMainCtrl();
+
             _mainCtrl.Attach( new[] { mvsui1, mvsui2 },
                               new[] { DSFly0, DSFly1, DSFly2, DSFly3 },
                               label1 );

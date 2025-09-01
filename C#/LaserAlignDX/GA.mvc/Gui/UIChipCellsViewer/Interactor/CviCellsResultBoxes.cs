@@ -430,7 +430,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
             if (checkResult(cell, out bool pass, out bool empty))
             {
                 if (empty)
-                    return $"[{cell.Index}]\n空位";
+                    return $"[{cell.Index}]\n缺";
                 return _formatter.Format(cell);
             }
             return null;

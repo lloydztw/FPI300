@@ -413,7 +413,7 @@ namespace LaserAlignDX.FormSpace
         {
             try
             {
-                var newBmp = EzMvdImageConvertor.LoadBigImage(fileName);
+                var newBmp = GaImageUtil.LoadBigImage(fileName);
                 if (newBmp != null)
                 {
                     xRecipe.bmpOrg?.Dispose();
@@ -430,7 +430,7 @@ namespace LaserAlignDX.FormSpace
         {
             try
             {
-                var newBmp = EzMvdImageConvertor.LoadBigImage(fileName);
+                var newBmp = GaImageUtil.LoadBigImage(fileName);
                 if (newBmp != null)
                 {
                     xRecipe.bmpOrgNoTray?.Dispose();
