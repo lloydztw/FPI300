@@ -1422,7 +1422,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         const string _Cat1 = "A01.基础设置";
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的演算法")]
         [DisplayName("A00.演算法")]
-        [TypeConverter(typeof(EnumConverter))]
+        [TypeConverter(typeof(JzEnumConverter))]
         [Browsable(true)]
         public MatchAlgorithmEnum xAlgorithm { get; set; } = MatchAlgorithmEnum.GridMatch;
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的相似程度")]

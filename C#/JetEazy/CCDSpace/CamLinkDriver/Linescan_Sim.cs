@@ -845,7 +845,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                     int stride = (int)_simImg.Step();
                     uint totalBytes = (uint)(height * stride * bytesPerPixel);
 
-                    camera.Format = PixelFormat.Format8bppIndexed;
+                    camera.Format = getPixelFormat(_simImg);
                     camera.uBytes = totalBytes;
                     camera.iWidth = width;
                     camera.iHeight = height;
