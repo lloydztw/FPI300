@@ -34,6 +34,7 @@ namespace LaserAlignDX.FormSpace
 {
     public partial class frmFlySetup : Form
     {
+
         CviCross _cviCross = new CviCross(Color.Yellow);
         Mover xMovers = new Mover();
         protected MainFPIX3MachineClass MACHINEx3
@@ -69,6 +70,7 @@ namespace LaserAlignDX.FormSpace
         Button btnSpecialCal;
 
         FlyOffsetUI flyOffsetUI => flyOffsetUI1;
+        FlyOffsetUI flyOffset2UI => flyOffsetUI2;
 
         /// <summary>
         /// 飞拍模式 0-取像 1-测试
@@ -107,12 +109,9 @@ namespace LaserAlignDX.FormSpace
             if(!makeSureNotLiveMode())
                 e.Cancel = true;
         }
-
         private void FrmFlySetup_FormClosed(object sender, FormClosedEventArgs e)
         {
-            // 2025-09-02 @LETIAN 視窗消滅前, 必須要卸載 對 camera 的 Event Handler
             IxFlyAreaCam.LineTriggerAction -= IxFlyAreaCam_LineTriggerAction;
-
             Traveller106.Universal.IsOpenFlyForm = false;
         }
 
@@ -147,7 +146,8 @@ namespace LaserAlignDX.FormSpace
 
             LanguageExClass.Instance.EnumControls(this);
 
-            flyOffsetUI.Init();
+            flyOffsetUI.Init(StageNumber.N0);
+            flyOffset2UI.Init(StageNumber.N1);
 
             xTimer = new Timer();
             xTimer.Interval = 50;
@@ -335,9 +335,6 @@ namespace LaserAlignDX.FormSpace
             //if(m_FlyRunning)
             //{
             //    JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
-            //    return;
-            //}
-
             if (!makeSureNotLiveMode())
                 return;
 
@@ -350,13 +347,11 @@ namespace LaserAlignDX.FormSpace
             //if (m_FlyRunning)
             //{
             //    JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
-            //    return;
-            //}
-
             if (!makeSureNotLiveMode())
                 return;
 
             flyOffsetUI.GetPoints();
+            flyOffset2UI.GetPoints();
             this.DialogResult = DialogResult.OK;
         }
 
@@ -471,7 +466,6 @@ namespace LaserAlignDX.FormSpace
                 freeImageBitmap.Dispose();
             }
         }
-
         bool makeSureNotLiveMode()
         {
             if (m_FlyRunning)

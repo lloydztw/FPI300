@@ -88,6 +88,21 @@ namespace LaserAlignDX.Mvc.Ctrl
         bool m_plcFlyStartOld2 = false;
         #endregion
 
+        #region OFFSETS
+        PointF[] FlyOffsetUseStage
+        {
+            get
+            {
+                int iscanIndex = MACHINE.PLCIO.iScanStage;
+                if (iscanIndex == 2)
+                {
+                    return xFlyPara.ptsOffset2;
+                }
+                return xFlyPara.ptsOffset;
+            }
+        }
+        #endregion
+
         #region LOT_DATA_FROM_PLC
         string m_StripId = "Strip_NONE";
         string m_LotId = "Lot_NONE";
@@ -786,9 +801,14 @@ namespace LaserAlignDX.Mvc.Ctrl
                         centerRun = new PointF(xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterX + roiRectF.X,
                                                xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + roiRectF.Y);
 
+                        ////算出的pix需加入解析度
+                        //m_iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].X;
+                        //m_iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].Y;
+                        //m_iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
+
                         //算出的pix需加入解析度
-                        m_iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].X;
-                        m_iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].Y;
+                        m_iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
+                        m_iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
                         m_iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
                     }
                     else
@@ -807,9 +827,14 @@ namespace LaserAlignDX.Mvc.Ctrl
                         centerRun = new PointF(xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterX + roiRectF.X,
                                                xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + roiRectF.Y);
 
+                        ////算出的pix需加入解析度
+                        //m_iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].X;
+                        //m_iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].Y;
+                        //m_iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
+
                         //算出的pix需加入解析度
-                        m_iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].X;
-                        m_iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + xFlyPara.ptsOffset[flyShowIndex - 1].Y;
+                        m_iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
+                        m_iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
                         m_iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
                     }
                     else

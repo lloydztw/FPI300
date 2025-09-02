@@ -43,11 +43,13 @@
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.DS1 = new JzDisplay.UISpace.DispUI();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.DS2 = new JzDisplay.UISpace.DispUI();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.DS1 = new JzDisplay.UISpace.DispUI();
+            this.DS2 = new JzDisplay.UISpace.DispUI();
             this.flyOffsetUI1 = new LaserAlignDX.GA.FormSpace.FPI30Form.FlyOffsetUI();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
+            this.flyOffsetUI2 = new LaserAlignDX.GA.FormSpace.FPI30Form.FlyOffsetUI();
             this.pnlBottom.SuspendLayout();
             this.pnlTop.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -55,6 +57,7 @@
             this.tabPage3.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.tabPage4.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlBottom
@@ -207,6 +210,7 @@
             this.tabControl2.Controls.Add(this.tabPage3);
             this.tabControl2.Controls.Add(this.tabPage2);
             this.tabControl2.Controls.Add(this.tabPage1);
+            this.tabControl2.Controls.Add(this.tabPage4);
             this.tabControl2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl2.Location = new System.Drawing.Point(0, 125);
             this.tabControl2.Name = "tabControl2";
@@ -224,15 +228,6 @@
             this.tabPage3.Text = "原始图片";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // DS1
-            // 
-            this.DS1.Cursor = System.Windows.Forms.Cursors.Default;
-            this.DS1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DS1.Location = new System.Drawing.Point(0, 0);
-            this.DS1.Name = "DS1";
-            this.DS1.Size = new System.Drawing.Size(704, 528);
-            this.DS1.TabIndex = 8;
-            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.DS2);
@@ -243,6 +238,25 @@
             this.tabPage2.Text = "测试图片";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.flyOffsetUI1);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Size = new System.Drawing.Size(704, 528);
+            this.tabPage1.TabIndex = 2;
+            this.tabPage1.Text = "载台一补偿";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // DS1
+            // 
+            this.DS1.Cursor = System.Windows.Forms.Cursors.Default;
+            this.DS1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.DS1.Location = new System.Drawing.Point(0, 0);
+            this.DS1.Name = "DS1";
+            this.DS1.Size = new System.Drawing.Size(704, 528);
+            this.DS1.TabIndex = 8;
+            // 
             // DS2
             // 
             this.DS2.Cursor = System.Windows.Forms.Cursors.Default;
@@ -252,16 +266,6 @@
             this.DS2.Size = new System.Drawing.Size(704, 528);
             this.DS2.TabIndex = 7;
             // 
-            // tabPage1
-            // 
-            this.tabPage1.Controls.Add(this.flyOffsetUI1);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(704, 528);
-            this.tabPage1.TabIndex = 2;
-            this.tabPage1.Text = "补偿页面";
-            this.tabPage1.UseVisualStyleBackColor = true;
-            // 
             // flyOffsetUI1
             // 
             this.flyOffsetUI1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -269,6 +273,24 @@
             this.flyOffsetUI1.Name = "flyOffsetUI1";
             this.flyOffsetUI1.Size = new System.Drawing.Size(704, 528);
             this.flyOffsetUI1.TabIndex = 0;
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Controls.Add(this.flyOffsetUI2);
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Size = new System.Drawing.Size(704, 528);
+            this.tabPage4.TabIndex = 3;
+            this.tabPage4.Text = "载台二补偿";
+            this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // flyOffsetUI2
+            // 
+            this.flyOffsetUI2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flyOffsetUI2.Location = new System.Drawing.Point(0, 0);
+            this.flyOffsetUI2.Name = "flyOffsetUI2";
+            this.flyOffsetUI2.Size = new System.Drawing.Size(704, 528);
+            this.flyOffsetUI2.TabIndex = 1;
             // 
             // frmFlySetup
             // 
@@ -290,6 +312,7 @@
             this.tabPage3.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tabPage4.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -316,5 +339,7 @@
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.TabPage tabPage1;
         private GA.FormSpace.FPI30Form.FlyOffsetUI flyOffsetUI1;
+        private System.Windows.Forms.TabPage tabPage4;
+        private GA.FormSpace.FPI30Form.FlyOffsetUI flyOffsetUI2;
     }
 }
