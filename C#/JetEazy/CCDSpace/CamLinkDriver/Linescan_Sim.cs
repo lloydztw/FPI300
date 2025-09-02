@@ -13,7 +13,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
     public class Linescan_Sim : IxLineScanCam
     {
         private string _simImgFileName = "D:\\AUTOMATION\\Eazy FPI30\\_BIN_\\LASER-MAIN_FPIX3\\PIC\\00003\\orgFly.bmp";
-        private FreeImageAPI.FreeImageBitmap _freeBmp;
+        private FreeImageBitmap _freeBmp;
         //private Bitmap _simBmp;
         private Mat _simImg;
         void disposeImages()
@@ -196,8 +196,8 @@ namespace JetEazy.CCDSpace.CamLinkDriver
         
         FreeImageBitmap IxLineScanCam.GetFreeImageBitmap(int size)
         {
-            //if (m_IsDebug)
-            //    return new FreeImageBitmap(1, 1);
+            if (_freeBmp == null)
+                _freeBmp = createFreeBitmap(_simImg);
             if (_freeBmp == null)
             {
                 m_TriggerOK = false;
@@ -309,7 +309,6 @@ namespace JetEazy.CCDSpace.CamLinkDriver
 
             // 使用 OpenCvSharp 載入圖檔, 以保證是 8bbp
             _simImg = new Mat(_simImgFileName, ImreadModes.Grayscale);
-            _freeBmp = new FreeImageBitmap(_simImg.Width, _simImg.Height, (int)_simImg.Step(), PixelFormat.Format8bppIndexed, _simImg.ToBytes());
 
             int ret = _simImg != null ? 0 : -1;
             if (ret == 0)
@@ -837,14 +836,13 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                 {
                     CameraFrame camera = new CameraFrame();
 
-                    PixelFormat pixFmt = _freeBmp.PixelFormat;
-                    int bytesPerPixel = System.Drawing.Image.GetPixelFormatSize(pixFmt) / 8;
+                    int bytesPerPixel = _simImg.Type().Channels;
                     int width = _simImg.Width;
                     int height = _simImg.Height;
                     int stride = (int)_simImg.Step();
                     uint totalBytes = (uint)(height * stride * bytesPerPixel);
 
-                    camera.Format = pixFmt;
+                    camera.Format = getPixelFormat(_simImg);
                     camera.uBytes = totalBytes;
                     camera.iWidth = width;
                     camera.iHeight = height;
@@ -901,6 +899,29 @@ namespace JetEazy.CCDSpace.CamLinkDriver
             _threadRunFlag = false;
 
             System.Diagnostics.Debug.WriteLine("Thread[{0}] terminated !", Thread.CurrentThread.Name);
+        }
+        #endregion
+
+        #region HELPER_FUNCTION
+        PixelFormat getPixelFormat(Mat mat)
+        {
+            var channels = mat.Channels();
+            switch(channels)
+            {
+                case 1: return PixelFormat.Format8bppIndexed;
+                case 2: return PixelFormat.Format16bppRgb565;
+                case 3: return PixelFormat.Format24bppRgb;
+                case 4: return PixelFormat.Format32bppArgb;
+                default:
+                    throw new Exception("Mat invalid channels number!");
+            }
+        }
+        FreeImageBitmap createFreeBitmap(Mat mat)
+        {
+            if (mat == null) return null;
+            var pixFmt = getPixelFormat(mat);
+            var freeBmp = new FreeImageBitmap(mat.Width, mat.Height, (int)mat.Step(), pixFmt, _simImg.Data);
+            return freeBmp;
         }
         #endregion
     }
