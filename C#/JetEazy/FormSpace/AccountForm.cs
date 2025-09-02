@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Text;
-using System.Windows.Forms;
-
 using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
+using System;
+using System.Windows.Forms;
 
 namespace JetEazy.FormSpace
 {

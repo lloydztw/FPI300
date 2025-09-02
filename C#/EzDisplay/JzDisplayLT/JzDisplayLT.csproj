@@ -144,9 +144,9 @@
       <Project>{a4d1d9b0-ef2e-4072-9fe1-f1ea28571688}</Project>
       <Name>EzCamera.Gui.LiveViewer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\JetEazy\JetEazy.csproj">
+    <ProjectReference Include="..\..\JetEazy\JetEazy.Basics.csproj">
       <Project>{a24458c1-b3ac-462a-8b42-dafd1d420e19}</Project>
-      <Name>JetEazy</Name>
+      <Name>JetEazy.Basics</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

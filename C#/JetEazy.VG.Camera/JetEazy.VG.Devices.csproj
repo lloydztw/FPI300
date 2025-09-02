@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{A24458C1-B3AC-462A-8B42-DAFD1D420E19}</ProjectGuid>
+    <ProjectGuid>{AFA9CF55-2235-415D-B437-F4A62DA34A0C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>JetEazy</RootNamespace>
-    <AssemblyName>JetEazy</AssemblyName>
+    <AssemblyName>JetEazy.VG.Devices</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -146,20 +146,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BasicSpace\JzAHBlob.cs" />
-    <Compile Include="BasicSpace\JzCheckRepeatClass.cs" />
-    <Compile Include="BasicSpace\JzFindObjectClass.cs" />
-    <Compile Include="BasicSpace\JzLangKernel32.cs" />
-    <Compile Include="BasicSpace\JzLanguageClass.cs" />
-    <Compile Include="BasicSpace\JzLogClass.cs" />
-    <Compile Include="BasicSpace\JzPlaneClass.cs" />
-    <Compile Include="BasicSpace\JzPlugClass.cs" />
     <Compile Include="BasicSpace\JzTCPClass.cs" />
-    <Compile Include="BasicSpace\JzTimesClass.cs" />
-    <Compile Include="BasicSpace\JzToolsClass.cs" />
-    <Compile Include="BasicSpace\JzTransparentPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="CCDSpace\CAMERAClass.cs" />
     <Compile Include="CCDSpace\CamLinkDriver\Linescan_Dvp2.cs" />
     <Compile Include="CCDSpace\CamLinkDriver\LINESCAN_HUARUI.cs" />
@@ -176,12 +163,10 @@
     <Compile Include="ControlSpace\PLCSpace\EzBarcodeM3DHelper.cs" />
     <Compile Include="ControlSpace\PLCSpace\Mitsubishi_FX3UClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\ModbusTcpFromNNModbus4.cs" />
-    <Compile Include="EnumTypeConverter.cs" />
-    <Compile Include="Interface\IAxis.cs" />
-    <Compile Include="Interface\IxLineScanCam.cs" />
-    <Compile Include="Interface\IxTickable.cs" />
-    <Compile Include="Interface\ICam.cs" />
-    <Compile Include="NumericUpDownTypeConverter.cs" />
+    <Compile Include=".Interface\IAxis.cs" />
+    <Compile Include=".Interface\IxLineScanCam.cs" />
+    <Compile Include=".Interface\IxTickable.cs" />
+    <Compile Include=".Interface\ICam.cs" />
     <Compile Include="ControlSpace\CCDClass.cs" />
     <Compile Include="ControlSpace\COMClass.cs" />
     <Compile Include="ControlSpace\EventClass.cs" />
@@ -200,30 +185,6 @@
     <Compile Include="ControlSpace\PLCSpace\ModbusRTUClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\Modbus_From_HSL.cs" />
     <Compile Include="ControlSpace\PLCSpace\PLCComm.cs" />
-    <Compile Include="DBSpace\AccDBClass.cs" />
-    <Compile Include="DBSpace\EsssDBClass.cs" />
-    <Compile Include="DBSpace\RCPDBClass.cs" />
-    <Compile Include="DBSpace\RUNDBClass.cs" />
-    <Compile Include="FormSpace\AccountForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FormSpace\AccountForm.designer.cs">
-      <DependentUpon>AccountForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FormSpace\LoginForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FormSpace\LoginForm.designer.cs">
-      <DependentUpon>LoginForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="FormSpace\VsMessageBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FormSpace\VsMessageBox.Designer.cs">
-      <DependentUpon>VsMessageBox.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GlobalSpace\Enums.cs" />
-    <Compile Include="GlobalSpace\Universal.cs" />
     <Compile Include="OPSpace\CalibrationPlateClass.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -232,12 +193,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PropertyGridSpace\PropGrid_CaliClass.cs" />
-    <Compile Include="UISpace\EssUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="UISpace\EssUI.designer.cs">
-      <DependentUpon>EssUI.cs</DependentUpon>
-    </Compile>
     <Compile Include="UISpace\VsHandleMotorUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -254,21 +209,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="FormSpace\AccountForm.resx">
-      <DependentUpon>AccountForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\LoginForm.resx">
-      <DependentUpon>LoginForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\VsMessageBox.resx">
-      <DependentUpon>VsMessageBox.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="UISpace\EssUI.resx">
-      <DependentUpon>EssUI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UISpace\VsHandleMotorUI.resx">
       <DependentUpon>VsHandleMotorUI.cs</DependentUpon>
@@ -280,6 +223,12 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JetEazy\JetEazy.Basics.csproj">
+      <Project>{a24458c1-b3ac-462a-8b42-dafd1d420e19}</Project>
+      <Name>JetEazy.Basics</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

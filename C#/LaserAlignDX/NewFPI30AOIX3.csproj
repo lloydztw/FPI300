@@ -910,9 +910,13 @@
       <Project>{ecf19b8d-be9a-4159-8b94-defc25a59507}</Project>
       <Name>JetEazy.Calib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\JetEazy\JetEazy.csproj">
+    <ProjectReference Include="..\JetEazy.VG.Camera\JetEazy.VG.Devices.csproj">
+      <Project>{afa9cf55-2235-415d-b437-f4a62da34a0c}</Project>
+      <Name>JetEazy.VG.Devices</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JetEazy\JetEazy.Basics.csproj">
       <Project>{a24458c1-b3ac-462a-8b42-dafd1d420e19}</Project>
-      <Name>JetEazy</Name>
+      <Name>JetEazy.Basics</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
