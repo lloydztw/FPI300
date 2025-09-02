@@ -29,7 +29,7 @@ namespace LaserAlignDX.AoiModel
     /// 使用全新 LT AoiLib 套件
     /// (注意: 只能 專門用於 格點晶粒)
     /// </summary>
-    public class MvdChipMatcherRG : IMvdTemplateMatcher
+    public class JezGridPadsChipMatcher : IMvdTemplateMatcher
     {
         #region PRIVATE_MVD_VisionDesigner_Members
         EzRigidBodyGridMatcher _ezChipMatcher = new EzRigidBodyGridMatcher();
@@ -60,7 +60,7 @@ namespace LaserAlignDX.AoiModel
             private set;
         } = new List<xFindResult>();
 
-        ~MvdChipMatcherRG()
+        ~JezGridPadsChipMatcher()
         {
             // for Garbage Collection
             Dispose();

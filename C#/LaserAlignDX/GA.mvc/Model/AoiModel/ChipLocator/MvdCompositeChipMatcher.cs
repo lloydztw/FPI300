@@ -66,7 +66,7 @@ namespace LaserAlignDX.AoiModel
                 for (int i = 0; i < N_CHANNLS; i++)
                 {
                     _matchers[i]?.Dispose();
-                    _matchers[i] = new MvdChipMatcherRG();
+                    _matchers[i] = new JezGridPadsChipMatcher();
                 }
             }
             else

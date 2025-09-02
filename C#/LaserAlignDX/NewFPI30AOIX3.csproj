@@ -383,9 +383,9 @@
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzPadsGridFinder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzRigidBodyGridMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\AlgorithmEnum.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\Implements\MvdChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\Implements\JezGridPadsChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\IMvdTemplateMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\MvdChipMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\MvdChipMatcherRG.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\MvdCompositeChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\TravellerBigImagesHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
