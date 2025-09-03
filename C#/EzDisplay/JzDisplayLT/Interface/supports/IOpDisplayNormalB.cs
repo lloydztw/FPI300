@@ -22,7 +22,7 @@ namespace JzDisplay.Interface
         /// <br/> 調用者必須維持此新的 bmp 生命週期 !!!
         /// </summary>
         Bitmap GetScreen();
-        void SaveScreen();
+        void SaveScreen(string saveFileName = null);
 
         /// <summary>
         /// 此函式直接傳回 bmpOrg 的參考 (reference)

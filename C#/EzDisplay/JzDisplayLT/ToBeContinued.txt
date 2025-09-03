@@ -1,0 +1,2 @@
+﻿1. Resize All / Rotate All still can't do (5/20)
+2. LETIAN 2024-06-11 初次 移植整合至 QzImageViewer 

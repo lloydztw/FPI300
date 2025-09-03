@@ -17,6 +17,7 @@
         RECTO = 8,
         HEXO = 9,
     }
+
     public enum ShapeDefineEnum
     {
         RECT,
@@ -30,6 +31,7 @@
         RECTO,
         HEXO,
     }
+
     public enum MoverOpEnum : int
     {
         SELECT,
@@ -42,12 +44,14 @@
 
         READYTOMOVE,
     }
+
     public enum ShapeOpEnum : int
     {
         ADDSHAPE,
         DELSHAPE,
         REVISESHAPE,
     }
+
     public enum DisplayTypeEnum
     {
         SHOW,   //僅顯示
@@ -56,14 +60,11 @@
         CAPTRUE,    //取像
         //SELECT,//仅选中
     }
+
     public enum ShowModeEnum : int
     {
         NORMAL = 0,
         BORDERSHOW = 1,
         MAINSHOW = 2,
     }
-
-
-
-
 }

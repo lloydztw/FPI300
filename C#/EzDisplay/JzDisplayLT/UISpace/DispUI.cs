@@ -90,7 +90,7 @@ namespace JzDisplay.UISpace
         }
         public bool DispUIload(Form myForm = null)
         {
-#if(OPT_BYPASS_DONGLE)
+#if(OPT_BYPASS_DONGLE || true)
             return true;
 #else
             ProjectForAllinone.ProjectClass project = new ProjectForAllinone.ProjectClass();
@@ -295,9 +295,9 @@ namespace JzDisplay.UISpace
             OPDISP.iMode = i;
         }
 
-        public void SaveScreen()
+        public void SaveScreen(string saveFileName = null)
         {
-            OPDISP.SaveScreen();
+            OPDISP.SaveScreen(saveFileName);
         }
 
         /// <summary>

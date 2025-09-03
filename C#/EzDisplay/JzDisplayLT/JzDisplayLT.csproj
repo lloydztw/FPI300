@@ -86,10 +86,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\opencv_vbase.dll</HintPath>
     </Reference>
-    <Reference Include="ProjectForAllinone, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Dlls\dc\ProjectForAllinone.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -113,6 +109,7 @@
     <Compile Include="BasicSpace\JzIdentityHoleEAG.cs" />
     <Compile Include="BasicSpace\JzRingEAG.cs" />
     <Compile Include="BasicSpace\JzStripEAG.cs" />
+    <Compile Include="GlobalSpace\GlobalConfig.cs" />
     <Compile Include="Interface\IDispUI.cs" />
     <Compile Include="Interface\IOpDisplay.cs" />
     <Compile Include="Interface\supports\IOpDisplayEvents.cs" />

@@ -884,11 +884,26 @@ namespace JzDisplay.OPSpace
             return bmpScreen;
 #endif
         }
-        public void SaveScreen()
+        public void SaveScreen(string saveFileName = null)
         {
             using (Bitmap bmp = GetScreen())
             {
-                bmp.Save(Universal.TESTPATH + "\\PRTSCREEN" + Universal.GlobalImageTypeString, Universal.GlobalImageFormat);
+                bool useDefaultFormat = false;
+
+                if (string.IsNullOrEmpty(saveFileName))
+                {
+                    saveFileName = GlobalConfig.SCREEN_DUMP_FILE;
+                    useDefaultFormat = true;
+                }
+                
+                string path = System.IO.Path.GetDirectoryName(saveFileName);
+                if (!System.IO.Directory.Exists(path))
+                    System.IO.Directory.CreateDirectory(path);
+
+                if (useDefaultFormat)
+                    bmp.Save(saveFileName, GlobalConfig.SCREEN_DUMP_IMG_FORMAT);
+                else
+                    bmp.Save(saveFileName);
             }
         }
 
