@@ -688,7 +688,7 @@ namespace JetEazy.UISpace
             button1.Size = button2.Size;
 
             //foreach (var c in new Control[] { lblMainStatus, cboChangeRecipe })
-            foreach (var c in new Control[] { label4, comboBox1 })
+            foreach (var c in new Control[] { label4, comboBox1})
             {
                 c.Left = pad;
                 c.Width = rcc.Width - pad * 2;
@@ -709,6 +709,15 @@ namespace JetEazy.UISpace
             //lblDateTime
             label2.Left = label1.Right + pad;
             label2.Width = rcc.Width - label2.Left - pad;
+
+            // lblVer
+            pad = 2;
+            label10.Left = pad;
+            label10.Width = rcc.Width - pad * 2;
+            label10.Top = label2.Top - 1 - label10.Height;
+
+            // pic
+            pictureBox1.Height = label10.Top - 1 - pictureBox1.Top;
 
             //lblPassCount;
             //lblFailCount;

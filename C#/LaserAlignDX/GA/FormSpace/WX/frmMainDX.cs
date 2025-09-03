@@ -175,7 +175,7 @@ namespace Traveller106
 
             //this.Text = $"{ToChangeLanguage("字符视觉检测")} Ver" + Application.ProductVersion;
             //this.Text = $"{ToChangeLanguage("字符视觉检测")} Ver" + Universal.VersionDate;
-            this.Text = $"{ToChangeLanguage("FPI30-Studio")} Ver" + Universal.VersionDate;
+            this.Text = $"{ToChangeLanguage("FPI30-Studio")} (Ver {Application.ProductVersion}) " + Universal.VersionDate;
 
             LanguageExClass.Instance.EnumControls(this);
 
@@ -1270,7 +1270,6 @@ namespace Traveller106
             var rcc = ClientRectangle;
             mainControlUI1.Width = rcc.Width - panelWidth - 2;
             mainControlUI1.Height = rcc.Height;
-            ctrlUI1.Height = rcc.Bottom - ctrlUI1.Top;
             var panels = new Control[]
             {
                 essUI1,
@@ -1285,6 +1284,11 @@ namespace Traveller106
                 panel.Left = rcc.Width - panel.Width;
                 panel.Padding = new Padding(5, 5, 5, 5);
             }
+            runUI1.Top = essUI1.Bottom;
+            rcpUI1.Top = runUI1.Top;
+            iniUI1.Top = runUI1.Top;
+            ctrlUI1.Top = runUI1.Bottom;
+            ctrlUI1.Height = rcc.Bottom - ctrlUI1.Top;
 #endif
         }
         private string ToChangeLanguage(string eText)

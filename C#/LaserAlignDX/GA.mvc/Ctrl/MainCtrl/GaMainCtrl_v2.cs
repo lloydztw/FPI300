@@ -45,7 +45,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         //}
         protected MainFPIX3MachineClass MACHINE
         {
-            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
+            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
         }
         #endregion
 

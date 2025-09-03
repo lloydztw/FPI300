@@ -122,6 +122,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region GUI_MEMBERS
+        Control _wndOwner;
         MVSUI[] _DSFLYs;
         MVSUI DSFly0 => _DSFLYs[0];
         MVSUI DSFly1 => _DSFLYs[1];
@@ -132,6 +133,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         public void Attach(MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
         {
+            _wndOwner = DsFlys[0].Parent;
             _DSFLYs = DsFlys;
             lblSerialNumber = lblFlyCameraSerialNo;
 
@@ -157,11 +159,11 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         void updateFlyCameraSerialNumber(int serialNumber)
         {
-            //frmOwner?.Invoke(new Action(() =>
-            //{
-            //    lblSerialNumber.Text = $"飞拍序号:{serialNumber}";
-            //    lblSerialNumber.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
-            //}));
+            _wndOwner?.Invoke(new Action(() =>
+            {
+                lblSerialNumber.Text = $"飞拍序号:{serialNumber}";
+                lblSerialNumber.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
+            }));
         }
 
         void IxFlyAreaCam_LineTriggerAction(JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)

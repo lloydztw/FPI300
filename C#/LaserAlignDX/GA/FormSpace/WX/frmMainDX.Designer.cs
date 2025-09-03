@@ -29,69 +29,75 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMainDX));
-            this.runUI1 = new PhotoMachine.UISpace.RunUI();
             this.essUI1 = new JetEazy.UISpace.EssUI();
-            this.iniUI1 = new PhotoMachine.UISpace.IniUI();
-            this.ctrlUI1 = new PhotoMachine.UISpace.CtrlUI();
             this.rcpUI1 = new PhotoMachine.UISpace.RcpUI();
+            this.iniUI1 = new PhotoMachine.UISpace.IniUI();
             this.mainControlUI1 = new Eazy_Project_III.UISpace.MainControlUI();
+            this.ctrlUI1 = new PhotoMachine.UISpace.CtrlUI();
+            this.runUI1 = new PhotoMachine.UISpace.RunUI();
             this.SuspendLayout();
-            // 
-            // runUI1
-            // 
-            this.runUI1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.runUI1.Location = new System.Drawing.Point(1052, 239);
-            this.runUI1.Name = "runUI1";
-            this.runUI1.Size = new System.Drawing.Size(228, 417);
-            this.runUI1.TabIndex = 0;
             // 
             // essUI1
             // 
             this.essUI1.BackColor = System.Drawing.SystemColors.Control;
             this.essUI1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.essUI1.Location = new System.Drawing.Point(1052, 0);
+            this.essUI1.Location = new System.Drawing.Point(1403, 0);
+            this.essUI1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.essUI1.Name = "essUI1";
             this.essUI1.RunWatchTime = 30;
-            this.essUI1.Size = new System.Drawing.Size(226, 238);
+            this.essUI1.Size = new System.Drawing.Size(301, 327);
             this.essUI1.TabIndex = 1;
-            // 
-            // iniUI1
-            // 
-            this.iniUI1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.iniUI1.Location = new System.Drawing.Point(818, 239);
-            this.iniUI1.Name = "iniUI1";
-            this.iniUI1.Size = new System.Drawing.Size(228, 417);
-            this.iniUI1.TabIndex = 2;
-            // 
-            // ctrlUI1
-            // 
-            this.ctrlUI1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
-            this.ctrlUI1.Location = new System.Drawing.Point(1052, 657);
-            this.ctrlUI1.Name = "ctrlUI1";
-            this.ctrlUI1.Size = new System.Drawing.Size(223, 239);
-            this.ctrlUI1.TabIndex = 3;
             // 
             // rcpUI1
             // 
             this.rcpUI1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.rcpUI1.Location = new System.Drawing.Point(584, 239);
+            this.rcpUI1.Location = new System.Drawing.Point(779, 326);
+            this.rcpUI1.Margin = new System.Windows.Forms.Padding(5);
             this.rcpUI1.Name = "rcpUI1";
-            this.rcpUI1.Size = new System.Drawing.Size(228, 417);
+            this.rcpUI1.Size = new System.Drawing.Size(303, 521);
             this.rcpUI1.TabIndex = 4;
+            // 
+            // iniUI1
+            // 
+            this.iniUI1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.iniUI1.Location = new System.Drawing.Point(1091, 326);
+            this.iniUI1.Margin = new System.Windows.Forms.Padding(5);
+            this.iniUI1.Name = "iniUI1";
+            this.iniUI1.Size = new System.Drawing.Size(303, 521);
+            this.iniUI1.TabIndex = 2;
             // 
             // mainControlUI1
             // 
             this.mainControlUI1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.mainControlUI1.Location = new System.Drawing.Point(0, 0);
+            this.mainControlUI1.Margin = new System.Windows.Forms.Padding(5);
             this.mainControlUI1.Name = "mainControlUI1";
-            this.mainControlUI1.Size = new System.Drawing.Size(1046, 896);
+            this.mainControlUI1.Size = new System.Drawing.Size(1395, 1120);
             this.mainControlUI1.TabIndex = 5;
+            // 
+            // ctrlUI1
+            // 
+            this.ctrlUI1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.ctrlUI1.Location = new System.Drawing.Point(1403, 850);
+            this.ctrlUI1.Margin = new System.Windows.Forms.Padding(5);
+            this.ctrlUI1.Name = "ctrlUI1";
+            this.ctrlUI1.Size = new System.Drawing.Size(297, 270);
+            this.ctrlUI1.TabIndex = 3;
+            // 
+            // runUI1
+            // 
+            this.runUI1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.runUI1.Location = new System.Drawing.Point(1403, 329);
+            this.runUI1.Margin = new System.Windows.Forms.Padding(5);
+            this.runUI1.Name = "runUI1";
+            this.runUI1.Size = new System.Drawing.Size(303, 521);
+            this.runUI1.TabIndex = 0;
             // 
             // frmMainDX
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1280, 900);
+            this.ClientSize = new System.Drawing.Size(1707, 1125);
             this.Controls.Add(this.rcpUI1);
             this.Controls.Add(this.iniUI1);
             this.Controls.Add(this.mainControlUI1);
@@ -100,6 +106,7 @@
             this.Controls.Add(this.runUI1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "frmMainDX";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form1";
