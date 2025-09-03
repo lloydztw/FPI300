@@ -136,9 +136,10 @@ namespace PhotoMachine.UISpace
             //STPUI.TriggerActionForSetupDetail += new StpUI.TriggerHandlerForSetupDetail(STPUI_TriggerActionForSetupDetail);
 
             FillDisplay(true);
-
             DBStatus = DBStatusEnum.NONE;
 
+            //HandleCreated += (s, e) => LtAoiFactory.RcpCheckActive();
+            BeginInvoke(new Action(() => LtAoiFactory.RcpCheckActive()));
         }
 
         private void BtnDel_Click(object sender, EventArgs e)
@@ -161,7 +162,9 @@ namespace PhotoMachine.UISpace
                 {
                     if (rcpitem.Index == RCPDB.Indicator)
                     {
+                        var item = RCPDB.RCPItemList[i];
                         RCPDB.RCPItemList.RemoveAt(i);
+                        LtAoiFactory.RcpDelete(item.Name);
                         break;
                     }
                     i++;
@@ -259,6 +262,8 @@ namespace PhotoMachine.UISpace
             {
                 WriteBack(true);
 
+                LtAoiFactory.RcpRename(RCPItemNow.Name);
+                
                 //VIEW.Save();
 
                 //STPUI.ModifyComplete();
@@ -335,6 +340,9 @@ namespace PhotoMachine.UISpace
         public void ChangeRecipe(bool IsLoad) //IsLoad is judge is the image is from file or memory
         {
             FillDisplay(IsLoad);
+
+            // 檢查空盤參數是否存在 !!!
+            LtAoiFactory.RcpCheckActive();
         }
         void FillDisplay(bool IsLoad)   //IsLoad is judge is the image is from file or memory
         {
@@ -350,6 +358,7 @@ namespace PhotoMachine.UISpace
 
             //if (IsLoad)
             //    STPUI.ResetcboSetup();
+            LtAoiFactory.RcpSetActive(RCPItemNow?.Name);
 
         }
         DBStatusEnum myDBStatus = DBStatusEnum.NONE;
