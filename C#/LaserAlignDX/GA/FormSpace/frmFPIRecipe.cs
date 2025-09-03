@@ -84,7 +84,7 @@ namespace LaserAlignDX.FormSpace
             this.FormClosed += FrmFPIRecipe_FormClosed;
             this.SizeChanged += FrmFPIRecipe_SizeChanged;
 
-            LtAoiFactory.OnLineScanRequested += (s, e) => test_PushImage();
+            //LtAoiFactory.OnLineScanRequested += (s, e) => test_PushImage();
         }
 
         private void FrmFPIRecipe_SizeChanged(object sender, EventArgs e)

@@ -18,12 +18,11 @@ using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
 using JetEazy.FormSpace;
 using JetEazy.Match;
+using JetEazy.OpenCV;
 using JetEazy.Utils;
 using System;
 using System.Drawing;
-using System.Linq.Expressions;
 using System.Windows.Forms;
-using System.Windows.Markup;
 using AoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
 
 
@@ -64,24 +63,42 @@ namespace Traveller106
         /// <summary>
         /// 開啟 Tool Window
         /// </summary>
-        public static Form OpenEmptyTrayInspectorTool(Form owner, string recipeName = null)
+        public static Form OpenEmptyTrayInspectorTool(Form owner, string recipeName = null, Bitmap bmpToShow = null)
         {
             if (recipeName == null)
                 recipeName = GetActiveRecipeNameAtFPI30();
 
             var frm = AoiFactory.OpenEmptyTrayInspectorTool(owner, recipeName);
-            frm?.Show();
+            if (frm == null)
+                return null;
+
+            if (bmpToShow != null)
+            {
+                frm.Load += (s, e) =>
+                {
+                    frm.BeginInvoke(new Action(() =>
+                    {
+                        PushBitmap(bmpToShow, "RecipeOrg");
+                    }));
+                };
+            }
+
+            frm.Show();
             return frm;
         }
 
         /// <summary>
         /// 推送影像到 Tool Window
-        /// - AoiFactory 負責接手管控 image 生命週期
+        /// - AoiFactory 負責接手管控 bmp 生命週期
         /// - name 為標記名稱
         /// </summary>
-        public static void PushImage(IEzImage image, string name)
+        public static void PushBitmap(Bitmap bmp, string name)
         {
-            AoiFactory.PushImage(image, name);
+            using (var bridge = new QxImageBridge(bmp))
+            {
+                var qImg = new EzQuickImage(bridge.Image, true);
+                AoiFactory.PushImage(qImg, name);
+            }
         }
 
         public static EzBlocsGrid DetectGrid(Bitmap fullfovBmp)
@@ -102,13 +119,14 @@ namespace Traveller106
     }
 
 
-    //-----------------------------------------------------------------------
-    // 參數檔之同步管理
-    //-----------------------------------------------------------------------
+
     partial class LtAoiFactory
     {
+        #region PRIVATE_DATA
         static string _recipePath => AoiFactory.RecipePath;
         static string _activeRecipeName;
+        #endregion
+
         public static bool RcpCheckActive(bool silent = false)
         {
             var recipeName = _activeRecipeName = GetActiveRecipeNameAtFPI30();

@@ -80,6 +80,7 @@ namespace JetEazy.Utils
             if (stm != null)
                 stm.Dispose();
         }
+
         /// <summary>
         /// 获取枚举类子项描述信息
         /// </summary>
@@ -101,10 +102,39 @@ namespace JetEazy.Utils
             }
         }
 
-        public static void LOG(string msg, Color color)
+        /// <summary>
+        /// 通用的 LOG function
+        /// </summary>
+        public static void LOG(string msg, params object[] args)
         {
+#if (true)
+            Color color = Color.Black;
+
+            int N = args.Length;
+            if (N > 0 && args[N - 1] is Color)
+            {
+                color = (Color)args[N - 1];
+                N -= 1;
+            }
+
+            var sb = new System.Text.StringBuilder();
+            //sb.Append(Name);
+            sb.Append(", ");
+            sb.Append(msg);
+
+            for (int i = 0; i < N; i++)
+            {
+                sb.Append(", ");
+                sb.Append(args[i]);
+            }
+
+            msg = sb.ToString();
             CommonLogClass.Instance.LogMessage(msg, color);
+            //if (color == Color.Red)
+            //    GdxGlobal.LOG.Warn(msg);
+            //else
+            //    GdxGlobal.LOG.Debug(msg);
+#endif
         }
     }
-
 }
