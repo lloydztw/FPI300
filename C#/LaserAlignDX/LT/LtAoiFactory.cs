@@ -16,16 +16,20 @@
 
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
+using JetEazy.FormSpace;
 using JetEazy.Match;
+using JetEazy.Utils;
 using System;
 using System.Drawing;
+using System.Linq.Expressions;
 using System.Windows.Forms;
+using System.Windows.Markup;
 using AoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
 
 
 namespace Traveller106
 {
-    public class LtAoiFactory
+    public partial class LtAoiFactory
     {
         /// <summary>
         /// 要求線掃影像
@@ -94,6 +98,72 @@ namespace Traveller106
         public static void DisposeAll()
         {
             AoiFactory.DisposeAll();
+        }
+    }
+
+
+    //-----------------------------------------------------------------------
+    // 參數檔之同步管理
+    //-----------------------------------------------------------------------
+    partial class LtAoiFactory
+    {
+        static string _recipePath => AoiFactory.RecipePath;
+        static string _activeRecipeName;
+        public static bool RcpCheckActive(bool silent = false)
+        {
+            var recipeName = _activeRecipeName = GetActiveRecipeNameAtFPI30();
+            var fileName = System.IO.Path.Combine(_recipePath, recipeName + ".json");
+            if (!System.IO.File.Exists(fileName))
+            {
+                if (!silent)
+                    PromptWarning($"空盤檢測參數 {recipeName} 還沒建立!");
+                return false;
+            }
+            return true;
+        }
+        public static void RcpSetActive(string recipeName)
+        {
+            _activeRecipeName = recipeName;
+        }
+        public static void RcpRename(string recipeName)
+        {
+            if (_activeRecipeName != recipeName)
+            {
+                try
+                {
+                    var srcFile = System.IO.Path.Combine(_recipePath, _activeRecipeName + ".json");
+                    var dstFile = System.IO.Path.Combine(_recipePath, recipeName + ".json");
+                    if (System.IO.File.Exists(srcFile))
+                        System.IO.File.Move(srcFile, dstFile);
+                }
+                catch(Exception ex)
+                {
+                    PromptWarning($"空盤檢測參數 無法改名:\n\r {_activeRecipeName} -> {recipeName}");
+                }
+            }
+        }
+        public static void RcpDelete(string recipeName)
+        {
+            try
+            {
+                var fileName = System.IO.Path.Combine(_recipePath, recipeName);
+                System.IO.File.Delete(fileName);
+            }
+            catch
+            {
+                PromptWarning($"空盤檢測參數 {recipeName} 無法刪除!");
+            }
+        }
+        static void PromptWarning(string message)
+        {
+            #region 暫時直接在此調用 GUI 元件
+            GaUtil.LOG(message, Color.Red);
+            var msgBox = new VsMessageBox(message, true);
+            msgBox.FormClosed += (s, e) => (s as Form)?.Dispose();
+            var frms = Application.OpenForms;
+            var frm = frms.Count > 0 ? frms[0] : null;
+            msgBox.ShowDialog(frm);
+            #endregion
         }
     }
 }

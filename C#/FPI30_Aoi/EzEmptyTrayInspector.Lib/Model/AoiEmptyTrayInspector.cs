@@ -1156,7 +1156,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 run_match(SideID.A, imgA, _dumpPath);
 
                 var matchResult = _matchResults[0];
-                if (_recipe.VisionSettings.FindAllFailBlocs.Value && _recipe.VisionSettings.Match.UseGrid)
+                if (matchResult != null && _recipe.VisionSettings.FindAllFailBlocs.Value && _recipe.VisionSettings.Match.UseGrid)
                 {
                     run_on_grid_ng_predict(SideID.A, imgA, matchResult, _dumpPath);
                     run_off_grid_ng_detect(SideID.A, imgA, matchResult, _dumpPath, out List<EzBloc> ngBloc);

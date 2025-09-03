@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JetEazy.BasicSpace;
+using System;
 using System.Drawing;
 using System.Reflection;
 
@@ -98,6 +99,11 @@ namespace JetEazy.Utils
                 System.ComponentModel.DescriptionAttribute da = (System.ComponentModel.DescriptionAttribute)objs[0];
                 return da.Description;
             }
+        }
+
+        public static void LOG(string msg, Color color)
+        {
+            CommonLogClass.Instance.LogMessage(msg, color);
         }
     }
 

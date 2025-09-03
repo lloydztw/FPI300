@@ -1221,7 +1221,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                         {
                             case ScanInspectMode.NOTRAY:
                                 //填写数据 疑似有料
-                                //try
+                                try
                                 {
                                     string strNoTray = cell.GetNoTrayDesc();
                                     if (!string.IsNullOrEmpty(strNoTray))
@@ -1242,12 +1242,12 @@ namespace LaserAlignDX.UISpace.MainSpace
                                         DSMain.mvdRenderActivex1.AddShape(mvdRect);
                                     }
                                 }
-                                //catch (Exception ex)
-                                //{
-                                //    string errMsg = $"顯示結果異常: {ex.Message}\n\r\n\r@{ex.StackTrace}";
-                                //    MessageBox.Show(errMsg);
-                                //    return;
-                                //}
+                                catch (Exception ex)
+                                {
+                                    //string errMsg = $"顯示結果異常: {ex.Message}\n\r\n\r@{ex.StackTrace}";
+                                    //MessageBox.Show(errMsg);
+                                    return;
+                                }
                                 break;
                             case ScanInspectMode.MEASUREAOI:
                             case ScanInspectMode.QRCODE:

@@ -36,6 +36,14 @@ namespace EzAoiEmptyTrayInspector
         /// </summary>
         public static event EventHandler OnLineScanRequested;
 
+        public static string RecipePath
+        {
+            get
+            {
+                return Global.APP_PATH.RecipePath;
+            }
+        }
+
         /// <summary>
         /// 直接取用 AoiModel
         /// </summary>

@@ -1280,12 +1280,20 @@ namespace LaserAlignDX.RunSpace.V2
         {
             xRecipe.AnalyzeDatasData();
 
+            // 檢查空盤參數是否存在 !!!
+            if (!LtAoiFactory.RcpCheckActive(silent: true))
+            {
+                m_IsPass = false;
+                return;
+            }
+
             m_ElapsedTime = 0;
             m_Running = true;
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Restart();
 
             var aoiModel = LtAoiFactory.InstanceModel();
+
             using (Bitmap bmpInputImage = EzMvdImageConvertor.CMvdImageToBitmap(cMvdInput))
             {
                 xRecipe.xOutBlocs.Clear();
@@ -1351,7 +1359,6 @@ namespace LaserAlignDX.RunSpace.V2
             m_ElapsedTime = stopwatch.ElapsedMilliseconds;  //@ for Inspect003
             m_Running = false;
         }
-
         /// <summary>
         /// 空载台检测 : 更新結果 到 Gaara 數據群
         /// </summary>
