@@ -1,4 +1,19 @@
-﻿using JetEazy.Match;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-08-18 初稿 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using JetEazy.Match;
 using JetEazy.OpenCV.Viewer;
 using JetEazy.QvMath;
 using JetEazy.QxCollections;

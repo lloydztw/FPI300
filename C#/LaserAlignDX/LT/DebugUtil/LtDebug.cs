@@ -1,21 +1,18 @@
-﻿/****************************************************************************
- *                                                                          
- * Copyright (c) 2009 Jet Eazy Corp. All rights reserved.        
- *                                                                          
- ***************************************************************************/
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-08-14 初稿 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
 
-/****************************************************************************
- *
- * VERSION
- *		$Revision:$
- *
- * HISTORY
- *      $Id:$    
- *	    2008/07/01 The class is created by LeTian Chang
-  * DESCRIPTION
- *      
- *
- ***************************************************************************/
 
 namespace LeTian.AoiLib
 {

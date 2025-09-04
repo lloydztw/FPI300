@@ -377,7 +377,11 @@ namespace LaserAlignDX.AoiModel.V2
                 //// 釋放巨圖
                 //bmpInputImage?.Dispose();
                 //bmpInputImage = null;
-                throw ex;
+                //throw ex;
+
+                m_IsPass = true;
+                m_Running = false;
+                LtDebug.LOG.Error(ex, $"{GetType().Name}.Inspect001_LT()");
             }
             finally
             {

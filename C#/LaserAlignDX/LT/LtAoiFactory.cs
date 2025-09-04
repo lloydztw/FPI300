@@ -83,7 +83,8 @@ namespace Traveller106
                 };
             }
 
-            frm.Show();
+            //frm.Show();
+            frm.ShowDialog(owner);
             return frm;
         }
 

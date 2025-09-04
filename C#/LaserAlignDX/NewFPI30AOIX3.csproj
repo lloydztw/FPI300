@@ -394,7 +394,6 @@
     <Compile Include="GA.mvc\Model\AoiModel\ScanInspectModeEnum.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaBigImageHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaCellsGroup.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\Supports\GaChipData.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaProgressEventArgs.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />

@@ -878,6 +878,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 }
             }
         }
+
         RectangleF LeftTopRect
         {
             get { return xRegionTrain; }

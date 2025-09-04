@@ -52,6 +52,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             get
             {
+                // 每次都通訊一次
                 int iscanIndex = MACHINE.PLCIO.iScanStage;
                 var viewer = iscanIndex == 2 ?
                     _DSMains[1]:
