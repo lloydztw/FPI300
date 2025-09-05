@@ -25,7 +25,7 @@ namespace JetEazy.Match
 {
     public class EzBlocsGridBuilder
     {
-        public EzBlocsGrid Build(IList<EzBloc> blocs)
+        public EzBlocsGrid Build(IList<EzBloc> blocs, Comparison<EzBlocsGrid> comparer = null)
         {
             if (blocs == null)
                 return null;
@@ -58,11 +58,13 @@ namespace JetEazy.Match
 
             if (localMaps.Count > 1)
             {
-                int compare_map(EzBlocsGrid a, EzBlocsGrid b)
-                {
-                    return b.ActualCount - a.ActualCount;
-                }
-                localMaps.Sort(compare_map);
+                if (comparer != null)
+                    localMaps.Sort(comparer);
+                else
+                    localMaps.Sort((a, b) =>
+                    {
+                        return b.ActualCount - a.ActualCount;
+                    });
             }
 
             var globalGrid = new EzBlocsGrid(bound, pitch, localMaps[0]);
@@ -71,6 +73,21 @@ namespace JetEazy.Match
             interpo.RunExpolation(globalGrid, null, null, 2);
             globalGrid.RebuildRowColTags();
             return globalGrid;
+        }
+
+        public EzBlocsGrid BuildEmptyGrid(IList<EzBloc> blocs, int rows, int cols)
+        {
+            if (blocs == null)
+                return null;
+
+            var bound = get_boundary(blocs);
+            var aveSize = get_ave_size(blocs);
+            var pitch = search_best_pitches(blocs, aveSize);
+            if (pitch.X <= 0) pitch.X = bound.Width;
+            if (pitch.Y <= 0) pitch.Y = bound.Height;
+
+            var grid = new EzBlocsGrid(bound, pitch, rows, cols);
+            return grid;
         }
 
         #region PRIVATE_BUILD_FUNCTIONS

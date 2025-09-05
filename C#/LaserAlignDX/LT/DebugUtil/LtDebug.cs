@@ -1,23 +1,20 @@
-﻿/****************************************************************************
- *                                                                          
- * Copyright (c) 2009 Jet Eazy Corp. All rights reserved.        
- *                                                                          
- ***************************************************************************/
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-08-14 初稿 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
 
-/****************************************************************************
- *
- * VERSION
- *		$Revision:$
- *
- * HISTORY
- *      $Id:$    
- *	    2008/07/01 The class is created by LeTian Chang
-  * DESCRIPTION
- *      
- *
- ***************************************************************************/
 
-namespace LeTian.Match
+namespace LeTian.AoiLib
 {
     public class LtDebug
     {
@@ -25,6 +22,11 @@ namespace LeTian.Match
         static NLog.Logger _NLOG = NLog.LogManager.GetCurrentClassLogger();
         static EzTiming _TM = new EzTiming(_NLOG);
         #endregion
+        
+        public static NLog.Logger LOG
+        {
+            get => _NLOG;
+        }
 
         public static void Reset()
         {
@@ -54,11 +56,6 @@ namespace LeTian.Match
         public static void DUMP_ACCUM()
         {
             _TM?.DUMP_ACCUM();
-        }
-
-        public static NLog.Logger LOG
-        {
-            get => _NLOG;
         }
     }
 }

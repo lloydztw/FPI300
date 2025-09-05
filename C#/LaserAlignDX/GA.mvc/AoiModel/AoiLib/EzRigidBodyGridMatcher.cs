@@ -27,7 +27,7 @@ using CvSize = OpenCvSharp.Size;
 using EzAoiBase = EzAoiEmptyTrayInspector.Model.Aoi.EzAoiBase;
 
 
-namespace LeTian.Match
+namespace LeTian.AoiLib
 {
     public partial class EzRigidBodyGridMatcher : EzAoiBase, IDisposable
     {
@@ -50,37 +50,55 @@ namespace LeTian.Match
         {
             _goldenImg?.Dispose();
             _goldenImg = null;
-            _goldenRigidBody?.Grid?.Dispose();
+            _goldenRigidBody?.Dispose();
             _goldenRigidBody = null;
+        }
+        
+        public RigidBody GetGoldenBody()
+        {
+            return _goldenRigidBody;
+        }
+        public RigidBody DetachGoldenBody()
+        {
+            var body = _goldenRigidBody;
+            _goldenRigidBody = null;
+            return body;
         }
 
         public void SetGoldenTemplate(Bitmap bmpGolden)
         {
-            var bmpGoldenU8 = GaImageUtil.ToU8(bmpGolden);
-            using (var bridge = new QxImageBridge(bmpGoldenU8))
+            Bitmap bmpU8 = GaImageUtil.ToU8(bmpGolden);
+
+            using (var bridge = new QxImageBridge(bmpU8))
             {
-                analyzeGoldenTemplate(bridge.Image);
+                SetGoldenTemplate(bridge.Image);
             }
-            if (bmpGoldenU8 != bmpGolden)
-                bmpGoldenU8?.Dispose();
+
+            if (bmpU8 != bmpGolden)
+                bmpU8?.Dispose();
         }
         public void SetGoldenTemplate(Mat imgGolden)
         {
             analyzeGoldenTemplate(imgGolden);
         }
 
+        public int PadThreshold
+        {
+            get => _padsFinder.PadThreshold;
+            set => _padsFinder.PadThreshold = value;
+        }
         public RigidBody FindBestMatch(Bitmap bmpScene, string debugDumpFile = null)
         {
+            Bitmap bmpU8 = GaImageUtil.ToU8(bmpScene);
             RigidBody result;
-            var bmpSceneU8 = GaImageUtil.ToU8(bmpScene);
-            
-            using (var bridge = new QxImageBridge(bmpSceneU8))
+
+            using (var bridge = new QxImageBridge(bmpU8))
             {
                 result = FindBestMatch(bridge.Image, debugDumpFile);
             }
 
-            if (bmpSceneU8 != bmpScene)
-                bmpSceneU8?.Dispose();
+            if (bmpU8 != bmpScene)
+                bmpU8?.Dispose();
             return result;
         }
         public RigidBody FindBestMatch(Mat imgScene, string debugDumpFile = null)
@@ -170,15 +188,15 @@ namespace LeTian.Match
 
             if (rigitBody != null)
             {
-                EzBlocsGridAnalyzer.CalcRotatedBox2D(rigitBody.Grid, out box2D, useBoundaryPoints: false);
-                rigitBody.Box2D = box2D;
+                //EzBlocsGridAnalyzer.CalcRotatedBox2D(rigitBody.Grid, out box2D, useBoundaryPoints: false);
+                //rigitBody.Box2D = box2D;
+
+                // 缺兩個 pad
+                if (rigitBody.Score < -200)
+                    rigitBody = null;
             }
 
             return rigitBody;
-        }
-        public RigidBody GetGoldenBody()
-        {
-            return _goldenRigidBody;
         }
 
         #region PRIVATE_SEARCH_FUNCTIONS
@@ -189,6 +207,7 @@ namespace LeTian.Match
             _goldenRigidBody?.Grid?.Dispose();
 
             _padsFinder.GoldenPadSize = CvSize.Zero;
+            _padsFinder.GoldenGrid = null;
             _padsFinder.FindPadsGrid(
                     _goldenImg, 
                     out var grid, 
@@ -204,6 +223,7 @@ namespace LeTian.Match
                 _goldenRigidBody = new RigidBody(grid, keyRow, keyCol, keySQRatio: keySQ);
                 _goldenRigidBody.getMinMaxBlocSize(out var sizeMin, out var sizeMax);
                 _padsFinder.GoldenPadSize = sizeMax;
+                _padsFinder.GoldenGrid = grid;
             }
         }
         RigidBody findBestGridMatch(Mat imgScene, EzBlocsGrid sceneGrid, out EzBlocsGrid bestGrid, out QvBox2D bestBox2D, bool debug = false)
@@ -279,27 +299,21 @@ namespace LeTian.Match
                     if (logicDiff > 0)
                         penalty += logicDiff * 100f;
 
-                    // (3) 檢查 KeyPad 不一致
-                    //EzPadsGridFinder.FindSpecialKeyPad(sceneSubGrid, out int keyRow, out int keyCol, out int keyPixels);
-                    EzPadsGridFinder.FindSpecialKeyPad(imgScene, sceneSubGrid, out int keyRow, out int keyCol, out double keySQ);
+                    // (3) 檢查 KeyPad (KeyRow && KeyCol) 不一致
+                    _padsFinder.FindSpecialKeyPad(imgScene, sceneSubGrid, out int keyRow, out int keyCol, out double keySQ);
                     if (keyRow != _goldenRigidBody.KeyRow || keyCol != _goldenRigidBody.KeyCol)
                         penalty += 10f;
 
-                    //// (4) 檢查 KeyPixels (因為投影關係, 不是很準!)
-                    //double pixDiff = ((double)Math.Abs(keyPixels - goldenPixels)) / goldenPixels;
-                    //pixDiff = Math.Round(pixDiff, 3);
-                    //penalty += pixDiff;
-
-                    // (5) 檢查 SQ ratio 缺角 (保留)
+                    // (4) 檢查 SQ ratio 缺角
                     penalty += keySQ;
 
-                    // (6) 自我檢查 出格錯排 (保留)
+                    // (5) 自我檢查 出格錯排
                     gridChecker.ScanDefects(sceneSubGrid, out Mat defectsMat, 1f);
                     double defects = defectsMat.Sum().Val0;
                     defects = Math.Round(defects, 3);
                     penalty += defects;
 
-                    // (7) 保留最佳值
+                    // (6) 保留最佳值
                     if (bestPenalty > penalty)
                     {
                         bestPenalty = penalty;
@@ -371,7 +385,7 @@ namespace LeTian.Match
 
     partial class EzRigidBodyGridMatcher
     {
-        public class RigidBody
+        public class RigidBody : IDisposable
         {
             public EzBlocsGrid Grid               // in non-shrink domain
             {
@@ -408,16 +422,38 @@ namespace LeTian.Match
                 get; internal set;
             }
 
-            /// <summary>
-            /// 如果是 Perspective Transform, 則會不準
-            /// </summary>
-            public QvBox2D Box2D
+
+            public RigidBody(EzBlocsGrid grid, int keyRow, int keyCol, int keyPixels = 0, double keySQRatio = 1)
             {
-                get;
-                internal set;
+                Grid = grid;
+                KeyRow = keyRow;
+                KeyCol = keyCol;
+                KeyPixels = keyPixels;
+                KeySQRatio = keySQRatio;
             }
 
-            internal void getMinMaxBlocSize(out CvSize sizeMin, out CvSize sizeMax)
+            public void Dispose()
+            {
+                Grid?.Dispose();
+                Grid = null;
+            }
+
+            /// <summary>
+            /// 如果 晶粒表面 與 載台 不平行, 則 Box2D 不會完美 切齊 pads 
+            /// </summary>
+            /// <param name="useBoundaryPoints"></param>
+            public QvBox2D CalcBox2D(bool useBoundaryPoints = false)
+            {
+                EzBlocsGridAnalyzer.CalcRotatedBox2D(this.Grid, out var box2D, useBoundaryPoints);
+                return box2D;
+            }
+
+            /// <summary>
+            /// 取的 最小 pad, 與最大 pad 的 size
+            /// </summary>
+            /// <param name="sizeMin"></param>
+            /// <param name="sizeMax"></param>
+            public void getMinMaxBlocSize(out CvSize sizeMin, out CvSize sizeMax)
             {
                 sizeMin = new CvSize(int.MaxValue, int.MaxValue);
                 sizeMax = new CvSize(0, 0);
@@ -433,15 +469,6 @@ namespace LeTian.Match
                     sizeMax.Width = Math.Max(sizeMax.Width, bloc.Rect.Width);
                     sizeMax.Height = Math.Max(sizeMax.Height, bloc.Rect.Height);
                 }
-            }
-
-            public RigidBody(EzBlocsGrid grid, int keyRow, int keyCol, int keyPixels = 0, double keySQRatio = 1)
-            {
-                Grid = grid;
-                KeyRow = keyRow;
-                KeyCol = keyCol;
-                KeyPixels = keyPixels;
-                KeySQRatio = keySQRatio;
             }
         }
     }

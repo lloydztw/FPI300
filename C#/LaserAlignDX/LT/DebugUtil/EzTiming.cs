@@ -1,28 +1,25 @@
-﻿/****************************************************************************
- *                                                                          
- * Copyright (c) 2009 Jet Eazy Corp. All rights reserved.        
- *                                                                          
- ***************************************************************************/
-
-/****************************************************************************
- *
- * VERSION
- *		$Revision:$
- *
- * HISTORY
- *      $Id:$    
- *	    2008/07/01 The class is created by LeTian Chang
-  * DESCRIPTION
- *      
- *
- ***************************************************************************/
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-08-12 增修 (by LeTian Chang)
+ *      2008-07-01 初稿 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
 
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
 
-namespace LeTian.Match
+namespace LeTian.AoiLib
 {
     /// <summary>
     /// 效能追蹤計時

@@ -104,7 +104,9 @@ namespace JetEazy.ControlSpace.PLCSpace
 
             RetryCount = int.Parse(ReadINIValue("Other", "Retry", RetryCount.ToString(), FileName));
             Timeoutinms = int.Parse(ReadINIValue("Other", "Timeout(ms)", Timeoutinms.ToString(), FileName));
-            IsSimulater = ReadINIValue("Other", "IsDebug", "0", FileName) == "1";
+
+            if (!_isSimulation)
+                IsSimulater = ReadINIValue("Other", "IsDebug", "0", FileName) == "1";
 
             return ReOpen();
         }

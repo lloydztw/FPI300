@@ -96,6 +96,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             var garbagesCan = new List<Mat>();
             _fovWidth = srcImg.Width;
             _fovHeight = srcImg.Height;
+            int ogThreshold = _recipe.VisionSettings.OutGridBlocThreshold.Value;
 
             try
             {
@@ -133,7 +134,16 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                     _DUMP(imgWork, "imgWork_m.png");
 
                     // 6. otsu
-                    Cv2.Threshold(imgWork, imgWork, 0, 255, ThresholdTypes.Otsu);
+                    double otsu;
+                    if (ogThreshold <= 0)
+                    {
+                        otsu = Cv2.Threshold(imgWork, imgWork, 0, 255, ThresholdTypes.Otsu);
+                        _LOG.Info("OutGrid Blocs Otsu = {0}", otsu);
+                    }
+                    else
+                    {
+                        Cv2.Threshold(imgWork, imgWork, ogThreshold, 255, ThresholdTypes.Binary);
+                    }
                     _DUMP(imgWork, "imgWork_o.png");
 
                     // 7. mask again

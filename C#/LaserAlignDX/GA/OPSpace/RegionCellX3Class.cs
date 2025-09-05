@@ -1,23 +1,20 @@
 ﻿using AUVision;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.GA.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
-using System.Drawing.Imaging;
 using System.Drawing;
-using System.Linq;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Traveller106;
-using VisionDesigner.Code2DReader;
-using VisionDesigner.ImageArithmetic;
-using VisionDesigner.PositionFix;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
-using LaserAlignDX.GA.BasicSpace;
+using VisionDesigner.Code2DReader;
+using VisionDesigner.ImageArithmetic;
 using VisionDesigner.PairLineFind;
-using LeTian.Match;
+using VisionDesigner.PositionFix;
 
 namespace LaserAlignDX.OPSpace
 {

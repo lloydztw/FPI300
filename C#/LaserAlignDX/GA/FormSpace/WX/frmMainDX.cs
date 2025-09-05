@@ -1,12 +1,10 @@
-﻿using Common.RecipeSpace;
-using Eazy_Project_III;
+﻿using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
 using Eazy_Project_III.UISpace;
 using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
 using JetEazy.FormSpace;
-using JetEazy.ImageViewerEx;
 using JetEazy.UISpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.RunSpace;
@@ -16,7 +14,6 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using System.Xml.Linq;
 using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
@@ -175,7 +172,7 @@ namespace Traveller106
 
             //this.Text = $"{ToChangeLanguage("字符视觉检测")} Ver" + Application.ProductVersion;
             //this.Text = $"{ToChangeLanguage("字符视觉检测")} Ver" + Universal.VersionDate;
-            this.Text = $"{ToChangeLanguage("FPI30-Studio")} Ver" + Universal.VersionDate;
+            this.Text = $"{ToChangeLanguage("FPI30-Studio")} (Ver {Application.ProductVersion}) " + Universal.VersionDate;
 
             LanguageExClass.Instance.EnumControls(this);
 

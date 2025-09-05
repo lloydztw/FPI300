@@ -6,7 +6,6 @@ using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
-using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -14,7 +13,7 @@ using System.Threading.Tasks;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BoxOverlap;
-using _TM = LeTian.Match.LtDebug;
+using _TM = LeTian.AoiLib.LtDebug;
 
 
 namespace LaserAlignDX.RunSpace.V0

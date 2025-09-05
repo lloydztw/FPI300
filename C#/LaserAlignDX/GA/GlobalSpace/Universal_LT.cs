@@ -31,13 +31,13 @@ namespace Traveller106
         public static readonly bool N_THREADS_ENABLED = true;
         public static readonly int N_THREADS = 16;
 
-        public static bool IsNoUseCCD = true;
+        public static bool IsNoUseCCD = false;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/09/04";
+        public const string VersionDate = "2025/09/05";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
@@ -526,6 +526,12 @@ namespace Traveller106
 
             var config = CameraConfig.Instance;
             config.Initial(WORKPATH);
+
+            if(IsNoUseCCD)
+            {
+                foreach (var camParams in config.cameras)
+                    camParams.IsDebug = true;
+            }
 
             IxLineScan = GaCameraFactory.LoadLineScanCamera(config.cameras[0]);
             bool ok = IxLineScan != null && IxLineScan.Open();
