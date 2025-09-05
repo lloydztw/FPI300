@@ -16,7 +16,7 @@
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
-using GaMainCtrl = GA.Mvc.Ctrl.Abs.GaMainCtrl;
+using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 
 
 namespace LaserAlignDX
@@ -39,7 +39,7 @@ namespace LaserAlignDX
         public static GaMainCtrl CreateMainCtrl()
         {
             // GaMainCtrl 使用 V3 
-            return new global::GA.Mvc.Ctrl.V3.GaMainCtrl();
+            return new global::LaserAlignDX.Mvc.Ctrl.V3.GaMainCtrl();
         }
 
         public static IxReportBuilder CreateReportBuilder()

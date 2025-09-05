@@ -8,7 +8,7 @@ namespace UnitTest_FP130
 {
     public abstract class Test_Base
     {
-        protected static string FILE_GOLDEN_IMG => "D:\\AUTOMATION\\Eazy FPI30\\_BIN_\\LASER-MAIN_FPIX3\\PIC\\00003\\bmpDefectTemplate.bmp";
+        protected static string FILE_GOLDEN_IMG => "D:\\AUTOMATION\\Eazy FPI30\\_BIN_\\LASER-MAIN_FPIX3\\PIC\\00005\\bmpDefectTemplate.bmp";
         protected static string FILE_CELL_REGIONS => "D:\\paso.log\\region_cells.txt";
         protected static string PATH_IMAGE_LOG_ROOT => "D:\\log\\MAIN_FPIX3\\Images";
         protected static string PATH_IMAGE_LOG(string date = null, string time = null)

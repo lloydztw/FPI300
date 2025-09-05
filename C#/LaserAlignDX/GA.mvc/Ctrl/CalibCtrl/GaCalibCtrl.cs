@@ -14,7 +14,7 @@ using WorldOfMoveableObjects;
 using FindType = LaserAlignDX.OPSpace.FindType;
 
 
-namespace GA.Mvc.Ctrl
+namespace LaserAlignDX.Mvc.Ctrl
 {
     public partial class GaCalibCtrl
     {

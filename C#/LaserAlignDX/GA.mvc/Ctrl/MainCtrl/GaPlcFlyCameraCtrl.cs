@@ -21,7 +21,7 @@ using VsCommon.ControlSpace.MachineSpace;
 using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
 
 
-namespace GA.Mvc.Ctrl
+namespace LaserAlignDX.Mvc.Ctrl
 {
     /// <summary>
     /// 重整 MainX3UI 飛拍

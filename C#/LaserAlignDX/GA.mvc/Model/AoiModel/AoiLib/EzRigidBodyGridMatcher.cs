@@ -207,6 +207,7 @@ namespace LeTian.AoiLib
             _goldenRigidBody?.Grid?.Dispose();
 
             _padsFinder.GoldenPadSize = CvSize.Zero;
+            _padsFinder.GoldenGrid = null;
             _padsFinder.FindPadsGrid(
                     _goldenImg, 
                     out var grid, 
@@ -222,6 +223,7 @@ namespace LeTian.AoiLib
                 _goldenRigidBody = new RigidBody(grid, keyRow, keyCol, keySQRatio: keySQ);
                 _goldenRigidBody.getMinMaxBlocSize(out var sizeMin, out var sizeMax);
                 _padsFinder.GoldenPadSize = sizeMax;
+                _padsFinder.GoldenGrid = grid;
             }
         }
         RigidBody findBestGridMatch(Mat imgScene, EzBlocsGrid sceneGrid, out EzBlocsGrid bestGrid, out QvBox2D bestBox2D, bool debug = false)

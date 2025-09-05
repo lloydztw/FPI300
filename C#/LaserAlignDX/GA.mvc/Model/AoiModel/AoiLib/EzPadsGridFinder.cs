@@ -49,6 +49,10 @@ namespace LeTian.AoiLib
         {
             get; set;
         }
+        public EzBlocsGrid GoldenGrid
+        {
+            get; set;
+        }
 
         /// <summary>
         /// Runtime Parameter
@@ -156,7 +160,7 @@ namespace LeTian.AoiLib
         {
             findWhiteKeyPoints(img, out _blocs, useInnerFilter: useInnerFilter);
 
-            //// 以中心點排序
+            //// 以中心點排序 (沒啥幫助)
             if (false)
             {
                 int cx = img.Width / 2;
@@ -174,7 +178,22 @@ namespace LeTian.AoiLib
             }
 
             var builder = new EzBlocsGridBuilder();
-            gridPoints = builder.Build(_blocs);
+            
+            Comparison<EzBlocsGrid> comparison = null;
+            if (GoldenGrid != null)
+            {
+                var analyzer = new EzBlocsGridAnalyzer();
+                comparison = new Comparison<EzBlocsGrid>((a, b) =>
+                {
+                    int d1 = analyzer.CalcLogicDiff(a, GoldenGrid);
+                    int d2 = analyzer.CalcLogicDiff(b, GoldenGrid);
+                    if (d1 < d2) return -1;
+                    if (d1 > d2) return 1;
+                    return b.ActualCount - a.ActualCount;
+                });
+            }
+
+            gridPoints = builder.Build(_blocs, comparison);
 
             if (gridPoints != null)
             {

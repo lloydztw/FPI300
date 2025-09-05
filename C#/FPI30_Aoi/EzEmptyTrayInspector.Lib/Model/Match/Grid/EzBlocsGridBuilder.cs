@@ -25,7 +25,7 @@ namespace JetEazy.Match
 {
     public class EzBlocsGridBuilder
     {
-        public EzBlocsGrid Build(IList<EzBloc> blocs)
+        public EzBlocsGrid Build(IList<EzBloc> blocs, Comparison<EzBlocsGrid> comparer = null)
         {
             if (blocs == null)
                 return null;
@@ -58,11 +58,13 @@ namespace JetEazy.Match
 
             if (localMaps.Count > 1)
             {
-                int compare_map(EzBlocsGrid a, EzBlocsGrid b)
-                {
-                    return b.ActualCount - a.ActualCount;
-                }
-                localMaps.Sort(compare_map);
+                if (comparer != null)
+                    localMaps.Sort(comparer);
+                else
+                    localMaps.Sort((a, b) =>
+                    {
+                        return b.ActualCount - a.ActualCount;
+                    });
             }
 
             var globalGrid = new EzBlocsGrid(bound, pitch, localMaps[0]);

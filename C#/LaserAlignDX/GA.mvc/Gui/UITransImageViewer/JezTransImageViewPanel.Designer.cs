@@ -1,4 +1,4 @@
-﻿namespace GA.Mvc.Gui
+﻿namespace LaserAlignDX.Mvc.Gui
 {
     using GvImageViewerClassT = JetEazy.OpenCV.Viewer.CvMatViewer;
 

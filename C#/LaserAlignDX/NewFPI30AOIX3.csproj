@@ -361,18 +361,24 @@
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v2.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaPlcFlyCameraCtrl.cs" />
-    <Compile Include="GA.mvc\Gui\Forms\FormCalibration.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\Forms\FormCalibration.Designer.cs">
-      <DependentUpon>FormCalibration.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA.mvc\Gui\MainSpace\IMainUI.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UICalib\FormCalibration.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UICalib\FormCalibration.Designer.cs">
+      <DependentUpon>FormCalibration.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UICalib\GvCalibPointPair.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UICalib\GvCalibPointPair.Designer.cs">
+      <DependentUpon>GvCalibPointPair.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\CviLineSegmentsBox.cs" />
     <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\IvDrawItem.cs" />
@@ -754,11 +760,14 @@
     </Compile>
     <Compile Include="LT\DebugUtil\VxDebugDrawer.cs" />
     <Compile Include="LT\UnitTest\UnitTest_ChipMatcher.cs" />
-    <EmbeddedResource Include="GA.mvc\Gui\Forms\FormCalibration.resx">
-      <DependentUpon>FormCalibration.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.resx">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UICalib\FormCalibration.resx">
+      <DependentUpon>FormCalibration.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UICalib\GvCalibPointPair.resx">
+      <DependentUpon>GvCalibPointPair.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UIChipCellsViewer\JezChipCellsViewPanel.resx">
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>

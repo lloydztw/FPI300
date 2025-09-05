@@ -20,7 +20,7 @@ using System;
 using System.Windows.Forms;
 
 
-namespace GA.Mvc.Gui
+namespace LaserAlignDX.Mvc.Gui
 {
     public partial class JezTransImageViewPanel : UserControl
     {

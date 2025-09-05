@@ -19,7 +19,7 @@ using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
 
-namespace GA.Mvc.Ctrl.V3
+namespace LaserAlignDX.Mvc.Ctrl.V3
 {
     /// <summary>
     /// 重整 MainX3UI

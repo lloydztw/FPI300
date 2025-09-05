@@ -25,7 +25,7 @@ using VisionDesigner.BlobFind;
 using VsCommon.ControlSpace.MachineSpace;
 
 
-namespace GA.Mvc.Ctrl.V2
+namespace LaserAlignDX.Mvc.Ctrl.V2
 {
     /// <summary>
     /// 重整 MainX3UI

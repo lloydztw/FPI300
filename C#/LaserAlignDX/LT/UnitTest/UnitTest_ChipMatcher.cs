@@ -28,14 +28,23 @@ namespace UnitTest_FP130
     {
         //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250825171200");
         //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250825180739");
-        static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250828042243");   // BLACK
+
+        //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250905162112");           // 146
+        //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250905162210");         // ok
+        //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250905162254");         // 145
+        //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250905162404");         // 146
+        static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250905165504");           // 50
+
         static string PATH_DUMP => "d:\\paso.log\\chipLoc";
 
         int[] ng_numbers = new int[]
         {
             //83,
             //89,
-            91,
+            //91,
+            50,
+            //145,
+            //146
         };
 
         public override void Run()

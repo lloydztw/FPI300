@@ -20,7 +20,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 
-namespace GA.Mvc.Gui
+namespace LaserAlignDX.Mvc.Gui
 {
     public class CviTransCoordInfo : CvImageViewerInteractor
     {

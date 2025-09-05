@@ -3,7 +3,7 @@ using LaserAlignDX.UISpace.UIMVC;
 using System.Windows.Forms;
 
 
-namespace GA.Mvc.Ctrl
+namespace LaserAlignDX.Mvc.Ctrl
 {
     public class GaMainCtrl : Abs.GaMainCtrl
     {

@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.jezTransImageViewPanel1 = new global::GA.Mvc.Gui.JezTransImageViewPanel();
+            this.jezTransImageViewPanel1 = new global::LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.menuLoadImage = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -104,7 +104,7 @@
 
         #endregion
 
-        private global::GA.Mvc.Gui.JezTransImageViewPanel jezTransImageViewPanel1;
+        private global::LaserAlignDX.Mvc.Gui.JezTransImageViewPanel jezTransImageViewPanel1;
         public System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         public System.Windows.Forms.ToolStripMenuItem menuLoadImage;
         public System.Windows.Forms.ToolStripMenuItem menuTestChipInspect;

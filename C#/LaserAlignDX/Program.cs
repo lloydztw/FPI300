@@ -25,8 +25,9 @@ namespace LaserAlignDX
                 return;
             }
 
-            //Application.Run(new frmMain());
-            Application.Run(new Traveller106.frmMainDX());
+            //var frm = new FormCalibration();
+            var frm = new Traveller106.frmMainDX();
+            Application.Run(frm);
         }
 
         public static bool AppInstance()
@@ -45,9 +46,9 @@ namespace LaserAlignDX
 
         static bool run_unit_tests()
         {
-            //LeTian.Match.Test.Run();
-            //return true;
             return false;
+            new UnitTest_FP130.Test_ChipMatcher().Run();
+            return true;
         }
     }
 }
