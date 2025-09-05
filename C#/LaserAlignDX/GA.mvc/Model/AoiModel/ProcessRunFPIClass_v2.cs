@@ -184,7 +184,6 @@ namespace LaserAlignDX.AoiModel.V2
 
             //if (!myRecipe.Ischip_open_measure)
             //    return;
-
             //runTest();
 
             GaUtil.LOG($"{GetType().Name} [V2] Run", Color.Purple);
@@ -1272,6 +1271,8 @@ namespace LaserAlignDX.AoiModel.V2
         /// </summary>
         private void _Inspect003_LT()
         {
+            fire_AoiBegin();
+
             xRecipe.AnalyzeDatasData();
 
             m_ElapsedTime = 0;
@@ -1346,6 +1347,8 @@ namespace LaserAlignDX.AoiModel.V2
             stopwatch.Stop();
             m_ElapsedTime = stopwatch.ElapsedMilliseconds;  //@ for Inspect003
             m_Running = false;
+
+            fire_AoiEnd();
         }
 
         /// <summary>

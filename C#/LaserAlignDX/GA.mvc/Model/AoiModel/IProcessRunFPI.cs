@@ -1,5 +1,4 @@
 ﻿using System;
-using VisionDesigner;
 
 namespace LaserAlignDX.AoiModel
 {

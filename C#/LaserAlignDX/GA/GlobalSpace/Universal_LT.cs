@@ -527,6 +527,12 @@ namespace Traveller106
             var config = CameraConfig.Instance;
             config.Initial(WORKPATH);
 
+            if (IsNoUseCCD)
+            {
+                foreach (var camParams in config.cameras)
+                    camParams.IsDebug = true;
+            }
+
             IxLineScan = GaCameraFactory.LoadLineScanCamera(config.cameras[0]);
             bool ok = IxLineScan != null && IxLineScan.Open();
 

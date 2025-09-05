@@ -360,6 +360,12 @@
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v2.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaPlcFlyCameraCtrl.cs" />
+    <Compile Include="GA.mvc\Gui\Forms\FormCalibration.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\Forms\FormCalibration.Designer.cs">
+      <DependentUpon>FormCalibration.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\MainSpace\IMainUI.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.cs">
       <SubType>UserControl</SubType>
@@ -380,6 +386,13 @@
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UIChipCellsViewer\MvsChipCellsViewer.cs" />
+    <Compile Include="GA.mvc\Gui\UITransImageViewer\Interactor\CviTransCoordInfo.cs" />
+    <Compile Include="GA.mvc\Gui\UITransImageViewer\JezTransImageViewPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UITransImageViewer\JezTransImageViewPanel.Designer.cs">
+      <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzPadsGridFinder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzRigidBodyGridMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\AlgorithmEnum.cs" />
@@ -395,6 +408,13 @@
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaBigImageHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaCellsGroup.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaProgressEventArgs.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\Base\QCoord.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\Base\QTransform.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\PlcGridPoints.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\TravellerCoordsEnums.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\TravellerCoords.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\TravellerTranformsUtil.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\TravellerTranforms.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\MainDispTextFormatter.cs" />
@@ -733,11 +753,17 @@
     </Compile>
     <Compile Include="LT\DebugUtil\VxDebugDrawer.cs" />
     <Compile Include="LT\UnitTest\UnitTest_ChipMatcher.cs" />
+    <EmbeddedResource Include="GA.mvc\Gui\Forms\FormCalibration.resx">
+      <DependentUpon>FormCalibration.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.resx">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UIChipCellsViewer\JezChipCellsViewPanel.resx">
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UITransImageViewer\JezTransImageViewPanel.resx">
+      <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">
       <DependentUpon>BannerForm.cs</DependentUpon>
@@ -877,6 +903,7 @@
     </EmbeddedResource>
     <None Include="GA.mvc\Ctrl\Readme.md" />
     <None Include="GA.mvc\Gui\Readme.md" />
+    <None Include="GA.mvc\Model\CustomerModel\Readme.md" />
     <None Include="GA.mvc\Model\Readme.md" />
     <None Include="GA.mvc\Readme.md" />
     <None Include="GA\RunSpace\X2\Readme.md" />
@@ -922,7 +949,10 @@
     <Content Include="coconut1.ico" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="GA.mvc\Ctrl\CalibCtrl\" />
+    <Folder Include="GA.mvc\Model\Machine\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)

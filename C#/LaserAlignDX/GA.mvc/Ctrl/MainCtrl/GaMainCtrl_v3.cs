@@ -1,14 +1,17 @@
 ﻿using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
 using LaserAlignDX.UISpace.UIMVC;
 using NeedleX.ProcessSpace;
 using System;
+using System.Data.OleDb;
 using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
@@ -39,9 +42,17 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             get { return RecipeFPIX3Class.Instance; }
         }
+        GaBigImageHolder _lineScanImageHolder
+        {
+            get => TravellerBigImagesHolder.Instance.LineScanImageHolder;
+        }
         IProcessRunFPI _aoiModel
         {
             get => ProcessRunFPIClass.Instance;
+        }
+        bool IsBusy()
+        {
+            return _aoiModel.Running || LineScanSingleProcess.Instance.IsOn || LineScanProcess.Instance.IsOn;
         }
         #endregion
 
@@ -71,8 +82,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             // CHIP_CELLS_VIEWERS
             _DSMains = new[]
             {
-                buildChipCellsViewer(DsMains[0]),
-                buildChipCellsViewer(DsMains[1]),
+                buildChipCellsViewer(DsMains[0], CarrierEnum.C1),
+                buildChipCellsViewer(DsMains[1], CarrierEnum.C2),
             };
             
             // FLY CAMERA CONTROLS
@@ -89,7 +100,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             InitAllProcesses();
         }
 
-        IvChipCellsViewer buildChipCellsViewer(Control panel)
+        IvChipCellsViewer buildChipCellsViewer(Control panel, CarrierEnum carrierID)
         {
             //(1) 使用新的 ChipCellsViewer
             if (OPT_USE_LETIAN_CHIP_CELL_VIEWER)
@@ -97,7 +108,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 //(1.1) 如果傳進來的已經是 JezChipCellsViewPanel
                 if (panel is JezChipCellsViewPanel jezViewer)
                 {
-                    // 直接返回
+                    jezViewer.CarrierID = carrierID;
+                    connectPopupMenuEvents(jezViewer, carrierID);
                     return jezViewer;
                 }
                 //(1.2) 如果傳進來的是其他視窗控件
@@ -106,6 +118,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     // 生成新的 JezChipCellsViewPanel
                     var viewer = new JezChipCellsViewPanel
                     {
+                        CarrierID = carrierID,
                         Location = childWnd.Location,
                         Size = childWnd.Size,
                         Dock = childWnd.Dock,
@@ -115,6 +128,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     var parent = childWnd.Parent;
                     childWnd.Visible = false;
                     parent.Controls.Add(viewer);
+                    connectPopupMenuEvents(viewer, carrierID);
                     return viewer;
                 }
                 else
@@ -122,7 +136,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     return null;
                 }
             }
-            // (2) 使用舊有的 MVSUI
+            //(2) 使用舊有的 MVSUI
             else
             {
                 if (panel is MVSUI mvsui)
@@ -342,7 +356,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             }
         }
 
-        #region MVD_UPDATE_FUNCTIONS
+        #region UPDATE_CELL_RESULT_FUNCTIONS
         void updateMvd_LineScanImage()
         {
             //------------------------------------------------------------------------
@@ -359,8 +373,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             // NOTE: 目前 cMvdInput 生命週期由 TravellerBigImagesHolder 保管 !!!
             //       不用重複 Clone() 來餵給 MVS
             //------------------------------------------------------------------------
-            var lineScanImageHolder = TravellerBigImagesHolder.Instance.LineScanImageHolder;
-            DSMain.UpdateImageSrc(lineScanImageHolder);
+            DSMain.UpdateImageSrc(_lineScanImageHolder, _lineScanImageHolder.SrcName);
         }
         void updateMvd_AoiResultData(ProcessEventArgs e)
         {
@@ -440,6 +453,141 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 _frmAoiProgressing?.Dispose();
                 _frmAoiProgressing = null;
             }
+        }
+        #endregion
+
+        #region EVENT_HANDLERS_FOR_POPUP_MENU
+        private void connectPopupMenuEvents(Control dsMain, CarrierEnum carrierID)
+        {
+            if (dsMain is JezChipCellsViewPanel ccvPanel)
+            {
+                ccvPanel.menuLoadImage.Click += MenuLoadImage_Click;
+                ccvPanel.menuTestChipInspect.Click += MenuTestChipInspect_Click;
+                ccvPanel.menuTestEmptyTrayInspect.Click += MenuTestEmptyTrayInspect_Click;
+                ccvPanel.menuTestQRCode.Click += MenuTestQRCode_Click;
+
+                ccvPanel.menuLoadImage.Tag = carrierID;
+                ccvPanel.menuTestChipInspect.Tag = carrierID;
+                ccvPanel.menuTestEmptyTrayInspect.Tag = carrierID;
+                ccvPanel.menuTestQRCode.Tag = carrierID;
+            }
+        }
+        private void MenuLoadImage_Click(object sender, EventArgs e)
+        {
+            if (promptCheckBusy())
+                return;
+
+            string fileName = browseImageFile();
+            if (fileName != null)
+            {
+                loadImage(fileName);
+            }
+        }
+        private void MenuTestChipInspect_Click(object sender, EventArgs e)
+        {
+            if (promptCheckBusy())
+                return;
+            if (promptCheckImageHolder())
+            {
+                DSMain.Reset();
+                LineScanSingleProcess.Instance.Start(ScanInspectMode.MEASUREAOI);
+            }
+        }
+        private void MenuTestEmptyTrayInspect_Click(object sender, EventArgs e)
+        {
+            if (promptCheckBusy())
+                return;
+            if (promptCheckImageHolder())
+            {
+                DSMain.Reset();
+                LineScanSingleProcess.Instance.Start(ScanInspectMode.NOTRAY);
+            }
+        }
+        private void MenuTestQRCode_Click(object sender, EventArgs e)
+        {
+            if (promptCheckBusy())
+                return;
+            if (promptCheckImageHolder())
+            {
+                DSMain.Reset();
+                LineScanSingleProcess.Instance.Start(ScanInspectMode.QRCODE);
+            }
+        }
+        #endregion
+
+        #region PRIVATE_FUNCTIONS
+        bool promptCheckBusy()
+        {
+            if(IsBusy())
+            {
+                MessageBox.Show("AOI 執行中", "AOI", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return true;
+            }
+            return false;
+        }
+        bool promptCheckImageHolder()
+        {
+            if (_lineScanImageHolder.IsEmpty())
+            {
+                MessageBox.Show("請先 加載圖檔 或 取像", "AOI", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
+            return true;
+        }
+        string browseImageFile()
+        {
+            string fileName = null;
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Title = "Select Image";
+                dlg.Filter = "JPG Files(*.jpg)|*.jpg|BMP Files(*.bmp)|*.bmp|PNG Files(*.png)|*.png";
+                dlg.FileName = "*.jpg";
+
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    try
+                    {
+                        dlg.InitialDirectory = System.IO.Path.GetDirectoryName(fileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+                if (DialogResult.OK == dlg.ShowDialog())
+                {
+                    //ResetAndClear();
+                    fileName = dlg.FileName;
+                }
+                else
+                {
+                    fileName = null;
+                }
+            }
+            return fileName;
+        }
+        void loadImage(string fileName)
+        {
+            if (fileName != null)
+            {
+                var oldCursor = setCursor(Cursors.WaitCursor);
+                var bmp = GaImageUtil.LoadBigImage(fileName);
+                _lineScanImageHolder?.TakeOver(bmp, System.IO.Path.GetFileName(fileName));
+                setCursor(oldCursor);
+            }
+        }
+        Cursor setCursor(Cursor cursor)
+        {
+            var frmOwner = _wndOwner?.FindForm();
+            if (frmOwner != null)
+            {
+                var old = frmOwner.Cursor;
+                frmOwner.Cursor = cursor;
+                frmOwner.Invalidate();
+                return old;
+            }
+            return Cursors.Default;
         }
         #endregion
 

@@ -1,9 +1,7 @@
-﻿using FreeImageAPI;
-using JetEazy.BasicSpace;
+﻿using JetEazy.BasicSpace;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.FormSpace;
-using LaserAlignDX.RunSpace;
 using NeedleX.ProcessSpace;
 using System.Drawing;
 using System.Text;
@@ -17,14 +15,14 @@ namespace TravellerMINIX6.ProcessSpace
     /// </summary>
     public class LineScanSingleProcess : BaseProcess
     {
+        #region PRIVATE_DATA
+        ScanInspectMode? _modeArg = null;
+        #endregion
+
         #region SINGLETON
         static LineScanSingleProcess _singleton = null;
         private LineScanSingleProcess()
         {
-            //Task.Run(() =>
-            //{
-            //    TcpRun();
-            //});
         }
         #endregion
 
@@ -36,6 +34,14 @@ namespace TravellerMINIX6.ProcessSpace
                     _singleton = new LineScanSingleProcess();
                 return _singleton;
             }
+        }
+
+        public override void Start(params object[] args)
+        {
+            _modeArg = null;
+            if (args.Length > 0 && args[0] is ScanInspectMode mode)
+                _modeArg = mode;
+            base.Start();
         }
 
         public override void Tick()
@@ -51,68 +57,61 @@ namespace TravellerMINIX6.ProcessSpace
 
                     FireMessage(new ProcessEventArgs("Record.Start"));
 
-                    process.Pause();
-
-                    string fileName = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("JPG Files (*.jpg)|*.JPG|" + "BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
-                    //>>> fileName = $"{Universal.RCPPATH}\\{xRecipe.IndexStr}\\org.bmp";
-
-                    process.Continue();
-
-                    if (!string.IsNullOrEmpty(fileName))
+                    if (_modeArg != null)
                     {
-                        ////using (EzMvdImageConvertor.LoadBigImage(fileName))
-                        //using (Bitmap bmp = EzMvdImageConvertor.LoadBigImage(fileName))
-                        //{
-                        //    pRun.cMvdInput?.Dispose();
-                        //    pRun.cMvdInput = EzMvdImageConvertor.BitmapToCMvdImage(bmp);
-                        //    using (var dummy = new Bitmap(1, 1))
-                        //    {
-                        //        //LETIAN: FireLiveImaging 必須由 caller 負責 bitmap 的 life-cycle
-                        //        FireLiveImaging(dummy);
-                        //    }
-                        //}
-
-                        // 2025-08-28 LETIAN:
-                        //  巨圖 統一由 LineScanCamImageHolder 保管其生命週期
-                        //  不再使用不安全的 cMvdInput !!!
-                        Bitmap bitmap = GaImageUtil.LoadBigImage(fileName);
-                        pRun.LineScanCamImageHolder.TakeOver(bitmap);
-                        FireLiveImaging(bitmap);
+                        SetNextState(10, 0);
                     }
                     else
                     {
-                        process.Stop();
+                        #region 加載圖檔
+                        process.Pause();
+
+                        string fileName = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("JPG Files (*.jpg)|*.JPG|" + "BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
+                        //>>> fileName = $"{Universal.RCPPATH}\\{xRecipe.IndexStr}\\org.bmp";
+
+                        process.Continue();
+
+                        if (!string.IsNullOrEmpty(fileName))
+                        {
+                            // 2025-08-28 LETIAN:
+                            //  巨圖 統一由 LineScanCamImageHolder 保管其生命週期
+                            //  不再使用不安全的 cMvdInput !!!
+                            Bitmap bitmap = GaImageUtil.LoadBigImage(fileName);
+                            pRun.LineScanCamImageHolder.TakeOver(bitmap, System.IO.Path.GetFileName(fileName));
+                            FireLiveImaging(bitmap);
+                        }
+                        else
+                        {
+                            process.Stop();
+                        }
+                        #endregion
+
+                        SetNextState(6, 0);
                     }
-
-                    //>>> 以後最好統一改成調用
-                    //>>> process.SetNextState(6, 0);
-                    process.NextDuriation = 0;
-                    process.ID = 6;
-
                     break;
 
                 case 6:
                     if (process.IsTimeup)
                     {
+                        #region 選擇檢測模式
                         process.Pause();
-
                         using (var selectionDialog = new frmSelectScanInspectMode())
                         {
                             if (DialogResult.OK == selectionDialog.ShowDialog())
                             {
-                                pRun.xScanInspectMode = (ScanInspectMode)selectionDialog.SelectScanMode;
+                                //pRun.xScanInspectMode = (ScanInspectMode)selectionDialog.SelectScanMode;
+                                //switch (pRun.xScanInspectMode)
+                                //{
+                                //    case ScanInspectMode.QRCODE:
+                                //        pRun.QrUsed = true;
+                                //        break;
+                                //}
 
-                                switch (pRun.xScanInspectMode)
-                                {
-                                    case ScanInspectMode.QRCODE:
-                                        pRun.QrUsed = true;
-                                        break;
-                                }
+                                _modeArg = (ScanInspectMode)selectionDialog.SelectScanMode;
 
-                                //>>> 以後最好統一改成調用
-                                //>>> process.SetNextState(10, 0);
-                                process.NextDuriation = 0;
-                                process.ID = 10;
+                                //process.NextDuriation = 0;
+                                //process.ID = 10;
+                                SetNextState(10, 0);
 
                                 process.Continue();
                             }
@@ -121,6 +120,7 @@ namespace TravellerMINIX6.ProcessSpace
                                 process.Stop();
                             }
                         }
+                        #endregion
                     }
                     break;
 
@@ -128,10 +128,14 @@ namespace TravellerMINIX6.ProcessSpace
                     if (process.IsTimeup)
                     {
                         pRun.FileBarcodeStr = JzTimes.DateTimeSerialString;
+
+                        pRun.xScanInspectMode = _modeArg.Value;
+                        pRun.QrUsed = (ScanInspectMode.QRCODE == pRun.xScanInspectMode);
                         pRun.Run();
 
-                        process.NextDuriation = 100;
-                        process.ID = 20;
+                        //process.NextDuriation = 100;
+                        //process.ID = 20;
+                        SetNextState(20, 100);
                     }
                     break;
 
@@ -139,6 +143,7 @@ namespace TravellerMINIX6.ProcessSpace
                     if (process.IsTimeup)
                     {
                         bool ret = !pRun.Running;
+
                         if (ret)
                         {
                             process.Stop();

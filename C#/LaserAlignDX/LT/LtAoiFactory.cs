@@ -76,10 +76,11 @@ namespace Traveller106
             {
                 frm.Load += (s, e) =>
                 {
-                    frm.BeginInvoke(new Action(() =>
+                    new Action(() =>
                     {
+                        System.Threading.Thread.Sleep(2000);
                         PushBitmap(bmpToShow, "RecipeOrg");
-                    }));
+                    }).BeginInvoke(null, null);
                 };
             }
 

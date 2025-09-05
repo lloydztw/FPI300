@@ -4,7 +4,6 @@ using JetEazy.Interface;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LaserAlignDX.RunSpace;
 using System;
 using System.Drawing;
 using System.Threading;

@@ -104,7 +104,9 @@ namespace JetEazy.ControlSpace.PLCSpace
 
             RetryCount = int.Parse(ReadINIValue("Other", "Retry", RetryCount.ToString(), FileName));
             Timeoutinms = int.Parse(ReadINIValue("Other", "Timeout(ms)", Timeoutinms.ToString(), FileName));
-            IsSimulater = ReadINIValue("Other", "IsDebug", "0", FileName) == "1";
+            
+            if(!_isSimulation)
+                IsSimulater = ReadINIValue("Other", "IsDebug", "0", FileName) == "1";
 
             return ReOpen();
         }
@@ -896,16 +898,16 @@ namespace JetEazy.ControlSpace.PLCSpace
 
 
         #region EVENT_NOTIFICATIONS_NOT_USED
-        //當有Input Trigger時，產生OnTrigger
-        public delegate void TriggerHandler(string OperationString);
-        public event TriggerHandler TriggerAction;
-        public void OnTrigger(String OperationString)
-        {
-            if (TriggerAction != null)
-            {
-                TriggerAction(OperationString);
-            }
-        }
+        ////當有Input Trigger時，產生OnTrigger
+        //public delegate void TriggerHandler(string OperationString);
+        //public event TriggerHandler TriggerAction;
+        //public void OnTrigger(String OperationString)
+        //{
+        //    if (TriggerAction != null)
+        //    {
+        //        TriggerAction(OperationString);
+        //    }
+        //}
         #endregion
 
         #region EVENT_NOTIFICATIONS_NOT_LAUNCHED

@@ -51,7 +51,7 @@ namespace NeedleX.ProcessSpace
         {
             LastNG = null;
             if (args.Length > 0)
-                base.Start((string)args[0]);
+                base.Start(args[0]?.ToString());
             else
                 base.Start();
         }

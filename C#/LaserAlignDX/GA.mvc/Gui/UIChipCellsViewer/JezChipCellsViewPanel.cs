@@ -15,8 +15,10 @@
 
 using JetEazy.ImageViewerEx;
 using JetEazy.OpenCV;
+using JetEazy.OpenCV.Viewer;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
+using LaserAlignDX.Model.Coords;
 using OpenCvSharp;
 using System.Collections.Generic;
 using System.Drawing;
@@ -36,26 +38,39 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         public JezChipCellsViewPanel()
         {
             InitializeComponent();
-            cvMatViewer.Attach(lblCoordInfo, lblBlinker);
-            cvMatViewer.AddInteractor(_resultBox);
+
             _resultBox.Visible = false;
-            _resultBox.lblSummaryTitle = this.lblTitle;
+            _resultBox.lblSummaryTitle = lblTitle;
+            ImgViewer.AddInteractor(_resultBox);
+            
+            jezTransImageViewPanel1.AttachPopupMenu(contextMenuStrip1);
+
             HandleDestroyed += (s, e) => cleanUp();
+        }
+
+        public CarrierEnum CarrierID
+        {
+            get; set;
         }
         public IvImageViewer ImgViewer
         {
-            get => cvMatViewer;
+            get => jezTransImageViewPanel1.ImgViewer;
+        }
+        public CvMatViewer MatViewer
+        {
+            get => jezTransImageViewPanel1.MatViewer;
         }
 
         Control IvChipCellsViewer.Window => this;
-        
+        Control lblTitle => jezTransImageViewPanel1.lblTitle;
+
         void IvChipCellsViewer.Reset()
         {
             _resultBox.Reset();
-            Mat old = cvMatViewer.Image;
-            if (old != null)
-                old.SetTo(Scalar.Black);
-            cvMatViewer.Invalidate();
+            //Mat old = this.MatViewer.Image;
+            //if (old != null)
+            //    old.SetTo(Scalar.Black);
+            this.MatViewer.Invalidate();
         }
         void IvChipCellsViewer.UpdateImageSrc(object fullfovImage, string srcName)
         {
@@ -67,10 +82,12 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
             if (fullfovImage is GaBigImageHolder imgHolder)
             {
                 Bitmap bmp = imgHolder.PeekBitmap();
+                lblTitle.Text = srcName;
                 update_LineScanImage(bmp);
             }
             else if (fullfovImage is CMvdImage mvdImage)
             {
+                lblTitle.Text = srcName;
                 update_LineScanImage(mvdImage);
             }
             else
@@ -85,7 +102,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
             _resultBox.UpdateResult(cells, mode);
             _resultBox.Visible = true;
 
-            cvMatViewer.Invalidate();
+            this.MatViewer.Invalidate();
         }
 
         #region PRIVATE_IMAGE_FUCNTIONS
@@ -94,9 +111,9 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         /// </summary>
         void update_LineScanImage(CMvdImage mvdImage)
         {
-            Mat old = cvMatViewer.Image;
+            Mat old = this.MatViewer.Image;
             Mat img = GaImageUtil.PeekMat(mvdImage);
-            cvMatViewer.CopyFrom(img);
+            this.MatViewer.CopyFrom(img);
             old?.Dispose();
         }
 
@@ -105,10 +122,10 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         /// </summary>
         void update_LineScanImage(Bitmap bmp)
         {
-            Mat old = cvMatViewer.Image;
+            Mat old = this.MatViewer.Image;
             using (var bridge = new QxImageBridge(bmp))
             {
-                cvMatViewer.CopyFrom(bridge.Image);
+                this.MatViewer.CopyFrom(bridge.Image);
             }
             old?.Dispose();
         }
@@ -128,7 +145,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         {
             try
             {
-                cvMatViewer.Image?.Dispose();
+                this.MatViewer.Image?.Dispose();
                 //cvMatViewer.Image = null;
             }
             catch

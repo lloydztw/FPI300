@@ -180,7 +180,7 @@ namespace TravellerMINIX6.ProcessSpace
                                         //  巨圖 統一由 LineScanCamImageHolder 保管其生命週期
                                         //  不再使用不安全的 cMvdInput !!!
                                         Bitmap bitmap = IScanCam.GetFreeImageBitmap().ToBitmap();
-                                        pRun.LineScanCamImageHolder.TakeOver(bitmap);
+                                        pRun.LineScanCamImageHolder.TakeOver(bitmap, "LineScanCamera");
                                         FireLiveImaging(bitmap);
                                     }
 

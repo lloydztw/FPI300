@@ -40,29 +40,39 @@ namespace LaserAlignDX.AoiModel
             return _bitmap == null && _mvdImage == null;
         }
 
+        public string SrcName
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// 接管 bitmap
         /// </summary>
-        public void TakeOver(Bitmap bitmap)
+        public void TakeOver(Bitmap bitmap, string srcName = null)
         {
             if (_bitmap == bitmap)
                 return;
 
             cleanUp();
             _bitmap = bitmap;
+            SrcName = srcName;
+
             OnImageChanged?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>
         /// 接管 mvdImage
         /// </summary>
-        public void TakeOver(CMvdImage image)
+        public void TakeOver(CMvdImage image, string srcName = null)
         {
             if (_mvdImage == image)
                 return;
 
             cleanUp();
             _mvdImage = image;
+            SrcName = srcName;
+
             OnImageChanged?.Invoke(this, EventArgs.Empty);
         }
 

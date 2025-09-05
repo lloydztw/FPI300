@@ -116,7 +116,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
             this.tabPage2.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(1051, 877);
+            this.tabPage2.Size = new System.Drawing.Size(682, 970);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "日志";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -129,7 +129,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(1051, 877);
+            this.groupBox1.Size = new System.Drawing.Size(682, 970);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "日志记录";
@@ -140,7 +140,7 @@
             this.richTextBox1.Location = new System.Drawing.Point(4, 22);
             this.richTextBox1.Margin = new System.Windows.Forms.Padding(4);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(1043, 851);
+            this.richTextBox1.Size = new System.Drawing.Size(674, 944);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 

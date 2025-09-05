@@ -15,6 +15,7 @@
 
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
+using LaserAlignDX.Model.Coords;
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 
 
@@ -45,6 +46,16 @@ namespace LaserAlignDX
         {
             // 使用力成報表
             return new PowerTechReportBuilder();
+        }
+
+        public static TravellerTransforms Transforms
+        {
+            get => TravellerTransforms.Instance;
+        }
+
+        public static void DisposeAll()
+        {
+            Transforms?.Dispose();
         }
     }
 }
