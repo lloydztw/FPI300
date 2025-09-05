@@ -1,8 +1,9 @@
-﻿using LaserAlignDX.UISpace.UIMVC;
+﻿using LaserAlignDX;
+using LaserAlignDX.UISpace.UIMVC;
 using System.Windows.Forms;
 
 
-namespace LaserAlignDX.Mvc.Ctrl
+namespace GA.Mvc.Ctrl
 {
     public class GaMainCtrl : Abs.GaMainCtrl
     {

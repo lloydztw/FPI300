@@ -2,6 +2,7 @@
 using Eazy_Project_III.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
+using LaserAlignDX;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -24,7 +25,7 @@ using VisionDesigner.BlobFind;
 using VsCommon.ControlSpace.MachineSpace;
 
 
-namespace LaserAlignDX.Mvc.Ctrl.V2
+namespace GA.Mvc.Ctrl.V2
 {
     /// <summary>
     /// 重整 MainX3UI

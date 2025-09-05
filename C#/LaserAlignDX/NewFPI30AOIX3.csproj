@@ -355,6 +355,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_abs.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v2.cs" />
@@ -950,7 +951,6 @@
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="GA.mvc\Ctrl\CalibCtrl\" />
     <Folder Include="GA.mvc\Model\Machine\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

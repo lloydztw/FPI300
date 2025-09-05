@@ -8,7 +8,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 
-namespace LaserAlignDX.Mvc.Ctrl.Abs
+namespace GA.Mvc.Ctrl.Abs
 {
     public abstract class GaMainCtrl : IxTickable
     {

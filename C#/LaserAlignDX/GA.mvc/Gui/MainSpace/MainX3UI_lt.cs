@@ -1,8 +1,7 @@
 ﻿using Eazy_Project_III;
 using JetEazy.BasicSpace;
 using System.Windows.Forms;
-
-using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.GaMainCtrl;
+using GaMainCtrl = GA.Mvc.Ctrl.GaMainCtrl;
 
 
 namespace LaserAlignDX.UISpace.MainSpace

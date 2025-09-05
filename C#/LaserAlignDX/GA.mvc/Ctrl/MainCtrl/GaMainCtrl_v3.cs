@@ -2,6 +2,7 @@
 using Eazy_Project_III.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
+using LaserAlignDX;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
@@ -11,7 +12,6 @@ using LaserAlignDX.UISpace.ChipCellsViewer;
 using LaserAlignDX.UISpace.UIMVC;
 using NeedleX.ProcessSpace;
 using System;
-using System.Data.OleDb;
 using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
@@ -19,7 +19,7 @@ using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
 
-namespace LaserAlignDX.Mvc.Ctrl.V3
+namespace GA.Mvc.Ctrl.V3
 {
     /// <summary>
     /// 重整 MainX3UI
