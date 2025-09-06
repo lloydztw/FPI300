@@ -17,9 +17,9 @@ using JetEazy.ImageViewerEx;
 using JetEazy.QvMath;
 using System.Drawing;
 
-namespace LaserAlignDX.UISpace.ChipCellsViewer
+namespace LaserAlignDX.Mvc.Gui
 {
-    public class CviRotRectBox : IvDrawItem
+    public class CviRotRectBox : CvImageViewerInteractor, IvDrawItem
     {
         #region PRIVATE_DATA
         QvBox2D _box2D;
@@ -95,7 +95,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         }
 
         #region OVERRIDES
-        public void OnDraw(CvImageViewer viewer, Graphics gxView)
+        public override void OnDraw(CvImageViewer viewer, Graphics gxView)
         {
             if (_box2D == null)
                 return;

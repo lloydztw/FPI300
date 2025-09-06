@@ -78,11 +78,11 @@ namespace LaserAlignDX.Model.Transforms
             set;
         }
 
-        public QCoord SrcRef(int i)
+        public QCoord GetSrcRef(int i)
         {
             return _srcRefs[i];
         }
-        public QCoord DstRef(int i)
+        public QCoord GetDstRef(int i)
         {
             return _dstRefs[i];
         }

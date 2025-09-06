@@ -1,5 +1,4 @@
-﻿using LaserAlignDX;
-using LaserAlignDX.UISpace.UIMVC;
+﻿using LaserAlignDX.UISpace.UIMVC;
 using System.Windows.Forms;
 
 

@@ -368,36 +368,38 @@
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UICalib\FormCalibration.cs">
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UICalib\FormCalibration.Designer.cs">
-      <DependentUpon>FormCalibration.cs</DependentUpon>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.Designer.cs">
+      <DependentUpon>FormCalibrationTool.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UICalib\GvCalibPointPair.cs">
+    <Compile Include="GA.mvc\Gui\UiCalibTool\GvCalibPointsDataGridView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UICalib\GvCalibPointPair.Designer.cs">
-      <DependentUpon>GvCalibPointPair.cs</DependentUpon>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\GvCalibPointsDataGridView.Designer.cs">
+      <DependentUpon>GvCalibPointsDataGridView.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\CviLineSegmentsBox.cs" />
-    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\IvDrawItem.cs" />
-    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\MvdConvertor.cs" />
-    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\CviRotRectBox.cs" />
-    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\Interactor\CviCellsResultBoxes.cs" />
-    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\IvChipCellsViewer.cs" />
-    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\JezChipCellsViewPanel.cs">
+    <Compile Include="GA.mvc\Gui\UiCalibTool\Interactor\CviCalibResultBox.cs" />
+    <Compile Include="GA.mvc\Gui\UiCalibTool\IvCalibToolUI.cs" />
+    <Compile Include="GA.mvc\Gui\UiChipCellsViewer\Interactor\CviLineSegmentsBox.cs" />
+    <Compile Include="GA.mvc\Gui\UiChipCellsViewer\Interactor\IvDrawItem.cs" />
+    <Compile Include="GA.mvc\Gui\UiChipCellsViewer\Interactor\MvdConvertor.cs" />
+    <Compile Include="GA.mvc\Gui\UiChipCellsViewer\Interactor\CviRotRectBox.cs" />
+    <Compile Include="GA.mvc\Gui\UiChipCellsViewer\Interactor\CviCellsResultBoxes.cs" />
+    <Compile Include="GA.mvc\Gui\UiChipCellsViewer\IvChipCellsViewer.cs" />
+    <Compile Include="GA.mvc\Gui\UiChipCellsViewer\JezChipCellsViewPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\JezChipCellsViewPanel.Designer.cs">
+    <Compile Include="GA.mvc\Gui\UiChipCellsViewer\JezChipCellsViewPanel.Designer.cs">
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UIChipCellsViewer\MvsChipCellsViewer.cs" />
-    <Compile Include="GA.mvc\Gui\UITransImageViewer\Interactor\CviTransCoordInfo.cs" />
-    <Compile Include="GA.mvc\Gui\UITransImageViewer\JezTransImageViewPanel.cs">
+    <Compile Include="GA.mvc\Gui\UiChipCellsViewer\MvsChipCellsViewer.cs" />
+    <Compile Include="GA.mvc\Gui\UiTransImageViewer\Interactor\CviTransCoordInfo.cs" />
+    <Compile Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UITransImageViewer\JezTransImageViewPanel.Designer.cs">
+    <Compile Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.Designer.cs">
       <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzPadsGridFinder.cs" />
@@ -763,16 +765,16 @@
     <EmbeddedResource Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.resx">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UICalib\FormCalibration.resx">
-      <DependentUpon>FormCalibration.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.resx">
+      <DependentUpon>FormCalibrationTool.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UICalib\GvCalibPointPair.resx">
-      <DependentUpon>GvCalibPointPair.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\GvCalibPointsDataGridView.resx">
+      <DependentUpon>GvCalibPointsDataGridView.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UIChipCellsViewer\JezChipCellsViewPanel.resx">
+    <EmbeddedResource Include="GA.mvc\Gui\UiChipCellsViewer\JezChipCellsViewPanel.resx">
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UITransImageViewer\JezTransImageViewPanel.resx">
+    <EmbeddedResource Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.resx">
       <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">

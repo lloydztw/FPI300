@@ -16,6 +16,7 @@
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
+using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.UISpace.UIMVC;
 using LeTian.AoiLib;

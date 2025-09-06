@@ -1,556 +1,327 @@
-﻿using FreeImageAPI;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-09-06 重新設計校正架構 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
 using JetEazy.Interface;
-using JzDisplay;
-using LaserAlignDX.BasicSpace.ParaSpace;
-using LaserAlignDX.FormSpace.FPI30Form;
-using LaserAlignDX.OPSpace.RecipeSpace;
-using MoveGraphLibrary;
+using JetEazy.Utils;
+using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Model.Transforms;
+using LaserAlignDX.Mvc.Gui;
 using System;
+using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Windows.Forms;
-using Traveller106;
-using WorldOfMoveableObjects;
-using FindType = LaserAlignDX.OPSpace.FindType;
+
+using CalibVisionParams = LaserAlignDX.BasicSpace.ParaSpace.MvdFindCircleClass;
+using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
 
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
     public partial class GaCalibCtrl
     {
-        const int BTNCOUNT = 4;
+        static int N_CALIB_POINTS => QTransform.N_POINTS;
+        enum CalibCornersEnum : int
+        {
+            [Description("載台左上")]
+            LeftTop,
+            [Description("載台右上")]
+            RightTop,
+            [Description("載台右下")]
+            RigthBottom,
+            [Description("載台左下")]
+            LeftBottom
+        };
+
+        #region GLOBAL_PATH
+        static string GA_WORK_PATH => Traveller106.Universal.WORKPATH;
+        static string GA_CALIB_VISION_INI_FILE => "CalibrateForm_default_info.ini";
+        #endregion
 
         #region GLOBAL_MESS
-        protected IxLineScanCam IScanCam
+        IxLineScanCam IScanCam
         {
             get { return Traveller106.Universal.IxLineScan; }
         }
-
-        LineScanCalibrateClass lineScanCalibrate
-        {
-            get { return Universal.LineScanCalibrateClasses[ActiveSelection]; }
-        }
+        CalibVisionParams _calibVisionParams => CalibVisionParams.Instance;
         #endregion
 
-        int ActiveSelection
-        {
-            get; set;
-        }
-
-        #region INTERACTORS
-        Mover xMovers = new Mover();
+        #region KERNEL_MEMBERS
+        TravellerTransforms _transforms => GaMvcConfig.Transforms;
         #endregion
 
         #region GUI_MEMBERS
-        JzDisplay.UISpace.DispUI DS;
-        ComboBox cboStage;
-        RichTextBox richTextBox1;
-        PropertyGrid pgPara;
-        Button btnGetImage;
-        Button btnLoadImage;
-        Button btnOK;
-        Button btnCancel;
-        Button btnReCalibration;
-        Button btnVerify;
-        Button[] btnPointPos = new Button[BTNCOUNT];
-        CalibrationUI[] calibrationUIs = new CalibrationUI[BTNCOUNT];
-        Button btnSelectCurrent
+        IvCalibToolUI _calibToolUI;
+        Control _wndOwner => _calibToolUI.Window;
+        JezTransImageViewPanel _imgViewer => _calibToolUI.ImgViewer;
+        GvCalibPointsDataGridView _dgvCalibPointsListView => _calibToolUI.dgvCalibPointsListView;
+        RadioButton[] _rdoCarriers => _calibToolUI.rdoCarriers;
+        RadioButton[] _rdoSuckerRows => _calibToolUI.rdoSuckerRows;
+        Button _btnGrabImage => _calibToolUI.btnGrabImage;
+        Button _btnLoadImage => _calibToolUI.btnLoadImage;
+        Button _btnOK => _calibToolUI.btnOK;
+        Button _btnCancel => _calibToolUI.btnCancel;
+        #endregion
+
+        #region INTERACTORS
+        CviCalibResultBox _cviResultBox = new CviCalibResultBox() { Visible = false };
+        CviCalibPointBox[] _cviCalibPointBoxes = new CviCalibPointBox[N_CALIB_POINTS];
+        #endregion
+
+        #region RUNTIME_DATA
+        CarrierEnum _activeCarrierID = CarrierEnum.C1;
+        SuckerRowEnum _activeSuckerRowID = SuckerRowEnum.S1;
+        bool _modified = false;
+        #endregion
+
+        public void Attach(IvCalibToolUI toolView)
         {
-            get { return btnPointPos[m_CurrentIndex]; }
+            _calibToolUI = toolView;
+            initImgViewer();
+            loadSettings();
+            updateAllData(false);
+            connectEventHandlers();
+        }
+
+        #region PRIVATE_INIT_FUNCTIONS
+        void initImgViewer()
+        {
+            var matViewer = _imgViewer.MatViewer;
+
+            matViewer.AddInteractor(_cviResultBox);
+
+            for (int i = 0; i < N_CALIB_POINTS; i++)
+            {
+                _cviCalibPointBoxes[i] = new CviCalibPointBox(new Rectangle(0, 0, 500, 500), Color.Lime, 0.25f)
+                {
+                    Visible = false,
+                    CrossLength = 100,
+                };
+                matViewer.AddInteractor(_cviCalibPointBoxes[i]);
+            }
+        }
+        void connectEventHandlers()
+        {
+            _btnOK.Click += (s, e) => closeTool(true);
+            _btnCancel.Click += (s, e) => closeTool(false);
+            _rdoCarriers[0].CheckedChanged += _rdoSelect_CheckedChanged;
+            _rdoSuckerRows[0].CheckedChanged += _rdoSelect_CheckedChanged;
+            _btnGrabImage.Click += (s, e) => grabImage();
+            _btnLoadImage.Click += (s, e) => loadImage();
+            _imgViewer.MatViewer.MouseMove += MatViewer_MouseMove;
+        }
+
+
+        #endregion
+
+        #region EVENT_HANDLERS
+        private void _rdoSelect_CheckedChanged(object sender, System.EventArgs e)
+        {
+            _activeCarrierID = _rdoCarriers[0].Checked ? CarrierEnum.C1 : CarrierEnum.C2;
+            _activeSuckerRowID = _rdoSuckerRows[0].Checked ? SuckerRowEnum.S1 : SuckerRowEnum.S2;
+            if (Array.IndexOf(_rdoCarriers, sender) >= 0)
+                updateVisionParams(_activeCarrierID, false);
+            updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);
+        }
+        private void MatViewer_MouseMove(object sender, MouseEventArgs e)
+        {
+            int x = e.X; 
+            int y = e.Y;
+
+            _imgViewer.MatViewer.TransCoordToWorld(ref x, ref y);
+
+            for (int i = 0; i < N_CALIB_POINTS; i++)
+            {
+                var rect = _cviCalibPointBoxes[i].Box2D.BoundaryRect;
+                if (rect.Contains(x, y))
+                {
+                    _dgvCalibPointsListView.SelectedIndex = i;
+                    return;
+                }
+            }
+
+            _dgvCalibPointsListView.SelectedIndex = -1;
         }
         #endregion
 
-        #region RUNTIME_VARIABLES
-        /// <summary>
-        /// Yz 是簡中的 "驗證"
-        /// </summary>
-        bool bYzSelect = false;
-        bool[] btnSelect = new bool[BTNCOUNT];
-        bool IsSelectCurrent
+        #region PRIVATE_UPDATE_FUNCTIONS
+        void updateAllData(bool toModel)
         {
-            get { return btnSelect[m_CurrentIndex]; }
-            set { btnSelect[m_CurrentIndex] = value; }
+            updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, toModel);
+            updateVisionParams(_activeCarrierID, toModel);
         }
-        int m_CurrentIndex = 0;
-        Bitmap bmpOperate = new Bitmap(1, 1);
-        #endregion
-
-
-        public GaCalibCtrl()
+        void updateVisionParams(CarrierEnum carrierID, bool toModel)
         {
-            //InitializeComponent();
-            //this.Load += FrmCalibration_Load;
-            //this.SizeChanged += FrmCalibration_SizeChanged;
-        }
-
-        private void FrmCalibration_SizeChanged(object sender, EventArgs e)
-        {
-            update_Display();
-        }
-
-        private void FrmCalibration_Load(object sender, EventArgs e)
-        {
-            //this.Text = $"载台校正页面";
-
-            init_Display();
-            update_Display();
-
-            //btnPointPos = new Button[BTNCOUNT] { button1, button2, button3, button4 };
-            //calibrationUIs = new CalibrationUI[BTNCOUNT] { calibrationUI1, calibrationUI2, calibrationUI3, calibrationUI4 };
-            btnSelect = new bool[BTNCOUNT] { false, false, false, false };
-
-            //btnGetImage = button5;
-            //btnLoadImage = button6;
-            //btnOK = button7;
-            //btnCancel = button8;
-            //btnReCalibration = button9;
-
-            btnGetImage.Click += BtnGetImage_Click;
-            btnLoadImage.Click += BtnLoadImage_Click;
-            btnOK.Click += BtnOK_Click;
-            btnCancel.Click += BtnCancel_Click;
-            btnReCalibration.Click += BtnReCalibration_Click;
-            btnVerify.Click += BtnVerify_Click;
-
-            pgPara.SelectedObject = MvdFindCircleClass.Instance;
-            cboStage.SelectedIndex = 0;
-            cboStage.SelectedIndexChanged += CboStage_SelectedIndexChanged;
-
-            int i = 0;
-            while (i < BTNCOUNT)
+            if (toModel)
             {
-                btnPointPos[i].Tag = i;
-                btnPointPos[i].Click += FrmCalibrationBtnPos_Click;
-
-                calibrationUIs[i].Init($"GaCalib[{i}]", i);
-
-                i++;
             }
-
-        }
-
-        private void CboStage_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            switch (cboStage.SelectedIndex)
+            else
             {
-                case 0:
-                    calibrationUIs[0].Visible = true;
-                    calibrationUIs[1].Visible = true;
-                    calibrationUIs[2].Visible = false;
-                    calibrationUIs[3].Visible = false;
-                    break;
-                case 1:
-                    calibrationUIs[0].Visible = false;
-                    calibrationUIs[1].Visible = false;
-                    calibrationUIs[2].Visible = true;
-                    calibrationUIs[3].Visible = true;
-                    break;
+                _calibToolUI.pgridVisionParams.SelectedObject = _calibVisionParams;
             }
         }
-
-        private void BtnVerify_Click(object sender, EventArgs e)
+        void updateCalibKeyPoints(CarrierEnum carrierID, SuckerRowEnum suckerRowID, bool toModel)
         {
-            bYzSelect = !bYzSelect;
-            btnVerify.BackColor = bYzSelect ? Color.Red : Color.FromArgb(192, 255, 192);
-        }
+            var transform = _transforms.GetCameraMotorTransform(carrierID, suckerRowID);
+            var corners = Enum.GetValues(typeof(CalibCornersEnum));
+            var dgv = _dgvCalibPointsListView.DataGridView;
 
-        private void BtnReCalibration_Click(object sender, EventArgs e)
-        {
-            int i = 0;
-            while (i < BTNCOUNT)
+            if (toModel)
             {
-                calibrationUIs[i].GetViewWorldPoints();
-                //LineScanCalibrateClasses[i] = new LineScanCalibrateClass();
-                //LineScanCalibrateClasses[i].Initial(WORKPATH, 0, $"Calibrate_default_info{i}.ini");
-                Traveller106.Universal.LineScanCalibrateClasses[i].Save();
-                i++;
-            }
-            JetEazy.BasicSpace.VsMSG.Instance.Warning($"重新校正成功", false);
-        }
+                if (transform == null)
+                    return;
 
-        private void BtnCancel_Click(object sender, EventArgs e)
-        {
-            //this.Close();
-        }
-
-        private void BtnOK_Click(object sender, EventArgs e)
-        {
-            MvdFindCircleClass.Instance.Save();
-            JetEazy.BasicSpace.VsMSG.Instance.Warning($"保存成功", false);
-        }
-
-        private void FrmCalibrationBtnPos_Click(object sender, EventArgs e)
-        {
-            m_CurrentIndex = int.Parse(((Button)sender).Tag.ToString());
-            IsSelectCurrent = !IsSelectCurrent;
-            btnSelectCurrent.BackColor = IsSelectCurrent ? Color.Red : Color.FromArgb(192, 255, 192);
-
-        }
-
-        private void BtnLoadImage_Click(object sender, EventArgs e)
-        {
-            string _filename = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
-            if (!string.IsNullOrEmpty(_filename))
-            {
-                FreeImageBitmap freeImageBitmap = new FreeImageBitmap(_filename);
-                if (freeImageBitmap.PixelFormat == PixelFormat.Format32bppArgb)
+                foreach (CalibCornersEnum corner in corners)
                 {
-                    bmpOperate.Dispose();
-                    bmpOperate = Convert32bppTo8bpp(freeImageBitmap.ToBitmap());
-                    DS.ReplaceDisplayImage(bmpOperate);
-                }
-                else if (freeImageBitmap.PixelFormat == PixelFormat.Format24bppRgb)
-                {
-                    bmpOperate.Dispose();
-                    bmpOperate = Convert24bppTo8bpp(freeImageBitmap.ToBitmap());
-                    DS.ReplaceDisplayImage(bmpOperate);
-                }
-                else if (freeImageBitmap.PixelFormat == PixelFormat.Format8bppIndexed)
-                {
-                    bmpOperate.Dispose();
-                    bmpOperate = freeImageBitmap.ToBitmap();
-                    DS.ReplaceDisplayImage(bmpOperate);
-                }
-                else
-                {
-                    JetEazy.BasicSpace.VsMSG.Instance.Warning($"加载图片格式不支持！");
-                }
-
-
-                freeImageBitmap.Dispose();
-            }
-        }
-
-        private void BtnGetImage_Click(object sender, EventArgs e)
-        {
-            if (IScanCam.GetFreeImageBitmap() != null)
-            {
-                bmpOperate.Dispose();
-                bmpOperate = IScanCam.GetFreeImageBitmap().ToBitmap();
-                DS.ReplaceDisplayImage(bmpOperate);
-
-            }
-        }
-
-        #region JzDISP
-        void init_Display()
-        {
-            DS.Initial(100, 0.01f);
-            DS.SetDisplayType(DisplayTypeEnum.NORMAL);
-            //DS2.Initial(100, 0.01f);
-            //DS2.SetDisplayType(DisplayTypeEnum.SHOW);
-            //DS3.Initial(100, 0.01f);
-            //DS3.SetDisplayType(DisplayTypeEnum.SHOW);
-            DS.CaptureAction += DS_CaptureAction;
-        }
-        private void DS_CaptureAction(RectangleF rectf)
-        {
-            RectangleF rectf_org = new RectangleF(10, 10, 10, 10);
-            RectangleF rectf_des = new RectangleF(10, 10, 10, 10);
-
-            if (IsSelectCurrent)
-            {
-                BoundRect(ref rectf, bmpOperate.Size);
-                if (rectf.Width > 1 && rectf.Height > 1)
-                {
-                    DS.ClearStaticMover();
-                    xMovers.Clear();
-                    JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), rectf);
-                    _rect.RelateLevel = 2;
-                    //_rect.RelateNo = i;
-                    _rect.RelatePosition = 0;
-                    xMovers.Add(_rect);
-
-                    IsSelectCurrent = false;
-
-                    Bitmap bmp0 = bmpOperate.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                    PointF ptf1 = MvdFindCircleClass.Instance.GetImageMarkCenter(
-                                        bmp0,
-                                        true,
-                                        out RectangleF maxrecttemp,
-                                        out Bitmap bmpouputtemp,
-                                        out int maxareatemp);
-
-                    rectf_des = new RectangleF(maxrecttemp.X + rectf.X,
-                                                       maxrecttemp.Y + rectf.Y,
-                                                       maxrecttemp.Width,
-                                                       maxrecttemp.Height);
-
-                    ptf1.X += rectf.X;
-                    ptf1.Y += rectf.Y;
-
-                    switch (cboStage.SelectedIndex)
+                    int rowId = (int)corner;
+                    var camPt = transform.GetSrcRef(rowId);
+                    var motorPt = transform.GetDstRef(rowId);
+                    bool isChanged = updateCalibKeyPoints(dgv, rowId, camPt, motorPt, toModel);
+                    if (isChanged)
                     {
-                        case 0:
-                            calibrationUIs[0].SetViewPoints(m_CurrentIndex, ptf1);
-                            calibrationUIs[1].SetViewPoints(m_CurrentIndex, ptf1);
-                            break;
-                        case 1:
-                            calibrationUIs[2].SetViewPoints(m_CurrentIndex, ptf1);
-                            calibrationUIs[3].SetViewPoints(m_CurrentIndex, ptf1);
-                            break;
+                        transform.SetSrcRef(rowId, camPt);
+                        transform.SetDstRef(rowId, motorPt);
+                        _modified = true;
                     }
-
-                    //CalibrationCurrent.SetViewPoints(m_CurrentIndex, ptf1);
-
-                    switch (MvdFindCircleClass.Instance.mFindType)
-                    {
-                        case FindType.CIRCLE:
-
-                            JzCircleEAG jzCircleEAG = new JzCircleEAG(Color.FromArgb(0, Color.Blue), rectf_des);
-                            jzCircleEAG.RelateLevel = 3;
-                            //_rect.RelateNo = i;
-                            jzCircleEAG.RelatePosition = 0;
-                            xMovers.Add(jzCircleEAG);
-
-                            break;
-                        case FindType.BLOB:
-                        default:
-
-                            _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), rectf_des);
-                            _rect.RelateLevel = 3;
-                            //_rect.RelateNo = i;
-                            _rect.RelatePosition = 0;
-                            xMovers.Add(_rect);
-
-                            break;
-                    }
-
-                    btnSelectCurrent.BackColor = (IsSelectCurrent ? Color.Red : Color.FromArgb(192, 255, 192));
-
-                    bmp0.Dispose();
-
-                    DS.SetStaticMover(xMovers);
-                    DS.RefreshDisplayShape();
-                    DS.MappingSelect();
-
-                    update_Display(false);
                 }
             }
-            else if(bYzSelect)
+            else
             {
-                BoundRect(ref rectf, bmpOperate.Size);
-                if (rectf.Width > 1 && rectf.Height > 1)
+                dgv.Rows.Clear();
+                foreach (CalibCornersEnum corner in corners)
                 {
-                    DS.ClearStaticMover();
-                    xMovers.Clear();
-                    JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), rectf);
-                    _rect.RelateLevel = 2;
-                    //_rect.RelateNo = i;
-                    _rect.RelatePosition = 0;
-                    xMovers.Add(_rect);
+                    int rowId = (int)corner;
+                    var camPt = transform?.GetSrcRef(rowId);
+                    var motorPt = transform?.GetDstRef(rowId);
 
-                    bYzSelect = false;
-
-                    Bitmap bmp0 = bmpOperate.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                    PointF ptf1 = MvdFindCircleClass.Instance.GetImageMarkCenter(
-                                        bmp0,
-                                        true,
-                                        out RectangleF maxrecttemp,
-                                        out Bitmap bmpouputtemp,
-                                        out int maxareatemp);
-
-                    rectf_des = new RectangleF(maxrecttemp.X + rectf.X,
-                                                       maxrecttemp.Y + rectf.Y,
-                                                       maxrecttemp.Width,
-                                                       maxrecttemp.Height);
-
-                    ptf1.X += rectf.X;
-                    ptf1.Y += rectf.Y;
-
-                    PointF ptfResult = lineScanCalibrate.ViewToWorld(ptf1);
-                    richTextBox1.Text = $"图像点:{PointF000ToString(ptf1)}";
-                    richTextBox1.Text += Environment.NewLine;
-                    richTextBox1.Text += $"轴XY点:{PointF000ToString(ptfResult)}";
-
-                    switch (MvdFindCircleClass.Instance.mFindType)
-                    {
-                        case FindType.CIRCLE:
-
-                            JzCircleEAG jzCircleEAG = new JzCircleEAG(Color.FromArgb(0, Color.Blue), rectf_des);
-                            jzCircleEAG.RelateLevel = 3;
-                            //_rect.RelateNo = i;
-                            jzCircleEAG.RelatePosition = 0;
-                            xMovers.Add(jzCircleEAG);
-                            break;
-                        case FindType.BLOB:
-                        default:
-
-                            _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), rectf_des);
-                            _rect.RelateLevel = 3;
-                            //_rect.RelateNo = i;
-                            _rect.RelatePosition = 0;
-                            xMovers.Add(_rect);
-
-                            break;
-                    }
-
-                    btnVerify.BackColor = bYzSelect ? Color.Red : Color.FromArgb(192, 255, 192);
-
-                    bmp0.Dispose();
-
-                    DS.SetStaticMover(xMovers);
-                    DS.RefreshDisplayShape();
-                    DS.MappingSelect();
-
-                    update_Display(false);
+                    var name = GaUtil.GetEnumDescription(corner);
+                    dgv.Rows.Add(name, 0, 0, 0.0, 0.0);
+                    dgv.Rows[rowId].Cells[0].Value = GaUtil.GetEnumDescription(corner);
+                    updateCalibKeyPoints(dgv, rowId, camPt, motorPt, toModel);
+                    updateCalibKeyPointBox(corner, camPt);
                 }
             }
         }
-        void update_Display(bool eRefresh = true)
+        bool updateCalibKeyPoints(DataGridView dgv, int rowId, QCoord camPt, QCoord motorPt, bool toModel)
         {
-            DS.Refresh();
-            if (eRefresh)
-                DS.DefaultView();
-            //DS2.Refresh();
-            //DS2.DefaultView();
-            //DS3.Refresh();
-            //DS3.DefaultView();
+            int col = 1;
+            var dgvRow = dgv.Rows[rowId];
+
+            if (toModel)
+            {
+                bool isChanged = false;
+
+                var cx = (int)dgvRow.Cells[col++].Value;
+                var cy = (int)dgvRow.Cells[col++].Value;
+                var mx = (double)dgvRow.Cells[col++].Value;
+                var my = (double)dgvRow.Cells[col++].Value;
+
+                if (camPt.X != cx || camPt.Y != cy)
+                {
+                    camPt.X = cx;
+                    camPt.Y = cy;
+                    isChanged = true;
+                }
+
+                if (motorPt.X != mx || motorPt.Y != my)
+                {
+                    motorPt.X = mx;
+                    motorPt.Y = my;
+                    isChanged = true;
+                }
+
+                return isChanged;
+            }
+            else
+            {
+                dgvRow.Cells[col++].Value = camPt != null ? (int)camPt.X : 0;
+                dgvRow.Cells[col++].Value = camPt != null ? (int)camPt.Y : 0;
+                dgvRow.Cells[col++].Value = motorPt != null ? motorPt.X : 0.0;
+                dgvRow.Cells[col++].Value = motorPt != null ? motorPt.Y : 0.0;
+                return true;
+            }
+        }
+        void updateCalibKeyPointBox(CalibCornersEnum corner, QCoord camPt, bool show = true)
+        {
+            var box = _cviCalibPointBoxes[(int)corner];
+            if (camPt == null)
+            {
+                box.Visible = false;
+                return;
+            }
+
+            var loc = box.Box2D;
+            loc.SetCenter((float)camPt.X, (float)camPt.Y);
+            box.SetBox(loc);
+            box.Visible = show;
+        }
+        void updateAllCalibKeyPointBoxes()
+        {
+            var carrierID = _activeCarrierID;
+            var suckerRowID = _activeSuckerRowID;
+
+            var transform = _transforms.GetCameraMotorTransform(carrierID, suckerRowID);
+            var corners = Enum.GetValues(typeof(CalibCornersEnum));
+
+            foreach (CalibCornersEnum corner in corners)
+            {
+                int rowId = (int)corner;
+                var camPt = transform?.GetSrcRef(rowId);
+                updateCalibKeyPointBox(corner, camPt);
+            }
         }
         #endregion
 
-        #region CONVERT_FUNCTIONS
-        Bitmap Convert32bppTo8bpp(Bitmap original)
+        void loadImage()
         {
-            // 创建一个新的8bpp位图
-            Bitmap newBitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format8bppIndexed);
-
-            // 设置调色板（这里使用灰度调色板）
-            ColorPalette palette = newBitmap.Palette;
-            for (int i = 0; i < 256; i++)
+            string fileName = GaUtil.BrowseImageFile();
+            if (fileName != null)
             {
-                palette.Entries[i] = Color.FromArgb(i, i, i);
+                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
+                // MatViewer 會接手管理 Image 生命
+                _imgViewer.MatViewer.LoadImage(fileName);
+                _imgViewer.lblTitle.Text = "[校正] " + System.IO.Path.GetFileName(fileName);
+
+                GaUtil.SetCursor(_wndOwner, oldCursor);
             }
-            newBitmap.Palette = palette;
-
-            // 锁定位图数据
-            BitmapData originalData = original.LockBits(
-                new Rectangle(0, 0, original.Width, original.Height),
-                ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-
-            BitmapData newData = newBitmap.LockBits(
-                new Rectangle(0, 0, newBitmap.Width, newBitmap.Height),
-                ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
-
-            // 转换像素数据
-            unsafe
+            updateAllCalibKeyPointBoxes();
+        }
+        void grabImage()
+        {
+            //throw new NotImplementedException();
+        }
+        void closeTool(bool save)
+        {
+            if (save && _modified)
             {
-                byte* originalPtr = (byte*)originalData.Scan0;
-                byte* newPtr = (byte*)newData.Scan0;
-
-                for (int y = 0; y < original.Height; y++)
-                {
-                    for (int x = 0; x < original.Width; x++)
-                    {
-                        // 获取32bpp像素值
-                        byte b = originalPtr[y * originalData.Stride + x * 4];
-                        byte g = originalPtr[y * originalData.Stride + x * 4 + 1];
-                        byte r = originalPtr[y * originalData.Stride + x * 4 + 2];
-                        byte a = originalPtr[y * originalData.Stride + x * 4 + 3];
-
-                        // 转换为灰度值（8bpp）
-                        byte gray = (byte)((r * 0.299 + g * 0.587 + b * 0.114) * (a / 255.0));
-
-                        // 写入8bpp位图
-                        newPtr[y * newData.Stride + x] = gray;
-                    }
-                }
+                updateAllData(true);
+                saveSettings();
             }
 
-            // 解锁位图
-            original.UnlockBits(originalData);
-            newBitmap.UnlockBits(newData);
-
-            return newBitmap;
+            var frm = _wndOwner.FindForm();
+            frm?.Close();
+            frm?.Dispose();
         }
-        Bitmap Convert24bppTo8bpp(Bitmap original)
+        void loadSettings()
         {
-            //if (original.PixelFormat != PixelFormat.Format24bppRgb)
-            //    throw new ArgumentException("源图像必须是24位位图");
-
-            // 创建新的8位位图
-            Bitmap newBitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format8bppIndexed);
-
-            // 设置灰度调色板
-            ColorPalette palette = newBitmap.Palette;
-            for (int i = 0; i < 256; i++)
-            {
-                palette.Entries[i] = Color.FromArgb(i, i, i);
-            }
-            newBitmap.Palette = palette;
-
-            // 锁定位图数据进行操作
-            BitmapData originalData = original.LockBits(
-                new Rectangle(0, 0, original.Width, original.Height),
-                ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-
-            BitmapData newData = newBitmap.LockBits(
-                new Rectangle(0, 0, newBitmap.Width, newBitmap.Height),
-                ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
-
-            unsafe
-            {
-                byte* originalPtr = (byte*)originalData.Scan0;
-                byte* newPtr = (byte*)newData.Scan0;
-
-                for (int y = 0; y < original.Height; y++)
-                {
-                    for (int x = 0; x < original.Width; x++)
-                    {
-                        // 获取24bpp像素值
-                        byte b = originalPtr[y * originalData.Stride + x * 3];
-                        byte g = originalPtr[y * originalData.Stride + x * 3 + 1];
-                        byte r = originalPtr[y * originalData.Stride + x * 3 + 2];
-
-                        // 转换为灰度值（8bpp）
-                        byte gray = (byte)(r * 0.299 + g * 0.587 + b * 0.114);
-
-                        // 写入8bpp位图
-                        newPtr[y * newData.Stride + x] = gray;
-                    }
-                }
-            }
-
-            // 解锁位图
-            original.UnlockBits(originalData);
-            newBitmap.UnlockBits(newData);
-
-            return newBitmap;
+            _transforms.LoadGaaraIniFile();
+            _calibVisionParams.Initial(GA_WORK_PATH, 0, GA_CALIB_VISION_INI_FILE);
         }
-        public void BoundRect(ref Rectangle InnerRect, Size BoundSize)
+        void saveSettings()
         {
-            InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
-            InnerRect.Y = Math.Min(Math.Max(InnerRect.Y, 0), (BoundSize.Height - InnerRect.Height < 0 ? 0 : BoundSize.Height - InnerRect.Height));
-
-            if (BoundSize.Width <= InnerRect.X + InnerRect.Width)
-                InnerRect.Width = BoundValue(InnerRect.Width, BoundSize.Width - InnerRect.X, 1);
-            if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
-                InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
-        }
-        public void BoundRect(ref RectangleF InnerRect, Size BoundSize)
-        {
-            InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
-            InnerRect.Y = Math.Min(Math.Max(InnerRect.Y, 0), (BoundSize.Height - InnerRect.Height < 0 ? 0 : BoundSize.Height - InnerRect.Height));
-
-            if (BoundSize.Width <= InnerRect.X + InnerRect.Width)
-                InnerRect.Width = BoundValue(InnerRect.Width, BoundSize.Width - InnerRect.X, 1);
-            if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
-                InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
-        }
-        public int BoundValue(int Value, int Max, int Min)
-        {
-            return Math.Max(Math.Min(Value, Max), Min);
 
         }
-        public float BoundValue(float Value, float Max, float Min)
-        {
-            return Math.Max(Math.Min(Value, Max), Min);
-
-        }
-        public string PointF000ToString(PointF PTF)
-        {
-            return PTF.X.ToString("0.000") + "," + PTF.Y.ToString("0.000");
-        }
-        #endregion
     }
 }

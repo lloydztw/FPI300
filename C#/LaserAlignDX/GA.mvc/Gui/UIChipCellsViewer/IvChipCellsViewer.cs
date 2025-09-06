@@ -18,7 +18,7 @@ using System.Windows.Forms;
 
 using CELL = LaserAlignDX.OPSpace.RegionCellX3Class;
 
-namespace LaserAlignDX.UISpace
+namespace LaserAlignDX.UISpace.ChipCellsViewer
 {
     public interface IvChipCellsViewer
     {

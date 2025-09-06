@@ -2,12 +2,10 @@
 using Eazy_Project_III.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
-using LaserAlignDX;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LaserAlignDX.UISpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
 using LaserAlignDX.UISpace.UIMVC;
 using NeedleX.ProcessSpace;
@@ -477,10 +475,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             if (promptCheckBusy())
                 return;
 
-            string fileName = browseImageFile();
+            string fileName = GaUtil.BrowseImageFile();
             if (fileName != null)
             {
-                loadImage(fileName);
+                loadLineScanImage(fileName);
             }
         }
         private void MenuTestChipInspect_Click(object sender, EventArgs e)
@@ -534,60 +532,17 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             }
             return true;
         }
-        string browseImageFile()
-        {
-            string fileName = null;
-            using (OpenFileDialog dlg = new OpenFileDialog())
-            {
-                dlg.Title = "Select Image";
-                dlg.Filter = "JPG Files(*.jpg)|*.jpg|BMP Files(*.bmp)|*.bmp|PNG Files(*.png)|*.png";
-                dlg.FileName = "*.jpg";
-
-                if (!string.IsNullOrEmpty(fileName))
-                {
-                    try
-                    {
-                        dlg.InitialDirectory = System.IO.Path.GetDirectoryName(fileName);
-                    }
-                    catch
-                    {
-
-                    }
-                }
-
-                if (DialogResult.OK == dlg.ShowDialog())
-                {
-                    //ResetAndClear();
-                    fileName = dlg.FileName;
-                }
-                else
-                {
-                    fileName = null;
-                }
-            }
-            return fileName;
-        }
-        void loadImage(string fileName)
+        void loadLineScanImage(string fileName)
         {
             if (fileName != null)
             {
-                var oldCursor = setCursor(Cursors.WaitCursor);
+                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
                 var bmp = GaImageUtil.LoadBigImage(fileName);
                 _lineScanImageHolder?.TakeOver(bmp, System.IO.Path.GetFileName(fileName));
-                setCursor(oldCursor);
+
+                GaUtil.SetCursor(_wndOwner, oldCursor);
             }
-        }
-        Cursor setCursor(Cursor cursor)
-        {
-            var frmOwner = _wndOwner?.FindForm();
-            if (frmOwner != null)
-            {
-                var old = frmOwner.Cursor;
-                frmOwner.Cursor = cursor;
-                frmOwner.Invalidate();
-                return old;
-            }
-            return Cursors.Default;
         }
         #endregion
 

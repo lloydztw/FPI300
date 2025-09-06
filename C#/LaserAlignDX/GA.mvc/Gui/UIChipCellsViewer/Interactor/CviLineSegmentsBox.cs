@@ -16,9 +16,9 @@
 using JetEazy.ImageViewerEx;
 using System.Drawing;
 
-namespace LaserAlignDX.UISpace.ChipCellsViewer
+namespace LaserAlignDX.Mvc.Gui
 {
-    public class CviLineSegmentsBox : IvDrawItem
+    public class CviLineSegmentsBox : CvImageViewerInteractor, IvDrawItem
     {
         #region PRIVATE_DATA
         PointF[][] _lines;
@@ -46,7 +46,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         }
 
         #region OVERRIDES
-        public void OnDraw(CvImageViewer viewer, Graphics gxView)
+        public override void OnDraw(CvImageViewer viewer, Graphics gxView)
         {
             if (_lines == null || _lines.Length == 0)
                 return;

@@ -2,6 +2,7 @@
 using System;
 using System.Drawing;
 using System.Reflection;
+using System.Windows.Forms;
 
 
 namespace JetEazy.Utils
@@ -100,6 +101,56 @@ namespace JetEazy.Utils
                 System.ComponentModel.DescriptionAttribute da = (System.ComponentModel.DescriptionAttribute)objs[0];
                 return da.Description;
             }
+        }
+
+        public static string BrowseImageFile()
+        {
+            string fileName = null;
+            using (OpenFileDialog dlg = new OpenFileDialog())
+            {
+                dlg.Title = "Select Image";
+                dlg.Filter = "JPG Files(*.jpg)|*.jpg|BMP Files(*.bmp)|*.bmp|PNG Files(*.png)|*.png";
+                dlg.FileName = "*.jpg";
+
+                if (!string.IsNullOrEmpty(fileName))
+                {
+                    try
+                    {
+                        dlg.InitialDirectory = System.IO.Path.GetDirectoryName(fileName);
+                    }
+                    catch
+                    {
+
+                    }
+                }
+
+                if (DialogResult.OK == dlg.ShowDialog())
+                {
+                    //ResetAndClear();
+                    fileName = dlg.FileName;
+                }
+                else
+                {
+                    fileName = null;
+                }
+            }
+            return fileName;
+        }
+
+        public static Cursor SetCursor(Control wnd, Cursor cursor)
+        {
+            var frmOwner = wnd?.FindForm();
+            if (frmOwner != null)
+            {
+                var old = frmOwner.Cursor;
+                if (old != cursor)
+                {
+                    frmOwner.Cursor = cursor;
+                    frmOwner.Invalidate();
+                }
+                return old;
+            }
+            return Cursors.Default;
         }
 
         /// <summary>

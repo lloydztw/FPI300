@@ -16,7 +16,7 @@
 using JetEazy.ImageViewerEx;
 using System.Drawing;
 
-namespace LaserAlignDX.UISpace.ChipCellsViewer
+namespace LaserAlignDX.Mvc.Gui
 {
     public interface IvDrawItem
     {

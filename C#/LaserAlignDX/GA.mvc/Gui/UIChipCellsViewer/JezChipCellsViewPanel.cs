@@ -19,6 +19,7 @@ using JetEazy.OpenCV.Viewer;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Mvc.Gui.ChipCellsViewer;
 using OpenCvSharp;
 using System.Collections.Generic;
 using System.Drawing;

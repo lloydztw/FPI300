@@ -43,7 +43,7 @@ namespace LaserAlignDX.Model.Coords
         /// <summary>
         /// C (Camera) 相機座標系 (抽象)
         /// </summary>
-        public abstract class C : QCoord
+        public class C : QCoord
         {
             public override int ORDER => 10000;
             public override string UNIT => "pix";
@@ -99,7 +99,7 @@ namespace LaserAlignDX.Model.Coords
         /// <summary>
         /// M (Motor) 馬達座標系 (抽象)
         /// </summary>
-        public abstract class M : QCoord
+        public class M : QCoord
         {
             public override int ORDER => 1000;
             public M(double x, double y) : base(x, y)
