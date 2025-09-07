@@ -119,8 +119,7 @@ namespace LaserAlignDX.Model.Transforms
             _mat = Cv2.GetPerspectiveTransform(srcPts, dstPts);
 
             // 逆轉換
-            _matInv = new Mat();
-            Cv2.Invert(_mat, _matInv);
+            _matInv = Cv2.GetPerspectiveTransform(dstPts, srcPts);
             #endregion
 
             // 脫離正規化
@@ -195,6 +194,7 @@ namespace LaserAlignDX.Model.Transforms
             var rets = InvTrans(new[] { coord });
             return rets[0];
         }
+        
         public QCoord[] Trans(QCoord[] coords)
         {
             if (_mat == null || coords == null || coords.Length == 0)

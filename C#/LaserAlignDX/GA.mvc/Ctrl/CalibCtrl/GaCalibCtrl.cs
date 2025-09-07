@@ -64,7 +64,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region KERNEL_MEMBERS
-        TravellerTransforms _transforms => GaMvcConfig.Transforms;
+        TravellerTransforms _transforms => GaMvcConfig.TransformsModel;
         JxAoiRecipe _jxCalibAoiSettings = new JxAoiRecipe();
         CalibAoiModel _aoiModel = new CalibAoiModel();
         #endregion
@@ -158,10 +158,15 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             _activeCarrierID = _rdoCarriers[0].Checked ? CarrierEnum.C1 : CarrierEnum.C2;
             _activeSuckerRowID = _rdoSuckerRows[0].Checked ? SuckerRowEnum.S1 : SuckerRowEnum.S2;
+            
             if (Array.IndexOf(_rdoCarriers, sender) >= 0)
                 updateVisionParams(_activeCarrierID, false);
-            updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);
+
+            updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);            
             clearCviResults();
+
+            _cviResultBox.ActiveCarrierID = _activeCarrierID;
+            _cviResultBox.ActiveSuckerRowID = _activeSuckerRowID;
         }
         private void MatViewer_MouseMove(object sender, MouseEventArgs e)
         {
@@ -240,7 +245,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                     var motorPt = transform?.GetDstRef(rowId);
 
                     var name = GaUtil.GetEnumDescription(corner);
-                    dgv.Rows.Add(name, 0, 0, 0.0, 0.0);
+                    dgv.Rows.Add(name, 0.0, 0.0, 0.0, 0.0);
                     dgv.Rows[rowId].Cells[0].Value = GaUtil.GetEnumDescription(corner);
                     updateCalibKeyPoints(dgv, rowId, camPt, motorPt, toModel);
                     updateCalibKeyPointBox(corner, camPt);
@@ -256,17 +261,21 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 bool isChanged = false;
 
-                var cx = (int)dgvRow.Cells[col++].Value;
-                var cy = (int)dgvRow.Cells[col++].Value;
+                var cx = (double)dgvRow.Cells[col++].Value;
+                var cy = (double)dgvRow.Cells[col++].Value;
                 var mx = (double)dgvRow.Cells[col++].Value;
                 var my = (double)dgvRow.Cells[col++].Value;
 
-                if (camCoord.X != cx || camCoord.Y != cy)
-                {
-                    camCoord.X = cx;
-                    camCoord.Y = cy;
-                    isChanged = true;
-                }
+                //===================================================
+                // camCoord 由像測自動改變
+                // 在此更新會有數值誤差 !!!
+                //===================================================
+                //if (camCoord.X != cx || camCoord.Y != cy)
+                //{
+                //    camCoord.X = cx;
+                //    camCoord.Y = cy;
+                //    isChanged = true;
+                //}
 
                 if (motorCoord.X != mx || motorCoord.Y != my)
                 {
@@ -279,8 +288,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             else
             {
-                dgvRow.Cells[col++].Value = camCoord != null ? (int)camCoord.X : 0;
-                dgvRow.Cells[col++].Value = camCoord != null ? (int)camCoord.Y : 0;
+                dgvRow.Cells[col++].Value = camCoord != null ? camCoord.X : 0.0;
+                dgvRow.Cells[col++].Value = camCoord != null ? camCoord.Y : 0.0;
                 dgvRow.Cells[col++].Value = motorCoord != null ? motorCoord.X : 0.0;
                 dgvRow.Cells[col++].Value = motorCoord != null ? motorCoord.Y : 0.0;
                 return true;
@@ -300,81 +309,38 @@ namespace LaserAlignDX.Mvc.Ctrl
             box.SetBox(loc);
             box.Visible = show;
         }
-        void updateCalibKeyPoints(EzBlocsGrid grid)
+        void updateCalibKeyPoints(EzBlocsGrid camGrid)
         {
-            if (grid == null)
+            if (camGrid == null)
                 return;
 
-            //(0) Camera Coords 四角點
-            int r = grid.Rows - 1;
-            int c = grid.Cols - 1;
-            var cornerPts = new[]
-            {
-                grid[0,0].Center,
-                grid[0,c].Center,
-                grid[r,c].Center,
-                grid[r,0].Center,
-            };
-
-            //(1) 設定 線掃相機 到 馬達 (Carrier + Sucker) 座標轉換 的 校正點位
-            QVector motorLeftTop = new QVector();
-            if (true)
-            {
-                var transCameraToMotor = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
-                for (int i = 0; i < cornerPts.Length; i++)
-                {
-                    var camCoord = transCameraToMotor.GetSrcRef(i);
-                    var motorCoord = transCameraToMotor.GetDstRef(i);
-                    camCoord.X = cornerPts[i].X;
-                    camCoord.Y = cornerPts[i].Y;
-                    transCameraToMotor.SetSrcRef(i, camCoord);
-                    updateCalibKeyPoints(_dgvCalibPointsListView, i, camCoord, motorCoord, false);
-                    updateCalibKeyPointBox((CalibCornersEnum)i, camCoord);
-                    if (i == 0)
-                        motorLeftTop = new QVector(motorCoord);
-                }
-            }
-
-            //(2) 設定 線掃相機 到 Physical (PLC grid) 座標轉換 的 校正點位
-            //(2.1) 取出參數設定的 pitch, rows, cols
+            //(1) 取出參數設定的 pitch, rows, cols
             var traySettings = _jxCalibAoiSettings.TrayMiscSettings;
             var pitchX = (double)traySettings.PitchX.Value;
             var pitchY = (double)traySettings.PitchY.Value;
             var rows = (int)traySettings.FullRows.Value;
             var cols = (int)traySettings.FullCols.Value;
-            if (rows != grid.Rows || cols != grid.Cols)
+            bool areRowsColsMatched = (rows == camGrid.Rows && cols == camGrid.Cols);
+
+            if (!areRowsColsMatched)
             {
-                string msg = $"像測的 Rows={grid.Rows} Cols={grid.Cols} 與\n\r"
+                string msg = $"像測的 Rows={camGrid.Rows} Cols={camGrid.Cols} 與\n\r"
                            + $"參數的 Rows={rows} Cols={cols} 不一致 !";
                 MessageBox.Show(msg, _wndOwner.FindForm().Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return;
-            }
-            //(2.2) 計算 Physic (or PLC 眼中) 世界 的 格點座標
-            var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
-            plcGrid.Offset(motorLeftTop.X, motorLeftTop.Y);
-            var physicPts = new[]
-            {
-                plcGrid[0,0],
-                plcGrid[0,c],
-                plcGrid[r,c],
-                plcGrid[r,0]
-            };
-            if (true)
-            {
-                var transCameraToPhysic = _transforms.GetCameraPhysicTransform(_activeCarrierID);
-                for (int i = 0; i < cornerPts.Length; i++)
-                {
-                    var camCoord = transCameraToPhysic.GetSrcRef(i);
-                    var physicCoord = transCameraToPhysic.GetDstRef(i);
-                    camCoord.X = cornerPts[i].X;
-                    camCoord.Y = cornerPts[i].Y;
-                    physicCoord.X = physicPts[i].X;
-                    physicCoord.Y = physicPts[i].Y;
-                    transCameraToPhysic.SetSrcRef(i, camCoord);
-                    transCameraToPhysic.SetDstRef(i, physicCoord);
-                }
             }
 
+            //(2) 將 校正點位群 更新到 座標轉換 系統 (Model)
+            if (areRowsColsMatched)
+            {
+                _transforms.ConfigPlcGrid(rows, cols, pitchX, pitchY);
+                _transforms.UpdateCalibPoints(_activeCarrierID, _activeSuckerRowID, camGrid);
+            }
+
+            //(3) 更新 GUI
+            updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);
+            //updateAllCalibKeyPointBoxes();
+
+            //(4) 設定 旗標
             _isCoordModified = true;
         }
         void updateAllCalibKeyPointBoxes()
@@ -499,10 +465,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             //(4) Refine each detail locations
             _aoiModel.RefineCentroidLocations(matchResult, ezImage);
 
-            //(5) Update 4 Corners
+            //(5) Update Grid 4 Corners To Model
             updateCalibKeyPoints(matchResult?.Grid);
 
-            //(6) Update Grid Result
+            //(6) Update Calib Grid Result
             _cviResultBox.TransCameraToMotor = null;
             _cviResultBox.TransCameraToWorld = null;
             _cviResultBox.UpdateResult(matchResult);

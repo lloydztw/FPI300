@@ -27,6 +27,10 @@ namespace LaserAlignDX.Model.Coords
         protected P _org = new P(0, 0);
         #endregion
 
+        public PlcGridPoints()
+        {
+
+        }
         public PlcGridPoints(int rows = 22, int cols = 7, double pitchX = 9.30, double pitchY = 10.64)
         {
             Rows = rows;

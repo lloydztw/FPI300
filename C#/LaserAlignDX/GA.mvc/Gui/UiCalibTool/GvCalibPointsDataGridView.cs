@@ -143,7 +143,8 @@ namespace LaserAlignDX.Mvc.Gui
                 }
                 else if (i == 1 || i == 2)
                 {
-                    column.ValueType = typeof(int);
+                    column.ValueType = typeof(double);
+                    column.DefaultCellStyle.Format = "0.0";
                     column.DefaultCellStyle.BackColor = Color.LightGray;
                     column.DefaultCellStyle.SelectionBackColor = Color.LightGray;
                     column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;

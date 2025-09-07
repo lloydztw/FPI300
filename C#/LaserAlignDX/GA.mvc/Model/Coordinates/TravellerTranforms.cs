@@ -17,8 +17,6 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using LaserAlignDX.Model.Transforms;
 using System;
-using System.Windows.Controls;
-using System.Windows.Forms;
 
 
 namespace LaserAlignDX.Model.Coords
@@ -28,15 +26,19 @@ namespace LaserAlignDX.Model.Coords
     /// </summary>
     public class TravellerTransforms : IDisposable
     {
+        public const int CAMERA_ORDER = TravellerCoords.CAMERA_ORDER;
+        public const int MOTOR_ORDER = TravellerCoords.MOTOR_ORDER;
+
         #region PRIVATE_DATA
+        PlcGridPoints _plcGrid = null;
         QTransform[] _transforms = new QTransform[]
         {
-            new QTransform("C1_P", 10000, "pix", 1000, "mm"),
-            new QTransform("C1_M1S1", 10000, "pix", 1000, "mm"),
-            new QTransform("C1_M1S2", 10000, "pix", 1000, "mm"),
-            new QTransform("C2_P", 10000, "pix", 1000, "mm"),
-            new QTransform("C2_M2S1", 10000, "pix", 1000, "mm"),
-            new QTransform("C2_M2S2", 10000, "pix", 1000, "mm"),
+            new QTransform("C1_P", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
+            new QTransform("C1_M1S1", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
+            new QTransform("C1_M1S2", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
+            new QTransform("C2_P", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
+            new QTransform("C2_M2S1", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
+            new QTransform("C2_M2S2", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
         };
         int getIndex(CarrierEnum C, SuckerRowEnum S)
         {
@@ -88,23 +90,49 @@ namespace LaserAlignDX.Model.Coords
         {
             get => GetCameraPhysicTransform(C);
         }
-
-        public void Load(string iniFileName)
-        {
-            foreach (var trf in _transforms)
-            {
-                trf.Load(iniFileName, trf.Name);
-            }
-        }
-        public void Save(string iniFileName)
-        {
-            foreach (var trf in _transforms)
-            {
-                trf.Save(iniFileName, trf.Name);
-            }
-        }
         
-        public void UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid camGrid, PlcGridPoints plcGrid)
+        /// <summary>
+        /// 設定 P 座標 (PLC) 格點
+        /// </summary>
+        public void ConfigPlcGrid(int rows, int cols, double pitchX, double pitchY)
+        {
+            _plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
+        }
+        /// <summary>
+        /// 計算 PLC 補償量
+        /// </summary>
+        public QVector[] CalcPlcCompensation(CarrierEnum C, SuckerRowEnum S, QVector camPt, int rowId, int colId)
+        {
+            if (_plcGrid == null)
+                return new[] { new QVector(), new QVector() };
+
+            // P 目標值
+            var targetWorldPt = _plcGrid.GetGridPoint(rowId, colId);
+
+            // 目標值 轉換至 Camera Coords
+            ITransform transCameraToWorld = GetCameraPhysicTransform(C);
+            var targetCamPt = transCameraToWorld.InvTrans(targetWorldPt);
+
+            // 目標值 轉換至 Motor Coords
+            ITransform transCameraToMotor = GetCameraMotorTransform(C, S);
+            var targetMotorPt = transCameraToMotor.Trans(targetCamPt);
+
+            // 像測現值 轉換至 Motor Coords
+            var motorPt = transCameraToMotor.Trans(camPt);
+            var curWorldPt = transCameraToWorld.Trans(camPt);
+            
+            // 自己轉換誤差
+            var dErr = targetWorldPt - curWorldPt;
+
+            // 補償量
+            var dV = targetMotorPt - motorPt;
+            return new QVector[] { dV, dErr };
+        }
+
+        /// <summary>
+        /// 更新校正格點
+        /// </summary>
+        public void UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid camGrid)
         {
             if (camGrid == null)
                 return;
@@ -140,16 +168,13 @@ namespace LaserAlignDX.Model.Coords
             }
 
             //(2) 設定 線掃相機 到 Physical (PLC grid) 座標轉換 的 校正點位
-            //var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
-            if (plcGrid == null) 
-                return;
-            plcGrid.Offset(motorLeftTop.X, motorLeftTop.Y);
+            _plcGrid.Offset(motorLeftTop.X, motorLeftTop.Y);
             var physicPts = new[]
             {
-                plcGrid[0,0],
-                plcGrid[0,c],
-                plcGrid[r,c],
-                plcGrid[r,0]
+                _plcGrid[0,0],
+                _plcGrid[0,c],
+                _plcGrid[r,c],
+                _plcGrid[r,0]
             };
             if (true)
             {
@@ -167,10 +192,28 @@ namespace LaserAlignDX.Model.Coords
                 }
             }
         }
+        /// <summary>
+        /// 建置全部 座標轉換 系統
+        /// </summary>
         public void BuildAll()
         {
             foreach (var trf in _transforms)
                 trf?.Build();
+        }
+
+        public void Load(string iniFileName)
+        {
+            foreach (var trf in _transforms)
+            {
+                trf.Load(iniFileName, trf.Name);
+            }
+        }
+        public void Save(string iniFileName)
+        {
+            foreach (var trf in _transforms)
+            {
+                trf.Save(iniFileName, trf.Name);
+            }
         }
     }
 }

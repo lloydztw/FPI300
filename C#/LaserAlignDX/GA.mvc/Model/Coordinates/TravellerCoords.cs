@@ -23,12 +23,16 @@ namespace LaserAlignDX.Model.Coords
     /// </summary>
     public static class TravellerCoords
     {
+        public const int CAMERA_ORDER = 10000;
+        public const int MOTOR_ORDER = 1000;
+
         /// <summary>
         /// P (Physic) 座標系
         /// </summary>
         public class P : QCoord
         {
-            public override int ORDER => 1000;
+            public override int ORDER => MOTOR_ORDER;
+            public override string UNIT => "mm";
             public P(double x, double y) : base(x, y)
             {
             }
@@ -45,7 +49,7 @@ namespace LaserAlignDX.Model.Coords
         /// </summary>
         public class C : QCoord
         {
-            public override int ORDER => 10000;
+            public override int ORDER => CAMERA_ORDER;
             public override string UNIT => "pix";
             public override string ToString()
             {
@@ -101,7 +105,7 @@ namespace LaserAlignDX.Model.Coords
         /// </summary>
         public class M : QCoord
         {
-            public override int ORDER => 1000;
+            public override int ORDER => MOTOR_ORDER;
             public M(double x, double y) : base(x, y)
             {
             }

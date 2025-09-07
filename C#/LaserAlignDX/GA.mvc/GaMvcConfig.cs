@@ -48,14 +48,14 @@ namespace LaserAlignDX
             return new PowerTechReportBuilder();
         }
 
-        public static TravellerTransforms Transforms
+        public static TravellerTransforms TransformsModel
         {
             get => TravellerTransforms.Instance;
         }
 
         public static void DisposeAll()
         {
-            Transforms?.Dispose();
+            TransformsModel?.Dispose();
         }
     }
 }

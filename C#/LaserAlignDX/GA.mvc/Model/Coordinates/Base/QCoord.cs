@@ -26,7 +26,8 @@ namespace LaserAlignDX.Model.Coords
     {
         public virtual int ORDER
         {
-            get; protected set;
+            get; 
+            protected set;
         } = 1;
         public virtual string UNIT
         {
@@ -134,7 +135,7 @@ namespace LaserAlignDX.Model.Coords
 
             int i = 0;
             if (strs.Length > i) UNIT = strs[i++].Trim();
-            if (strs.Length > i) if (int.TryParse(strs[i++], out int order)) ORDER = order;
+            if (strs.Length > i) if (int.TryParse(strs[i++], out int order)) {} //ORDER = order;
             if (strs.Length > i) if (double.TryParse(strs[i++], out double vx)) X = vx;
             if (strs.Length > i) if (double.TryParse(strs[i++], out double vy)) Y = vy;
         }

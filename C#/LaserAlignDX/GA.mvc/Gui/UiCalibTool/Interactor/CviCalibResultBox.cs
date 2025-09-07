@@ -17,6 +17,7 @@ using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Model.Transforms;
 using System;
 using System.Collections.Generic;
@@ -54,11 +55,20 @@ namespace LaserAlignDX.Mvc.Gui
             _matchResult = result;
             adjustFetchSize();
         }
+
         public ITransform TransCameraToMotor
         {
             get; set;
         }
         public ITransform TransCameraToWorld
+        {
+            get; set;
+        }
+        public CarrierEnum ActiveCarrierID
+        {
+            get; set;
+        }
+        public SuckerRowEnum ActiveSuckerRowID
         {
             get; set;
         }
@@ -532,8 +542,10 @@ namespace LaserAlignDX.Mvc.Gui
                 bool showScore = true;
 
                 var sb = new StringBuilder();
-                if (bloc.Tag is QuadLinkNode node && node.rowCol != null)
-                    sb.Append("格點: [").AppendValues(node.rowCol.Row, node.rowCol.Col).AppendLine("]");
+
+                var rowCol = (bloc.Tag as QuadLinkNode)?.rowCol;
+                if (rowCol != null)
+                    sb.Append("格點: [").AppendValues(rowCol.Row, rowCol.Col).AppendLine("]");
 
                 appendCameraCoords(sb, _cursorBloc, _cursorBloc2);
 
@@ -547,6 +559,12 @@ namespace LaserAlignDX.Mvc.Gui
                     appendWorldCoords(sb, _cursorBloc, _cursorBloc2);
                     showScore = false;
                 }
+                if (TransCameraToMotor != null && TransCameraToMotor != null && _cursorBloc2 == null)
+                {
+                    appendPlcCompensation(sb, _cursorBloc, rowCol.Row, rowCol.Col);
+                    showScore = false;
+                }
+
                 if (showScore)
                 {
                     sb.AppendLine($"Score= {bloc.Score:0.00}");
@@ -623,6 +641,23 @@ namespace LaserAlignDX.Mvc.Gui
                 sb.AppendLine($"Physic座標 dY = {dv.Y:0.000} mm");
                 sb.AppendLine($"Physic座標 距離 = {dist:0.000} mm");
             }
+        }
+
+        void appendPlcCompensation(StringBuilder sb, EzBloc bloc, int row, int col)
+        {
+            if (bloc == null)
+                return;
+
+            var transformsModel = GaMvcConfig.TransformsModel;
+            var res = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, row, col);
+            var dV = res[0];
+            var dErr = res[1];
+
+            sb.AppendLine();
+            sb.AppendLine($"PLC 補償量 dX = {dV.X:0.000} mm");
+            sb.AppendLine($"PLC 補償量 dY = {dV.Y:0.000} mm");
+            sb.AppendLine($"CP 誤差值 errX = {dErr.X:0.000} mm");
+            sb.AppendLine($"CP 誤差值 errY = {dErr.Y:0.000} mm");
         }
     }
 }
