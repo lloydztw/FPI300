@@ -23,8 +23,8 @@ namespace LaserAlignDX.Model.Coords
     /// </summary>
     public static class TravellerCoords
     {
-        public const int CAMERA_ORDER = 10000;
-        public const int MOTOR_ORDER = 1000;
+        public const int CAMERA_ORDER = 5000;
+        public const int MOTOR_ORDER = 50;
 
         /// <summary>
         /// P (Physic) 座標系

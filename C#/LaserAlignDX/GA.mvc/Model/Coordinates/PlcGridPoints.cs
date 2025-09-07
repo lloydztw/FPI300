@@ -73,6 +73,10 @@ namespace LaserAlignDX.Model.Coords
 
             double x = PitchX * col + _org.X;
             double y = PitchY * row + _org.Y;
+            //double x = _org.X;
+            //double y = _org.Y;
+            //for (int i = 0; i < col; i++) x += PitchX;
+            //for (int i = 0; i < row; i++) y += PitchY;
             return new P(x, y);
         }
         public P this[int row, int col]

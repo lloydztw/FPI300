@@ -169,10 +169,19 @@ namespace LaserAlignDX.Model.Coords
 
             //(2) 設定 線掃相機 到 Physical (PLC grid) 座標轉換 的 校正點位
             _plcGrid.Offset(motorLeftTop.X, motorLeftTop.Y);
+            //int r0 = r - camGrid.Rows / 4;
+            int r0 = 0;
+            cornerPts = new[]
+            {
+                camGrid[r0,0].Center,
+                camGrid[r0,c].Center,
+                camGrid[r,c].Center,
+                camGrid[r,0].Center,
+            };
             var physicPts = new[]
             {
-                _plcGrid[0,0],
-                _plcGrid[0,c],
+                _plcGrid[r0,0],
+                _plcGrid[r0,c],
                 _plcGrid[r,c],
                 _plcGrid[r,0]
             };

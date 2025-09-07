@@ -61,19 +61,31 @@ namespace LaserAlignDX.Model.Coords
 
         public QCoord Normalize(bool inplace = false)
         {
+            
+
             if (inplace)
             {
                 if (ORDER > 1)
                 {
                     for (int i = 0, N = this.Length; i < N; i++)
+                    {
                         this[i] /= ORDER;
+                    }
                 }
                 return this;
             }
             else
             {
-                var v =  this / ORDER;
-                return new QCoord(v) { ORDER = this.ORDER, UNIT = this.UNIT };
+                //var v =  this / ORDER;
+                //return new QCoord(v) { ORDER = this.ORDER, UNIT = this.UNIT };
+                int order = Math.Max(this.ORDER, 1);
+                return new QCoord()
+                {
+                    X = this.X / order,
+                    Y = this.Y / order,
+                    ORDER = this.ORDER,
+                    UNIT = this.UNIT,
+                };
             }
         }
         public QCoord DeNormalize(bool inplace = false)
@@ -88,8 +100,16 @@ namespace LaserAlignDX.Model.Coords
             }
             else
             {
-                var v = this * ORDER;
-                return new QCoord(v) { ORDER = this.ORDER, UNIT = this.UNIT };
+                //var v = this * ORDER;
+                //return new QCoord(v) { ORDER = this.ORDER, UNIT = this.UNIT };
+                int order = Math.Max(this.ORDER, 1);
+                return new QCoord()
+                {
+                    X = this.X * order,
+                    Y = this.Y * order,
+                    ORDER = this.ORDER,
+                    UNIT = this.UNIT,
+                };
             }
         }
         public static QCoord[] Normalize(QCoord[] coords, bool inplace = false)

@@ -96,6 +96,8 @@ namespace LaserAlignDX.Model.Transforms
 
         public bool Build()
         {
+            bool isFirstTime = _mat == null;
+
             #region 條件檢查
             if (_srcRefs.Length != _srcRefs.Length || _srcRefs.Length < N_POINTS)
             {
@@ -128,9 +130,14 @@ namespace LaserAlignDX.Model.Transforms
 
             #region 判定轉換矩陣的品質
             bool ok = _mat != null && _matInv != null;
-            if (ok)
+            if (ok && !isFirstTime)
             {
                 double det = _mat.Determinant();
+                double det2 = _matInv.Determinant();
+
+                GaUtil.LOG($"Matrix[{Name}] det1= {det:0.000000}");
+                GaUtil.LOG($"Matrix[{Name}] det2= {det2:0.000000}");
+
                 ok = Math.Abs(det) > 1e-9;
                 if (!ok)
                 {
