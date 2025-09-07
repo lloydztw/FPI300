@@ -162,7 +162,8 @@ namespace LaserAlignDX.AoiModel
                     center.X += roi.X;
                     center.Y += roi.Y;
                     bloc.Center = center;
-                    bloc.Rect = JetEazy.Qcvt.CreateCenterRect((int)center.X, (int)center.Y, bloc.Rect.Width, bloc.Rect.Height);
+                    var rc = JetEazy.Qcvt.CreateCenterRect((float)center.X, (float)center.Y, (float)bloc.Rect.Width, (float)bloc.Rect.Height);
+                    bloc.Rect = Rectangle.Round(rc);
                 }
             }
         }
@@ -222,6 +223,7 @@ namespace LaserAlignDX.AoiModel
 
                 var bloc = new EzBloc(rect, 0);
                 bloc.Pixels = ccBlob.Area;
+                bloc.Center = new JetEazy.QMath.QVector(ccBlob.Centroid.X, ccBlob.Centroid.Y); // 保留精度 !
                 keyBlocs.Add(bloc);
             }
 

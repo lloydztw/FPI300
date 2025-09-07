@@ -18,13 +18,11 @@ using JetEazy;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using LaserAlignDX.Model.Transforms;
-using MoveGraphLibrary;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
 
 namespace LaserAlignDX.Mvc.Gui
 {
@@ -39,11 +37,8 @@ namespace LaserAlignDX.Mvc.Gui
 
         #region GUI_MEMBERS
         ToolTip _toolTip = new ToolTip();
-        CviRotRectBox _cviCursorBox = new CviRotRectBox(new Rectangle(0, 0, 500, 500), Color.Blue)
-        {
-            CrossColor = Color.Gold,
-            Visible = false
-        };
+        EzBloc _cursorBloc = null;
+        EzBloc _cursorBloc2 = null;
         #endregion
 
         #region RUNTIME_DATA
@@ -59,14 +54,31 @@ namespace LaserAlignDX.Mvc.Gui
             _matchResult = result;
             adjustFetchSize();
         }
-
-        public ITransform Transform
+        public ITransform TransCameraToMotor
         {
-            get;
-            set;
+            get; set;
+        }
+        public ITransform TransCameraToWorld
+        {
+            get; set;
         }
 
         #region OVERRIDES
+        public override void OnKeyDown(CvImageViewer viewer, KeyEventArgs e)
+        {
+            if (e.Control && _cursorBloc != null)
+            {
+                _cursorBloc2 = _cursorBloc;
+                viewer.Invalidate();
+            }
+            else if (e.KeyCode == Keys.Escape && _cursorBloc2 != null)
+            {
+                _cursorBloc2 = null;
+                viewer.Invalidate();
+            }
+
+            base.OnKeyDown(viewer, e);
+        }
         public override void OnDraw(CvImageViewer viewer, Graphics gxView)
         {
             if (_matchResult == null)
@@ -85,8 +97,10 @@ namespace LaserAlignDX.Mvc.Gui
             //// 畫記 異常 Blocs (沒有吸嘴)
             //draw_bloc_rects(viewer, gxView, iter_ng_blocs(), Color.Red, Color.DarkRed, 0.25f);
 
-            if (_cviCursorBox.Visible)
-                _cviCursorBox.OnDraw(viewer, gxView);
+            // Cursors
+            draw_cursor(viewer, gxView, _cursorBloc2, Color.White);
+            draw_cursor(viewer, gxView, _cursorBloc, Color.Gold);
+            draw_line(viewer, gxView, _cursorBloc, _cursorBloc2, Color.Cyan);
 
             if (!isWorld)
                 viewer.SwitchToViewportCoordinate(gxView);
@@ -121,7 +135,6 @@ namespace LaserAlignDX.Mvc.Gui
                 }
             }
         }
-
         void draw_grid_lines(CvImageViewer viewer, Graphics gxView, EzBlocsGrid grid)
         {
             if (grid == null)
@@ -212,6 +225,51 @@ namespace LaserAlignDX.Mvc.Gui
             }
 
             brush?.Dispose();
+        }
+        void draw_cursor(CvImageViewer viewer, Graphics gxView, EzBloc bloc, Color color)
+        {
+            if (bloc == null)
+                return;
+
+            var pen = viewer.GetOnePixelPen(color);
+            int cx = bloc.CenterX;
+            int cy = bloc.CenterY;
+            int cw = bloc.Rect.Width / 2;
+            int ch = bloc.Rect.Height / 2;
+
+            bool isWorldDrawing = viewer.IsInWorldCoordinate();
+            if (!isWorldDrawing)
+            {
+                int x2 = cx + cw;
+                int y2 = cy + ch;
+                viewer.TransCoordToView(ref cx, ref cy);
+                viewer.TransCoordToView(ref x2, ref y2);
+                cw = x2 - cx;
+                ch = y2 - cy;
+            }
+
+            gxView.DrawLine(pen, cx - cw, cy, cx + cw, cy);
+            gxView.DrawLine(pen, cx, cy - ch, cx, cy + ch);
+        }
+        void draw_line(CvImageViewer viewer, Graphics gxView, EzBloc from, EzBloc to, Color color)
+        {
+            if (from == null || to == null)
+                return;
+
+            var pen = viewer.GetOnePixelPen(color);
+            var lx = (float)from.Center.X;
+            var ly = (float)from.Center.Y;
+            var cx = (float)to.Center.X;
+            var cy = (float)to.Center.Y;
+
+            bool isWorldDrawing = viewer.IsInWorldCoordinate();
+            if (!isWorldDrawing)
+            {
+                viewer.TransWorldToViewport(ref lx, ref ly);
+                viewer.TransWorldToViewport(ref cx, ref cy);
+            }
+
+            gxView.DrawLine(pen, lx, ly, cx, cy);
         }
 
         void draw_centroids(CvImageViewer viewer, Graphics gxView, IEnumerable<EzBloc> blocs, bool debug = false)
@@ -456,9 +514,9 @@ namespace LaserAlignDX.Mvc.Gui
             {
                 _toolTip.Hide(wnd);
 
-                if (_cviCursorBox.Visible)
+                if (_cursorBloc != null)
                 {
-                    _cviCursorBox.Visible = false;
+                    _cursorBloc = null;
                     return true;
                 }
 
@@ -469,19 +527,27 @@ namespace LaserAlignDX.Mvc.Gui
                 if (_hitPt.X == vx && _hitPt.Y == vy)
                     return false;
 
+                _cursorBloc = bloc;
+
+                bool showScore = true;
+
                 var sb = new StringBuilder();
                 if (bloc.Tag is QuadLinkNode node && node.rowCol != null)
                     sb.Append("格點: [").AppendValues(node.rowCol.Row, node.rowCol.Col).AppendLine("]");
 
-                sb.Append("相機座標: (").AppendValues(bloc.CenterX, bloc.CenterY).AppendLine(")");
+                appendCameraCoords(sb, _cursorBloc, _cursorBloc2);
 
-                if (Transform != null)
+                if (TransCameraToMotor != null)
                 {
-                    var motorCoord = Transform.Trans(bloc.Center);
-                    sb.AppendLine($"吸嘴 馬達座標 X = {motorCoord.X:0.000} mm");
-                    sb.AppendLine($"載台 馬達座標 Y = {motorCoord.Y:0.000} mm");
+                    appendMotorCoords(sb, _cursorBloc, _cursorBloc2);
+                    showScore = false;
                 }
-                else
+                if (TransCameraToWorld != null)
+                {
+                    appendWorldCoords(sb, _cursorBloc, _cursorBloc2);
+                    showScore = false;
+                }
+                if (showScore)
                 {
                     sb.AppendLine($"Score= {bloc.Score:0.00}");
                     sb.AppendLine($"Size= {bloc.Rect.Width}x{bloc.Rect.Height}");
@@ -492,14 +558,70 @@ namespace LaserAlignDX.Mvc.Gui
 
                 _toolTip.Show(sb.ToString(), wnd, vx + 10, vy + 10);
                 _hitPt = new Point(vx, vy);
-
-                _cviCursorBox.SetBox(bloc.Rect);
-                _cviCursorBox.CrossLength = bloc.Rect.Width / 2;
-                //var loc = _cviCursorBox.Box2D;
-                //loc.SetCenter((float)bloc.Center.X, (float)bloc.Center.Y);
-                //_cviCursorBox.SetBox(loc);
-                _cviCursorBox.Visible = true;
                 return true;
+            }
+        }
+
+        void appendCameraCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        {
+            if (bloc == null)
+                return;
+
+            sb.Append($"相機座標: ({bloc.Center.X:0.0}, {bloc.Center.Y:0.0})").AppendLine();
+
+            if (bloc != null && bloc2 != null && bloc != bloc2)
+            {
+                var dv = bloc.Center - bloc2.Center;
+                var dist = dv.NormLength;
+                sb.AppendLine($"相機座標 dX = {dv.X:0.0} pix");
+                sb.AppendLine($"相機座標 dY = {dv.Y:0.0} pix");
+                sb.AppendLine($"相機座標 距離 = {dist:0.0} pix");
+            }
+        }
+
+        void appendMotorCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        {
+            var transform = TransCameraToMotor;
+            if (bloc == null || transform == null)
+                return;
+
+            var motorCoord = transform.Trans(bloc.Center);
+
+            sb.AppendLine();
+            sb.AppendLine($"吸嘴馬達座標 X = {motorCoord.X:0.000} mm");
+            sb.AppendLine($"載台馬達座標 Y = {motorCoord.Y:0.000} mm");
+
+            if (bloc != null && bloc2 != null && bloc != bloc2)
+            {
+                var motorCoord2 = transform.Trans(bloc2.Center);
+                var dv = motorCoord - motorCoord2;
+                double dist = dv.NormLength;
+                sb.AppendLine($"馬達座標 dX = {dv.X:0.000} mm");
+                sb.AppendLine($"馬達座標 dY = {dv.Y:0.000} mm");
+                sb.AppendLine($"馬達座標 距離 = {dist:0.000} mm");
+            }
+        }
+
+        void appendWorldCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        {
+            var transform = TransCameraToWorld;
+            if (bloc == null || transform == null)
+                return;
+
+            var worldCoord = transform.Trans(bloc.Center);
+
+            sb.AppendLine();
+            sb.AppendLine($"Physic座標 X = {worldCoord.X:0.000} mm");
+            sb.AppendLine($"Physic座標 Y = {worldCoord.Y:0.000} mm");
+
+            if (bloc != null && bloc2 != null && bloc != bloc2)
+            {
+                var worldCoord2 = transform.Trans(bloc2.Center);
+                var dv = worldCoord - worldCoord2;
+                double dist = dv.NormLength;
+                sb.AppendLine($"Physic座標 dX = {dv.X:0.000} mm");
+                sb.AppendLine($"Physic座標 dY = {dv.Y:0.000} mm");
+                sb.AppendLine($"Physic座標 距離 = {dist:0.000} mm");
             }
         }
     }

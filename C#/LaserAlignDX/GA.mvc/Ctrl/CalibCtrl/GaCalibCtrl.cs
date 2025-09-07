@@ -19,6 +19,7 @@ using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.Interface;
 using JetEazy.Match;
+using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
@@ -304,6 +305,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (grid == null)
                 return;
 
+            //(0) Camera Coords 四角點
             int r = grid.Rows - 1;
             int c = grid.Cols - 1;
             var cornerPts = new[]
@@ -314,16 +316,63 @@ namespace LaserAlignDX.Mvc.Ctrl
                 grid[r,0].Center,
             };
 
-            var transform = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
-            for(int i = 0; i < cornerPts.Length; i++)
+            //(1) 設定 線掃相機 到 馬達 (Carrier + Sucker) 座標轉換 的 校正點位
+            QVector motorLeftTop = new QVector();
+            if (true)
             {
-                var camCoord = transform.GetSrcRef(i);
-                var motorCoord = transform.GetDstRef(i);
-                camCoord.X = cornerPts[i].X;
-                camCoord.Y = cornerPts[i].Y;
-                transform.SetSrcRef(i, camCoord);
-                updateCalibKeyPoints(_dgvCalibPointsListView, i, camCoord, motorCoord, false);
-                updateCalibKeyPointBox((CalibCornersEnum)i, camCoord);
+                var transCameraToMotor = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+                for (int i = 0; i < cornerPts.Length; i++)
+                {
+                    var camCoord = transCameraToMotor.GetSrcRef(i);
+                    var motorCoord = transCameraToMotor.GetDstRef(i);
+                    camCoord.X = cornerPts[i].X;
+                    camCoord.Y = cornerPts[i].Y;
+                    transCameraToMotor.SetSrcRef(i, camCoord);
+                    updateCalibKeyPoints(_dgvCalibPointsListView, i, camCoord, motorCoord, false);
+                    updateCalibKeyPointBox((CalibCornersEnum)i, camCoord);
+                    if (i == 0)
+                        motorLeftTop = new QVector(motorCoord);
+                }
+            }
+
+            //(2) 設定 線掃相機 到 Physical (PLC grid) 座標轉換 的 校正點位
+            //(2.1) 取出參數設定的 pitch, rows, cols
+            var traySettings = _jxCalibAoiSettings.TrayMiscSettings;
+            var pitchX = (double)traySettings.PitchX.Value;
+            var pitchY = (double)traySettings.PitchY.Value;
+            var rows = (int)traySettings.FullRows.Value;
+            var cols = (int)traySettings.FullCols.Value;
+            if (rows != grid.Rows || cols != grid.Cols)
+            {
+                string msg = $"像測的 Rows={grid.Rows} Cols={grid.Cols} 與\n\r"
+                           + $"參數的 Rows={rows} Cols={cols} 不一致 !";
+                MessageBox.Show(msg, _wndOwner.FindForm().Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return;
+            }
+            //(2.2) 計算 Physic (or PLC 眼中) 世界 的 格點座標
+            var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
+            plcGrid.Offset(motorLeftTop.X, motorLeftTop.Y);
+            var physicPts = new[]
+            {
+                plcGrid[0,0],
+                plcGrid[0,c],
+                plcGrid[r,c],
+                plcGrid[r,0]
+            };
+            if (true)
+            {
+                var transCameraToPhysic = _transforms.GetCameraPhysicTransform(_activeCarrierID);
+                for (int i = 0; i < cornerPts.Length; i++)
+                {
+                    var camCoord = transCameraToPhysic.GetSrcRef(i);
+                    var physicCoord = transCameraToPhysic.GetDstRef(i);
+                    camCoord.X = cornerPts[i].X;
+                    camCoord.Y = cornerPts[i].Y;
+                    physicCoord.X = physicPts[i].X;
+                    physicCoord.Y = physicPts[i].Y;
+                    transCameraToPhysic.SetSrcRef(i, camCoord);
+                    transCameraToPhysic.SetDstRef(i, physicCoord);
+                }
             }
 
             _isCoordModified = true;
@@ -454,7 +503,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             updateCalibKeyPoints(matchResult?.Grid);
 
             //(6) Update Grid Result
-            _cviResultBox.Transform = null;
+            _cviResultBox.TransCameraToMotor = null;
+            _cviResultBox.TransCameraToWorld = null;
             _cviResultBox.UpdateResult(matchResult);
             _cviResultBox.Visible = true;
             _imgViewer.MatViewer.Invalidate();
@@ -470,7 +520,8 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             _transforms.BuildAll();
 
-            _cviResultBox.Transform = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+            _cviResultBox.TransCameraToMotor = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+            _cviResultBox.TransCameraToWorld = _transforms.GetCameraPhysicTransform(_activeCarrierID);
 
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }

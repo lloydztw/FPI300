@@ -32,22 +32,32 @@ namespace JetEazy.Match
             get; set;
         }
 
+        protected EzBloc()
+        {
+        }
         public EzBloc(Rectangle rect, double score, object owner = null, object tag = null)
         {
             Rect = rect;
             Score = score;
             Owner = owner;
             Tag = tag;
-            var xCenter = Math.Round((rect.X + rect.Right) / 2.0);
-            var yCenter = Math.Round((rect.Y + rect.Bottom) / 2.0);
+            // 不要 Round, 以提高量測精度
+            //var xCenter = Math.Round((rect.X + rect.Right) / 2.0);
+            //var yCenter = Math.Round((rect.Y + rect.Bottom) / 2.0);
+            var xCenter = (rect.X + rect.Right) / 2.0;
+            var yCenter = (rect.Y + rect.Bottom) / 2.0;
             Center = new QVector(xCenter, yCenter);
         }
         public EzBloc Clone()
         {
-            var blob = new EzBloc(Rect, Score, Owner, null)
+            var blob = new EzBloc()
             {
+                Rect = Rect,
+                Score = Score,
+                Owner = Owner,
                 SQRatio = SQRatio,
-                Pixels = Pixels
+                Pixels = Pixels,
+                Center = new QVector(Center)    // 為了精度 !!!
             };
             ((IxBlob)blob).Bin = ((IxBlob)this).Bin;
             return blob;

@@ -13,8 +13,12 @@
  */
 #endregion
 
+using JetEazy.Match;
+using JetEazy.QMath;
 using LaserAlignDX.Model.Transforms;
 using System;
+using System.Windows.Controls;
+using System.Windows.Forms;
 
 
 namespace LaserAlignDX.Model.Coords
@@ -100,6 +104,69 @@ namespace LaserAlignDX.Model.Coords
             }
         }
         
+        public void UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid camGrid, PlcGridPoints plcGrid)
+        {
+            if (camGrid == null)
+                return;
+
+            //(0) Camera Coords 四角點
+            int r = camGrid.Rows - 1;
+            int c = camGrid.Cols - 1;
+            var cornerPts = new[]
+            {
+                camGrid[0,0].Center,
+                camGrid[0,c].Center,
+                camGrid[r,c].Center,
+                camGrid[r,0].Center,
+            };
+
+            //(1) 設定 線掃相機 到 馬達 (Carrier + Sucker) 座標轉換 的 校正點位
+            QVector motorLeftTop = new QVector();
+            if (true)
+            {
+                var transCameraToMotor = this.GetCameraMotorTransform(C, S);
+                for (int i = 0; i < cornerPts.Length; i++)
+                {
+                    var camCoord = transCameraToMotor.GetSrcRef(i);
+                    var motorCoord = transCameraToMotor.GetDstRef(i);
+                    camCoord.X = cornerPts[i].X;
+                    camCoord.Y = cornerPts[i].Y;
+                    transCameraToMotor.SetSrcRef(i, camCoord);
+                    //updateCalibKeyPoints(_dgvCalibPointsListView, i, camCoord, motorCoord, false);
+                    //updateCalibKeyPointBox((CalibCornersEnum)i, camCoord);
+                    if (i == 0)
+                        motorLeftTop = new QVector(motorCoord);
+                }
+            }
+
+            //(2) 設定 線掃相機 到 Physical (PLC grid) 座標轉換 的 校正點位
+            //var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
+            if (plcGrid == null) 
+                return;
+            plcGrid.Offset(motorLeftTop.X, motorLeftTop.Y);
+            var physicPts = new[]
+            {
+                plcGrid[0,0],
+                plcGrid[0,c],
+                plcGrid[r,c],
+                plcGrid[r,0]
+            };
+            if (true)
+            {
+                var transCameraToPhysic = this.GetCameraPhysicTransform(C);
+                for (int i = 0; i < cornerPts.Length; i++)
+                {
+                    var camCoord = transCameraToPhysic.GetSrcRef(i);
+                    var physicCoord = transCameraToPhysic.GetDstRef(i);
+                    camCoord.X = cornerPts[i].X;
+                    camCoord.Y = cornerPts[i].Y;
+                    physicCoord.X = physicPts[i].X;
+                    physicCoord.Y = physicPts[i].Y;
+                    transCameraToPhysic.SetSrcRef(i, camCoord);
+                    transCameraToPhysic.SetDstRef(i, physicCoord);
+                }
+            }
+        }
         public void BuildAll()
         {
             foreach (var trf in _transforms)

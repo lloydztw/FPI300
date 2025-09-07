@@ -34,6 +34,11 @@ namespace LaserAlignDX.Model.Coords
             PitchX = pitchX;
             PitchY = pitchY;
         }
+        public void Offset(double dx, double dy)
+        {
+            _org.X = dx;
+            _org.Y = dy;
+        }
 
         public int Rows
         {
