@@ -34,7 +34,7 @@ namespace LaserAlignDX.Model.Coords
         } = "pix";
         public override string ToString()
         {
-            string str = GetType().Name.Replace("Coord", "") + $" ({X:0.000}, {Y:0.000}) {UNIT}";
+            string str = $"({X:0.000}, {Y:0.000}) {UNIT}";
             return str;
         }
 

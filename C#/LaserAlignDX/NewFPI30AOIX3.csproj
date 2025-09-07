@@ -380,6 +380,7 @@
     <Compile Include="GA.mvc\Gui\UiCalibTool\GvCalibPointsDataGridView.Designer.cs">
       <DependentUpon>GvCalibPointsDataGridView.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\Interactor\CviGoldenPickingBox.cs" />
     <Compile Include="GA.mvc\Gui\UiCalibTool\Interactor\CviCalibResultBox.cs" />
     <Compile Include="GA.mvc\Gui\UiCalibTool\IvCalibToolUI.cs" />
     <Compile Include="GA.mvc\Gui\UiChipCellsViewer\Interactor\CviLineSegmentsBox.cs" />
@@ -409,6 +410,7 @@
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\Implements\JezGridPadsChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\IMvdTemplateMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\MvdCompositeChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\TravellerBigImagesHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass.cs" />
@@ -422,7 +424,7 @@
     <Compile Include="GA.mvc\Model\Coordinates\PlcGridPoints.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\TravellerCoordsEnums.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\TravellerCoords.cs" />
-    <Compile Include="GA.mvc\Model\Coordinates\TravellerTranformsUtil.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\TravellerTranformsExt.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\TravellerTranforms.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />

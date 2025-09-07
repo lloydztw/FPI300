@@ -48,21 +48,20 @@ namespace LaserAlignDX.Model.Transforms
         protected QCoord[] _dstRefs;
         #endregion
 
-        public QTransform(string name = null)
+        public QTransform(string name, int srcOrder, string srcUnit, int dstOrder, string dstUnit)
         {
             Name = name == null ? "" : name;
 
             _srcRefs = new QCoord[N_POINTS];
             _dstRefs = new QCoord[N_POINTS];
+
             for (int i = 0; i < N_POINTS; i++)
             {
-                int r = i / (N_POINTS / 2);
-                int c = i % (N_POINTS / 2);
-                _srcRefs[i] = new QCoord(r, c);
-                _dstRefs[i] = new QCoord(r, c);
+                int ry = i / (N_POINTS / 2);
+                int cx = i % (N_POINTS / 2);
+                _srcRefs[i] = new QCoord(ry, cx, srcOrder, srcUnit);
+                _dstRefs[i] = new QCoord(ry, cx, dstOrder, dstUnit);
             }
-
-            Build();
         }
         public virtual void Dispose()
         {
@@ -207,7 +206,10 @@ namespace LaserAlignDX.Model.Transforms
             var srcPts = Array.ConvertAll(coords, c => new Point2d(c.X / order, c.y / order));
             var dstPts = Cv2.PerspectiveTransform(srcPts, _mat);
 
-            var ret = Array.ConvertAll(dstPts, pt => new QCoord(pt.X * order, pt.Y * order, order, unit));
+            var dstUnit = _dstRefs[0].UNIT;
+            var dstOrder = _dstRefs[0].ORDER;
+
+            var ret = Array.ConvertAll(dstPts, pt => new QCoord(pt.X * dstOrder, pt.Y * dstOrder, dstOrder, dstUnit));
             return ret;
         }
         public QCoord[] InvTrans(QCoord[] coords)
@@ -221,7 +223,9 @@ namespace LaserAlignDX.Model.Transforms
             var srcPts = Array.ConvertAll(coords, c => new Point2d(c.X / order, c.y / order));
             var dstPts = Cv2.PerspectiveTransform(srcPts, _matInv);
 
-            var ret = Array.ConvertAll(dstPts, pt => new QCoord(pt.X * order, pt.Y * order, order, unit));
+            var srcUnit = _srcRefs[0].UNIT;
+            var srcOrder = _srcRefs[0].ORDER;
+            var ret = Array.ConvertAll(dstPts, pt => new QCoord(pt.X * srcOrder, pt.Y * srcOrder, order, srcUnit));
             return ret;
         }
 
@@ -235,8 +239,6 @@ namespace LaserAlignDX.Model.Transforms
                 _srcRefs[i].Load(iniFileName, sectName, $"SrcRef_{i}");
                 _dstRefs[i].Load(iniFileName, sectName, $"DstRef_{i}");
             }
-
-            Build();
         }
         public virtual void Save(string iniFileName, string sectName)
         {
@@ -274,7 +276,12 @@ namespace LaserAlignDX.Model.Transforms
             var invM = new Mat();
             Cv2.Invert(M, invM);
 
-            var newTrans = new QTransform()
+            var srcOrder = T0._srcRefs[0].ORDER;
+            var srcUnit = T0._srcRefs[0].UNIT;
+            var dstOrder = T._dstRefs[0].ORDER;
+            var dstUnit = T._dstRefs[0].UNIT;
+
+            var newTrans = new QTransform("MERGED", srcOrder, srcUnit, dstOrder, dstUnit)
             {
                 _mat = M,
                 _matInv = invM,

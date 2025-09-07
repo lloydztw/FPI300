@@ -15,9 +15,6 @@
 
 using JetEazy.Match;
 using LeTian.JxProps;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Documents;
 
 
 namespace EzAoiEmptyTrayInspector.Model
@@ -26,6 +23,8 @@ namespace EzAoiEmptyTrayInspector.Model
     {
         public JxInt FullRows = new JxInt("Full Rows", "滿盤 行數", 10, Range.C255);
         public JxInt FullCols = new JxInt("Full Cols", "滿盤 列數", 5, Range.C255);
+        public JxNumber PitchX = new JxNumber("PitchX", "X方向 間距 mm", 10m, new Range(-5000m, 5000m, 0.01m, 3));
+        public JxNumber PitchY = new JxNumber("PitchY", "Y方向 間距 mm", 10m, new Range(-5000m, 5000m, 0.01m, 3));
         public JxInt FovWidth = new JxInt("FovWidth", description: "取像 寬度 (Hidden)");
         public JxInt FovHeight = new JxInt("FovHeight", description: "取像 高度 (Hidden)");
         public JxBool DebugDump = new JxBool("Debug Dump", false, description: "輸出調適影像檔 (Hidden)");
@@ -46,14 +45,14 @@ namespace EzAoiEmptyTrayInspector.Model
             BindItems(new IProp[] {
                 FullRows,
                 FullCols,
+                PitchX,
+                PitchY,
                 FovWidth,
                 FovHeight,
                 DebugDump,
                 GoldenGridRawData,
             });
             base.OnBindingSubItems();
-
-
         }
 
         protected override void OnDisposing()

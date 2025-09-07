@@ -32,16 +32,9 @@ namespace LaserAlignDX.Mvc.Gui
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormCalibrationTool));
             this.tbLayoutDockRight = new System.Windows.Forms.TableLayoutPanel();
-            this.panelBtns = new System.Windows.Forms.Panel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
-            this.btnBuildCalib = new System.Windows.Forms.Button();
-            this.btnLoadImage = new System.Windows.Forms.Button();
-            this.btnGrabImage = new System.Windows.Forms.Button();
-            this.btnRefRB = new System.Windows.Forms.Button();
-            this.btnRefLB = new System.Windows.Forms.Button();
-            this.btnRefRT = new System.Windows.Forms.Button();
-            this.btnRefLT = new System.Windows.Forms.Button();
+            this.gwPanePropsViewer1 = new LeTian.JxProps.Gui.GwPanePropsViewer();
+            this.gvCalibPointsDataGridView1 = new LaserAlignDX.Mvc.Gui.GvCalibPointsDataGridView();
             this.panelB = new System.Windows.Forms.Panel();
             this.btnVerify = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -54,16 +47,21 @@ namespace LaserAlignDX.Mvc.Gui
             this.panel2 = new System.Windows.Forms.Panel();
             this.rdoSucker2 = new System.Windows.Forms.RadioButton();
             this.rdoSucker1 = new System.Windows.Forms.RadioButton();
+            this.panelBtns = new System.Windows.Forms.Panel();
+            this.btnAutoFindCalibPoints = new System.Windows.Forms.Button();
+            this.btnBuildCalib = new System.Windows.Forms.Button();
+            this.btnLoadImage = new System.Windows.Forms.Button();
+            this.btnGrabImage = new System.Windows.Forms.Button();
+            this.btnPickGolden = new System.Windows.Forms.Button();
             this.panelDockLeft = new System.Windows.Forms.Panel();
-            this.gvCalibPointsDataGridView1 = new LaserAlignDX.Mvc.Gui.GvCalibPointsDataGridView();
             this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.tbLayoutDockRight.SuspendLayout();
-            this.panelBtns.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.panelB.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
+            this.panelBtns.SuspendLayout();
             this.panelDockLeft.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -90,130 +88,40 @@ namespace LaserAlignDX.Mvc.Gui
             this.tbLayoutDockRight.Size = new System.Drawing.Size(723, 951);
             this.tbLayoutDockRight.TabIndex = 31;
             // 
-            // panelBtns
-            // 
-            this.panelBtns.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.panelBtns.Controls.Add(this.btnBuildCalib);
-            this.panelBtns.Controls.Add(this.btnLoadImage);
-            this.panelBtns.Controls.Add(this.btnGrabImage);
-            this.panelBtns.Controls.Add(this.btnRefRB);
-            this.panelBtns.Controls.Add(this.btnRefLB);
-            this.panelBtns.Controls.Add(this.btnRefRT);
-            this.panelBtns.Controls.Add(this.btnRefLT);
-            this.panelBtns.Location = new System.Drawing.Point(4, 258);
-            this.panelBtns.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.panelBtns.Name = "panelBtns";
-            this.panelBtns.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.panelBtns.Size = new System.Drawing.Size(715, 144);
-            this.panelBtns.TabIndex = 28;
-            this.panelBtns.Text = "像測操作";
-            // 
             // groupBox1
             // 
             this.groupBox1.BackColor = System.Drawing.Color.WhiteSmoke;
-            this.groupBox1.Controls.Add(this.propertyGrid1);
+            this.groupBox1.Controls.Add(this.gwPanePropsViewer1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(4, 408);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(8, 18, 8, 12);
             this.groupBox1.Size = new System.Drawing.Size(715, 440);
             this.groupBox1.TabIndex = 29;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "像測參數";
             // 
-            // propertyGrid1
+            // gwPanePropsViewer1
             // 
-            this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.propertyGrid1.Location = new System.Drawing.Point(4, 21);
-            this.propertyGrid1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(707, 416);
-            this.propertyGrid1.TabIndex = 20;
+            this.gwPanePropsViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gwPanePropsViewer1.Editable = true;
+            this.gwPanePropsViewer1.ImageList = null;
+            this.gwPanePropsViewer1.Location = new System.Drawing.Point(8, 36);
+            this.gwPanePropsViewer1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.gwPanePropsViewer1.Name = "gwPanePropsViewer1";
+            this.gwPanePropsViewer1.Size = new System.Drawing.Size(699, 392);
+            this.gwPanePropsViewer1.TabIndex = 0;
             // 
-            // btnBuildCalib
+            // gvCalibPointsDataGridView1
             // 
-            this.btnBuildCalib.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.btnBuildCalib.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnBuildCalib.Location = new System.Drawing.Point(524, 16);
-            this.btnBuildCalib.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnBuildCalib.Name = "btnBuildCalib";
-            this.btnBuildCalib.Size = new System.Drawing.Size(167, 110);
-            this.btnBuildCalib.TabIndex = 25;
-            this.btnBuildCalib.Text = "重新校正";
-            this.btnBuildCalib.UseVisualStyleBackColor = false;
-            // 
-            // btnLoadImage
-            // 
-            this.btnLoadImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.btnLoadImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnLoadImage.Location = new System.Drawing.Point(34, 74);
-            this.btnLoadImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnLoadImage.Name = "btnLoadImage";
-            this.btnLoadImage.Size = new System.Drawing.Size(148, 52);
-            this.btnLoadImage.TabIndex = 22;
-            this.btnLoadImage.Text = "载入图像";
-            this.btnLoadImage.UseVisualStyleBackColor = false;
-            // 
-            // btnGrabImage
-            // 
-            this.btnGrabImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.btnGrabImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnGrabImage.Location = new System.Drawing.Point(34, 16);
-            this.btnGrabImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnGrabImage.Name = "btnGrabImage";
-            this.btnGrabImage.Size = new System.Drawing.Size(148, 52);
-            this.btnGrabImage.TabIndex = 21;
-            this.btnGrabImage.Text = "取像";
-            this.btnGrabImage.UseVisualStyleBackColor = false;
-            // 
-            // btnRefRB
-            // 
-            this.btnRefRB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.btnRefRB.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnRefRB.Location = new System.Drawing.Point(361, 74);
-            this.btnRefRB.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnRefRB.Name = "btnRefRB";
-            this.btnRefRB.Size = new System.Drawing.Size(148, 52);
-            this.btnRefRB.TabIndex = 19;
-            this.btnRefRB.Text = "点4(载台右下)";
-            this.btnRefRB.UseVisualStyleBackColor = false;
-            // 
-            // btnRefLB
-            // 
-            this.btnRefLB.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.btnRefLB.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnRefLB.Location = new System.Drawing.Point(205, 74);
-            this.btnRefLB.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnRefLB.Name = "btnRefLB";
-            this.btnRefLB.Size = new System.Drawing.Size(148, 52);
-            this.btnRefLB.TabIndex = 18;
-            this.btnRefLB.Text = "点3(载台左下)";
-            this.btnRefLB.UseVisualStyleBackColor = false;
-            // 
-            // btnRefRT
-            // 
-            this.btnRefRT.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.btnRefRT.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnRefRT.Location = new System.Drawing.Point(361, 16);
-            this.btnRefRT.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnRefRT.Name = "btnRefRT";
-            this.btnRefRT.Size = new System.Drawing.Size(148, 52);
-            this.btnRefRT.TabIndex = 17;
-            this.btnRefRT.Text = "点2(载台右上)";
-            this.btnRefRT.UseVisualStyleBackColor = false;
-            // 
-            // btnRefLT
-            // 
-            this.btnRefLT.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.btnRefLT.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnRefLT.Location = new System.Drawing.Point(205, 16);
-            this.btnRefLT.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnRefLT.Name = "btnRefLT";
-            this.btnRefLT.Size = new System.Drawing.Size(148, 52);
-            this.btnRefLT.TabIndex = 16;
-            this.btnRefLT.Text = "点1(载台左上)";
-            this.btnRefLT.UseVisualStyleBackColor = false;
+            this.gvCalibPointsDataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(3, 83);
+            this.gvCalibPointsDataGridView1.Name = "gvCalibPointsDataGridView1";
+            this.gvCalibPointsDataGridView1.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.gvCalibPointsDataGridView1.SelectedIndex = 0;
+            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(717, 169);
+            this.gvCalibPointsDataGridView1.TabIndex = 0;
             // 
             // panelB
             // 
@@ -394,6 +302,88 @@ namespace LaserAlignDX.Mvc.Gui
             this.rdoSucker1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rdoSucker1.UseVisualStyleBackColor = true;
             // 
+            // panelBtns
+            // 
+            this.panelBtns.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.panelBtns.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelBtns.Controls.Add(this.btnAutoFindCalibPoints);
+            this.panelBtns.Controls.Add(this.btnBuildCalib);
+            this.panelBtns.Controls.Add(this.btnLoadImage);
+            this.panelBtns.Controls.Add(this.btnGrabImage);
+            this.panelBtns.Controls.Add(this.btnPickGolden);
+            this.panelBtns.Location = new System.Drawing.Point(4, 258);
+            this.panelBtns.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.panelBtns.Name = "panelBtns";
+            this.panelBtns.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.panelBtns.Size = new System.Drawing.Size(715, 144);
+            this.panelBtns.TabIndex = 28;
+            this.panelBtns.Text = "像測操作";
+            // 
+            // btnAutoFindCalibPoints
+            // 
+            this.btnAutoFindCalibPoints.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.btnAutoFindCalibPoints.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnAutoFindCalibPoints.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnAutoFindCalibPoints.Location = new System.Drawing.Point(261, 74);
+            this.btnAutoFindCalibPoints.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnAutoFindCalibPoints.Name = "btnAutoFindCalibPoints";
+            this.btnAutoFindCalibPoints.Size = new System.Drawing.Size(180, 52);
+            this.btnAutoFindCalibPoints.TabIndex = 26;
+            this.btnAutoFindCalibPoints.Text = "自動抓取四角";
+            this.btnAutoFindCalibPoints.UseVisualStyleBackColor = false;
+            // 
+            // btnBuildCalib
+            // 
+            this.btnBuildCalib.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.btnBuildCalib.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnBuildCalib.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnBuildCalib.Location = new System.Drawing.Point(472, 16);
+            this.btnBuildCalib.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnBuildCalib.Name = "btnBuildCalib";
+            this.btnBuildCalib.Size = new System.Drawing.Size(188, 110);
+            this.btnBuildCalib.TabIndex = 25;
+            this.btnBuildCalib.Text = "執行校正";
+            this.btnBuildCalib.UseVisualStyleBackColor = false;
+            // 
+            // btnLoadImage
+            // 
+            this.btnLoadImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnLoadImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnLoadImage.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnLoadImage.Location = new System.Drawing.Point(55, 74);
+            this.btnLoadImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnLoadImage.Name = "btnLoadImage";
+            this.btnLoadImage.Size = new System.Drawing.Size(180, 52);
+            this.btnLoadImage.TabIndex = 22;
+            this.btnLoadImage.Text = "加載圖片";
+            this.btnLoadImage.UseVisualStyleBackColor = false;
+            // 
+            // btnGrabImage
+            // 
+            this.btnGrabImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnGrabImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnGrabImage.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnGrabImage.Location = new System.Drawing.Point(55, 16);
+            this.btnGrabImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnGrabImage.Name = "btnGrabImage";
+            this.btnGrabImage.Size = new System.Drawing.Size(180, 52);
+            this.btnGrabImage.TabIndex = 21;
+            this.btnGrabImage.Text = "取像";
+            this.btnGrabImage.UseVisualStyleBackColor = false;
+            // 
+            // btnPickGolden
+            // 
+            this.btnPickGolden.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.btnPickGolden.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnPickGolden.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnPickGolden.Location = new System.Drawing.Point(261, 16);
+            this.btnPickGolden.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnPickGolden.Name = "btnPickGolden";
+            this.btnPickGolden.Size = new System.Drawing.Size(180, 52);
+            this.btnPickGolden.TabIndex = 17;
+            this.btnPickGolden.Text = "框取 Golden";
+            this.btnPickGolden.UseVisualStyleBackColor = false;
+            // 
             // panelDockLeft
             // 
             this.panelDockLeft.Controls.Add(this.jezTransImageViewPanel1);
@@ -403,15 +393,6 @@ namespace LaserAlignDX.Mvc.Gui
             this.panelDockLeft.Name = "panelDockLeft";
             this.panelDockLeft.Size = new System.Drawing.Size(665, 951);
             this.panelDockLeft.TabIndex = 1;
-            // 
-            // gvCalibPointsDataGridView1
-            // 
-            this.gvCalibPointsDataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(3, 83);
-            this.gvCalibPointsDataGridView1.Name = "gvCalibPointsDataGridView1";
-            this.gvCalibPointsDataGridView1.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(717, 169);
-            this.gvCalibPointsDataGridView1.TabIndex = 0;
             // 
             // jezTransImageViewPanel1
             // 
@@ -439,12 +420,12 @@ namespace LaserAlignDX.Mvc.Gui
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "校正設定";
             this.tbLayoutDockRight.ResumeLayout(false);
-            this.panelBtns.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.panelB.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
+            this.panelBtns.ResumeLayout(false);
             this.panelDockLeft.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -464,10 +445,7 @@ namespace LaserAlignDX.Mvc.Gui
         private System.Windows.Forms.Button btnBuildCalib;
         private System.Windows.Forms.Button btnLoadImage;
         private System.Windows.Forms.Button btnGrabImage;
-        private System.Windows.Forms.Button btnRefRB;
-        private System.Windows.Forms.Button btnRefLB;
-        private System.Windows.Forms.Button btnRefRT;
-        private System.Windows.Forms.Button btnRefLT;
+        private System.Windows.Forms.Button btnPickGolden;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.RadioButton rdoSucker2;
         private System.Windows.Forms.RadioButton rdoSucker1;
@@ -478,6 +456,7 @@ namespace LaserAlignDX.Mvc.Gui
         private System.Windows.Forms.Panel panelB;
         private GvCalibPointsDataGridView gvCalibPointsDataGridView1;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.PropertyGrid propertyGrid1;
+        private LeTian.JxProps.Gui.GwPanePropsViewer gwPanePropsViewer1;
+        private System.Windows.Forms.Button btnAutoFindCalibPoints;
     }
 }

@@ -50,9 +50,11 @@ namespace LaserAlignDX.Mvc.Gui
         Control IvCalibToolUI.Window => this;
         JezTransImageViewPanel IvCalibToolUI.ImgViewer => jezTransImageViewPanel1;
         GvCalibPointsDataGridView IvCalibToolUI.dgvCalibPointsListView => gvCalibPointsDataGridView1;
-        PropertyGrid IvCalibToolUI.pgridVisionParams => propertyGrid1;
+        Control IvCalibToolUI.wndVisionSettingsPanel => gwPanePropsViewer1;
         Button IvCalibToolUI.btnGrabImage => btnGrabImage;
         Button IvCalibToolUI.btnLoadImage => btnLoadImage;
+        Button IvCalibToolUI.btnPickupGolden => btnPickGolden;
+        Button IvCalibToolUI.btnAutoFindCalibPoints => btnAutoFindCalibPoints;
         Button IvCalibToolUI.btnBuildCalib => btnBuildCalib;
         Button IvCalibToolUI.btnCancel => btnCancel;
         Button IvCalibToolUI.btnOK => btnOK;

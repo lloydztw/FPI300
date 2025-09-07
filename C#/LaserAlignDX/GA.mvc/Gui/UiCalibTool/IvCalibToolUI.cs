@@ -21,13 +21,15 @@ namespace LaserAlignDX.Mvc.Gui
     public interface IvCalibToolUI
     {
         Control Window { get; }
-        JezTransImageViewPanel ImgViewer { get; }
-        GvCalibPointsDataGridView dgvCalibPointsListView { get; }
         RadioButton[] rdoCarriers { get; }
         RadioButton[] rdoSuckerRows { get; }
-        PropertyGrid pgridVisionParams { get; }
+        JezTransImageViewPanel ImgViewer { get; }
+        GvCalibPointsDataGridView dgvCalibPointsListView { get; }
+        Control wndVisionSettingsPanel { get; }
         Button btnGrabImage { get; }
         Button btnLoadImage { get; }
+        Button btnPickupGolden { get; }
+        Button btnAutoFindCalibPoints { get; }
         Button btnBuildCalib { get; }
         Button btnCancel { get; }
         Button btnOK { get; }

@@ -27,12 +27,12 @@ namespace LaserAlignDX.Model.Coords
         #region PRIVATE_DATA
         QTransform[] _transforms = new QTransform[]
         {
-            new QTransform("C1_P"),
-            new QTransform("C1_M1S1"),
-            new QTransform("C1_M1S2"),
-            new QTransform("C2_P"),
-            new QTransform("C2_M2S1"),
-            new QTransform("C2_M2S2"),
+            new QTransform("C1_P", 10000, "pix", 1000, "mm"),
+            new QTransform("C1_M1S1", 10000, "pix", 1000, "mm"),
+            new QTransform("C1_M1S2", 10000, "pix", 1000, "mm"),
+            new QTransform("C2_P", 10000, "pix", 1000, "mm"),
+            new QTransform("C2_M2S1", 10000, "pix", 1000, "mm"),
+            new QTransform("C2_M2S2", 10000, "pix", 1000, "mm"),
         };
         int getIndex(CarrierEnum C, SuckerRowEnum S)
         {
@@ -98,6 +98,12 @@ namespace LaserAlignDX.Model.Coords
             {
                 trf.Save(iniFileName, trf.Name);
             }
+        }
+        
+        public void BuildAll()
+        {
+            foreach (var trf in _transforms)
+                trf?.Build();
         }
     }
 }

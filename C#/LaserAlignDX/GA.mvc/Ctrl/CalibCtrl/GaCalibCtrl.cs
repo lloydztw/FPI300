@@ -13,17 +13,22 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector;
+using EzAoiEmptyTrayInspector.Model;
+using JetEazy;
+using JetEazy.EzImage;
 using JetEazy.Interface;
+using JetEazy.Match;
 using JetEazy.Utils;
+using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Model.Transforms;
 using LaserAlignDX.Mvc.Gui;
+using LeTian.JxProps.Gui;
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-
-using CalibVisionParams = LaserAlignDX.BasicSpace.ParaSpace.MvdFindCircleClass;
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
 
 
@@ -46,7 +51,8 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         #region GLOBAL_PATH
         static string GA_WORK_PATH => Traveller106.Universal.WORKPATH;
-        static string GA_CALIB_VISION_INI_FILE => "CalibrateForm_default_info.ini";
+        static string CALIB_VISION_JSON_FILE => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Vision_Settings.json");
+        static string CALIB_TRANSFORMS_INI_FILE => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Transforms.ini");
         #endregion
 
         #region GLOBAL_MESS
@@ -54,14 +60,15 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             get { return Traveller106.Universal.IxLineScan; }
         }
-        CalibVisionParams _calibVisionParams => CalibVisionParams.Instance;
         #endregion
 
         #region KERNEL_MEMBERS
         TravellerTransforms _transforms => GaMvcConfig.Transforms;
+        JxAoiRecipe _jxCalibAoiSettings = new JxAoiRecipe();
+        CalibAoiModel _aoiModel = new CalibAoiModel();
         #endregion
 
-        #region GUI_MEMBERS
+        #region GUI_LINKS
         IvCalibToolUI _calibToolUI;
         Control _wndOwner => _calibToolUI.Window;
         JezTransImageViewPanel _imgViewer => _calibToolUI.ImgViewer;
@@ -70,11 +77,15 @@ namespace LaserAlignDX.Mvc.Ctrl
         RadioButton[] _rdoSuckerRows => _calibToolUI.rdoSuckerRows;
         Button _btnGrabImage => _calibToolUI.btnGrabImage;
         Button _btnLoadImage => _calibToolUI.btnLoadImage;
-        Button _btnOK => _calibToolUI.btnOK;
+        Button _btnPickupGolden => _calibToolUI.btnPickupGolden;
+        Button _btnAutoFindCalibPoints => _calibToolUI.btnAutoFindCalibPoints;
+        Button _btnBuildCalib => _calibToolUI.btnBuildCalib;
         Button _btnCancel => _calibToolUI.btnCancel;
+        Button _btnOK => _calibToolUI.btnOK;
         #endregion
 
         #region INTERACTORS
+        CviGoldenPickingBox _cviGoldenBox = new CviGoldenPickingBox(Brushes.Orange) { Visible = false };
         CviCalibResultBox _cviResultBox = new CviCalibResultBox() { Visible = false };
         CviCalibPointBox[] _cviCalibPointBoxes = new CviCalibPointBox[N_CALIB_POINTS];
         #endregion
@@ -82,25 +93,31 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region RUNTIME_DATA
         CarrierEnum _activeCarrierID = CarrierEnum.C1;
         SuckerRowEnum _activeSuckerRowID = SuckerRowEnum.S1;
-        bool _modified = false;
+        bool _isCoordModified = false;
+        bool _isGoldenPicking = false;
+        bool _isRunning = false;
         #endregion
 
         public void Attach(IvCalibToolUI toolView)
         {
             _calibToolUI = toolView;
             initImgViewer();
-            loadSettings();
+            LoadSettings();
             updateAllData(false);
             connectEventHandlers();
+        }
+        public void CleanUp()
+        {
+            _aoiModel?.Dispose();
+            _aoiModel = null;
+            _jxCalibAoiSettings.Dispose();
+            _jxCalibAoiSettings = null;
         }
 
         #region PRIVATE_INIT_FUNCTIONS
         void initImgViewer()
         {
             var matViewer = _imgViewer.MatViewer;
-
-            matViewer.AddInteractor(_cviResultBox);
-
             for (int i = 0; i < N_CALIB_POINTS; i++)
             {
                 _cviCalibPointBoxes[i] = new CviCalibPointBox(new Rectangle(0, 0, 500, 500), Color.Lime, 0.25f)
@@ -110,19 +127,29 @@ namespace LaserAlignDX.Mvc.Ctrl
                 };
                 matViewer.AddInteractor(_cviCalibPointBoxes[i]);
             }
+            matViewer.AddInteractor(_cviGoldenBox);
+            matViewer.AddInteractor(_cviResultBox);
         }
         void connectEventHandlers()
         {
-            _btnOK.Click += (s, e) => closeTool(true);
-            _btnCancel.Click += (s, e) => closeTool(false);
+            _btnOK.Click += (s, e) => CloseTool(true);
+            _btnCancel.Click += (s, e) => CloseTool(false);
+
             _rdoCarriers[0].CheckedChanged += _rdoSelect_CheckedChanged;
             _rdoSuckerRows[0].CheckedChanged += _rdoSelect_CheckedChanged;
-            _btnGrabImage.Click += (s, e) => grabImage();
-            _btnLoadImage.Click += (s, e) => loadImage();
+
+            _btnGrabImage.Click += (s, e) => GrabImage();
+            _btnLoadImage.Click += (s, e) => LoadImage();
+
+            _btnPickupGolden.Click += (s, e) => toggleGoldenPicking();
+            _btnAutoFindCalibPoints.Click += (s, e) => RunAutoFetchCalibPoints();
+            _btnBuildCalib.Click += (s, e) => BuildAllTransforms();
+            _cviGoldenBox.OnBoxSelected += (s, e) => BuildGolden();
+
             _imgViewer.MatViewer.MouseMove += MatViewer_MouseMove;
+            _wndOwner.HandleCreated += (s, e) => updateGuiStatus();
+            _wndOwner.HandleDestroyed += (s, e) => CleanUp();           // 自動釋放資源
         }
-
-
         #endregion
 
         #region EVENT_HANDLERS
@@ -133,6 +160,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (Array.IndexOf(_rdoCarriers, sender) >= 0)
                 updateVisionParams(_activeCarrierID, false);
             updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);
+            clearCviResults();
         }
         private void MatViewer_MouseMove(object sender, MouseEventArgs e)
         {
@@ -163,12 +191,17 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updateVisionParams(CarrierEnum carrierID, bool toModel)
         {
+            GwPanePropsViewer panel = _calibToolUI.wndVisionSettingsPanel as GwPanePropsViewer;
+            if (panel == null)
+                return;
+
             if (toModel)
             {
             }
             else
             {
-                _calibToolUI.pgridVisionParams.SelectedObject = _calibVisionParams;
+                panel.BuildGuiCtrls(_jxCalibAoiSettings);
+                panel.ExpandAll();
             }
         }
         void updateCalibKeyPoints(CarrierEnum carrierID, SuckerRowEnum suckerRowID, bool toModel)
@@ -192,7 +225,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                     {
                         transform.SetSrcRef(rowId, camPt);
                         transform.SetDstRef(rowId, motorPt);
-                        _modified = true;
+                        _isCoordModified = true;
                     }
                 }
             }
@@ -213,7 +246,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
             }
         }
-        bool updateCalibKeyPoints(DataGridView dgv, int rowId, QCoord camPt, QCoord motorPt, bool toModel)
+        bool updateCalibKeyPoints(DataGridView dgv, int rowId, QCoord camCoord, QCoord motorCoord, bool toModel)
         {
             int col = 1;
             var dgvRow = dgv.Rows[rowId];
@@ -227,17 +260,17 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var mx = (double)dgvRow.Cells[col++].Value;
                 var my = (double)dgvRow.Cells[col++].Value;
 
-                if (camPt.X != cx || camPt.Y != cy)
+                if (camCoord.X != cx || camCoord.Y != cy)
                 {
-                    camPt.X = cx;
-                    camPt.Y = cy;
+                    camCoord.X = cx;
+                    camCoord.Y = cy;
                     isChanged = true;
                 }
 
-                if (motorPt.X != mx || motorPt.Y != my)
+                if (motorCoord.X != mx || motorCoord.Y != my)
                 {
-                    motorPt.X = mx;
-                    motorPt.Y = my;
+                    motorCoord.X = mx;
+                    motorCoord.Y = my;
                     isChanged = true;
                 }
 
@@ -245,26 +278,55 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             else
             {
-                dgvRow.Cells[col++].Value = camPt != null ? (int)camPt.X : 0;
-                dgvRow.Cells[col++].Value = camPt != null ? (int)camPt.Y : 0;
-                dgvRow.Cells[col++].Value = motorPt != null ? motorPt.X : 0.0;
-                dgvRow.Cells[col++].Value = motorPt != null ? motorPt.Y : 0.0;
+                dgvRow.Cells[col++].Value = camCoord != null ? (int)camCoord.X : 0;
+                dgvRow.Cells[col++].Value = camCoord != null ? (int)camCoord.Y : 0;
+                dgvRow.Cells[col++].Value = motorCoord != null ? motorCoord.X : 0.0;
+                dgvRow.Cells[col++].Value = motorCoord != null ? motorCoord.Y : 0.0;
                 return true;
             }
         }
-        void updateCalibKeyPointBox(CalibCornersEnum corner, QCoord camPt, bool show = true)
+        void updateCalibKeyPointBox(CalibCornersEnum corner, QCoord camCoord, bool show = true)
         {
             var box = _cviCalibPointBoxes[(int)corner];
-            if (camPt == null)
+            if (camCoord == null)
             {
                 box.Visible = false;
                 return;
             }
 
             var loc = box.Box2D;
-            loc.SetCenter((float)camPt.X, (float)camPt.Y);
+            loc.SetCenter((float)camCoord.X, (float)camCoord.Y);
             box.SetBox(loc);
             box.Visible = show;
+        }
+        void updateCalibKeyPoints(EzBlocsGrid grid)
+        {
+            if (grid == null)
+                return;
+
+            int r = grid.Rows - 1;
+            int c = grid.Cols - 1;
+            var cornerPts = new[]
+            {
+                grid[0,0].Center,
+                grid[0,c].Center,
+                grid[r,c].Center,
+                grid[r,0].Center,
+            };
+
+            var transform = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+            for(int i = 0; i < cornerPts.Length; i++)
+            {
+                var camCoord = transform.GetSrcRef(i);
+                var motorCoord = transform.GetDstRef(i);
+                camCoord.X = cornerPts[i].X;
+                camCoord.Y = cornerPts[i].Y;
+                transform.SetSrcRef(i, camCoord);
+                updateCalibKeyPoints(_dgvCalibPointsListView, i, camCoord, motorCoord, false);
+                updateCalibKeyPointBox((CalibCornersEnum)i, camCoord);
+            }
+
+            _isCoordModified = true;
         }
         void updateAllCalibKeyPointBoxes()
         {
@@ -281,10 +343,141 @@ namespace LaserAlignDX.Mvc.Ctrl
                 updateCalibKeyPointBox(corner, camPt);
             }
         }
+        void updateGuiStatus()
+        {
+            bool isEmpty = _imgViewer.MatViewer.Image == null;
+            _btnGrabImage.Enabled = !_isRunning;
+            _btnLoadImage.Enabled = !_isRunning;
+
+            _btnPickupGolden.BackColor = _isGoldenPicking ? Color.HotPink : _btnAutoFindCalibPoints.BackColor;
+            _btnPickupGolden.Enabled = !_isRunning && !isEmpty;
+            _btnAutoFindCalibPoints.Enabled = !_isRunning && !isEmpty;
+            _btnBuildCalib.Enabled = !_isRunning && !isEmpty;
+        }
+        void toggleGoldenPicking()
+        {
+            enableGoldenPicking(!_isGoldenPicking);
+        }
+        void enableGoldenPicking(bool enabled)
+        {
+            _isGoldenPicking = enabled;
+            _cviGoldenBox.Visible = enabled;
+            _cviGoldenBox.Enabled = enabled;
+            updateGuiStatus();
+        }
+        void clearCviResults()
+        {
+            _cviResultBox.Reset();
+            _imgViewer.MatViewer.Invalidate();
+        }
         #endregion
 
-        void loadImage()
+        void BuildGolden()
         {
+            clearCviResults();
+
+            var fullfovImg = _imgViewer.MatViewer.Image;
+            if (fullfovImg == null)
+                return;
+
+            //(1) Peek the ezImage (deepCopy = false 所以不用 Dispose())
+            var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
+
+            //(2) Cropping the golden Bitmap
+            var boundRect = new Rectangle(0, 0, ezImage.Width, ezImage.Height);
+            var goldenRect = _cviGoldenBox.Box;
+            JetEazy.QUtilities.QUtility.ClipBoundary(ref goldenRect, ref boundRect);
+            var goldenBmp = ImageUtil.CropBmp(ezImage, goldenRect);
+
+            //(3) Update to Recipe
+            var matchSetting = _jxCalibAoiSettings.VisionSettings.Match;
+            matchSetting.GoldenBmp.Value = goldenBmp;
+            matchSetting.GoldenBox.Value = goldenRect;
+            updateVisionParams(_activeCarrierID, false);
+
+            ////(4) Build the Golden Grid
+            //BuildGoldenGrid();
+        }
+        bool BuildGoldenGrid()
+        {
+            var fullfovImg = _imgViewer.MatViewer.Image;
+            if (fullfovImg == null)
+                return false;
+
+            //(1) Peek the ezImage (deepCopy = false 所以不用 Dispose())
+            var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
+
+            var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
+            //(2) Reset
+            _aoiModel.ResetAndClear();
+
+            //(3) Build
+            var err = _aoiModel.BuildGoldenGridTemplate(SideID.A, ezImage);
+            if (err != ErrCodes.OK)
+            {
+                var msg = QxNums.GetEnumDescription(err);
+                MessageBox.Show(msg, _wndOwner.FindForm().Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+
+            GaUtil.SetCursor(_wndOwner, oldCursor);
+
+            return err == ErrCodes.OK;
+        }
+        void RunAutoFetchCalibPoints()
+        {
+            enableGoldenPicking(false);
+            
+            bool ok = BuildGoldenGrid();
+            if (!ok)
+                return;
+
+            var fullfovImg = _imgViewer.MatViewer.Image;
+            if (fullfovImg == null)
+                return;
+
+            //(1) Peek the ezImage (deepCopy = false 所以不用 Dispose())
+            var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
+
+            var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
+            //(2) Run Aoi
+            _aoiModel.RunMatch(SideID.A, ezImage);
+
+            //(3) Update Result
+            var matchResult = _aoiModel.GetMatchResult(SideID.A);
+
+            //(4) Refine each detail locations
+            _aoiModel.RefineCentroidLocations(matchResult, ezImage);
+
+            //(5) Update 4 Corners
+            updateCalibKeyPoints(matchResult?.Grid);
+
+            //(6) Update Grid Result
+            _cviResultBox.Transform = null;
+            _cviResultBox.UpdateResult(matchResult);
+            _cviResultBox.Visible = true;
+            _imgViewer.MatViewer.Invalidate();
+
+            GaUtil.SetCursor(_wndOwner, oldCursor);
+        }
+        void BuildAllTransforms()
+        {
+            var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
+            enableGoldenPicking(false);
+            updateAllData(true);
+
+            _transforms.BuildAll();
+
+            _cviResultBox.Transform = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+
+            GaUtil.SetCursor(_wndOwner, oldCursor);
+        }
+
+        void LoadImage()
+        {
+            enableGoldenPicking(false);
             string fileName = GaUtil.BrowseImageFile();
             if (fileName != null)
             {
@@ -296,32 +489,64 @@ namespace LaserAlignDX.Mvc.Ctrl
 
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
+            
             updateAllCalibKeyPointBoxes();
+            updateGuiStatus();
         }
-        void grabImage()
+        void GrabImage()
         {
-            //throw new NotImplementedException();
+            enableGoldenPicking(false);
+            updateGuiStatus();
         }
-        void closeTool(bool save)
+
+        void LoadSettings()
         {
-            if (save && _modified)
+            // VISIONS
+            _jxCalibAoiSettings.Load(CALIB_VISION_JSON_FILE);
+            _aoiModel.SetRecipe(_jxCalibAoiSettings);
+
+            // TRANSFORMS
+            var newFile = CALIB_TRANSFORMS_INI_FILE;
+            if (!System.IO.File.Exists(newFile))
+                _transforms.LoadGaaraIniFile();
+            else
+                _transforms.Load(newFile);
+
+            // 第一次建置座標轉換
+            _transforms.BuildAll();
+        }
+        void SaveSettings(bool force = false)
+        {
+            // TRANSFORMS
+            if (force || _isCoordModified)
+            {
+                _transforms.Save(CALIB_TRANSFORMS_INI_FILE);
+                _transforms.SaveGaaraIniFile();
+            }
+
+            // VISIONS
+            if (force || _jxCalibAoiSettings.Modified)
+            {
+                _jxCalibAoiSettings.Save(CALIB_VISION_JSON_FILE);
+            }
+        }
+        void CloseTool(bool confirm)
+        {
+            if (confirm)
             {
                 updateAllData(true);
-                saveSettings();
+                SaveSettings();
+            }
+            else
+            {
+                // 還原舊值
+                if (_isCoordModified || _jxCalibAoiSettings.Modified)
+                    LoadSettings();
             }
 
             var frm = _wndOwner.FindForm();
             frm?.Close();
             frm?.Dispose();
-        }
-        void loadSettings()
-        {
-            _transforms.LoadGaaraIniFile();
-            _calibVisionParams.Initial(GA_WORK_PATH, 0, GA_CALIB_VISION_INI_FILE);
-        }
-        void saveSettings()
-        {
-
         }
     }
 }

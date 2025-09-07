@@ -200,6 +200,7 @@
     <Compile Include="Gui\Panels\GvSingleMatchViewPanel.Designer.cs">
       <DependentUpon>GvSingleMatchViewPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="Gui\Panels\GwPanePropsViewerExt.cs" />
     <Compile Include="Gui\Panels\GwRecipeInfo.cs">
       <SubType>UserControl</SubType>
     </Compile>

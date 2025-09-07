@@ -17,7 +17,7 @@ using System.Drawing;
 using System.Text;
 
 
-namespace LaserAlignDX.Model
+namespace LaserAlignDX
 {
     /// <summary>
     /// StringBuilder 擴增函式
