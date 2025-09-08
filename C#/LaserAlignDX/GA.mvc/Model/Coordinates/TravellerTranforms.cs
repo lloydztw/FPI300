@@ -13,10 +13,12 @@
  */
 #endregion
 
+using JetEazy.Transform;
 using JetEazy.Match;
 using JetEazy.QMath;
-using LaserAlignDX.Model.Transforms;
 using System;
+using System.Collections.Generic;
+using System.Windows.Documents;
 
 
 namespace LaserAlignDX.Model.Coords
@@ -26,19 +28,18 @@ namespace LaserAlignDX.Model.Coords
     /// </summary>
     public class TravellerTransforms : IDisposable
     {
-        public const int CAMERA_ORDER = TravellerCoords.CAMERA_ORDER;
-        public const int MOTOR_ORDER = TravellerCoords.MOTOR_ORDER;
+        public const int N_CALIB_POINTS = 4;
 
         #region PRIVATE_DATA
         PlcGridPoints _plcGrid = null;
         QTransform[] _transforms = new QTransform[]
         {
-            new QTransform("C1_P", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
-            new QTransform("C1_M1S1", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
-            new QTransform("C1_M1S2", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
-            new QTransform("C2_P", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
-            new QTransform("C2_M2S1", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
-            new QTransform("C2_M2S2", CAMERA_ORDER, "pix", MOTOR_ORDER, "mm"),
+            new QTransform("C1_P", "pix", "mm"),
+            new QTransform("C1_M1S1", "pix", "mm"),
+            new QTransform("C1_M1S2", "pix", "mm"),
+            new QTransform("C2_P", "pix", "mm"),
+            new QTransform("C2_M2S1", "pix", "mm"),
+            new QTransform("C2_M2S2", "pix", "mm"),
         };
         int getIndex(CarrierEnum C, SuckerRowEnum S)
         {
@@ -91,6 +92,21 @@ namespace LaserAlignDX.Model.Coords
             get => GetCameraPhysicTransform(C);
         }
         
+        private QVector getCameraBasePoint(CarrierEnum C)
+        {
+            var trf = GetCameraPhysicTransform(C) ?? GetCameraMotorTransform(C, SuckerRowEnum.S1);
+            var trfCorners = (ICalibCornerPoints)trf;
+            trfCorners.Get(0, out var camPt, out var _);
+            return camPt;
+        }
+        private QVector getMotorBasePoint(CarrierEnum C, SuckerRowEnum S)
+        {
+            var trf = GetCameraMotorTransform(C, S);
+            var trfCorners = (ICalibCornerPoints)trf;
+            trfCorners.Get(0, out var _, out var motorPt);
+            return motorPt;
+        }
+
         /// <summary>
         /// 設定 P 座標 (PLC) 格點
         /// </summary>
@@ -98,6 +114,7 @@ namespace LaserAlignDX.Model.Coords
         {
             _plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
         }
+
         /// <summary>
         /// 計算 PLC 補償量
         /// </summary>
@@ -105,6 +122,9 @@ namespace LaserAlignDX.Model.Coords
         {
             if (_plcGrid == null)
                 return new[] { new QVector(), new QVector() };
+
+            // M coords 的基準點
+            var motorBasePt = getMotorBasePoint(C, S);
 
             // P 目標值
             var targetWorldPt = _plcGrid.GetGridPoint(rowId, colId);
@@ -116,6 +136,8 @@ namespace LaserAlignDX.Model.Coords
             // 目標值 轉換至 Motor Coords
             ITransform transCameraToMotor = GetCameraMotorTransform(C, S);
             var targetMotorPt = transCameraToMotor.Trans(targetCamPt);
+            //targetMotorPt.X += motorBasePt.X;
+            //targetMotorPt.Y += motorBasePt.Y;
 
             // 像測現值 轉換至 Motor Coords
             var motorPt = transCameraToMotor.Trans(camPt);
@@ -140,7 +162,7 @@ namespace LaserAlignDX.Model.Coords
             //(0) Camera Coords 四角點
             int r = camGrid.Rows - 1;
             int c = camGrid.Cols - 1;
-            var cornerPts = new[]
+            var camCornerPts = new[]
             {
                 camGrid[0,0].Center,
                 camGrid[0,c].Center,
@@ -149,80 +171,107 @@ namespace LaserAlignDX.Model.Coords
             };
 
             //(1) 設定 線掃相機 到 馬達 (Carrier + Sucker) 座標轉換 的 校正點位
-            QVector motorLeftTop = new QVector();
             if (true)
             {
                 var transCameraToMotor = this.GetCameraMotorTransform(C, S);
-                for (int i = 0; i < cornerPts.Length; i++)
+                var trfCorners = (ICalibCornerPoints)transCameraToMotor;
+                var motorPts = trfCorners.GetAll(isSrc: false);
+                for (int i = 0; i < camCornerPts.Length; i++)
                 {
-                    var camCoord = transCameraToMotor.GetSrcRef(i);
-                    var motorCoord = transCameraToMotor.GetDstRef(i);
-                    camCoord.X = cornerPts[i].X;
-                    camCoord.Y = cornerPts[i].Y;
-                    transCameraToMotor.SetSrcRef(i, camCoord);
-                    //updateCalibKeyPoints(_dgvCalibPointsListView, i, camCoord, motorCoord, false);
-                    //updateCalibKeyPointBox((CalibCornersEnum)i, camCoord);
-                    if (i == 0)
-                        motorLeftTop = new QVector(motorCoord);
+                    var camCoord = camCornerPts[i];
+                    var motorCoord = motorPts[i];
+                    trfCorners.Set(i, camCoord, motorCoord);
                 }
             }
 
             //(2) 設定 線掃相機 到 Physical (PLC grid) 座標轉換 的 校正點位
-            _plcGrid.Offset(motorLeftTop.X, motorLeftTop.Y);
-            //int r0 = r - camGrid.Rows / 4;
-            int r0 = 0;
-            cornerPts = new[]
+            if (false)
             {
-                camGrid[r0,0].Center,
-                camGrid[r0,c].Center,
-                camGrid[r,c].Center,
-                camGrid[r,0].Center,
-            };
-            var physicPts = new[]
-            {
-                _plcGrid[r0,0],
-                _plcGrid[r0,c],
-                _plcGrid[r,c],
-                _plcGrid[r,0]
-            };
+                //int r0 = r - camGrid.Rows / 4;
+                int r0 = 3;
+                camCornerPts = new[]
+                {
+                    camGrid[r0,0].Center,
+                    camGrid[r0,c].Center,
+                    camGrid[r,c].Center,
+                    camGrid[r,0].Center,
+                };
+                    var phyCornerPts = new[]
+                    {
+                    _plcGrid[r0,0],
+                    _plcGrid[r0,c],
+                    _plcGrid[r,c],
+                    _plcGrid[r,0]
+                };
+
+                var transCameraToPhysic = this.GetCameraPhysicTransform(C);
+                var trfCorners = (ICalibCornerPoints)transCameraToPhysic;
+                for (int i = 0; i < camCornerPts.Length; i++)
+                {
+                    trfCorners.Set(i, camCornerPts[i], phyCornerPts[i]);
+                }
+                transCameraToPhysic.Build();
+            }
             if (true)
             {
+                var camPts = toCalibGrid(camGrid);
+                var plcPts = toCalibGrid(_plcGrid);
                 var transCameraToPhysic = this.GetCameraPhysicTransform(C);
-                for (int i = 0; i < cornerPts.Length; i++)
-                {
-                    var camCoord = transCameraToPhysic.GetSrcRef(i);
-                    var physicCoord = transCameraToPhysic.GetDstRef(i);
-                    camCoord.X = cornerPts[i].X;
-                    camCoord.Y = cornerPts[i].Y;
-                    physicCoord.X = physicPts[i].X;
-                    physicCoord.Y = physicPts[i].Y;
-                    transCameraToPhysic.SetSrcRef(i, camCoord);
-                    transCameraToPhysic.SetDstRef(i, physicCoord);
-                }
+                var trfGridPoints = (ICalibGridPoints)transCameraToPhysic;
+                trfGridPoints.SetAll(camPts, plcPts);
+                transCameraToPhysic.Build();
             }
         }
+
         /// <summary>
         /// 建置全部 座標轉換 系統
         /// </summary>
         public void BuildAll()
         {
+            var trfC1 = GetCameraPhysicTransform(CarrierEnum.C1);
             foreach (var trf in _transforms)
+            {
+                if (trf == trfC1) continue;
                 trf?.Build();
+            }
         }
 
         public void Load(string iniFileName)
         {
             foreach (var trf in _transforms)
             {
-                trf.Load(iniFileName, trf.Name);
+                trf.Load(iniFileName);
             }
         }
         public void Save(string iniFileName)
         {
             foreach (var trf in _transforms)
             {
-                trf.Save(iniFileName, trf.Name);
+                trf.Save(iniFileName);
             }
         }
+
+        #region PRIVATE_FUNCTIONS
+        QVector[,] toCalibGrid(EzBlocsGrid camGrid)
+        {
+            int rows = camGrid.Rows;
+            int cols = camGrid.Cols;
+            var pts = new QVector[rows, cols];
+            for (int r = 0; r < rows; r++)
+                for (int c = 0; c < cols; c++)
+                    pts[r, c] = camGrid[r, c].Center;
+            return pts;
+        }
+        QVector[,] toCalibGrid(PlcGridPoints plcGrid)
+        {
+            int rows = plcGrid.Rows;
+            int cols = plcGrid.Cols;
+            var pts = new QVector[rows, cols];
+            for (int r = 0; r < rows; r++)
+                for (int c = 0; c < cols; c++)
+                    pts[r, c] = plcGrid[r, c];
+            return pts;
+        }
+        #endregion
     }
 }

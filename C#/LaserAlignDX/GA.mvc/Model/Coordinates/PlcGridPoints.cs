@@ -16,7 +16,7 @@
 
 namespace LaserAlignDX.Model.Coords
 {
-    using P = TravellerCoords.P;
+    using P = JetEazy.QMath.QVector2;
 
     /// <summary>
     /// 空台上的格點 (mm)

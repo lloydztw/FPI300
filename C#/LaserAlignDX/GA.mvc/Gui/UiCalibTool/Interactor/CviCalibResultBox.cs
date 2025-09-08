@@ -17,8 +17,8 @@ using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
+using JetEazy.Transform;
 using LaserAlignDX.Model.Coords;
-using LaserAlignDX.Model.Transforms;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -656,8 +656,9 @@ namespace LaserAlignDX.Mvc.Gui
             sb.AppendLine();
             sb.AppendLine($"PLC 補償量 dX = {dV.X:0.000} mm");
             sb.AppendLine($"PLC 補償量 dY = {dV.Y:0.000} mm");
-            sb.AppendLine($"CP 誤差值 errX = {dErr.X:0.000} mm");
-            sb.AppendLine($"CP 誤差值 errY = {dErr.Y:0.000} mm");
+            sb.AppendLine();
+            sb.AppendLine($"Phy 變動值 ΔX = {dErr.X:0.000} mm");
+            sb.AppendLine($"Phy 變動值 ΔY = {dErr.Y:0.000} mm");
         }
     }
 }

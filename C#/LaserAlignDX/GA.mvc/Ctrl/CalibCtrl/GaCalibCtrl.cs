@@ -19,11 +19,10 @@ using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.Interface;
 using JetEazy.Match;
-using JetEazy.QMath;
+using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
-using LaserAlignDX.Model.Transforms;
 using LaserAlignDX.Mvc.Gui;
 using LeTian.JxProps.Gui;
 using System;
@@ -31,13 +30,15 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
+using QCoord = JetEazy.QMath.QVector;
 
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
     public partial class GaCalibCtrl
     {
-        static int N_CALIB_POINTS => QTransform.N_POINTS;
+        static int N_CALIB_POINTS => TravellerTransforms.N_CALIB_POINTS;
+
         enum CalibCornersEnum : int
         {
             [Description("載台左上")]
@@ -212,10 +213,14 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updateCalibKeyPoints(CarrierEnum carrierID, SuckerRowEnum suckerRowID, bool toModel)
         {
-            var transform = _transforms.GetCameraMotorTransform(carrierID, suckerRowID);
             var corners = Enum.GetValues(typeof(CalibCornersEnum));
             var dgv = _dgvCalibPointsListView.DataGridView;
 
+            var transform = _transforms.GetCameraMotorTransform(carrierID, suckerRowID);
+            var trfCalibCorners = (ICalibCornerPoints)transform;
+            var camPts = trfCalibCorners?.GetAll(isSrc: true);
+            var motorPts = trfCalibCorners?.GetAll(isSrc: false);
+            
             if (toModel)
             {
                 if (transform == null)
@@ -223,14 +228,14 @@ namespace LaserAlignDX.Mvc.Ctrl
 
                 foreach (CalibCornersEnum corner in corners)
                 {
-                    int rowId = (int)corner;
-                    var camPt = transform.GetSrcRef(rowId);
-                    var motorPt = transform.GetDstRef(rowId);
-                    bool isChanged = updateCalibKeyPoints(dgv, rowId, camPt, motorPt, toModel);
+                    int index = (int)corner;
+                    var camPt = camPts[index];
+                    var motorPt = motorPts[index];
+                    bool isChanged = updateCalibKeyPoints(dgv, index, camPt, motorPt, toModel);
                     if (isChanged)
                     {
-                        transform.SetSrcRef(rowId, camPt);
-                        transform.SetDstRef(rowId, motorPt);
+                        //transform.setCalibCornerPoints(index, camPt, motorPt);
+                        trfCalibCorners.Set(index, camPt, motorPt);
                         _isCoordModified = true;
                     }
                 }
@@ -241,8 +246,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 foreach (CalibCornersEnum corner in corners)
                 {
                     int rowId = (int)corner;
-                    var camPt = transform?.GetSrcRef(rowId);
-                    var motorPt = transform?.GetDstRef(rowId);
+                    var camPt = camPts != null ? camPts[rowId] : null;
+                    var motorPt = motorPts != null ? motorPts[rowId] : null;
 
                     var name = GaUtil.GetEnumDescription(corner);
                     dgv.Rows.Add(name, 0.0, 0.0, 0.0, 0.0);
@@ -349,12 +354,14 @@ namespace LaserAlignDX.Mvc.Ctrl
             var suckerRowID = _activeSuckerRowID;
 
             var transform = _transforms.GetCameraMotorTransform(carrierID, suckerRowID);
-            var corners = Enum.GetValues(typeof(CalibCornersEnum));
+            var trfCorners = (ICalibCornerPoints)transform;
+            var camPts = trfCorners?.GetAll(isSrc: true);
 
+            var corners = Enum.GetValues(typeof(CalibCornersEnum));
             foreach (CalibCornersEnum corner in corners)
             {
                 int rowId = (int)corner;
-                var camPt = transform?.GetSrcRef(rowId);
+                var camPt = camPts != null ? camPts[rowId] : null;
                 updateCalibKeyPointBox(corner, camPt);
             }
         }
@@ -524,7 +531,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             // TRANSFORMS
             var newFile = CALIB_TRANSFORMS_INI_FILE;
-            if (!System.IO.File.Exists(newFile))
+            if (!System.IO.File.Exists(newFile) || true)
                 _transforms.LoadGaaraIniFile();
             else
                 _transforms.Load(newFile);

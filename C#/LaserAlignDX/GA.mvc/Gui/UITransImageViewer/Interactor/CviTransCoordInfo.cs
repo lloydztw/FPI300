@@ -15,7 +15,7 @@
 
 using JetEazy.ImageViewerEx;
 using JetEazy.QMath;
-using LaserAlignDX.Model.Transforms;
+using JetEazy.Transform;
 using System.Drawing;
 using System.Windows.Forms;
 

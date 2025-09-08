@@ -14,15 +14,14 @@
 #endregion
 
 using JetEazy.QMath;
-using System;
 
 
-namespace LaserAlignDX.Model.Coords
+namespace JetEazy.Transform
 {
     /// <summary>
     /// 座標系 抽象類別
     /// </summary>
-    public class QCoord : QVector
+    internal class QCoord : QVector
     {
         public virtual string UNIT
         {
