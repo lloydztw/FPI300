@@ -2,15 +2,14 @@
 using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
 using JetEazy.FormSpace;
-using LaserAlignDX.FormSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Windows.Forms;
 using Traveller106;
-//using Traveller106.OPSpace;
 
-//using Mist.OPSpace;
-//using Mist.DBSpace;
+//using FormRecipeEditor = LaserAlignDX.FormSpace.frmFPIRecipe;
+using FormRecipeEditor = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
+
 
 namespace PhotoMachine.UISpace
 {
@@ -427,7 +426,7 @@ namespace PhotoMachine.UISpace
         //frmFPIRecipe frmRecipeSetup = null;
         void showRecipeDialogWindow()
         {
-            using (var frmRecipeSetup = new frmFPIRecipe())
+            using (var frmRecipeSetup = new FormRecipeEditor())
             {
                 frmRecipeSetup.ShowDialog();
             }

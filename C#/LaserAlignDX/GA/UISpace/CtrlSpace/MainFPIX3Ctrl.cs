@@ -170,7 +170,9 @@ namespace LaserAlignDX.UISpace.CtrlSpace
         private void BtnCalib_Click(object sender, EventArgs e)
         {
             using (var calibTool = new FormCalibration())
+            {
                 calibTool.ShowDialog();
+            }
         }
 
         private void BtnSIMData_Click(object sender, EventArgs e)

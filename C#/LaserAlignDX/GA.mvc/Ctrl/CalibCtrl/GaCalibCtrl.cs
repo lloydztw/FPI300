@@ -20,7 +20,6 @@ using JetEazy.EzImage;
 using JetEazy.Interface;
 using JetEazy.Match;
 using JetEazy.OpenCV;
-using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
@@ -135,8 +134,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void connectEventHandlers()
         {
-            _btnOK.Click += (s, e) => CloseTool(true);
-            _btnCancel.Click += (s, e) => CloseTool(false);
+            _btnOK.Click += (s, e) => CloseWindow(true);
+            _btnCancel.Click += (s, e) => CloseWindow(false);
 
             _rdoCarriers[0].CheckedChanged += _rdoSelect_CheckedChanged;
             _rdoSuckerRows[0].CheckedChanged += _rdoSelect_CheckedChanged;
@@ -403,7 +402,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (fullfovImg == null)
                 return;
 
-            //(1) Peek the ezImage (deepCopy = false 所以不用 Dispose())
+            //(1) Peek the ezImage
             var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
 
             //(2) Cropping the golden Bitmap
@@ -418,8 +417,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             matchSetting.GoldenBox.Value = goldenRect;
             updateVisionParams(_activeCarrierID, false);
 
-            ////(4) Build the Golden Grid
-            //BuildGoldenGrid();
+            //(4) CleanUp
+            ezImage?.Dispose();
         }
         bool BuildGoldenGrid()
         {
@@ -427,7 +426,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (fullfovImg == null)
                 return false;
 
-            //(1) Peek the ezImage (deepCopy = false 所以不用 Dispose())
+            //(1) Peek the ezImage
             var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
 
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
@@ -442,6 +441,9 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var msg = QxNums.GetEnumDescription(err);
                 MessageBox.Show(msg, _wndOwner.FindForm().Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
+            
+            //(4) CleanUp
+            ezImage?.Dispose();
 
             GaUtil.SetCursor(_wndOwner, oldCursor);
 
@@ -459,7 +461,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (fullfovImg == null)
                 return;
 
-            //(1) Peek the ezImage (deepCopy = false 所以不用 Dispose())
+            //(1) Peek the ezImage
             var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
 
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
@@ -483,6 +485,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             _cviResultBox.Visible = true;
             _imgViewer.MatViewer.Invalidate();
 
+            //(6) CleanUp
+            ezImage?.Dispose();
+
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
         void BuildAllTransforms()
@@ -503,6 +508,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         void LoadImage()
         {
             enableGoldenPicking(false);
+
             string fileName = GaUtil.BrowseImageFile();
             if (fileName != null)
             {
@@ -565,7 +571,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _jxCalibAoiSettings.Save(CALIB_VISION_JSON_FILE);
             }
         }
-        void CloseTool(bool confirm)
+        void CloseWindow(bool confirm)
         {
             if (confirm)
             {
@@ -581,7 +587,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             var frm = _wndOwner.FindForm();
             frm?.Close();
-            frm?.Dispose();
+            //frm?.Dispose();
         }
     }
 }
