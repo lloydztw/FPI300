@@ -31,14 +31,23 @@ namespace JetEazy.Transform
             JetEazy.Win32.Win32Ini.Load(ref rows, iniFileName, sectName, "KP_ROWS");
             JetEazy.Win32.Win32Ini.Load(ref cols, iniFileName, sectName, "KP_COLS");
 
-            for (int r = 0; r < rows; r++)
+            if (rows >= 2 && cols >= 2)
             {
-                for (int c = 0; c < cols; c++)
+                if (rows > trf._srcPoints.GetLength(0) || cols > trf._srcPoints.GetLength(1))
                 {
-                    trf._srcPoints[r, c] = new QVector((double)r, (double)c);
-                    trf._dstPoints[r, c] = new QVector((double)r, (double)c);
-                    trf._srcPoints[r, c].LoadIni(iniFileName, sectName, $"SRC_KP_{r}_{c}");
-                    trf._dstPoints[r, c].LoadIni(iniFileName, sectName, $"DST_KP_{r}_{c}");
+                    trf._srcPoints = new QVector[rows, cols];
+                    trf._dstPoints = new QVector[rows, cols];
+                }
+
+                for (int r = 0; r < rows; r++)
+                {
+                    for (int c = 0; c < cols; c++)
+                    {
+                        trf._srcPoints[r, c] = new QVector((double)r, (double)c);
+                        trf._dstPoints[r, c] = new QVector((double)r, (double)c);
+                        trf._srcPoints[r, c].LoadIni(iniFileName, sectName, $"SRC_KP_{r}_{c}");
+                        trf._dstPoints[r, c].LoadIni(iniFileName, sectName, $"DST_KP_{r}_{c}");
+                    }
                 }
             }
 

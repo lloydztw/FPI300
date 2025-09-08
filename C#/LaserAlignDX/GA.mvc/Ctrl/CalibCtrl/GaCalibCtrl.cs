@@ -19,6 +19,7 @@ using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.Interface;
 using JetEazy.Match;
+using JetEazy.OpenCV;
 using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
@@ -521,6 +522,16 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             enableGoldenPicking(false);
             updateGuiStatus();
+            var freeBmp = IScanCam.GetFreeImageBitmap();
+            if (freeBmp != null)
+            {
+                using (var bmp = freeBmp.ToBitmap())
+                using (var bridge = new QxImageBridge(bmp))
+                {
+                    var old = _imgViewer.MatViewer.Image;
+                    _imgViewer.MatViewer.Image = bridge.Image.Clone();
+                }
+            }
         }
 
         void LoadSettings()
@@ -531,7 +542,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             // TRANSFORMS
             var newFile = CALIB_TRANSFORMS_INI_FILE;
-            if (!System.IO.File.Exists(newFile) || true)
+            if (!System.IO.File.Exists(newFile))
                 _transforms.LoadGaaraIniFile();
             else
                 _transforms.Load(newFile);

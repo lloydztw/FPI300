@@ -16,9 +16,6 @@
 
 using JetEazy.QMath;
 using JetEazy.Transform;
-using System;
-using System.Linq.Expressions;
-using System.Windows.Documents;
 
 namespace LaserAlignDX.Model.Coords
 {
