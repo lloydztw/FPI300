@@ -90,7 +90,7 @@ namespace LaserAlignDX.Mvc.Gui
             if (WindowState == FormWindowState.Minimized)
                 return;
 
-            panelDockLeft.Width = ClientRectangle.Right - tbLayoutDockRight.Left;
+            panelDockLeft.Width = ClientRectangle.Width - tbLayoutDockRight.Width;
         }
         #endregion
     }

@@ -180,6 +180,8 @@ namespace JetEazy.Transform
 
             // 條件檢查
             checkPointsCondition(_srcPoints, _dstPoints);
+            SrcDynamicRanges(reset: true);
+            DstDynamicRanges(reset: true);
 
             // 準備建立轉換矩陣
             _mat?.Dispose();
@@ -336,14 +338,14 @@ namespace JetEazy.Transform
             }
             if (_dstRanges == null)
             {
-                _dstRanges = createRanges(_srcPoints);
+                _dstRanges = createRanges(_dstPoints);
             }
             return _dstRanges;
         }
         DynamicRange[] createRanges(QVector[,] coords)
         {
-            QVector v_min = new QVector();  //double.MaxValue, double.MaxValue);
-            QVector v_max = new QVector();  //double.MinValue, double.MinValue);
+            QVector v_min = new QVector2();  //double.MaxValue, double.MaxValue);
+            QVector v_max = new QVector2();  //double.MinValue, double.MinValue);
 
             for (int i = 0; i < N_DIMS; i++)
             {
@@ -355,7 +357,7 @@ namespace JetEazy.Transform
             {
                 for (int i = 0; i < N_DIMS; i++)
                 {
-                    v_min[i] = Math.Max(v_min[i], coord[i]);
+                    v_min[i] = Math.Min(v_min[i], coord[i]);
                     v_max[i] = Math.Max(v_max[i], coord[i]);
                 }
             }
@@ -374,9 +376,11 @@ namespace JetEazy.Transform
         {
             var pts = Array.ConvertAll(coords, (c) =>
             {
-                double x = ranges[0].Normalize(c.X);
-                double y = ranges[1].Normalize(c.Y);
-                var pt = new Point2d(x, y);
+                var pt = new Point2d()
+                {
+                    X = ranges[0].Normalize(c.X),
+                    Y = ranges[1].Normalize(c.Y)
+                };
                 return pt;
             });
             return pts;
@@ -386,9 +390,12 @@ namespace JetEazy.Transform
             var pts = new List<Point2d>();
             foreach(var c in coords)
             {
-                double x = ranges[0].Normalize(c.X);
-                double y = ranges[1].Normalize(c.Y);
-                pts.Add(new Point2d(c.X, c.Y));
+                var pt = new Point2d()
+                {
+                    X = ranges[0].Normalize(c.X),
+                    Y = ranges[1].Normalize(c.Y)
+                };
+                pts.Add(pt);
             }
             return pts.ToArray();
         }

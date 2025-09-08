@@ -13,12 +13,11 @@
  */
 #endregion
 
-using JetEazy.Transform;
 using JetEazy.Match;
 using JetEazy.QMath;
+using JetEazy.Transform;
+using JetEazy.Utils;
 using System;
-using System.Collections.Generic;
-using System.Windows.Documents;
 
 
 namespace LaserAlignDX.Model.Coords
@@ -55,6 +54,7 @@ namespace LaserAlignDX.Model.Coords
         static TravellerTransforms _instance;
         TravellerTransforms()
         {
+            QVector.Percision = 12;
         }
         #endregion
 
@@ -210,7 +210,7 @@ namespace LaserAlignDX.Model.Coords
                 {
                     trfCorners.Set(i, camCornerPts[i], phyCornerPts[i]);
                 }
-                transCameraToPhysic.Build();
+                return;
             }
             if (true)
             {
@@ -219,7 +219,6 @@ namespace LaserAlignDX.Model.Coords
                 var transCameraToPhysic = this.GetCameraPhysicTransform(C);
                 var trfGridPoints = transCameraToPhysic.GetCalibGridPoints();
                 trfGridPoints.SetAll(camPts, plcPts);
-                transCameraToPhysic.Build();
             }
         }
 
@@ -228,11 +227,13 @@ namespace LaserAlignDX.Model.Coords
         /// </summary>
         public void BuildAll()
         {
-            var trfC1 = GetCameraPhysicTransform(CarrierEnum.C1);
             foreach (var trf in _transforms)
             {
-                if (trf == trfC1) continue;
+                if (trf == null) continue;
                 trf?.Build();
+                trf.CheckBuildCondition(out double det1, out double det2);
+                GaUtil.LOG($"MATRIX_{trf.Name} det1 = {det1:0.000000}");
+                GaUtil.LOG($"MATRIX_{trf.Name} det2 = {det2:0.000000}");
             }
         }
 

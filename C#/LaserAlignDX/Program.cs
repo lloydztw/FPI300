@@ -1,5 +1,4 @@
-﻿using JetEazy.QMath;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
 
@@ -15,8 +14,6 @@ namespace LaserAlignDX
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
-            QVector.Percision = 9;
 
             // 只跑單元測試
             if (run_unit_tests())

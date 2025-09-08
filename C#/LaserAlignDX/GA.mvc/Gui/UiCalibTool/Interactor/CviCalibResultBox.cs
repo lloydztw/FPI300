@@ -43,7 +43,7 @@ namespace LaserAlignDX.Mvc.Gui
         #endregion
 
         #region RUNTIME_DATA
-        //string _dumpFileName;
+        int _debugOption = -1;
         #endregion
 
         public void Reset()
@@ -86,6 +86,17 @@ namespace LaserAlignDX.Mvc.Gui
                 _cursorBloc2 = null;
                 viewer.Invalidate();
             }
+            else
+            {
+            }
+
+            switch (e.KeyCode)
+            {
+                case Keys.Escape: scanSelfErrors(_debugOption = -1); viewer.Invalidate(); break;
+                case Keys.X: scanSelfErrors(_debugOption = 0); viewer.Invalidate(); break;
+                case Keys.Y: scanSelfErrors(_debugOption = 1); viewer.Invalidate(); break;
+                case Keys.B: scanSelfErrors(_debugOption = 2); viewer.Invalidate(); break;
+            }
 
             base.OnKeyDown(viewer, e);
         }
@@ -98,14 +109,8 @@ namespace LaserAlignDX.Mvc.Gui
             if (!isWorld)
                 viewer.SwitchToWorldCoordinate(gxView);
 
-            //// 畫出 grid 節點線
-            //draw_grid_lines(viewer, gxView, _matchResult?.Grid);
-
             // 畫出 正常 Blocs (有吸嘴)
             draw_bloc_rects(viewer, gxView, _suckerBlocs, Color.Blue, Color.DarkBlue, 0.25f);
-
-            //// 畫記 異常 Blocs (沒有吸嘴)
-            //draw_bloc_rects(viewer, gxView, iter_ng_blocs(), Color.Red, Color.DarkRed, 0.25f);
 
             // Cursors
             draw_cursor(viewer, gxView, _cursorBloc2, Color.White);
@@ -215,6 +220,12 @@ namespace LaserAlignDX.Mvc.Gui
                     continue;
 
                 var pen = bloc.IsMajorNode() ? viewer.GetOnePixelPen(color) : viewer.GetOnePixelPen(color2);
+
+                if (_debugOption >= 0)
+                {
+                    brush?.Dispose();
+                    brush = getDebugBrush(bloc);
+                }
 
                 if (isWorldDrawing)
                 {
@@ -596,7 +607,6 @@ namespace LaserAlignDX.Mvc.Gui
                 sb.AppendLine($"相機座標 距離 = {dist:0.0} pix");
             }
         }
-
         void appendMotorCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
             var transform = TransCameraToMotor;
@@ -619,7 +629,6 @@ namespace LaserAlignDX.Mvc.Gui
                 sb.AppendLine($"馬達座標 距離 = {dist:0.000} mm");
             }
         }
-
         void appendWorldCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
             var transform = TransCameraToWorld;
@@ -642,7 +651,6 @@ namespace LaserAlignDX.Mvc.Gui
                 sb.AppendLine($"Physic座標 距離 = {dist:0.000} mm");
             }
         }
-
         void appendPlcCompensation(StringBuilder sb, EzBloc bloc, int row, int col)
         {
             if (bloc == null)
@@ -659,6 +667,50 @@ namespace LaserAlignDX.Mvc.Gui
             sb.AppendLine();
             sb.AppendLine($"Phy 變動值 ΔX = {dErr.X:0.000} mm");
             sb.AppendLine($"Phy 變動值 ΔY = {dErr.Y:0.000} mm");
+        }
+
+        void scanSelfErrors(int option)
+        {
+            if(_grid==null) return;
+            int rows = _grid.Rows;
+            int cols = _grid.Cols;
+            var transformsModel = GaMvcConfig.TransformsModel;
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    var bloc = _grid[r, c];
+                    var res = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, r, c);
+                    var dV = res[0];
+                    var dErr = res[1];
+
+                    double err;
+                    if (option == 0)
+                        err = Math.Abs(dErr.X);
+                    else if (option == 1)
+                        err = Math.Abs(dErr.Y);
+                    else if (option == 2)
+                        err = Math.Max(Math.Abs(dErr.X), Math.Abs(dErr.Y));
+                    else
+                        err = 0;
+                    bloc.SQRatio = err;
+                }
+            }
+        }
+        Brush getDebugBrush(EzBloc bloc)
+        {
+            var err = Math.Abs(bloc.SQRatio);
+            if (err < 0.010)
+                return new SolidBrush(Color.FromArgb(64, Color.Blue));
+            else if(err < 0.020)
+                return new SolidBrush(Color.FromArgb(64, Color.Yellow));
+            else if (err < 0.030)
+                return new SolidBrush(Color.FromArgb(64, Color.Orange));
+            else if(err < 0.050)
+                return new SolidBrush(Color.FromArgb(64, Color.Red));
+            else
+                return new SolidBrush(Color.FromArgb(128, Color.Red));
         }
     }
 }
