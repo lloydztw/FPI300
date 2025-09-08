@@ -95,14 +95,14 @@ namespace LaserAlignDX.Model.Coords
         private QVector getCameraBasePoint(CarrierEnum C)
         {
             var trf = GetCameraPhysicTransform(C) ?? GetCameraMotorTransform(C, SuckerRowEnum.S1);
-            var trfCorners = (ICalibCornerPoints)trf;
+            var trfCorners = trf.GetCalibCornerPoints();
             trfCorners.Get(0, out var camPt, out var _);
             return camPt;
         }
         private QVector getMotorBasePoint(CarrierEnum C, SuckerRowEnum S)
         {
             var trf = GetCameraMotorTransform(C, S);
-            var trfCorners = (ICalibCornerPoints)trf;
+            var trfCorners = trf.GetCalibCornerPoints();
             trfCorners.Get(0, out var _, out var motorPt);
             return motorPt;
         }
@@ -217,7 +217,7 @@ namespace LaserAlignDX.Model.Coords
                 var camPts = toCalibGrid(camGrid);
                 var plcPts = toCalibGrid(_plcGrid);
                 var transCameraToPhysic = this.GetCameraPhysicTransform(C);
-                var trfGridPoints = (ICalibGridPoints)transCameraToPhysic;
+                var trfGridPoints = transCameraToPhysic.GetCalibGridPoints();
                 trfGridPoints.SetAll(camPts, plcPts);
                 transCameraToPhysic.Build();
             }

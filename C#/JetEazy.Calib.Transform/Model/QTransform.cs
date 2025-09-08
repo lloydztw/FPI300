@@ -92,6 +92,12 @@ namespace JetEazy.Transform
         }
         #endregion
 
+        public ICalibGridPoints GetCalibGridPoints()
+        {
+            return this;
+        }
+        
+        #region CALIB_GRID_POINTS
         int ICalibCornerPoints.Counts => 4;
         QVector[] ICalibCornerPoints.GetAll(bool isSrc)
         {
@@ -122,7 +128,14 @@ namespace JetEazy.Transform
             SrcDynamicRanges(reset: true);
             DstDynamicRanges(reset: true);
         }
+        #endregion
 
+        public ICalibCornerPoints GetCalibCornerPoints()
+        {
+            return this;
+        }
+        
+        #region CALIB_CORNER_POINTS
         int ICalibGridPoints.Rows => _srcPoints.GetLength(0);
         int ICalibGridPoints.Cols => _srcPoints.GetLength(1);
         void ICalibGridPoints.SetAll(QVector[,] srcPoints, QVector[,] dstPoints)
@@ -159,6 +172,7 @@ namespace JetEazy.Transform
             src = new QVector(_srcPoints[row, col]);
             dst = new QVector(_dstPoints[row, col]);
         }
+        #endregion
 
         public bool Build()
         {

@@ -125,7 +125,7 @@ namespace LaserAlignDX.Model.Coords
             string sectName = "Tray";
 
             int[] cornerIndexes = new[] { 0, 1, 3, 2 };
-            var trfCorners = (ICalibCornerPoints)trf;
+            var trfCorners = trf.GetCalibCornerPoints();
             var srcCornerPoints = trfCorners.GetAll(isSrc: true);
             var dstCornerPoints = trfCorners.GetAll(isSrc: false);
 
@@ -164,7 +164,7 @@ namespace LaserAlignDX.Model.Coords
             string sectName = "Tray";
 
             int[] cornerIndexes = new[] { 0, 1, 3, 2 };
-            var trfCorners = (ICalibCornerPoints)trf;
+            var trfCorners = trf.GetCalibCornerPoints();
             var srcCornerPoints = trfCorners.GetAll(isSrc: true);
             var dstCornerPoints = trfCorners.GetAll(isSrc: false);
 

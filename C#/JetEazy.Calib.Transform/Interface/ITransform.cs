@@ -27,11 +27,8 @@ namespace JetEazy.Transform
         QVector Trans(QVector pt);
         QVector InvTrans(QVector pt);
 
-        //void GetCalibrationPoints(out QVector[,] srcPoints, out QVector[,] dstPoints);
-        //void SetCalibrationPoints(QVector[,] srcPoints, QVector[,] dstPoints);
-
-        //CalibPointPair[] GetCalibCorners();
-        //void SetCalibCorners(CalibPointPair[] calibCorners);
+        ICalibGridPoints GetCalibGridPoints();
+        ICalibCornerPoints GetCalibCornerPoints();
 
         bool Build();
         bool CheckBuildCondition(out double det, out double det2);

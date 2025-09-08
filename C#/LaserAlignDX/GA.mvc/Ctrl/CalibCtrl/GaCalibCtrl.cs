@@ -217,7 +217,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var dgv = _dgvCalibPointsListView.DataGridView;
 
             var transform = _transforms.GetCameraMotorTransform(carrierID, suckerRowID);
-            var trfCalibCorners = (ICalibCornerPoints)transform;
+            var trfCalibCorners = transform.GetCalibCornerPoints();
             var camPts = trfCalibCorners?.GetAll(isSrc: true);
             var motorPts = trfCalibCorners?.GetAll(isSrc: false);
             
@@ -354,7 +354,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var suckerRowID = _activeSuckerRowID;
 
             var transform = _transforms.GetCameraMotorTransform(carrierID, suckerRowID);
-            var trfCorners = (ICalibCornerPoints)transform;
+            var trfCorners = transform.GetCalibCornerPoints();
             var camPts = trfCorners?.GetAll(isSrc: true);
 
             var corners = Enum.GetValues(typeof(CalibCornersEnum));
