@@ -72,6 +72,11 @@ namespace LaserAlignDX.Mvc.Ctrl
         string _recipeFileName;
         #endregion
 
+        internal CalibAoiModel GetAoiModel()
+        {
+            return _aoiModel;
+        }
+
         #region GUI_LINKS
         IvCalibToolUI _calibToolUI;
         Control _wndOwner => _calibToolUI.Window;
@@ -462,6 +467,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             _cviResultBox.Reset();
             _imgViewer.MatViewer.Invalidate();
         }
+        #endregion
+
         internal void ShowCviResult(bool show, bool clear = false)
         {
             if (clear)
@@ -480,7 +487,6 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             enableGoldenPicking(enabled);
         }
-        #endregion
 
         void BuildGolden()
         {

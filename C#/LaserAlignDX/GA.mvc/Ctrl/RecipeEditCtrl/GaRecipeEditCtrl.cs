@@ -417,16 +417,17 @@ namespace LaserAlignDX.Mvc.Ctrl
             enableGoldenChipPicking(false);
 
             // 更新 Plc Grid
-            //var traySettings = _jxRecipeCombo.EmptyTrayParams.TrayMiscSettings;
-            //var rows = (int)traySettings.FullRows.Value;
-            //var cols = (int)traySettings.FullCols.Value;
-            //var pitchX = (double)traySettings.PitchX.Value;
-            //var pitchY = (double)traySettings.PitchY.Value;
-            //GaMvcConfig.TransformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
             updatePlcGridConfig(true);
 
-            // 執行自動抓取格點
+            // 利用 GaCalibCtrl 執行空盤檢測 並且 自動抓取格點
             _calibCtrl.RunAutoFetch(true);
+
+            // 將 格點 回存 Recipe
+            var aoiModel = _calibCtrl.GetAoiModel();
+            var result = aoiModel.GetResult();
+            var grid = result?.Grid;
+            if (grid != null)
+                _jxRecipeCombo.EmptyTrayParams.TrayMiscSettings.SetGoldenGrid(grid);
         }
         void BuildGoldenChipRegion(int target = 0)
         {
