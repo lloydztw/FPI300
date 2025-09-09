@@ -8,10 +8,6 @@ using System.Windows.Forms;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
 
-using FormCalibration = LaserAlignDX.Mvc.Gui.FormCalibrationTool;
-//using FormCalibration = LaserAlignDX.FormSpace.FPI30Form.frmCalibration;
-
-
 namespace LaserAlignDX.UISpace.CtrlSpace
 {
     public partial class MainFPIX3Ctrl : UserControl
@@ -169,10 +165,11 @@ namespace LaserAlignDX.UISpace.CtrlSpace
 
         private void BtnCalib_Click(object sender, EventArgs e)
         {
-            using (var calibTool = new FormCalibration())
-            {
-                calibTool.ShowDialog();
-            }
+            //using (var calibTool = new FormCalibration())
+            //{
+            //    calibTool.ShowDialog();
+            //}
+            GaMvcConfig.OpenCalibrationTool();
         }
 
         private void BtnSIMData_Click(object sender, EventArgs e)

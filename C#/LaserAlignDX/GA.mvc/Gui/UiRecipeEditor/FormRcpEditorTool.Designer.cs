@@ -30,10 +30,12 @@ namespace LaserAlignDX.Mvc.Gui
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormRcpEditorTool));
             this.tbLayoutDockRight = new System.Windows.Forms.TableLayoutPanel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.gwPanePropsViewer1 = new LeTian.JxProps.Gui.GwPanePropsViewer();
+            this.gvCalibPointsDataGridView1 = new LaserAlignDX.Mvc.Gui.GvCalibPointsDataGridView();
             this.panelB = new System.Windows.Forms.Panel();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
@@ -43,6 +45,7 @@ namespace LaserAlignDX.Mvc.Gui
             this.rdoCarrier1 = new System.Windows.Forms.RadioButton();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panelBtns = new System.Windows.Forms.Panel();
+            this.btnSaveImage = new System.Windows.Forms.Button();
             this.btnOpenTemplateMatch = new System.Windows.Forms.Button();
             this.btnOpenFlyCamRcpEditor = new System.Windows.Forms.Button();
             this.btnPickGoldenEmptyRegion = new System.Windows.Forms.Button();
@@ -52,9 +55,8 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnGrabImage = new System.Windows.Forms.Button();
             this.btnPickGoldenChipRegion = new System.Windows.Forms.Button();
             this.panelDockLeft = new System.Windows.Forms.Panel();
-            this.btnSaveImage = new System.Windows.Forms.Button();
-            this.gvCalibPointsDataGridView1 = new LaserAlignDX.Mvc.Gui.GvCalibPointsDataGridView();
             this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.tbLayoutDockRight.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.panelB.SuspendLayout();
@@ -111,6 +113,16 @@ namespace LaserAlignDX.Mvc.Gui
             this.gwPanePropsViewer1.Name = "gwPanePropsViewer1";
             this.gwPanePropsViewer1.Size = new System.Drawing.Size(699, 503);
             this.gwPanePropsViewer1.TabIndex = 0;
+            // 
+            // gvCalibPointsDataGridView1
+            // 
+            this.gvCalibPointsDataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(3, 83);
+            this.gvCalibPointsDataGridView1.Name = "gvCalibPointsDataGridView1";
+            this.gvCalibPointsDataGridView1.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.gvCalibPointsDataGridView1.SelectedIndex = 0;
+            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(717, 58);
+            this.gvCalibPointsDataGridView1.TabIndex = 0;
             // 
             // panelB
             // 
@@ -247,6 +259,19 @@ namespace LaserAlignDX.Mvc.Gui
             this.panelBtns.TabIndex = 28;
             this.panelBtns.Text = "像測操作";
             // 
+            // btnSaveImage
+            // 
+            this.btnSaveImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnSaveImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnSaveImage.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.btnSaveImage.Location = new System.Drawing.Point(166, 75);
+            this.btnSaveImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnSaveImage.Name = "btnSaveImage";
+            this.btnSaveImage.Size = new System.Drawing.Size(120, 52);
+            this.btnSaveImage.TabIndex = 30;
+            this.btnSaveImage.Text = "另存圖片";
+            this.btnSaveImage.UseVisualStyleBackColor = false;
+            // 
             // btnOpenTemplateMatch
             // 
             this.btnOpenTemplateMatch.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
@@ -361,29 +386,6 @@ namespace LaserAlignDX.Mvc.Gui
             this.panelDockLeft.Size = new System.Drawing.Size(665, 951);
             this.panelDockLeft.TabIndex = 1;
             // 
-            // btnSaveImage
-            // 
-            this.btnSaveImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.btnSaveImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnSaveImage.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.btnSaveImage.Location = new System.Drawing.Point(166, 75);
-            this.btnSaveImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnSaveImage.Name = "btnSaveImage";
-            this.btnSaveImage.Size = new System.Drawing.Size(120, 52);
-            this.btnSaveImage.TabIndex = 30;
-            this.btnSaveImage.Text = "另存圖片";
-            this.btnSaveImage.UseVisualStyleBackColor = false;
-            // 
-            // gvCalibPointsDataGridView1
-            // 
-            this.gvCalibPointsDataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(3, 83);
-            this.gvCalibPointsDataGridView1.Name = "gvCalibPointsDataGridView1";
-            this.gvCalibPointsDataGridView1.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.gvCalibPointsDataGridView1.SelectedIndex = 0;
-            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(717, 58);
-            this.gvCalibPointsDataGridView1.TabIndex = 0;
-            // 
             // jezTransImageViewPanel1
             // 
             this.jezTransImageViewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -393,6 +395,13 @@ namespace LaserAlignDX.Mvc.Gui
             this.jezTransImageViewPanel1.Padding = new System.Windows.Forms.Padding(0, 2, 0, 1);
             this.jezTransImageViewPanel1.Size = new System.Drawing.Size(665, 951);
             this.jezTransImageViewPanel1.TabIndex = 0;
+            // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "EmptyTrayParams");
+            this.imageList1.Images.SetKeyName(1, "GaGridParams");
             // 
             // FormRcpEditorTool
             // 
@@ -447,5 +456,6 @@ namespace LaserAlignDX.Mvc.Gui
         private System.Windows.Forms.Button btnOpenTemplateMatch;
         private GvCalibPointsDataGridView gvCalibPointsDataGridView1;
         private System.Windows.Forms.Button btnSaveImage;
+        private System.Windows.Forms.ImageList imageList1;
     }
 }

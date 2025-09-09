@@ -1,13 +1,8 @@
 ﻿using Eazy_Project_III;
 using JetEazy;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing.Design;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LaserAlignDX.BasicSpace
 {

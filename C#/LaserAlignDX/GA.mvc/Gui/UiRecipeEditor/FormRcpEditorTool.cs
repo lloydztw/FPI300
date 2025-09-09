@@ -14,7 +14,9 @@
 #endregion
 
 using JetEazy.BasicSpace;
+using JetEazy.QMath;
 using LaserAlignDX.Mvc.Ctrl;
+using System;
 using System.Windows.Forms;
 
 
@@ -74,6 +76,16 @@ namespace LaserAlignDX.Mvc.Gui
         Button IvRecipeEditorUI.btnOK => btnOK;
         #endregion
 
+        public void UpdateCoordsRef(QVector camPt, QVector motorPt)
+        {
+            var dgv = gvCalibPointsDataGridView1.DataGridView;
+            int ci = 1;
+            dgv.Rows[0].Cells[ci++].Value = camPt != null ? camPt.X : 0.0;
+            dgv.Rows[0].Cells[ci++].Value = camPt != null ? camPt.Y : 0.0;
+            dgv.Rows[0].Cells[ci++].Value = motorPt != null ? motorPt.X : 0.0;
+            dgv.Rows[0].Cells[ci++].Value = motorPt != null ? motorPt.Y : 0.0;
+        }
+
         #region EVENT_HANDLERS
         private void Form_Load(object sender, System.EventArgs e)
         {
@@ -112,11 +124,19 @@ namespace LaserAlignDX.Mvc.Gui
         void initDgv()
         {
             var dgv = gvCalibPointsDataGridView1.DataGridView;
-            dgv.Columns[0].Width = 0;
             while (dgv.Rows.Count > 1)
                 dgv.Rows.RemoveAt(dgv.Rows.Count - 1);
+            
+            dgv.Columns[0].HeaderCell.Value = "點位";
+            int cols = dgv.Columns.Count;
+            for (int c = 0; c < cols; c++)
+            {
+                dgv.Columns[c].ReadOnly = true;
+            }
+
             gvCalibPointsDataGridView1.SelectedIndex = -1;
-            gvCalibPointsDataGridView1.Height = 2;
+            //gvCalibPointsDataGridView1.Height = 2;
+            //dgv.Columns[0].Width = 0;
         }
         #endregion
     }

@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.QMath;
 using System.Windows.Forms;
 
 
@@ -22,7 +23,6 @@ namespace LaserAlignDX.Mvc.Gui
     {
         Control Window { get; }
         JezTransImageViewPanel ImgViewer { get; }
-        //PropertyGrid pgParamsView { get; }
         Control wndVisionSettingsPanel { get; }
 
         Button btnLoadImage { get; }
@@ -42,5 +42,7 @@ namespace LaserAlignDX.Mvc.Gui
 
         Button btnCancel { get; }
         Button btnOK { get; }
+
+        void UpdateCoordsRef(QVector camPt, QVector motorPt);
     }
 }

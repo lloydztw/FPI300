@@ -17,13 +17,18 @@ using EzAoiEmptyTrayInspector.Model;
 using JetEazy.BasicSpace;
 using JetEazy.EzImage;
 using JetEazy.Interface;
+using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.FormSpace;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
+using LaserAlignDX.Mvc.Model.Recipe;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LeTian.JxProps.Gui;
 using System;
 using System.Drawing;
+using System.Windows.Documents;
 using System.Windows.Forms;
 using Traveller106;
 
@@ -41,7 +46,9 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         #region RECIPE
         RecipeFPIX3Class xRecipe => RecipeFPIX3Class.Instance;
-        JxAoiRecipe _jxEmptyTrayRecipe;
+        //RecipeParaGridClass _gaParams => RecipeParaGridClass.Instance;
+        //JxAoiRecipe _jxEmptyTrayRecipe => _jxRecipeCombo?.EmptyTrayParams;
+        JxRecipeCombo _jxRecipeCombo;
         string getEmptyTrayRecipeFileName()
         {
             return LtAoiFactory.RcpGetRecipeFileName(null);
@@ -63,6 +70,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         internal IvRecipeEditorUI _rcpEditUI;
         Form _frmOwner;
 
+        Button btnPickGoldenEmptyRegion => _rcpEditUI.btnPickGoldenEmptyRegion;
         Button btnRunEmptyTrayInspect => _rcpEditUI.btnRunEmptyTrayInspect;
         Button btnPickGoldenChipRegion => _rcpEditUI.btnPickGoldenChipRegion;
         Button btnCreateRegions => _rcpEditUI.btnCreateCellRegions;
@@ -96,7 +104,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             _lineScanImageHolder.OnImageChanged -= _lineScanImageHolder_OnImageChanged;
             LtAoiFactory.OnLineScanRequested -= LtAoi_OnLineScanRequested;
             // Recipe
-            _jxEmptyTrayRecipe?.Dispose();
+            _jxRecipeCombo?.Dispose();
+            _jxRecipeCombo = null;
         }
 
         #region PRIVATE_INIT_FUNCTIONS
@@ -110,12 +119,16 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 載入 空盤檢測 參數
             LoadSettings();
 
+            // EmptyTrayRecipe
+            var recipeFileName = getEmptyTrayRecipeFileName();
+            var jxEmptyTrayRecipe = _jxRecipeCombo?.EmptyTrayParams;
+
             // 重複利用 GaCalibCtrl
             _calibCtrl = new GaCalibCtrl();
-            _calibCtrl.Attach(new PseudoCalibUI(this), _jxEmptyTrayRecipe, getEmptyTrayRecipeFileName());
+            _calibCtrl.Attach(new Rcp.PseudoCalibUI(this), jxEmptyTrayRecipe, recipeFileName);
 
             // 因為 GaCalibCtrl 會調用 _jxEmptyTrayRecipe.Dispose(), 所以在此處要多 AddRef() 一次.
-            _jxEmptyTrayRecipe.AddRef();
+            jxEmptyTrayRecipe.AddRef();
         }
         void connectEventHandlers()
         {
@@ -125,9 +138,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             btnOK.Click += (s, e) => CloseWindow(confirm: true);
             btnCancel.Click += (s, e) => CloseWindow(confirm: false);
             btnSaveImage.Click += (s, e) => SaveImageOrg();
-            //btnLoadImage.Click += (s, e) => LoadImage();
-            //btnGrabImage.Click += (s, e) => GrabImage();
 
+            //btnLoadImage.Click += (s, e) => LoadImage();  //<<< 已經於 GaCalibCtrl 處理
+            //btnGrabImage.Click += (s, e) => GrabImage();  //<<< 已經於 GaCalibCtrl 處理
+
+            btnPickGoldenEmptyRegion.Click += (s, e) => enableGoldenChipPicking(false);
             btnPickGoldenChipRegion.Click += (s, e) => toggleGoldenChipPicking();
             btnCreateRegions.Click += (s, e) => AutoCreateRegions();
             _cviGoldenChipBox.OnBoxSelected += (s, e) => BuildGoldenChipRegion();
@@ -147,7 +162,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 updateRecipeParams(false);
 
                 // 顯示默認的圖
-                _lineScanImageHolder.TakeOver((Bitmap)xRecipe.bmpOrg.Clone(), "[參數] bmpOrg");
+                new Action(() => _lineScanImageHolder.TakeOver((Bitmap)xRecipe.bmpOrg.Clone(), "[參數] bmpOrg")).BeginInvoke(null, null);
             };
         }
         #endregion
@@ -167,6 +182,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             else
             {
+                enableGoldenChipPicking(false);
+
                 //--------------------------------------------------
                 // 更新到 xRecipe 的 bmpOrg 或 bmpNoTray
                 // xRecipe 會接手 newBmp
@@ -189,20 +206,43 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region PRIVATE_UPDATE_FUNCTIONS
         void updateRecipeParams(bool toModel)
         {
-            //(1) 顯示 xRecipe.bmpOrg 圖片
-            //DS1.ReplaceDisplayImage(xRecipe.bmpOrg);
-            //DS2.ReplaceDisplayImage(xRecipe.bmpOrgNoTray);
-            //(2) 顯示 RecipeParaGridClass 參數
-            //propertyGrid1.SelectedObject = RecipeParaGridClass.Instance;
             if (toModel)
             {
             }
             else
             {
-                var rcpParams = RecipeParaGridClass.Instance;
-                var properyGrid = _rcpEditUI.wndVisionSettingsPanel as PropertyGrid;
-                if (properyGrid != null)
-                    properyGrid.SelectedObject = rcpParams;
+                //(1) 顯示 EmptyTray 參數
+                //(2) 顯示 RecipeParaGridClass 參數
+                if (_rcpEditUI.wndVisionSettingsPanel is GwPanePropsViewer propsViewer)
+                {
+                    propsViewer.BuildGuiCtrls(_jxRecipeCombo);
+                    propsViewer.ExpandAll();
+                }
+                //(3) 顯示 左上基準點
+                updatePlcGridConfig(false);
+            }
+        }
+        void updatePlcGridConfig(bool toModel)
+        {
+            var traySettings = _jxRecipeCombo.EmptyTrayParams.TrayMiscSettings;
+            var rows = (int)traySettings.FullRows.Value;
+            var cols = (int)traySettings.FullCols.Value;
+            var pitchX = (double)traySettings.PitchX.Value;
+            var pitchY = (double)traySettings.PitchY.Value;
+            var plcGrid = GaMvcConfig.TransformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
+
+            if (toModel)
+            {
+
+            }
+            else
+            {
+                var trfCP = GaMvcConfig.TransformsModel.GetCameraPhysicTransform(CarrierEnum.C1);
+                var trfCM = GaMvcConfig.TransformsModel.GetCameraMotorTransform(CarrierEnum.C1, SuckerRowEnum.S1);
+                var plcPt = plcGrid[0, 0];
+                var camPt = trfCP.InvTrans(plcPt);
+                var motorPt = trfCM.Trans(camPt);
+                _rcpEditUI.UpdateCoordsRef(camPt, motorPt);
             }
         }
         void updateFullfovBmpToRecipe(Bitmap bmp, int target)
@@ -239,6 +279,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 xRecipe.bmpprinttemplate?.Dispose();
                 xRecipe.bmpprinttemplate = goldenBmp;
                 xRecipe.xRectRegionPrint = goldenRect;
+                _jxRecipeCombo.GaGridParams.Cate1.ChipGoldenBmp.Value = (Bitmap)xRecipe.bmpprinttemplate.Clone();
             }
             else
             {
@@ -246,6 +287,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 xRecipe.bmpprintNoTraytemplate = goldenBmp;
                 xRecipe.xRectRegionPrintNoTray = goldenRect;
             }
+        }
+        void ShowCviResult(bool show)
+        {
+            _calibCtrl.ShowCviResult(show);
         }
         #endregion
 
@@ -257,13 +302,19 @@ namespace LaserAlignDX.Mvc.Ctrl
         void toggleGoldenChipPicking()
         {
             enableGoldenChipPicking(!_isGoldenChipPicking);
+            _calibCtrl.EnableGoldenPicking(false);
         }
         void enableGoldenChipPicking(bool enabled)
         {
             if (_isGoldenChipPicking != enabled)
             {
                 _cviGoldenChipBox.Visible = enabled;
+                
                 updateGuiStatus();
+                
+                if (enabled)
+                    ShowCviResult(false);
+
                 var matViewer = _rcpEditUI.ImgViewer.MatViewer;
                 matViewer.Invalidate();
             }
@@ -281,54 +332,11 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         void LoadImage(int target = 0)
         {
-            //enableGoldenPicking(false);
-
-            ////string fileName = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
-            //string fileName = GaUtil.BrowseImageFile();
-            //if (string.IsNullOrEmpty(fileName))
-            //    return;
-
-            //var oldCursor = GaUtil.SetCursor(_frmOwner, Cursors.WaitCursor);
-
-            //try
-            //{
-            //    var newBmp = GaImageUtil.LoadBigImage(fileName);
-            //    if (newBmp == null)
-            //        return;
-
-            //    //--------------------------------------------------
-            //    // 更新到 xRecipe 的 bmpOrg 或 bmpNoTray
-            //    // xRecipe 會接手 newBmp
-            //    //--------------------------------------------------
-            //    updateFullfovBmpToRecipe(newBmp, target);
-            //}
-            //catch (Exception ex)
-            //{
-            //    GaUtil.SetCursor(_frmOwner, oldCursor);
-            //    JetEazy.BasicSpace.VsMSG.Instance.Warning(ex.Message);
-            //}
-            //finally
-            //{
-            //    GaUtil.SetCursor(_frmOwner, oldCursor);
-            //}
+            // GaCalibCtrl 處理了
         }
         void GrabImage(int target = 0)
         {
-            //enableGoldenPicking(false);
-
-            //var oldCursor = GaUtil.SetCursor(_frmOwner, Cursors.WaitCursor);
-            //var freeBmp = IScanCam.GetFreeImageBitmap();
-
-            //if (freeBmp != null)
-            //{
-            //    //--------------------------------------------------
-            //    // 更新到 xRecipe 的 bmpOrg 或 bmpNoTray
-            //    // xRecipe 會接手 newBmp
-            //    //--------------------------------------------------
-            //    updateFullfovBmpToRecipe(freeBmp.ToBitmap(), target);
-            //}
-
-            //GaUtil.SetCursor(_frmOwner, oldCursor);
+            // GaCalibCtrl 處理了
         }
         void SaveImageOrg()
         {
@@ -352,6 +360,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         void OpenTemplateMatchWindow()
         {
+            // 關掉 Golden Picking 
             enableGoldenChipPicking(false);
 
             using (var frm = new frmTemplateX3())
@@ -363,6 +372,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void OpenFlyCameraRecipeEditor()
         {
+            // 關掉 Golden Picking 
             enableGoldenChipPicking(false);
 
             using (var dlg = new frmFlySetup())
@@ -372,6 +382,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void OpenLightCtrlWindow()
         {
+            // 關掉 Golden Picking 
             enableGoldenChipPicking(false);
 
             using (var dlg = new frmLightControl())
@@ -383,16 +394,14 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             if (confirm)
             {
-                //updateAllData(true);
+                // updateAllData(true);
                 SaveSettings();
-
-
                 _frmOwner.DialogResult = DialogResult.OK;
             }
             else
             {
                 // 還原舊值
-                xRecipe.Load();
+                LoadSettings();
                 _frmOwner.DialogResult = DialogResult.Cancel;
             }
 
@@ -404,13 +413,17 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         void RunEmptyTrayInspect()
         {
+            // 關掉 Golden Picking 
+            enableGoldenChipPicking(false);
+
             // 更新 Plc Grid
-            var traySettings = _jxEmptyTrayRecipe.TrayMiscSettings;
-            var rows = (int)traySettings.FullRows.Value;
-            var cols = (int)traySettings.FullCols.Value;
-            var pitchX = (double)traySettings.PitchX.Value;
-            var pitchY = (double)traySettings.PitchY.Value;
-            GaMvcConfig.TransformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
+            //var traySettings = _jxRecipeCombo.EmptyTrayParams.TrayMiscSettings;
+            //var rows = (int)traySettings.FullRows.Value;
+            //var cols = (int)traySettings.FullCols.Value;
+            //var pitchX = (double)traySettings.PitchX.Value;
+            //var pitchY = (double)traySettings.PitchY.Value;
+            //GaMvcConfig.TransformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
+            updatePlcGridConfig(true);
 
             // 執行自動抓取格點
             _calibCtrl.RunAutoFetch(true);
@@ -489,53 +502,28 @@ namespace LaserAlignDX.Mvc.Ctrl
             //update_Display(false);
         }
 
-        void LoadSettings()
+        void LoadSettings(bool reloadGaara = false)
         {
-            var recipeFileName = getEmptyTrayRecipeFileName();
-            _jxEmptyTrayRecipe?.Dispose();
-            _jxEmptyTrayRecipe = new JxAoiRecipe();
-            _jxEmptyTrayRecipe.Load(recipeFileName);
+            var oldCursor = GaUtil.SetCursor(_frmOwner, Cursors.WaitCursor);
+
+            if (reloadGaara)
+                xRecipe.Load();
+            _jxRecipeCombo = new JxRecipeCombo();
+            _jxRecipeCombo.Load(xRecipe.INIFILE);
+
+            GaUtil.SetCursor(_frmOwner, oldCursor);
         }
         void SaveSettings(bool force = false)
         {
-            if (force || _jxEmptyTrayRecipe.Modified)
+            if (force || _jxRecipeCombo.Modified)
             {
-                var recipeFileName = LtAoiFactory.RcpGetRecipeFileName(null);
-                _jxEmptyTrayRecipe.Save(recipeFileName);
+                var oldCursor = GaUtil.SetCursor(_frmOwner, Cursors.WaitCursor);
+
+                _jxRecipeCombo.Save(xRecipe.INIFILE);
+                //xRecipe.Save();
+
+                GaUtil.SetCursor(_frmOwner, oldCursor);
             }
         }
-    }
-
-    class PseudoCalibUI : IvCalibToolUI
-    {
-        #region PRIVATE_DATA
-        IvRecipeEditorUI _imp;
-        #endregion
-
-        public PseudoCalibUI(GaRecipeEditCtrl rcpCtrl)
-        {
-            _imp = rcpCtrl._rcpEditUI;
-        }
-
-        #region WRAPPERS
-        Control IvCalibToolUI.Window => _imp.Window;
-
-        RadioButton[] IvCalibToolUI.rdoCarriers => null;
-        RadioButton[] IvCalibToolUI.rdoSuckerRows => null;
-        GvCalibPointsDataGridView IvCalibToolUI.dgvCalibPointsListView => null;
-
-        JezTransImageViewPanel IvCalibToolUI.ImgViewer => _imp.ImgViewer;
-        Control IvCalibToolUI.wndVisionSettingsPanel => _imp.wndVisionSettingsPanel;
-
-        Button IvCalibToolUI.btnLoadImage => _imp.btnLoadImage;
-        Button IvCalibToolUI.btnGrabImage => _imp.btnGrabImage;
-
-        Button IvCalibToolUI.btnPickupGolden => _imp.btnPickGoldenEmptyRegion;
-
-        Button IvCalibToolUI.btnRunAutoFetch => null;
-        Button IvCalibToolUI.btnBuildCalib => null;
-        Button IvCalibToolUI.btnCancel => null;
-        Button IvCalibToolUI.btnOK => null;
-        #endregion
     }
 }

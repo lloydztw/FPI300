@@ -16,6 +16,11 @@
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
+
+//using FormCalibrationTool = LaserAlignDX.FormSpace.FPI30Form.frmCalibration;
+//using FormRcpEditorTool = LaserAlignDX.FormSpace.frmFPIRecipe;
+using FormCalibrationTool = LaserAlignDX.Mvc.Gui.FormCalibrationTool;
+using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRcpEditorTool;
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 
 
@@ -54,6 +59,21 @@ namespace LaserAlignDX
         public static TravellerTransforms TransformsModel
         {
             get => TravellerTransforms.Instance;
+        }
+
+        public static void OpenRecipeEditor()
+        {
+            using (var dlg = new FormRcpEditorTool())
+            {
+                dlg.ShowDialog();
+            }
+        }
+        public static void OpenCalibrationTool()
+        {
+            using (var dlg = new FormCalibrationTool())
+            {
+                dlg.ShowDialog();
+            }
         }
 
         public static void DisposeAll()

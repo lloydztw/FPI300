@@ -212,8 +212,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 {
                     // 暫時使用 Clone 浪費了內存, 但是比較安全.
                     var old = _imgViewer.MatViewer.Image;
-                    old?.Dispose();
                     _imgViewer.MatViewer.Image = bridge.Image.Clone();
+                    old?.Dispose();
                     _imgViewer.lblTitle.Text = _lineScanImageHolder.SrcName;
                 }
             }
@@ -403,6 +403,13 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updateAllCalibKeyPointBoxes()
         {
+            if (!_isInGlobalCalibration)
+            {
+                foreach (var box in _cviCalibPointBoxes)
+                    box.Visible = false;
+                return;
+            }
+
             var carrierID = _activeCarrierID;
             var suckerRowID = _activeSuckerRowID;
 
@@ -468,6 +475,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _cviResultBox.Visible = show;
                 _imgViewer.MatViewer.Refresh();
             }
+        }
+        internal void EnableGoldenPicking(bool enabled)
+        {
+            enableGoldenPicking(enabled);
         }
         #endregion
 

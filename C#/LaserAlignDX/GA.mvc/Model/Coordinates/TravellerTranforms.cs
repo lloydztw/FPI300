@@ -110,9 +110,10 @@ namespace LaserAlignDX.Model.Coords
         /// <summary>
         /// 設定 P 座標 (PLC) 格點
         /// </summary>
-        public void ConfigPlcGrid(int rows, int cols, double pitchX, double pitchY)
+        public PlcGridPoints ConfigPlcGrid(int rows, int cols, double pitchX, double pitchY)
         {
             _plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
+            return _plcGrid;
         }
 
         /// <summary>

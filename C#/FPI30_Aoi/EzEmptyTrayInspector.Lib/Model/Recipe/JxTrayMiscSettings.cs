@@ -30,7 +30,7 @@ namespace EzAoiEmptyTrayInspector.Model
         public JxBool DebugDump = new JxBool("Debug Dump", false, description: "輸出調適影像檔 (Hidden)");
         public JxText GoldenGridRawData = new JxText("GoldenGridRawData", "", description: "(Hidden)");
 
-        public JxTrayMiscSettings() : base("Tray Settings", "空盤 全域設定")
+        public JxTrayMiscSettings() : base("Tray Settings", "空盤 規格設定")
         {
             //>>> System.Diagnostics.Debug.WriteLine($"{GetType().Name} [{Name}] 建構");
         }
