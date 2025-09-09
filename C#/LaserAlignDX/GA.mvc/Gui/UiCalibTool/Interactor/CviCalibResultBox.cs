@@ -701,7 +701,7 @@ namespace LaserAlignDX.Mvc.Gui
         #region DEBUG_TRACE
         void scanSelfErrors(int option)
         {
-            if (IsEmptyTrayMode) return;
+            //if (IsEmptyTrayMode) return;
             if (_grid == null) return;
 
             int rows = _grid.Rows;

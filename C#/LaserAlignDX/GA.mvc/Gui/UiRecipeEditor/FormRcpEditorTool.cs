@@ -50,11 +50,6 @@ namespace LaserAlignDX.Mvc.Gui
         {
             get; private set;
         }
-        //public RadioButton[] rdoSuckerRows
-        //{
-        //    get; private set;
-        //}
-
         Control IvRecipeEditorUI.Window => this;
 
         JezTransImageViewPanel IvRecipeEditorUI.ImgViewer => jezTransImageViewPanel1;
@@ -82,7 +77,7 @@ namespace LaserAlignDX.Mvc.Gui
         #region EVENT_HANDLERS
         private void Form_Load(object sender, System.EventArgs e)
         {
-            //gvCalibPointsDataGridView1.SelectedIndex = -1;
+            initDgv();
         }
         private void RdoSucker1_CheckedChanged(object sender, System.EventArgs e)
         {
@@ -110,6 +105,18 @@ namespace LaserAlignDX.Mvc.Gui
                 return;
 
             panelDockLeft.Width = ClientRectangle.Width - tbLayoutDockRight.Width;
+        }
+        #endregion
+
+        #region PRIVATE_FUNCTION
+        void initDgv()
+        {
+            var dgv = gvCalibPointsDataGridView1.DataGridView;
+            dgv.Columns[0].Width = 0;
+            while (dgv.Rows.Count > 1)
+                dgv.Rows.RemoveAt(dgv.Rows.Count - 1);
+            gvCalibPointsDataGridView1.SelectedIndex = -1;
+            gvCalibPointsDataGridView1.Height = 2;
         }
         #endregion
     }
