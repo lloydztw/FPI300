@@ -68,6 +68,7 @@ namespace LaserAlignDX
                 dlg.ShowDialog();
             }
         }
+
         public static void OpenCalibrationTool()
         {
             using (var dlg = new FormCalibrationTool())
