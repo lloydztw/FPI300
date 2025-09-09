@@ -56,6 +56,11 @@ namespace LaserAlignDX.Mvc.Gui
             adjustFetchSize();
         }
 
+        public bool IsEmptyTrayMode
+        {
+            get;
+            set;
+        }
         public ITransform TransCameraToMotor
         {
             get; set;
@@ -76,27 +81,35 @@ namespace LaserAlignDX.Mvc.Gui
         #region OVERRIDES
         public override void OnKeyDown(CvImageViewer viewer, KeyEventArgs e)
         {
+            bool needsToRefresh = false;
+
             if (e.Control && _cursorBloc != null)
             {
                 _cursorBloc2 = _cursorBloc;
-                viewer.Invalidate();
+                needsToRefresh = true;
             }
             else if (e.KeyCode == Keys.Escape && _cursorBloc2 != null)
             {
                 _cursorBloc2 = null;
-                viewer.Invalidate();
+                needsToRefresh = true;
             }
             else
             {
             }
 
-            switch (e.KeyCode)
+            if (true || !IsEmptyTrayMode)
             {
-                case Keys.Escape: scanSelfErrors(_debugOption = -1); viewer.Invalidate(); break;
-                case Keys.X: scanSelfErrors(_debugOption = 0); viewer.Invalidate(); break;
-                case Keys.Y: scanSelfErrors(_debugOption = 1); viewer.Invalidate(); break;
-                case Keys.B: scanSelfErrors(_debugOption = 2); viewer.Invalidate(); break;
+                switch (e.KeyCode)
+                {
+                    case Keys.Escape: scanSelfErrors(_debugOption = -1); needsToRefresh = true; break;
+                    case Keys.X: scanSelfErrors(_debugOption = 0); needsToRefresh = true; break;
+                    case Keys.Y: scanSelfErrors(_debugOption = 1); needsToRefresh = true; break;
+                    case Keys.B: scanSelfErrors(_debugOption = 2); needsToRefresh = true; break;
+                }
             }
+
+            if (needsToRefresh)
+                viewer.Invalidate();
 
             base.OnKeyDown(viewer, e);
         }
@@ -109,8 +122,10 @@ namespace LaserAlignDX.Mvc.Gui
             if (!isWorld)
                 viewer.SwitchToWorldCoordinate(gxView);
 
-            // 畫出 正常 Blocs (有吸嘴)
-            draw_bloc_rects(viewer, gxView, _suckerBlocs, Color.Blue, Color.DarkBlue, 0.25f);
+            if (IsEmptyTrayMode)
+                drawEmptyTrayResult(viewer, gxView);
+            else
+                drawCalibResult(viewer, gxView);
 
             // Cursors
             draw_cursor(viewer, gxView, _cursorBloc2, Color.White);
@@ -126,8 +141,22 @@ namespace LaserAlignDX.Mvc.Gui
         }
         #endregion
 
-        #region PRIVATE_FUNCTIONS
+        void drawEmptyTrayResult(CvImageViewer viewer, Graphics gxView)
+        {
+            // 畫出 grid 節點線
+            draw_grid_lines(viewer, gxView, _matchResult?.Grid);
+            // 畫出 正常 Blocs (有吸嘴)
+            draw_bloc_rects(viewer, gxView, _suckerBlocs, Color.Lime, Color.DarkGreen, 0.25f);
+            // 畫記 異常 Blocs (沒有吸嘴)
+            draw_bloc_rects(viewer, gxView, iter_ng_blocs(), Color.Red, Color.DarkRed, 0.25f);
+        }
+        void drawCalibResult(CvImageViewer viewer, Graphics gxView)
+        {
+            // 畫出 正常 Blocs (有吸嘴)
+            draw_bloc_rects(viewer, gxView, _suckerBlocs, Color.Blue, Color.DarkBlue, 0.25f);
+        }
 
+        #region PRIVATE_FUNCTIONS
         /// <summary>
         /// 枚舉 Empty Blocs (沒有吸嘴)
         /// </summary>
@@ -292,7 +321,6 @@ namespace LaserAlignDX.Mvc.Gui
 
             gxView.DrawLine(pen, lx, ly, cx, cy);
         }
-
         void draw_centroids(CvImageViewer viewer, Graphics gxView, IEnumerable<EzBloc> blocs, bool debug = false)
         {
             if (blocs == null)
@@ -570,14 +598,15 @@ namespace LaserAlignDX.Mvc.Gui
                     appendWorldCoords(sb, _cursorBloc, _cursorBloc2);
                     showScore = false;
                 }
-                if (TransCameraToMotor != null && TransCameraToMotor != null && _cursorBloc2 == null)
+                if (TransCameraToMotor != null && TransCameraToMotor != null && _cursorBloc2 == null && rowCol != null)
                 {
                     appendPlcCompensation(sb, _cursorBloc, rowCol.Row, rowCol.Col);
                     showScore = false;
                 }
 
-                if (showScore)
+                if (showScore || IsEmptyTrayMode)
                 {
+                    sb.AppendLine();
                     sb.AppendLine($"Score= {bloc.Score:0.00}");
                     sb.AppendLine($"Size= {bloc.Rect.Width}x{bloc.Rect.Height}");
                 }
@@ -669,9 +698,12 @@ namespace LaserAlignDX.Mvc.Gui
             sb.AppendLine($"Phy 變動值 ΔY = {dErr.Y:0.000} mm");
         }
 
+        #region DEBUG_TRACE
         void scanSelfErrors(int option)
         {
-            if(_grid==null) return;
+            if (IsEmptyTrayMode) return;
+            if (_grid == null) return;
+
             int rows = _grid.Rows;
             int cols = _grid.Cols;
             var transformsModel = GaMvcConfig.TransformsModel;
@@ -712,5 +744,6 @@ namespace LaserAlignDX.Mvc.Gui
             else
                 return new SolidBrush(Color.FromArgb(128, Color.Red));
         }
+        #endregion
     }
 }

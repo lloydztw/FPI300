@@ -23,14 +23,17 @@ namespace LaserAlignDX.Mvc.Gui
         Control Window { get; }
         RadioButton[] rdoCarriers { get; }
         RadioButton[] rdoSuckerRows { get; }
-        JezTransImageViewPanel ImgViewer { get; }
+
         GvCalibPointsDataGridView dgvCalibPointsListView { get; }
+        JezTransImageViewPanel ImgViewer { get; }
         Control wndVisionSettingsPanel { get; }
+
         Button btnGrabImage { get; }
         Button btnLoadImage { get; }
         Button btnPickupGolden { get; }
-        Button btnAutoFindCalibPoints { get; }
+        Button btnRunAutoFetch { get; }
         Button btnBuildCalib { get; }
+
         Button btnCancel { get; }
         Button btnOK { get; }
     }

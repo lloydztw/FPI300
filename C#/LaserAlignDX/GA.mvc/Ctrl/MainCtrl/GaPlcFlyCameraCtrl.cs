@@ -31,7 +31,7 @@ namespace LaserAlignDX.Mvc.Ctrl
     /// </summary>
     public partial class GaPlcFlyCameraCtrl : IxTickable, IDisposable
     {
-        const int TOTAL_FLY_CAMERAS = 4;
+        static int TOTAL_FLY_CAMERAS => GaMvcConfig.TOTAL_FLY_CAMERAS;
 
         #region MACHINE
         MainFPIX3MachineClass MACHINE

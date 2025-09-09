@@ -13,13 +13,14 @@
  */
 #endregion
 
+using JetEazy.BasicSpace;
 using LaserAlignDX.Mvc.Ctrl;
 using System.Windows.Forms;
 
 
 namespace LaserAlignDX.Mvc.Gui
 {
-    public partial class FormRcpEditorTool : Form, IvCalibToolUI
+    public partial class FormRcpEditorTool : Form, IvRecipeEditorUI
     {
         public FormRcpEditorTool()
         {
@@ -29,13 +30,19 @@ namespace LaserAlignDX.Mvc.Gui
             //rdoSuckerRows = new RadioButton[] { rdoSucker1, rdoSucker2 };
 
             rdoCarrier1.CheckedChanged += RdoCarrier1_CheckedChanged;
-            //rdoSucker1.CheckedChanged += RdoSucker1_CheckedChanged;
             SizeChanged += (s, e) => autoLayout();
-            Load += FormCalibrationTool_Load;
+            Load += Form_Load;
 
-            var ctrl = new GaCalibCtrl();
-            ctrl.Attach(this);
-            this.Height = Screen.PrimaryScreen.Bounds.Height;
+            if (!DesignMode)
+            {
+                var ctrl = new GaRecipeEditCtrl();
+                ctrl.Attach(this);
+
+                // 設定 Form 屬性
+                this.Text = "参数设定窗口";
+                this.WindowState = FormWindowState.Maximized;
+                LanguageExClass.Instance.EnumControls(this);
+            }
         }
 
         #region GUI_LINKS
@@ -43,27 +50,39 @@ namespace LaserAlignDX.Mvc.Gui
         {
             get; private set;
         }
-        public RadioButton[] rdoSuckerRows
-        {
-            get; private set;
-        }
-        Control IvCalibToolUI.Window => this;
-        JezTransImageViewPanel IvCalibToolUI.ImgViewer => jezTransImageViewPanel1;
-        GvCalibPointsDataGridView IvCalibToolUI.dgvCalibPointsListView => gvCalibPointsDataGridView1;
-        Control IvCalibToolUI.wndVisionSettingsPanel => gwPanePropsViewer1;
-        Button IvCalibToolUI.btnGrabImage => btnGrabImage;
-        Button IvCalibToolUI.btnLoadImage => btnLoadImage;
-        Button IvCalibToolUI.btnPickupGolden => btnPickGolden;
-        Button IvCalibToolUI.btnAutoFindCalibPoints => btnAutoFindCalibPoints;
-        Button IvCalibToolUI.btnBuildCalib => btnBuildCalib;
-        Button IvCalibToolUI.btnCancel => btnCancel;
-        Button IvCalibToolUI.btnOK => btnOK;
+        //public RadioButton[] rdoSuckerRows
+        //{
+        //    get; private set;
+        //}
+
+        Control IvRecipeEditorUI.Window => this;
+
+        JezTransImageViewPanel IvRecipeEditorUI.ImgViewer => jezTransImageViewPanel1;
+        Control IvRecipeEditorUI.wndVisionSettingsPanel => gwPanePropsViewer1;
+
+        Button IvRecipeEditorUI.btnLoadImage => btnLoadImage;
+        Button IvRecipeEditorUI.btnGrabImage => btnGrabImage;
+        Button IvRecipeEditorUI.btnSaveImage => btnSaveImage;
+
+        Button IvRecipeEditorUI.btnPickGoldenEmptyRegion => btnPickGoldenEmptyRegion;
+        Button IvRecipeEditorUI.btnRunEmptyTrayInspect => btnRunEmptyTrayInspect;
+
+        Button IvRecipeEditorUI.btnPickGoldenChipRegion => btnPickGoldenChipRegion;
+        Button IvRecipeEditorUI.btnCreateCellRegions => btnOpenTemplateMatch;
+
+        Button IvRecipeEditorUI.btnOpenTemplateMatchWindow => btnOpenTemplateMatch;
+        Button IvRecipeEditorUI.btnOpenFlyCamRcpWindow => btnOpenFlyCamRcpEditor;
+        Button IvRecipeEditorUI.btnOpenLightCtrlWindow => btnOpenLightCtrl;
+        Button IvRecipeEditorUI.btnOpenEmptyTrayWindow => null;
+
+        Button IvRecipeEditorUI.btnCancel => btnCancel;
+        Button IvRecipeEditorUI.btnOK => btnOK;
         #endregion
 
         #region EVENT_HANDLERS
-        private void FormCalibrationTool_Load(object sender, System.EventArgs e)
+        private void Form_Load(object sender, System.EventArgs e)
         {
-            gvCalibPointsDataGridView1.SelectedIndex = -1;
+            //gvCalibPointsDataGridView1.SelectedIndex = -1;
         }
         private void RdoSucker1_CheckedChanged(object sender, System.EventArgs e)
         {

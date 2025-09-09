@@ -22,14 +22,18 @@ namespace LaserAlignDX.Mvc.Gui
     {
         Control Window { get; }
         JezTransImageViewPanel ImgViewer { get; }
-        PropertyGrid pgParamsView { get; }
+        //PropertyGrid pgParamsView { get; }
+        Control wndVisionSettingsPanel { get; }
 
         Button btnLoadImage { get; }
         Button btnGrabImage { get; }
         Button btnSaveImage { get; }
 
-        Button btnPickGoldenRegion { get; }
-        Button btnCreateCellRegions { get; }
+        Button btnPickGoldenEmptyRegion { get; }        // 選取標準 空位 樣本
+        Button btnRunEmptyTrayInspect { get; }          // 空盤檢查
+
+        Button btnPickGoldenChipRegion { get; }         // 選取標準 晶粒 樣本
+        Button btnCreateCellRegions { get; }            // 自動抓取 Cell Regions
 
         Button btnOpenTemplateMatchWindow { get; }
         Button btnOpenEmptyTrayWindow { get; }

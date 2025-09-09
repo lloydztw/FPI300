@@ -27,14 +27,17 @@ namespace LaserAlignDX.Mvc.Gui
 
             rdoCarriers = new RadioButton[] { rdoCarrier1, rdoCarrier2 };
             rdoSuckerRows = new RadioButton[] { rdoSucker1, rdoSucker2 };
-
             rdoCarrier1.CheckedChanged += RdoCarrier1_CheckedChanged;
             rdoSucker1.CheckedChanged += RdoSucker1_CheckedChanged;
             SizeChanged += (s, e) => autoLayout();
-            Load += FormCalibrationTool_Load;
+            Load += Form_Load;
 
-            var ctrl = new GaCalibCtrl();
-            ctrl.Attach(this);
+            if (!DesignMode)
+            {
+                var ctrl = new GaCalibCtrl();
+                ctrl.Attach(this);
+            }
+
             this.Height = Screen.PrimaryScreen.Bounds.Height;
         }
 
@@ -54,14 +57,14 @@ namespace LaserAlignDX.Mvc.Gui
         Button IvCalibToolUI.btnGrabImage => btnGrabImage;
         Button IvCalibToolUI.btnLoadImage => btnLoadImage;
         Button IvCalibToolUI.btnPickupGolden => btnPickGolden;
-        Button IvCalibToolUI.btnAutoFindCalibPoints => btnAutoFindCalibPoints;
+        Button IvCalibToolUI.btnRunAutoFetch => btnAutoFindCalibPoints;
         Button IvCalibToolUI.btnBuildCalib => btnBuildCalib;
         Button IvCalibToolUI.btnCancel => btnCancel;
         Button IvCalibToolUI.btnOK => btnOK;
         #endregion
 
         #region EVENT_HANDLERS
-        private void FormCalibrationTool_Load(object sender, System.EventArgs e)
+        private void Form_Load(object sender, System.EventArgs e)
         {
             gvCalibPointsDataGridView1.SelectedIndex = -1;
         }

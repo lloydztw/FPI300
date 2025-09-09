@@ -8,7 +8,8 @@ using System.Windows.Forms;
 using Traveller106;
 
 //using FormRecipeEditor = LaserAlignDX.FormSpace.frmFPIRecipe;
-using FormRecipeEditor = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
+//using FormRecipeEditor = LaserAlignDX.Mvc.Gui.FormRecipeEditor
+using FormRecipeEditor = LaserAlignDX.Mvc.Gui.FormRcpEditorTool;
 
 
 namespace PhotoMachine.UISpace

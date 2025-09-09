@@ -362,6 +362,7 @@
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaPlcFlyCameraCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl.cs" />
+    <Compile Include="GA.mvc\GaMvcPaths.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\IMainUI.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.cs">
       <SubType>UserControl</SubType>

@@ -1,5 +1,4 @@
-﻿using JetEazy.ImageViewerEx;
-using LaserAlignDX.Mvc.Ctrl;
+﻿using LaserAlignDX.Mvc.Ctrl;
 using System.Windows.Forms;
 
 namespace LaserAlignDX.Mvc.Gui
@@ -17,13 +16,16 @@ namespace LaserAlignDX.Mvc.Gui
         Control IvRecipeEditorUI.Window => this;
 
         JezTransImageViewPanel IvRecipeEditorUI.ImgViewer => jezTransImageViewPanel1;
-        PropertyGrid IvRecipeEditorUI.pgParamsView => propertyGrid1;
+        Control IvRecipeEditorUI.wndVisionSettingsPanel => propertyGrid1;
 
         Button IvRecipeEditorUI.btnLoadImage => btnLoadImage;
         Button IvRecipeEditorUI.btnGrabImage => btnGrabImage;
         Button IvRecipeEditorUI.btnSaveImage => btnSaveImage;
 
-        Button IvRecipeEditorUI.btnPickGoldenRegion => btnPickGoldenRegion;
+        Button IvRecipeEditorUI.btnPickGoldenEmptyRegion => null;
+        Button IvRecipeEditorUI.btnRunEmptyTrayInspect => null;
+
+        Button IvRecipeEditorUI.btnPickGoldenChipRegion => btnPickGoldenRegion;
         Button IvRecipeEditorUI.btnCreateCellRegions => btnCreateCellRegions;
 
         Button IvRecipeEditorUI.btnOpenTemplateMatchWindow => btnOpenTemplateMatchWindow;

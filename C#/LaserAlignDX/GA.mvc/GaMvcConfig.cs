@@ -29,7 +29,10 @@ namespace LaserAlignDX
     public static class GaMvcConfig
     {
         public static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER = true;
-        
+
+        public static int TOTAL_FLY_CAMERAS => 4;
+
+
         public static IProcessRunFPI InstanceAoiModel()
         {
             // AoiModel 使用 V2

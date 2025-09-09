@@ -129,6 +129,16 @@ namespace Traveller106
         static string _activeRecipeName;
         #endregion
 
+        public static string RcpGetRecipeFileName(string recipeName)
+        {
+            if (string.IsNullOrEmpty(recipeName))
+            {
+                RcpCheckActive(silent: true);
+                recipeName = _activeRecipeName;
+            }
+            var fileName = System.IO.Path.Combine(_recipePath, recipeName + ".json");
+            return fileName;
+        }
         public static bool RcpCheckActive(bool silent = false)
         {
             var recipeName = _activeRecipeName = GetActiveRecipeNameAtFPI30();
