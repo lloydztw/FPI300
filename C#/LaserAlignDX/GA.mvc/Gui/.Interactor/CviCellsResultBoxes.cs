@@ -13,12 +13,16 @@
  */
 #endregion
 
+using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
+using JetEazy.OpenCV;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
+using LeTian.AoiLib;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -31,7 +35,7 @@ using RECIPE = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
 
 namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 {
-    public class CviCellsResultBoxes : CvImageViewerInteractor
+    public class CviCellsResultBoxes : CviAbsTooltipBox
     {
         #region INNER_CLASS
         class CellBloc : EzBloc
@@ -78,14 +82,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
         #region GUI_MEMBERS
         IxDispTextFormatter _formatter = new MainDispTextFormatter();
-        ToolTip _toolTip = new ToolTip();
         Font _font = null;
-        #endregion
-
-        #region GUI_DRAW_ITEMS
-        //List<CviRotRectBox> _boxes = new List<CviRotRectBox>();
-        //List<CviLineSegmentsBox> _lineSegBoxes = new List<CviLineSegmentsBox>();
-        List<IvDrawItem> _drawItems = new List<IvDrawItem>();
         #endregion
 
         public Control lblSummaryTitle
@@ -93,6 +90,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             get;
             set;
         }
+
+        #region GUI_DRAW_ITEMS
+        List<IvDrawItem> _drawItems = new List<IvDrawItem>();
+        CviRotRectBox _cviRegionBox;
+        #endregion
 
         public void Reset()
         {
@@ -116,172 +118,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             updatePassNgEmptyCount(cells);
             updateDrawItems();
+            adjustFetchSize();
         }
-
-        #region OVERRIDES
-        public override void OnDraw(CvImageViewer viewer, Graphics gxView)
-        {
-            if (_font == null)
-                _font = viewer.Font;
-
-            if (_grid == null && _outGridBlocs == null)
-                return;
-
-            bool isWorld = viewer.IsInWorldCoordinate();
-            if (!isWorld)
-                viewer.SwitchToWorldCoordinate(gxView);
-
-            foreach(var item in _drawItems) 
-                item.OnDraw(viewer, gxView);
-
-            draw_All_QrCodes(viewer, gxView);
-
-            if (!isWorld)
-                viewer.SwitchToViewportCoordinate(gxView);
-        }
-        public override bool OnMouseMove(CvImageViewer viewer, MouseEventArgs e)
-        {
-            return handleMouseMove(viewer, e);
-        }
-        #endregion
-
-        #region PRIVATE_TOOL_TIP_FUNCTIONS
-        Point _hitPt = new Point();
-        Size _fetchSize = new Size(100, 100);
-        bool handleMouseMove(CvImageViewer viewer, MouseEventArgs e)
-        {
-            if ((_grid != null) && Visible && Enabled)
-            {
-                int xx = e.X;
-                int yy = e.Y;
-
-                viewer.TransViewportToWorld(ref xx, ref yy);
-                var boundary = viewer.GetWorldRect();
-                _fetchSize.Width = (int)Math.Max(100, boundary.Width / 50);
-                _fetchSize.Height = (int)Math.Max(100, boundary.Height / 50);
-
-                var bloc = fetchOne(xx, yy) as CellBloc;
-                updateTooltip(bloc, e.X, e.Y, viewer);
-            }
-            return false;
-        }
-        EzBloc fetchOne(int x, int y)
-        {
-            if (_grid != null)
-            {
-                var blobs = fetchKNN(x, y, 1, _fetchSize, _grid.IterBlocs());
-                if (blobs != null && blobs.Length > 0)
-                    return blobs[0];
-            }
-            //if (_suckerBlocs != null)
-            //{
-            //    var blobs = fetchKNN(x, y, 1, _fetchSize, _suckerBlocs);
-            //    if (blobs != null && blobs.Length > 0)
-            //        return blobs[0];
-            //}
-            //if (_outGridBlocs != null)
-            //{
-            //    var blobs = fetchKNN(x, y, 1, _fetchSize, _outGridBlocs);
-            //    if (blobs != null && blobs.Length > 0)
-            //        return blobs[0];
-            //}
-            return null;
-        }
-        EzBloc[] fetchKNN(int x, int y, int kNumber, Size range, IEnumerable<EzBloc> srcBlobs)
-        {
-            bool needsToSort = (kNumber >= 0);
-
-            if (kNumber <= 0)
-            {
-                // Get All
-                kNumber = int.MaxValue;
-            }
-
-            //if (range == Size.Empty)
-            //{
-            //    range = m_sizeCell;
-            //}
-
-            Rectangle rectRange = new Rectangle(
-                    x - range.Width / 2,
-                    y - range.Height / 2,
-                    range.Width,
-                    range.Height
-                );
-
-
-            var knn = new List<KeyValuePair<EzBloc, int>>();
-
-            foreach (var spot in srcBlobs)
-            {
-                if (spot == null)
-                    continue;
-
-                //////if (chkList.IndexOf(spot) >= 0)
-                //////{
-                //////    System.Diagnostics.Trace.Assert(false);
-                //////    continue;
-                //////}
-
-                if (rectRange.Contains(spot.CenterX, spot.CenterY))
-                {
-                    var dx = x - spot.CenterX;
-                    var dy = y - spot.CenterY;
-                    var dSQ = dx * dx + dy * dy;
-                    knn.Add(new KeyValuePair<EzBloc, int>(spot, dSQ));
-                    //////chkList.Add(spot);
-                }
-            }
-
-            if (knn.Count == 0)
-                return null;
-
-            if (needsToSort && knn.Count > 1)
-            {
-                int _compareSpots(KeyValuePair<EzBloc, int> kp1, KeyValuePair<EzBloc, int> kp2)
-                {
-                    if (kp1.Value > kp2.Value)
-                        return 1;
-                    else if (kp1.Value < kp2.Value)
-                        return -1;
-                    return 0;
-                }
-                knn.Sort(_compareSpots);
-            }
-
-            kNumber = Math.Min(kNumber, knn.Count);
-            var result = new EzBloc[kNumber];
-
-            for (int k = 0; k < kNumber; k++)
-                result[k] = (EzBloc)knn[k].Key;
-
-            return result;
-        }
-        void updateTooltip(CellBloc bloc, int vx, int vy, Control wnd)
-        {
-            if (bloc == null || _mode == ScanInspectMode.NOTRAY)
-            {
-                _toolTip.Hide(wnd);
-            }
-            else
-            {
-                if (_hitPt.X == vx && _hitPt.Y == vy)
-                    return;
-
-                //string msg = $"(x,y)=({bloc.CenterX},{bloc.CenterY}), score={bloc.Score:0.00}, size={bloc.Rect.Width}x{bloc.Rect.Height}";
-                //if (bloc.Tag is QuadLinkNode node && node.rowCol != null)
-                //    msg = $"[{node.rowCol.Row},{node.rowCol.Col}] " + msg;
-
-                string msg = formatDisplayText(bloc);
-                if (!string.IsNullOrEmpty(msg))
-                {
-                    _toolTip.Show(msg, wnd, vx + 10, vy + 10);
-                }
-
-                _hitPt = new Point(vx, vy);
-            }
-        }
-        #endregion
 
         void updateCellGrid(IEnumerable<CELL> cells, out EzBlocsGrid grid)
         {
@@ -344,7 +182,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             if (_mode == ScanInspectMode.NOTRAY)
             {
-                foreach (var (b,t) in iterNonEmptyBlocs())
+                foreach (var b in iterNonEmptyBlocs(true))
+                    if (b != null)
+                        ng++;
+
+                foreach (var b in iterNonEmptyBlocs(false))
                     if (b != null)
                         ng++;
 
@@ -374,29 +216,122 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void updateTitle(string text)
         {
-            if(lblSummaryTitle != null)
+            if (lblSummaryTitle != null)
                 lblSummaryTitle.Text = text;
         }
 
-        #region HELPER_FUCTIONS
-        IEnumerable<(EzBloc, string)> iterNonEmptyBlocs()
+        #region OVERRIDES
+        public override void OnKeyDown(CvImageViewer viewer, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.F10)
+            {
+                if (_cursorBloc != null)
+                    DebugMatching(_cursorBloc as CellBloc);
+            }
+            if (e.KeyCode == Keys.Escape)
+            {
+                DebugMatchingOff();
+            }
+
+            base.OnKeyDown(viewer, e);
+        }
+        public override void OnDraw(CvImageViewer viewer, Graphics gxView)
+        {
+            base.OnDraw(viewer, gxView);
+
+            if (_cviRegionBox != null && _cviRegionBox.Visible)
+                _cviRegionBox.OnDraw(viewer, gxView);
+
+
+            if (_font == null)
+                _font = viewer.Font;
+
+            if (_grid == null && _outGridBlocs == null)
+                return;
+
+            bool isWorld = viewer.IsInWorldCoordinate();
+            if (!isWorld)
+                viewer.SwitchToWorldCoordinate(gxView);
+
+            foreach(var item in _drawItems) 
+                item.OnDraw(viewer, gxView);
+
+            draw_All_QrCodes(viewer, gxView);
+
+            if (!isWorld)
+                viewer.SwitchToViewportCoordinate(gxView);
+        }
+        public override bool OnMouseMove(CvImageViewer viewer, MouseEventArgs e)
+        {
+            return base.OnMouseMove(viewer, e);
+        }
+        #endregion
+
+        #region TOOL_TIP_FUNCTIONS
+        void adjustFetchSize()
         {
             if (_grid != null)
             {
-                foreach (CellBloc bloc in _grid)
+                foreach (var bloc in _grid.IterBlocs())
                 {
-                    var cell = bloc?.Cell;
-                    if (cell != null && !bloc.IsEmpty)
-                        yield return (bloc, bloc.NonEmptyDesc);
+                    if (bloc is CellBloc cellBloc)
+                    {
+                        var cell = cellBloc.Cell;
+                        var cellRect = Rectangle.Round(cell.viewRectF);
+                        cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
+                        base.adjustFetchSize(cellRect.Size);
+                        _cviRegionBox = new CviRotRectBox(cellRect, Color.White);
+                        _cviRegionBox.Visible = false;
+                        return;
+                    }
                 }
             }
-
-            if (_outGridBlocs != null)
+        }
+        protected override IEnumerable<EzBloc> iterFetchableBlocs()
+        {
+            if (_grid != null)
             {
-                foreach (EzBloc bloc in _outGridBlocs)
+                foreach (var bloc in _grid.IterBlocs())
+                    if (bloc != null)
+                        yield return bloc;
+            }
+        }
+        protected override string composeTooltipText(EzBloc cursor, EzBloc cursor2)
+        {
+            var cellBloc = cursor as CellBloc;
+
+            _cviRegionBox.Box2D.SetCenter((float)cellBloc.Center.X, (float)cellBloc.Center.Y);
+            _cviRegionBox.Visible = true;
+
+            string txt = formatDisplayText(cellBloc);
+            return txt;
+        }
+        #endregion
+
+        #region HELPER_FUCTIONS
+        IEnumerable<EzBloc> iterNonEmptyBlocs(bool onGrid)
+        {
+            if (onGrid)
+            {
+                if (_grid != null)
                 {
-                    if (bloc == null) continue;
-                    yield return (bloc, "疑似有料");
+                    foreach (CellBloc bloc in _grid)
+                    {
+                        var cell = bloc?.Cell;
+                        if (cell != null && !bloc.IsEmpty)
+                            yield return bloc;
+                    }
+                }
+            }
+            else
+            {
+                if (_outGridBlocs != null)
+                {
+                    foreach (EzBloc bloc in _outGridBlocs)
+                    {
+                        if (bloc == null) continue;
+                        yield return bloc;
+                    }
                 }
             }
         }
@@ -489,10 +424,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 var item = new CviRotRectBox(ref rect, Color.Lime, 0.25f);
                 _drawItems.Add(item);
             }
-            foreach ((var cBloc, string text) in iterNonEmptyBlocs())
+            foreach (var cBloc in iterNonEmptyBlocs(onGrid: true))
             {
                 var rect = JetEazy.Qcvt.CreateCenterRect((float)cBloc.CenterX, (float)cBloc.CenterY, size.Width, size.Height);
-                var item = new CviRotRectBox(ref rect, Color.Red, 0.25f) { Text = text };
+                var item = new CviRotRectBox(ref rect, Color.Red, 0.25f) { Text = "有料" };
+                _drawItems.Add(item);
+            }
+            foreach (var cBloc in iterNonEmptyBlocs(onGrid: false))
+            {
+                var rect = JetEazy.Qcvt.CreateCenterRect((float)cBloc.CenterX, (float)cBloc.CenterY, size.Width, size.Height);
+                var item = new CviRotRectBox(ref rect, Color.DarkOrange, 0.25f) { Text = "疑似有料" };
                 _drawItems.Add(item);
             }
         }
@@ -602,5 +543,68 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
         }
         #endregion
+
+        static string PATH_DUMP => "d:\\paso.log\\chipLoc";
+        void DebugMatching(CellBloc cellBloc)
+        {
+            var cell = cellBloc?.Cell;
+            if (cell == null) return;
+
+            // (0) Directory
+            JetEazy.IO.QxPathUtility.InitDirectory(PATH_DUMP);
+            string fname = cellBloc.Cell.lblName + ".png";
+            string dumpFile = System.IO.Path.Combine(PATH_DUMP, fname);
+
+            // (1) Golden and Thresh
+            var goldenBmp = _xRecipe.bmpprinttemplate;
+            var thresh = InspectParams.Instance.xGridPadThreshold;
+            var extendX = _xRecipe.xExtendx;
+            var extendY = _xRecipe.xExtendy;
+
+            // (2) VISUAL_DEBUG
+            EzPadsGridFinder.VISUAL_DEBUG = true;
+
+            // (3) Matcher
+            var matcher = new EzRigidBodyGridMatcher(shrink: 1);
+            matcher.SetGoldenTemplate(goldenBmp);
+            matcher.PadThreshold = thresh;
+
+            // (4) 測試資料
+            var lineScanImageHolder = GaMvcConfig.SysModel.LineScanImageHolder;
+            var fullfovBmp = lineScanImageHolder.PeekBitmap();
+            using (var bridge = new QxImageBridge(fullfovBmp))
+            {
+                var cellRect = Rectangle.Round(cell.viewRectF);
+                cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
+                GaUtil.BoundRect(ref cellRect, fullfovBmp.Size);
+                var roi = JetEazy.Qcvt.CV(cellRect);
+
+                Mat imgScene = bridge.Image[roi].Clone();
+
+                var bestResult = matcher.FindBestMatch(imgScene, dumpFile);
+
+                if (bestResult != null)
+                {
+                    var bestGrid = bestResult.Grid;
+                    var box2d = bestResult.CalcBox2D();
+                    //EzPadsGridFinder.FindSpecialKeyPad(bestGrid, out int kr, out int kc, out int px);
+                    //EzPadsGridFinder.FindSpecialKeyPad(imgScene, bestGrid, out int kr, out int kc, out double kSQ);
+                    int kr = bestResult.KeyRow;
+                    int kc = bestResult.KeyCol;
+                    var kSQ = bestResult.KeySQRatio;
+                    VxDebugDrawer.Draw(imgScene, box2d, bestGrid, kr, kc, Scalar.Lime, $"Best Grid [{bestGrid.Rows}x{bestGrid.Cols}] = {bestGrid.GetMajorCount()} @ {fname}");
+                }
+
+                Cv2.WaitKey();
+                Cv2.DestroyAllWindows();
+                EzPadsGridFinder.VISUAL_DEBUG = false;
+                imgScene?.Dispose();
+            }
+        }
+        void DebugMatchingOff()
+        {
+            Cv2.DestroyAllWindows();
+            EzPadsGridFinder.VISUAL_DEBUG = false;
+        }
     }
 }

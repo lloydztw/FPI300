@@ -513,7 +513,7 @@ namespace LaserAlignDX.AoiModel.V25
                     cBoxOverlapTool.ROI2 = cellmvdRectF;
                     cBoxOverlapTool.Run();
 
-                    if (cBoxOverlapTool.Result.Overlap >= xInspect.xChipOverlap)
+                    if (true || cBoxOverlapTool.Result.Overlap >= xInspect.xChipOverlap)
                     {
 #if (OPT_OLD_GAARA || false)
                         //计算偏移值

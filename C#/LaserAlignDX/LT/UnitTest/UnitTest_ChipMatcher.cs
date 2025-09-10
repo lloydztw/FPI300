@@ -33,16 +33,20 @@ namespace UnitTest_FP130
         //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250905162210");         // ok
         //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250905162254");         // 145
         //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250905162404");         // 146
-        static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250905165504");           // 50
+        //static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250905165504");           // 50
+        static string PATH_IMAGE_LOG_ONE => PATH_IMAGE_LOG("20250910142939");
 
         static string PATH_DUMP => "d:\\paso.log\\chipLoc";
 
         int[] ng_numbers = new int[]
         {
+            //17,
+            84,
+            125,
             //83,
             //89,
             //91,
-            50,
+            //50,
             //145,
             //146
         };

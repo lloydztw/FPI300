@@ -185,6 +185,13 @@ namespace LeTian.AoiLib
                 var analyzer = new EzBlocsGridAnalyzer();
                 comparison = new Comparison<EzBlocsGrid>((a, b) =>
                 {
+                    bool aOk = a.Rows>= GoldenGrid.Rows && a.Cols>= GoldenGrid.Cols;
+                    bool bOk = b.Rows>= GoldenGrid.Rows && b.Cols>= GoldenGrid.Cols;
+                    if (aOk != bOk)
+                    {
+                        if (aOk) return -1;
+                        if (bOk) return 1;
+                    }
                     int d1 = analyzer.CalcLogicDiff(a, GoldenGrid);
                     int d2 = analyzer.CalcLogicDiff(b, GoldenGrid);
                     if (d1 < d2) return -1;

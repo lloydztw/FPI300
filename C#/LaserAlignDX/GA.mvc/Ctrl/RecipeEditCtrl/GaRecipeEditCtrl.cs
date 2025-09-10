@@ -497,7 +497,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 var oldCursor = GaUtil.SetCursor(_frmOwner, Cursors.WaitCursor);
 
-                xRecipe.Save();
+                //xRecipe.Save();
 
                 _jxRecipeCombo.Save(null);
                 _sysModel.ApplyRecipe();

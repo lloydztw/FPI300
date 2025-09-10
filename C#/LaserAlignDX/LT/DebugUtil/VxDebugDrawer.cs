@@ -428,7 +428,14 @@ namespace LeTian.AoiLib
         }
         static void destroyDummyCvWindow()
         {
-            Cv2.DestroyWindow(_CV_DUMMY_WIN_NAME);
+            try
+            {
+                Cv2.DestroyWindow(_CV_DUMMY_WIN_NAME);
+            }
+            catch
+            {
+
+            }
         }
         static Form createForm(string name, out CvMatViewer viewer)
         {
