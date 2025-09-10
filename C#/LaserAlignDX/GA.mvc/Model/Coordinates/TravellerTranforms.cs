@@ -17,6 +17,7 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
+using LeTian.AoiLib;
 using System;
 
 
@@ -240,6 +241,13 @@ namespace LaserAlignDX.Model.Coords
 
         public void Load(string iniFileName)
         {
+            if (!System.IO.File.Exists(iniFileName))
+            {
+                this.LoadGaaraIniFile();
+                return;
+            }
+
+            LtDebug.LOG.Debug($"載入 [校正參數 (Trf)] {iniFileName}");
             foreach (var trf in _transforms)
             {
                 trf.Load(iniFileName);
@@ -247,6 +255,7 @@ namespace LaserAlignDX.Model.Coords
         }
         public void Save(string iniFileName)
         {
+            LtDebug.LOG.Debug($"寫入 [校正參數 (Trf)] {iniFileName}");
             foreach (var trf in _transforms)
             {
                 trf.Save(iniFileName);

@@ -685,7 +685,7 @@ namespace LaserAlignDX.Mvc.Gui
             if (bloc == null)
                 return;
 
-            var transformsModel = GaMvcConfig.TransformsModel;
+            var transformsModel = GaMvcConfig.SysModel.TransformsModel;
             var res = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, row, col);
             var dV = res[0];
             var dErr = res[1];
@@ -706,7 +706,7 @@ namespace LaserAlignDX.Mvc.Gui
 
             int rows = _grid.Rows;
             int cols = _grid.Cols;
-            var transformsModel = GaMvcConfig.TransformsModel;
+            var transformsModel = GaMvcConfig.SysModel.TransformsModel;
 
             for (int r = 0; r < rows; r++)
             {

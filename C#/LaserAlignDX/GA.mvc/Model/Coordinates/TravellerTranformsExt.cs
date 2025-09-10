@@ -16,6 +16,7 @@
 
 using JetEazy.QMath;
 using JetEazy.Transform;
+using LeTian.AoiLib;
 
 namespace LaserAlignDX.Model.Coords
 {
@@ -48,6 +49,7 @@ namespace LaserAlignDX.Model.Coords
                 CarrierEnum c = (CarrierEnum)(i / 2);
                 SuckerRowEnum s = (SuckerRowEnum)(i % 2);
                 var transform = trfs.GetCameraMotorTransform(c, s);
+
                 loadGaaraIni(transform, GA_CALIB_INI_FILE(i, true));
             }
         }
@@ -106,6 +108,8 @@ namespace LaserAlignDX.Model.Coords
 
         static void saveGaaraIni(QTransform trf, string iniFileName)
         {
+            LtDebug.LOG.Debug($"寫入 [校正參數 (Trf)] {iniFileName}");
+
             //[Tray]
             //; 虚拟点
             //ptsview_0 = 4178.286,4237.869
@@ -145,6 +149,8 @@ namespace LaserAlignDX.Model.Coords
 
         static void loadGaaraIni(QTransform trf, string iniFileName)
         {
+            LtDebug.LOG.Debug($"載入 [校正參數 (Trf)] {iniFileName}");
+
             //[Tray]
             //; 虚拟点
             //ptsview_0 = 4178.286,4237.869     //LT

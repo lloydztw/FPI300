@@ -20,6 +20,7 @@ using JetEazy.FormSpace;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.Utils;
+using LaserAlignDX;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -120,8 +121,6 @@ namespace Traveller106
         }
     }
 
-
-
     partial class LtAoiFactory
     {
         #region PRIVATE_DATA
@@ -153,7 +152,11 @@ namespace Traveller106
         }
         public static void RcpSetActive(string recipeName)
         {
-            _activeRecipeName = recipeName;
+            // 當 Gaara Recipe Manager 發生變動
+            if (_activeRecipeName != recipeName)
+                _activeRecipeName = recipeName;
+            var model = GaMvcConfig.SysModel;
+            model.ApplyRecipe(_activeRecipeName);
         }
         public static void RcpRename(string recipeName)
         {

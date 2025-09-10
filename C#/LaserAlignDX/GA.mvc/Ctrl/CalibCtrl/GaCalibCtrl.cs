@@ -32,6 +32,7 @@ using System.Windows.Forms;
 
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
 using QCoord = JetEazy.QMath.QVector;
+using JxCalibAoiRecipe = EzAoiEmptyTrayInspector.Model.JxAoiRecipe;
 
 
 namespace LaserAlignDX.Mvc.Ctrl
@@ -53,8 +54,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         };
 
         #region GLOBAL_PATH
-        static string CALIB_VISION_JSON_FILE => GaMvcPaths.CALIB_VISION_JSON_FILE;
-        static string CALIB_TRANSFORMS_INI_FILE => GaMvcPaths.CALIB_TRANSFORMS_INI_FILE;
+        static string CALIB_VISION_FILE => GaMvcPaths.CALIB_VISION_FILE;
+        static string CALIB_TRANSFORMS_FILE => GaMvcPaths.CALIB_TRANSFORMS_FILE;
         #endregion
 
         #region GLOBAL_MESS
@@ -62,17 +63,17 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             get { return Traveller106.Universal.IxLineScan; }
         }
-        GaBigImageHolder _lineScanImageHolder => TravellerBigImagesHolder.Instance.LineScanImageHolder;
+        GaBigImageHolder _lineScanImageHolder => GaMvcConfig.SysModel.LineScanImageHolder;
+        TravellerTransforms _transforms => GaMvcConfig.SysModel.TransformsModel;
         #endregion
 
-        #region KERNEL_MEMBERS
-        TravellerTransforms _transforms => GaMvcConfig.TransformsModel;
-        CalibAoiModel _aoiModel = new CalibAoiModel();
-        JxAoiRecipe _jxCalibAoiSettings;
-        string _recipeFileName;
+        #region CALIB_AOI_MODEL
+        ICalibAoiModel _aoiModel => GaMvcConfig.SysModel.CalibAoiModel;
+        JxCalibAoiRecipe _jxAoiRecipe;
+        bool _isInGlobalCalibration;
         #endregion
 
-        internal CalibAoiModel GetAoiModel()
+        internal ICalibAoiModel GetAoiModel()
         {
             return _aoiModel;
         }
@@ -102,34 +103,32 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region RUNTIME_DATA
         CarrierEnum _activeCarrierID = CarrierEnum.C1;
         SuckerRowEnum _activeSuckerRowID = SuckerRowEnum.S1;
-        bool _isInGlobalCalibration => _btnBuildCalib != null;
         bool _isCoordModified = false;
         bool _isGoldenPicking = false;
         bool _isRunning = false;        // 因為目前是單執行緒, 所以此變量用處不大.
         #endregion
 
-        public void Attach(IvCalibToolUI toolView, JxAoiRecipe recipe = null, string recipeFileName = null)
+        public void Attach(IvCalibToolUI toolView, JxCalibAoiRecipe localRecipe = null)
         {
             _calibToolUI = toolView;
-            _jxCalibAoiSettings = recipe == null ? new JxAoiRecipe() : recipe;
-            _recipeFileName = recipeFileName == null ? CALIB_VISION_JSON_FILE : recipeFileName;
             _btnPickupGolden.Tag = _btnPickupGolden.BackColor;
+
+            _isInGlobalCalibration = (localRecipe == null);
+            _jxAoiRecipe = localRecipe == null ? new JxCalibAoiRecipe() : localRecipe;
 
             initImgViewer();
             LoadSettings();
+
             updateAllData(false);
             connectEventHandlers();
         }
-        public void Dispose()
+        void CleanUp()
         {
             // 卸載 lineScanImageHolder Event Handler
             _lineScanImageHolder.OnImageChanged -= _lineScanImageHolder_OnImageChanged;
-            // 釋放 Aoi Model
-            _aoiModel?.Dispose();
-            _aoiModel = null;
-            // 釋放 JxRecipe
-            _jxCalibAoiSettings.Dispose();
-            _jxCalibAoiSettings = null;
+            // 由於 _jxAoiRecipe 被 _aoiModel 接管, 所以不用 Dispose !!!
+            //_jxAoiRecipe.Dispose();
+            //_jxAoiRecipe = null;
         }
 
         #region PRIVATE_INIT_FUNCTIONS
@@ -182,7 +181,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             _lineScanImageHolder.OnImageChanged += _lineScanImageHolder_OnImageChanged;
 
             // 自動釋放資源
-            _wndOwner.HandleDestroyed += (s, e) => Dispose();           
+            _wndOwner.HandleDestroyed += (s, e) => CleanUp();           
         }
         #endregion
 
@@ -264,7 +263,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             else
             {
-                panel.BuildGuiCtrls(_jxCalibAoiSettings);
+                panel.BuildGuiCtrls(_jxAoiRecipe);
                 panel.ExpandAll();
             }
         }
@@ -378,7 +377,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return;
 
             //(1) 取出參數設定的 pitch, rows, cols
-            var traySettings = _jxCalibAoiSettings.TrayMiscSettings;
+            var traySettings = _jxAoiRecipe.TrayMiscSettings;
             var pitchX = (double)traySettings.PitchX.Value;
             var pitchY = (double)traySettings.PitchY.Value;
             var rows = (int)traySettings.FullRows.Value;
@@ -506,7 +505,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var goldenBmp = ImageUtil.CropBmp(ezImage, goldenRect);
 
             //(3) Update to Recipe
-            var matchSetting = _jxCalibAoiSettings.VisionSettings.Match;
+            var matchSetting = _jxAoiRecipe.VisionSettings.Match;
             matchSetting.GoldenBmp.Value = goldenBmp;
             matchSetting.GoldenBox.Value = goldenRect;
             updateVisionParams(_activeCarrierID, false);
@@ -674,33 +673,48 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         void LoadSettings()
         {
-            // Load VISIONS
-            _jxCalibAoiSettings.Load(_recipeFileName);
-            _aoiModel.SetRecipe(_jxCalibAoiSettings);
-
-            // Load TRANSFORMS
-            var calibFileName = CALIB_TRANSFORMS_INI_FILE;
-            if (!System.IO.File.Exists(calibFileName))
-                _transforms.LoadGaaraIniFile();
+            // (1) Load VISIONS 
+            if (_isInGlobalCalibration)
+            {
+                // 載入全域 Calib Aoi Recipe
+                _jxAoiRecipe.Load(CALIB_VISION_FILE);
+                // _aoiModel 會接管 _jxAoiRecipe
+                _aoiModel.SetRecipe(_jxAoiRecipe);
+            }
             else
-                _transforms.Load(calibFileName);
+            {
+                // 局域由上層負責 調用 _jxAoiRecipe.Load()
+            }
+
+            // (2) Load TRANSFORMS (永遠載入全域設定)
+            if (true)
+            {
+                _transforms.Load(CALIB_TRANSFORMS_FILE);
+            }
 
             // 第一次建置座標轉換
             _transforms.BuildAll();
         }
         void SaveSettings(bool force = false)
         {
-            // Save TRANSFORMS
-            if ((force || _isCoordModified) && _isInGlobalCalibration)
+            if (_isInGlobalCalibration)
             {
-                _transforms.Save(CALIB_TRANSFORMS_INI_FILE);
-                _transforms.SaveGaaraIniFile();
+                // 保存全域設定
+                // (1) TRANSFORMS
+                if (force || _isCoordModified)
+                {
+                    _transforms.Save(CALIB_TRANSFORMS_FILE);
+                    _transforms.SaveGaaraIniFile();
+                }
+                // (2) VISIONS
+                if (force || _jxAoiRecipe.Modified)
+                {
+                    _jxAoiRecipe.Save(CALIB_VISION_FILE);
+                }
             }
-
-            // Save VISIONS
-            if (force || _jxCalibAoiSettings.Modified)
+            else
             {
-                _jxCalibAoiSettings.Save(_recipeFileName);
+                // 局域由上層負責 調用 _jxAoiRecipe.Save()
             }
         }
         void CloseWindow(bool confirm)
@@ -713,7 +727,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             else
             {
                 // 還原舊值
-                if (_isCoordModified || _jxCalibAoiSettings.Modified)
+                if (_isCoordModified || _jxAoiRecipe.Modified)
                     LoadSettings();
             }
 

@@ -13,22 +13,21 @@
  */
 #endregion
 
-using EzAoiEmptyTrayInspector.Model;
+using Eazy_Project_III;
 using JetEazy.BasicSpace;
 using JetEazy.EzImage;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.BasicSpace;
 using LaserAlignDX.FormSpace;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
+using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.Mvc.Model.Recipe;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.JxProps.Gui;
 using System;
 using System.Drawing;
-using System.Windows.Documents;
 using System.Windows.Forms;
 using Traveller106;
 
@@ -41,29 +40,23 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             get { return Traveller106.Universal.IxLineScan; }
         }
-        GaBigImageHolder _lineScanImageHolder => TravellerBigImagesHolder.Instance.LineScanImageHolder;
+        IProcessRunFPI _aoiModel => GaMvcConfig.SysModel.AoiModel;
+        GaBigImageHolder _lineScanImageHolder => GaMvcConfig.SysModel.LineScanImageHolder;
+        TravellerTransforms _transforms => GaMvcConfig.SysModel.TransformsModel;
         #endregion
 
         #region RECIPE
         RecipeFPIX3Class xRecipe => RecipeFPIX3Class.Instance;
-        //RecipeParaGridClass _gaParams => RecipeParaGridClass.Instance;
-        //JxAoiRecipe _jxEmptyTrayRecipe => _jxRecipeCombo?.EmptyTrayParams;
-        JxRecipeCombo _jxRecipeCombo;
-        string getEmptyTrayRecipeFileName()
-        {
-            return LtAoiFactory.RcpGetRecipeFileName(null);
-        }
+        JxRecipeCombo _jxRecipeCombo => _sysModel?.GetCurrentRecipe();
         #endregion
 
         #region KERNEL_DATA
+        ITravelerModel _sysModel => GaMvcConfig.SysModel;
         GaCalibCtrl _calibCtrl;
         #endregion
 
         #region INTERACTOR
         CviGoldenPickingBox _cviGoldenChipBox = new CviGoldenPickingBox(Brushes.Orange) { Visible = false };
-        #endregion
-
-        #region GUI_MEMBERS
         #endregion
 
         #region GUI_LINKS
@@ -85,6 +78,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region RUNTIME_DATA
+        CarrierEnum _activeCarrierID = CarrierEnum.C1;
+        SuckerRowEnum _activeSuckerRowID = SuckerRowEnum.S1;
         bool _isGoldenChipPicking => _cviGoldenChipBox.Visible;
         #endregion
 
@@ -103,9 +98,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 卸載 EventHandler
             _lineScanImageHolder.OnImageChanged -= _lineScanImageHolder_OnImageChanged;
             LtAoiFactory.OnLineScanRequested -= LtAoi_OnLineScanRequested;
-            // Recipe
-            _jxRecipeCombo?.Dispose();
-            _jxRecipeCombo = null;
         }
 
         #region PRIVATE_INIT_FUNCTIONS
@@ -120,15 +112,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             LoadSettings();
 
             // EmptyTrayRecipe
-            var recipeFileName = getEmptyTrayRecipeFileName();
             var jxEmptyTrayRecipe = _jxRecipeCombo?.EmptyTrayParams;
 
             // 重複利用 GaCalibCtrl
             _calibCtrl = new GaCalibCtrl();
-            _calibCtrl.Attach(new Rcp.PseudoCalibUI(this), jxEmptyTrayRecipe, recipeFileName);
-
-            // 因為 GaCalibCtrl 會調用 _jxEmptyTrayRecipe.Dispose(), 所以在此處要多 AddRef() 一次.
-            jxEmptyTrayRecipe.AddRef();
+            _calibCtrl.Attach(new Rcp.PseudoCalibUI(this), jxEmptyTrayRecipe);
         }
         void connectEventHandlers()
         {
@@ -229,7 +217,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             var cols = (int)traySettings.FullCols.Value;
             var pitchX = (double)traySettings.PitchX.Value;
             var pitchY = (double)traySettings.PitchY.Value;
-            var plcGrid = GaMvcConfig.TransformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
+
+            var transformsModel = GaMvcConfig.SysModel.TransformsModel;
+            var plcGrid = transformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
 
             if (toModel)
             {
@@ -237,11 +227,13 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             else
             {
-                var trfCP = GaMvcConfig.TransformsModel.GetCameraPhysicTransform(CarrierEnum.C1);
-                var trfCM = GaMvcConfig.TransformsModel.GetCameraMotorTransform(CarrierEnum.C1, SuckerRowEnum.S1);
+                var trfCP = transformsModel.GetCameraPhysicTransform(_activeCarrierID);
+                var trfCM = transformsModel.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+
                 var plcPt = plcGrid[0, 0];
                 var camPt = trfCP.InvTrans(plcPt);
                 var motorPt = trfCM.Trans(camPt);
+
                 _rcpEditUI.UpdateCoordsRef(camPt, motorPt);
             }
         }
@@ -279,7 +271,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 xRecipe.bmpprinttemplate?.Dispose();
                 xRecipe.bmpprinttemplate = goldenBmp;
                 xRecipe.xRectRegionPrint = goldenRect;
-                _jxRecipeCombo.GaGridParams.Cate1.ChipGoldenBmp.Value = (Bitmap)xRecipe.bmpprinttemplate.Clone();
+                _jxRecipeCombo.GaaraParams.Cate1.ChipGoldenBmp.Value = (Bitmap)xRecipe.bmpprinttemplate.Clone();
             }
             else
             {
@@ -390,26 +382,6 @@ namespace LaserAlignDX.Mvc.Ctrl
                 dlg.ShowDialog();
             }
         }
-        void CloseWindow(bool confirm)
-        {
-            if (confirm)
-            {
-                // updateAllData(true);
-                SaveSettings();
-                _frmOwner.DialogResult = DialogResult.OK;
-            }
-            else
-            {
-                // 還原舊值
-                LoadSettings();
-                _frmOwner.DialogResult = DialogResult.Cancel;
-            }
-
-            _frmOwner?.Close();
-
-            //由上層調用 Dispose
-            //_frmOwner?.Dispose();
-        }
 
         void RunEmptyTrayInspect()
         {
@@ -505,14 +477,19 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         void LoadSettings(bool reloadGaara = false)
         {
-            var oldCursor = GaUtil.SetCursor(_frmOwner, Cursors.WaitCursor);
+            if (_jxRecipeCombo.Modified || reloadGaara)
+            {
+                var oldCursor = GaUtil.SetCursor(_frmOwner, Cursors.WaitCursor);
 
-            if (reloadGaara)
-                xRecipe.Load();
-            _jxRecipeCombo = new JxRecipeCombo();
-            _jxRecipeCombo.Load(xRecipe.INIFILE);
+                if (reloadGaara)
+                    xRecipe.Load();
 
-            GaUtil.SetCursor(_frmOwner, oldCursor);
+                _jxRecipeCombo.Load(null);
+
+                _sysModel.ApplyRecipe();
+
+                GaUtil.SetCursor(_frmOwner, oldCursor);
+            }
         }
         void SaveSettings(bool force = false)
         {
@@ -520,11 +497,33 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 var oldCursor = GaUtil.SetCursor(_frmOwner, Cursors.WaitCursor);
 
-                _jxRecipeCombo.Save(xRecipe.INIFILE);
-                //xRecipe.Save();
+                xRecipe.Save();
+
+                _jxRecipeCombo.Save(null);
+                _sysModel.ApplyRecipe();
 
                 GaUtil.SetCursor(_frmOwner, oldCursor);
             }
+        }
+        void CloseWindow(bool confirm)
+        {
+            if (confirm)
+            {
+                // 保存更新的參數
+                updateRecipeParams(true);
+                SaveSettings();
+                _frmOwner.DialogResult = DialogResult.OK;
+            }
+            else
+            {
+                // 還原舊值
+                LoadSettings(true);
+                _frmOwner.DialogResult = DialogResult.Cancel;
+            }
+
+            _frmOwner.Close();
+
+            //由上層調用 _frmOwner.Dispose();
         }
     }
 }

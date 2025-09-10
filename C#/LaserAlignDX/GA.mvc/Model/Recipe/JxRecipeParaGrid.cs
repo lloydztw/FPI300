@@ -99,8 +99,10 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             Angle.Value = (decimal)xRecipe.xAngle;
             LeftTopX.Value = xParaGrid.xLeftTopX;
             LeftTopY.Value = xParaGrid.xLeftTopY;
-            ChipWidth.Value = (decimal)xRecipe.xChipWidth;
-            ChipHeight.Value = (decimal)xRecipe.xChipHeight;
+            //ChipWidth.Value = (decimal)xRecipe.xChipWidth;
+            //ChipHeight.Value = (decimal)xRecipe.xChipHeight;
+            ChipWidth.Value = (decimal)InspectX3ParaClass.Instance.mWidthStand;
+            ChipHeight.Value = (decimal)InspectX3ParaClass.Instance.mHeightStand;
             ExtendX.Value = xRecipe.xExtendx;
             ExtendY.Value = xRecipe.xExtendy;
             Modified = false;
@@ -110,8 +112,10 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             xRecipe.xAngle = (float)Angle.Value;
             xParaGrid.xLeftTopX = LeftTopX.Value;
             xParaGrid.xLeftTopY = LeftTopY.Value;
-            xRecipe.xChipWidth = (float)ChipWidth.Value;
-            xRecipe.xChipHeight = (float)ChipHeight.Value;
+            //xRecipe.xChipWidth = (float)ChipWidth.Value;
+            //xRecipe.xChipHeight = (float)ChipHeight.Value;
+            InspectX3ParaClass.Instance.mWidthStand = (float)ChipWidth.Value;
+            InspectX3ParaClass.Instance.mHeightStand = (float)ChipHeight.Value;
             xRecipe.xExtendx = ExtendX.Value;
             xRecipe.xExtendy = ExtendY.Value;
             Modified = false;

@@ -1,4 +1,19 @@
-﻿using EzAoiEmptyTrayInspector.Model;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-09-07 初稿 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
 using JetEazy.Match;
 using OpenCvSharp;
@@ -6,9 +21,15 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 
+
 namespace LaserAlignDX.AoiModel
 {
-    public class CalibAoiModel : IxEmptyTrayInspector
+    public interface ICalibAoiModel : IxEmptyTrayInspector
+    {
+        void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg);
+    }
+
+    public class CalibAoiModel : ICalibAoiModel
     {
         #region PRIVATE_DATA
         IxEmptyTrayInspector _imp = AoiEmptyTrayInspector.Instance;
@@ -110,7 +131,6 @@ namespace LaserAlignDX.AoiModel
         {
             _imp.RunMatch(sideId, img, dumpPath);
         }
-
         public void TryApplyFilters(SideID sideId, IEzImage img, JxRotAngleSettings settings, out object result)
         {
             _imp.TryApplyFilters(sideId, img, settings, out result);
@@ -123,6 +143,7 @@ namespace LaserAlignDX.AoiModel
         }
         public void SetRecipe(JxAoiRecipe recipe)
         {
+            // recipe 會由 _imp 持有, 所以不用 Dispose
             _imp.SetRecipe(recipe);
             _jxRecipe = recipe;
         }

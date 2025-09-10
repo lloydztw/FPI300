@@ -2,9 +2,12 @@
 using Eazy_Project_III;
 using FreeImageAPI;
 using JetEazy;
+using JetEazy.Match;
+using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model.Coords;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -855,10 +858,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 switch (xStageNumber)
                 {
                     case StageNumber.N1:
-                        return Traveller106.Universal.LineScanCalibrateClasses[2];
+                        return Traveller106.Universal.LineScanCalibrateClasses[2];  //Carrier2 Sucker1
                         //break;
                     default:
-                        return Traveller106.Universal.LineScanCalibrateClasses[0];
+                        return Traveller106.Universal.LineScanCalibrateClasses[0];  //Carrier1 Sucker1
                         //break;
                 }
             }
@@ -870,10 +873,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 switch (xStageNumber)
                 {
                     case StageNumber.N1:
-                        return Traveller106.Universal.LineScanCalibrateClasses[3];
+                        return Traveller106.Universal.LineScanCalibrateClasses[3];  //Carrier2 Sucker2
                     //break;
                     default:
-                        return Traveller106.Universal.LineScanCalibrateClasses[1];
+                        return Traveller106.Universal.LineScanCalibrateClasses[1];  //Carrier1 Sucker2
                         //break;
                 }
             }
@@ -924,8 +927,16 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 iret = PrintTempFlyTrain();
             return iret;
         }
+
+        /// <summary>
+        /// 這個應該是放在 AoiModel 內
+        /// </summary>
         public void CreateViews()
         {
+            // 暫時 掛載此處 ...
+            GaMvcConfig.SysModel.ApplyRecipe(null);
+            return;
+
             xRegionCells.Clear();
 
             PointF ptworld = lineScanCalibrate.ViewToWorld(LeftTopRectCenter);
@@ -1016,7 +1027,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //        _index++;
             //    }
             //}
-
         }
 
 #if (MY_BACKUP)
@@ -1096,122 +1106,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
 #endif
 
-#if(OPT_REPLACED_BY_GA_IMAGE_UTIL)
-        protected CMvdImage BitmapToCMvdImage(Bitmap bmpInputImg)
-        {
-            CMvdImage cMvdImage = new CMvdImage();
-            System.Drawing.Imaging.PixelFormat bitPixelFormat = bmpInputImg.PixelFormat;
-            BitmapData bmData = bmpInputImg.LockBits(new Rectangle(0, 0, bmpInputImg.Width, bmpInputImg.Height), ImageLockMode.ReadOnly, bitPixelFormat);//锁定
-
-            if (bitPixelFormat == System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
-            {
-                Int32 bitmapDataSize = bmData.Stride * bmData.Height;//bitmap图像缓存长度
-                int offset = bmData.Stride - bmData.Width;
-                Int32 ImageBaseDataSize = bmData.Width * bmData.Height;//imageBaseData_V2图像真正的缓存长度
-                byte[] _BitImageBufferBytes = new byte[bitmapDataSize];
-                byte[] _ImageBaseDataBufferBytes = new byte[ImageBaseDataSize];
-                Marshal.Copy(bmData.Scan0, _BitImageBufferBytes, 0, bitmapDataSize);
-                int bitmapIndex = 0;
-                int ImageBaseDataIndex = 0;
-                for (int i = 0; i < bmData.Height; i++)
-                {
-                    for (int j = 0; j < bmData.Width; j++)
-                    {
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex++];
-                    }
-                    bitmapIndex += offset;
-                }
-                MVD_IMAGE_DATA_INFO stImageData = new MVD_IMAGE_DATA_INFO();
-                stImageData.stDataChannel[0].nRowStep = (uint)bmData.Width;
-                stImageData.stDataChannel[0].nLen = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].nSize = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].arrDataBytes = _ImageBaseDataBufferBytes;
-                cMvdImage.InitImage((uint)bmData.Width, (uint)bmData.Height, MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08, stImageData);
-            }
-            else if (bitPixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb)
-            {
-                Int32 bitmapDataSize = bmData.Stride * bmData.Height;//bitmap图像缓存长度
-                int offset = bmData.Stride - bmData.Width * 3;
-                Int32 ImageBaseDataSize = bmData.Width * bmData.Height * 3;//imageBaseData_V2图像真正的缓存长度
-                byte[] _BitImageBufferBytes = new byte[bitmapDataSize];
-                byte[] _ImageBaseDataBufferBytes = new byte[ImageBaseDataSize];
-                Marshal.Copy(bmData.Scan0, _BitImageBufferBytes, 0, bitmapDataSize);
-                int bitmapIndex = 0;
-                int ImageBaseDataIndex = 0;
-                for (int i = 0; i < bmData.Height; i++)
-                {
-                    for (int j = 0; j < bmData.Width; j++)
-                    {
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex + 2];
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex + 1];
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex];
-                        bitmapIndex += 3;
-                    }
-                    bitmapIndex += offset;
-                }
-                MVD_IMAGE_DATA_INFO stImageData = new MVD_IMAGE_DATA_INFO();
-                stImageData.stDataChannel[0].nRowStep = (uint)bmData.Width * 3;
-                stImageData.stDataChannel[0].nLen = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].nSize = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].arrDataBytes = _ImageBaseDataBufferBytes;
-                cMvdImage.InitImage((uint)bmData.Width, (uint)bmData.Height, MVD_PIXEL_FORMAT.MVD_PIXEL_RGB_RGB24_C3, stImageData);
-            }
-            else if (bitPixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb)
-            {
-                Int32 bitmapDataSize = bmData.Stride * bmData.Height;//bitmap图像缓存长度
-                int offset = bmData.Stride - bmData.Width;
-                Int32 ImageBaseDataSize = bmData.Width * bmData.Height;//imageBaseData_V2图像真正的缓存长度
-                byte[] _BitImageBufferBytes = new byte[bitmapDataSize];
-                byte[] _ImageBaseDataBufferBytes = new byte[ImageBaseDataSize];
-                Marshal.Copy(bmData.Scan0, _BitImageBufferBytes, 0, bitmapDataSize);
-                int bitmapIndex = 0;
-                int ImageBaseDataIndex = 0;
-                for (int i = 0; i < bmData.Height; i++)
-                {
-                    for (int j = 0; j < bmData.Width; j++)
-                    {
-                        // 获取32bpp像素值
-                        byte b = _BitImageBufferBytes[bitmapIndex];
-                        byte g = _BitImageBufferBytes[bitmapIndex + 1];
-                        byte r = _BitImageBufferBytes[bitmapIndex + 2];
-                        byte a = _BitImageBufferBytes[bitmapIndex + 3];
-                        bitmapIndex += 4;
-                        // 转换为灰度值（8bpp）
-                        byte gray = (byte)((r * 0.299 + g * 0.587 + b * 0.114) * (a / 255.0));
-
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = gray;// _BitImageBufferBytes[bitmapIndex++];
-                    }
-                    bitmapIndex += offset;
-                }
-                MVD_IMAGE_DATA_INFO stImageData = new MVD_IMAGE_DATA_INFO();
-                stImageData.stDataChannel[0].nRowStep = (uint)bmData.Width;
-                stImageData.stDataChannel[0].nLen = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].nSize = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].arrDataBytes = _ImageBaseDataBufferBytes;
-                cMvdImage.InitImage((uint)bmData.Width, (uint)bmData.Height, MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08, stImageData);
-            }
-            bmpInputImg.UnlockBits(bmData);  // 解除锁定
-            return cMvdImage;
-        }
-        public void BoundRect(ref RectangleF InnerRect, Size BoundSize)
-        {
-            InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
-            InnerRect.Y = Math.Min(Math.Max(InnerRect.Y, 0), (BoundSize.Height - InnerRect.Height < 0 ? 0 : BoundSize.Height - InnerRect.Height));
-
-            if (BoundSize.Width <= InnerRect.X + InnerRect.Width)
-                InnerRect.Width = BoundValue(InnerRect.Width, BoundSize.Width - InnerRect.X, 1);
-            if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
-                InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
-        }
-        public float BoundValue(float Value, float Max, float Min)
-        {
-            return Math.Max(Math.Min(Value, Max), Min);
-
-        }
-#endif
 
         /// <summary>
-        /// 绕任意点旋转一个点
+        /// 绕任意点旋转一个点 (這個應該放在 Util class 內)
         /// </summary>
         /// <param name="pointToRotate">要旋转的点</param>
         /// <param name="pivotPoint">旋转中心点</param>

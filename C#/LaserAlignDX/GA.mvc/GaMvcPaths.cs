@@ -23,7 +23,7 @@ namespace LaserAlignDX
     public static class GaMvcPaths
     {
         public static string GA_WORK_PATH => Traveller106.Universal.WORKPATH;
-        public static string CALIB_VISION_JSON_FILE => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Vision_Settings.json");
-        public static string CALIB_TRANSFORMS_INI_FILE => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Transforms.ini");
+        public static string CALIB_VISION_FILE => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Vision_Settings.json");
+        public static string CALIB_TRANSFORMS_FILE => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Transforms.ini");
     }
 }

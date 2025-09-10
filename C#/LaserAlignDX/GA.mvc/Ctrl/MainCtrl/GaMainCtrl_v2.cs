@@ -4,6 +4,7 @@ using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
 using LaserAlignDX.UISpace.UIMVC;
@@ -61,10 +62,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         {
             get { return InspectX3ParaClass.Instance; }
         }
-        IProcessRunFPI _aoiModel
-        {
-            get => ProcessRunFPIClass.Instance;
-        }
+        IProcessRunFPI _aoiModel => GaMvcConfig.SysModel.AoiModel;
+        GaBigImageHolder _lineScanImageHolder => GaMvcConfig.SysModel.LineScanImageHolder;
+        TravellerTransforms _transforms => GaMvcConfig.SysModel.TransformsModel;
         #endregion
 
         #region GUI_MEMBERS
@@ -192,8 +192,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             //m_SingleProcess.OnLiveImage += process_OnLiveImage;
             m_SingleProcess.OnMessage += handle_aoi_run_message;
 
-            var lineScanImagegHolder = TravellerBigImagesHolder.Instance.LineScanImageHolder;
-            lineScanImagegHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
+            _lineScanImageHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
 
             var aoiEngine = ProcessRunFPIClass.Instance;
             aoiEngine.OnAoiProgressing += AoiEngine_OnAoiProgressing;
@@ -378,9 +377,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             // NOTE: 目前 cMvdInput 生命週期由 TravellerBigImagesHolder 保管 !!!
             //       不用重複 Clone() 來餵給 MVS
             //------------------------------------------------------------------------
-            var lineScanImageHolder = TravellerBigImagesHolder.Instance.LineScanImageHolder;
-            //>>> CMvdImage mvdImage = lineScanImageHolder.PeekMvdImage();
-            DSMain.UpdateImageSrc(lineScanImageHolder);
+            DSMain.UpdateImageSrc(_lineScanImageHolder);
         }
         void updateMvd_AoiResultData(ProcessEventArgs e)
         {

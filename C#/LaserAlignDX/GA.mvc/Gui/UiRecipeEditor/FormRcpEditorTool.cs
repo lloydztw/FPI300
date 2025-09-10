@@ -135,8 +135,7 @@ namespace LaserAlignDX.Mvc.Gui
             }
 
             gvCalibPointsDataGridView1.SelectedIndex = -1;
-            //gvCalibPointsDataGridView1.Height = 2;
-            //dgv.Columns[0].Width = 0;
+            gvCalibPointsDataGridView1.Height = 2;
         }
         #endregion
     }

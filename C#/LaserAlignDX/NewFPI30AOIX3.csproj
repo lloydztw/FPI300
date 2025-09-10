@@ -366,10 +366,13 @@
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_abs.cs" />
-    <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v2.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaPlcFlyCameraCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\Wrappers\PseudoCalibUI.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v25.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
+    <Compile Include="GA.mvc\Model\SysModel\TravellerSysModel.cs" />
     <Compile Include="GA.mvc\Model\Recipe\Enums.cs" />
     <Compile Include="GA.mvc\Model\Recipe\JxRecipeCombo.cs" />
     <Compile Include="GA.mvc\Model\Recipe\JxRecipeParaGrid.cs" />
@@ -424,10 +427,9 @@
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\IMvdTemplateMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\MvdCompositeChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\TravellerBigImagesHolder.cs" />
+    <Compile Include="GA.mvc\Model\SysModel\TravellerBigImagesHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v2.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ScanInspectModeEnum.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaBigImageHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaCellsGroup.cs" />
@@ -932,6 +934,7 @@
     <None Include="GA.mvc\Gui\Readme.md" />
     <None Include="GA.mvc\Model\CustomerModel\Readme.md" />
     <None Include="GA.mvc\Model\Readme.md" />
+    <None Include="GA.mvc\Model\Recipe\Readme.md" />
     <None Include="GA.mvc\Readme.md" />
     <None Include="GA\RunSpace\X2\Readme.md" />
     <None Include="LT\UnitTest\Readme.md" />

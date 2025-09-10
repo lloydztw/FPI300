@@ -1,5 +1,6 @@
 ﻿using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
+using JetEazy.BasicSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
@@ -40,14 +41,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             get { return RecipeFPIX3Class.Instance; }
         }
-        GaBigImageHolder _lineScanImageHolder
-        {
-            get => TravellerBigImagesHolder.Instance.LineScanImageHolder;
-        }
-        IProcessRunFPI _aoiModel
-        {
-            get => ProcessRunFPIClass.Instance;
-        }
+        IProcessRunFPI _aoiModel => GaMvcConfig.SysModel.AoiModel;
+        GaBigImageHolder _lineScanImageHolder => GaMvcConfig.SysModel.LineScanImageHolder;
         bool IsBusy()
         {
             return _aoiModel.Running || LineScanSingleProcess.Instance.IsOn || LineScanProcess.Instance.IsOn;
@@ -77,6 +72,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
         public override void Attach(Control[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
         {
+            // MODEL
+            GaMvcConfig.SysModel.OnError += (s, e) => VsMSG.Instance.Warning(e.Message, true);
+
             // CHIP_CELLS_VIEWERS
             _DSMains = new[]
             {
@@ -185,8 +183,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             m_LineScanProcess.OnMessage += handle_aoi_run_message;
             m_SingleProcess.OnMessage += handle_aoi_run_message;
 
-            var lineScanImagegHolder = TravellerBigImagesHolder.Instance.LineScanImageHolder;
-            lineScanImagegHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
+            _lineScanImageHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
 
             var aoiEngine = ProcessRunFPIClass.Instance;
             aoiEngine.OnAoiProgressing += AoiEngine_OnAoiProgressing;
@@ -371,7 +368,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             // NOTE: 目前 cMvdInput 生命週期由 TravellerBigImagesHolder 保管 !!!
             //       不用重複 Clone() 來餵給 MVS
             //------------------------------------------------------------------------
-            DSMain.UpdateImageSrc(_lineScanImageHolder, _lineScanImageHolder.SrcName);
+            var srcName = _lineScanImageHolder.SrcName;
+            if (srcName != null && !srcName.Contains("參數") && !srcName.Contains("校正"))
+                DSMain.UpdateImageSrc(_lineScanImageHolder, _lineScanImageHolder.SrcName);
         }
         void updateMvd_AoiResultData(ProcessEventArgs e)
         {

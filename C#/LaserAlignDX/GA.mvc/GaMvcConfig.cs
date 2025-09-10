@@ -16,6 +16,8 @@
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Mvc.Model;
+
 
 //using FormCalibrationTool = LaserAlignDX.FormSpace.FPI30Form.frmCalibration;
 //using FormRcpEditorTool = LaserAlignDX.FormSpace.frmFPIRecipe;
@@ -34,33 +36,44 @@ namespace LaserAlignDX
     public static class GaMvcConfig
     {
         public static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER = true;
-
         public static int TOTAL_FLY_CAMERAS => 4;
 
+        #region PRIVATE_DATA
+        static TravellerSysModel _sysModel;
+        #endregion
 
-        public static IProcessRunFPI InstanceAoiModel()
+        // MODEL ----------------------------------------------------
+        public static ITravelerModel SysModel
+        {
+            get
+            {
+                if (_sysModel == null)
+                {
+                    var aoiModel = InstanceAoiModel();
+                    _sysModel = TravellerSysModel.Instance(aoiModel);
+                }
+                return _sysModel;
+            }
+        }
+        private static IProcessRunFPI InstanceAoiModel()
         {
             // AoiModel 使用 V2
-            return AoiModel.V2.ProcessRunFPIClass.Instance;
+            return AoiModel.V25.ProcessRunFPIClass.Instance;
         }
-        
-        public static GaMainCtrl CreateMainCtrl()
-        {
-            // GaMainCtrl 使用 V3 
-            return new global::LaserAlignDX.Mvc.Ctrl.V3.GaMainCtrl();
-        }
-
         public static IxReportBuilder CreateReportBuilder()
         {
             // 使用力成報表
             return new PowerTechReportBuilder();
         }
 
-        public static TravellerTransforms TransformsModel
+        // CTRL ----------------------------------------------------
+        public static GaMainCtrl CreateMainCtrl()
         {
-            get => TravellerTransforms.Instance;
+            // GaMainCtrl 使用 V3 
+            return new global::LaserAlignDX.Mvc.Ctrl.V3.GaMainCtrl();
         }
 
+        // VIEW ----------------------------------------------------
         public static void OpenRecipeEditor()
         {
             using (var dlg = new FormRcpEditorTool())
@@ -68,7 +81,6 @@ namespace LaserAlignDX
                 dlg.ShowDialog();
             }
         }
-
         public static void OpenCalibrationTool()
         {
             using (var dlg = new FormCalibrationTool())
@@ -77,9 +89,11 @@ namespace LaserAlignDX
             }
         }
 
+        // Dispose -------------------------------------------------
         public static void DisposeAll()
         {
-            TransformsModel?.Dispose();
+            _sysModel?.Dispose();
+            _sysModel = null;
         }
     }
 }
