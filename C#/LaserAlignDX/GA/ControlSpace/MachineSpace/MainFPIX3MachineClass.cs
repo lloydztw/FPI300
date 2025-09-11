@@ -15,7 +15,7 @@ namespace VsCommon.ControlSpace.MachineSpace
     {
         const int MSDuriation = 10;
 
-        public MainFPIX3IOClass PLCIO;
+        public IPlcIoFPIX3 PLCIO;
 
         public MainFPIX3MachineClass(Machine_EA machineea, string opstr, string workpath, bool isnouseplc)
         {
@@ -91,7 +91,12 @@ namespace VsCommon.ControlSpace.MachineSpace
                 i++;
             }
 
-            PLCIO = new MainFPIX3IOClass();
+            // LETIAN: 2025-09-11 加入模擬的 PLCIO
+            if (IsNoUseIO)
+                PLCIO = new MainFPIX3IOSim();
+            else
+                PLCIO = new MainFPIX3IOClass();
+
             PLCIO.Initial(WORKPATH + "\\" + myMachineEA.ToString(), PLCCollection);
 
             return ret;

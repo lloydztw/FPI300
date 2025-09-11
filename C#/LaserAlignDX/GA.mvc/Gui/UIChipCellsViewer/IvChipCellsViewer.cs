@@ -24,6 +24,10 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
     {
         Control Window { get; }
         
+        bool IsActive { get; set; }
+
+        bool HasImage();
+
         void Reset();
 
         /// <summary>

@@ -106,6 +106,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 if (panel is JezChipCellsViewPanel jezViewer)
                 {
                     jezViewer.CarrierID = carrierID;
+                    jezViewer.IsActive = carrierID == CarrierEnum.C1;
                     connectPopupMenuEvents(jezViewer, carrierID);
                     return jezViewer;
                 }
@@ -119,7 +120,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                         Location = childWnd.Location,
                         Size = childWnd.Size,
                         Dock = childWnd.Dock,
-                        Visible = true
+                        Visible = true,
+                        IsActive = carrierID == CarrierEnum.C1
                     };
                     // 與舊的 childWnd 互換角色
                     var parent = childWnd.Parent;

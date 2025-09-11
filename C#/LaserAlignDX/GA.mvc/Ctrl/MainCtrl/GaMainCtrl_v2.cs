@@ -39,17 +39,25 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER => GaMvcConfig.OPT_USE_LETIAN_CHIP_CELL_VIEWER;
 
         #region MACHINE
-        //List<CollectResultClass> collectResultClasses = new List<CollectResultClass>();
-        //protected MachineCollectionClass MACHINECollection
-        //{
-        //    get
-        //    {
-        //        return Traveller106.Universal.MACHINECollection;
-        //    }
-        //}
-        protected MainFPIX3MachineClass MACHINE
+        MainFPIX3MachineClass MACHINE
         {
             get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
+        }
+        void mxReadPlcStageID(out CarrierEnum carrierID)
+        {
+            carrierID = CarrierEnum.C1;
+            var plcIO = MACHINE?.PLCIO;
+            if (plcIO != null)
+            {
+                var index = plcIO.iScanStage;
+                if (index == 2)
+                    carrierID = CarrierEnum.C2;
+            }
+        }
+        void mxSimPlcStageID(CarrierEnum carrierID)
+        {
+            var plcIO = MACHINE?.PLCIO;
+            plcIO?.simActiveStage((int)carrierID + 1);
         }
         #endregion
 
@@ -62,10 +70,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         {
             get { return FlyParaClass.Instance; }
         }
-        //InspectX3ParaClass InspectPara
-        //{
-        //    get { return InspectX3ParaClass.Instance; }
-        //}
         ITravelerModel _sysModel => GaMvcConfig.SysModel;
         IProcessRunFPI _aoiModel => _sysModel.AoiModel;
         GaBigImageHolder _lineScanImageHolder => _sysModel.LineScanImageHolder;
@@ -80,15 +84,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         IvChipCellsViewer[] _DSMains;
         IvChipCellsViewer DSMain
         {
-            get
-            {
-                int iscanIndex = MACHINE.PLCIO.iScanStage;
-                var viewer = iscanIndex == 2 ?
-                    _DSMains[1]:
-                    _DSMains[0];
-                return viewer;
-            }
+            get => _DSMains[(int)_currentCarrierID];
         }
+        CarrierEnum _currentCarrierID;
         #endregion
 
         public override void Attach(Control[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
@@ -122,6 +120,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 if (panel is JezChipCellsViewPanel jezViewer)
                 {
                     jezViewer.CarrierID = carrierID;
+                    jezViewer.IsActive = carrierID == CarrierEnum.C1;
                     connectPopupMenuEvents(jezViewer, carrierID);
                     return jezViewer;
                 }
@@ -135,7 +134,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                         Location = childWnd.Location,
                         Size = childWnd.Size,
                         Dock = childWnd.Dock,
-                        Visible = true
+                        Visible = true,
+                        IsActive = carrierID == CarrierEnum.C1,
                     };
                     // 與舊的 childWnd 互換角色
                     var parent = childWnd.Parent;
@@ -494,15 +494,28 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         {
             if (dsMain is JezChipCellsViewPanel ccvPanel)
             {
+                ccvPanel.contextMenuStrip1.VisibleChanged += ContextMenuStrip1_VisibleChanged;
                 ccvPanel.menuLoadImage.Click += MenuLoadImage_Click;
                 ccvPanel.menuTestChipInspect.Click += MenuTestChipInspect_Click;
                 ccvPanel.menuTestEmptyTrayInspect.Click += MenuTestEmptyTrayInspect_Click;
                 ccvPanel.menuTestQRCode.Click += MenuTestQRCode_Click;
 
+                ccvPanel.contextMenuStrip1.Tag = carrierID;
                 ccvPanel.menuLoadImage.Tag = carrierID;
                 ccvPanel.menuTestChipInspect.Tag = carrierID;
                 ccvPanel.menuTestEmptyTrayInspect.Tag = carrierID;
                 ccvPanel.menuTestQRCode.Tag = carrierID;
+            }
+        }
+        private void ContextMenuStrip1_VisibleChanged(object sender, EventArgs e)
+        {
+            if (sender is ContextMenuStrip menu)
+            {
+                if (menu.Visible && menu.Tag is CarrierEnum carrierID)
+                {
+                    bool ok = checkPlcStageID(carrierID);
+                    menu.Enabled = ok;
+                }
             }
         }
         private void MenuLoadImage_Click(object sender, EventArgs e)
@@ -521,7 +534,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             if (promptCheckBusy())
                 return;
 
-            if(_lineScanImageHolder.IsEmpty())
+            if(_lineScanImageHolder.IsEmpty() || !DSMain.HasImage())
                 MenuLoadImage_Click(sender, e);
 
             if (promptCheckImageHolder())
@@ -535,7 +548,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             if (promptCheckBusy())
                 return;
 
-            if (_lineScanImageHolder.IsEmpty())
+            if (_lineScanImageHolder.IsEmpty() || !DSMain.HasImage())
                 MenuLoadImage_Click(sender, e);
 
             if (promptCheckImageHolder())
@@ -549,7 +562,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             if (promptCheckBusy())
                 return;
 
-            if (_lineScanImageHolder.IsEmpty())
+            if (_lineScanImageHolder.IsEmpty() || !DSMain.HasImage())
                 MenuLoadImage_Click(sender, e);
 
             if (promptCheckImageHolder())
@@ -561,6 +574,17 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         #endregion
 
         #region PRIVATE_FUNCTIONS
+        bool checkPlcStageID(CarrierEnum targetID)
+        {
+            if (Universal.IsNoUseIO)
+            {
+                mxSimPlcStageID(targetID);
+                mxReadPlcStageID(out var activeID);
+                updatePlcStageIdToGui(activeID);
+            }
+            bool ok = _currentCarrierID == targetID;
+            return ok;
+        }
         bool promptCheckBusy()
         {
             if (IsBusy())
@@ -591,12 +615,24 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
         }
+        void updatePlcStageIdToGui(CarrierEnum carrierID, bool force = false)
+        {
+            if (_currentCarrierID != carrierID || force)
+            {
+                _currentCarrierID = carrierID;
+                _DSMains[0].IsActive = _currentCarrierID == CarrierEnum.C1;
+                _DSMains[1].IsActive = _currentCarrierID == CarrierEnum.C2;
+            }
+        }
         #endregion
 
         public override void Tick()
         {
             TickFlyCameras();
             TickAllProcesses();
+
+            mxReadPlcStageID(out var carrierID);
+            updatePlcStageIdToGui(carrierID);
         }
 
         void CGOperate()
@@ -606,6 +642,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             GC.Collect();
         }
     }
+
 
     //------------------------------------------
     // 準備分離 PlcFlyCameraCtrl
@@ -661,6 +698,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
 
         #region FLY_DATA_BYTES
         List<byte[]> bytesFlyDatas = new List<byte[]>();
+        int _lastFlySerialNo = -1;
         #endregion
 
         void Attach(MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
@@ -683,15 +721,20 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         void clearFlyDataBytes()
         {
             bytesFlyDatas?.Clear();
+            _lastFlySerialNo = -1;
         }
 
         void updateFlyCameraSerialNumber(int serialNumber)
         {
-            _wndOwner?.Invoke(new Action(() =>
+            if (_lastFlySerialNo != serialNumber)
             {
-                lblSerialNumber.Text = $"飞拍序号:{serialNumber}";
-                lblSerialNumber.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
-            }));
+                _lastFlySerialNo = serialNumber;
+                _wndOwner?.Invoke(new Action(() =>
+                {
+                    lblSerialNumber.Text = $"飞拍序号:{serialNumber}";
+                    lblSerialNumber.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
+                }));
+            }
         }
 
         void TickFlyCameras()
@@ -716,10 +759,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 byte[] bmpbytes = new byte[cameraFrame.uBytes];
                 Marshal.Copy(pBuffer, bmpbytes, 0, bmpbytes.Length);
                 bytesFlyDatas.Add(bmpbytes);
-                _wndOwner?.Invoke(new Action(() =>
-                {
-                    lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
-                }));
+
+                //_wndOwner?.Invoke(new Action(() =>
+                //{
+                //    lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
+                //}));
+                updateFlyCameraSerialNumber(serialNumber: bytesFlyDatas.Count);
+
                 if (bytesFlyDatas.Count >= 4)
                 {
                     plcIO.bFlyReady = false;
@@ -761,18 +807,22 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
 
         private void _getPlcRunTick()
         {
-
             //btnReady.BackColor = (MACHINE.PLCIO.bSoftwareReady ? Color.Red : Color.FromArgb(192, 255, 192));
             //if (m_LineScanProcess.IsOn)
             //    lblState.Text = ToChangeLanguage("执行-线扫测试中") + m_LineScanProcess.ID.ToString();
             //else
             //    lblState.Text = ToChangeLanguage("等待");
+            //if (_lastFlySerialNo != bytesFlyDatas.Count)
+            //{
+            //    _lastFlySerialNo = bytesFlyDatas.Count;
+            //    _wndOwner?.Invoke(new Action(() =>
+            //    {
+            //        lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
+            //        lblNumberStr.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
+            //    }));
+            //}
 
-            _wndOwner?.Invoke(new Action(() =>
-            {
-                lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
-                lblNumberStr.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
-            }));
+            updateFlyCameraSerialNumber(serialNumber: bytesFlyDatas.Count);
 
             if (MACHINE.PLCIO.bSoftwareReady)
             {

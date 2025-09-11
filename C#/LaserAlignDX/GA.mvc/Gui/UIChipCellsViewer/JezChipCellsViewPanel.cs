@@ -19,9 +19,12 @@ using JetEazy.OpenCV.Viewer;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Gui.ChipCellsViewer;
 using OpenCvSharp;
+using OpenCvSharp.Internal.Vectors;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using VisionDesigner;
@@ -34,11 +37,15 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
     {
         #region PRIVATE_DATA
         CviCellsResultBoxes _resultBox = new CviCellsResultBoxes();
+        bool _isActive = false;
         #endregion
 
         public JezChipCellsViewPanel()
         {
             InitializeComponent();
+
+            if (DesignMode)
+                return;
 
             _resultBox.Visible = false;
             _resultBox.lblSummaryTitle = lblTitle;
@@ -46,7 +53,9 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
             
             jezTransImageViewPanel1.AttachPopupMenu(contextMenuStrip1);
 
+            HandleCreated += (s, e) => update_ActiveGuiStatus();
             HandleDestroyed += (s, e) => cleanUp();
+            timBlinker.Tick += (s, e) => blinking();
         }
 
         public CarrierEnum CarrierID
@@ -64,7 +73,26 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
 
         Control IvChipCellsViewer.Window => this;
         Control lblTitle => jezTransImageViewPanel1.lblTitle;
+        Control lblBlinker => jezTransImageViewPanel1.lblBlinker;
+        PictureBox picIcon => jezTransImageViewPanel1.picIcon;
 
+        [Browsable(false)]
+        public bool IsActive
+        {
+            get => _isActive;
+            set
+            {
+                if (_isActive != value)
+                {
+                    _isActive = value;
+                    update_ActiveGuiStatus();
+                }
+            }
+        }
+        public bool HasImage()
+        {
+            return MatViewer.Image != null;
+        }
         void IvChipCellsViewer.Reset()
         {
             _resultBox.Reset();
@@ -131,16 +159,28 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
             old?.Dispose();
         }
 
-        //Mat peekMat(CMvdImage mvdImage)
-        //{
-        //    MVD_IMAGE_DATA_INFO info = mvdImage.GetImageData();
-        //    MVD_DATA_CHANNEL_INFO ch0 = info.stDataChannel[0];
-        //    int w = (int)ch0.nRowStep;
-        //    int h = (int)(ch0.nLen / ch0.nRowStep);
-        //    var bytes = ch0.arrDataBytes;
-        //    Mat mat = new Mat(h, w, MatType.CV_8UC1, bytes, w);
-        //    return mat;
-        //}
+        void update_ActiveGuiStatus()
+        {
+            lblBlinker.BackColor = _isActive ? Color.Lime : Color.DimGray;
+            //blink(_isActive);
+        }
+        void blink(bool enabled)
+        {
+            timBlinker.Enabled = enabled;
+            if(!enabled)
+            {
+                lblBlinker.BackColor = Color.DimGray;
+                picIcon.BackColor = Color.Black;
+            }
+        }
+        void blinking()
+        {
+            bool isON = lblBlinker.Tag != null;
+            isON = !isON;
+            lblBlinker.Tag = isON ? lblBlinker : null;
+            lblBlinker.BackColor = isON ? Color.Lime : Color.DimGray;
+            picIcon.BackColor = isON ? Color.Cyan : Color.Black;
+        }
 
         void cleanUp()
         {

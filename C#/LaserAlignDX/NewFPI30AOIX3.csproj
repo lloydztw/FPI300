@@ -469,7 +469,9 @@
     <Compile Include="GA\BasicSpace\TrayClass.cs" />
     <Compile Include="GA\BasicSpace\XinliFindLineClass.cs" />
     <Compile Include="GA\ControlSpace\IOSpace\GeoIOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\IPlcIoFPIX3.cs" />
     <Compile Include="GA\ControlSpace\IOSpace\MainFPIX3IOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\MainFPIX3IOSim.cs" />
     <Compile Include="GA\ControlSpace\IOSpace\MainLSIOClass.cs" />
     <Compile Include="GA\ControlSpace\IOSpace\MainX1IOClass.cs" />
     <Compile Include="GA\ControlSpace\IOSpace\MainX2IOClass.cs" />
