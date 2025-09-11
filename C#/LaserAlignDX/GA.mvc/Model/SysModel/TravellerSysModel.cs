@@ -14,6 +14,8 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy.BasicSpace;
+using JetEazy.Machine;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
@@ -28,6 +30,7 @@ using NeedleX.ProcessSpace;
 using System;
 using System.Drawing;
 using Traveller106;
+using VsCommon.ControlSpace.MachineSpace;
 
 namespace LaserAlignDX.Mvc.Model
 {
@@ -187,6 +190,7 @@ namespace LaserAlignDX.Mvc.Model
         }
         #endregion
 
+
         internal void BuildCellRegions(EzBlocsGrid camGrid, CarrierEnum C, bool optWriteBlackToRecipe = false)
         {
             if (camGrid == null)
@@ -292,6 +296,78 @@ namespace LaserAlignDX.Mvc.Model
                 //xRecipe.xRealOffsetX = (float)(p01 - p00).X / (cols - 1);
                 //xRecipe.xRealOffsetY = (float)(p10 - p00).Y / (rows - 1);
             }
+        }
+
+        public bool WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camCoord, out PointF suckerCoord, out string msg)
+        {
+            //(0) PlcIO
+            var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
+            if (plcIO == null)
+            {
+                msg = "找不到【PLCIO】!";
+                camCoord = PointF.Empty;
+                suckerCoord = PointF.Empty;
+                return false;
+            }
+
+            //(1) Transform
+            var transCM = GaMvcConfig.SysModel.TransformsModel.GetCameraMotorTransform(carrierID, suckerRowID);
+            var traySettings = GaMvcConfig.SysModel.GetCurrentRecipe()?.EmptyTrayParams.TrayMiscSettings;
+            if (traySettings == null)
+            {
+                msg = "缺少【空盤檢測】之參數!";
+                camCoord = PointF.Empty;
+                suckerCoord = PointF.Empty;
+                return false;
+            }
+
+            //(2) Camera Grid
+            var camGrid = traySettings.GetGoldenGrid(true);
+            if (camGrid == null || camGrid.Rows<2 || camGrid.Cols<2)
+            {
+                msg = "缺少【全域校正】之數據!";
+                camCoord = PointF.Empty;
+                suckerCoord = PointF.Empty;
+                return false;
+            }
+
+            //(3) Coords
+            var camPt0 = camGrid[0, 0].Center;
+            var suckerWorldPt = transCM.Trans(camPt0);
+
+            PointF _P(QVector v) { return new PointF((float)v.X, (float)v.Y); }
+            camCoord = _P(camPt0);
+            suckerCoord = _P(suckerWorldPt);
+
+            //(4) Write to plc (according to the combination of carriers and suckerRows)
+            if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S1)
+            {
+                int suckerIndex = (int)suckerRowID;
+                plcIO.SetStage1(suckerIndex, suckerCoord, PointF.Empty);
+            }
+            else if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S2)
+            {
+                int suckerIndex = (int)suckerRowID;
+                plcIO.SetStage1(suckerIndex, PointF.Empty, suckerCoord);
+            }
+            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S1)
+            {
+                int suckerIndex = (int)suckerRowID;
+                plcIO.SetStage2(suckerIndex, suckerCoord, PointF.Empty);
+            }
+            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S2)
+            {
+                int suckerIndex = (int)suckerRowID;
+                plcIO.SetStage2(suckerIndex, PointF.Empty, suckerCoord);
+            }
+            else
+            {
+                msg = $"錯誤的組合 載台 {carrierID} 吸嘴 {suckerRowID}!";
+                return false;
+            }
+
+            msg = "OK";
+            return true;
         }
     }
 }

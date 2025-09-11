@@ -19,6 +19,7 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Model.Recipe;
 using NeedleX.ProcessSpace;
 using System;
+using System.Drawing;
 
 namespace LaserAlignDX.Mvc.Model
 {
@@ -35,9 +36,14 @@ namespace LaserAlignDX.Mvc.Model
         TravellerTransforms TransformsModel { get; }
         
         GaBigImageHolder LineScanImageHolder { get; }
-
-        void ApplyRecipe(string gaaraRecipeName = null, bool optWritebackToRecipe = false);
         
         JxRecipeCombo GetCurrentRecipe();
+
+        void ApplyRecipe(string gaaraRecipeName = null, bool optWritebackToRecipe = false);
+
+        ///// <summary>
+        ///// 將座標數據 寫入 PLC
+        ///// </summary>
+        bool WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camCoord, out PointF suckerCoord, out string msg);
     }
 }

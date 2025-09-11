@@ -1,15 +1,12 @@
 ﻿using JetEazy.BasicSpace;
-using JetEazy.QMath;
 using JetEazy.Utils;
 using JzDisplay;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
-using OpenCvSharp.Flann;
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Windows.Forms;
 using VisionDesigner;
 using VisionDesigner.PairLineFind;
@@ -21,21 +18,26 @@ namespace LaserAlignDX.FormSpace
 {
     public partial class frmTemplateX3 : Form
     {
-        CMvdImage xMvdTestImage = new CMvdImage();
+        //CMvdImage xMvdTestImage = new CMvdImage();
         //LineScanCalibrateClass LineScanCalibrate
         //{
         //    get { return Traveller106.Universal.LineScanCalibrateClasses[cboCaliIndex.SelectedIndex]; }
         //}
-        Mover xMovers = new Mover();
 
+        #region INTERACTORS
+        Mover xMovers = new Mover();
         Mover xMoversDs1 = new Mover();
+        #endregion
 
         protected MainFPIX3MachineClass MACHINE
         {
             get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
         }
 
-
+        /// <summary>
+        /// Golden Chip Template Rect
+        /// 優化後, 已經不用於 PLC 座標數據之計算
+        /// </summary>
         RectangleF LeftTopRect
         {
             get { return xRecipe.xRegionTrain; }
@@ -43,6 +45,7 @@ namespace LaserAlignDX.FormSpace
 
         /// <summary>
         /// 目前 Gaara 定義為 Camera Grid 左上 [row=0, col=0] 中心點
+        /// 優化後, 已經不用於 PLC 座標數據之計算
         /// </summary>
         PointF LeftTopRectCenter
         {
@@ -55,6 +58,7 @@ namespace LaserAlignDX.FormSpace
             }
         }
 
+        #region GUI_MEMBERS
         //int xMoverIndex = 0;
         //Mover xMovers = new Mover();
         //bool bSelectRegion = false;
@@ -62,7 +66,7 @@ namespace LaserAlignDX.FormSpace
         //Button btnDeleteAllRegion;
         //Button btnDeleteRegion;
 
-        Mover CodeMovers = new Mover();
+        //Mover CodeMovers = new Mover();
         bool bSelectRegion = false;
         Button btnSelectRegion => button8;
         Button btnCodeTest => button9;
@@ -81,6 +85,7 @@ namespace LaserAlignDX.FormSpace
         //Button btnTestImage;
         //Button btnCreateImageTemplate;
         //Button btnSaveInspectPara;
+        #endregion
 
         protected RecipeFPIX3Class xRecipe
         {
@@ -97,6 +102,7 @@ namespace LaserAlignDX.FormSpace
             this.Load += FrmTemplateX3_Load;
         }
 
+        #region EVENT_HANDLERS
         private void FrmTemplateX3_Load(object sender, EventArgs e)
         {
             init_Display();
@@ -336,6 +342,7 @@ namespace LaserAlignDX.FormSpace
             xRecipe.SavePrintTemplate();
             JetEazy.BasicSpace.VsMSG.Instance.Warning($"保存成功", false);
         }
+        #endregion
 
         void init_Display()
         {
@@ -894,6 +901,7 @@ namespace LaserAlignDX.FormSpace
 #endif
         #endregion
 
+        #region PLC_COORDS_WRITING_FUNCTOINS
         Control txtCamCoord => textBox1;
         Control txtWorldCoord => textBox2;
         Control lblCompletedInfo => label5;
@@ -948,6 +956,7 @@ namespace LaserAlignDX.FormSpace
                     PointF ptworld1 = c0.ViewToWorld(LeftTopRectCenter);
                     PointF ptworld2 = new PointF(ptworld1.X + ptOffset.X, ptworld1.Y + ptOffset.Y);
                     textBox2.Text = PointFtoStringSimple(ptworld2);
+
                     MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld2);
                     updatePlcCoordsToGui(LeftTopRectCenter, ptworld2);
                     break;
@@ -966,6 +975,7 @@ namespace LaserAlignDX.FormSpace
                     ptworld1 = c0.ViewToWorld(LeftTopRectCenter);
                     ptworld2 = new PointF(ptworld1.X + ptOffset.X, ptworld1.Y + ptOffset.Y);
                     textBox2.Text = PointFtoStringSimple(ptworld2);
+
                     MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld2);
                     updatePlcCoordsToGui(LeftTopRectCenter, ptworld2);
                     break;
@@ -984,62 +994,24 @@ namespace LaserAlignDX.FormSpace
                 return;
 
             updatePlcWritingStatus(null, Color.Black);
-            Control txtCamCoord = textBox1;
-            Control txtWorldCoord = textBox2;
-            Control lblCompletedInfo = label5;
 
             CarrierEnum carrierID = (CarrierEnum)(index / 2);
             SuckerRowEnum suckerRowID = (SuckerRowEnum)(index % 2);
 
-            var transCM = GaMvcConfig.SysModel.TransformsModel.GetCameraMotorTransform(carrierID, suckerRowID);
-            var traySettings = GaMvcConfig.SysModel.GetCurrentRecipe()?.EmptyTrayParams.TrayMiscSettings;
-            if (traySettings == null)
-            {
-                string errMsg = "缺少【空盤檢測】之參數!";
-                updatePlcWritingStatus(errMsg, Color.Red);
-                VsMSG.Instance.Warning(errMsg);
-                return;
-            }
+            var sysModel = GaMvcConfig.SysModel;
 
-            var camGrid = traySettings.GetGoldenGrid(true);
-            var camPt0 = camGrid[0, 0].Center;
-            var suckerWorldPt = transCM.Trans(camPt0);
+            bool ok = sysModel.WriteCoordsToPlc(carrierID, suckerRowID, out var camCoord, out var suckerCoord, out var msg);
 
-            // 更新 GUI
-            updatePlcCoordsToGui(_P(camPt0), _P(suckerWorldPt));
-
-            // 轉換函式
-            PointF _P(QVector v)
+            if (!ok)
             {
-                return new PointF((float) v.X, (float) v.Y);
-            };
-
-            // 寫入 PLC
-            var plcIO = MACHINE.PLCIO;
-            
-            if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S1)
-            {
-                plcIO.SetStage1(0, _P(suckerWorldPt), PointF.Empty);
-            }
-            else if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S2)
-            {
-                plcIO.SetStage1(1, PointF.Empty, _P(suckerWorldPt));
-            }
-            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S1)
-            {
-                plcIO.SetStage2(0, _P(suckerWorldPt), PointF.Empty);
-            }
-            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S2)
-            {
-                plcIO.SetStage2(1, PointF.Empty, _P(suckerWorldPt));
+                updatePlcWritingStatus(msg, Color.Red);
+                VsMSG.Instance.Warning(msg);
             }
             else
             {
-                updatePlcWritingStatus($"錯誤的組合 載台 {carrierID} 吸嘴 {suckerRowID}!", Color.Red);
-                return;
+                updatePlcCoordsToGui(camCoord, suckerCoord);
+                updatePlcWritingStatus($"{DateTime.Now.ToString()} 載台 {carrierID} 吸嘴 {suckerRowID} 寫入PLC操作完成!", Color.Lime);
             }
-
-            updatePlcWritingStatus($"{DateTime.Now.ToString()} 載台 {carrierID} 吸嘴 {suckerRowID} 寫入PLC操作完成!", Color.Lime);
         }
 
         void updatePlcCoordsToGui(PointF camPt, PointF suckerWorldPt)
@@ -1060,5 +1032,6 @@ namespace LaserAlignDX.FormSpace
             lblCompletedInfo.BackColor = Color.Black;
             lblCompletedInfo.Visible = true;
         }
+        #endregion
     }
 }
