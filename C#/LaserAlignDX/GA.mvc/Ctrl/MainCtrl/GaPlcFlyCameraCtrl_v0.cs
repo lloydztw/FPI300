@@ -1,15 +1,9 @@
 ﻿using AUVision;
-using Eazy_Project_III;
-using Eazy_Project_III.FormSpace;
 using JetEazy.BasicSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.Model;
-using LaserAlignDX.Model.Coords;
-using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LaserAlignDX.UISpace.ChipCellsViewer;
 using LaserAlignDX.UISpace.UIMVC;
 using NeedleX.ProcessSpace;
 using System;
@@ -28,624 +22,114 @@ using VisionDesigner.PositionFix;
 using VsCommon.ControlSpace.MachineSpace;
 
 
-namespace LaserAlignDX.Mvc.Ctrl.V2
+namespace LaserAlignDX.Mvc.Ctrl.Fly.V0
 {
-    /// <summary>
-    /// 重整 MainX3UI
-    /// 使用 ChipCellsViewer 取代原來的 MVSUI 來顯示 晶粒檢測結果
-    /// </summary>
-    public partial class GaMainCtrl : Abs.GaMainCtrl, IxTickable
+    public partial class GaPlyFlyCameraCtrl
     {
-        static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER => GaMvcConfig.OPT_USE_LETIAN_CHIP_CELL_VIEWER;
+#if (OPT_MainX3)
+        List<CollectResultClass> collectResultClasses = new List<CollectResultClass>();
+        protected MachineCollectionClass MACHINECollection
+        {
+            get
+            {
+                return Traveller106.Universal.MACHINECollection;
+            }
+        }
+#endif
 
-        #region MACHINE
-        //List<CollectResultClass> collectResultClasses = new List<CollectResultClass>();
-        //protected MachineCollectionClass MACHINECollection
-        //{
-        //    get
-        //    {
-        //        return Traveller106.Universal.MACHINECollection;
-        //    }
-        //}
         protected MainFPIX3MachineClass MACHINE
         {
             get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
         }
-        #endregion
 
-        #region GLOBAL_MESS
-        RecipeFPIX3Class xRecipe
-        {
-            get { return RecipeFPIX3Class.Instance; }
-        }
-        FlyParaClass xFlyPara
-        {
-            get { return FlyParaClass.Instance; }
-        }
-        //InspectX3ParaClass InspectPara
-        //{
-        //    get { return InspectX3ParaClass.Instance; }
-        //}
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
-        IProcessRunFPI _aoiModel => _sysModel.AoiModel;
-        GaBigImageHolder _lineScanImageHolder => _sysModel.LineScanImageHolder;
-        bool IsBusy()
-        {
-            return _aoiModel.Running || LineScanSingleProcess.Instance.IsOn || LineScanProcess.Instance.IsOn;
-        }
-        #endregion
-
-        #region GUI_MEMBERS
-        Control _wndOwner;
-        IvChipCellsViewer[] _DSMains;
-        IvChipCellsViewer DSMain
-        {
-            get
-            {
-                int iscanIndex = MACHINE.PLCIO.iScanStage;
-                var viewer = iscanIndex == 2 ?
-                    _DSMains[1]:
-                    _DSMains[0];
-                return viewer;
-            }
-        }
-        #endregion
-
-        public override void Attach(Control[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
-        {
-            // CHIP_CELLS_VIEWERS
-            _DSMains = new[]
-            {
-                buildChipCellsViewer(DsMains[0], CarrierEnum.C1),
-                buildChipCellsViewer(DsMains[1], CarrierEnum.C2),
-            };
-
-            // Owner Window
-            _wndOwner = _DSMains[0].Window.Parent;
-            System.Diagnostics.Debug.Assert(_wndOwner != null, "_wndOwner 不能為 null !");
-
-            // FLY CAMERA Display UI
-            Attach(DsFlys, lblFlyCameraSerialNo);
-
-            _wndOwner.HandleCreated += (s, e) => _wndOwner.BeginInvoke(new Action(() => _LOG("GaMailCtrl [V2]", Color.Blue)));
-
-            // Processes
-            InitAllProcesses();
-        }
-
-        IvChipCellsViewer buildChipCellsViewer(Control panel, CarrierEnum carrierID)
-        {
-            //(1) 使用新的 ChipCellsViewer
-            if (OPT_USE_LETIAN_CHIP_CELL_VIEWER)
-            {
-                //(1.1) 如果傳進來的已經是 JezChipCellsViewPanel
-                if (panel is JezChipCellsViewPanel jezViewer)
-                {
-                    jezViewer.CarrierID = carrierID;
-                    connectPopupMenuEvents(jezViewer, carrierID);
-                    return jezViewer;
-                }
-                //(1.2) 如果傳進來的是其他視窗控件
-                else if (panel is Control childWnd)
-                {
-                    // 生成新的 JezChipCellsViewPanel
-                    var viewer = new JezChipCellsViewPanel
-                    {
-                        CarrierID = carrierID,
-                        Location = childWnd.Location,
-                        Size = childWnd.Size,
-                        Dock = childWnd.Dock,
-                        Visible = true
-                    };
-                    // 與舊的 childWnd 互換角色
-                    var parent = childWnd.Parent;
-                    childWnd.Visible = false;
-                    parent.Controls.Add(viewer);
-                    connectPopupMenuEvents(viewer, carrierID);
-                    return viewer;
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            //(2) 使用舊有的 MVSUI
-            else
-            {
-                if (panel is MVSUI mvsui)
-                    return new MvsChipCellsViewer(mvsui);
-                return null;
-            }
-        }
-
-        #region PROCESSES_這以後要納入_SYS_MODEL
-        BaseProcess m_BuzzerProcess
-        {
-            get { return BuzzerProcess.Instance; }
-        }
-        BaseProcess m_resetprocess
-        {
-            get { return ResetProcess.Instance; }
-        }
-        BaseProcess m_LineScanProcess
-        {
-            get { return LineScanProcess.Instance; }
-        }
-        BaseProcess m_MainProcess
-        {
-            get { return MainProcess.Instance; }
-        }
-        BaseProcess m_SingleProcess
-        {
-            get { return LineScanSingleProcess.Instance; }
-        }
-        #endregion
-
-        void InitAllProcesses()
-        {
-            //----------------------------------------------------------------
-            // (1) 大部的 Processes 應該可以當成 MainProcess 的 Child Process,
-            //      可以集中由 MainProcess 管理, 形成一體 Model.
-            // (2) 以下對 Process Event Handler 的掛載.
-            //      在 Model-View-Control 的架構規範下, 屬於 Control.
-            //      ~ 以後再從 GUI(MainGdx3UI) 抽離出來.
-            //----------------------------------------------------------------
-            //m_mainprocess.OnCompleted += process_OnCompleted;
-            // Buzzer 的結束 用來檢視是否有 NG 發生.
-            m_MainProcess.OnMessage += process_OnMessage;
-            m_MainProcess.OnCompleted += process_OnCompleted;
-            m_BuzzerProcess.OnCompleted += buzzer_OnCompleted;
-            m_resetprocess.OnCompleted += process_OnCompleted;
-
-            m_LineScanProcess.OnCompleted += process_OnCompleted;
-            //m_LineScanProcess.OnLiveImage += process_OnLiveImage;
-            m_LineScanProcess.OnMessage += handle_aoi_run_message;
-            //m_SingleProcess.OnLiveImage += process_OnLiveImage;
-            m_SingleProcess.OnMessage += handle_aoi_run_message;
-
-            _lineScanImageHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
-
-            var aoiEngine = ProcessRunFPIClass.Instance;
-            aoiEngine.OnAoiProgressing += AoiEngine_OnAoiProgressing;
-            aoiEngine.OnAoiBegin += AoiEngine_OnAoiBegin;
-            aoiEngine.OnAoiEnd += AoiEngine_OnAoiEnd;
-        }
-        void TickAllProcesses()
-        {
-            m_resetprocess.Tick();
-            m_BuzzerProcess.Tick();
-            m_LineScanProcess.Tick();
-            m_MainProcess.Tick();
-            m_SingleProcess.Tick();
-        }
-
-        private void process_OnMessage(object sender, ProcessEventArgs e)
-        {
-            if (sender == m_MainProcess)
-            {
-                if (e.Message.Contains("Reset.Data"))
-                {
-                }
-                else if (e.Message.Contains("Record.Start"))
-                {
-                    FireChangeState(MainS1State.LS_START);
-                }
-                else if (e.Message.Contains("Record.Stop"))
-                {
-                    FireChangeState(MainS1State.LS_STOP);
-                }
-            }
-
-            try
-            {
-                // Do whatever message you want to show to the operators.
-                string msg = $"Process {((BaseProcess)sender).Name}, {e.Message}\n";
-                _LOG(msg, Color.Black);
-            }
-            catch
-            {
-            }
-
-            //CGOperate();
-        }
-        private void process_OnLiveImage(object sender, ProcessEventArgs e)
-        {
-            if (e.Tag != null && e.Tag is Bitmap)
-            {
-                try
-                {
-                    if (_wndOwner.InvokeRequired)
-                    {
-                        EventHandler<ProcessEventArgs> h = process_OnLiveImage;
-                        _wndOwner.Invoke(h, sender, e);
-                    }
-                    else
-                    {
-                        //@LETIAN: 2022/07/01 改用 GdxDispUI 增加一些 fps
-                        // bmp 由 Sender maintains life cycle.
-                        // 在此不用 Dispose
-                        //Bitmap bmp = (Bitmap)e.Tag;
-                        //dispUI1.UpdateLiveImage(bmp);
-                        //DS1.ReplaceDisplayImage(bmp);
-
-                        //問題: 誰負責對新生成的 mvdImage 進行 Dispose() ? 
-                        //DSMain.mvdRenderActivex1.LoadImageFromObject(pRun.cMvdInput.Clone());
-                        //DSMain.mvdRenderActivex1.ClearShapes();
-                        //DSMain.AddCross();
-                        //DSMain.mvdRenderActivex1.Display();
-                        updateMvd_LineScanImage();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    //>>> 此一層的 try - catch 以後可以省略.
-                    //>>> 會由 Event Sender 處理 exception
-                    //throw ex;
-                }
-            }
-        }
-        private void process_OnCompleted(object sender, ProcessEventArgs e)
-        {
-            if (sender == m_resetprocess)
-            {
-                if (m_resetprocess.RelateString == "CloseWindows")
-                {
-                    //執行的關閉流程 這裏則跳出
-                    return;
-                }
-            }
-
-            try
-            {
-                string msg = $"Process {((BaseProcess)sender).Name}, Completed!\n";
-                _LOG(msg, Color.Black);
-            }
-            catch
-            {
-            }
-        }
-        private void buzzer_OnCompleted(object sender, ProcessEventArgs e)
-        {
-            //if (InvokeRequired)
-            //{
-            //    EventHandler<ProcessEventArgs> h = buzzer_OnCompleted;
-            //    BeginInvoke(h, sender, e);
-            //}
-            //else
-            //{
-
-            //}
-        }
-        private void handle_aoi_run_message(object sender, ProcessEventArgs e)
-        {
-            if (sender != m_LineScanProcess && sender != m_SingleProcess)
-                return;
-
-            if (e.Message.Contains("Result.1"))
-            {
-                FireChangeState(MainS1State.M_PASS);
-            }
-            else if (e.Message.Contains("Result.2"))
-            {
-                FireChangeState(MainS1State.M_NG);
-            }
-            else if (e.Message.Contains("Record.Start"))
-            {
-                //MappingReset();
-                //FireChangeState(MainS1State.LS_START);
-            }
-            else if (e.Message.Contains("Record.Stop"))
-            {
-                //FireChangeState(MainS1State.LS_STOP);
-            }
-            else if (e.Message.Contains("Show.X"))
-            {
-                updateMvd_AoiResultData(e);
-            }
-            else if (e.Message.Contains("ResultX.Code"))
-            {
-                INI.Instance.CurrentBarcodeStr = e.Tag as string;
-                FireChangeState(MainS1State.M_SHOWCODE, e.Tag as string);
-            }
-
-            try
-            {
-                string msg = $"Process {((BaseProcess)sender).Name}, {e.Message}\n";
-                _LOG(msg, Color.Black);
-            }
-            catch
-            {
-            }
-
-            CGOperate();
-        }
-        private void LineScanImageHolder_OnImageChanged(object sender, EventArgs e)
-        {
-            if (_wndOwner.InvokeRequired)
-            {
-                _wndOwner.Invoke((EventHandler)LineScanImageHolder_OnImageChanged, sender, e);
-            }
-            else
-            {
-                updateMvd_LineScanImage();
-            }
-        }
-
-        #region MVD_UPDATE_FUNCTIONS
-        void updateMvd_LineScanImage()
-        {
-            //------------------------------------------------------------------------
-            // 舊代碼寫法
-            //------------------------------------------------------------------------
-            //CMvdImage mvdImage = pRun.cMvdInput.Clone();
-            //DSMain.mvdRenderActivex1.LoadImageFromObject(mvdImage);
-            //DSMain.mvdRenderActivex1.ClearShapes();
-            //DSMain.AddCross();
-            //DSMain.mvdRenderActivex1.Display();
-
-            //------------------------------------------------------------------------
-            // 新代碼
-            // NOTE: 目前 cMvdInput 生命週期由 TravellerBigImagesHolder 保管 !!!
-            //       不用重複 Clone() 來餵給 MVS
-            //------------------------------------------------------------------------
-            string srcName = _lineScanImageHolder.SrcName;
-            if (srcName != null && (srcName.Contains("校正") || srcName.Contains("參數")))
-                return;
-            DSMain.UpdateImageSrc(_lineScanImageHolder);
-        }
-        void updateMvd_AoiResultData(ProcessEventArgs e)
-        {
-            DSMain.UpdateCells(xRecipe.xRegionCells, (int)_aoiModel.xScanInspectMode);
-
-            //// 清除 MVD canvas
-            //DSMain.mvdRenderActivex1.ClearShapes();
-
-            // 報表 & LOG
-            generate_report_and_log();
-
-            //// 為每一個 Cell 更新 MVD 顯示元件
-            //foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
-            //{
-            //    updateMvd_OneCellData(cell);
-            //}
-
-            //// 显示格点之外的料件
-            //updateMvd_OutGrid_Blocs();
-
-            //// MVD render
-            //DSMain.mvdRenderActivex1.Display();
-
-            // FIRE EVENTS
-            FireChangeState(MainS1State.M_SHOWRESULT, e.Tag as string);
-            if (_aoiModel.IsPass)
-                FireChangeState(MainS1State.M_PASS);
-            else
-                FireChangeState(MainS1State.M_NG);
-        }
-        #endregion
-
-        void generate_report_and_log()
-        {
-            string lotId = _aoiModel.LotId;
-            string stripId = _aoiModel.StripId;
-            string fileName = _aoiModel.FileName;
-
-            // 報表
-            IxReportBuilder report = GaMvcConfig.CreateReportBuilder();
-            report.GenerateReport(stripId, fileName);
-
-            // LOG
-            var logFormatter = new LogTextFormatter();
-            string msg = logFormatter.Format(xRecipe.xRegionCells);
-            _LOG($"StripID: {stripId}", Color.Black);
-            _LOG($"LotID: {lotId}", Color.Black);
-            _LOG($"#数据信息: {msg}", Color.Black);
-        }
-
-        #region EVENT_HANDLERS_FOR_PROGRESS_BAR
-        FormProgressing _frmAoiProgressing = null;
-        private void AoiEngine_OnAoiProgressing(object sender, GaProgressEventArgs e)
-        {
-            if (_wndOwner.InvokeRequired)
-            {
-                _wndOwner.BeginInvoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiProgressing, sender, e);
-            }
-            else
-            {
-                _frmAoiProgressing?.UpdateProgress(e.CurrentStep);
-            }
-        }
-        private void AoiEngine_OnAoiBegin(object sender, GaProgressEventArgs e)
-        {
-            if (_wndOwner.InvokeRequired)
-            {
-                _wndOwner.Invoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiBegin, sender, e);
-            }
-            else
-            {
-                if (_frmAoiProgressing == null)
-                {
-                    _frmAoiProgressing = new FormProgressing();
-                    //_frmAoiProgressing.TopMost = true;
-                    _frmAoiProgressing.SetTotalSteps(e.TotalSteps);
-                    _frmAoiProgressing.UpdateProgress(e.CurrentStep);
-                    _frmAoiProgressing.Show(_wndOwner);
-                    _frmAoiProgressing.BringToFront();
-                }
-            }
-        }
-        private void AoiEngine_OnAoiEnd(object sender, GaProgressEventArgs e)
-        {
-            if (_wndOwner.InvokeRequired)
-            {
-                _wndOwner.Invoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiEnd, sender, e);
-            }
-            else
-            {
-                _frmAoiProgressing?.Close();
-                _frmAoiProgressing?.Dispose();
-                _frmAoiProgressing = null;
-            }
-        }
-        #endregion
-
-        #region EVENT_HANDLERS_FOR_POPUP_MENU
-        private void connectPopupMenuEvents(Control dsMain, CarrierEnum carrierID)
-        {
-            if (dsMain is JezChipCellsViewPanel ccvPanel)
-            {
-                ccvPanel.menuLoadImage.Click += MenuLoadImage_Click;
-                ccvPanel.menuTestChipInspect.Click += MenuTestChipInspect_Click;
-                ccvPanel.menuTestEmptyTrayInspect.Click += MenuTestEmptyTrayInspect_Click;
-                ccvPanel.menuTestQRCode.Click += MenuTestQRCode_Click;
-
-                ccvPanel.menuLoadImage.Tag = carrierID;
-                ccvPanel.menuTestChipInspect.Tag = carrierID;
-                ccvPanel.menuTestEmptyTrayInspect.Tag = carrierID;
-                ccvPanel.menuTestQRCode.Tag = carrierID;
-            }
-        }
-        private void MenuLoadImage_Click(object sender, EventArgs e)
-        {
-            if (promptCheckBusy())
-                return;
-
-            string fileName = GaUtil.BrowseImageFile();
-            if (fileName != null)
-            {
-                loadLineScanImage(fileName);
-            }
-        }
-        private void MenuTestChipInspect_Click(object sender, EventArgs e)
-        {
-            if (promptCheckBusy())
-                return;
-
-            if(_lineScanImageHolder.IsEmpty())
-                MenuLoadImage_Click(sender, e);
-
-            if (promptCheckImageHolder())
-            {
-                DSMain.Reset();
-                LineScanSingleProcess.Instance.Start(ScanInspectMode.MEASUREAOI);
-            }
-        }
-        private void MenuTestEmptyTrayInspect_Click(object sender, EventArgs e)
-        {
-            if (promptCheckBusy())
-                return;
-
-            if (_lineScanImageHolder.IsEmpty())
-                MenuLoadImage_Click(sender, e);
-
-            if (promptCheckImageHolder())
-            {
-                DSMain.Reset();
-                LineScanSingleProcess.Instance.Start(ScanInspectMode.NOTRAY);
-            }
-        }
-        private void MenuTestQRCode_Click(object sender, EventArgs e)
-        {
-            if (promptCheckBusy())
-                return;
-
-            if (_lineScanImageHolder.IsEmpty())
-                MenuLoadImage_Click(sender, e);
-
-            if (promptCheckImageHolder())
-            {
-                DSMain.Reset();
-                LineScanSingleProcess.Instance.Start(ScanInspectMode.QRCODE);
-            }
-        }
-        #endregion
-
-        #region PRIVATE_FUNCTIONS
-        bool promptCheckBusy()
-        {
-            if (IsBusy())
-            {
-                MessageBox.Show("AOI 執行中", "AOI", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                return true;
-            }
-            return false;
-        }
-        bool promptCheckImageHolder()
-        {
-            if (_lineScanImageHolder.IsEmpty())
-            {
-                MessageBox.Show("請先 加載圖檔 或 取像", "AOI", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return false;
-            }
-            return true;
-        }
-        void loadLineScanImage(string fileName)
-        {
-            if (fileName != null)
-            {
-                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
-
-                var bmp = GaImageUtil.LoadBigImage(fileName);
-                _lineScanImageHolder?.TakeOver(bmp, System.IO.Path.GetFileName(fileName));
-
-                GaUtil.SetCursor(_wndOwner, oldCursor);
-            }
-        }
-        #endregion
-
-        public override void Tick()
-        {
-            TickFlyCameras();
-            TickAllProcesses();
-        }
-
-        void CGOperate()
-        {
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-        }
-    }
-
-    //------------------------------------------
-    // 準備分離 PlcFlyCameraCtrl
-    //------------------------------------------
-    partial class GaMainCtrl
-    {
-        #region GUI_MEMBERS
-        MVSUI[] _DSFLYs;
-        MVSUI DSFly0 => _DSFLYs[0];
-        MVSUI DSFly1 => _DSFLYs[1];
-        MVSUI DSFly2 => _DSFLYs[2];
-        MVSUI DSFly3 => _DSFLYs[3];
-        Control lblSerialNumber;
-        Control lblNumberStr => lblSerialNumber;
-        #endregion
-
-        #region PLC_FLY_CAMERA_EXCHANGE_DATA
+        #region PRIVATE_DATA
         const int FLYCOUNT = 4;
         //Bitmap[] bmpFlyOperate = new Bitmap[FLYCOUNT];
         Bitmap bmpFlyOperate = new Bitmap(1, 1);
         int iFlyIndex = 0;
         int[] iFlyResult = new int[4];
         float[] iFlyOffset = new float[4 * 3];
+        Control lblNumberStr => lblSerialNumber;
 
         bool m_plcStartOld = false;
         bool m_plcGetImageOld = false;
 
         bool m_plcFlyStartOld1 = false;
         bool m_plcFlyStartOld2 = false;
-        #endregion
 
-        #region LOT_DATA_FROM_PLC
         string m_StripId = "Strip_NONE";
         string m_LotId = "Lot_NONE";
+        #endregion
+
+        #region GLOBAL_MESS
+        protected RecipeFPIX3Class xRecipe
+        {
+            get { return RecipeFPIX3Class.Instance; }
+        }
+        protected FlyParaClass xFlyPara
+        {
+            get { return FlyParaClass.Instance; }
+        }
+        protected InspectX3ParaClass InspectPara
+        {
+            get { return InspectX3ParaClass.Instance; }
+        }
+        protected ProcessRunFPIClass pRun
+        {
+            get { return ProcessRunFPIClass.Instance; }
+        }
         #endregion
 
         IxLineScanCam IxFlyAreaCam
         {
             get { return Universal.IxFlyAreaCam; }
         }
+        BaseProcess m_LineScanProcess
+        {
+            get { return LineScanProcess.Instance; }
+        }
+
+        #region GUI_MEMBERS
+        Control _wndOwner;
+        MVSUI[] _DSFLYs;
+        MVSUI DSFly0 => _DSFLYs[0];
+        MVSUI DSFly1 => _DSFLYs[1];
+        MVSUI DSFly2 => _DSFLYs[2];
+        MVSUI DSFly3 => _DSFLYs[3];
+        Control lblSerialNumber;
+        #endregion
+
+        public void Attach(MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
+        {
+            _wndOwner = DsFlys[0].Parent;
+            _DSFLYs = DsFlys;
+            lblSerialNumber = lblFlyCameraSerialNo;
+
+            lblSerialNumber.DoubleClick += LblNumberStr_DoubleClick;
+            IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
+        }
+
+        public void Dispose()
+        {
+            cPositionFixToolObj?.Dispose();
+            cPositionFixToolObj = null;
+        }
+
+#if (OPT_MainX3)
+        MVSUI DSMain
+        {
+            get
+            {
+                int iscanIndex = MACHINE.PLCIO.iScanStage;
+                if (iscanIndex == 2)
+                {
+                    return mvsui2;
+                }
+                return mvsui1;
+            }
+        }
+#endif
+
         PointF[] FlyOffsetUseStage
         {
             get
@@ -659,45 +143,96 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             }
         }
 
-        #region FLY_DATA_BYTES
-        List<byte[]> bytesFlyDatas = new List<byte[]>();
-        #endregion
-
-        void Attach(MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
+#if (OPT_MainX3)
+        public MainX3UI()
         {
-            _DSFLYs = DsFlys;
-            lblSerialNumber = lblFlyCameraSerialNo;
+            InitializeComponent();
+        }
+        public void Init()
+        {
+            //int i = 0;
+            //while (i < FLYCOUNT)
+            //{
+            //    bmpFlyOperate[i] = new Bitmap(1, 1);
+            //    i++;
+            //}
 
-            lblSerialNumber.DoubleClick += (s, e) => clearFlyDataBytes();
+            //init_Display();
+            //update_Display();
+            CommonLogClass.Instance.SetRichTextBox(richTextBox1);
+            InitAllProcesses();
+
+            //init_Display();
+            //update_Display();
+
+            //InitializeDataGridView();
+
+            //MappingInit();
+
+            lblNumberStr = label1;
+            lblNumberStr.DoubleClick += LblNumberStr_DoubleClick;
+
+            //lblState = label11;
+
+            //btnSoftwareReady = button6;
+            //btnSoftwareReady.Click += BtnSoftwareReady_Click;
+
+            //btnReady = button6;
+            //btnReady.Click += BtnReady_Click;
+            //btnChangeReplaceImage = button1;
+            //btnChangeReplaceImage.Click += BtnChangeReplaceImage_Click;
+
+            //SizeChanged += MainX2UI_SizeChanged;
+
+            SizeChanged += MainX3UI_SizeChanged;
+
+            ////删除矩形菜单项，右键菜单中对应项会被删除
+            //mvdRenderActivex1.SetMenuState(System.Convert.ToUInt32(MVD_MENU_ID.MvdAddShape),
+            //    System.Convert.ToUInt32(MVD_MENU_CMD.MvdMenuDelete), null);
+            //mvdRenderActivex1.SetMenuState(System.Convert.ToUInt32(MVD_MENU_ID.MvdFile),
+            //    System.Convert.ToUInt32(MVD_MENU_CMD.MvdMenuDelete), null);
+            //mvdRenderActivex1.SetMenuState(System.Convert.ToUInt32(MVD_MENU_ID.MvdZoom),
+            //  System.Convert.ToUInt32(MVD_MENU_CMD.MvdMenuDelete), null);
+            //mvdRenderActivex1.SetMenuState(System.Convert.ToUInt32(MVD_MENU_ID.MvdRotate),
+            //   System.Convert.ToUInt32(MVD_MENU_CMD.MvdMenuDelete), null);
+            //mvdRenderActivex1.SetMenuState(System.Convert.ToUInt32(MVD_MENU_ID.MvdEraser),
+            //   System.Convert.ToUInt32(MVD_MENU_CMD.MvdMenuDelete), null);
+            //mvdRenderActivex1.SetMenuState(System.Convert.ToUInt32(MVD_MENU_ID.MvdShapeMenuPaste),
+            //    System.Convert.ToUInt32(MVD_MENU_CMD.MvdMenuDelete), null);
+
             IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
 
-            _wndOwner.HandleDestroyed += (s, e) => Dispose();
+            HandleDestroyed += (s, e) => IxFlyAreaCam?.StopGrab();
         }
 
-        void Dispose()
+        private void DSFly0_DoubleClick(object sender, EventArgs e)
         {
-            cPositionFixToolObj?.Dispose();
-            cPositionFixToolObj = null;
-        }
 
-        void clearFlyDataBytes()
-        {
-            bytesFlyDatas?.Clear();
         }
+#endif
 
-        void updateFlyCameraSerialNumber(int serialNumber)
+        private void LblNumberStr_DoubleClick(object sender, EventArgs e)
         {
-            _wndOwner?.Invoke(new Action(() =>
+            bytesFlyDatas.Clear();
+
+            if (Traveller106.Universal.IsNoUseCCD)
             {
-                lblSerialNumber.Text = $"飞拍序号:{serialNumber}";
-                lblSerialNumber.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
-            }));
+                string _flyfilenamepath = JzToolsClass.OpenFilePicker("JPEG Files (*.jpeg)|*.JPEG| + All files (*.*)|*.*", "");
+                if (!string.IsNullOrEmpty(_flyfilenamepath))
+                {
+                    Bitmap bmp = new Bitmap(_flyfilenamepath);
+                    flyProcessPro(1, 0, bmp);
+                    bmp.Dispose();
+                }
+            }
         }
 
-        void TickFlyCameras()
-        {
-            _getPlcRunTick();
-        }
+        List<byte[]> bytesFlyDatas = new List<byte[]>();
+
+#if (OPT_MainX3)
+        int m_W = 2448;
+        int m_H = 2048;
+#endif
 
         private void IxFlyAreaCam_LineTriggerAction(JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
         {
@@ -716,10 +251,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 byte[] bmpbytes = new byte[cameraFrame.uBytes];
                 Marshal.Copy(pBuffer, bmpbytes, 0, bmpbytes.Length);
                 bytesFlyDatas.Add(bmpbytes);
+                
                 _wndOwner?.Invoke(new Action(() =>
                 {
                     lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
                 }));
+                
                 if (bytesFlyDatas.Count >= 4)
                 {
                     plcIO.bFlyReady = false;
@@ -756,101 +293,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
 
                     plcIO.bFlyReady = true;
                 }
-            }
-        }
-
-        private void _getPlcRunTick()
-        {
-
-            //btnReady.BackColor = (MACHINE.PLCIO.bSoftwareReady ? Color.Red : Color.FromArgb(192, 255, 192));
-            //if (m_LineScanProcess.IsOn)
-            //    lblState.Text = ToChangeLanguage("执行-线扫测试中") + m_LineScanProcess.ID.ToString();
-            //else
-            //    lblState.Text = ToChangeLanguage("等待");
-
-            _wndOwner?.Invoke(new Action(() =>
-            {
-                lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
-                lblNumberStr.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
-            }));
-
-            if (MACHINE.PLCIO.bSoftwareReady)
-            {
-                if (MACHINE.PLCIO.bScanStart)
-                {
-                    if (!m_plcStartOld)
-                    {
-                        m_plcStartOld = true;
-
-                        CommonLogClass.Instance.LogMessage("接收到plc启动信号", Color.Black);
-                        if (!m_LineScanProcess.IsOn)
-                        {
-                            m_StripId = MACHINE.PLCIO.sStripID;
-                            m_LotId = MACHINE.PLCIO.sLotID;
-
-                            m_LineScanProcess.Start();
-                        }
-                        else
-                        {
-                            CommonLogClass.Instance.LogMessage("测试中#PLC重复启动", Color.Black);
-                        }
-                    }
-                }
-                else
-                {
-                    m_plcStartOld = false;
-                }
-
-                if (MACHINE.PLCIO.iFlyStart == 1)
-                {
-                    if (!m_plcFlyStartOld1)
-                    {
-                        m_plcFlyStartOld1 = true;
-                        bytesFlyDatas.Clear();
-                        CommonLogClass.Instance.LogMessage("接收到plc飞拍1启动信号", Color.Black);
-                    }
-                }
-                else
-                {
-                    m_plcFlyStartOld1 = false;
-                }
-
-                if (MACHINE.PLCIO.iFlyStart == 2)
-                {
-                    if (!m_plcFlyStartOld2)
-                    {
-                        m_plcFlyStartOld2 = true;
-                        bytesFlyDatas.Clear();
-                        CommonLogClass.Instance.LogMessage("接收到plc飞拍2启动信号", Color.Black);
-                    }
-                }
-                else
-                {
-                    m_plcFlyStartOld2 = false;
-                }
-
-
-                //if (MACHINE.PLCIO.IsGetImage)
-                //{
-                //    if (!m_plcGetImageOld)
-                //    {
-                //        m_plcGetImageOld = true;
-
-                //        CommonLogClass.Instance.LogMessage("接收到plc抓图信号", Color.Black);
-                //        if (!m_LineScanProcess.IsOn)
-                //        {
-                //            m_LineScanProcess.Start("Snap");
-                //        }
-                //        else
-                //        {
-                //            CommonLogClass.Instance.LogMessage("测试中#PLC重复抓图", Color.Black);
-                //        }
-                //    }
-                //}
-                //else
-                //{
-                //    m_plcGetImageOld = false;
-                //}
             }
         }
 
@@ -940,7 +382,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 iShowIndex++;
             }
         }
-#if(NO_USE_CODE)
+#if (NO_USE_CODE)
         void flyProcess(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
         {
             flystopwatch.Restart();
@@ -1689,24 +1131,691 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
 
         #endregion
 
-        #region GaUtil_取代重複碼
-#if (false)
-        void BoundRect(ref RectangleF InnerRect, Size BoundSize)
+#if (OPT_MainX3)
+        BaseProcess m_BuzzerProcess
         {
-            InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
-            InnerRect.Y = Math.Min(Math.Max(InnerRect.Y, 0), (BoundSize.Height - InnerRect.Height < 0 ? 0 : BoundSize.Height - InnerRect.Height));
-
-            if (BoundSize.Width <= InnerRect.X + InnerRect.Width)
-                InnerRect.Width = BoundValue(InnerRect.Width, BoundSize.Width - InnerRect.X, 1);
-            if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
-                InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
+            get { return BuzzerProcess.Instance; }
         }
-        float BoundValue(float Value, float Max, float Min)
+        BaseProcess m_resetprocess
         {
-            return Math.Max(Math.Min(Value, Max), Min);
+            get { return ResetProcess.Instance; }
+        }
+        BaseProcess m_LineScanProcess
+        {
+            get { return LineScanProcess.Instance; }
+        }
+        BaseProcess m_MainProcess
+        {
+            get { return MainProcess.Instance; }
+        }
+        BaseProcess m_SingleProcess
+        {
+            get { return LineScanSingleProcess.Instance; }
+        }
 
+        private void BtnReady_Click(object sender, EventArgs e)
+        {
+            //MACHINE.PLCIO.bSoftwareReady = !MACHINE.PLCIO.bSoftwareReady;
+            //if (m_LineScanProcess.IsOn)
+            //    m_LineScanProcess.Stop();
         }
 #endif
+
+#if (OPT_MainX3)
+        void InitAllProcesses()
+        {
+            //----------------------------------------------------------------
+            // (1) 大部的 Processes 應該可以當成 MainProcess 的 Child Process,
+            //      可以集中由 MainProcess 管理, 形成一體 Model.
+            // (2) 以下對 Process Event Handler 的掛載.
+            //      在 Model-View-Control 的架構規範下, 屬於 Control.
+            //      ~ 以後再從 GUI(MainGdx3UI) 抽離出來.
+            //----------------------------------------------------------------
+            //m_mainprocess.OnCompleted += process_OnCompleted;
+            // Buzzer 的結束 用來檢視是否有 NG 發生.
+            m_MainProcess.OnCompleted += process_OnCompleted;
+            m_BuzzerProcess.OnCompleted += buzzer_OnCompleted;
+            m_resetprocess.OnCompleted += process_OnCompleted;
+            m_LineScanProcess.OnCompleted += process_OnCompleted;
+            m_LineScanProcess.OnLiveImage += process_OnLiveImage;
+            m_MainProcess.OnMessage += process_OnMessage;
+            m_SingleProcess.OnMessage += process_OnMessage;
+            m_LineScanProcess.OnMessage += process_OnMessage;
+            m_SingleProcess.OnLiveImage += process_OnLiveImage;
+
+            var aoiEngine = ProcessRunFPIClass.Instance;
+            aoiEngine.OnAoiProgressing += AoiEngine_OnAoiProgressing;
+            aoiEngine.OnAoiBegin += AoiEngine_OnAoiBegin;
+            aoiEngine.OnAoiEnd += AoiEngine_OnAoiEnd;
+        }
+        private void process_OnMessage(object sender, ProcessEventArgs e)
+        {
+            if (sender == m_MainProcess)
+            {
+                if (e.Message.Contains("Reset.Data"))
+                {
+
+                }
+                else if (e.Message.Contains("Record.Start"))
+                {
+                    FireChangeState(MainS1State.LS_START);
+                }
+                else if (e.Message.Contains("Record.Stop"))
+                {
+                    FireChangeState(MainS1State.LS_STOP);
+                }
+            }
+            else if (sender == m_LineScanProcess || sender == m_SingleProcess)
+            {
+                if (e.Message.Contains("Result.1"))
+                {
+                    FireChangeState(MainS1State.M_PASS);
+                }
+                else if (e.Message.Contains("Result.2"))
+                {
+                    FireChangeState(MainS1State.M_NG);
+                }
+                else if (e.Message.Contains("Record.Start"))
+                {
+                    //MappingReset();
+                    //FireChangeState(MainS1State.LS_START);
+                }
+                else if (e.Message.Contains("Record.Stop"))
+                {
+                    //FireChangeState(MainS1State.LS_STOP);
+                }
+                else if (e.Message.Contains("Show.X"))
+                {
+                    //DSMain.Invoke(new Action(() =>
+                    //{
+                    collectResultClasses.Clear();
+                    //收集所有信息
+                    string _collectStrMsg = string.Empty;
+                    DSMain.mvdRenderActivex1.ClearShapes();
+                    //string _reportStr = string.Empty;
+                    StringBuilder reportBuilder = new StringBuilder();
+                    reportBuilder.Append(ToReport1HeadStr());
+
+                    //所有框的显示
+                    foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
+                    {
+                        RectangleF _rectF = new RectangleF(cell.viewRectF.X, cell.viewRectF.Y, cell.viewRectF.Width, cell.viewRectF.Height);
+                        _rectF.Inflate(xRecipe.xExtendx, xRecipe.xExtendy);
+                        //BoundRect(ref _rectF, new Size((int)ProcessRunClass.Instance.cMvdInput.Width,
+                        //                               (int)ProcessRunClass.Instance.cMvdInput.Height));
+
+                        reportBuilder.Append(cell.ToReport1Str());
+
+                        _collectStrMsg += $"({cell.ToResultStr()})";
+                        CMvdRectangleF mvdRectangleF = cell.DrawResultRectF();
+                        switch (pRun.xScanInspectMode)
+                        {
+                            case ScanInspectMode.NOTRAY:
+                                //填写数据 疑似有料
+                                try
+                                {
+                                    string strNoTray = cell.GetNoTrayDesc();
+                                    if (!string.IsNullOrEmpty(strNoTray))
+                                    {
+                                        CMvdTextF cMvdTextFShowNoTray = new CMvdTextF(mvdRectangleF.CenterX,
+                                                                    mvdRectangleF.CenterY,
+                                                                    $"{strNoTray}");
+
+                                        cMvdTextFShowNoTray.BorderColor = new MVD_COLOR(255, 0, 0);
+                                        cMvdTextFShowNoTray.FontWidth = 11;
+                                        //if (INI.Instance.IsResultShowChar)
+                                        DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowNoTray);
+                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(false));
+                                    }
+                                    else
+                                    {
+                                        var mvdRect = cell.DrawBaseRectFFixSize();
+                                        DSMain.mvdRenderActivex1.AddShape(mvdRect);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    //string errMsg = $"顯示結果異常: {ex.Message}\n\r\n\r@{ex.StackTrace}";
+                                    //MessageBox.Show(errMsg);
+                                    return;
+                                }
+                                break;
+                            case ScanInspectMode.MEASUREAOI:
+                            case ScanInspectMode.QRCODE:
+                            default:
+                                //try
+                                {
+                                    if (InspectPara.bOpenLineMeasure)
+                                    {
+                                        //画直线
+                                        int i = 0;
+                                        while (i < 4)
+                                        {
+                                            CMvdLineSegmentF mLine = cell.cMvdLineSegmentFsOut[i];
+                                            if (mLine != null)
+                                            {
+                                                MVD_POINT_F s0 = new MVD_POINT_F(mLine.StartPoint.fX + _rectF.X,
+                                                    mLine.StartPoint.fY + _rectF.Y);
+                                                MVD_POINT_F s1 = new MVD_POINT_F(mLine.EndPoint.fX + _rectF.X,
+                                                    mLine.EndPoint.fY + _rectF.Y);
+                                                CMvdLineSegmentF newLine = new CMvdLineSegmentF(s0, s1);
+                                                newLine.BorderColor = new MVD_COLOR(255, 0, 255);
+                                                DSMain.mvdRenderActivex1.AddShape(newLine);
+                                            }
+                                            CMvdShape mvdShape = cell.cMvdShapesForFindLineRegion[i];
+                                            if (mvdShape != null)
+                                            {
+                                                mvdShape.BorderColor = new MVD_COLOR(38, 127, 0);
+                                                DSMain.mvdRenderActivex1.AddShape(mvdShape);
+                                            }
+                                            i++;
+                                        }
+
+                                        if (InspectPara.bCheckMeasureOffset)
+                                        {
+                                            //画直线
+                                            i = 0;
+                                            while (i < 4)
+                                            {
+                                                CMvdLineSegmentF mLine = cell.cMvdLineSegmentFsInSide[i];
+                                                if (mLine != null)
+                                                {
+                                                    MVD_POINT_F s0 = new MVD_POINT_F(mLine.StartPoint.fX + _rectF.X,
+                                                        mLine.StartPoint.fY + _rectF.Y);
+                                                    MVD_POINT_F s1 = new MVD_POINT_F(mLine.EndPoint.fX + _rectF.X,
+                                                        mLine.EndPoint.fY + _rectF.Y);
+                                                    CMvdLineSegmentF newLine = new CMvdLineSegmentF(s0, s1);
+                                                    newLine.BorderColor = new MVD_COLOR(112, 48, 160);
+                                                    DSMain.mvdRenderActivex1.AddShape(newLine);
+                                                }
+                                                i++;
+                                            }
+                                        }
+                                    }
+
+
+                                    //显示结果的xy angle
+                                    CMvdTextF cMvdTextFShowMain = new CMvdTextF(cell.DrawResultRectF().CenterX,
+                                        cell.DrawResultRectF().CenterY,
+                                        $"{cell.ToShowMainStr()}");
+                                    cMvdTextFShowMain.BorderColor = new MVD_COLOR(0, 255, 0);// cell.DrawResultRectF().BorderColor;// new MVD_COLOR(0, 255, 0);
+                                    cMvdTextFShowMain.FontWidth = 11;
+                                    cMvdTextFShowMain.FillColor = new MVD_COLOR(0, 0, 0, 50);
+
+                                    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                                    {
+                                        //引导数据
+                                        if (INI.Instance.IsResultShowChar)
+                                            DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowMain);
+                                        //定位框
+                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawResultRectF());
+                                        //DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(true));
+                                    }
+                                    else
+                                    {
+                                        //引导数据
+                                        if (cell.inspectReason != InspectReason.INS_ALIGNERR)
+                                        {
+                                            if (INI.Instance.IsResultShowChar)
+                                            {
+
+                                                cMvdTextFShowMain = new CMvdTextF(cell.DrawResultRectF().CenterX,
+                                            cell.DrawResultRectF().CenterY,
+                                            $"{cell.ToShowMainStr()}{Environment.NewLine}{GaUtil.GetEnumDescription(cell.inspectReason)}");
+                                                cMvdTextFShowMain.BorderColor = new MVD_COLOR(255, 0, 0);
+                                                DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowMain);
+
+                                                //定位框
+                                                DSMain.mvdRenderActivex1.AddShape(cell.DrawResultRectF());
+                                            }
+                                        }
+                                        else
+                                            DSMain.mvdRenderActivex1.AddShape(cell.DrawBaseRectFFixSize(false));
+                                    }
+
+                                    //二维码
+                                    if (cell.DrawBarcodePosition != null)
+                                    {
+                                        DSMain.mvdRenderActivex1.AddShape(cell.DrawBarcodePosition);
+                                        CMvdTextF _CodeText
+                                            = new CMvdTextF(cell.DrawBarcodePosition.GetVertex(2).fX,
+                                                                          cell.DrawBarcodePosition.GetVertex(2).fY + 120,
+                                                                          cell.RunCodeInfo.Content);
+                                        _CodeText.BorderColor = new MVD_COLOR(0, 255, 0);
+                                        //_CodeText.FontWidth = 11;
+                                        _CodeText.FillColor = new MVD_COLOR(0, 0, 0);
+                                        DSMain.mvdRenderActivex1.AddShape(_CodeText);
+
+                                    }
+                                }
+                                //catch (Exception ex)
+                                //{
+                                //    string errMsg = $"顯示結果異常: {ex.Message}\n\r\n\r@{ex.StackTrace}";
+                                //    MessageBox.Show(errMsg);
+                                //    return;
+                                //}
+                                break;
+                        }
+                    }
+
+                    _LOG($"StripID:{pRun.StripId}", Color.Black);
+                    _LOG($"LotID:{pRun.LotId}", Color.Black);
+                    _LOG($"#数据信息:{_collectStrMsg}", Color.Black);
+
+
+                    //存储report
+                    string reportPath = $"{INI.Instance.ResultImagePath}\\report\\{DateTime.Now.ToString("yyyyMMdd")}\\{pRun.StripId}";
+                    if (!System.IO.Directory.Exists(reportPath))
+                    {
+                        System.IO.Directory.CreateDirectory(reportPath);
+                    }
+                    GaUtil.SaveData(reportBuilder.ToString(), reportPath + $"\\{pRun.FileName.Replace(".jpg", ".csv")}");
+
+                    #region 显示格点之外的料件
+
+                    switch (pRun.xScanInspectMode)
+                    {
+                        case ScanInspectMode.NOTRAY:
+
+                            foreach (var rect in xRecipe.xOutBlocs)
+                            {
+                                PointF ptCenter = new PointF(rect.X + rect.Width / 2, rect.Y + rect.Height / 2);
+                                CMvdTextF cMvdTextFShowNoTray = new CMvdTextF(
+                                                                                ptCenter.X,
+                                                                                ptCenter.Y,
+                                                                                $"疑似有料");
+
+                                cMvdTextFShowNoTray.BorderColor = new MVD_COLOR(255, 0, 0);
+                                cMvdTextFShowNoTray.FontWidth = 11;
+
+                                DSMain.mvdRenderActivex1.AddShape(cMvdTextFShowNoTray);
+                                CMvdRectangleF rectRect = new CMvdRectangleF(ptCenter.X, ptCenter.Y, 200, 200);
+                                rectRect.BorderColor = new MVD_COLOR(255, 0, 0);
+                                DSMain.mvdRenderActivex1.AddShape(rectRect);
+                            }
+
+                            break;
+                    }
+
+                    #endregion
+
+                    //_updateDgvData();
+                    DSMain.mvdRenderActivex1.Display();
+
+                    //MappingUpdate();
+                    FireChangeState(MainS1State.M_SHOWRESULT, e.Tag as string);
+                    if (pRun.IsPass)
+                        FireChangeState(MainS1State.M_PASS);
+                    else
+                        FireChangeState(MainS1State.M_NG);
+                    //}));
+                }
+                else if (e.Message.Contains("ResultX.Code"))
+                {
+                    INI.Instance.CurrentBarcodeStr = e.Tag as string;
+                    FireChangeState(MainS1State.M_SHOWCODE, e.Tag as string);
+                }
+            }
+
+            try
+            {
+                // Do whatever message you want to show to the operators.
+                string msg = $"Process {((BaseProcess)sender).Name}, {e.Message}\n";
+                CommonLogClass.Instance.LogMessage(msg, Color.Black);
+            }
+            catch
+            {
+            }
+
+            CGOperate();
+        }
+        public string ToReport1HeadStr()
+        {
+            string str = string.Empty;
+
+            str += $"编号" + ",";
+            str += $"名称" + ",";
+            str += $"是否检测" + ",";
+            str += $"尺寸宽度X" + ",";
+            str += $"尺寸高度Y" + ",";
+            str += $"位置偏移X" + ",";
+            str += $"位置偏移Y" + ",";
+            str += $"原始X" + ",";
+            str += $"原始Y" + ",";
+            str += $"引导偏移X" + ",";
+            str += $"引导偏移Y" + ",";
+            str += $"引导偏移角度" + ",";
+
+            str += $"左边距" + ",";
+            str += $"右边距" + ",";
+            str += $"上边距" + ",";
+            str += $"下边距" + ",";
+
+            str += $"马达1-X" + ",";
+            str += $"马达1-Y" + ",";
+            str += $"马达2-X" + ",";
+            str += $"马达2-Y" + ",";
+            str += $"条码设定值" + ",";
+            str += $"读取码" + ",";
+            str += $"{Environment.NewLine}";
+
+            return str;
+        }
+
+        void TickAllProcesses()
+        {
+            m_resetprocess.Tick();
+            m_BuzzerProcess.Tick();
+            m_LineScanProcess.Tick();
+            m_MainProcess.Tick();
+            m_SingleProcess.Tick();
+        }
+
+        private void process_OnLiveImage(object sender, ProcessEventArgs e)
+        {
+            if (e.Tag != null && e.Tag is Bitmap)
+            {
+                try
+                {
+                    if (InvokeRequired)
+                    {
+                        EventHandler<ProcessEventArgs> h = process_OnLiveImage;
+                        this.Invoke(h, sender, e);
+                    }
+                    else
+                    {
+                        //@LETIAN: 2022/07/01 改用 GdxDispUI 增加一些 fps
+                        // bmp 由 Sender maintains life cycle.
+                        // 在此不用 Dispose
+                        //Bitmap bmp = (Bitmap)e.Tag;
+                        //dispUI1.UpdateLiveImage(bmp);
+                        //DS1.ReplaceDisplayImage(bmp);
+                        DSMain.mvdRenderActivex1.LoadImageFromObject(pRun.cMvdInput.Clone());
+                        DSMain.mvdRenderActivex1.ClearShapes();
+                        DSMain.AddCross();
+                        DSMain.mvdRenderActivex1.Display();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //>>> 此一層的 try - catch 以後可以省略.
+                    //>>> 會由 Event Sender 處理 exception
+                    //throw ex;
+                }
+            }
+        }
+        private void process_OnCompleted(object sender, ProcessEventArgs e)
+        {
+            if (sender == m_resetprocess)
+            {
+                if (m_resetprocess.RelateString == "CloseWindows")
+                {
+                    //執行的關閉流程 這裏則跳出
+                    return;
+                }
+            }
+
+            try
+            {
+                string msg = $"Process {((BaseProcess)sender).Name}, Completed!\n";
+                CommonLogClass.Instance.LogMessage(msg, Color.Black);
+            }
+            catch
+            {
+            }
+        }
+        private void buzzer_OnCompleted(object sender, ProcessEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                EventHandler<ProcessEventArgs> h = buzzer_OnCompleted;
+                BeginInvoke(h, sender, e);
+            }
+            else
+            {
+
+            }
+        }
+        private void handle_main_process_completed(object sender, ProcessEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                EventHandler<ProcessEventArgs> h = handle_main_process_completed;
+                BeginInvoke(h, sender, e);
+            }
+            else
+            {
+                if (e.Message == "PartialCompleted")
+                {
+
+                }
+                else
+                {
+                }
+            }
+        }
+
+        FormProgressing _frmAoiProgressing = null;
+        private void AoiEngine_OnAoiBegin(object sender, GaProgressEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiBegin, sender, e);
+            }
+            else
+            {
+                if (_frmAoiProgressing == null)
+                {
+                    _frmAoiProgressing = new FormProgressing();
+                    //_frmAoiProgressing.TopMost = true;
+                    _frmAoiProgressing.SetTotalSteps(e.TotalSteps);
+                    _frmAoiProgressing.UpdateProgress(e.CurrentStep);
+                    _frmAoiProgressing.Show(this);
+                    _frmAoiProgressing.BringToFront();
+                }
+            }
+        }
+        private void AoiEngine_OnAoiProgressing(object sender, GaProgressEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiProgressing, sender, e);
+            }
+            else
+            {
+                _frmAoiProgressing?.UpdateProgress(e.CurrentStep);
+            }
+        }
+        private void AoiEngine_OnAoiEnd(object sender, GaProgressEventArgs e)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiEnd, sender, e);
+            }
+            else
+            {
+                _frmAoiProgressing?.Close();
+                _frmAoiProgressing?.Dispose();
+                _frmAoiProgressing = null;
+            }
+        }
+#endif
+
+        public void Tick()
+        {
+            _getPlcRunTick();
+            //TickAllProcesses();
+        }
+
+#if (OPT_MainX3)
+        public void ChangeRecipe()
+        {
+
+        }
+        public void SetEnable(bool isendable)
+        {
+        }
+        public void SetEnableState(bool isendable)
+        {
+        }
+#endif
+
+        private void _getPlcRunTick()
+        {
+
+            //btnReady.BackColor = (MACHINE.PLCIO.bSoftwareReady ? Color.Red : Color.FromArgb(192, 255, 192));
+            //if (m_LineScanProcess.IsOn)
+            //    lblState.Text = ToChangeLanguage("执行-线扫测试中") + m_LineScanProcess.ID.ToString();
+            //else
+            //    lblState.Text = ToChangeLanguage("等待");
+
+            _wndOwner?.Invoke(new Action(() =>
+            {
+                lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
+                lblNumberStr.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
+            }));
+
+            if (MACHINE.PLCIO.bSoftwareReady)
+            {
+                if (MACHINE.PLCIO.bScanStart)
+                {
+                    if (!m_plcStartOld)
+                    {
+                        m_plcStartOld = true;
+
+                        CommonLogClass.Instance.LogMessage("接收到plc启动信号", Color.Black);
+                        if (!m_LineScanProcess.IsOn)
+                        {
+                            m_StripId = MACHINE.PLCIO.sStripID;
+                            m_LotId = MACHINE.PLCIO.sLotID;
+
+                            m_LineScanProcess.Start();
+                        }
+                        else
+                        {
+                            CommonLogClass.Instance.LogMessage("测试中#PLC重复启动", Color.Black);
+                        }
+                    }
+                }
+                else
+                {
+                    m_plcStartOld = false;
+                }
+
+                if (MACHINE.PLCIO.iFlyStart == 1)
+                {
+                    if (!m_plcFlyStartOld1)
+                    {
+                        m_plcFlyStartOld1 = true;
+                        bytesFlyDatas.Clear();
+                        CommonLogClass.Instance.LogMessage("接收到plc飞拍1启动信号", Color.Black);
+                    }
+                }
+                else
+                {
+                    m_plcFlyStartOld1 = false;
+                }
+
+                if (MACHINE.PLCIO.iFlyStart == 2)
+                {
+                    if (!m_plcFlyStartOld2)
+                    {
+                        m_plcFlyStartOld2 = true;
+                        bytesFlyDatas.Clear();
+                        CommonLogClass.Instance.LogMessage("接收到plc飞拍2启动信号", Color.Black);
+                    }
+                }
+                else
+                {
+                    m_plcFlyStartOld2 = false;
+                }
+
+
+                //if (MACHINE.PLCIO.IsGetImage)
+                //{
+                //    if (!m_plcGetImageOld)
+                //    {
+                //        m_plcGetImageOld = true;
+
+                //        CommonLogClass.Instance.LogMessage("接收到plc抓图信号", Color.Black);
+                //        if (!m_LineScanProcess.IsOn)
+                //        {
+                //            m_LineScanProcess.Start("Snap");
+                //        }
+                //        else
+                //        {
+                //            CommonLogClass.Instance.LogMessage("测试中#PLC重复抓图", Color.Black);
+                //        }
+                //    }
+                //}
+                //else
+                //{
+                //    m_plcGetImageOld = false;
+                //}
+
+            }
+
+        }
+
+#if (OPT_MainX3)
+        void CGOperate()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+        }
+
+        public delegate void ChangeStateHandler(MainS1State status, object tag = null);
+        public event ChangeStateHandler OnChangeState;
+        protected void FireChangeState(MainS1State status, object tag = null)
+        {
+            if (OnChangeState != null)
+            {
+                OnChangeState(status, tag);
+            }
+        }
+#endif
+
+#if (OPT_MainX3)
+        #region AUTO_LAYOUT
+        private void MainX3UI_SizeChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                _auto_layout();
+            }
+            catch
+            {
+            }
+        }
+        void _auto_layout()
+        {
+#if OPT_LETIAN_AUTO_LAYOUT
+
+            var rcc = ClientRectangle;
+            int pad = 3;
+
+            int w = tabControl1.Width;
+            int h = tabControl1.Height;
+
+            //tabControl2.Width = rcc.Width - pad * 2;
+            //tabControl2.Height = rcc.Height - pad * 3 - h;
+            //tabControl2.Location = new Point(pad, pad);
+
+            //groupBox1.Location = new Point(pad, tabControl2.Height + pad);
+            //groupBox1.Width = rcc.Width - pad * 3 - w;
+            //groupBox1.Height = h;
+
+            //tabControl1.Location = new Point(groupBox1.Width + pad, tabControl2.Height + pad);
+
+#endif
+        }
         #endregion
+#endif
+
+        protected void _LOG(string msg, Color color)
+        {
+            GaUtil.LOG(msg, color);
+        }
     }
 }

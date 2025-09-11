@@ -25,6 +25,8 @@ namespace LaserAlignDX.Mvc.Gui
 {
     public abstract class CviAbsTooltipBox : CvImageViewerInteractor
     {
+        public event EventHandler OnCursorsChanged;
+
         #region GUI_MEMBERS
         protected ToolTip _toolTip = new ToolTip();
         protected EzBloc _cursorBloc = null;
@@ -427,12 +429,12 @@ namespace LaserAlignDX.Mvc.Gui
         }
         bool updateTooltip(EzBloc curBloc, int vx, int vy, Control wnd)
         {
+            bool isChanged = false;
             if (curBloc == null)
             {
                 _toolTip.Hide(wnd);
-                bool isChanged = _cursorBloc != null;
+                isChanged = _cursorBloc != null;
                 _cursorBloc = null;
-                return isChanged;
             }
             else
             {
@@ -446,15 +448,33 @@ namespace LaserAlignDX.Mvc.Gui
                     _toolTip.Show(txt, wnd, vx + 10, vy + 10);
 
                 _hitPt = new Point(vx, vy);
-                return true;
+
+                isChanged = true;
             }
+
+            if (isChanged)
+                fire_CursorsChangedEvent();
+
+            return isChanged;
         }
         #endregion
+
+        public EzBloc GetCursorBloc(int index)
+        {
+            if (index == 0) return _cursorBloc;
+            else if (index == 1) return _cursorBloc2;
+            return null;
+        }
 
         protected void adjustFetchSize(Size sz)
         {
             _fetchSize = sz;
         }
+        protected void fire_CursorsChangedEvent()
+        {
+            OnCursorsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         protected virtual IEnumerable<EzBloc> iterFetchableBlocs()
         {
             yield break;

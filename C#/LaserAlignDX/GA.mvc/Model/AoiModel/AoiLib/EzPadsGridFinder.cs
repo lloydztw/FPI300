@@ -275,6 +275,7 @@ namespace LeTian.AoiLib
 
                     var bloc = new EzBloc(rect, 0);
                     bloc.Pixels = ccBlob.Area;
+                    bloc.Center = new JetEazy.QMath.QVector(ccBlob.Centroid.X, ccBlob.Centroid.Y); // 保留精度 !
                     keyBlocs.Add(bloc);
                 }
             }

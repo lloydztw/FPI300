@@ -355,6 +355,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v2.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCalibResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCellsResultBoxes.cs" />

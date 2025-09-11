@@ -29,7 +29,7 @@ namespace LaserAlignDX.Mvc.Ctrl
     /// ToDO: 
     /// 需要把 flyProcessPro 與 flyProcessProSpecial 的 AOI 部分 抽離到 AoiModel 模塊內
     /// </summary>
-    public partial class GaPlcFlyCameraCtrl : IxTickable, IDisposable
+    public partial class GaPlcFlyCameraCtrl : IxTickable
     {
         static int TOTAL_FLY_CAMERAS => GaMvcConfig.TOTAL_FLY_CAMERAS;
 
@@ -139,9 +139,10 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             lblSerialNumber.DoubleClick += (s, e) => clearFlyDataBytes();
             FlyCamera.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
+            _wndOwner.HandleDestroyed += (s, e) => Dispose();
         }
 
-        public void Dispose()
+        void Dispose()
         {
             cPositionFixToolObj?.Dispose();
             cPositionFixToolObj = null;

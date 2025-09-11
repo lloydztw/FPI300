@@ -183,11 +183,11 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         private void LtAoi_OnLineScanRequested(object sender, EventArgs e)
         {
-            new Action(() =>
-            {
-                //System.Threading.Thread.Sleep(2000);
-                LtAoiFactory.PushBitmap(xRecipe.bmpOrg, "RecipeOrg");
-            }).BeginInvoke(null, null);
+            //new Action(() =>
+            //{
+            //    //System.Threading.Thread.Sleep(2000);
+            //    LtAoiFactory.PushBitmap(xRecipe.bmpOrg, "RecipeOrg");
+            //}).BeginInvoke(null, null);
         }
         #endregion
 

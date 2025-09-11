@@ -458,7 +458,7 @@ namespace LaserAlignDX.FormSpace
             new Action(() =>
             {
                 //System.Threading.Thread.Sleep(2000);
-                LtAoiFactory.PushBitmap(xRecipe.bmpOrg, "RecipeOrg");
+                LtAoiFactory.PushBitmap(xRecipe.bmpOrg, "[參數] bmpOrg");
             }).BeginInvoke(null, null);
         }
 

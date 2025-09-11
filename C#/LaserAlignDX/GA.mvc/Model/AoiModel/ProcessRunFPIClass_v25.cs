@@ -441,7 +441,6 @@ namespace LaserAlignDX.AoiModel.V25
         {
             _PrepareChipMatcher(threadIdx, out IMvdTemplateMatcher chipMatcher);
             _PrepareBoxOverlapTool(threadIdx, out CBoxOverlapTool cBoxOverlapTool);
-
             
             var fullFovSize = cellsGroup.FullFovRect.Size;
             var debugSB = new StringBuilder();
@@ -513,7 +512,7 @@ namespace LaserAlignDX.AoiModel.V25
                     cBoxOverlapTool.ROI2 = cellmvdRectF;
                     cBoxOverlapTool.Run();
 
-                    if (true || cBoxOverlapTool.Result.Overlap >= xInspect.xChipOverlap)
+                    if (cBoxOverlapTool.Result.Overlap >= xInspect.xChipOverlap)
                     {
 #if (OPT_OLD_GAARA || false)
                         //计算偏移值
@@ -712,7 +711,7 @@ namespace LaserAlignDX.AoiModel.V25
 
             try
             {
-                RectangleF[] recipeBorderBoxes = new RectangleF[]
+                RectangleF[] rcpBorderBoxes = new RectangleF[]
                 {
                     xRecipe.xLineLeft,
                     xRecipe.xLineTop,
@@ -720,26 +719,29 @@ namespace LaserAlignDX.AoiModel.V25
                     xRecipe.xLineBottom,
                 };
 
-                for (int borderIdx = 0, N = recipeBorderBoxes.Length; borderIdx < N; borderIdx++)
+                for (int borderIdx = 0, N = rcpBorderBoxes.Length; borderIdx < N; borderIdx++)
                 {
                     eBorder = (EdgeBorder)borderIdx;
 
-                    RectangleF borderBox = recipeBorderBoxes[borderIdx];
+                    RectangleF borderBox = rcpBorderBoxes[borderIdx];
+
                     CMvdRectangleF mvdBorderBox = GaImageUtil.ToCMvdRectangleF(ref borderBox);
-                    CMvdRectangleF mvdRoi = cell.PositionFixRun(
+
+                    CMvdRectangleF mvdCellRoi = cell.PositionFixRun(
                                                     mvdBorderBox,
                                                     xRecipe.xRegionTrain,
                                                     Rectangle.Round(cellRoi),
                                                     chipLocationResult) as CMvdRectangleF;
 
-                    cell.LineSegmentRun(borderIdx, cellBmp, mvdRoi);
+                    // 海康線檢 (輸出為 cell.cMvdShapesForFindLineRegion)
+                    cell.LineSegmentRun(borderIdx, cellBmp, mvdCellRoi);
 
                     // Offset
-                    mvdRoi.CenterX += cellRoi.X;
-                    mvdRoi.CenterY += cellRoi.Y;
+                    mvdCellRoi.CenterX += cellRoi.X;
+                    mvdCellRoi.CenterY += cellRoi.Y;
 
                     // 更新到 cell
-                    cell.cMvdShapesForFindLineRegion[borderIdx] = (CMvdShape)mvdRoi.Clone();
+                    cell.cMvdShapesForFindLineRegion[borderIdx] = (CMvdShape)mvdCellRoi.Clone();
                 }
             }
             catch (Exception ex)
@@ -790,6 +792,10 @@ namespace LaserAlignDX.AoiModel.V25
                 var line2 = cell.cMvdLineSegmentFsOut[2]?.ToLineSegment();
                 if (line0 != null && line2 != null)
                 {
+                    //>>> cMvdLineSegmentFsOut 是在 Cell Roi Coordinates
+                    line0.Offset(cellRoi.X, cellRoi.Y);
+                    line2.Offset(cellRoi.X, cellRoi.Y);
+
                     //// 使用 MVD VisionDesigner Tool
                     //using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
                     //{
@@ -822,9 +828,10 @@ namespace LaserAlignDX.AoiModel.V25
                     var P2 = transCP.Trans(line0.P2);
                     var Q1 = transCP.Trans(line2.P1);
                     var Q2 = transCP.Trans(line2.P2);
+                    var QM = (Q1 + Q2) / 2;
                     line0 = new EzLSD.LineSegment(P1, P2);
                     line2 = new EzLSD.LineSegment(Q1, Q2);
-                    double dist = line0.CalcDistance(Q1);
+                    double dist = line0.CalcDistance(QM);
                     cell.RunWidth = (float)Math.Round(dist, 3);
                 }
 #endif
@@ -880,6 +887,10 @@ namespace LaserAlignDX.AoiModel.V25
                 var line3 = cell.cMvdLineSegmentFsOut[3]?.ToLineSegment();
                 if (line1 != null && line3 != null)
                 {
+                    //>>> cMvdLineSegmentFsOut 是在 Cell Roi Coordinates
+                    line1.Offset(cellRoi.X, cellRoi.Y);
+                    line3.Offset(cellRoi.X, cellRoi.Y);
+
                     //// 使用 MVD VisionDesigner Tool
                     //using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
                     //{
@@ -912,9 +923,10 @@ namespace LaserAlignDX.AoiModel.V25
                     var P2 = transCP.Trans(line1.P2);
                     var Q1 = transCP.Trans(line3.P1);
                     var Q2 = transCP.Trans(line3.P2);
+                    var QM = (Q1 + Q2) / 2;
                     line1 = new EzLSD.LineSegment(P1, P2);
                     line3 = new EzLSD.LineSegment(Q1, Q2);
-                    double dist = line1.CalcDistance(Q1);
+                    double dist = line1.CalcDistance(QM);
                     cell.RunHeight = (float)Math.Round(dist, 3);
                 }
 #endif

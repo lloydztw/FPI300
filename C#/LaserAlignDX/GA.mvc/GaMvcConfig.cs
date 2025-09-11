@@ -68,8 +68,8 @@ namespace LaserAlignDX
         // CTRL ----------------------------------------------------
         public static GaMainCtrl CreateMainCtrl()
         {
-            // GaMainCtrl 使用 V3 
-            return new global::LaserAlignDX.Mvc.Ctrl.V3.GaMainCtrl();
+            // GaMainCtrl 使用 V2
+            return new global::LaserAlignDX.Mvc.Ctrl.V2.GaMainCtrl();
         }
 
         // VIEW ----------------------------------------------------
@@ -79,6 +79,9 @@ namespace LaserAlignDX
             {
                 dlg.ShowDialog();
             }
+
+            //為安全起見, 重新再次載入 RecipeCombo
+            SysModel.ApplyRecipe();
         }
         public static void OpenCalibrationTool()
         {
@@ -86,6 +89,9 @@ namespace LaserAlignDX
             {
                 dlg.ShowDialog();
             }
+
+            //為安全起見, 重新再次載入 RecipeCombo
+            SysModel.ApplyRecipe();
         }
 
         // Dispose -------------------------------------------------

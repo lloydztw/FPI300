@@ -6,6 +6,7 @@ using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
 using LaserAlignDX.UISpace.UIMVC;
@@ -41,8 +42,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             get { return RecipeFPIX3Class.Instance; }
         }
-        IProcessRunFPI _aoiModel => GaMvcConfig.SysModel.AoiModel;
-        GaBigImageHolder _lineScanImageHolder => GaMvcConfig.SysModel.LineScanImageHolder;
+        ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        IProcessRunFPI _aoiModel => _sysModel.AoiModel;
+        GaBigImageHolder _lineScanImageHolder => _sysModel.LineScanImageHolder;
         bool IsBusy()
         {
             return _aoiModel.Running || LineScanSingleProcess.Instance.IsOn || LineScanProcess.Instance.IsOn;
@@ -81,16 +83,15 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 buildChipCellsViewer(DsMains[0], CarrierEnum.C1),
                 buildChipCellsViewer(DsMains[1], CarrierEnum.C2),
             };
-            
-            // FLY CAMERA CONTROLS
-            _plcFlyCameraCtrl.Attach(DsFlys, lblFlyCameraSerialNo);
 
             // Owner Window
             _wndOwner = DsMains[0].Parent;
             System.Diagnostics.Debug.Assert(_wndOwner != null, "_wndOwner 不能為 null !");
 
+            // FLY CAMERA CONTROLS
+            _plcFlyCameraCtrl.Attach(DsFlys, lblFlyCameraSerialNo);
+
             _wndOwner.HandleCreated += (s, e) => _wndOwner.BeginInvoke(new Action(() => _LOG("GaMailCtrl [V3]", Color.Blue)));
-            _wndOwner.HandleDestroyed += (s, e) => _plcFlyCameraCtrl?.Dispose();
 
             // Processes
             InitAllProcesses();

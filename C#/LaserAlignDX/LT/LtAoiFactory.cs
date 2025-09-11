@@ -80,7 +80,7 @@ namespace Traveller106
                     new Action(() =>
                     {
                         System.Threading.Thread.Sleep(2000);
-                        PushBitmap(bmpToShow, "RecipeOrg");
+                        PushBitmap(bmpToShow, "[參數] bmpOrg");
                     }).BeginInvoke(null, null);
                 };
             }

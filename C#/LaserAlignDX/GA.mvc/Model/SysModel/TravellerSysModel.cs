@@ -62,6 +62,7 @@ namespace LaserAlignDX.Mvc.Model
 
         #region AOI_MODELS
         IProcessRunFPI _aoiModel;
+        IxEmptyTrayInspector _aoiEmptyTrayModel;
         ICalibAoiModel _calibModel;
         JxRecipeCombo _jxRecipe;
         #endregion
@@ -89,6 +90,9 @@ namespace LaserAlignDX.Mvc.Model
             _aoiModel?.Dispose();
             _aoiModel = null;
 
+            _aoiEmptyTrayModel?.Dispose();
+            _aoiEmptyTrayModel = null;
+
             _calibModel?.Dispose();
             _calibModel = null;
 
@@ -113,7 +117,7 @@ namespace LaserAlignDX.Mvc.Model
             {
                 if (_calibModel == null)
                 {
-                    _calibModel = new CalibAoiModel();
+                    _calibModel = new CalibAoiModel(EmptyTrayAoiModel);
                 }
                 return _calibModel;
             }
@@ -122,8 +126,8 @@ namespace LaserAlignDX.Mvc.Model
         {
             get
             {
-                // 共用
-                return CalibAoiModel;
+                _aoiEmptyTrayModel = AoiEmptyTrayInspector.Instance;
+                return _aoiEmptyTrayModel;
             }
         }
         public TravellerTransforms TransformsModel
@@ -176,9 +180,11 @@ namespace LaserAlignDX.Mvc.Model
                 transformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
             }
 
-            // 將參數餵給其他子系統 (Child Models)
-            var model = CalibAoiModel;
-            model.SetRecipe(recipe.EmptyTrayParams);
+            //// 將參數餵給其他子系統 (Child Models)
+            EmptyTrayAoiModel.SetRecipe(recipe.EmptyTrayParams);
+
+            //var model = CalibAoiModel;
+            //model.SetRecipe(recipe.EmptyTrayParams);
 
             // 建置 Cell Regions
             if (camGrid == null)

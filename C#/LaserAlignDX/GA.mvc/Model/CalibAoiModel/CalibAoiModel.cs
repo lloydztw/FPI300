@@ -32,7 +32,7 @@ namespace LaserAlignDX.AoiModel
     public class CalibAoiModel : ICalibAoiModel
     {
         #region PRIVATE_DATA
-        IxEmptyTrayInspector _imp = AoiEmptyTrayInspector.Instance;
+        IxEmptyTrayInspector _imp;
         JxAoiRecipe _jxRecipe;
         #endregion
 
@@ -137,9 +137,14 @@ namespace LaserAlignDX.AoiModel
         }
         #endregion
 
+        public CalibAoiModel(IxEmptyTrayInspector imp)
+        {
+            // Caller 負責調用 imp.Dispose()
+            _imp = imp;
+        }
         public void Dispose()
         {
-            _imp.Dispose();
+            //_imp.Dispose();
         }
         public void SetRecipe(JxAoiRecipe recipe)
         {

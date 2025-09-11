@@ -20,9 +20,9 @@ using System.Drawing;
 using VisionDesigner;
 
 
-namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
+namespace LaserAlignDX
 {
-    internal static class MvdConvertor
+    public static class MvdConvertor
     {
         public static QvBox2D ToBox2D(this CMvdRectangleF mvdRectF)
         {
@@ -65,6 +65,17 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var lines = ToCSharpLines(mvdLines);
             Offset(lines, offset);
             return lines;
+        }
+        public static void Offset(this CMvdLineSegmentF line, float offsetX, float offsetY)
+        {
+            var p1 = line.StartPoint;
+            var p2 = line.EndPoint;
+            p1.fX += offsetX;
+            p1.fY += offsetY;
+            p2.fX += offsetX;
+            p2.fY += offsetY;
+            line.StartPoint = p1;
+            line.EndPoint = p2;
         }
         public static void Offset(PointF[][] lines, PointF offset)
         {

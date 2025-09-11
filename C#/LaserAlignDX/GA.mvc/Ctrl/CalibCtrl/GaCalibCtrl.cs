@@ -114,7 +114,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             _btnPickupGolden.Tag = _btnPickupGolden.BackColor;
 
             _isInGlobalCalibration = (localRecipe == null);
-            _jxAoiRecipe = localRecipe == null ? new JxCalibAoiRecipe() : localRecipe;
+            _jxAoiRecipe = localRecipe == null ? new JxCalibAoiRecipe() { Name = "Global Calib" } : localRecipe;
 
             initImgViewer();
             LoadSettings();

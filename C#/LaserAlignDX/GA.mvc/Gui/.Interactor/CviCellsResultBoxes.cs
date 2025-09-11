@@ -26,6 +26,8 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Forms;
 using VisionDesigner;
 
@@ -95,6 +97,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         List<IvDrawItem> _drawItems = new List<IvDrawItem>();
         CviRotRectBox _cviRegionBox;
         #endregion
+
+        public CviCellsResultBoxes()
+        {
+            base.OnCursorsChanged += CviCellsResultBoxes_OnCursorsChanged;
+        }
 
         public void Reset()
         {
@@ -223,16 +230,21 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #region OVERRIDES
         public override void OnKeyDown(CvImageViewer viewer, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.F10)
+            switch(e.KeyCode)
             {
-                if (_cursorBloc != null)
-                    DebugMatching(_cursorBloc as CellBloc);
+                case Keys.Escape:
+                    DebugMatchingOff();
+                    break;
+                case Keys.F4:
+                    if (_cursorBloc is CellBloc cellBloc)
+                        DebugMatching(cellBloc);
+                    break;
+                case Keys.F2:
+                    var oldCursor = GaUtil.SetCursor(viewer.FindForm(), Cursors.AppStarting);
+                    DumpCellRegions();
+                    GaUtil.SetCursor(viewer.FindForm(), oldCursor);
+                    break;
             }
-            if (e.KeyCode == Keys.Escape)
-            {
-                DebugMatchingOff();
-            }
-
             base.OnKeyDown(viewer, e);
         }
         public override void OnDraw(CvImageViewer viewer, Graphics gxView)
@@ -265,46 +277,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             return base.OnMouseMove(viewer, e);
         }
-        #endregion
-
-        #region TOOL_TIP_FUNCTIONS
-        void adjustFetchSize()
+        private void CviCellsResultBoxes_OnCursorsChanged(object sender, EventArgs e)
         {
-            if (_grid != null)
-            {
-                foreach (var bloc in _grid.IterBlocs())
-                {
-                    if (bloc is CellBloc cellBloc)
-                    {
-                        var cell = cellBloc.Cell;
-                        var cellRect = Rectangle.Round(cell.viewRectF);
-                        cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
-                        base.adjustFetchSize(cellRect.Size);
-                        _cviRegionBox = new CviRotRectBox(cellRect, Color.White);
-                        _cviRegionBox.Visible = false;
-                        return;
-                    }
-                }
-            }
-        }
-        protected override IEnumerable<EzBloc> iterFetchableBlocs()
-        {
-            if (_grid != null)
-            {
-                foreach (var bloc in _grid.IterBlocs())
-                    if (bloc != null)
-                        yield return bloc;
-            }
-        }
-        protected override string composeTooltipText(EzBloc cursor, EzBloc cursor2)
-        {
-            var cellBloc = cursor as CellBloc;
-
-            _cviRegionBox.Box2D.SetCenter((float)cellBloc.Center.X, (float)cellBloc.Center.Y);
-            _cviRegionBox.Visible = true;
-
-            string txt = formatDisplayText(cellBloc);
-            return txt;
+            var cursorBloc = GetCursorBloc(0);
+            _cviRegionBox.Visible = cursorBloc != null;
         }
         #endregion
 
@@ -479,12 +455,15 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             foreach (CellBloc bloc in _grid)
             {
                 var cell = bloc?.Cell;
+                if (cell == null) continue;
+
                 RectangleF cellRect = cell.viewRectF;
                 cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
                 var offset = cellRect.Location;
 
                 // 繪件: 找到的邊線
                 var linesOut = MvdConvertor.ToCSharpLines(offset, cell.cMvdLineSegmentFsOut);
+                //var linesOut = MvdConvertor.ToCSharpLines(cell.cMvdLineSegmentFsOut);
                 if (linesOut != null && linesOut.Length > 0)
                     drawItemsOfLinesOutSide.Add(new CviLineSegmentsBox(Color.Cyan, linesOut));
 
@@ -499,6 +478,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 if (_inspectParams.bCheckMeasureOffset)
                 {
                     var linesIn = MvdConvertor.ToCSharpLines(offset, cell.cMvdLineSegmentFsInSide);
+                    //var linesIn = MvdConvertor.ToCSharpLines(cell.cMvdLineSegmentFsInSide);
                     if (linesIn != null && linesIn.Length > 0)
                         drawItemsOfLinesInSide.Add(new CviLineSegmentsBox(Color.FromArgb(112, 48, 160), linesIn));
                 }
@@ -544,44 +524,93 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         #endregion
 
+        #region TOOL_TIP_FUNCTIONS
+        void adjustFetchSize()
+        {
+            if (_grid != null)
+            {
+                foreach (var bloc in _grid.IterBlocs())
+                {
+                    if (bloc is CellBloc cellBloc)
+                    {
+                        var cell = cellBloc.Cell;
+                        var cellRect = Rectangle.Round(cell.viewRectF);
+                        cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
+                        base.adjustFetchSize(cellRect.Size);
+                        _cviRegionBox = new CviRotRectBox(cellRect, Color.White);
+                        _cviRegionBox.Visible = false;
+                        return;
+                    }
+                }
+            }
+        }
+        protected override IEnumerable<EzBloc> iterFetchableBlocs()
+        {
+            if (_grid != null)
+            {
+                foreach (var bloc in _grid.IterBlocs())
+                    if (bloc != null)
+                        yield return bloc;
+            }
+        }
+        protected override string composeTooltipText(EzBloc cursor, EzBloc cursor2)
+        {
+            var cellBloc = cursor as CellBloc;
+
+            _cviRegionBox.Box2D.SetCenter((float)cellBloc.Center.X, (float)cellBloc.Center.Y);
+            _cviRegionBox.Visible = true;
+
+            string txt = formatDisplayText(cellBloc);
+            return txt;
+        }
+        #endregion
+
+        #region DEBUG_FUNCTIONS
         static string PATH_DUMP => "d:\\paso.log\\chipLoc";
         void DebugMatching(CellBloc cellBloc)
         {
             var cell = cellBloc?.Cell;
             if (cell == null) return;
 
-            // (0) Directory
-            JetEazy.IO.QxPathUtility.InitDirectory(PATH_DUMP);
-            string fname = cellBloc.Cell.lblName + ".png";
-            string dumpFile = System.IO.Path.Combine(PATH_DUMP, fname);
+            // (0) DEBUG OPIONS
+            EzPadsGridFinder.VISUAL_DEBUG = true;
+            VxDebugDrawer.OPT_USE_OPENCV_WINDOW = false;
 
-            // (1) Golden and Thresh
-            var goldenBmp = _xRecipe.bmpprinttemplate;
+            // (1) ImageHolder
+            var lineScanImageHolder = GaMvcConfig.SysModel.LineScanImageHolder;
+            string srcName = lineScanImageHolder.SrcName;
+
+            // (2) Directory
+            string dstPath = System.IO.Path.Combine(PATH_DUMP, "dumpOne");
+            JetEazy.IO.QxPathUtility.InitDirectory(dstPath);
+            string fname = $"{cell.Index}@{cell.CellRow}_{cell.CellCol}.png";
+            string dumpFile = System.IO.Path.Combine(dstPath, fname);
+
+            // (3) Thresh and Golden
             var thresh = InspectParams.Instance.xGridPadThreshold;
+            var goldenBmp = _xRecipe.bmpprinttemplate;
             var extendX = _xRecipe.xExtendx;
             var extendY = _xRecipe.xExtendy;
 
-            // (2) VISUAL_DEBUG
-            EzPadsGridFinder.VISUAL_DEBUG = true;
-
-            // (3) Matcher
+            // (4) Matcher
             var matcher = new EzRigidBodyGridMatcher(shrink: 1);
+            matcher.PadThreshold = thresh;          //<<< PadThresh 要先設定, 才能取 Golden
             matcher.SetGoldenTemplate(goldenBmp);
-            matcher.PadThreshold = thresh;
 
-            // (4) 測試資料
-            var lineScanImageHolder = GaMvcConfig.SysModel.LineScanImageHolder;
+            // (5) 測試資料
             var fullfovBmp = lineScanImageHolder.PeekBitmap();
             using (var bridge = new QxImageBridge(fullfovBmp))
             {
+                // (5.1) ROI
                 var cellRect = Rectangle.Round(cell.viewRectF);
                 cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
                 GaUtil.BoundRect(ref cellRect, fullfovBmp.Size);
                 var roi = JetEazy.Qcvt.CV(cellRect);
 
-                Mat imgScene = bridge.Image[roi].Clone();
+                // (5.2) Crop
+                Mat imgRegion = bridge.Image[roi];
 
-                var bestResult = matcher.FindBestMatch(imgScene, dumpFile);
+                var bestResult = matcher.FindBestMatch(imgRegion, dumpFile);
 
                 if (bestResult != null)
                 {
@@ -592,19 +621,63 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     int kr = bestResult.KeyRow;
                     int kc = bestResult.KeyCol;
                     var kSQ = bestResult.KeySQRatio;
-                    VxDebugDrawer.Draw(imgScene, box2d, bestGrid, kr, kc, Scalar.Lime, $"Best Grid [{bestGrid.Rows}x{bestGrid.Cols}] = {bestGrid.GetMajorCount()} @ {fname}");
+                    VxDebugDrawer.Draw(imgRegion, box2d, bestGrid, kr, kc, Scalar.Lime, $"Best Grid [{bestGrid.Rows}x{bestGrid.Cols}] = {bestGrid.GetMajorCount()} @ {fname}");
                 }
-
-                Cv2.WaitKey();
-                Cv2.DestroyAllWindows();
-                EzPadsGridFinder.VISUAL_DEBUG = false;
-                imgScene?.Dispose();
             }
+
+            // (6) Turn Off VISUAL_DEBUG
+            EzPadsGridFinder.VISUAL_DEBUG = false;
         }
         void DebugMatchingOff()
         {
-            Cv2.DestroyAllWindows();
+            VxDebugDrawer.DestroyAllWindows();
             EzPadsGridFinder.VISUAL_DEBUG = false;
         }
+        void DumpCellRegions()
+        {
+            EzPadsGridFinder.VISUAL_DEBUG = false;
+
+            // (0) ImageHolder
+            var lineScanImageHolder = GaMvcConfig.SysModel.LineScanImageHolder;
+            string srcName = lineScanImageHolder.SrcName;
+
+            // (1) Directory
+            string dstPath = PATH_DUMP;
+            if (srcName != null)
+                dstPath = System.IO.Path.Combine(dstPath, System.IO.Path.GetFileNameWithoutExtension(srcName));
+            JetEazy.IO.QxPathUtility.InitDirectory(dstPath);
+
+            // (2) Golden
+            var goldenBmp = _xRecipe.bmpprinttemplate;
+            goldenBmp?.Save(System.IO.Path.Combine(dstPath, "0_golden.png"));
+
+            // (3) LOOP region cells
+            var xRegionCells = _xRecipe.xRegionCells;
+            var extendX = _xRecipe.xExtendx;
+            var extendY = _xRecipe.xExtendy;
+            var fullfovBmp = lineScanImageHolder.PeekBitmap();
+
+            using (var bridge = new QxImageBridge(fullfovBmp))
+            {
+                Mat fullfovImg = bridge.Image;
+
+                foreach (var cell in xRegionCells)
+                {
+                    // ROI
+                    var cellRect = Rectangle.Round(cell.viewRectF);
+                    cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
+                    GaUtil.BoundRect(ref cellRect, fullfovBmp.Size);
+                    var roi = JetEazy.Qcvt.CV(cellRect);
+
+                    // Save the crop
+                    string fileName = System.IO.Path.Combine(dstPath, $"{cell.Index}@{cell.CellRow}_{cell.CellCol}.png");
+                    Mat imgRegion = bridge.Image[roi];
+                    imgRegion.SaveImage(fileName);
+                }
+            }
+
+            MessageBox.Show($"已存入 Region Cell Images 至\n\r{dstPath}", "DEBUG", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        #endregion
     }
 }

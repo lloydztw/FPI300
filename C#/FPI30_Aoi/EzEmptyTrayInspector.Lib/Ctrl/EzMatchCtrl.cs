@@ -167,7 +167,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             {
                 _frmOwner.Refresh();
                 //_model.SetRecipe(_activeRecipe);
-                LoadImage(_imgSourceFile?.Value);
+                //LoadImage(_imgSourceFile?.Value);
                 _rcpEditCtrl = new EzMatchRcpEdittingCtrl((int)ID, _view, _funcButtonsPanel, _recipesMgr);
                 _rcpEditCtrl.AttachImageSource(_largeIMG);
             }));
@@ -862,6 +862,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             if (isClear)
             {
                 refresh(_view.ImageViewer);
+                update_image_file_name(_lastPushName);
                 return;
             }
 

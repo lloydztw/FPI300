@@ -28,7 +28,7 @@ namespace Traveller106
 {
     public class Universal : JetEazy.Universal
     {
-        public static readonly bool N_THREADS_ENABLED = true;
+        public static readonly bool N_THREADS_ENABLED = false;
         public static readonly int N_THREADS = 16;
 
         public static bool IsNoUseCCD = true;
