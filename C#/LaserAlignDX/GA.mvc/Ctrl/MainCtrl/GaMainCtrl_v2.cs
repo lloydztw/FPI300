@@ -1,10 +1,12 @@
-﻿using Eazy_Project_III;
+﻿using AUVision;
+using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
+using JetEazy.BasicSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
-using LaserAlignDX;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
@@ -22,6 +24,7 @@ using Traveller106;
 using TravellerMINIX6.ProcessSpace;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
+using VisionDesigner.PositionFix;
 using VsCommon.ControlSpace.MachineSpace;
 
 
@@ -59,13 +62,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         {
             get { return FlyParaClass.Instance; }
         }
-        InspectX3ParaClass InspectPara
+        IProcessRunFPI _aoiModel => GaMvcConfig.InstanceAoiModel();
+        GaBigImageHolder _lineScanImageHolder => TravellerBigImagesHolder.Instance.LineScanImageHolder;
+        bool IsBusy()
         {
-            get { return InspectX3ParaClass.Instance; }
-        }
-        IProcessRunFPI _aoiModel
-        {
-            get => ProcessRunFPIClass.Instance;
+            return _aoiModel.Running || LineScanSingleProcess.Instance.IsOn || LineScanProcess.Instance.IsOn;
         }
         #endregion
 
@@ -90,16 +91,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             // CHIP_CELLS_VIEWERS
             _DSMains = new[]
             {
-                buildChipCellsViewer(DsMains[0]),
-                buildChipCellsViewer(DsMains[1]),
+                buildChipCellsViewer(DsMains[0], CarrierEnum.C1),
+                buildChipCellsViewer(DsMains[1], CarrierEnum.C2),
             };
-
-            // FLY CAMERA Display UI
-            Attach(DsFlys, lblFlyCameraSerialNo);
 
             // Owner Window
             _wndOwner = _DSMains[0].Window.Parent;
             System.Diagnostics.Debug.Assert(_wndOwner != null, "_wndOwner 不能為 null !");
+
+            // FLY CAMERA Display UI
+            Attach(DsFlys, lblFlyCameraSerialNo);
 
             _wndOwner.HandleCreated += (s, e) => _wndOwner.BeginInvoke(new Action(() => _LOG("GaMailCtrl [V2]", Color.Blue)));
 
@@ -107,7 +108,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             InitAllProcesses();
         }
 
-        IvChipCellsViewer buildChipCellsViewer(Control panel)
+        IvChipCellsViewer buildChipCellsViewer(Control panel, CarrierEnum carrierID)
         {
             //(1) 使用新的 ChipCellsViewer
             if (OPT_USE_LETIAN_CHIP_CELL_VIEWER)
@@ -115,7 +116,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 //(1.1) 如果傳進來的已經是 JezChipCellsViewPanel
                 if (panel is JezChipCellsViewPanel jezViewer)
                 {
-                    // 直接返回
+                    jezViewer.CarrierID = carrierID;
+                    connectPopupMenuEvents(jezViewer, carrierID);
                     return jezViewer;
                 }
                 //(1.2) 如果傳進來的是其他視窗控件
@@ -124,6 +126,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     // 生成新的 JezChipCellsViewPanel
                     var viewer = new JezChipCellsViewPanel
                     {
+                        CarrierID = carrierID,
                         Location = childWnd.Location,
                         Size = childWnd.Size,
                         Dock = childWnd.Dock,
@@ -133,6 +136,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     var parent = childWnd.Parent;
                     childWnd.Visible = false;
                     parent.Controls.Add(viewer);
+                    connectPopupMenuEvents(viewer, carrierID);
                     return viewer;
                 }
                 else
@@ -140,7 +144,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     return null;
                 }
             }
-            // (2) 使用舊有的 MVSUI
+            //(2) 使用舊有的 MVSUI
             else
             {
                 if (panel is MVSUI mvsui)
@@ -194,8 +198,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             //m_SingleProcess.OnLiveImage += process_OnLiveImage;
             m_SingleProcess.OnMessage += handle_aoi_run_message;
 
-            var lineScanImagegHolder = TravellerBigImagesHolder.Instance.LineScanImageHolder;
-            lineScanImagegHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
+            _lineScanImageHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
 
             var aoiEngine = ProcessRunFPIClass.Instance;
             aoiEngine.OnAoiProgressing += AoiEngine_OnAoiProgressing;
@@ -380,9 +383,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             // NOTE: 目前 cMvdInput 生命週期由 TravellerBigImagesHolder 保管 !!!
             //       不用重複 Clone() 來餵給 MVS
             //------------------------------------------------------------------------
-            var lineScanImageHolder = TravellerBigImagesHolder.Instance.LineScanImageHolder;
-            //>>> CMvdImage mvdImage = lineScanImageHolder.PeekMvdImage();
-            DSMain.UpdateImageSrc(lineScanImageHolder);
+            string srcName = _lineScanImageHolder.SrcName;
+            if (srcName != null && (srcName.Contains("校正") || srcName.Contains("參數")))
+                return;
+            DSMain.UpdateImageSrc(_lineScanImageHolder);
         }
         void updateMvd_AoiResultData(ProcessEventArgs e)
         {
@@ -480,6 +484,110 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         }
         #endregion
 
+        #region EVENT_HANDLERS_FOR_POPUP_MENU
+        private void connectPopupMenuEvents(Control dsMain, CarrierEnum carrierID)
+        {
+            if (dsMain is JezChipCellsViewPanel ccvPanel)
+            {
+                ccvPanel.menuLoadImage.Click += MenuLoadImage_Click;
+                ccvPanel.menuTestChipInspect.Click += MenuTestChipInspect_Click;
+                ccvPanel.menuTestEmptyTrayInspect.Click += MenuTestEmptyTrayInspect_Click;
+                ccvPanel.menuTestQRCode.Click += MenuTestQRCode_Click;
+
+                ccvPanel.menuLoadImage.Tag = carrierID;
+                ccvPanel.menuTestChipInspect.Tag = carrierID;
+                ccvPanel.menuTestEmptyTrayInspect.Tag = carrierID;
+                ccvPanel.menuTestQRCode.Tag = carrierID;
+            }
+        }
+        private void MenuLoadImage_Click(object sender, EventArgs e)
+        {
+            if (promptCheckBusy())
+                return;
+
+            string fileName = GaUtil.BrowseImageFile();
+            if (fileName != null)
+            {
+                loadLineScanImage(fileName);
+            }
+        }
+        private void MenuTestChipInspect_Click(object sender, EventArgs e)
+        {
+            if (promptCheckBusy())
+                return;
+
+            if(_lineScanImageHolder.IsEmpty())
+                MenuLoadImage_Click(sender, e);
+
+            if (promptCheckImageHolder())
+            {
+                DSMain.Reset();
+                LineScanSingleProcess.Instance.Start(ScanInspectMode.MEASUREAOI);
+            }
+        }
+        private void MenuTestEmptyTrayInspect_Click(object sender, EventArgs e)
+        {
+            if (promptCheckBusy())
+                return;
+
+            if (_lineScanImageHolder.IsEmpty())
+                MenuLoadImage_Click(sender, e);
+
+            if (promptCheckImageHolder())
+            {
+                DSMain.Reset();
+                LineScanSingleProcess.Instance.Start(ScanInspectMode.NOTRAY);
+            }
+        }
+        private void MenuTestQRCode_Click(object sender, EventArgs e)
+        {
+            if (promptCheckBusy())
+                return;
+
+            if (_lineScanImageHolder.IsEmpty())
+                MenuLoadImage_Click(sender, e);
+
+            if (promptCheckImageHolder())
+            {
+                DSMain.Reset();
+                LineScanSingleProcess.Instance.Start(ScanInspectMode.QRCODE);
+            }
+        }
+        #endregion
+
+        #region PRIVATE_FUNCTIONS
+        bool promptCheckBusy()
+        {
+            if (IsBusy())
+            {
+                MessageBox.Show("AOI 執行中", "AOI", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return true;
+            }
+            return false;
+        }
+        bool promptCheckImageHolder()
+        {
+            if (_lineScanImageHolder.IsEmpty())
+            {
+                MessageBox.Show("請先 加載圖檔 或 取像", "AOI", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
+            return true;
+        }
+        void loadLineScanImage(string fileName)
+        {
+            if (fileName != null)
+            {
+                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
+                var bmp = GaImageUtil.LoadBigImage(fileName);
+                _lineScanImageHolder?.TakeOver(bmp, System.IO.Path.GetFileName(fileName));
+
+                GaUtil.SetCursor(_wndOwner, oldCursor);
+            }
+        }
+        #endregion
+
         public override void Tick()
         {
             TickFlyCameras();
@@ -506,6 +614,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         MVSUI DSFly2 => _DSFLYs[2];
         MVSUI DSFly3 => _DSFLYs[3];
         Control lblSerialNumber;
+        Control lblNumberStr => lblSerialNumber;
         #endregion
 
         #region PLC_FLY_CAMERA_EXCHANGE_DATA
@@ -532,6 +641,18 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         {
             get { return Universal.IxFlyAreaCam; }
         }
+        PointF[] FlyOffsetUseStage
+        {
+            get
+            {
+                int iscanIndex = MACHINE.PLCIO.iScanStage;
+                if (iscanIndex == 2)
+                {
+                    return xFlyPara.ptsOffset2;
+                }
+                return xFlyPara.ptsOffset;
+            }
+        }
 
         #region FLY_DATA_BYTES
         List<byte[]> bytesFlyDatas = new List<byte[]>();
@@ -544,6 +665,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
 
             lblSerialNumber.DoubleClick += (s, e) => clearFlyDataBytes();
             IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
+
+            _wndOwner.HandleDestroyed += (s, e) => Dispose();
+        }
+
+        void Dispose()
+        {
+            cPositionFixToolObj?.Dispose();
+            cPositionFixToolObj = null;
         }
 
         void clearFlyDataBytes()
@@ -560,44 +689,49 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             }));
         }
 
-        void IxFlyAreaCam_LineTriggerAction(JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
+        void TickFlyCameras()
+        {
+            _getPlcRunTick();
+        }
+
+        private void IxFlyAreaCam_LineTriggerAction(JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
         {
             if (Traveller106.Universal.IsOpenFlyForm)
             {
                 return;
             }
 
-            if (MACHINE.PLCIO.bFlyReady)
+            var plcIO = MACHINE?.PLCIO;
+            if (plcIO == null)
+                return;
+
+            if (plcIO.bFlyReady)
             {
                 //转换图像
                 byte[] bmpbytes = new byte[cameraFrame.uBytes];
                 Marshal.Copy(pBuffer, bmpbytes, 0, bmpbytes.Length);
                 bytesFlyDatas.Add(bmpbytes);
-
-                //frmOwner.Invoke(new Action(() =>
-                //{
-                //    lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
-                //}));
-                updateFlyCameraSerialNumber(serialNumber: bytesFlyDatas.Count);
-
+                _wndOwner?.Invoke(new Action(() =>
+                {
+                    lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
+                }));
                 if (bytesFlyDatas.Count >= 4)
                 {
-                    MACHINE.PLCIO.bFlyReady = false;
+                    plcIO.bFlyReady = false;
 
-                    int iflystartindex = MACHINE.PLCIO.iFlyStart;
+                    int iflystartindex = plcIO.iFlyStart;
                     iFlyIndex = 3;
                     flyRunning(iflystartindex, cameraFrame);
 
-                    //MACHINE.PLCIO.bFlyDone = true;
+                    //plcIO.bFlyDone = true;
 
-                    MACHINE.PLCIO.iFlyResult(iFlyResult);
-                    MACHINE.PLCIO.rOffset(iFlyOffset);
+                    plcIO.iFlyResult(iFlyResult);
+                    plcIO.rOffset(iFlyOffset);
 
-                    MACHINE.PLCIO.bFlyDone = true;
+                    plcIO.bFlyDone = true;
 
                     bytesFlyDatas.Clear();
 
-                    #region LOG_RESULTS
                     int[] ints0 = iFlyResult;
                     float[] floats0 = iFlyOffset;
 
@@ -614,14 +748,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                         sb1.Append(ix.ToString() + ",");
                     }
                     _LOG("iFlyOffset:" + sb1.ToString(), Color.Black);
-                    #endregion
 
-                    MACHINE.PLCIO.bFlyReady = true;
+                    plcIO.bFlyReady = true;
                 }
             }
         }
 
-        void TickFlyCameras()
+        private void _getPlcRunTick()
         {
 
             //btnReady.BackColor = (MACHINE.PLCIO.bSoftwareReady ? Color.Red : Color.FromArgb(192, 255, 192));
@@ -630,12 +763,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             //else
             //    lblState.Text = ToChangeLanguage("等待");
 
-            //frmOwner.Invoke(new Action(() =>
-            //{
-            //    lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
-            //    lblNumberStr.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
-            //}));
-            updateFlyCameraSerialNumber(serialNumber: bytesFlyDatas.Count);
+            _wndOwner?.Invoke(new Action(() =>
+            {
+                lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
+                lblNumberStr.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
+            }));
 
             if (MACHINE.PLCIO.bSoftwareReady)
             {
@@ -645,7 +777,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     {
                         m_plcStartOld = true;
 
-                        _LOG("接收到plc启动信号", Color.Black);
+                        CommonLogClass.Instance.LogMessage("接收到plc启动信号", Color.Black);
                         if (!m_LineScanProcess.IsOn)
                         {
                             m_StripId = MACHINE.PLCIO.sStripID;
@@ -655,7 +787,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                         }
                         else
                         {
-                            _LOG("测试中#PLC重复启动", Color.Black);
+                            CommonLogClass.Instance.LogMessage("测试中#PLC重复启动", Color.Black);
                         }
                     }
                 }
@@ -670,7 +802,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     {
                         m_plcFlyStartOld1 = true;
                         bytesFlyDatas.Clear();
-                        _LOG("接收到plc飞拍1启动信号", Color.Black);
+                        CommonLogClass.Instance.LogMessage("接收到plc飞拍1启动信号", Color.Black);
                     }
                 }
                 else
@@ -684,7 +816,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     {
                         m_plcFlyStartOld2 = true;
                         bytesFlyDatas.Clear();
-                        _LOG("接收到plc飞拍2启动信号", Color.Black);
+                        CommonLogClass.Instance.LogMessage("接收到plc飞拍2启动信号", Color.Black);
                     }
                 }
                 else
@@ -699,14 +831,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 //    {
                 //        m_plcGetImageOld = true;
 
-                //        _LOG("接收到plc抓图信号", Color.Black);
+                //        CommonLogClass.Instance.LogMessage("接收到plc抓图信号", Color.Black);
                 //        if (!m_LineScanProcess.IsOn)
                 //        {
                 //            m_LineScanProcess.Start("Snap");
                 //        }
                 //        else
                 //        {
-                //            _LOG("测试中#PLC重复抓图", Color.Black);
+                //            CommonLogClass.Instance.LogMessage("测试中#PLC重复抓图", Color.Black);
                 //        }
                 //    }
                 //}
@@ -714,9 +846,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 //{
                 //    m_plcGetImageOld = false;
                 //}
-
             }
-
         }
 
         /* 备份20250801
@@ -805,6 +935,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 iShowIndex++;
             }
         }
+#if(NO_USE_CODE)
         void flyProcess(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
         {
             flystopwatch.Restart();
@@ -877,7 +1008,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             //        break;
             //}
 
-            CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
 
             //flystopwatch.Stop();
             //long ms = flystopwatch.ElapsedMilliseconds;
@@ -942,7 +1073,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             //    cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
             //}
         }
-        void flyProcessPro(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, byte[] eBytes)
+        void flyProcessProBAK01(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, byte[] eBytes)
         {
             flystopwatch.Restart();
             ////转换图像
@@ -958,7 +1089,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 xRecipe.xRectRegionPrintFly.Width,
                 xRecipe.xRectRegionPrintFly.Height);
             _rectF.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
-            GaUtil.BoundRect(ref _rectF, bmpFlyOperate.Size);
+            BoundRect(ref _rectF, bmpFlyOperate.Size);
             Bitmap bmptemp = bmpFlyOperate.Clone(_rectF, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
             int iret = xRecipe.PrintTempFlyRun(bmptemp);
             PointF centerOrg = new PointF(xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
@@ -1025,13 +1156,25 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     break;
             }
 
-            CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
 
             flystopwatch.Stop();
             long ms = flystopwatch.ElapsedMilliseconds;
 
+            //转正的图形
+            var _MatchResult = xRecipe.mvdprintFlytemp_Find.xResults[0];
+            _MatchResult.fCenterX += _rectF.X;
+            _MatchResult.fCenterY += _rectF.Y;
+            var RectangleShapeBase
+                = new CMvdRectangleF(centerOrg.X, centerOrg.Y, _rectF.Width, _rectF.Height);
             var RectangleShape
-                = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
+                   = PositionFixRun(RectangleShapeBase,
+                                    new RectangleF(0, 0, _rectF.Width, _rectF.Height),
+                                    new Rectangle(0, 0, bmpFlyOperate.Width, bmpFlyOperate.Height),
+                                    _MatchResult) as CMvdRectangleF;
+
+            //var RectangleShape
+            //    = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
             if (iFlyResult[flyIndex] == 1)
                 RectangleShape.BorderColor = new MVD_COLOR(0, 255, 0);
             else
@@ -1096,6 +1239,206 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
             }
         }
+#endif
+        void flyProcessPro(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, byte[] eBytes)
+        {
+            int iw = cameraFrame.iWidth;
+            int ih = cameraFrame.iHeight;
+            flyProcessPro(flyStart, flyIndex, ConvertFromMONO(eBytes, iw, ih));
+        }
+        void flyProcessPro(int flyStart, int flyIndex, Bitmap bmpInput)
+        {
+            flystopwatch.Restart();
+            bmpFlyOperate.Dispose();
+            bmpFlyOperate = bmpInput;
+            RectangleF _rectF = new RectangleF(
+                xRecipe.xRectRegionPrintFly.X,
+                xRecipe.xRectRegionPrintFly.Y,
+                xRecipe.xRectRegionPrintFly.Width,
+                xRecipe.xRectRegionPrintFly.Height);
+            _rectF.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
+            BoundRect(ref _rectF, bmpFlyOperate.Size);
+            Bitmap bmptemp = bmpFlyOperate.Clone(_rectF, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+            int iret = xRecipe.PrintTempFlyRun(bmptemp);
+            PointF centerOrg = new PointF(xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
+                xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
+            PointF centerRun = new PointF(xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
+                xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
+
+            float _resolutionFly = INI.Instance.FlyImageResolution;
+
+            int flyShowIndex = flyIndex + 1;
+            switch (flyStart)
+            {
+                case 1:
+                    flyShowIndex = flyIndex + 1;
+                    break;
+                case 2:
+                    flyShowIndex = flyIndex + 1 + 4;
+                    break;
+            }
+
+            switch (flyStart)
+            {
+                case 1:
+
+                    iFlyResult[flyIndex] = (iret == 0 ? 1 : 2);
+                    if (iret == 0)
+                    {
+                        centerRun = new PointF(xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterX + _rectF.X,
+                           xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + _rectF.Y);
+
+                        //算出的pix需加入解析度
+                        iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
+                        iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
+                        iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
+                    }
+                    else
+                    {
+                        iFlyOffset[flyIndex * 3 + 0] = 0;
+                        iFlyOffset[flyIndex * 3 + 1] = 0;
+                        iFlyOffset[flyIndex * 3 + 2] = 0;
+                    }
+
+                    break;
+                case 2:
+
+                    iFlyResult[flyIndex] = (iret == 0 ? 1 : 2);
+                    if (iret == 0)
+                    {
+                        centerRun = new PointF(xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterX + _rectF.X,
+                          xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + _rectF.Y);
+
+                        //算出的pix需加入解析度
+                        iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
+                        iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
+                        iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
+                    }
+                    else
+                    {
+                        iFlyOffset[flyIndex * 3 + 0] = 0;
+                        iFlyOffset[flyIndex * 3 + 1] = 0;
+                        iFlyOffset[flyIndex * 3 + 2] = 0;
+                    }
+
+                    break;
+            }
+
+            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
+
+            flystopwatch.Stop();
+            long ms = flystopwatch.ElapsedMilliseconds;
+
+            var RectangleShape
+                = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
+            if (iFlyResult[flyIndex] == 1)
+            {
+                //转正的图形
+                var _MatchResult = xRecipe.mvdprintFlytemp_Find.xResults[0];
+                //_MatchResult.fCenterX += _rectF.X;
+                //_MatchResult.fCenterY += _rectF.Y;
+                var RectangleShapeBase
+                    = new CMvdRectangleF(xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
+                                         xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2,
+                                         xRecipe.xRectRegionPrintFly.Width,
+                                         xRecipe.xRectRegionPrintFly.Height);
+
+                //RectangleShapeBase
+                //    = new CMvdRectangleF(0,
+                //                         0,
+                //                         xRecipe.xRectRegionPrintFly.Width,
+                //                         xRecipe.xRectRegionPrintFly.Height);
+                RectangleShape
+                       = PositionFixRun(RectangleShapeBase,
+                                        xRecipe.xRectRegionPrintFly,
+                                        new Rectangle(0, 0, bmpFlyOperate.Width, bmpFlyOperate.Height),
+                                        _MatchResult) as CMvdRectangleF;
+
+                RectangleShape.CenterX += _rectF.X;
+                RectangleShape.CenterY += _rectF.Y;
+            }
+
+            //var RectangleShape
+            //    = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
+            if (iFlyResult[flyIndex] == 1)
+                RectangleShape.BorderColor = new MVD_COLOR(0, 255, 0);
+            else
+                RectangleShape.BorderColor = new MVD_COLOR(255, 0, 0);
+
+            //CMvdTextF cMvdTextF = new CMvdTextF(100, 100, $"耗时:{ms.ToString("0.00")} ms");
+            //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
+            //cMvdTextF.FontWidth = 20;
+            //添加十字线
+            CMvdLineSegmentF v1 = new CMvdLineSegmentF(new MVD_POINT_F(0, bmpFlyOperate.Height / 2),
+                new MVD_POINT_F(bmpFlyOperate.Width, bmpFlyOperate.Height / 2));
+            v1.BorderColor = new MVD_COLOR(255, 215, 0);
+            v1.BorderWidth = 1;
+            CMvdLineSegmentF h1 = new CMvdLineSegmentF(new MVD_POINT_F(bmpFlyOperate.Width / 2, 0),
+                new MVD_POINT_F(bmpFlyOperate.Width / 2, bmpFlyOperate.Height));
+            h1.BorderColor = new MVD_COLOR(255, 215, 0);
+            h1.BorderWidth = 1;
+
+            CMvdTextF cMvdTextFResult = new CMvdTextF(RectangleShape.CenterX,
+                RectangleShape.CenterY,
+                $"[{flyShowIndex}] x:{iFlyOffset[flyIndex * 3 + 0].ToString("0.000")}," +
+                $"y:{iFlyOffset[flyIndex * 3 + 1].ToString("0.000")}," +
+                $"a:{iFlyOffset[flyIndex * 3 + 2].ToString("0.000")}");
+            cMvdTextFResult.BorderColor = new MVD_COLOR(0, 255, 0);
+            cMvdTextFResult.FontWidth = 20;
+
+            switch (flyIndex)
+            {
+                case 0:
+                    DSFly0.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    DSFly0.mvdRenderActivex1.AddShape(v1);
+                    DSFly0.mvdRenderActivex1.AddShape(h1);
+                    //DSFly0.mvdRenderActivex1.AddShape(cMvdTextF);
+                    DSFly0.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    DSFly0.mvdRenderActivex1.AddShape(RectangleShape);
+                    DSFly0.AddCross();
+                    DSFly0.mvdRenderActivex1.Display();
+                    break;
+                case 1:
+                    DSFly1.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    DSFly1.mvdRenderActivex1.AddShape(v1);
+                    DSFly1.mvdRenderActivex1.AddShape(h1);
+                    //DSFly1.mvdRenderActivex1.AddShape(cMvdTextF);
+                    DSFly1.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    DSFly1.mvdRenderActivex1.AddShape(RectangleShape);
+                    DSFly1.AddCross();
+                    DSFly1.mvdRenderActivex1.Display();
+                    break;
+                case 2:
+                    DSFly2.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    DSFly2.mvdRenderActivex1.AddShape(v1);
+                    DSFly2.mvdRenderActivex1.AddShape(h1);
+                    //DSFly2.mvdRenderActivex1.AddShape(cMvdTextF);
+                    DSFly2.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    DSFly2.mvdRenderActivex1.AddShape(RectangleShape);
+                    DSFly2.AddCross();
+                    DSFly2.mvdRenderActivex1.Display();
+                    break;
+                case 3:
+                    DSFly3.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    DSFly3.mvdRenderActivex1.AddShape(v1);
+                    DSFly3.mvdRenderActivex1.AddShape(h1);
+                    //DSFly3.mvdRenderActivex1.AddShape(cMvdTextF);
+                    DSFly3.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    DSFly3.mvdRenderActivex1.AddShape(RectangleShape);
+                    DSFly3.AddCross();
+                    DSFly3.mvdRenderActivex1.Display();
+                    break;
+            }
+
+            if (INI.Instance.IsSaveDebugBMP)
+            {
+                string flypath = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{m_StripId}";
+                if (!Directory.Exists(flypath))
+                    Directory.CreateDirectory(flypath);
+                string flyname = $"{m_LotId}-[{flyShowIndex.ToString()}]-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.jpg";
+                cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
+            }
+        }
         void flyProcessProSpecial(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, byte[] eBytes)
         {
             flystopwatch.Restart();
@@ -1112,7 +1455,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 xRecipe.xRectRegionPrintFly.Width,
                 xRecipe.xRectRegionPrintFly.Height);
             _rectF.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
-            GaUtil.BoundRect(ref _rectF, bmpFlyOperate.Size);
+            BoundRect(ref _rectF, bmpFlyOperate.Size);
             Bitmap bmptemp = bmpFlyOperate.Clone(_rectF, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
 
             bool bOK = xRecipe.CheckSpecialAngle(bmptemp, out List<CBlobInfo> list, out float angle, out System.Drawing.PointF Center);
@@ -1168,7 +1511,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     break;
             }
 
-            CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
 
             flystopwatch.Stop();
             long ms = flystopwatch.ElapsedMilliseconds;
@@ -1262,7 +1605,22 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
             }
         }
-        Bitmap ConvertFromMONO(byte[] rgbaData, int width, int height)
+        void BoundRect(ref RectangleF InnerRect, Size BoundSize)
+        {
+            InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
+            InnerRect.Y = Math.Min(Math.Max(InnerRect.Y, 0), (BoundSize.Height - InnerRect.Height < 0 ? 0 : BoundSize.Height - InnerRect.Height));
+
+            if (BoundSize.Width <= InnerRect.X + InnerRect.Width)
+                InnerRect.Width = BoundValue(InnerRect.Width, BoundSize.Width - InnerRect.X, 1);
+            if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
+                InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
+        }
+        float BoundValue(float Value, float Max, float Min)
+        {
+            return Math.Max(Math.Min(Value, Max), Min);
+
+        }
+        private Bitmap ConvertFromMONO(byte[] rgbaData, int width, int height)
         {
             var pixelFormat = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
             Bitmap bitmap = new Bitmap(width, height, pixelFormat);
@@ -1284,6 +1642,44 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             bitmap.Palette = tempPalette;
 
             return bitmap;
+        }
+        VisionDesigner.PositionFix.CPositionFixTool cPositionFixToolObj = null;
+        /// <summary>
+        /// 计算修正后的位置框
+        /// </summary>
+        /// <param name="eMVDInput">输入转换的形状</param>
+        /// <param name="templateRectF">模板尺寸</param>
+        /// <param name="runRect">输入图片尺寸</param>
+        /// <param name="templateRunResult">定位的结果</param>
+        /// <returns>返回位置的形状</returns>
+        public CMvdShape PositionFixRun(CMvdShape eMVDInput, RectangleF templateRectF, Rectangle runRect, xFindResult templateRunResult)
+        {
+            // CreateInstance
+            if (cPositionFixToolObj == null)
+                cPositionFixToolObj = new CPositionFixTool();
+
+            // Set basic parameter
+
+            cPositionFixToolObj.BasicParam.BasePoint
+                = new VisionDesigner.PositionFix.MVD_FIDUCIAL_POINT_F(
+                    new MVD_POINT_F(templateRectF.X + templateRectF.Width / 2, templateRectF.Y + templateRectF.Height / 2), 0);
+
+            cPositionFixToolObj.BasicParam.RunningPoint
+                = new VisionDesigner.PositionFix.MVD_FIDUCIAL_POINT_F(
+                    new MVD_POINT_F(templateRunResult.fCenterX, templateRunResult.fCenterY), templateRunResult.fAngle);
+
+            cPositionFixToolObj.BasicParam.RunImageSize = new MVD_SIZE_I(runRect.Width, runRect.Height);
+
+            cPositionFixToolObj.BasicParam.FixMode = MVD_POSFIX_MODE.MVD_POSFIX_MODE_HVA;
+
+            cPositionFixToolObj.BasicParam.InitialShape = eMVDInput;
+
+            // Running
+
+            cPositionFixToolObj.Run();
+
+            // Get the result
+            return cPositionFixToolObj.Result.CorrectedShape;
         }
 
         #endregion

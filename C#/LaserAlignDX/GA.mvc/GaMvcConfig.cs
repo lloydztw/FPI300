@@ -38,8 +38,8 @@ namespace LaserAlignDX
         
         public static GaMainCtrl CreateMainCtrl()
         {
-            // GaMainCtrl 使用 V3 
-            return new global::LaserAlignDX.Mvc.Ctrl.V3.GaMainCtrl();
+            // GaMainCtrl 使用 V2 
+            return new global::LaserAlignDX.Mvc.Ctrl.V2.GaMainCtrl();
         }
 
         public static IxReportBuilder CreateReportBuilder()

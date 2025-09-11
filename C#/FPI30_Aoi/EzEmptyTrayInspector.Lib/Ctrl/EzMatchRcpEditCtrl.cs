@@ -20,6 +20,7 @@ using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
+using LeTian.JxProps.Gui;
 using LeTian.JxRecipesTool.Ctrl;
 using System;
 using System.Drawing;
@@ -195,6 +196,8 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 //refresh(_view.ImageViewer);
                 leaveEdittingMode();
             }
+
+            GwPanePropsViewerExt.ExpandTrees(BaseUtil.SearchAwMainForm().OpDocker.Window);
         }
 
         private void BtnGolden_Click(object sender, EventArgs e)
@@ -392,7 +395,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             if (err != ErrCodes.OK)
             {
                 var msg = QxNums.GetEnumDescription(err);
-                MessageBox.Show(msg, _frmOwner.Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(msg, _frmOwner.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         #endregion
