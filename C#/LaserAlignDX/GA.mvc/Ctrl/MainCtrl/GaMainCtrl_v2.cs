@@ -39,17 +39,26 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER => GaMvcConfig.OPT_USE_LETIAN_CHIP_CELL_VIEWER;
 
         #region MACHINE
-        //List<CollectResultClass> collectResultClasses = new List<CollectResultClass>();
-        //protected MachineCollectionClass MACHINECollection
-        //{
-        //    get
-        //    {
-        //        return Traveller106.Universal.MACHINECollection;
-        //    }
-        //}
-        protected MainFPIX3MachineClass MACHINE
+        MainFPIX3MachineClass MACHINE
         {
             get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
+        }
+        void mxReadPlcStageID(out CarrierEnum carrierID)
+        {
+            carrierID = CarrierEnum.C1;
+            var plcIO = MACHINE?.PLCIO;
+            if (plcIO != null)
+            {
+                var index = plcIO.iScanStage;
+                if (index == 2)
+                    carrierID = CarrierEnum.C2;
+            }
+        }
+        void mxSimPlcStageID(CarrierEnum carrierID)
+        {
+            var plcIO = MACHINE?.PLCIO;
+            if (plcIO != null)
+                plcIO.simActiveStage((int)carrierID + 1);
         }
         #endregion
 
@@ -77,10 +86,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         {
             get
             {
-                int iscanIndex = MACHINE.PLCIO.iScanStage;
-                var viewer = iscanIndex == 2 ?
-                    _DSMains[1]:
-                    _DSMains[0];
+                mxReadPlcStageID(out CarrierEnum carrierID);
+                var viewer = _DSMains[(int)carrierID];
                 return viewer;
             }
         }
@@ -489,15 +496,28 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         {
             if (dsMain is JezChipCellsViewPanel ccvPanel)
             {
+                ccvPanel.contextMenuStrip1.VisibleChanged += ContextMenuStrip1_VisibleChanged;
                 ccvPanel.menuLoadImage.Click += MenuLoadImage_Click;
                 ccvPanel.menuTestChipInspect.Click += MenuTestChipInspect_Click;
                 ccvPanel.menuTestEmptyTrayInspect.Click += MenuTestEmptyTrayInspect_Click;
                 ccvPanel.menuTestQRCode.Click += MenuTestQRCode_Click;
 
+                ccvPanel.contextMenuStrip1.Tag = carrierID;
                 ccvPanel.menuLoadImage.Tag = carrierID;
                 ccvPanel.menuTestChipInspect.Tag = carrierID;
                 ccvPanel.menuTestEmptyTrayInspect.Tag = carrierID;
                 ccvPanel.menuTestQRCode.Tag = carrierID;
+            }
+        }
+        private void ContextMenuStrip1_VisibleChanged(object sender, EventArgs e)
+        {
+            if (sender is ContextMenuStrip menu)
+            {
+                if (menu.Visible && menu.Tag is CarrierEnum carrierID)
+                {
+                    bool ok = checkPlcStageID(carrierID);
+                    menu.Enabled = ok;
+                }
             }
         }
         private void MenuLoadImage_Click(object sender, EventArgs e)
@@ -556,6 +576,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         #endregion
 
         #region PRIVATE_FUNCTIONS
+        bool checkPlcStageID(CarrierEnum targetID)
+        {
+            if (Universal.IsNoUseIO)
+                mxSimPlcStageID(targetID);
+            mxReadPlcStageID(out var activeID);
+            bool ok = activeID == targetID;
+            return ok;
+        }
         bool promptCheckBusy()
         {
             if (IsBusy())

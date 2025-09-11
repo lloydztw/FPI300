@@ -4,7 +4,7 @@ using System.Drawing;
 
 namespace VsCommon.ControlSpace.IOSpace
 {
-    public class MainFPIX3IOClass : GeoIOClass
+    public class MainFPIX3IOClass : GeoIOClass, IPlcIoFPIX3
     {
 
         #region 发送数据的格式排列注释
@@ -119,7 +119,7 @@ namespace VsCommon.ControlSpace.IOSpace
                 PLC[address.SiteNo].WriteVari(address.Address0, (value ? "true" : "false"));
             }
         }
-        
+
         /// <summary>
         /// PLC->PC 马达移动到开始位通知pc信号
         /// </summary>
@@ -496,6 +496,11 @@ namespace VsCommon.ControlSpace.IOSpace
                 int.TryParse(str, out iret);
                 return iret;
             }
+        }
+
+        void IPlcIoFPIX3.simActiveStage(int stageId1)
+        {
+            // 實體 PLCIO 不用實作此函式 !
         }
 
         AddressClass getCipAdress(string eAdrStr)
