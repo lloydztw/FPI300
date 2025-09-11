@@ -162,6 +162,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         void update_ActiveGuiStatus()
         {
             lblBlinker.BackColor = _isActive ? Color.Lime : Color.DimGray;
+            picIcon.BackgroundImage = _isActive ? Properties.Resources.ActiveCarrier : Properties.Resources.PassiveCarrier;
             //blink(_isActive);
         }
         void blink(bool enabled)

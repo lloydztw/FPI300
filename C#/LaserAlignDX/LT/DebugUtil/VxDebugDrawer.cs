@@ -461,6 +461,8 @@ namespace LeTian.AoiLib
             frm.Controls.Add(viewer);
             frm.FormClosed += (s, e) => destroyForm(s as Form);
             viewer.KeyPress += (s, e) => destroyDummyCvWindow();
+            if (!OPT_USE_OPENCV_WINDOW)
+                frm.TopMost = true;
             return frm;
         }
         static void destroyForm(Form form)

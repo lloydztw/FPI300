@@ -398,19 +398,19 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             foreach (var cBloc in iterEmptyBlocs())
             {
                 var rect = JetEazy.Qcvt.CreateCenterRect((float)cBloc.CenterX, (float)cBloc.CenterY, size.Width, size.Height);
-                var item = new CviRotRectBox(ref rect, Color.Lime, 0.25f);
+                var item = new CviRotRectBox(ref rect, Color.Lime, 0.10f);
                 _drawItems.Add(item);
             }
             foreach (var cBloc in iterNonEmptyBlocs(onGrid: true))
             {
                 var rect = JetEazy.Qcvt.CreateCenterRect((float)cBloc.CenterX, (float)cBloc.CenterY, size.Width, size.Height);
-                var item = new CviRotRectBox(ref rect, Color.Red, 0.25f) { Text = "有料" };
+                var item = new CviRotRectBox(ref rect, Color.Red, 0.10f) { Text = "有料" };
                 _drawItems.Add(item);
             }
             foreach (var cBloc in iterNonEmptyBlocs(onGrid: false))
             {
                 var rect = JetEazy.Qcvt.CreateCenterRect((float)cBloc.CenterX, (float)cBloc.CenterY, size.Width, size.Height);
-                var item = new CviRotRectBox(ref rect, Color.DarkOrange, 0.25f) { Text = "疑似有料" };
+                var item = new CviRotRectBox(ref rect, Color.DarkOrange, 0.10f) { Text = "疑似有料" };
                 _drawItems.Add(item);
             }
         }
@@ -425,14 +425,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     // PASS
                     var mvdRect = cell.DrawResultRectF();
-                    var item = new CviRotRectBox(mvdRect.ToBox2D(), Color.Lime, 0.10f);
+                    var item = new CviRotRectBox(mvdRect.ToBox2D(), Color.Lime, 0f);
                     _drawItems.Add(item);
                 }
                 else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
                 {
                     // NG
                     var mvdDrawResultRectF = cell.DrawResultRectF();
-                    var item = new CviRotRectBox(mvdDrawResultRectF.ToBox2D(), Color.Red, 0.10f) { Text = "NG" };
+                    var item = new CviRotRectBox(mvdDrawResultRectF.ToBox2D(), Color.Red, 0f) { Text = "NG" };
                     _drawItems.Add(item);
                 }
                 else
@@ -733,7 +733,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             QxRowCol rowCol = cell != null ? new QxRowCol(cell.CellRow, cell.CellCol) : null;
             //var rowCol = (cursorBloc.Tag as QuadLinkNode)?.rowCol;
             if (rowCol != null)
-                sb.Append("格點: [").AppendValues(rowCol.Row, rowCol.Col).AppendLine("]");
+                sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(rowCol.Row, rowCol.Col).AppendLine("]");
 
             appendCameraCoords(sb, cursorBloc, cursorBloc2);
 
