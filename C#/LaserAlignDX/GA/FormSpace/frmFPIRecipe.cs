@@ -590,10 +590,8 @@ namespace LaserAlignDX.FormSpace
         }
         private void _autoRowCol()
         {
-            //var fullfovBmp = DS2.GetOrgBMP();
-            //var fullfovBmp = xRecipe.bmpOrg;
-            //var grid = LtAoiFactory.DetectGrid(fullfovBmp);
-            xRecipe.CreateViews();
+            xRecipe.CreateViews(writeback: true);
+            propertyGrid1.SelectedObject = RecipeParaGridClass.Instance;
 
             DS1.ClearStaticMover();
             DS2.ClearStaticMover();

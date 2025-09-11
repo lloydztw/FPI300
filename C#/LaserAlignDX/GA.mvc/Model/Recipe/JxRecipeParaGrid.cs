@@ -70,7 +70,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     {
         public JxBitmap ChipGoldenBmp = new JxBitmap("ChipGoldenBmp", "A00.晶粒模板樣本");
         public JxNumber Angle = new JxNumber("Angle", "A00.阵列角度", range: new Range(-180m, 180m, 1, 2));
-        public JxInt LeftTopX = new JxInt("LeftTopX", "A04.左上角X (pix)", range: new Range(0, 50000));
+        public JxInt LeftTopX = new JxInt("LeftTopX", "A03.左上角X (pix)", range: new Range(0, 50000));
         public JxInt LeftTopY = new JxInt("LeftTopY", "A04.左上角Y (pix)", range: new Range(0, 50000));
         public JxNumber ChipWidth = new JxNumber("ChipWidth", "A07.Chip寬度 (mm)", 10m, range: new Range(1m, 1000m, 0.1m, 3));
         public JxNumber ChipHeight = new JxNumber("ChipHeight", "A08.Chip高度 (mm)", 10m, range: new Range(1m, 1000m, 0.1m, 3));
@@ -96,28 +96,28 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         {
             ChipGoldenBmp.Value = (Bitmap)xRecipe.bmpprinttemplate.Clone();
 
-            Angle.Value = (decimal)xRecipe.xAngle;
+            Angle.Value = (decimal)xParaGrid.xAngle;
             LeftTopX.Value = xParaGrid.xLeftTopX;
             LeftTopY.Value = xParaGrid.xLeftTopY;
-            //ChipWidth.Value = (decimal)xRecipe.xChipWidth;
-            //ChipHeight.Value = (decimal)xRecipe.xChipHeight;
-            ChipWidth.Value = (decimal)InspectX3ParaClass.Instance.mWidthStand;
-            ChipHeight.Value = (decimal)InspectX3ParaClass.Instance.mHeightStand;
-            ExtendX.Value = xRecipe.xExtendx;
-            ExtendY.Value = xRecipe.xExtendy;
+            ChipWidth.Value = (decimal)xParaGrid.xChipWidth;
+            ChipHeight.Value = (decimal)xParaGrid.xChipHeight;
+            //ChipWidth.Value = (decimal)InspectX3ParaClass.Instance.mWidthStand;
+            //ChipHeight.Value = (decimal)InspectX3ParaClass.Instance.mHeightStand;
+            ExtendX.Value = xParaGrid.xExtendx;
+            ExtendY.Value = xParaGrid.xExtendy;
             Modified = false;
         }
         public override void Save(string fileName)
         {
-            xRecipe.xAngle = (float)Angle.Value;
+            xParaGrid.xAngle = (float)Angle.Value;
             xParaGrid.xLeftTopX = LeftTopX.Value;
             xParaGrid.xLeftTopY = LeftTopY.Value;
-            //xRecipe.xChipWidth = (float)ChipWidth.Value;
-            //xRecipe.xChipHeight = (float)ChipHeight.Value;
-            InspectX3ParaClass.Instance.mWidthStand = (float)ChipWidth.Value;
-            InspectX3ParaClass.Instance.mHeightStand = (float)ChipHeight.Value;
-            xRecipe.xExtendx = ExtendX.Value;
-            xRecipe.xExtendy = ExtendY.Value;
+            xParaGrid.xChipWidth = (float)ChipWidth.Value;
+            xParaGrid.xChipHeight = (float)ChipHeight.Value;
+            //InspectX3ParaClass.Instance.mWidthStand = (float)ChipWidth.Value;
+            //InspectX3ParaClass.Instance.mHeightStand = (float)ChipHeight.Value;
+            xParaGrid.xExtendx = ExtendX.Value;
+            xParaGrid.xExtendy = ExtendY.Value;
             Modified = false;
         }
     }
@@ -184,10 +184,6 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         }
         public override void Save(string fileName)
         {
-            //xRecipe.xRealLeftX = (float)xRecipe.xRealLeftX;
-            //xRecipe.xRealLeftY = (float)xRecipe.xRealLeftY;
-            //xRecipe.xRealOffsetX = (float)xRecipe.xRealOffsetX;
-            //xRecipe.xRealOffsetY = (float)xRecipe.xRealOffsetY;
             Modified = false;
         }
     }

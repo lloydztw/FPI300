@@ -16,8 +16,9 @@
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.QMath;
-using JetEazy.Utils;
+using JetEazy.QvMath;
 using LaserAlignDX.AoiModel;
+using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Model.Recipe;
 using LaserAlignDX.OPSpace;
@@ -30,21 +31,6 @@ using Traveller106;
 
 namespace LaserAlignDX.Mvc.Model
 {
-    public interface ITravelerModel : IDisposable
-    {
-        event EventHandler<ProcessEventArgs> OnError;
-
-        IProcessRunFPI AoiModel { get; }
-        ICalibAoiModel CalibAoiModel { get; }
-        IxEmptyTrayInspector EmptyTrayAoiModel { get; }
-        TravellerTransforms TransformsModel { get; }
-        GaBigImageHolder LineScanImageHolder { get; }
-
-        void ApplyRecipe(string gaaraRecipeName = null);
-        JxRecipeCombo GetCurrentRecipe();
-    }
-
-
     public class TravellerSysModel : ITravelerModel
     {
         public event EventHandler<ProcessEventArgs> OnError;
@@ -111,6 +97,7 @@ namespace LaserAlignDX.Mvc.Model
         {
             get => _aoiModel;
         }
+
         public ICalibAoiModel CalibAoiModel
         {
             get
@@ -122,6 +109,7 @@ namespace LaserAlignDX.Mvc.Model
                 return _calibModel;
             }
         }
+
         public IxEmptyTrayInspector EmptyTrayAoiModel
         {
             get
@@ -130,10 +118,12 @@ namespace LaserAlignDX.Mvc.Model
                 return _aoiEmptyTrayModel;
             }
         }
+
         public TravellerTransforms TransformsModel
         {
             get => _transformsModel;
         }
+
         public GaBigImageHolder LineScanImageHolder
         {
             get => TravellerBigImagesHolder.Instance.LineScanImageHolder;
@@ -143,7 +133,8 @@ namespace LaserAlignDX.Mvc.Model
         {
             return _jxRecipe;
         }
-        public void ApplyRecipe(string gaaraRecipeName)
+
+        public void ApplyRecipe(string gaaraRecipeName, bool optWritebackToRecipe = false)
         {
             if (gaaraRecipeName == null)
                 gaaraRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
@@ -156,11 +147,11 @@ namespace LaserAlignDX.Mvc.Model
                 old?.Dispose();
             }
 
-            applyRecipe(_jxRecipe);
+            applyRecipe(_jxRecipe, optWritebackToRecipe);
         }
 
         #region PRIVATE_FUNCTIONS
-        void applyRecipe(JxRecipeCombo recipe)
+        void applyRecipe(JxRecipeCombo recipe, bool optWritebackToRecipe)
         {
             // 載入 TransformsModel 設定 (全域)
             var transformsModel = TransformsModel;
@@ -180,11 +171,8 @@ namespace LaserAlignDX.Mvc.Model
                 transformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
             }
 
-            //// 將參數餵給其他子系統 (Child Models)
+            // 將參數餵給其他子系統 (Child Models)
             EmptyTrayAoiModel.SetRecipe(recipe.EmptyTrayParams);
-
-            //var model = CalibAoiModel;
-            //model.SetRecipe(recipe.EmptyTrayParams);
 
             // 建置 Cell Regions
             if (camGrid == null)
@@ -194,44 +182,50 @@ namespace LaserAlignDX.Mvc.Model
                 OnError?.Invoke(this, new ProcessEventArgs(errMsg));
                 return;
             }
-            this.BuildCellRegions(camGrid, ActiveCarrierID);
+
+            this.BuildCellRegions(camGrid, ActiveCarrierID, optWritebackToRecipe);
         }
         #endregion
 
-        public void BuildCellRegions(EzBlocsGrid camGrid, CarrierEnum C)
+        internal void BuildCellRegions(EzBlocsGrid camGrid, CarrierEnum C, bool optWriteBlackToRecipe = false)
         {
-            RecipeFPIX3Class xRecipe = RecipeFPIX3Class.Instance;
-            double xChipWidth = InspectX3ParaClass.Instance.mWidthStand;
-            double xChipHeight = InspectX3ParaClass.Instance.mHeightStand;
-            //var xChipWidth = xRecipe.xChipWidth;
-            //var xChipHeight = xRecipe.xChipHeight;
+            if (camGrid == null)
+                camGrid = _jxRecipe.EmptyTrayParams.TrayMiscSettings.GetGoldenGrid(true);
+
+            //(0) Global MESS
+            var xRecipe = RecipeFPIX3Class.Instance;
+            var xParaGrid = RecipeParaGridClass.Instance;
+            var xInpectParam = InspectX3ParaClass.Instance;
             var xRegionCells = xRecipe.xRegionCells;
 
-            //(0) TransformModel
-            var transformModel = GaMvcConfig.SysModel.TransformsModel;
-            var transCP = transformModel.GetCameraPhysicTransform(C);
+            double standardChipWidth = xInpectParam.mWidthStand;
+            double standardChipHeight = xInpectParam.mHeightStand;
+            xRegionCells.Clear();
 
-            //(1) goldenChipRect (in camera coordinates)
-            var standardChipSize = new QVector(xChipWidth, xChipHeight);
-            RectangleF goldenChipRect;
+            //(1) TransformModel
+            var transformModel = GaMvcConfig.SysModel.TransformsModel;
+            var trfCamToWorld = transformModel.GetCameraPhysicTransform(C);
+
+            //(2) goldenChipRect (in camera coordinates)
+            SizeF cellViewSizeF;
             if (true)
             {
                 // 從晶粒長寬規格 xChipWidth, xChipHeight (mm)
                 // 反推其在 Camera 座標系上 的大小
+                var standardChipSize = new QVector(standardChipWidth, standardChipHeight);
                 var camPt0 = camGrid[0, 0].Center;
-                var worldPt0 = transCP.Trans(camPt0);
-                var p1 = worldPt0 - (standardChipSize / 2);
-                var p2 = worldPt0 + (standardChipSize / 2);
-                p1 = transCP.InvTrans(p1);
-                p2 = transCP.InvTrans(p2);
-                var delta = p2 - p1;
-                goldenChipRect = new RectangleF((float)p1.X, (float)p1.Y, (float)delta.X, (float)delta.Y);
+                var worldPt0 = trfCamToWorld.Trans(camPt0);
+                var goldenP1 = worldPt0 - (standardChipSize / 2);
+                var goldenP2 = worldPt0 + (standardChipSize / 2);
+                goldenP1 = trfCamToWorld.InvTrans(goldenP1);
+                goldenP2 = trfCamToWorld.InvTrans(goldenP2);
+                var delta = goldenP2 - goldenP1;
+
+                var goldenChipRect = new RectangleF((float)goldenP1.X, (float)goldenP1.Y, (float)delta.X, (float)delta.Y);
+                cellViewSizeF = goldenChipRect.Size;
             }
-            SizeF goldenSize = goldenChipRect.Size;
 
-            //(2) Zigzag 順序加入至 xRegionCells
-            xRegionCells.Clear();
-
+            //(3) 用 Zigzag 順序加入至 xRegionCells
             int index = 0;
             foreach ((int r, int c, EzBloc bloc) in camGrid.IterZigzag())
             {
@@ -243,17 +237,60 @@ namespace LaserAlignDX.Mvc.Model
                 //cell.lblName = "ROW" + r.ToString("000") + "-COL" + c.ToString("000");
                 //cell.viewRectF = new RectangleF(_baserect.X + j * _coloffset, _baserect.Y + i * _rowoffset, _baserect.Width, _baserect.Height);
                 cell.lblName = $"ROW{r:000}-COL{c:000}";
-                cell.viewRectF = JetEazy.Qcvt.CreateCenterRect((float)bloc.Center.X, (float)bloc.Center.Y, ref goldenSize);
+                cell.viewRectF = JetEazy.Qcvt.CreateCenterRect((float)bloc.Center.X, (float)bloc.Center.Y, ref cellViewSizeF);
 
-                //cell OrgX 與 OrgY 是 Chip 左上角 ?
+                //cell (OrgX, OrgY) 是 Chip 的中心點?
                 //cell.OrgX = xRealLeftX + j * xRealOffsetX;
                 //cell.OrgY = xRealLeftY + i * xRealOffsetY;
-                var centroid = transCP.Trans(bloc.Center);
-                cell.OrgX = (float)(centroid.X);    // - standardChipSize.X / 2);
-                cell.OrgY = (float)(centroid.Y);    // - standardChipSize.Y / 2);
+                var wCenter = trfCamToWorld.Trans(bloc.Center);
+                cell.OrgX = (float)(wCenter.X);    // - standardChipSize.X / 2);
+                cell.OrgY = (float)(wCenter.Y);    // - standardChipSize.Y / 2);
 
                 xRegionCells.Add(cell);
                 index++;
+            }
+
+            //(4) 更新到 xParaGrid 舊參數
+            if (optWriteBlackToRecipe)
+            {
+                var rows = camGrid.Rows;
+                var cols = camGrid.Cols;
+                if (rows < 2 || cols < 2)
+                    return;
+
+                var camPt00 = camGrid[0, 0];
+                var p00 = trfCamToWorld.Trans(camGrid[0, 0].Center);
+                var p01 = trfCamToWorld.Trans(camGrid[0, cols - 1].Center);
+                var p10 = trfCamToWorld.Trans(camGrid[rows - 1, 0].Center);
+                var p11 = trfCamToWorld.Trans(camGrid[rows - 1, cols - 1].Center);
+                var corners = new[] { p00, p01, p11, p10 };
+
+                // xAngle
+                var box2D = new QvBox2D();
+                box2D.Corners = Array.ConvertAll(corners, c => new PointF((float)c.X, (float)c.Y));
+                double angle = box2D.Theta * 180.0 / Math.PI;
+                xParaGrid.xAngle = (float)Math.Round(angle, 3);
+
+                // xRows, xColumn
+                xParaGrid.xRow = rows;
+                xParaGrid.xColumn = cols;
+
+                // xLeftTopX, xLeftTopY
+                xParaGrid.xLeftTopX = (int)(camPt00.Center.X - cellViewSizeF.Width);
+                xParaGrid.xLeftTopY = (int)(camPt00.Center.Y - cellViewSizeF.Height);
+
+                // xRowOffset, xColumnOffset
+                xParaGrid.xRowOffset = (float)Math.Round((p10 - p00).Y / (rows - 1), 3);
+                xParaGrid.xColumnOffset = (float)Math.Round((p01 - p00).X / (cols - 1), 3);
+
+                // xChipWidth, xChipHeight
+                xParaGrid.xChipWidth = (float)Math.Round(standardChipWidth, 3);
+                xParaGrid.xChipHeight = (float)Math.Round(standardChipHeight, 3);
+
+                //xRecipe.xRealLeftX = (float)p00.X;
+                //xRecipe.xRealLeftY = (float)p00.Y;
+                //xRecipe.xRealOffsetX = (float)(p01 - p00).X / (cols - 1);
+                //xRecipe.xRealOffsetY = (float)(p10 - p00).Y / (rows - 1);
             }
         }
     }

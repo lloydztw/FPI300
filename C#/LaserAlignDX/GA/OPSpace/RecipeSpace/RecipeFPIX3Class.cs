@@ -931,10 +931,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// <summary>
         /// 這個應該是放在 AoiModel 內
         /// </summary>
-        public void CreateViews()
+        public void CreateViews(bool writeback = false)
         {
             // 暫時 掛載此處 ...
-            GaMvcConfig.SysModel.ApplyRecipe(null);
+            GaMvcConfig.SysModel.ApplyRecipe(null, writeback);
             return;
 
             xRegionCells.Clear();
