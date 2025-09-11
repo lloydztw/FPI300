@@ -65,6 +65,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //public System.Drawing.PointF template1Center = new System.Drawing.PointF(0, 0);
         //public System.Drawing.PointF distancebase0tobase1 = new System.Drawing.PointF(0, 0);
 
+        /// <summary>
+        /// Golden Region Cell (粗框)
+        /// </summary>
         public RectangleF xRectRegionPrint = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpprinttemplate = new Bitmap(1, 1);
         public Bitmap bmpprintmask = new Bitmap(1, 1);
@@ -79,7 +82,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //}
 
         /// <summary>
-        /// 训练的区域
+        /// Golden Chip Rect
+        /// 位於 Golden Region Cell (xRectRegionPrint) 之內
+        /// 相對於 xRectRegionPrint 的左上角為零點
         /// </summary>
         public RectangleF xRegionTrain = new RectangleF(0, 0, 100, 100);
 
@@ -882,6 +887,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
 
+        /// <summary>
+        /// Camera Coordinates [row=0, col=0] 的框選方塊.
+        /// </summary>
         RectangleF LeftTopRect
         {
             get { return xRegionTrain; }

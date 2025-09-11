@@ -1,8 +1,12 @@
-﻿using JetEazy.Utils;
+﻿using JetEazy.BasicSpace;
+using JetEazy.QMath;
+using JetEazy.Utils;
 using JzDisplay;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
+using OpenCvSharp.Flann;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -31,10 +35,15 @@ namespace LaserAlignDX.FormSpace
             get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
         }
 
+
         RectangleF LeftTopRect
         {
             get { return xRecipe.xRegionTrain; }
         }
+
+        /// <summary>
+        /// 目前 Gaara 定義為 Camera Grid 左上 [row=0, col=0] 中心點
+        /// </summary>
         PointF LeftTopRectCenter
         {
             get
@@ -128,65 +137,10 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnWritePLCStage_Click(object sender, EventArgs e)
         {
-           
-            //int i = 0;
-            //while (i < 4)
-            //{
-            //    LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[i];
-            //    PointF ptworld = cali.ViewToWorld(ptCenter);
-            //    switch (i)
-            //    {
-            //        case 0:
-            //            MACHINE.PLCIO.SetStage1(0, ptworld, new PointF());
-            //            break;
-            //        case 1:
-            //            MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld);
-            //            break;
-            //        case 2:
-            //            MACHINE.PLCIO.SetStage2(0, ptworld, new PointF());
-            //            break;
-            //        case 3:
-            //            MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld);
-            //            break;
-            //    }
-            //    i++;
-            //}
-            //label5.Text = $"{DateTime.Now.ToString()}操作完成";
-
-            LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[cboCaliIndex.SelectedIndex];
-            textBox1.Text = PointFtoStringSimple(LeftTopRectCenter);
-            PointF ptworld = cali.ViewToWorld(LeftTopRectCenter);
-            textBox2.Text = PointFtoStringSimple(ptworld);
-
-            switch (cboCaliIndex.SelectedIndex)
-            {
-                case 0:
-                    MACHINE.PLCIO.SetStage1(0, ptworld, new PointF());
-                    break;
-                case 1:
-                    LineScanCalibrateClass c0 = Traveller106.Universal.LineScanCalibrateClasses[0];
-                    PointF ptOffset = new PointF(cali.ptsworld[0].X - c0.ptsworld[0].X,
-                                                 cali.ptsworld[1].Y - c0.ptsworld[1].Y);
-                    PointF ptworld1 = c0.ViewToWorld(LeftTopRectCenter);
-                    PointF ptworld2 = new PointF(ptworld1.X + ptOffset.X, ptworld1.Y + ptOffset.Y);
-                    textBox2.Text = PointFtoStringSimple(ptworld2);
-                    MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld2);
-                    break;
-                case 2:
-                    MACHINE.PLCIO.SetStage2(0, ptworld, new PointF());
-                    break;
-                case 3:
-                    c0 = Traveller106.Universal.LineScanCalibrateClasses[2];
-                    ptOffset = new PointF(cali.ptsworld[0].X - c0.ptsworld[0].X,
-                                                 cali.ptsworld[1].Y - c0.ptsworld[1].Y);
-                    ptworld1 = c0.ViewToWorld(LeftTopRectCenter);
-                    ptworld2 = new PointF(ptworld1.X + ptOffset.X, ptworld1.Y + ptOffset.Y);
-                    textBox2.Text = PointFtoStringSimple(ptworld2);
-                    MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld2);
-                    break;
-            }
-
-            label5.Text = $"{DateTime.Now.ToString()}{cboCaliIndex.Text}操作完成";
+            if (GaMvcConfig.OPT_USE_LETIAN_CALIB)
+                axWriteCalibDataToPlc_LT();
+            else
+                axWriteCalibDataToPlc_Gaara();
         }
 
         private void BtnCalRealPointF_Click(object sender, EventArgs e)
@@ -882,7 +836,7 @@ namespace LaserAlignDX.FormSpace
 
 
         }
-#if(false)
+#if (false)
         void BoundRect(ref Rectangle InnerRect, Size BoundSize)
         {
             InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
@@ -939,5 +893,172 @@ namespace LaserAlignDX.FormSpace
         }
 #endif
         #endregion
+
+        Control txtCamCoord => textBox1;
+        Control txtWorldCoord => textBox2;
+        Control lblCompletedInfo => label5;
+
+        void axWriteCalibDataToPlc_Gaara()
+        {
+            ComboBox cboCaliIndex = this.cboCaliIndex;
+
+            //int i = 0;
+            //while (i < 4)
+            //{
+            //    LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[i];
+            //    PointF ptworld = cali.ViewToWorld(ptCenter);
+            //    switch (i)
+            //    {
+            //        case 0:
+            //            MACHINE.PLCIO.SetStage1(0, ptworld, new PointF());
+            //            break;
+            //        case 1:
+            //            MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld);
+            //            break;
+            //        case 2:
+            //            MACHINE.PLCIO.SetStage2(0, ptworld, new PointF());
+            //            break;
+            //        case 3:
+            //            MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld);
+            //            break;
+            //    }
+            //    i++;
+            //}
+            //label5.Text = $"{DateTime.Now.ToString()}操作完成";
+
+            LineScanCalibrateClass cali = Traveller106.Universal.LineScanCalibrateClasses[cboCaliIndex.SelectedIndex];
+            PointF ptworld = cali.ViewToWorld(LeftTopRectCenter);
+            //textBox1.Text = PointFtoStringSimple(LeftTopRectCenter);
+            //textBox2.Text = PointFtoStringSimple(ptworld);
+            updatePlcWritingStatus(null, Color.Black);
+
+            switch (cboCaliIndex.SelectedIndex)
+            {
+                // 載台1 吸嘴排1
+                case 0:
+                    MACHINE.PLCIO.SetStage1(0, ptworld, new PointF());
+                    updatePlcCoordsToGui(LeftTopRectCenter, ptworld);
+                    break;
+
+                // 載台1 吸嘴排2
+                case 1:
+                    LineScanCalibrateClass c0 = Traveller106.Universal.LineScanCalibrateClasses[0];
+                    PointF ptOffset = new PointF(cali.ptsworld[0].X - c0.ptsworld[0].X,
+                                                 cali.ptsworld[1].Y - c0.ptsworld[1].Y);
+                    PointF ptworld1 = c0.ViewToWorld(LeftTopRectCenter);
+                    PointF ptworld2 = new PointF(ptworld1.X + ptOffset.X, ptworld1.Y + ptOffset.Y);
+                    textBox2.Text = PointFtoStringSimple(ptworld2);
+                    MACHINE.PLCIO.SetStage1(1, new PointF(), ptworld2);
+                    updatePlcCoordsToGui(LeftTopRectCenter, ptworld2);
+                    break;
+
+                // 載台2 吸嘴排1
+                case 2:
+                    MACHINE.PLCIO.SetStage2(0, ptworld, new PointF());
+                    updatePlcCoordsToGui(LeftTopRectCenter, ptworld);
+                    break;
+
+                // 載台2 吸嘴排2
+                case 3:
+                    c0 = Traveller106.Universal.LineScanCalibrateClasses[2];
+                    ptOffset = new PointF(cali.ptsworld[0].X - c0.ptsworld[0].X,
+                                                 cali.ptsworld[1].Y - c0.ptsworld[1].Y);
+                    ptworld1 = c0.ViewToWorld(LeftTopRectCenter);
+                    ptworld2 = new PointF(ptworld1.X + ptOffset.X, ptworld1.Y + ptOffset.Y);
+                    textBox2.Text = PointFtoStringSimple(ptworld2);
+                    MACHINE.PLCIO.SetStage2(1, new PointF(), ptworld2);
+                    updatePlcCoordsToGui(LeftTopRectCenter, ptworld2);
+                    break;
+            }
+
+            int index = cboCaliIndex.SelectedIndex;
+            CarrierEnum carrierID = (CarrierEnum)(index / 2);
+            SuckerRowEnum suckerRowID = (SuckerRowEnum)(index % 2);
+            updatePlcWritingStatus($"{DateTime.Now.ToString()} 載台 {carrierID} 吸嘴 {suckerRowID} 寫入PLC操作完成!", Color.Lime);
+        }
+        void axWriteCalibDataToPlc_LT()
+        {
+            ComboBox cboCalibCombination = this.cboCaliIndex;
+            int index = cboCalibCombination.SelectedIndex;
+            if (index == -1)
+                return;
+
+            updatePlcWritingStatus(null, Color.Black);
+            Control txtCamCoord = textBox1;
+            Control txtWorldCoord = textBox2;
+            Control lblCompletedInfo = label5;
+
+            CarrierEnum carrierID = (CarrierEnum)(index / 2);
+            SuckerRowEnum suckerRowID = (SuckerRowEnum)(index % 2);
+
+            var transCM = GaMvcConfig.SysModel.TransformsModel.GetCameraMotorTransform(carrierID, suckerRowID);
+            var traySettings = GaMvcConfig.SysModel.GetCurrentRecipe()?.EmptyTrayParams.TrayMiscSettings;
+            if (traySettings == null)
+            {
+                string errMsg = "缺少【空盤檢測】之參數!";
+                updatePlcWritingStatus(errMsg, Color.Red);
+                VsMSG.Instance.Warning(errMsg);
+                return;
+            }
+
+            var camGrid = traySettings.GetGoldenGrid(true);
+            var camPt0 = camGrid[0, 0].Center;
+            var suckerWorldPt = transCM.Trans(camPt0);
+
+            // 更新 GUI
+            updatePlcCoordsToGui(_P(camPt0), _P(suckerWorldPt));
+
+            // 轉換函式
+            PointF _P(QVector v)
+            {
+                return new PointF((float) v.X, (float) v.Y);
+            };
+
+            // 寫入 PLC
+            var plcIO = MACHINE.PLCIO;
+            
+            if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S1)
+            {
+                plcIO.SetStage1(0, _P(suckerWorldPt), PointF.Empty);
+            }
+            else if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S2)
+            {
+                plcIO.SetStage1(1, PointF.Empty, _P(suckerWorldPt));
+            }
+            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S1)
+            {
+                plcIO.SetStage2(0, _P(suckerWorldPt), PointF.Empty);
+            }
+            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S2)
+            {
+                plcIO.SetStage2(1, PointF.Empty, _P(suckerWorldPt));
+            }
+            else
+            {
+                updatePlcWritingStatus($"錯誤的組合 載台 {carrierID} 吸嘴 {suckerRowID}!", Color.Red);
+                return;
+            }
+
+            updatePlcWritingStatus($"{DateTime.Now.ToString()} 載台 {carrierID} 吸嘴 {suckerRowID} 寫入PLC操作完成!", Color.Lime);
+        }
+
+        void updatePlcCoordsToGui(PointF camPt, PointF suckerWorldPt)
+        {
+            txtCamCoord.Text = $"({camPt.X:0.0}, {camPt.Y:0.0}) px";
+            txtWorldCoord.Text = $"({suckerWorldPt.X:0.000}, {suckerWorldPt.Y:0.000}) mm";
+
+        }
+        void updatePlcWritingStatus(string status, Color color)
+        {
+            if (status == null)
+            {
+                lblCompletedInfo.Visible = false;
+                return;
+            }
+            lblCompletedInfo.Text = status;
+            lblCompletedInfo.ForeColor = color;
+            lblCompletedInfo.BackColor = Color.Black;
+            lblCompletedInfo.Visible = true;
+        }
     }
 }

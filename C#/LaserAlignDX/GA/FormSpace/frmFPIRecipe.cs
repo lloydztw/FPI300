@@ -591,6 +591,7 @@ namespace LaserAlignDX.FormSpace
         private void _autoRowCol()
         {
             xRecipe.CreateViews(writeback: true);
+
             propertyGrid1.SelectedObject = RecipeParaGridClass.Instance;
 
             DS1.ClearStaticMover();

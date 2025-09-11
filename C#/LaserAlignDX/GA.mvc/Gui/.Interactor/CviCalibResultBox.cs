@@ -115,6 +115,8 @@ namespace LaserAlignDX.Mvc.Gui
         }
         public override void OnDraw(CvImageViewer viewer, Graphics gxView)
         {
+            base.OnDraw(viewer, gxView);
+
             if (_matchResult == null)
                 return;
 

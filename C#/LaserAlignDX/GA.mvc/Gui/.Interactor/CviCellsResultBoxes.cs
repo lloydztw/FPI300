@@ -13,21 +13,22 @@
  */
 #endregion
 
-using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.OpenCV;
+using JetEazy.QxCollections;
+using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text.RegularExpressions;
-using System.Threading;
+using System.Text;
 using System.Windows.Forms;
 using VisionDesigner;
 
@@ -35,9 +36,10 @@ using CELL = LaserAlignDX.OPSpace.RegionCellX3Class;
 using InspectParams = LaserAlignDX.OPSpace.RecipeSpace.InspectX3ParaClass;
 using RECIPE = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
 
+
 namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 {
-    public class CviCellsResultBoxes : CviAbsTooltipBox
+    public partial class CviCellsResultBoxes : CviAbsTooltipBox
     {
         #region INNER_CLASS
         class CellBloc : EzBloc
@@ -102,7 +104,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             base.OnCursorsChanged += CviCellsResultBoxes_OnCursorsChanged;
         }
-
         public void Reset()
         {
             _grid?.Dispose();
@@ -560,7 +561,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             _cviRegionBox.Box2D.SetCenter((float)cellBloc.Center.X, (float)cellBloc.Center.Y);
             _cviRegionBox.Visible = true;
 
-            string txt = formatDisplayText(cellBloc);
+            //string txt = formatDisplayText(cellBloc);
+
+            string txt = composeTooltipText2(cursor, cursor2);
             return txt;
         }
         #endregion
@@ -677,6 +680,210 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
 
             MessageBox.Show($"已存入 Region Cell Images 至\n\r{dstPath}", "DEBUG", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        #endregion
+    }
+
+    partial class CviCellsResultBoxes
+    {
+        public bool IsEmptyTrayMode
+        {
+            get => _mode == ScanInspectMode.NOTRAY;
+        }
+        public ITransform TransCameraToMotor
+        {
+            get; set;
+        }
+        public ITransform TransCameraToWorld
+        {
+            get; set;
+        }
+        public CarrierEnum ActiveCarrierID
+        {
+            get; set;
+        }
+        public SuckerRowEnum ActiveSuckerRowID
+        {
+            get; set;
+        }
+
+        void initDefaultTrfs()
+        {
+            if (TransCameraToMotor == null)
+                TransCameraToMotor = GaMvcConfig.SysModel.TransformsModel.GetCameraMotorTransform(ActiveCarrierID, ActiveSuckerRowID);
+            if (TransCameraToWorld == null)
+                TransCameraToWorld = GaMvcConfig.SysModel.TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+        }
+        protected string composeTooltipText2(EzBloc cursor, EzBloc cursor2)
+        {
+            if (cursor == null)
+                return "";
+            
+            initDefaultTrfs();
+
+            var cursorBloc = cursor;
+            var cursorBloc2 = cursor2;
+
+            bool showScore = true;
+
+            var sb = new StringBuilder();
+
+            var cellBloc = cursorBloc as CellBloc;
+            var cell = cellBloc?.Cell;
+            QxRowCol rowCol = cell != null ? new QxRowCol(cell.CellRow, cell.CellCol) : null;
+            //var rowCol = (cursorBloc.Tag as QuadLinkNode)?.rowCol;
+            if (rowCol != null)
+                sb.Append("格點: [").AppendValues(rowCol.Row, rowCol.Col).AppendLine("]");
+
+            appendCameraCoords(sb, cursorBloc, cursorBloc2);
+
+            if (TransCameraToMotor != null)
+            {
+                appendMotorCoords(sb, cursorBloc, cursorBloc2);
+                showScore = false;
+            }
+            if (TransCameraToWorld != null)
+            {
+                appendWorldCoords(sb, cursorBloc, cursorBloc2);
+                showScore = false;
+            }
+            if (TransCameraToMotor != null && TransCameraToMotor != null && cursorBloc2 == null && rowCol != null)
+            {
+                appendPlcCompensation(sb, cursorBloc, rowCol.Row, rowCol.Col);
+                showScore = false;
+            }
+
+            if (showScore || IsEmptyTrayMode)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"Score= {cursorBloc.Score:0.00}");
+                sb.AppendLine($"Size= {cursorBloc.Rect.Width}x{cursorBloc.Rect.Height}");
+            }
+            return sb.ToString();
+        }
+        void appendCameraCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        {
+            if (bloc == null)
+                return;
+
+            sb.Append($"相機座標: ({bloc.Center.X:0.0}, {bloc.Center.Y:0.0})").AppendLine();
+
+            if (bloc != null && bloc2 != null && bloc != bloc2)
+            {
+                var dv = bloc.Center - bloc2.Center;
+                var dist = dv.NormLength;
+                sb.AppendLine($"相機座標 dX = {dv.X:0.0} pix");
+                sb.AppendLine($"相機座標 dY = {dv.Y:0.0} pix");
+                sb.AppendLine($"相機座標 距離 = {dist:0.0} pix");
+            }
+        }
+        void appendMotorCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        {
+            var transform = TransCameraToMotor;
+            if (bloc == null || transform == null)
+                return;
+
+            var motorCoord = transform.Trans(bloc.Center);
+
+            sb.AppendLine();
+            sb.AppendLine($"吸嘴馬達座標 X = {motorCoord.X:0.000} mm");
+            sb.AppendLine($"載台馬達座標 Y = {motorCoord.Y:0.000} mm");
+
+            if (bloc != null && bloc2 != null && bloc != bloc2)
+            {
+                var motorCoord2 = transform.Trans(bloc2.Center);
+                var dv = motorCoord - motorCoord2;
+                double dist = dv.NormLength;
+                sb.AppendLine($"馬達座標 dX = {dv.X:0.000} mm");
+                sb.AppendLine($"馬達座標 dY = {dv.Y:0.000} mm");
+                sb.AppendLine($"馬達座標 距離 = {dist:0.000} mm");
+            }
+        }
+        void appendWorldCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        {
+            var transform = TransCameraToWorld;
+            if (bloc == null || transform == null)
+                return;
+
+            var worldCoord = transform.Trans(bloc.Center);
+
+            sb.AppendLine();
+            sb.AppendLine($"Physic座標 X = {worldCoord.X:0.000} mm");
+            sb.AppendLine($"Physic座標 Y = {worldCoord.Y:0.000} mm");
+
+            if (bloc != null && bloc2 != null && bloc != bloc2)
+            {
+                var worldCoord2 = transform.Trans(bloc2.Center);
+                var dv = worldCoord - worldCoord2;
+                double dist = dv.NormLength;
+                sb.AppendLine($"Physic座標 dX = {dv.X:0.000} mm");
+                sb.AppendLine($"Physic座標 dY = {dv.Y:0.000} mm");
+                sb.AppendLine($"Physic座標 距離 = {dist:0.000} mm");
+            }
+        }
+        void appendPlcCompensation(StringBuilder sb, EzBloc bloc, int row, int col)
+        {
+            if (bloc == null)
+                return;
+
+            var transformsModel = GaMvcConfig.SysModel.TransformsModel;
+            var res = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, row, col);
+            var dV = res[0];
+            var dErr = res[1];
+
+            sb.AppendLine();
+            sb.AppendLine($"PLC 補償量 dX = {dV.X:0.000} mm");
+            sb.AppendLine($"PLC 補償量 dY = {dV.Y:0.000} mm");
+            sb.AppendLine();
+            sb.AppendLine($"Phy 變動值 ΔX = {dErr.X:0.000} mm");
+            sb.AppendLine($"Phy 變動值 ΔY = {dErr.Y:0.000} mm");
+        }
+
+        #region DEBUG_TRACE
+        void scanSelfErrors(int option)
+        {
+            //if (IsEmptyTrayMode) return;
+            if (_grid == null) return;
+
+            int rows = _grid.Rows;
+            int cols = _grid.Cols;
+            var transformsModel = GaMvcConfig.SysModel.TransformsModel;
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    var bloc = _grid[r, c];
+                    var res = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, r, c);
+                    var dV = res[0];
+                    var dErr = res[1];
+
+                    double err;
+                    if (option == 0)
+                        err = Math.Abs(dErr.X);
+                    else if (option == 1)
+                        err = Math.Abs(dErr.Y);
+                    else if (option == 2)
+                        err = Math.Max(Math.Abs(dErr.X), Math.Abs(dErr.Y));
+                    else
+                        err = 0;
+                    bloc.SQRatio = err;
+                }
+            }
+        }
+        Brush getDebugBrush(EzBloc bloc)
+        {
+            var err = Math.Abs(bloc.SQRatio);
+            if (err < 0.010)
+                return new SolidBrush(Color.FromArgb(64, Color.Blue));
+            else if (err < 0.020)
+                return new SolidBrush(Color.FromArgb(64, Color.Yellow));
+            else if (err < 0.030)
+                return new SolidBrush(Color.FromArgb(64, Color.Orange));
+            else if (err < 0.050)
+                return new SolidBrush(Color.FromArgb(64, Color.Red));
+            else
+                return new SolidBrush(Color.FromArgb(128, Color.Red));
         }
         #endregion
     }

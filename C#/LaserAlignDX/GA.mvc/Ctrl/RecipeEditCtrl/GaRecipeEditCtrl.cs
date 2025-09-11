@@ -250,7 +250,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 xRecipe.bmpOrgNoTray = bmp;
             }
         }
-        void updateGoldenBmpToRecipe(Bitmap goldenBmp, Rectangle goldenRect, int target)
+        void updateGoldenRegionBmpToRecipe(Bitmap goldenRegionBmp, Rectangle goldenRegionRect, int target)
         {
             //    switch (xRegionNameCurrent)
             //    {
@@ -269,15 +269,15 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (target == 0)
             {
                 xRecipe.bmpprinttemplate?.Dispose();
-                xRecipe.bmpprinttemplate = goldenBmp;
-                xRecipe.xRectRegionPrint = goldenRect;
+                xRecipe.bmpprinttemplate = goldenRegionBmp;
+                xRecipe.xRectRegionPrint = goldenRegionRect;
                 _jxRecipeCombo.GaaraParams.Cate1.ChipGoldenBmp.Value = (Bitmap)xRecipe.bmpprinttemplate.Clone();
             }
             else
             {
                 xRecipe.bmpprintNoTraytemplate?.Dispose();
-                xRecipe.bmpprintNoTraytemplate = goldenBmp;
-                xRecipe.xRectRegionPrintNoTray = goldenRect;
+                xRecipe.bmpprintNoTraytemplate = goldenRegionBmp;
+                xRecipe.xRectRegionPrintNoTray = goldenRegionRect;
             }
         }
         void ShowCviResult(bool show)
@@ -405,15 +405,15 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             var bmpSrc = xRecipe.bmpOrg;
             var bound = new Rectangle(0, 0, bmpSrc.Width, bmpSrc.Height);
-            var goldenRect = _cviGoldenChipBox.Box;
-            JetEazy.QUtilities.QUtility.ClipBoundary(ref goldenRect, ref bound);
+            var goldenRegionRect = _cviGoldenChipBox.Box;
+            JetEazy.QUtilities.QUtility.ClipBoundary(ref goldenRegionRect, ref bound);
 
             //--------------------------------------------------------------
             // 更新到 xRecipe 的 bmpprinttemplate 或 bmpprintNoTraytemplate
             // xRecipe 會接手 goldenBmp
             //--------------------------------------------------------------
-            Bitmap goldenBmp = bmpSrc.Clone(goldenRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-            updateGoldenBmpToRecipe(goldenBmp, goldenRect, target);
+            Bitmap goldenRegionBmp = bmpSrc.Clone(goldenRegionRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+            updateGoldenRegionBmpToRecipe(goldenRegionBmp, goldenRegionRect, target);
         }
         void AutoCreateRegions()
         {
