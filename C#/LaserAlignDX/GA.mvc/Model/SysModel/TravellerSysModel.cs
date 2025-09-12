@@ -214,9 +214,10 @@ namespace LaserAlignDX.Mvc.Model
             SizeF cellViewSizeF;
             if (true)
             {
-                // 從晶粒長寬規格 xChipWidth, xChipHeight (mm)
+                // 從晶粒長寬規格 mWidthStand, mHeightStand (mm)
                 // 反推其在 Camera 座標系上 的大小
                 var standardChipSize = new QVector(standardChipWidth, standardChipHeight);
+
                 var camPt0 = camGrid[0, 0].Center;
                 var worldPt0 = trfCamToWorld.Trans(camPt0);
                 var goldenP1 = worldPt0 - (standardChipSize / 2);

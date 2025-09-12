@@ -271,7 +271,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 xRecipe.bmpprinttemplate?.Dispose();
                 xRecipe.bmpprinttemplate = goldenRegionBmp;
                 xRecipe.xRectRegionPrint = goldenRegionRect;
-                _jxRecipeCombo.GaaraParams.Cate1.ChipGoldenBmp.Value = (Bitmap)xRecipe.bmpprinttemplate.Clone();
+                _jxRecipeCombo.GaGridParams.ChipGoldenBmp.Value = (Bitmap)xRecipe.bmpprinttemplate.Clone();
             }
             else
             {

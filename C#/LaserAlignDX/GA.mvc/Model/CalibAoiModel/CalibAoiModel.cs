@@ -155,7 +155,7 @@ namespace LaserAlignDX.AoiModel
         public void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg)
         {
             var grid = matchResult?.Grid;
-            if (grid == null)
+            if (grid == null || _jxRecipe == null)
                 return;
 
             bool isBlackChip = !_jxRecipe.VisionSettings.Inverse.Value;

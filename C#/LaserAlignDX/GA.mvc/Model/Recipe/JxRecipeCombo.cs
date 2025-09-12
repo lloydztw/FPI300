@@ -28,14 +28,14 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     public class JxRecipeCombo: JxContainer
     {
         public JxAoiRecipe EmptyTrayParams = new JxAoiRecipe() { Name = "EmptyTray.Vision", Description = "(1) 空盤檢測設定" };
-        public JxRecipeParaGrid GaaraParams = new JxRecipeParaGrid() { Name = "GaChip.Vision", Description = "(2) 晶粒檢測設定" };
+        public JxRecipeParaGrid GaGridParams = new JxRecipeParaGrid() { Name = "GaGrid.Vision", Description = "(2) 晶粒陣列設定" };
         
         public override void OnBindingSubItems()
         {
             // 綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
                 EmptyTrayParams,
-                GaaraParams,
+                GaGridParams,
             });
             base.OnBindingSubItems();
         }
@@ -46,7 +46,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             LtDebug.LOG.Debug($"載入 [空盤參數] {emptyTrayRecipeFile}");
 
             EmptyTrayParams.Load(emptyTrayRecipeFile);
-            GaaraParams.Load(null);
+            GaGridParams.Load(null);
             Modified = false;
         }
         public override void Save(string dummyFileName)
@@ -55,7 +55,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             LtDebug.LOG.Debug($"寫入 [空盤參數] {emptyTrayRecipeFile}");
 
             EmptyTrayParams.Save(emptyTrayRecipeFile);
-            GaaraParams.Save(null);
+            GaGridParams.Save(null);
             Modified = false;
         }
     }

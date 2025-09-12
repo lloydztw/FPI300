@@ -374,6 +374,8 @@
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v25.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
+    <Compile Include="GA.mvc\Model\Recipe\Supports\JxMetadataUtil.cs" />
+    <Compile Include="GA.mvc\Model\Recipe\Supports\CsPropertyMetadataUtil.cs" />
     <Compile Include="GA.mvc\Model\SysModel\ITravellerSysModel.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerSysModel.cs" />
     <Compile Include="GA.mvc\Model\Recipe\Enums.cs" />
