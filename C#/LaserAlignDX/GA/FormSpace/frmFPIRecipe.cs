@@ -464,8 +464,9 @@ namespace LaserAlignDX.FormSpace
 
         void openEmptyTrayInspectorTool()
         {
-            var frmOwner = FindForm();
-            var tool = LtAoiFactory.OpenEmptyTrayInspectorTool(frmOwner, bmpToShow: xRecipe.bmpOrg);
+            //var frmOwner = FindForm();
+            //var tool = LtAoiFactory.OpenEmptyTrayInspectorTool(frmOwner, bmpToShow: xRecipe.bmpOrg);
+            GaMvcConfig.OpenEmptyTrayInspectTool(this);
         }
 
         void init_Display()

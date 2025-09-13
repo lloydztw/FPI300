@@ -273,6 +273,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Common\MvRenderActiveX.Net.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.5.2.8\lib\net46\NLog.dll</HintPath>
     </Reference>
@@ -356,6 +359,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v2.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCalibResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCellsResultBoxes.cs" />
@@ -364,24 +368,33 @@
     <Compile Include="GA.mvc\Gui\.Interactor\CviRotRectBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviTransCoordInfo.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\IvDrawItem.cs" />
-    <Compile Include="GA.mvc\Gui\.Interactor\MvdConvertor.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_abs.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaPlcFlyCameraCtrl.cs" />
-    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\Wrappers\PseudoCalibUI.cs" />
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.Designer.cs">
+      <DependentUpon>FormRecipeEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.Designer.cs">
+      <DependentUpon>FormLightControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v25.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
-    <Compile Include="GA.mvc\Model\Recipe\Supports\JxMetadataUtil.cs" />
-    <Compile Include="GA.mvc\Model\Recipe\Supports\CsPropertyMetadataUtil.cs" />
+    <Compile Include="GA.mvc\Model\JxRecipes\Supports\JxMetadataUtil.cs" />
+    <Compile Include="GA.mvc\Model\JxRecipes\Supports\CsPropertyMetadataUtil.cs" />
     <Compile Include="GA.mvc\Model\SysModel\ITravellerSysModel.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerSysModel.cs" />
-    <Compile Include="GA.mvc\Model\Recipe\Enums.cs" />
-    <Compile Include="GA.mvc\Model\Recipe\JxRecipeCombo.cs" />
-    <Compile Include="GA.mvc\Model\Recipe\JxRecipeParaGrid.cs" />
-    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl.cs" />
+    <Compile Include="GA.mvc\Model\JxRecipes\JxRecipeCombo.cs" />
+    <Compile Include="GA.mvc\Model\JxRecipes\JxRecipeParaGrid.cs" />
     <Compile Include="GA.mvc\GaMvcPaths.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\IMainUI.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.cs">
@@ -411,13 +424,6 @@
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiChipCellsViewer\MvsChipCellsViewer.cs" />
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRcpEditorTool.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRcpEditorTool.Designer.cs">
-      <DependentUpon>FormRcpEditorTool.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -636,6 +642,7 @@
     <Compile Include="GA\OPSpace\ChannelBarcodeClass.cs" />
     <Compile Include="GA\OPSpace\MarkItemClass.cs" />
     <Compile Include="GA\OPSpace\ModuleClass.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\Enums.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeBaseClass.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeFPIX3Class.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeMainX2Class.cs" />
@@ -657,6 +664,7 @@
     <Compile Include="GA\ProcessSpace\MainProcess.cs" />
     <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
     <Compile Include="GA\RunSpace\X2\ProcessRunClass.cs" />
+    <Compile Include="GA\Utils\GaMvdConvertor.cs" />
     <Compile Include="LT\DebugUtil\EzTiming.cs" />
     <Compile Include="LT\DebugUtil\LtDebug.cs" />
     <Compile Include="LT\LtAoiFactory.cs" />
@@ -795,8 +803,11 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiChipCellsViewer\JezChipCellsViewPanel.resx">
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRcpEditorTool.resx">
-      <DependentUpon>FormRcpEditorTool.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.resx">
+      <DependentUpon>FormRecipeEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.resx">
+      <DependentUpon>FormLightControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.resx">
       <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>
@@ -941,7 +952,7 @@
     <None Include="GA.mvc\Gui\Readme.md" />
     <None Include="GA.mvc\Model\CustomerModel\Readme.md" />
     <None Include="GA.mvc\Model\Readme.md" />
-    <None Include="GA.mvc\Model\Recipe\Readme.md" />
+    <None Include="GA.mvc\Model\JxRecipes\Readme.md" />
     <None Include="GA.mvc\Readme.md" />
     <None Include="GA\RunSpace\X2\Readme.md" />
     <None Include="LT\UnitTest\Readme.md" />

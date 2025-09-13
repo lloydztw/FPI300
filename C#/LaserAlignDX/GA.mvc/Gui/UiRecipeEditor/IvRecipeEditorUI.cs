@@ -29,20 +29,20 @@ namespace LaserAlignDX.Mvc.Gui
         Button btnGrabImage { get; }
         Button btnSaveImage { get; }
 
-        Button btnPickGoldenEmptyRegion { get; }        // 選取標準 空位 樣本
-        Button btnRunEmptyTrayInspect { get; }          // 空盤檢查
+        RadioButton[] rdoCarriers { get; }
 
-        Button btnPickGoldenChipRegion { get; }         // 選取標準 晶粒 樣本
-        Button btnCreateCellRegions { get; }            // 自動抓取 Cell Regions
+        Button btnPickGoldenChipRegion { get; }         // 選取標準 晶粒區域 樣本
+        Button btnAutoCreateCellRegions { get; }            // 自動抓取 Cell Regions
 
         Button btnOpenTemplateMatchWindow { get; }
         Button btnOpenEmptyTrayWindow { get; }
         Button btnOpenFlyCamRcpWindow { get; }
         Button btnOpenLightCtrlWindow { get; }
+        Button btnWriteCoordsToPlc { get; }
 
         Button btnCancel { get; }
         Button btnOK { get; }
 
-        void UpdateCoordsRef(QVector camPt, QVector motorPt);
+        void UpdateCoordsRef(QVector camPt, QVector worldPtSucker1, QVector worldPtSucker2);
     }
 }

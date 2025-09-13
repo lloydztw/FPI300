@@ -39,8 +39,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Rcp
         JezTransImageViewPanel IvCalibToolUI.ImgViewer => _imp.ImgViewer;
         Button IvCalibToolUI.btnLoadImage => _imp.btnLoadImage;
         Button IvCalibToolUI.btnGrabImage => _imp.btnGrabImage;
-        Button IvCalibToolUI.btnPickupGolden => _imp.btnPickGoldenEmptyRegion;
 
+        Button IvCalibToolUI.btnPickupGolden => null;
         RadioButton[] IvCalibToolUI.rdoCarriers => null;
         RadioButton[] IvCalibToolUI.rdoSuckerRows => null;
         GvCalibPointsDataGridView IvCalibToolUI.dgvCalibPointsListView => null;

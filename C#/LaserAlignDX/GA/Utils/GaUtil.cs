@@ -1,4 +1,19 @@
-﻿using JetEazy.BasicSpace;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-08-11 重新整理 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using JetEazy.BasicSpace;
 using System;
 using System.Drawing;
 using System.Reflection;
@@ -10,45 +25,90 @@ namespace JetEazy.Utils
     public class GaUtil
     {
         // 動詞使用 Clip 比 Bound 合適
-        public static void ClipRect(ref Rectangle InnerRect, Size BoundSize)
+        public static bool Clip(ref Rectangle rect, int boundWidth, int boundHeight)
         {
-            BoundRect(ref  InnerRect, BoundSize);
+            bool isClipped = false;
+            if (rect.X < 0 || rect.Y < 0 || rect.Right > boundWidth || rect.Bottom > boundHeight)
+            {
+                isClipped = true;
+                int x = Math.Max(rect.X, 0);
+                int y = Math.Max(rect.Y, 0);
+                int x2 = Math.Min(rect.Right, boundWidth);
+                int y2 = Math.Min(rect.Bottom, boundHeight);
+                rect.X = x;
+                rect.Y = y;
+                rect.Width = x2 - x;
+                rect.Height = y2 - y;
+            }
+            return isClipped;
         }
-        public static void ClipRect(ref RectangleF InnerRect, Size BoundSize)
+        public static bool Clip(ref RectangleF rect, int boundWidth, int boundHeight)
         {
-            BoundRect(ref InnerRect, BoundSize);
+            bool isClipped = false;
+            if (rect.X < 0 || rect.Y < 0 || rect.Right > boundWidth || rect.Bottom > boundHeight)
+            {
+                isClipped = true;
+                var x = Math.Max(rect.X, 0);
+                var y = Math.Max(rect.Y, 0);
+                var x2 = Math.Min(rect.Right, boundWidth);
+                var y2 = Math.Min(rect.Bottom, boundHeight);
+                rect.X = x;
+                rect.Y = y;
+                rect.Width = x2 - x;
+                rect.Height = y2 - y;
+            }
+            return isClipped;
         }
-        public static int ClipValue(int Value, int Max, int Min)
+        public static bool Clip(ref OpenCvSharp.Rect rect, int boundWidth, int boundHeight)
         {
-            return Math.Max(Math.Min(Value, Max), Min);
+            bool isClipped = false;
+            if (rect.X < 0 || rect.Y < 0 || rect.Right > boundWidth || rect.Bottom > boundHeight)
+            {
+                isClipped = true;
+                var x = Math.Max(rect.X, 0);
+                var y = Math.Max(rect.Y, 0);
+                var x2 = Math.Min(rect.Right, boundWidth);
+                var y2 = Math.Min(rect.Bottom, boundHeight);
+                rect.X = x;
+                rect.Y = y;
+                rect.Width = x2 - x;
+                rect.Height = y2 - y;
+            }
+            return isClipped;
+        }
 
-        }
-        public static float ClipValue(float Value, float Max, float Min)
+        public static bool Clip(ref Rectangle rect, Size boundSize)
         {
-            return Math.Max(Math.Min(Value, Max), Min);
-
+            return Clip(ref rect, boundSize.Width, boundSize.Height);
         }
-
-        public static void BoundRect(ref Rectangle InnerRect, Size BoundSize)
+        public static bool Clip(ref RectangleF rect, Size boundSize)
         {
-            InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
-            InnerRect.Y = Math.Min(Math.Max(InnerRect.Y, 0), (BoundSize.Height - InnerRect.Height < 0 ? 0 : BoundSize.Height - InnerRect.Height));
-
-            if (BoundSize.Width <= InnerRect.X + InnerRect.Width)
-                InnerRect.Width = BoundValue(InnerRect.Width, BoundSize.Width - InnerRect.X, 1);
-            if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
-                InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
+            return Clip(ref rect, boundSize.Width, boundSize.Height);
         }
-        public static void BoundRect(ref RectangleF InnerRect, Size BoundSize)
+
+        public static void BoundRect(ref Rectangle rect, Size boundSize)
         {
-            InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
-            InnerRect.Y = Math.Min(Math.Max(InnerRect.Y, 0), (BoundSize.Height - InnerRect.Height < 0 ? 0 : BoundSize.Height - InnerRect.Height));
-
-            if (BoundSize.Width <= InnerRect.X + InnerRect.Width)
-                InnerRect.Width = BoundValue(InnerRect.Width, BoundSize.Width - InnerRect.X, 1);
-            if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
-                InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
+            //rect.X = Math.Min(Math.Max(rect.X, 0), (boundSize.Width - rect.Width < 0 ? 0 : boundSize.Width - rect.Width));
+            //rect.Y = Math.Min(Math.Max(rect.Y, 0), (boundSize.Height - rect.Height < 0 ? 0 : boundSize.Height - rect.Height));
+            //if (boundSize.Width <= rect.X + rect.Width)
+            //    rect.Width = BoundValue(rect.Width, boundSize.Width - rect.X, 1);
+            //if (boundSize.Height <= rect.Height + rect.Height)
+            //    rect.Height = BoundValue(rect.Height, boundSize.Height - rect.Y, 1);
+            Clip(ref rect, boundSize);
         }
+        public static void BoundRect(ref RectangleF rect, Size boundSize)
+        {
+            //rect.X = Math.Min(Math.Max(rect.X, 0), (boundSize.Width - rect.Width < 0 ? 0 : boundSize.Width - rect.Width));
+            //rect.Y = Math.Min(Math.Max(rect.Y, 0), (boundSize.Height - rect.Height < 0 ? 0 : boundSize.Height - rect.Height));
+
+            //if (boundSize.Width <= rect.X + rect.Width)
+            //    rect.Width = BoundValue(rect.Width, boundSize.Width - rect.X, 1);
+            //if (boundSize.Height <= rect.Height + rect.Height)
+            //    rect.Height = BoundValue(rect.Height, boundSize.Height - rect.Y, 1);
+            Clip(ref rect, boundSize);
+        }
+
+#if (OPT_LEGACY)
         public static int BoundValue(int Value, int Max, int Min)
         {
             return Math.Max(Math.Min(Value, Max), Min);
@@ -57,9 +117,9 @@ namespace JetEazy.Utils
         public static float BoundValue(float Value, float Max, float Min)
         {
             return Math.Max(Math.Min(Value, Max), Min);
-
         }
-        
+#endif
+
         public static void SaveData(string DataStr, string fileName)
         {
             System.IO.StreamWriter stm = null;

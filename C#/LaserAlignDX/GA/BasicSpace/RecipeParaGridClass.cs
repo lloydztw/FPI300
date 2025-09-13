@@ -145,14 +145,14 @@ namespace LaserAlignDX.BasicSpace
 
         [CategoryAttribute(cat2), DescriptionAttribute("1-红光 2-白光 3-红白光")]
         [DisplayName("A01.灯光通道")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(1, 4)]
+        [TypeConverter(typeof(JzEnumConverter))]
         [Browsable(true)]
-        public int xChNum
+        public LightChannelEnum xChNum
         {
-            get { return xRecipe.xChNum; }
-            set { xRecipe.xChNum = value; }
+            get { return (LightChannelEnum)xRecipe.xChNum; }
+            set { xRecipe.xChNum = (int)value; }
         }
+
         [CategoryAttribute(cat2), DescriptionAttribute("0~255")]
         [DisplayName("A02.灯光值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -169,7 +169,6 @@ namespace LaserAlignDX.BasicSpace
         [CategoryAttribute(cat3), DescriptionAttribute("")]
         [DisplayName("A00.平台选择")]
         [TypeConverter(typeof(JzEnumConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(-99999999, 99999999)]
         [Browsable(true)]
         [ReadOnly(false)]
         public StageNumber xStageNumber

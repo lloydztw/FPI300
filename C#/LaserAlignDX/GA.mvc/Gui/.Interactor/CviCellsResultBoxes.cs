@@ -463,8 +463,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 var offset = cellRect.Location;
 
                 // 繪件: 找到的邊線
-                var linesOut = MvdConvertor.ToCSharpLines(offset, cell.cMvdLineSegmentFsOut);
                 //var linesOut = MvdConvertor.ToCSharpLines(cell.cMvdLineSegmentFsOut);
+                var linesOut = GaMvdExt.ToCSharpLines(offset, cell.cMvdLineSegmentFsOut);
                 if (linesOut != null && linesOut.Length > 0)
                     drawItemsOfLinesOutSide.Add(new CviLineSegmentsBox(Color.Cyan, linesOut));
 
@@ -478,8 +478,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 // 繪件: cMvdLineSegmentFsInSide
                 if (_inspectParams.bCheckMeasureOffset)
                 {
-                    var linesIn = MvdConvertor.ToCSharpLines(offset, cell.cMvdLineSegmentFsInSide);
                     //var linesIn = MvdConvertor.ToCSharpLines(cell.cMvdLineSegmentFsInSide);
+                    var linesIn = GaMvdExt.ToCSharpLines(offset, cell.cMvdLineSegmentFsInSide);
                     if (linesIn != null && linesIn.Length > 0)
                         drawItemsOfLinesInSide.Add(new CviLineSegmentsBox(Color.FromArgb(112, 48, 160), linesIn));
                 }
@@ -607,7 +607,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 // (5.1) ROI
                 var cellRect = Rectangle.Round(cell.viewRectF);
                 cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
-                GaUtil.BoundRect(ref cellRect, fullfovBmp.Size);
+                GaUtil.Clip(ref cellRect, fullfovBmp.Size);
                 var roi = JetEazy.Qcvt.CV(cellRect);
 
                 // (5.2) Crop
@@ -669,7 +669,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     // ROI
                     var cellRect = Rectangle.Round(cell.viewRectF);
                     cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
-                    GaUtil.BoundRect(ref cellRect, fullfovBmp.Size);
+                    GaUtil.Clip(ref cellRect, fullfovBmp.Size);
                     var roi = JetEazy.Qcvt.CV(cellRect);
 
                     // Save the crop

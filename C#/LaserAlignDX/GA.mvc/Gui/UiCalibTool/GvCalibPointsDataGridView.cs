@@ -35,8 +35,8 @@ namespace LaserAlignDX.Mvc.Gui
             InitializeComponent();
             setupDataGridView();
             dataGridView1.CellValidating += DataGridView1_CellValidating;
-            dataGridView1.DataError += DataGridView1_DataError;
             dataGridView1.SelectionChanged += DataGridView1_SelectionChanged;
+            dataGridView1.DataError += DataGridView1_DataError;
             //HandleCreated += (s, e) => ActiveRowID = -1;
             initDemoData();
         }
@@ -96,7 +96,7 @@ namespace LaserAlignDX.Mvc.Gui
 
             var headers = new string[]
             {
-                "校正點位",
+                "點位",
                 "相機 X",
                 "相機 Y",
                 "吸嘴馬達 X",
@@ -137,7 +137,7 @@ namespace LaserAlignDX.Mvc.Gui
 
                 if (i == 0)
                 {
-                    column.Width = 100;
+                    column.Width = 80;
                     column.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
                     column.DefaultCellStyle.SelectionBackColor = Color.Gold;
                 }
@@ -148,7 +148,7 @@ namespace LaserAlignDX.Mvc.Gui
                     column.DefaultCellStyle.BackColor = Color.LightGray;
                     column.DefaultCellStyle.SelectionBackColor = Color.LightGray;
                     column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                    column.DefaultCellStyle.Padding = new Padding(0, 0, 28, 0);
+                    column.DefaultCellStyle.Padding = new Padding(0, 0, 2, 0);
                 }
                 else if (i == 3 || i == 4)
                 {
@@ -159,7 +159,7 @@ namespace LaserAlignDX.Mvc.Gui
                     column.DefaultCellStyle.SelectionBackColor = Color.Black;
                     column.DefaultCellStyle.SelectionForeColor = Color.Lime;
                     column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
-                    column.DefaultCellStyle.Padding = new Padding(0, 0, 28, 0);
+                    column.DefaultCellStyle.Padding = new Padding(0, 0, 2, 0);
                     column.DefaultCellStyle.Font = new Font(this.Font, FontStyle.Bold);
                 }
 
@@ -171,10 +171,10 @@ namespace LaserAlignDX.Mvc.Gui
         {
             // 新增一些範例資料
             dataGridView1.Rows.Clear();
-            dataGridView1.Rows.Add("左上", 1000, 1000, 100.0, 100.0);
-            dataGridView1.Rows.Add("右上", 8000, 1000, 500.0, 100.0);
-            dataGridView1.Rows.Add("右下", 8000, 8000, 500.0, 500.0);
-            dataGridView1.Rows.Add("左下", 1000, 8000, 100.0, 500.0);
+            dataGridView1.Rows.Add("左上", 10000, 10000, -1000.0, -1200.0);
+            dataGridView1.Rows.Add("右上", 38000, 10000, -500.0, -100.0);
+            dataGridView1.Rows.Add("右下", 38000, 18000, -500.0, -500.0);
+            dataGridView1.Rows.Add("左下", 10000, 38000, -1000.0, -1500.0);
         }
         private int getDgvActiveSelectedIndex()
         {

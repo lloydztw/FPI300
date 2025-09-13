@@ -14,19 +14,30 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
+using LaserAlignDX.BasicSpace;
+using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using LeTian.JxProps;
+using Newtonsoft.Json;
 using Traveller106;
 
 namespace LaserAlignDX.Mvc.Model.Recipe
 {
     /// <summary>
-    /// 統合 JxAoiRecipe (空盤檢測參數) 
-    /// 與 RecipeFPIX3Class 
-    /// 與 RecipeParaGridClass
+    /// 統合 
+    ///     RecipeFPIX3Class 
+    ///     RecipeParaGridClass
+    ///     JxAoiRecipe (空盤檢測參數)
     /// </summary>
     public class JxRecipeCombo: JxContainer
     {
+        #region GAARA_RECIPE
+        [JsonIgnore]
+        public RecipeFPIX3Class xRecipe => RecipeFPIX3Class.Instance;
+        [JsonIgnore]
+        public RecipeParaGridClass xParamGrid => RecipeParaGridClass.Instance;
+        #endregion
+
         public JxAoiRecipe EmptyTrayParams = new JxAoiRecipe() { Name = "EmptyTray.Vision", Description = "(1) 空盤檢測設定" };
         public JxRecipeParaGrid GaGridParams = new JxRecipeParaGrid() { Name = "GaGrid.Vision", Description = "(2) 晶粒陣列設定" };
         
@@ -44,18 +55,20 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         {
             string emptyTrayRecipeFile = LtAoiFactory.RcpGetRecipeFileName(null);
             LtDebug.LOG.Debug($"載入 [空盤參數] {emptyTrayRecipeFile}");
-
             EmptyTrayParams.Load(emptyTrayRecipeFile);
+
             GaGridParams.Load(null);
+
             Modified = false;
         }
         public override void Save(string dummyFileName)
         {
             string emptyTrayRecipeFile = LtAoiFactory.RcpGetRecipeFileName(null);
             LtDebug.LOG.Debug($"寫入 [空盤參數] {emptyTrayRecipeFile}");
-
             EmptyTrayParams.Save(emptyTrayRecipeFile);
+
             GaGridParams.Save(null);
+
             Modified = false;
         }
     }

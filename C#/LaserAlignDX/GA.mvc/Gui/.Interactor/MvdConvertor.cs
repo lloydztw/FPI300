@@ -39,6 +39,7 @@ namespace LaserAlignDX
             box2D.SetTheta(angle * Math.PI / 180);
             return box2D;
         }
+
         public static PointF[] ToCSharpLine(this CMvdLineSegmentF mvdLine)
         {
             if(mvdLine == null) 

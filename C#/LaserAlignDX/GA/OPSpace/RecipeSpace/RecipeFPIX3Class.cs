@@ -2,12 +2,9 @@
 using Eazy_Project_III;
 using FreeImageAPI;
 using JetEazy;
-using JetEazy.Match;
-using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
-using LaserAlignDX.Model.Coords;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -46,67 +43,80 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         void dispose()
         {
-            // To DO: 請把自己清乾淨
+            // To DO: 請重新檢查一遍, 把自己清乾淨 !!!
             mvdprinttemp_Find?.Dispose();
             mvdprinttemp_Find = null;
+
+            bmpOrg?.Dispose();
+            bmpOrg = null;
+            bmpOrgFly?.Dispose();
+            bmpOrgFly = null;
+            bmpOrgNoTray?.Dispose();
+            bmpOrgNoTray = null;
         }
 
+        /// <summary>
+        /// 個別 晶粒區域 (位於格點範圍)
+        /// 這應該放在 AoiResult 而不是 Recipe 區
+        /// </summary>
         public List<RegionCellX3Class> xRegionCells = new List<RegionCellX3Class>();
+        /// <summary>
+        /// 個別 疑似異物區塊 (位於格點範圍外)
+        /// 這應該放在 AoiResult 而不是 Recipe 區
+        /// </summary>
         public List<Rectangle> xOutBlocs = new List<Rectangle>();
 
+        #region FULL_FOV_BITMAPS
         public Bitmap bmpOrg = new Bitmap(1, 1);
-        public Bitmap bmpOrgNoTray = new Bitmap(1, 1);
         public Bitmap bmpOrgFly = new Bitmap(1, 1);
-        //public Bitmap bmpbase0 = new Bitmap(1, 1);
-        //public Bitmap bmpbase1 = new Bitmap(1, 1);
-        //public Bitmap bmptemplate0 = new Bitmap(1, 1);
-        //public Bitmap bmptemplate1 = new Bitmap(1, 1);
-        //public System.Drawing.PointF template0Center = new System.Drawing.PointF(0, 0);
-        //public System.Drawing.PointF template1Center = new System.Drawing.PointF(0, 0);
-        //public System.Drawing.PointF distancebase0tobase1 = new System.Drawing.PointF(0, 0);
+        public Bitmap bmpOrgNoTray = new Bitmap(1, 1);
+        #endregion
 
+        #region GOLDEN_REGION_TEMPLATE_晶粒區域樣本
         /// <summary>
-        /// Golden Region Cell (粗框)
+        /// Golden Region Cell (晶粒區域粗框)
         /// </summary>
         public RectangleF xRectRegionPrint = new RectangleF(0, 0, 100, 100);
+        /// <summary>
+        /// Golden Region Bitmap (晶粒區域粗框)
+        /// </summary>
         public Bitmap bmpprinttemplate = new Bitmap(1, 1);
+        #endregion
+
+        #region DEFECT_INSPECTOR_TEMPLATE_瑕疵檢所用到的樣本
         public Bitmap bmpprintmask = new Bitmap(1, 1);
         public Bitmap bmpDefectTemplate = new Bitmap(1, 1);
-        //{
-        //    get
-        //    {
-        //        var rectF = xRegionTrain;
-        //        BoundRect(ref rectF, bmpprinttemplate.Size);
-        //        return (Bitmap)bmpprinttemplate.Clone(rectF, bmpprinttemplate.PixelFormat);
-        //    }
-        //}
+        #endregion
 
         /// <summary>
         /// Golden Chip Rect
-        /// 位於 Golden Region Cell (xRectRegionPrint) 之內
+        /// 更精確(內縮)的晶粒矩形區域
+        /// 位於 Golden Region (xRectRegionPrint) 之內
         /// 相對於 xRectRegionPrint 的左上角為零點
         /// </summary>
         public RectangleF xRegionTrain = new RectangleF(0, 0, 100, 100);
 
+        #region LINE_BORDER_BOXES
+        /// <summary>
+        /// 邊線框
+        /// </summary>
         public RectangleF xLineLeft = new RectangleF(0, 0, 100, 100);
         public RectangleF xLineTop = new RectangleF(0, 0, 100, 100);
         public RectangleF xLineRight = new RectangleF(0, 0, 100, 100);
         public RectangleF xLineBottom = new RectangleF(0, 0, 100, 100);
+        #endregion
 
+        #region EMPTY_TRAY_TEMPLATE_空盤樣本_目前沒用到
         public RectangleF xRectRegionPrintNoTray = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpprintNoTraytemplate = new Bitmap(1, 1);
+        #endregion
 
+        #region FLY_CAMERA_TEMPLATE_飛拍樣本
         public RectangleF xRectRegionPrintFly = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpprintFlytemplate = new Bitmap(1, 1);
+        #endregion
 
-        //public Bitmap bmpprint = new Bitmap(1, 1);
-        //public Bitmap bmpprinttemp = new Bitmap(1, 1);
-        //public RectangleF xRectRegionBase0 = new RectangleF(0, 0, 100, 100);
-        //public RectangleF xRectRegionBase1 = new RectangleF(0, 0, 100, 100);
-
-        //public MvdFindClass mvdbase0_Find = new MvdFindClass();
-        //public MvdFindClass mvdbase1_Find = new MvdFindClass();
-
+        #region MVD_AOI_TOOLS_RUNTIME_海康工具相關成員
         public PointF ptPrinttemp = new PointF(-1, -1);
         public MVD_CHIP_MATCHER mvdprinttemp_Find = new MVD_CHIP_MATCHER();
 
@@ -117,36 +127,39 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         public RectangleF xRectCodeRegion = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpcodetemplate = new Bitmap(1, 1);
+        #endregion
 
-        public int xRow = 1;
-        public int xColumn = 1;
-        public int xLeftTopX = 1;
-        public int xLeftTopY = 1;
-        public float xRowOffset = 2f;
-        public float xColumnOffset = 2f;
-        public float xChipWidth = 10;
-        public float xChipHeight = 10;
-        public int xExtendx = 100;
-        public int xExtendy = 100;
-        public float xAngle = 0;
-
-        public int xChNum = 1;
-        public int xChValue = 255;
+        #region 參數區_Persistance_Of_RecipeParaGridClass
+        // 以下成員, 是讓 RecipeParaGridClass 來進行 ini 存取 
+        internal int xRow = 1;
+        internal int xColumn = 1;
+        internal int xLeftTopX = 1;
+        internal int xLeftTopY = 1;
+        internal float xRowOffset = 2f;
+        internal float xColumnOffset = 2f;
+        internal float xChipWidth = 10;
+        internal float xChipHeight = 10;
+        internal int xExtendx = 100;
+        internal int xExtendy = 100;
+        internal float xAngle = 0;
+        internal int xChNum = 1;
+        internal int xChValue = 255;
         //public int xUseStageNo = 0;
-        public StageNumber xStageNumber = StageNumber.N0;
+        internal StageNumber xStageNumber = StageNumber.N0;
+        #endregion
 
         public string xLotNoStr = "NONE";
 
+        #region NO_USE_本專案沒用到_但是這應該放在_AOI_RESULT_區域
         public int PassCount = 0;
         public int NGCount = 0;
+        #endregion
 
         #region 实际矩阵XY
-
         public float xRealLeftX = 0;
         public float xRealLeftY = 0;
         public float xRealOffsetX = 1;
         public float xRealOffsetY = 1;
-
         #endregion
 
         public override void Load(bool eCancel = false)
@@ -227,7 +240,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 if (System.IO.File.Exists(bmporgpath))
                 {
                     FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgpath);
-                    bmpOrg.Dispose();
+                    bmpOrg?.Dispose();
                     bmpOrg = (Bitmap)freeImageBitmap.ToBitmap().Clone(
                                                                new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
                                                                freeImageBitmap.PixelFormat);
@@ -357,7 +370,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
                 //建立所有的region
                 CreateViews();
+
                 int iOK = ViewTrainLoad();
+
                 if (iOK != 0)
                     JetEazy.BasicSpace.VsMSG.Instance.Warning($"加载参数训练失败！");
             }
@@ -406,8 +421,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             string bmporgFlypath = $"{PathIndexStr}\\orgFly.bmp";
             bmpOrgFly.Save(bmporgFlypath, System.Drawing.Imaging.ImageFormat.Bmp);
 
-            //建立所有的region
+            // 建立所有的 region
             CreateViews();
+
             int iOK = ViewTrainLoad();
             if (iOK != 0)
                 JetEazy.BasicSpace.VsMSG.Instance.Warning($"加载参数训练失败！");
@@ -474,7 +490,16 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Collect", "xLotNoStr", xLotNoStr, INIFILE);
         }
 
-        #region 定位TRAIN&RUN
+        #region AOI_FUNCTIONS_FOR_CHIP_LOCATE_TRAIN_AND_RUN_晶粒定位的相關像測函式
+        //----------------------------------------------------------------------
+        // 這些應該放在 AOI MODEL 
+        //----------------------------------------------------------------------
+        // Recipe 是配方材料 (食譜食材)
+        // AoiModel 才是主角 (廚師)
+        //      出各種飯局料理 是 廚師 而不是 食譜食材
+        //      一隻雞 會自己剁雞腿 變成 滷雞腿 或 炸雞腿 是非常違反常理的謬異.
+        //----------------------------------------------------------------------
+
         public Size PrintTemplateSize
         {
             get
@@ -541,7 +566,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //    return (bOK ? 0 : -1);
         //}
 
-
         public int PrintTempFlyTrain()
         {
             mvdprintFlytemp_Find.bmpObj_Image?.Dispose();
@@ -576,7 +600,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //    bool bOK = mvdprintFlytemp_Find.HikRun3(eRectF);
         //    return (bOK ? 0 : -1);
         //}
-
 
         public bool CheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> m_list, out float retAngle, out PointF retCenter)
         {
@@ -696,11 +719,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             cBlobFindToolObj = null;
             return bOK;
         }
-
         #endregion
 
-        #region TCP_DATA
-
+        #region TCP_DATA_沒用到
+#if (OPT_TCP_DATA)
         public int SetByPass(bool[] eBypass)
         {
             if (eBypass == null)
@@ -780,8 +802,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //}
             return isgood;
         }
-
-        #endregion 
+#endif
+        #endregion
 
         #region 统计数据
 
@@ -856,6 +878,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         #endregion
 
+        #region 校正與座標轉換_GAARA_版本
+        /// <summary>
+        /// 校正與座標轉換: 第一吸嘴排. (GAARA版)
+        /// (載台: 由 xStageNumber Runtime 決定)
+        /// </summary>
         public LineScanCalibrateClass lineScanCalibrate
         {
             get
@@ -864,13 +891,17 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 {
                     case StageNumber.N1:
                         return Traveller106.Universal.LineScanCalibrateClasses[2];  //Carrier2 Sucker1
-                        //break;
+                                                                                    //break;
                     default:
                         return Traveller106.Universal.LineScanCalibrateClasses[0];  //Carrier1 Sucker1
                         //break;
                 }
             }
         }
+        /// <summary>
+        /// 校正與座標轉換: 第一吸嘴排. (GAARA版)
+        /// (載台: 由 xStageNumber Runtime 決定)
+        /// </summary>
         public LineScanCalibrateClass lineScanCalibrate2
         {
             get
@@ -886,27 +917,34 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 }
             }
         }
-
         /// <summary>
-        /// Camera Coordinates [row=0, col=0] 的框選方塊.
+        /// Golden Chip 中心點 pixel coordinates, 以 Golden Region (xRectRegionPrint) 左上角 當相對原點.
+        /// (用於 GAARA版 校正與座標轉換)
         /// </summary>
-        RectangleF LeftTopRect
-        {
-            get { return xRegionTrain; }
-        }
         PointF LeftTopRectCenter
         {
             get
             {
+                var LeftTopRect = xRegionTrain;
                 PointF ptCenter
                     = new PointF(LeftTopRect.X + LeftTopRect.Width / 2 + xRectRegionPrint.X,
                                  LeftTopRect.Y + LeftTopRect.Height / 2 + xRectRegionPrint.Y);
                 return ptCenter;
             }
         }
+        #endregion
 
-        public int ViewTrainLoad()
+        /// <summary>
+        /// 只被 Load function 內部調用 海康的 Train functions. 
+        /// (1) PrintTempTrain
+        /// (2) PrintTempFlyTrain
+        /// </summary>
+        private int ViewTrainLoad()
         {
+            //-----------------------------------------------------------------------------
+            // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
+            // 不應該由 Recipe 自己調用 !
+            //-----------------------------------------------------------------------------
             int iret = 0;// Base0Train();
             //if (iret == 0)
             //    iret = Base1Train();
@@ -937,14 +975,26 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         /// <summary>
-        /// 這個應該是放在 AoiModel 內
+        /// 創建 RegionCells.
+        /// (這個應該是放在 AOI MODEL 內)
         /// </summary>
         public void CreateViews(bool writeback = false)
         {
-            // 暫時 掛載此處 ...
+            //-----------------------------------------------------------------------------
+            // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
+            // 不應該由 Recipe 自己調用 !
+            //-----------------------------------------------------------------------------
+            // 暫時 醜醜的 掛在此處 ...
             GaMvcConfig.SysModel.ApplyRecipe(null, writeback);
             return;
+        }
 
+        /// <summary>
+        /// 創建 RegionCells. (Gaara 版)
+        /// (這個應該是放在 AOI MODEL 內)
+        /// </summary>
+        void CreateViews_Gaara()
+        { 
             xRegionCells.Clear();
 
             PointF ptworld = lineScanCalibrate.ViewToWorld(LeftTopRectCenter);
@@ -1037,7 +1087,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //}
         }
 
-#if (MY_BACKUP)
+#if (GAARA_OLD_BACKUP)
 
         public void CreateViews()
         {
@@ -1115,14 +1165,15 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 #endif
 
 
+        #region MISC_UTIL_FUNCTIONS
         /// <summary>
-        /// 绕任意点旋转一个点 (這個應該放在 Util class 內)
+        /// 绕任意点旋转一个点 (這個應該放在 Util 模塊內)
         /// </summary>
         /// <param name="pointToRotate">要旋转的点</param>
         /// <param name="pivotPoint">旋转中心点</param>
         /// <param name="angleDegrees">旋转角度(度)</param>
         /// <returns>旋转后的新点</returns>
-        PointF RotatePointAroundPivot(PointF pointToRotate, PointF pivotPoint, double angleDegrees)
+        static PointF RotatePointAroundPivot(PointF pointToRotate, PointF pivotPoint, double angleDegrees)
         {
             // 将角度转换为弧度
             double angleRadians = angleDegrees * Math.PI / 180.0;
@@ -1146,6 +1197,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             return finalPoint;
         }
+        #endregion
     }
 
     public class FlyParaClass : RecipeBaseClass

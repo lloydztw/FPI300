@@ -136,9 +136,18 @@ namespace LeTian.JxProps.PropertyMeta
                 };
             }
         }
-        public IProp[] GetProps()
+        public IProp[] GetBrowsableProps()
         {
-            return _propsDict.Keys.ToArray();
+            var props = new List<IProp>();
+            foreach(var jxProp in _propsDict.Keys)
+            {
+                if (_propsDict.TryGetValue(jxProp, out JxMeta meta))
+                {
+                    if (meta != null && meta.MetaData.Browsable)
+                        props.Add(jxProp);
+                }
+            }
+            return props.ToArray();
         }
     }
 }

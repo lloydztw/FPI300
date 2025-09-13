@@ -45,5 +45,10 @@ namespace LaserAlignDX.Mvc.Model
         ///// 將座標數據 寫入 PLC
         ///// </summary>
         bool WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camCoord, out PointF suckerCoord, out string msg);
+
+        /////// <summary>
+        /////// 將 所有 座標數據 寫入 PLC
+        /////// </summary>
+        //bool WriteAllCoordsToPlc(out string msg);
     }
 }

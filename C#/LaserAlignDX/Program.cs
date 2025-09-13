@@ -26,6 +26,7 @@ namespace LaserAlignDX
             }
 
             //var frm = new Mvc.Gui.FormCalibrationTool();
+            //var frm = new Mvc.Gui.FormRecipeEditor();
             var frm = new Traveller106.frmMainDX();
             Application.Run(frm);
         }

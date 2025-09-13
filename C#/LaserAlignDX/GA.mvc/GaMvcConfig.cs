@@ -16,12 +16,14 @@
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
+using System.Windows.Forms;
+using Traveller106;
 
-
-//using FormCalibrationTool = LaserAlignDX.FormSpace.FPI30Form.frmCalibration;
-using FormRcpEditorTool = LaserAlignDX.FormSpace.frmFPIRecipe;
 using FormCalibrationTool = LaserAlignDX.Mvc.Gui.FormCalibrationTool;
+//using FormCalibrationTool = LaserAlignDX.FormSpace.FPI30Form.frmCalibration;
+//using FormRcpEditorTool = LaserAlignDX.FormSpace.frmFPIRecipe;
 //using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRcpEditorTool;
+using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 
 
@@ -90,6 +92,13 @@ namespace LaserAlignDX
             {
                 dlg.ShowDialog();
             }
+
+            //為安全起見, 重新再次載入 RecipeCombo
+            SysModel.ApplyRecipe();
+        }
+        public static void OpenEmptyTrayInspectTool(Form frmOwner)
+        {
+            LtAoiFactory.OpenEmptyTrayInspectorTool(frmOwner, null);
 
             //為安全起見, 重新再次載入 RecipeCombo
             SysModel.ApplyRecipe();

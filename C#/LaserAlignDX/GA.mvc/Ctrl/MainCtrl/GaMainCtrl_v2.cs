@@ -1379,7 +1379,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     break;
             }
 
-            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFlyOperate);
 
             flystopwatch.Stop();
             long ms = flystopwatch.ElapsedMilliseconds;
@@ -1566,7 +1566,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     break;
             }
 
-            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
+            CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFlyOperate);
 
             flystopwatch.Stop();
             long ms = flystopwatch.ElapsedMilliseconds;

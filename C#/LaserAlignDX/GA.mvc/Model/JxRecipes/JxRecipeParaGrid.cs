@@ -17,22 +17,29 @@ using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.JxProps;
 using LeTian.JxProps.PropertyMeta;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Newtonsoft.Json;
+using System.Drawing;
 
 namespace LaserAlignDX.Mvc.Model.Recipe
 {
     public abstract class JxGaBase : JxContainer
     {
-        protected static RecipeParaGridClass xParaGrid => RecipeParaGridClass.Instance;
+        #region GAARA_RECIPES
+        [JsonIgnore]
+        public static RecipeFPIX3Class xRecipe => RecipeFPIX3Class.Instance;
+        [JsonIgnore]
+        public static RecipeParaGridClass xParaGrid => RecipeParaGridClass.Instance;
+        #endregion
+
         public override void Load(string fileName)
         {
-            Modified = false;
+            //由上層 container 處理
+            //Modified = false;
         }
         public override void Save(string fileName)
         {
-            Modified = false;
+            //由上層 container 處理
+            //Modified = false;
         }
     }
 
@@ -41,15 +48,37 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     /// </summary>
     public class JxRecipeParaGrid : JxGaBase
     {
-        public JxBitmap ChipGoldenBmp = new JxBitmap("ChipGoldenBmp", "晶粒模板樣本");
         public JxRecipeParaGrid_Cate1 Cate1 = new JxRecipeParaGrid_Cate1() { Name = "Cate1", Description = "01.基础设定" };
         public JxRecipeParaGrid_Cate2 Cate2 = new JxRecipeParaGrid_Cate2() { Name = "Cate2", Description = "02.其他设定" };
         public JxRecipeParaGrid_Cate3 Cate3 = new JxRecipeParaGrid_Cate3() { Name = "Cate3", Description = "03.位置矩阵设定" };
+
+        //public JxBitmap ChipGoldenRegionBmp = new JxBitmap("ChipGoldenRegionBmp", "晶粒區域樣本(Region)");
+        //public JxBase<RectangleF> ChipGoldenRegionRect = new JxBase<RectangleF>("ChipGoldenRegionRect", "晶粒區域(隱藏)");
+
+        public JxRecipeParaGrid()
+        {
+            //ChipGoldenRegionBmp.OnModified += (s, e) =>
+            //{
+            //    var old = xRecipe.bmpprinttemplate;
+            //    xRecipe.bmpprinttemplate = (Bitmap)ChipGoldenRegionBmp.Value?.Clone();
+            //    old?.Dispose();
+            //};
+            //ChipGoldenRegionRect.OnModified += (s, e) =>
+            //{
+            //    xRecipe.xRectRegionPrint = ChipGoldenRegionRect.Value;
+            //};
+        }
         public override void OnBindingSubItems()
         {
+            //// ChipGoldenRectionBmp 對應到 xRecipe.bmpprinttemplate
+            //ChipGoldenRegionBmp.Value = (Bitmap)xRecipe?.bmpprinttemplate?.Clone();
+            //// ChipGoldenRegionRect 對應到 xRecipe.xRectRegionPrint
+            //ChipGoldenRegionRect.Value = xRecipe.xRectRegionPrint;
+
             // 綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
-                ChipGoldenBmp,
+                //ChipGoldenRegionBmp,
+                //ChipGoldenRegionRect,
                 Cate1,
                 Cate2,
                 Cate3,
@@ -66,7 +95,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         JxMetaContainer _metaData = new JxMetaContainer(xParaGrid, "00.基础设定");
         public override void OnBindingSubItems()
         {
-            BindItems(_metaData.GetProps());
+            BindItems(_metaData.GetBrowsableProps());
             base.OnBindingSubItems();
         }
     }
@@ -80,9 +109,9 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         public JxInt LightAmp = JxInt.C255("LightAmp", "A02.灯光值");
         public JxRecipeParaGrid_Cate2()
         {
-            LightChannel.Value = (LightChannelEnum)xParaGrid.xChNum;
+            LightChannel.Value = xParaGrid.xChNum;
             LightAmp.Value = xParaGrid.xChValue;
-            LightChannel.OnModified += (s, e) => xParaGrid.xChNum = (int)LightChannel.Value;
+            LightChannel.OnModified += (s, e) => xParaGrid.xChNum = LightChannel.Value;
             LightAmp.OnModified += (s, e) => xParaGrid.xChValue = LightAmp.Value;
         }
         public override void OnBindingSubItems()
@@ -102,9 +131,10 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     public class JxRecipeParaGrid_Cate3 : JxGaBase
     {
         JxMetaContainer _metaData = new JxMetaContainer(xParaGrid, "03.位置矩阵设定");
+
         public override void OnBindingSubItems()
         {
-            BindItems(_metaData.GetProps());
+            BindItems(_metaData.GetBrowsableProps());
             base.OnBindingSubItems();
         }
     }
