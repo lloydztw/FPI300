@@ -219,9 +219,5 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xRealOffsetY; }
             set { xRecipe.xRealOffsetY = value; }
         }
-
     }
-
-
-
 }

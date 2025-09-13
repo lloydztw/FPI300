@@ -580,7 +580,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             {
                 mxSimPlcStageID(targetID);
                 mxReadPlcStageID(out var activeID);
-                updatePlcStageIdToGui(activeID);
+                updateCarrierID(activeID);              // By Simulation
             }
             bool ok = _currentCarrierID == targetID;
             return ok;
@@ -615,13 +615,18 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
         }
-        void updatePlcStageIdToGui(CarrierEnum carrierID, bool force = false)
+        void updateCarrierID(CarrierEnum carrierID, bool force = false)
         {
             if (_currentCarrierID != carrierID || force)
             {
                 _currentCarrierID = carrierID;
                 _DSMains[0].IsActive = _currentCarrierID == CarrierEnum.C1;
                 _DSMains[1].IsActive = _currentCarrierID == CarrierEnum.C2;
+
+                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+                _sysModel.ActiveCarrierID = carrierID;
+                _sysModel.ApplyRecipe();
+                GaUtil.SetCursor(_wndOwner, oldCursor);
             }
         }
         #endregion
@@ -632,7 +637,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             TickAllProcesses();
 
             mxReadPlcStageID(out var carrierID);
-            updatePlcStageIdToGui(carrierID);
+            updateCarrierID(carrierID);             //by PLC Tick
         }
 
         void CGOperate()

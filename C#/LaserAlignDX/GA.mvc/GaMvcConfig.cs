@@ -13,9 +13,13 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector;
+using JetEazy.EzImage;
+using JetEazy.OpenCV;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
@@ -79,30 +83,63 @@ namespace LaserAlignDX
         // VIEW ----------------------------------------------------
         public static void OpenRecipeEditor()
         {
+            var backID = _sysModel.ActiveCarrierID;
+
             using (var dlg = new FormRcpEditorTool())
             {
                 dlg.ShowDialog();
             }
 
-            //為安全起見, 重新再次載入 RecipeCombo
-            SysModel.ApplyRecipe();
+            //為安全起見, 重新再次載入 Recipe
+            _sysModel.ActiveCarrierID = backID;
+            _sysModel.ApplyRecipe();
         }
         public static void OpenCalibrationTool()
         {
+            var backID = _sysModel.ActiveCarrierID;
+
             using (var dlg = new FormCalibrationTool())
             {
                 dlg.ShowDialog();
             }
 
-            //為安全起見, 重新再次載入 RecipeCombo
-            SysModel.ApplyRecipe();
+            //為安全起見, 重新再次載入 Recipe
+            _sysModel.ActiveCarrierID = backID;
+            _sysModel.ApplyRecipe();
         }
-        public static void OpenEmptyTrayInspectTool(Form frmOwner, Bitmap bmpToShow = null)
+        public static void OpenEmptyTrayInspectTool(Form owner, string recipeName = null, Bitmap bmpToShow = null)
         {
-            LtAoiFactory.OpenEmptyTrayInspectorTool(frmOwner, null, bmpToShow);
+            if (recipeName == null)
+                recipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
 
-            //為安全起見, 重新再次載入 RecipeCombo
-            SysModel.ApplyRecipe();
+            var frm = AoiFactory.OpenEmptyTrayInspectorTool(owner, recipeName);
+            if (frm == null)
+                return;
+
+            if (bmpToShow != null)
+            {
+                frm.Load += (s, e) =>
+                {
+                    new Action(() =>
+                    {
+                        System.Threading.Thread.Sleep(2000);
+                        PushBitmapToEmptyTrayTool(bmpToShow, $"[參數] {recipeName} (bmpOrg)");
+                    }).BeginInvoke(null, null);
+                };
+            }
+
+            frm.ShowDialog(owner);
+
+            // RESERVED 重新再次載入 RecipeCombo
+            //_sysModel.ApplyRecipe();
+        }
+        public static void PushBitmapToEmptyTrayTool(Bitmap bmp, string name)
+        {
+            using (var bridge = new QxImageBridge(bmp))
+            {
+                var qImg = new EzQuickImage(bridge.Image, true);
+                AoiFactory.PushImage(qImg, name);
+            }
         }
 
         // Dispose -------------------------------------------------

@@ -14,6 +14,7 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy.Match;
 using JetEazy.QMath;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
@@ -40,7 +41,16 @@ namespace LaserAlignDX.Mvc.Model
         
         JxRecipeCombo GetCurrentRecipe();
 
+        CarrierEnum ActiveCarrierID { get; set; }
+
         void ApplyRecipe(string gaaraRecipeName = null, bool optWritebackToRecipe = false);
+
+        /// <summary>
+        /// 利用 EmptyTrayAoi 偵測 空盤格點
+        /// </summary>
+        MatchResult DetectCameraGrid(Bitmap fullfovBmp);
+
+        void BuildCellRegions(CarrierEnum C, EzBlocsGrid camGrid, bool optWriteBlackToRecipe = false);
 
         /// <summary>
         /// 取得 PLC 所需的參考座標

@@ -13,10 +13,11 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector;
 using EzAoiEmptyTrayInspector.Model;
-using JetEazy.BasicSpace;
-using JetEazy.Machine;
+using JetEazy.EzImage;
 using JetEazy.Match;
+using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.AoiModel;
@@ -26,24 +27,22 @@ using LaserAlignDX.Mvc.Model.Recipe;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
+using LeTian.JxRecipesTool;
 using NeedleX.ProcessSpace;
 using System;
 using System.Drawing;
-using System.Linq;
-using System.Windows.Documents;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
-using ZXing.Client.Result;
+using EmptyTrayAoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
+
 
 namespace LaserAlignDX.Mvc.Model
 {
     public class TravellerSysModel : ITravelerModel
     {
         public event EventHandler<ProcessEventArgs> OnError;
-        public CarrierEnum ActiveCarrierID
-        {
-            get => CarrierEnum.C1;
-        }
+
+
 
         #region SINGLETON
         static TravellerSysModel _instance;
@@ -52,9 +51,12 @@ namespace LaserAlignDX.Mvc.Model
         }
         #endregion
 
+        #region GLOBAL_MESS
+        RecipeFPIX3Class xRecipe => RecipeFPIX3Class.Instance;
+        #endregion
+
         #region AOI_MODELS
         IProcessRunFPI _aoiModel;
-        IxEmptyTrayInspector _aoiEmptyTrayModel;
         ICalibAoiModel _calibModel;
         JxRecipeCombo _jxRecipe;
         #endregion
@@ -82,9 +84,6 @@ namespace LaserAlignDX.Mvc.Model
             _aoiModel?.Dispose();
             _aoiModel = null;
 
-            _aoiEmptyTrayModel?.Dispose();
-            _aoiEmptyTrayModel = null;
-
             _calibModel?.Dispose();
             _calibModel = null;
 
@@ -95,6 +94,7 @@ namespace LaserAlignDX.Mvc.Model
             _jxRecipe = null;
 
             TravellerBigImagesHolder.DisposeAll();
+            EmptyTrayAoiFactory.DisposeAll();
 
             _instance = null;
         }
@@ -118,8 +118,9 @@ namespace LaserAlignDX.Mvc.Model
         {
             get
             {
-                _aoiEmptyTrayModel = AoiEmptyTrayInspector.Instance;
-                return _aoiEmptyTrayModel;
+                var recipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
+                var emptyTrayAoi = EmptyTrayAoiFactory.InstanceModel(recipeName);
+                return emptyTrayAoi;
             }
         }
         public TravellerTransforms TransformsModel
@@ -135,66 +136,79 @@ namespace LaserAlignDX.Mvc.Model
         {
             return _jxRecipe;
         }
-        public void ApplyRecipe(string gaaraRecipeName, bool optWritebackToRecipe = false)
+
+        public CarrierEnum ActiveCarrierID
         {
-            if (gaaraRecipeName == null)
-                gaaraRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
-
-            if (_jxRecipe == null || _jxRecipe.Name != gaaraRecipeName)
-            {
-                var old = _jxRecipe;
-                _jxRecipe = new JxRecipeCombo() { Name = gaaraRecipeName };
-                _jxRecipe.Load(null);
-                old?.Dispose();
-            }
-
-            applyRecipe(_jxRecipe, optWritebackToRecipe);
+            get;
+            set;
         }
 
-        #region PRIVATE_FUNCTIONS
-        void applyRecipe(JxRecipeCombo recipe, bool optWritebackToRecipe)
+        public void ApplyRecipe(string gaaraRecipeName = null, bool optWritebackToRecipe = false)
         {
             // 載入 TransformsModel 設定 (全域)
             var transformsModel = TransformsModel;
             transformsModel.Load(GaMvcPaths.CALIB_TRANSFORMS_FILE);
             transformsModel.BuildAll();
 
-            // 強制重新載入 Camera Grid (個別參數)
-            var traySettings = recipe.EmptyTrayParams.TrayMiscSettings;
-            var camGrid = traySettings.GetGoldenGrid(reload: true);
-            if (camGrid != null)
+            // 載入 Camera Grid (保存在個別參數)
+            EzBlocsGrid camGrid = ActiveCarrierID == CarrierEnum.C1 ?
+                                    xRecipe.xCamGrid1 :
+                                    xRecipe.xCamGrid2;
+
+            if (checkCamGrid(ActiveCarrierID, camGrid) != null)
+                return;
+
+            // Config Plc Grid
+            var rows = camGrid.Rows;
+            var cols = camGrid.Cols;
+            //var pitchX = (double)traySettings.PitchX.Value;
+            //var pitchY = (double)traySettings.PitchY.Value;
+            double pitchX = xRecipe.xRealOffsetX;
+            double pitchY = xRecipe.xRealOffsetY;
+            transformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
+
+            //BuildCellRegions(ActiveCarrierID, camGrid, optWritebackToRecipe);
+
+            //// 將參數餵給其他子系統 (Child Models)
+            //EmptyTrayAoiModel.SetRecipe(recipe.EmptyTrayParams);
+            //// 建置 Cell Regions
+            //if (camGrid == null)
+            //{
+            //    var errMsg = $"空盤參數 {recipe.Name} 建置不全, 沒有格點數據!";
+            //    LtDebug.LOG.Error(errMsg);
+            //    OnError?.Invoke(this, new ProcessEventArgs(errMsg));
+            //    return;
+            //}
+        }
+
+        public MatchResult DetectCameraGrid(Bitmap fullfovBmp)
+        {
+            var aoiModel = CalibAoiModel;
+
+            aoiModel.RunAll(fullfovBmp, wait: true);
+            
+            var matchResult = aoiModel.GetMatchResult(SideID.A);
+
+            if (matchResult != null)
             {
-                // Config Plc Grid
-                var rows = camGrid.Rows;
-                var cols = camGrid.Cols;
-                var pitchX = (double)traySettings.PitchX.Value;
-                var pitchY = (double)traySettings.PitchY.Value;
-                transformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
+                using (var bridge = new QxImageBridge(fullfovBmp))
+                {
+                    aoiModel.RefineCentroidLocations(matchResult, bridge.Image);
+                }
             }
 
-            // 將參數餵給其他子系統 (Child Models)
-            EmptyTrayAoiModel.SetRecipe(recipe.EmptyTrayParams);
+            return matchResult;
+        }
 
-            // 建置 Cell Regions
+        public void BuildCellRegions(CarrierEnum carrierID, EzBlocsGrid camGrid, bool optWriteBlackToRecipe = false)
+        {
             if (camGrid == null)
             {
-                var errMsg = $"空盤參數 {recipe.Name} 建置不全, 沒有格點數據!";
-                LtDebug.LOG.Error(errMsg);
-                OnError?.Invoke(this, new ProcessEventArgs(errMsg));
+                //>>> camGrid = _jxRecipe.EmptyTrayParams.TrayMiscSettings.GetGoldenGrid(true);
                 return;
             }
 
-            this.BuildCellRegions(camGrid, ActiveCarrierID, optWritebackToRecipe);
-        }
-        #endregion
-
-        internal void BuildCellRegions(EzBlocsGrid camGrid, CarrierEnum C, bool optWriteBlackToRecipe = false)
-        {
-            if (camGrid == null)
-                camGrid = _jxRecipe.EmptyTrayParams.TrayMiscSettings.GetGoldenGrid(true);
-
             //(0) Global MESS
-            var xRecipe = RecipeFPIX3Class.Instance;
             var xParaGrid = RecipeParaGridClass.Instance;
             var xInpectParam = InspectX3ParaClass.Instance;
             var xRegionCells = xRecipe.xRegionCells;
@@ -205,7 +219,7 @@ namespace LaserAlignDX.Mvc.Model
 
             //(1) TransformModel
             var transformModel = GaMvcConfig.SysModel.TransformsModel;
-            var trfCamToWorld = transformModel.GetCameraPhysicTransform(C);
+            var trfCamToWorld = transformModel.GetCameraPhysicTransform(carrierID);
 
             //(2) goldenChipRect (in camera coordinates)
             SizeF cellViewSizeF;
@@ -289,10 +303,16 @@ namespace LaserAlignDX.Mvc.Model
                 xParaGrid.xChipWidth = (float)Math.Round(standardChipWidth, 3);
                 xParaGrid.xChipHeight = (float)Math.Round(standardChipHeight, 3);
 
-                //xRecipe.xRealLeftX = (float)p00.X;
-                //xRecipe.xRealLeftY = (float)p00.Y;
-                //xRecipe.xRealOffsetX = (float)(p01 - p00).X / (cols - 1);
-                //xRecipe.xRealOffsetY = (float)(p10 - p00).Y / (rows - 1);
+                //xParaGrid.xRealLeftX = (float)p00.X;
+                //xParaGrid.xRealLeftY = (float)p00.Y;
+                //xParaGrid.xRealOffsetX = (float)(p01 - p00).X / (cols - 1);
+                //xParaGrid.xRealOffsetY = (float)(p10 - p00).Y / (rows - 1);
+                //var traySettings = _jxRecipe.EmptyTrayParams.TrayMiscSettings;
+                //xParaGrid.xRealOffsetX = (float)traySettings.PitchX.Value;
+                //xParaGrid.xRealOffsetY = (float)traySettings.PitchY.Value;
+
+                if (carrierID == CarrierEnum.C1)
+                    xRecipe.xCamGrid1 = camGrid;
             }
         }
 
@@ -311,18 +331,13 @@ namespace LaserAlignDX.Mvc.Model
 
             //(1) Transform
             var transCM = GaMvcConfig.SysModel.TransformsModel.GetCameraMotorTransform(carrierID, suckerRowID);
-            var traySettings = GaMvcConfig.SysModel.GetCurrentRecipe()?.EmptyTrayParams.TrayMiscSettings;
-            if (traySettings == null)
-            {
-                msg = "缺少【空盤檢測】之參數!";
-                return false;
-            }
 
             //(2) Camera Grid
-            var camGrid = traySettings.GetGoldenGrid(true);
-            if (camGrid == null || camGrid.Rows < 2 || camGrid.Cols < 2)
+            var camGrid = carrierID == CarrierEnum.C1 ? xRecipe.xCamGrid1 : xRecipe.xCamGrid2;
+            var errMsg = checkCamGrid(ActiveCarrierID, camGrid, false);
+            if (errMsg != null)
             {
-                msg = "缺少【全域校正】之數據!";
+                msg = errMsg;
                 return false;
             }
 
@@ -385,6 +400,24 @@ namespace LaserAlignDX.Mvc.Model
             return totalOK;
         }
 
+        #region PRIVATE_FUNCTIONS
+        string checkCamGrid(CarrierEnum carrierID, EzBlocsGrid camGrid, bool notify = true)
+        {
+            string errMsg = null;
+            if (camGrid == null)
+            {
+                errMsg = $"載台 {ActiveCarrierID} 格點或陣列沒有建置!";
+                OnError?.Invoke(this, new ProcessEventArgs(errMsg));
+                return errMsg;
+            }
+            if (camGrid.Rows < 2 || camGrid.Cols < 2)
+            {
+                errMsg = $"載台 {ActiveCarrierID} 陣列異 rows={camGrid.Rows}, cols={camGrid.Rows}!";
+                OnError?.Invoke(this, new ProcessEventArgs(errMsg));
+                return errMsg;
+            }
+            return errMsg;
+        }
         void writeToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, PointF suckerCoord)
         {
             var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
@@ -408,5 +441,6 @@ namespace LaserAlignDX.Mvc.Model
                 plcIO?.SetStage2((int)suckerRowID, NA, suckerCoord);
             }
         }
+        #endregion
     }
 }

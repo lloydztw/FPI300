@@ -23,15 +23,12 @@ using LaserAlignDX.FormSpace;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
-using LaserAlignDX.Mvc.Model.Recipe;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LeTian.JxProps.Gui;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Threading;
 using Traveller106;
 
 namespace LaserAlignDX.Mvc.Ctrl
@@ -55,7 +52,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         #region INTERACTOR
         CviGoldenPickingBox _cviGoldenRegionBox = new CviGoldenPickingBox(Brushes.Orange) { Visible = false };
-        CviCalibResultBox _cviRegionsBox = new CviCalibResultBox();
+        CviCalibResultBox _cviCamGridBox = new CviCalibResultBox();
         #endregion
 
         #region GUI_LINKS
@@ -103,6 +100,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             var matViewer = _rcpEditUI.ImgViewer.MatViewer;
             matViewer.AddInteractor(_cviGoldenRegionBox);
+            matViewer.AddInteractor(_cviCamGridBox);
         }
         void connectEventHandlers()
         {
@@ -154,6 +152,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             var carrierID = rdoCarriers[0].Checked ? CarrierEnum.C1 : CarrierEnum.C2;
             if (carrierID != _currentCarrierID)
             {
+                showCviResult(false);
+                enableGoldenRegionPicking(false);
+                _sysModel.ActiveCarrierID = carrierID;
+                _sysModel.ApplyRecipe();
                 updateAllRecipeData(false, carrierID);
             }
         }
@@ -292,12 +294,13 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             //_calibCtrl.ShowCviResult(show);
             //_cviGoldenRegionBox.Visible = false;
-            _cviRegionsBox.Visible = show;
+            _cviCamGridBox.Visible = show;
         }
         #endregion
 
         void LoadImage(string fileName = null)
         {
+            showCviResult(false);
             enableGoldenRegionPicking(false);
 
             if (fileName == null)
@@ -321,6 +324,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void GrabImage()
         {
+            showCviResult(false);
             enableGoldenRegionPicking(false);
 
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
@@ -345,13 +349,16 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void SaveImageOrg()
         {
+            showCviResult(false);
             enableGoldenRegionPicking(false);
 
+            var carrierID = this._currentCarrierID;
+
             // 從參數抓取 bmpOrg
-            Bitmap srcBmp = xRecipe.PeekOrgBmp(_currentCarrierID);
+            Bitmap srcBmp = xRecipe.PeekOrgBmp(carrierID);
             if(srcBmp == null)
             {
-                VsMSG.Instance.Warning($"參數 @ {_currentCarrierID} 沒有影像", false);
+                VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
                 return;
             }
 
@@ -375,30 +382,16 @@ namespace LaserAlignDX.Mvc.Ctrl
         void OpenEmptyTrayInspectWindow()
         {
             // 關掉 Golden Picking 
+            showCviResult(false);
             enableGoldenRegionPicking(false);
 
             CarrierEnum carrierID = _currentCarrierID;
             var bmpOrg = xRecipe.PeekOrgBmp(carrierID);
             GaMvcConfig.OpenEmptyTrayInspectTool(_wndOwner.FindForm(), bmpToShow: bmpOrg);
-
-            MessageBox.Show("SysModel 需要進一步處理 空盤檢測的 結果!");
-
-            //// 更新 Plc Grid
-            //updatePlcGridConfig(true);
-
-            //// 利用 GaCalibCtrl 執行空盤檢測 並且 自動抓取格點
-            ////_calibCtrl.RunAutoFetch(true);
-
-            //// 將 格點 回存 Recipe
-            //var aoiModel = _calibCtrl.GetAoiModel();
-            //var result = aoiModel.GetResult();
-            //var grid = result?.Grid;
-            //if (grid != null)
-            //    _jxRecipeCombo.EmptyTrayParams.TrayMiscSettings.SetGoldenGrid(grid);
         }
         void OpenTemplateMatchWindow()
         {
-            // 關掉 Golden Picking 
+            showCviResult(false);
             enableGoldenRegionPicking(false);
 
             using (var frm = new frmTemplateX3())
@@ -410,7 +403,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void OpenFlyCameraRecipeEditor()
         {
-            // 關掉 Golden Picking 
+            showCviResult(false);
             enableGoldenRegionPicking(false);
 
             using (var dlg = new frmFlySetup())
@@ -422,7 +415,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void OpenLightCtrlWindow()
         {
-            // 關掉 Golden Picking 
+            showCviResult(false);
             enableGoldenRegionPicking(false);
 
             using (var dlg = new FormLightControl())
@@ -451,6 +444,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         void BuildGoldenRegion()
         {
+            showCviResult(false);
             // 直接使用 viewer 的影像 (OpenCvSharp 的 Mat)
             var imgSrc = _imgViewer.MatViewer.Image;            
             var goldenRegionRect = _cviGoldenRegionBox.Box;
@@ -464,12 +458,39 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void AutoCreateRegions()
         {
+            showCviResult(false);
             enableGoldenRegionPicking(false);
+            _imgViewer.MatViewer.Refresh();
+
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+            var carrierID = _currentCarrierID;
 
-            _sysModel?.ApplyRecipe(null, true);
+            // 從參數抓取 bmpOrg
+            Bitmap srcBmp = xRecipe.PeekOrgBmp(carrierID);
+            if (srcBmp == null)
+            {
+                VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
+                return;
+            }
 
-            updateAllRecipeData(false, _currentCarrierID);
+            // 偵測格點
+            var result = _sysModel.DetectCameraGrid(srcBmp);
+            var camGrid = result?.Grid;
+            if (camGrid == null)
+                return;
+
+            // 建構 Region Cells
+            _sysModel.BuildCellRegions(carrierID, camGrid, true);
+            _isModified = true;
+            
+            // 更新 GUI
+            _cviCamGridBox.IsEmptyTrayMode = true;
+            _cviCamGridBox.UpdateResult(result);
+            _cviCamGridBox.Visible = true;
+            _imgViewer.MatViewer.Invalidate();
+
+            // 更新 參數畫面
+            updateRecipePropertyView(carrierID);
 
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }

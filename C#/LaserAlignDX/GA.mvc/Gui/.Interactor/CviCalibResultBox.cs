@@ -115,27 +115,27 @@ namespace LaserAlignDX.Mvc.Gui
         }
         public override void OnDraw(CvImageViewer viewer, Graphics gxView)
         {
+            if (_matchResult != null)
+            {
+
+                bool isWorld = viewer.IsInWorldCoordinate();
+                if (!isWorld)
+                    viewer.SwitchToWorldCoordinate(gxView);
+
+                if (IsEmptyTrayMode)
+                    drawEmptyTrayResult(viewer, gxView);
+                else
+                    drawCalibResult(viewer, gxView);
+
+                //// Cursors
+                //draw_cursor(viewer, gxView, _cursorBloc2, Color.White);
+                //draw_cursor(viewer, gxView, _cursorBloc, Color.Gold);
+                //draw_line(viewer, gxView, _cursorBloc, _cursorBloc2, Color.Cyan);
+
+                if (!isWorld)
+                    viewer.SwitchToViewportCoordinate(gxView);
+            }
             base.OnDraw(viewer, gxView);
-
-            if (_matchResult == null)
-                return;
-
-            bool isWorld = viewer.IsInWorldCoordinate();
-            if (!isWorld)
-                viewer.SwitchToWorldCoordinate(gxView);
-
-            if (IsEmptyTrayMode)
-                drawEmptyTrayResult(viewer, gxView);
-            else
-                drawCalibResult(viewer, gxView);
-
-            //// Cursors
-            //draw_cursor(viewer, gxView, _cursorBloc2, Color.White);
-            //draw_cursor(viewer, gxView, _cursorBloc, Color.Gold);
-            //draw_line(viewer, gxView, _cursorBloc, _cursorBloc2, Color.Cyan);
-
-            if (!isWorld)
-                viewer.SwitchToViewportCoordinate(gxView);
         }
         public override bool OnMouseMove(CvImageViewer viewer, MouseEventArgs e)
         {

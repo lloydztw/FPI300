@@ -80,8 +80,10 @@ namespace Traveller106
         }
 
         //public static string CODEPATH = @"D:\AUTOMATION";
-        public static string VEROPT = VERSION.ToString() + "-" + OPTION.ToString();
-        public static string MAINPATH = APP_ROOT_PATH + @"\" + VEROPT;
+        //public static string VEROPT = VERSION.ToString() + "-" + OPTION.ToString();
+        //public static string MAINPATH = APP_ROOT_PATH + @"\" + VEROPT;
+        public static string MAINPATH => "D:\\AUTOMATION\\Eazy FPI30\\LASER-MAIN_FPIX3_@_M02";
+
         public static string DBPATH = MAINPATH + @"\DB";
         public static string RCPPATH = MAINPATH + @"\PIC";
         //public static string UIPATH = CODEPATH + @"\" + VERSION.ToString() + "UI";
