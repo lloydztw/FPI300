@@ -14,6 +14,7 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy.QMath;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Model.Recipe;
@@ -41,14 +42,19 @@ namespace LaserAlignDX.Mvc.Model
 
         void ApplyRecipe(string gaaraRecipeName = null, bool optWritebackToRecipe = false);
 
-        ///// <summary>
-        ///// 將座標數據 寫入 PLC
-        ///// </summary>
+        /// <summary>
+        /// 取得 PLC 所需的參考座標
+        /// </summary>
+        bool GetCoordsRef(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out QVector camCoord, out QVector suckerCoord, out string msg);
+
+        /// <summary>
+        /// 將座標數據 寫入 PLC
+        /// </summary>
         bool WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camCoord, out PointF suckerCoord, out string msg);
 
-        /////// <summary>
-        /////// 將 所有 座標數據 寫入 PLC
-        /////// </summary>
-        //bool WriteAllCoordsToPlc(out string msg);
+        /// <summary>
+        /// 將 所有 座標數據 寫入 PLC
+        /// </summary>
+        bool WriteCoordsRefToPlc(out string msg);
     }
 }

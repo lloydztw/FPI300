@@ -169,7 +169,7 @@ namespace LaserAlignDX.BasicSpace
         [CategoryAttribute(cat3), DescriptionAttribute("")]
         [DisplayName("A00.平台选择")]
         [TypeConverter(typeof(JzEnumConverter))]
-        [Browsable(true)]
+        [Browsable(false)]
         [ReadOnly(false)]
         public StageNumber xStageNumber
         {

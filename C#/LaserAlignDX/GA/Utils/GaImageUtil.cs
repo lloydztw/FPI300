@@ -52,6 +52,22 @@ namespace JetEazy.Utils
 
             return bigBmp;
         }
+        public static bool SaveBigImage(string fileName, Bitmap bigBmp)
+        {
+            if (bigBmp == null) 
+                return false;
+            
+            string path = System.IO.Path.GetDirectoryName(fileName);
+            if (!System.IO.Directory.Exists(path))
+                System.IO.Directory.CreateDirectory(path);
+
+            bool ok;
+            using (QxImageBridge bridge = new QxImageBridge(bigBmp))
+            {
+                ok = bridge.Image.SaveImage(fileName);
+            }
+            return ok;
+        }
 
         #region PRIVATE_FUNCTIONS
         /// <summary>

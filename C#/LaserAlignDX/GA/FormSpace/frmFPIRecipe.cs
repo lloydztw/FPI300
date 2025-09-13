@@ -7,6 +7,7 @@ using JetEazy.Match;
 using JetEazy.Utils;
 using JzDisplay;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
 using System;
@@ -144,7 +145,7 @@ namespace LaserAlignDX.FormSpace
             xTimer.Tick += XTimer_Tick;
 
             DS1.ReplaceDisplayImage(xRecipe.bmpOrg);
-            DS2.ReplaceDisplayImage(xRecipe.bmpOrgNoTray);
+            //DS2.ReplaceDisplayImage(xRecipe.bmpOrgNoTray);
 
             propertyGrid1.SelectedObject = RecipeParaGridClass.Instance;
 
@@ -241,14 +242,17 @@ namespace LaserAlignDX.FormSpace
                 switch (xTabIndex)
                 {
                     case 0:
-                        xRecipe.bmpOrg.Dispose();
-                        xRecipe.bmpOrg = IScanCam.GetFreeImageBitmap().ToBitmap();
-                        DS1.ReplaceDisplayImage(xRecipe.bmpOrg);
+                        //xRecipe.bmpOrg.Dispose();
+                        //xRecipe.bmpOrg = IScanCam.GetFreeImageBitmap().ToBitmap();
+                        //DS1.ReplaceDisplayImage(xRecipe.bmpOrg);
+                        var newBmp = IScanCam.GetFreeImageBitmap().ToBitmap();
+                        xRecipe.TakeInOrgBmp(CarrierEnum.C1, newBmp);
+                        DS1.ReplaceDisplayImage(newBmp);
                         break;
                     case 1:
-                        xRecipe.bmpOrgNoTray.Dispose();
-                        xRecipe.bmpOrgNoTray = IScanCam.GetFreeImageBitmap().ToBitmap();
-                        DS2.ReplaceDisplayImage(xRecipe.bmpOrgNoTray);
+                        //xRecipe.bmpOrgNoTray.Dispose();
+                        //xRecipe.bmpOrgNoTray = IScanCam.GetFreeImageBitmap().ToBitmap();
+                        //DS2.ReplaceDisplayImage(xRecipe.bmpOrgNoTray);
                         break;
                 }
 
@@ -406,8 +410,9 @@ namespace LaserAlignDX.FormSpace
                 var newBmp = GaImageUtil.LoadBigImage(fileName);
                 if (newBmp != null)
                 {
-                    xRecipe.bmpOrg?.Dispose();
-                    xRecipe.bmpOrg = newBmp;
+                    //xRecipe.bmpOrg?.Dispose();
+                    //xRecipe.bmpOrg = newBmp;
+                    xRecipe.TakeInOrgBmp(CarrierEnum.C1, newBmp);
                     DS1.ReplaceDisplayImage(newBmp);
                 }
             }
@@ -418,20 +423,20 @@ namespace LaserAlignDX.FormSpace
         }
         void loadBigImage_for_EmptyTray(string fileName)
         {
-            try
-            {
-                var newBmp = GaImageUtil.LoadBigImage(fileName);
-                if (newBmp != null)
-                {
-                    xRecipe.bmpOrgNoTray?.Dispose();
-                    xRecipe.bmpOrgNoTray = newBmp;
-                    DS2.ReplaceDisplayImage(newBmp);
-                }
-            }
-            catch (Exception ex)
-            {
-                JetEazy.BasicSpace.VsMSG.Instance.Warning(ex.Message);
-            }
+            //try
+            //{
+            //    var newBmp = GaImageUtil.LoadBigImage(fileName);
+            //    if (newBmp != null)
+            //    {
+            //        xRecipe.bmpOrgNoTray?.Dispose();
+            //        xRecipe.bmpOrgNoTray = newBmp;
+            //        DS2.ReplaceDisplayImage(newBmp);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    JetEazy.BasicSpace.VsMSG.Instance.Warning(ex.Message);
+            //}
         }
         #endregion
 
@@ -542,9 +547,9 @@ namespace LaserAlignDX.FormSpace
                         xRecipe.SavePrintTemplate();
                         break;
                     case MeasureType.MeasureNoTray:
-                        xRecipe.xRectRegionPrintNoTray = rectf;
-                        xRecipe.bmpprintNoTraytemplate = xRecipe.bmpOrg.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-                        xRecipe.SavePrintNoTrayTemplate();
+                        //xRecipe.xRectRegionPrintNoTray = rectf;
+                        //xRecipe.bmpprintNoTraytemplate = xRecipe.bmpOrg.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+                        //xRecipe.SavePrintNoTrayTemplate();
                         break;
                 }
 

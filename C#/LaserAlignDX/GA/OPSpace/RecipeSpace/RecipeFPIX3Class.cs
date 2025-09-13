@@ -5,11 +5,13 @@ using JetEazy;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model.Coords;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
+using System.Windows.Navigation;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
@@ -18,11 +20,12 @@ using MVD_CHIP_MATCHER = LaserAlignDX.AoiModel.MvdCompositeChipMatcher;
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
 {
-    public class RecipeFPIX3Class : RecipeBaseClass
+    public class RecipeFPIX3Class : RecipeBaseClass, IDisposable
     {
         #region SINGLETON
         protected RecipeFPIX3Class()
         {
+            RcpBmpHolder.CommonPathFunc = new Func<string>(() => PathIndexStr);
         }
         private static RecipeFPIX3Class _instance = null;
         #endregion
@@ -38,21 +41,22 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         public static void DisposeAll()
         {
-            _instance?.dispose();
+            _instance?.Dispose();
             _instance = null;
         }
-        void dispose()
+        public void Dispose()
         {
             // To DO: 請重新檢查一遍, 把自己清乾淨 !!!
             mvdprinttemp_Find?.Dispose();
             mvdprinttemp_Find = null;
 
-            bmpOrg?.Dispose();
-            bmpOrg = null;
+            foreach (var cell in xRegionCells)
+                cell?.Dispose();
+            xRegionCells.Clear();
+
             bmpOrgFly?.Dispose();
             bmpOrgFly = null;
-            bmpOrgNoTray?.Dispose();
-            bmpOrgNoTray = null;
+            ReleaseOrgBmps(save: false);
         }
 
         /// <summary>
@@ -66,11 +70,44 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// </summary>
         public List<Rectangle> xOutBlocs = new List<Rectangle>();
 
-        #region FULL_FOV_BITMAPS
-        public Bitmap bmpOrg = new Bitmap(1, 1);
-        public Bitmap bmpOrgFly = new Bitmap(1, 1);
-        public Bitmap bmpOrgNoTray = new Bitmap(1, 1);
+        #region PRIVATE_ORG_BMP_HOLDERS
+        readonly RcpBmpHolder _bmpHolderOrg1 = new RcpBmpHolder("org");
+        readonly RcpBmpHolder _bmpHolderOrg2 = new RcpBmpHolder("org2");
         #endregion
+
+        /// <summary>
+        /// 舊接口 只傳回載台1
+        /// </summary>
+        public Bitmap bmpOrg
+        {
+            get
+            {
+                return PeekOrgBmp(CarrierEnum.C1);
+            }
+        }
+        public Bitmap PeekOrgBmp(CarrierEnum carrierID)
+        {
+            return carrierID == CarrierEnum.C1 ? _bmpHolderOrg1.Peek() : _bmpHolderOrg2.Peek();
+        }
+        public void TakeInOrgBmp(CarrierEnum carrierID, Bitmap bmp)
+        {
+            if (carrierID == CarrierEnum.C1)
+                _bmpHolderOrg1.TakeOver(bmp);
+            else
+                _bmpHolderOrg2?.TakeOver(bmp);
+        }
+        public void ReleaseOrgBmps(bool save)
+        {
+            if (save)
+            {
+                _bmpHolderOrg1.Save();
+                _bmpHolderOrg2.Save();
+            }
+            _bmpHolderOrg1?.Dispose();
+            _bmpHolderOrg2?.Dispose();
+        }
+
+        public Bitmap bmpOrgFly = new Bitmap(1, 1);
 
         #region GOLDEN_REGION_TEMPLATE_晶粒區域樣本
         /// <summary>
@@ -107,8 +144,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region EMPTY_TRAY_TEMPLATE_空盤樣本_目前沒用到
-        public RectangleF xRectRegionPrintNoTray = new RectangleF(0, 0, 100, 100);
-        public Bitmap bmpprintNoTraytemplate = new Bitmap(1, 1);
+        //public RectangleF xRectRegionPrintNoTray = new RectangleF(0, 0, 100, 100);
+        //public Bitmap bmpprintNoTraytemplate = new Bitmap(1, 1);
         #endregion
 
         #region FLY_CAMERA_TEMPLATE_飛拍樣本
@@ -197,7 +234,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xRectRegionPrint = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrint", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             xRegionTrain = StringtoRectF(ReadINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
 
-            xRectRegionPrintNoTray = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            //xRectRegionPrintNoTray = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             xRectRegionPrintFly = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrintFly", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
 
             xRectCodeRegion = StringtoRectF(ReadINIValue("Recipe Basic", "xRectCodeRegion", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
@@ -236,26 +273,29 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             if (!eCancel)
             {
                 #region 初始化加载图片
-                string bmporgpath = $"{PathIndexStr}\\org.bmp";
-                if (System.IO.File.Exists(bmporgpath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgpath);
-                    bmpOrg?.Dispose();
-                    bmpOrg = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
-                string bmporgNoTraypath = $"{PathIndexStr}\\orgNoTray.bmp";
-                if (System.IO.File.Exists(bmporgNoTraypath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgNoTraypath);
-                    bmpOrgNoTray.Dispose();
-                    bmpOrgNoTray = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
+
+                //string bmporgpath = $"{PathIndexStr}\\org.bmp";
+                //if (System.IO.File.Exists(bmporgpath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgpath);
+                //    bmpOrg?.Dispose();
+                //    bmpOrg = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+
+                //string bmporgNoTraypath = $"{PathIndexStr}\\orgNoTray.bmp";
+                //if (System.IO.File.Exists(bmporgNoTraypath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgNoTraypath);
+                //    bmpOrgNoTray.Dispose();
+                //    bmpOrgNoTray = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+
                 string bmporgFlypath = $"{PathIndexStr}\\orgFly.bmp";
                 if (System.IO.File.Exists(bmporgFlypath))
                 {
@@ -266,6 +306,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                                                                freeImageBitmap.PixelFormat);
                     freeImageBitmap.Dispose();
                 }
+
                 //string bmpbase0path = $"{PathIndexStr}\\base0.bmp";
                 //if (System.IO.File.Exists(bmpbase0path))
                 //{
@@ -306,6 +347,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 //                                               freeImageBitmap.PixelFormat);
                 //    freeImageBitmap.Dispose();
                 //}
+
                 string bmpprinttemplatepath = $"{PathIndexStr}\\bmpprinttemplate.bmp";
                 if (System.IO.File.Exists(bmpprinttemplatepath))
                 {
@@ -316,6 +358,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                                                                freeImageBitmap.PixelFormat);
                     freeImageBitmap.Dispose();
                 }
+
                 string bmpDefectTemplatepath = $"{PathIndexStr}\\bmpDefectTemplate.bmp";
                 if (System.IO.File.Exists(bmpDefectTemplatepath))
                 {
@@ -326,16 +369,17 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                                                                freeImageBitmap.PixelFormat);
                     freeImageBitmap.Dispose();
                 }
-                string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
-                if (System.IO.File.Exists(bmpprintNoTraytemplatepath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprintNoTraytemplatepath);
-                    bmpprintNoTraytemplate.Dispose();
-                    bmpprintNoTraytemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
+
+                //string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
+                //if (System.IO.File.Exists(bmpprintNoTraytemplatepath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprintNoTraytemplatepath);
+                //    bmpprintNoTraytemplate.Dispose();
+                //    bmpprintNoTraytemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
                 string bmpprintFlytemplatepath = $"{PathIndexStr}\\bmpprintFlytemplate.bmp";
                 if (System.IO.File.Exists(bmpprintFlytemplatepath))
                 {
@@ -414,10 +458,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "xChNum", xChNum.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xChValue", xChValue.ToString(), INIFILE);
 
-            string bmporgpath = $"{PathIndexStr}\\org.bmp";
-            bmpOrg.Save(bmporgpath, System.Drawing.Imaging.ImageFormat.Bmp);
-            string bmporgNoTraypath = $"{PathIndexStr}\\orgNoTray.bmp";
-            bmpOrgNoTray.Save(bmporgNoTraypath, System.Drawing.Imaging.ImageFormat.Bmp);
+            _bmpHolderOrg1.Save();
+            _bmpHolderOrg2.Save();
+
+            //string bmporgpath = $"{PathIndexStr}\\org.bmp";
+            //bmpOrg.Save(bmporgpath, System.Drawing.Imaging.ImageFormat.Bmp);
+            //string bmporgNoTraypath = $"{PathIndexStr}\\orgNoTray.bmp";
+            //bmpOrgNoTray.Save(bmporgNoTraypath, System.Drawing.Imaging.ImageFormat.Bmp);
+
             string bmporgFlypath = $"{PathIndexStr}\\orgFly.bmp";
             bmpOrgFly.Save(bmporgFlypath, System.Drawing.Imaging.ImageFormat.Bmp);
 
@@ -460,13 +508,13 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         public void SavePrintNoTrayTemplate()
         {
-            WriteINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(xRectRegionPrintNoTray), INIFILE);
-            string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
-            bmpprintNoTraytemplate.Save(bmpprintNoTraytemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
-            //string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
-            //bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
-            //InspectX2Class.Instance.SaveRoi();
-            //SaveCodeTemplate();
+            //WriteINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(xRectRegionPrintNoTray), INIFILE);
+            //string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
+            //bmpprintNoTraytemplate.Save(bmpprintNoTraytemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
+            ////string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
+            ////bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
+            ////InspectX2Class.Instance.SaveRoi();
+            ////SaveCodeTemplate();
         }
         public void SavePrintFlyTemplate()
         {

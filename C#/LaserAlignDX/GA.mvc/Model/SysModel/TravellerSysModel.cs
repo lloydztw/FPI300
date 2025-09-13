@@ -29,8 +29,11 @@ using LeTian.AoiLib;
 using NeedleX.ProcessSpace;
 using System;
 using System.Drawing;
+using System.Linq;
+using System.Windows.Documents;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
+using ZXing.Client.Result;
 
 namespace LaserAlignDX.Mvc.Model
 {
@@ -100,7 +103,6 @@ namespace LaserAlignDX.Mvc.Model
         {
             get => _aoiModel;
         }
-
         public ICalibAoiModel CalibAoiModel
         {
             get
@@ -112,7 +114,6 @@ namespace LaserAlignDX.Mvc.Model
                 return _calibModel;
             }
         }
-
         public IxEmptyTrayInspector EmptyTrayAoiModel
         {
             get
@@ -121,12 +122,10 @@ namespace LaserAlignDX.Mvc.Model
                 return _aoiEmptyTrayModel;
             }
         }
-
         public TravellerTransforms TransformsModel
         {
             get => _transformsModel;
         }
-
         public GaBigImageHolder LineScanImageHolder
         {
             get => TravellerBigImagesHolder.Instance.LineScanImageHolder;
@@ -136,7 +135,6 @@ namespace LaserAlignDX.Mvc.Model
         {
             return _jxRecipe;
         }
-
         public void ApplyRecipe(string gaaraRecipeName, bool optWritebackToRecipe = false)
         {
             if (gaaraRecipeName == null)
@@ -189,7 +187,6 @@ namespace LaserAlignDX.Mvc.Model
             this.BuildCellRegions(camGrid, ActiveCarrierID, optWritebackToRecipe);
         }
         #endregion
-
 
         internal void BuildCellRegions(EzBlocsGrid camGrid, CarrierEnum C, bool optWriteBlackToRecipe = false)
         {
@@ -299,15 +296,16 @@ namespace LaserAlignDX.Mvc.Model
             }
         }
 
-        public bool WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camCoord, out PointF suckerCoord, out string msg)
+        public bool GetCoordsRef(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out QVector camCoord, out QVector suckerCoord, out string msg)
         {
+            camCoord = new QVector(0, 0);
+            suckerCoord = new QVector(0, 0);
+
             //(0) PlcIO
             var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
             if (plcIO == null)
             {
-                msg = "找不到【PLCIO】!";
-                camCoord = PointF.Empty;
-                suckerCoord = PointF.Empty;
+                msg = "Machine.PLCIO 還沒配置!";
                 return false;
             }
 
@@ -317,18 +315,14 @@ namespace LaserAlignDX.Mvc.Model
             if (traySettings == null)
             {
                 msg = "缺少【空盤檢測】之參數!";
-                camCoord = PointF.Empty;
-                suckerCoord = PointF.Empty;
                 return false;
             }
 
             //(2) Camera Grid
             var camGrid = traySettings.GetGoldenGrid(true);
-            if (camGrid == null || camGrid.Rows<2 || camGrid.Cols<2)
+            if (camGrid == null || camGrid.Rows < 2 || camGrid.Cols < 2)
             {
                 msg = "缺少【全域校正】之數據!";
-                camCoord = PointF.Empty;
-                suckerCoord = PointF.Empty;
                 return false;
             }
 
@@ -336,39 +330,83 @@ namespace LaserAlignDX.Mvc.Model
             var camPt0 = camGrid[0, 0].Center;
             var suckerWorldPt = transCM.Trans(camPt0);
 
-            PointF _P(QVector v) { return new PointF((float)v.X, (float)v.Y); }
-            camCoord = _P(camPt0);
-            suckerCoord = _P(suckerWorldPt);
+            //(4) Outputs
+            camCoord = camPt0;
+            suckerCoord = suckerWorldPt;
+            msg = "OK";
+            return true;
+        }
+        public bool WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camCoord, out PointF suckerCoord, out string msg)
+        {
+            PointF _P(QVector v) { return v == null ? PointF.Empty : new PointF((float)v.X, (float)v.Y); }
 
-            //(4) Write to plc (according to the combination of carriers and suckerRows)
-            if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S1)
+            bool ok = GetCoordsRef(carrierID, suckerRowID, out var camPt, out var suckerPt, out msg);
+
+            camCoord = _P(camPt);
+            suckerCoord = _P(suckerPt);
+
+            if (ok)
+                writeToPlc(carrierID, suckerRowID, suckerCoord);
+
+            return ok;
+        }
+        public bool WriteCoordsRefToPlc(out string message)
+        {
+            PointF _P(QVector v) { return v == null ? PointF.Empty : new PointF((float)v.X, (float)v.Y); }
+
+            //(0) PlcIO
+            var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
+            if (plcIO == null)
             {
-                int suckerIndex = (int)suckerRowID;
-                plcIO.SetStage1(suckerIndex, suckerCoord, PointF.Empty);
-            }
-            else if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S2)
-            {
-                int suckerIndex = (int)suckerRowID;
-                plcIO.SetStage1(suckerIndex, PointF.Empty, suckerCoord);
-            }
-            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S1)
-            {
-                int suckerIndex = (int)suckerRowID;
-                plcIO.SetStage2(suckerIndex, suckerCoord, PointF.Empty);
-            }
-            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S2)
-            {
-                int suckerIndex = (int)suckerRowID;
-                plcIO.SetStage2(suckerIndex, PointF.Empty, suckerCoord);
-            }
-            else
-            {
-                msg = $"錯誤的組合 載台 {carrierID} 吸嘴 {suckerRowID}!";
+                message = "找不到【PLCIO】!";
                 return false;
             }
 
-            msg = "OK";
-            return true;
+            var carrierIDs = Enum.GetValues(typeof(CarrierEnum));
+            var suckerIDs = Enum.GetValues(typeof(SuckerRowEnum));
+
+            var errMsgs = new System.Collections.Generic.List<string>();
+            bool totalOK = true;
+
+            foreach (CarrierEnum C in carrierIDs)
+            {
+                foreach (SuckerRowEnum S in suckerIDs)
+                {
+                    bool ok = GetCoordsRef(C, S, out var camPt, out var suckerPt, out var msg);
+                    if (ok)
+                        writeToPlc(C, S, _P(suckerPt));
+                    else
+                        errMsgs.Add(msg);
+                    totalOK &= ok;
+                }
+            }
+
+            message = totalOK ? "OK" : string.Join("\n\r", errMsgs);
+            return totalOK;
+        }
+
+        void writeToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, PointF suckerCoord)
+        {
+            var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
+
+            var NA = PointF.Empty;
+
+            if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S1)
+            {
+                plcIO?.SetStage1((int)suckerRowID, suckerCoord, NA);
+            }
+            else if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S2)
+            {
+                plcIO?.SetStage1((int)suckerRowID, NA, suckerCoord);
+            }
+            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S1)
+            {
+                plcIO?.SetStage2((int)suckerRowID, suckerCoord, NA);
+            }
+            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S2)
+            {
+                plcIO?.SetStage2((int)suckerRowID, NA, suckerCoord);
+            }
         }
     }
 }

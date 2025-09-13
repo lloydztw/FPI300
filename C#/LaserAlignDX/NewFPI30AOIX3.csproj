@@ -579,12 +579,6 @@
     <Compile Include="GA\FormSpace\frmMSR.Designer.cs">
       <DependentUpon>frmMSR.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA\FormSpace\frmNoTrayX3.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmNoTrayX3.Designer.cs">
-      <DependentUpon>frmNoTrayX3.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA\FormSpace\frmRecipe.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -642,6 +636,7 @@
     <Compile Include="GA\OPSpace\ChannelBarcodeClass.cs" />
     <Compile Include="GA\OPSpace\MarkItemClass.cs" />
     <Compile Include="GA\OPSpace\ModuleClass.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\RcpBmpHolder.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\Enums.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeBaseClass.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeFPIX3Class.cs" />
@@ -853,9 +848,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\frmMSR.resx">
       <DependentUpon>frmMSR.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmNoTrayX3.resx">
-      <DependentUpon>frmNoTrayX3.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\frmRecipe.resx">
       <DependentUpon>frmRecipe.cs</DependentUpon>

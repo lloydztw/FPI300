@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormRecipeEditor));
             this.panelTop = new System.Windows.Forms.Panel();
+            this.gvCalibPointsDataGridView1 = new LaserAlignDX.Mvc.Gui.GvCalibPointsDataGridView();
             this.btnWriteCoordsToPlc = new System.Windows.Forms.Button();
             this.btnSaveImage = new System.Windows.Forms.Button();
             this.btnOpenFlyCamRcpWindow = new System.Windows.Forms.Button();
@@ -50,7 +51,6 @@
             this.label1 = new System.Windows.Forms.Label();
             this.tblayoutMajor = new System.Windows.Forms.TableLayoutPanel();
             this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
-            this.gvCalibPointsDataGridView1 = new LaserAlignDX.Mvc.Gui.GvCalibPointsDataGridView();
             this.panelTop.SuspendLayout();
             this.panelBottom.SuspendLayout();
             this.tblayoutRight.SuspendLayout();
@@ -79,6 +79,14 @@
             this.panelTop.Name = "panelTop";
             this.panelTop.Size = new System.Drawing.Size(1262, 148);
             this.panelTop.TabIndex = 6;
+            // 
+            // gvCalibPointsDataGridView1
+            // 
+            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(734, 12);
+            this.gvCalibPointsDataGridView1.Name = "gvCalibPointsDataGridView1";
+            this.gvCalibPointsDataGridView1.SelectedIndex = 0;
+            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(516, 111);
+            this.gvCalibPointsDataGridView1.TabIndex = 38;
             // 
             // btnWriteCoordsToPlc
             // 
@@ -142,7 +150,7 @@
             this.btnOpenEmptyTrayWindow.Name = "btnOpenEmptyTrayWindow";
             this.btnOpenEmptyTrayWindow.Size = new System.Drawing.Size(120, 31);
             this.btnOpenEmptyTrayWindow.TabIndex = 33;
-            this.btnOpenEmptyTrayWindow.Text = "設定 空載台";
+            this.btnOpenEmptyTrayWindow.Text = "空載台";
             this.btnOpenEmptyTrayWindow.UseVisualStyleBackColor = false;
             // 
             // btnGrabImage
@@ -168,7 +176,7 @@
             this.btnCreateCellRegions.Name = "btnCreateCellRegions";
             this.btnCreateCellRegions.Size = new System.Drawing.Size(120, 31);
             this.btnCreateCellRegions.TabIndex = 30;
-            this.btnCreateCellRegions.Text = "自動 生成陣列";
+            this.btnCreateCellRegions.Text = "生成陣列";
             this.btnCreateCellRegions.UseVisualStyleBackColor = false;
             // 
             // rdoCarrier2
@@ -220,7 +228,7 @@
             this.btnPickGoldenRegion.Name = "btnPickGoldenRegion";
             this.btnPickGoldenRegion.Size = new System.Drawing.Size(120, 31);
             this.btnPickGoldenRegion.TabIndex = 23;
-            this.btnPickGoldenRegion.Text = "框選 晶粒區域";
+            this.btnPickGoldenRegion.Text = "框選區域";
             this.btnPickGoldenRegion.UseVisualStyleBackColor = false;
             // 
             // btnLoadImage
@@ -335,14 +343,6 @@
             this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
             this.jezTransImageViewPanel1.Size = new System.Drawing.Size(927, 821);
             this.jezTransImageViewPanel1.TabIndex = 0;
-            // 
-            // gvCalibPointsDataGridView1
-            // 
-            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(734, 12);
-            this.gvCalibPointsDataGridView1.Name = "gvCalibPointsDataGridView1";
-            this.gvCalibPointsDataGridView1.SelectedIndex = 0;
-            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(516, 111);
-            this.gvCalibPointsDataGridView1.TabIndex = 38;
             // 
             // FormRecipeEditor
             // 
