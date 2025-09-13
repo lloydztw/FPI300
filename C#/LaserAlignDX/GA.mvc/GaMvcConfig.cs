@@ -16,6 +16,7 @@
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
+using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
 
@@ -96,9 +97,9 @@ namespace LaserAlignDX
             //為安全起見, 重新再次載入 RecipeCombo
             SysModel.ApplyRecipe();
         }
-        public static void OpenEmptyTrayInspectTool(Form frmOwner)
+        public static void OpenEmptyTrayInspectTool(Form frmOwner, Bitmap bmpToShow = null)
         {
-            LtAoiFactory.OpenEmptyTrayInspectorTool(frmOwner, null);
+            LtAoiFactory.OpenEmptyTrayInspectorTool(frmOwner, null, bmpToShow);
 
             //為安全起見, 重新再次載入 RecipeCombo
             SysModel.ApplyRecipe();

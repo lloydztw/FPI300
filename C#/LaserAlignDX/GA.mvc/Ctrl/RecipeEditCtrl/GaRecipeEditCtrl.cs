@@ -197,7 +197,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updateRecipeOrgBmpToViewer(CarrierEnum carrierID)
         {
-            string srcName = "[參數] bmpOrg";
+            string recipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
+            string srcName = $"[參數] {recipeName} (bmpOrg)";
             Bitmap bmpOrg = xRecipe.bmpOrg;
             _imgViewer.UpdateImage(bmpOrg, srcName, false);
         }
@@ -298,7 +299,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 
-            var srcName = "[參數] " + System.IO.Path.GetFileName(fileName);
+            var srcName = "[圖檔] " + System.IO.Path.GetFileName(fileName);
             var bigBmp = GaImageUtil.LoadBigImage(fileName);
             _imgViewer.UpdateImage(bigBmp, srcName, disposeSrc: true);
 
@@ -314,7 +315,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var freeBmp = IScanCam.GetFreeImageBitmap();
             if (freeBmp != null)
             {
-                var srcName = "[參數] 線掃相機擷圖";
+                var srcName = "[線掃相機] 擷圖";
                 var bigBmp = freeBmp.ToBitmap();
                 _imgViewer.UpdateImage(bigBmp, srcName, disposeSrc: true);
             }
@@ -353,7 +354,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 關掉 Golden Picking 
             enableGoldenRegionPicking(false);
 
-            GaMvcConfig.OpenEmptyTrayInspectTool(_wndOwner.FindForm());
+            GaMvcConfig.OpenEmptyTrayInspectTool(_wndOwner.FindForm(), bmpToShow: xRecipe.bmpOrg);
 
             MessageBox.Show("SysModel 需要進一步處理 空盤檢測的 結果!");
 

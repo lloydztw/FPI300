@@ -108,7 +108,7 @@
             // 
             // btnOpenFlyCamRcpWindow
             // 
-            this.btnOpenFlyCamRcpWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnOpenFlyCamRcpWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnOpenFlyCamRcpWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOpenFlyCamRcpWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnOpenFlyCamRcpWindow.Location = new System.Drawing.Point(460, 54);
@@ -116,12 +116,12 @@
             this.btnOpenFlyCamRcpWindow.Name = "btnOpenFlyCamRcpWindow";
             this.btnOpenFlyCamRcpWindow.Size = new System.Drawing.Size(120, 31);
             this.btnOpenFlyCamRcpWindow.TabIndex = 35;
-            this.btnOpenFlyCamRcpWindow.Text = "进入飞拍界面";
+            this.btnOpenFlyCamRcpWindow.Text = "飞拍界面";
             this.btnOpenFlyCamRcpWindow.UseVisualStyleBackColor = false;
             // 
             // btnOpenLightCtrlWindow
             // 
-            this.btnOpenLightCtrlWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnOpenLightCtrlWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.btnOpenLightCtrlWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOpenLightCtrlWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnOpenLightCtrlWindow.Location = new System.Drawing.Point(460, 92);
@@ -134,7 +134,7 @@
             // 
             // btnOpenEmptyTrayWindow
             // 
-            this.btnOpenEmptyTrayWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnOpenEmptyTrayWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnOpenEmptyTrayWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOpenEmptyTrayWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnOpenEmptyTrayWindow.Location = new System.Drawing.Point(314, 15);
@@ -142,7 +142,7 @@
             this.btnOpenEmptyTrayWindow.Name = "btnOpenEmptyTrayWindow";
             this.btnOpenEmptyTrayWindow.Size = new System.Drawing.Size(120, 31);
             this.btnOpenEmptyTrayWindow.TabIndex = 33;
-            this.btnOpenEmptyTrayWindow.Text = "設定空載台";
+            this.btnOpenEmptyTrayWindow.Text = "設定 空載台";
             this.btnOpenEmptyTrayWindow.UseVisualStyleBackColor = false;
             // 
             // btnGrabImage
@@ -160,7 +160,7 @@
             // 
             // btnCreateCellRegions
             // 
-            this.btnCreateCellRegions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnCreateCellRegions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnCreateCellRegions.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCreateCellRegions.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCreateCellRegions.Location = new System.Drawing.Point(314, 92);
@@ -168,7 +168,7 @@
             this.btnCreateCellRegions.Name = "btnCreateCellRegions";
             this.btnCreateCellRegions.Size = new System.Drawing.Size(120, 31);
             this.btnCreateCellRegions.TabIndex = 30;
-            this.btnCreateCellRegions.Text = "自動生成陣列";
+            this.btnCreateCellRegions.Text = "自動 生成陣列";
             this.btnCreateCellRegions.UseVisualStyleBackColor = false;
             // 
             // rdoCarrier2
@@ -199,7 +199,7 @@
             // 
             // btnOpenTemplateMatchWindow
             // 
-            this.btnOpenTemplateMatchWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnOpenTemplateMatchWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnOpenTemplateMatchWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOpenTemplateMatchWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnOpenTemplateMatchWindow.Location = new System.Drawing.Point(460, 15);
@@ -207,12 +207,12 @@
             this.btnOpenTemplateMatchWindow.Name = "btnOpenTemplateMatchWindow";
             this.btnOpenTemplateMatchWindow.Size = new System.Drawing.Size(120, 31);
             this.btnOpenTemplateMatchWindow.TabIndex = 26;
-            this.btnOpenTemplateMatchWindow.Text = "进入模板界面";
+            this.btnOpenTemplateMatchWindow.Text = "模板界面";
             this.btnOpenTemplateMatchWindow.UseVisualStyleBackColor = false;
             // 
             // btnPickGoldenRegion
             // 
-            this.btnPickGoldenRegion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnPickGoldenRegion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnPickGoldenRegion.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnPickGoldenRegion.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnPickGoldenRegion.Location = new System.Drawing.Point(314, 54);
@@ -220,7 +220,7 @@
             this.btnPickGoldenRegion.Name = "btnPickGoldenRegion";
             this.btnPickGoldenRegion.Size = new System.Drawing.Size(120, 31);
             this.btnPickGoldenRegion.TabIndex = 23;
-            this.btnPickGoldenRegion.Text = "框選晶粒範圍";
+            this.btnPickGoldenRegion.Text = "框選 晶粒區域";
             this.btnPickGoldenRegion.UseVisualStyleBackColor = false;
             // 
             // btnLoadImage
