@@ -37,7 +37,7 @@ namespace Traveller106
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/09/11";
+        public const string VersionDate = "2025/09/14";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
@@ -64,13 +64,14 @@ namespace Traveller106
                 switch (OPTION)
                 {
                     default:
+                        //return $"{Application.StartupPath}";
                         // 直接指定成 最後佈署的資料夾
                         //      "D:\\AUTOMATION\\Eazy FPI30\\_BIN_"
                         // 這樣 原代碼 C# 專案, 
                         //      才能放在任意資料夾
                         //      不需要 依附於 最後佈署的資料夾 
                         return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
-                        return $"{Application.StartupPath}";
+                        //return "D:\\AUTOMATION\\Eazy FPI30\\_M02_try_";
                 }
             }
         }
@@ -80,10 +81,12 @@ namespace Traveller106
         }
 
         //public static string CODEPATH = @"D:\AUTOMATION";
-        public static string VEROPT = VERSION.ToString() + "-" + OPTION.ToString();
-        public static string MAINPATH = APP_ROOT_PATH + @"\" + VEROPT;
-        public static string DBPATH = MAINPATH + @"\DB";
-        public static string RCPPATH = MAINPATH + @"\PIC";
+        public static string VEROPT => VERSION.ToString() + "-" + OPTION.ToString();
+        public static string MAINPATH => APP_ROOT_PATH + @"\" + VEROPT;
+        //public static string MAINPATH => "D:\\AUTOMATION\\Eazy FPI30\\LASER-MAIN_FPIX3_@_M02";
+
+        public static string DBPATH => MAINPATH + @"\DB";
+        public static string RCPPATH => MAINPATH + @"\PIC";
         //public static string UIPATH = CODEPATH + @"\" + VERSION.ToString() + "UI";
 
         public static string LOG_ROOT

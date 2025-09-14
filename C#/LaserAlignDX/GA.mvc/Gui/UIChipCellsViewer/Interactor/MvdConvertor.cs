@@ -20,7 +20,7 @@ using System.Drawing;
 using VisionDesigner;
 
 
-namespace LaserAlignDX.UISpace.ChipCellsViewer
+namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 {
     internal static class MvdConvertor
     {

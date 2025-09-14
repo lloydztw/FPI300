@@ -190,7 +190,7 @@ namespace LaserAlignDX.AoiModel
             {
                 Rectangle roi = Rectangle.Round(cell.viewRectF);
                 roi.Inflate(inflate.Width, inflate.Height);
-                GaUtil.ClipRect(ref roi, fullFovSize);
+                GaUtil.Clip(ref roi, fullFovSize);
                 var cellBmp = fullFovBmp.Clone(roi, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
                 var gaCell = new GaCell(cell, cellBmp, roi);
                 gaCells.Add(gaCell);

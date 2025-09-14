@@ -53,6 +53,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
 
         #region PRIVATE_DATA
         ScanInspectMode _mode;
+        bool _hasImage;
         #endregion
 
         #region PRIVATE_DATA_LINKS
@@ -65,6 +66,15 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         }
 
         Control IvChipCellsViewer.Window => _mvsUI;
+        bool IvChipCellsViewer.IsActive
+        {
+            get;
+            set;
+        }
+        bool IvChipCellsViewer.HasImage()
+        {
+            return _hasImage;
+        }
         void IvChipCellsViewer.Reset()
         {
 
@@ -130,6 +140,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         /// </summary>
         void updateMvd_LineScanImage(CMvdImage mvdImage)
         {
+            _hasImage = mvdImage != null;
             _mvsUI.mvdRenderActivex1.LoadImageFromObject(mvdImage);
             _mvsUI.mvdRenderActivex1.ClearShapes();
             _mvsUI.mvdRenderActivex1.Display();

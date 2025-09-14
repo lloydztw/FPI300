@@ -14,9 +14,12 @@
 #endregion
 
 using JetEazy.ImageViewerEx;
+using JetEazy.OpenCV;
 using JetEazy.OpenCV.Viewer;
-using LaserAlignDX.Model.Transforms;
+using JetEazy.Transform;
+using OpenCvSharp;
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 
 
@@ -38,8 +41,23 @@ namespace LaserAlignDX.Mvc.Gui
             _cviCoordInfo.Enabled = true;
             _cviCoordInfo.Visible = true;
             picIcon.Click += PicIcon_Click;
+            HandleDestroyed += (s, e) => cleanUp();
+        }
+        void cleanUp()
+        {
+            try
+            {
+                var old = cvMatViewer.Image;
+                //cvMatViewer.Image = null;
+                old?.Dispose();
+            }
+            catch(Exception ex) 
+            { 
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
         }
 
+        #region EVENT_HANDLERS
         private void PicIcon_Click(object sender, EventArgs e)
         {
             if (_contextMenuStrip != null)
@@ -53,22 +71,50 @@ namespace LaserAlignDX.Mvc.Gui
                 _contextMenuStrip.Show(screenPos);
             }
         }
+        #endregion
 
         public IvImageViewer ImgViewer
         {
             get => cvMatViewer;
         }
-
         public CvMatViewer MatViewer
         {
             get => cvMatViewer;
+        }
+
+        public Mat Image
+        {
+            get => cvMatViewer.Image;
+        }
+        public void UpdateImage(Bitmap srcBmp, string srcName, bool disposeSrc)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((Action<Bitmap, string, bool>)UpdateImage, srcBmp, srcName, disposeSrc);
+            }
+            else
+            {
+                lblTitle.Text = srcName;
+                if (srcBmp != null)
+                {
+                    var old = cvMatViewer.Image;
+                    using (var bridge = new QxImageBridge(srcBmp))
+                    {
+                        cvMatViewer.Image = bridge.Image.Clone();
+                    }
+                    old?.Dispose();
+                    if (disposeSrc)
+                    {
+                        srcBmp.Dispose();
+                    }
+                }
+            }
         }
 
         public void SetTransform(ITransform trf)
         {
             _cviCoordInfo.Transform = trf;
         }
-
         public void AttachPopupMenu(ContextMenuStrip contextMenuStrip)
         {
             _contextMenuStrip = contextMenuStrip;

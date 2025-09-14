@@ -36,10 +36,10 @@
             this.picIcon = new System.Windows.Forms.PictureBox();
             this.lblTitle = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.lblShadowInfo = new System.Windows.Forms.Label();
             this.lblBlinker = new System.Windows.Forms.Label();
             this.lblCoordInfo = new System.Windows.Forms.Label();
             this.cvMatViewer = new JetEazy.OpenCV.Viewer.CvMatViewer();
-            this.lblShadowInfo = new System.Windows.Forms.Label();
             this.tableLayoutPanel0.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picIcon)).BeginInit();
@@ -117,6 +117,16 @@
             this.panel2.Size = new System.Drawing.Size(541, 48);
             this.panel2.TabIndex = 17;
             // 
+            // lblShadowInfo
+            // 
+            this.lblShadowInfo.AutoSize = true;
+            this.lblShadowInfo.Location = new System.Drawing.Point(364, 11);
+            this.lblShadowInfo.Name = "lblShadowInfo";
+            this.lblShadowInfo.Size = new System.Drawing.Size(41, 15);
+            this.lblShadowInfo.TabIndex = 19;
+            this.lblShadowInfo.Text = "label1";
+            this.lblShadowInfo.Visible = false;
+            // 
             // lblBlinker
             // 
             this.lblBlinker.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
@@ -148,6 +158,7 @@
             this.cvMatViewer.CrosshairsColor = System.Drawing.Color.Gold;
             this.cvMatViewer.CrosshairsVisible = false;
             this.cvMatViewer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cvMatViewer.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.cvMatViewer.ForeColor = System.Drawing.Color.Black;
             this.cvMatViewer.GridLineColor = System.Drawing.Color.LightGray;
             this.cvMatViewer.GridLinesVisible = false;
@@ -159,23 +170,13 @@
             this.cvMatViewer.Size = new System.Drawing.Size(541, 700);
             this.cvMatViewer.TabIndex = 16;
             // 
-            // lblShadowInfo
-            // 
-            this.lblShadowInfo.AutoSize = true;
-            this.lblShadowInfo.Location = new System.Drawing.Point(364, 11);
-            this.lblShadowInfo.Name = "lblShadowInfo";
-            this.lblShadowInfo.Size = new System.Drawing.Size(41, 15);
-            this.lblShadowInfo.TabIndex = 19;
-            this.lblShadowInfo.Text = "label1";
-            this.lblShadowInfo.Visible = false;
-            // 
-            // JezImageViewPanel
+            // JezTransImageViewPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel0);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "JezImageViewPanel";
+            this.Name = "JezTransImageViewPanel";
             this.Size = new System.Drawing.Size(541, 790);
             this.tableLayoutPanel0.ResumeLayout(false);
             this.panel1.ResumeLayout(false);

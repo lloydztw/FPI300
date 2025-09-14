@@ -1,10 +1,12 @@
 ﻿using Common.RecipeSpace;
 using Eazy_Project_III;
-using FreeImageAPI;
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
+using JetEazy.Match;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model.Coords;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,11 +20,12 @@ using MVD_CHIP_MATCHER = LaserAlignDX.AoiModel.MvdCompositeChipMatcher;
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
 {
-    public class RecipeFPIX3Class : RecipeBaseClass
+    public class RecipeFPIX3Class : RecipeBaseClass, IDisposable
     {
         #region SINGLETON
         protected RecipeFPIX3Class()
         {
+            RcpBmpHolder.CommonPathFunc = new Func<string>(() => PathIndexStr);
         }
         private static RecipeFPIX3Class _instance = null;
         #endregion
@@ -38,107 +41,291 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         public static void DisposeAll()
         {
-            _instance?.dispose();
+            _instance?.Dispose();
             _instance = null;
         }
-        void dispose()
+        public void Dispose()
         {
-            // To DO: 請把自己清乾淨
-            mvdprinttemp_Find?.Dispose();
-            mvdprinttemp_Find = null;
+            // 2025-09-14 LETIAN: 初步整理出需要釋放資源的子模塊
+            disposeRegionCells();
+            disposeCamGrids();
+
+            disposeMvdTools();
+
+            disposeBmpOrgs();
+            disposeBmpOrgFly();
+
+            disposeGoldenRegionTemplate();
+            disposeDefectInspectTemplate();
+            disposeFlyCamTemplate();
+            disposeCodeTemplate();
         }
 
-        public List<RegionCellX3Class> xRegionCells = new List<RegionCellX3Class>();
-        public List<Rectangle> xOutBlocs = new List<Rectangle>();
-
-        public Bitmap bmpOrg = new Bitmap(1, 1);
-        public Bitmap bmpOrgNoTray = new Bitmap(1, 1);
-        public Bitmap bmpOrgFly = new Bitmap(1, 1);
-        //public Bitmap bmpbase0 = new Bitmap(1, 1);
-        //public Bitmap bmpbase1 = new Bitmap(1, 1);
-        //public Bitmap bmptemplate0 = new Bitmap(1, 1);
-        //public Bitmap bmptemplate1 = new Bitmap(1, 1);
-        //public System.Drawing.PointF template0Center = new System.Drawing.PointF(0, 0);
-        //public System.Drawing.PointF template1Center = new System.Drawing.PointF(0, 0);
-        //public System.Drawing.PointF distancebase0tobase1 = new System.Drawing.PointF(0, 0);
-
-        public RectangleF xRectRegionPrint = new RectangleF(0, 0, 100, 100);
-        public Bitmap bmpprinttemplate = new Bitmap(1, 1);
-        public Bitmap bmpprintmask = new Bitmap(1, 1);
-        public Bitmap bmpDefectTemplate = new Bitmap(1, 1);
-        //{
-        //    get
-        //    {
-        //        var rectF = xRegionTrain;
-        //        BoundRect(ref rectF, bmpprinttemplate.Size);
-        //        return (Bitmap)bmpprinttemplate.Clone(rectF, bmpprinttemplate.PixelFormat);
-        //    }
-        //}
-
+        #region REGION_CELLS
         /// <summary>
-        /// 训练的区域
+        /// 個別 晶粒區域 (位於格點範圍)
+        /// 這應該放在 AoiResult 而不是 Recipe 區
+        /// </summary>
+        public List<RegionCellX3Class> xRegionCells = new List<RegionCellX3Class>();
+        /// <summary>
+        /// 個別 疑似異物區塊 (位於格點範圍外)
+        /// 這應該放在 AoiResult 而不是 Recipe 區
+        /// </summary>
+        public List<Rectangle> xOutBlocs = new List<Rectangle>();
+        /// <summary>
+        /// 釋放資源
+        /// </summary>
+        void disposeRegionCells()
+        {
+            foreach (var cell in xRegionCells)
+                cell?.Dispose();
+            xRegionCells.Clear();
+        }
+        #endregion
+
+        #region PRIVATE_BMP_HOLDERS
+        /// <summary>
+        /// 使用 RcpBmpHolder 來動態載入 載台1 的 bmpOrg
+        /// </summary>
+        readonly RcpBmpHolder _bmpHolderOrg1 = new RcpBmpHolder("org");
+        /// <summary>
+        /// 使用 RcpBmpHolder 來動態載入 載台2 的 bmpOrg
+        /// </summary>
+        readonly RcpBmpHolder _bmpHolderOrg2 = new RcpBmpHolder("org2");
+        #endregion
+
+        #region 載台的_BMP_ORG_接口
+        /// <summary>
+        /// 舊接口 只傳回載台1
+        /// </summary>
+        private Bitmap bmpOrg
+        {
+            get
+            {
+                return PeekBmpOrg(CarrierEnum.C1);
+            }
+        }
+        public Bitmap PeekBmpOrg(CarrierEnum carrierID)
+        {
+            return carrierID == CarrierEnum.C1 ? _bmpHolderOrg1.Peek() : _bmpHolderOrg2.Peek();
+        }
+        public void TakeInBmpOrg(CarrierEnum carrierID, Bitmap bmp)
+        {
+            if (carrierID == CarrierEnum.C1)
+                _bmpHolderOrg1.TakeOver(bmp);
+            else
+                _bmpHolderOrg2?.TakeOver(bmp);
+        }
+        public void ReleaseBmpsOrg(bool save)
+        {
+            // bmpOrg 一般只用於參數編輯時期, 跑線時可以釋放
+            if (save)
+            {
+                _bmpHolderOrg1.Save();
+                _bmpHolderOrg2.Save();
+            }
+            _bmpHolderOrg1?.Dispose();
+            _bmpHolderOrg2?.Dispose();
+        }
+        void disposeBmpOrgs()
+        {
+            _bmpHolderOrg1?.Dispose();
+            _bmpHolderOrg2?.Dispose();
+        }
+        #endregion
+
+        #region 飛拍_BMP_ORG
+        public Bitmap bmpOrgFly = new Bitmap(1, 1);
+        void disposeBmpOrgFly()
+        {
+            bmpOrgFly?.Dispose();
+            bmpOrgFly = null;
+        }
+        #endregion
+
+        #region GOLDEN_REGION_TEMPLATE_晶粒區域樣本
+        /// <summary>
+        /// Golden Region Cell (晶粒區域粗框)
+        /// </summary>
+        public RectangleF xRectRegionPrint = new RectangleF(0, 0, 100, 100);
+        /// <summary>
+        /// Golden Region Bitmap (晶粒區域粗框)
+        /// </summary>
+        public Bitmap bmpprinttemplate = new Bitmap(1, 1);
+        /// <summary>
+        /// Golden Chip Rect
+        /// 更精確(內縮)的晶粒矩形區域
+        /// 位於 Golden Region (xRectRegionPrint) 之內
+        /// 相對於 xRectRegionPrint 的左上角為零點
         /// </summary>
         public RectangleF xRegionTrain = new RectangleF(0, 0, 100, 100);
+        void disposeGoldenRegionTemplate()
+        {
+            bmpcodetemplate?.Dispose();
+            bmpcodetemplate = null;
+        }
+        #endregion
 
+        #region DEFECT_INSPECTOR_TEMPLATE_瑕疵檢所用到的樣本
+        public Bitmap bmpprintmask = new Bitmap(1, 1);
+        public Bitmap bmpDefectTemplate = new Bitmap(1, 1);
+        void disposeDefectInspectTemplate()
+        {
+            this.bmpprintmask?.Dispose();
+            this.bmpprintmask = null;
+            this.bmpDefectTemplate?.Dispose();
+            this.bmpDefectTemplate = null;
+        }
+        #endregion
+
+        #region LINE_BORDER_BOXES_邊線區塊_手拉框
+        /// <summary>
+        /// 邊線框(左)
+        /// </summary>
         public RectangleF xLineLeft = new RectangleF(0, 0, 100, 100);
+        /// <summary>
+        /// 邊線框(上)
+        /// </summary>
         public RectangleF xLineTop = new RectangleF(0, 0, 100, 100);
+        /// <summary>
+        /// 邊線框(右)
+        /// </summary>
         public RectangleF xLineRight = new RectangleF(0, 0, 100, 100);
+        /// <summary>
+        /// 邊線框(下)
+        /// </summary>
         public RectangleF xLineBottom = new RectangleF(0, 0, 100, 100);
+        #endregion
 
-        public RectangleF xRectRegionPrintNoTray = new RectangleF(0, 0, 100, 100);
-        public Bitmap bmpprintNoTraytemplate = new Bitmap(1, 1);
+        #region EMPTY_TRAY_TEMPLATE_空盤樣本_目前沒用到
+        //public RectangleF xRectRegionPrintNoTray = new RectangleF(0, 0, 100, 100);
+        //public Bitmap bmpprintNoTraytemplate = new Bitmap(1, 1);
+        #endregion
 
+        #region FLY_CAMERA_TEMPLATE_飛拍樣本
         public RectangleF xRectRegionPrintFly = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpprintFlytemplate = new Bitmap(1, 1);
+        void disposeFlyCamTemplate()
+        {
+            this.bmpprintFlytemplate?.Dispose();
+            this.bmpprintFlytemplate = null;
+        }
+        #endregion
 
-        //public Bitmap bmpprint = new Bitmap(1, 1);
-        //public Bitmap bmpprinttemp = new Bitmap(1, 1);
-        //public RectangleF xRectRegionBase0 = new RectangleF(0, 0, 100, 100);
-        //public RectangleF xRectRegionBase1 = new RectangleF(0, 0, 100, 100);
-
-        //public MvdFindClass mvdbase0_Find = new MvdFindClass();
-        //public MvdFindClass mvdbase1_Find = new MvdFindClass();
-
+        #region MVD_AOI_TOOLS_RUNTIME_海康工具相關成員
         public PointF ptPrinttemp = new PointF(-1, -1);
         public MVD_CHIP_MATCHER mvdprinttemp_Find = new MVD_CHIP_MATCHER();
-
         public PointF ptPrintFlytemp = new PointF(-1, -1);
         public MvdFindClass mvdprintFlytemp_Find = new MvdFindClass();
-
         public Mvd2DReaderClass mvd2DReader = new Mvd2DReaderClass();
 
+        void disposeMvdTools()
+        {
+            mvdprinttemp_Find?.Dispose();
+            mvdprinttemp_Find = null;
+            mvdprintFlytemp_Find?.Dispose();
+            mvdprintFlytemp_Find = null;
+            mvd2DReader?.Dispose();
+            mvd2DReader = null;
+        }
+        #endregion
+
+        #region CODE_TEMPLATE
         public RectangleF xRectCodeRegion = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpcodetemplate = new Bitmap(1, 1);
+        void disposeCodeTemplate()
+        {
+            bmpcodetemplate?.Dispose();
+            bmpcodetemplate = null;
+        }
+        #endregion
 
-        public int xRow = 1;
-        public int xColumn = 1;
-        public int xLeftTopX = 1;
-        public int xLeftTopY = 1;
-        public float xRowOffset = 2f;
-        public float xColumnOffset = 2f;
-        public float xChipWidth = 10;
-        public float xChipHeight = 10;
-        public int xExtendx = 100;
-        public int xExtendy = 100;
-        public float xAngle = 0;
-
-        public int xChNum = 1;
-        public int xChValue = 255;
+        #region 參數區_RecipeParaGridClass
+        // 以下成員, 是讓 RecipeParaGridClass 來進行 ini 存取 
+        internal int xRow = 1;
+        internal int xColumn = 1;
+        internal int xLeftTopX = 1;
+        internal int xLeftTopY = 1;
+        internal float xRowOffset = 2f;
+        internal float xColumnOffset = 2f;
+        internal float xChipWidth = 10;
+        internal float xChipHeight = 10;
+        internal int xExtendx = 100;
+        internal int xExtendy = 100;
+        internal float xAngle = 0;
+        internal int xChNum = 1;
+        internal int xChValue = 255;
         //public int xUseStageNo = 0;
-        public StageNumber xStageNumber = StageNumber.N0;
+        internal StageNumber xStageNumber = StageNumber.N0;
+        #endregion
 
         public string xLotNoStr = "NONE";
 
-        public int PassCount = 0;
-        public int NGCount = 0;
+        #region NO_USE_本專案沒用到_但是這應該放在_AOI_RESULT_區域
+        private int PassCount = 0;
+        private int NGCount = 0;
+        #endregion
 
-        #region 实际矩阵XY
-
+        #region 參數區_实际矩阵XY
         public float xRealLeftX = 0;
         public float xRealLeftY = 0;
         public float xRealOffsetX = 1;
         public float xRealOffsetY = 1;
+        #endregion
 
+        #region 參數區_LT_CAM_GRIDS
+        public EzBlocsGrid xCamGrid1 = null;
+        public EzBlocsGrid xCamGrid2 = null;
+        void loadCamGrids(CarrierEnum carrierID, out EzBlocsGrid grid)
+        {
+            var file = System.IO.Path.Combine(PathIndexStr, $"camGrid_{carrierID}.txt");
+            if (System.IO.File.Exists(file))
+            {
+                string str = System.IO.File.ReadAllText(file);
+                var ss = new EzBlocsGridSerializer();
+                ss.Deserialize(str, out grid);
+                return;
+            }
+            else
+            {
+                grid = null;
+            }
+        }
+        void saveCamGrid(CarrierEnum carrierID, EzBlocsGrid grid)
+        {
+            if (grid == null)
+                return;
+
+            var file = System.IO.Path.Combine(PathIndexStr, $"camGrid_{carrierID}.txt");
+            var ss = new EzBlocsGridSerializer();
+            string str = ss.Serialize(grid);
+            System.IO.File.WriteAllText(file, str);
+        }
+        void disposeCamGrids()
+        {
+            xCamGrid1?.Dispose();
+            xCamGrid1 = null;
+            xCamGrid2?.Dispose();
+            xCamGrid2 = null;
+        }
+        #endregion
+
+        #region PRIVATE_LOCAL_BMP_HELPER_FUNCTIONS
+        Bitmap loadImage(string fname)
+        {
+            string fileName = System.IO.Path.Combine(PathIndexStr, fname);
+            if (System.IO.File.Exists(fileName))
+            {
+                return GaImageUtil.LoadBigImage(fileName);
+            }
+            return new Bitmap(1, 1, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+        }
+        void saveImage(Bitmap bmp, string fname)
+        {
+            if (bmp == null) return;
+            string fileName = System.IO.Path.Combine(PathIndexStr, fname);
+            GaImageUtil.SaveBigImage(fileName, bmp);
+        }
         #endregion
 
         public override void Load(bool eCancel = false)
@@ -176,7 +363,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xRectRegionPrint = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrint", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             xRegionTrain = StringtoRectF(ReadINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
 
-            xRectRegionPrintNoTray = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            //xRectRegionPrintNoTray = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             xRectRegionPrintFly = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrintFly", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
 
             xRectCodeRegion = StringtoRectF(ReadINIValue("Recipe Basic", "xRectCodeRegion", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
@@ -211,40 +398,50 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //xRectRegionPrint = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrint", RectFtoStringSimple(xRectRegionPrint), INIFILE));
 
             //xRectCodeRegion = StringtoRectF(ReadINIValue("Recipe Basic", "xRectCodeRegion", RectFtoStringSimple(xRectCodeRegion), INIFILE));
+            
+            loadCamGrids(CarrierEnum.C1, out xCamGrid1);
+            loadCamGrids(CarrierEnum.C2, out xCamGrid2);
 
             if (!eCancel)
             {
                 #region 初始化加载图片
-                string bmporgpath = $"{PathIndexStr}\\org.bmp";
-                if (System.IO.File.Exists(bmporgpath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgpath);
-                    bmpOrg.Dispose();
-                    bmpOrg = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
-                string bmporgNoTraypath = $"{PathIndexStr}\\orgNoTray.bmp";
-                if (System.IO.File.Exists(bmporgNoTraypath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgNoTraypath);
-                    bmpOrgNoTray.Dispose();
-                    bmpOrgNoTray = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
-                string bmporgFlypath = $"{PathIndexStr}\\orgFly.bmp";
-                if (System.IO.File.Exists(bmporgFlypath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgFlypath);
-                    bmpOrgFly.Dispose();
-                    bmpOrgFly = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
+
+                //string bmporgpath = $"{PathIndexStr}\\org.bmp";
+                //if (System.IO.File.Exists(bmporgpath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgpath);
+                //    bmpOrg?.Dispose();
+                //    bmpOrg = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+
+                //string bmporgNoTraypath = $"{PathIndexStr}\\orgNoTray.bmp";
+                //if (System.IO.File.Exists(bmporgNoTraypath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgNoTraypath);
+                //    bmpOrgNoTray.Dispose();
+                //    bmpOrgNoTray = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+
+                //string bmporgFlypath = $"{PathIndexStr}\\orgFly.bmp";
+                //if (System.IO.File.Exists(bmporgFlypath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmporgFlypath);
+                //    bmpOrgFly.Dispose();
+                //    bmpOrgFly = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+
+                bmpOrgFly?.Dispose();
+                bmpOrgFly = loadImage("orgFly.bmp");
+
                 //string bmpbase0path = $"{PathIndexStr}\\base0.bmp";
                 //if (System.IO.File.Exists(bmpbase0path))
                 //{
@@ -285,71 +482,88 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 //                                               freeImageBitmap.PixelFormat);
                 //    freeImageBitmap.Dispose();
                 //}
-                string bmpprinttemplatepath = $"{PathIndexStr}\\bmpprinttemplate.bmp";
-                if (System.IO.File.Exists(bmpprinttemplatepath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprinttemplatepath);
-                    bmpprinttemplate.Dispose();
-                    bmpprinttemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
-                string bmpDefectTemplatepath = $"{PathIndexStr}\\bmpDefectTemplate.bmp";
-                if (System.IO.File.Exists(bmpDefectTemplatepath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpDefectTemplatepath);
-                    bmpDefectTemplate.Dispose();
-                    bmpDefectTemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
-                string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
-                if (System.IO.File.Exists(bmpprintNoTraytemplatepath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprintNoTraytemplatepath);
-                    bmpprintNoTraytemplate.Dispose();
-                    bmpprintNoTraytemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
-                string bmpprintFlytemplatepath = $"{PathIndexStr}\\bmpprintFlytemplate.bmp";
-                if (System.IO.File.Exists(bmpprintFlytemplatepath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprintFlytemplatepath);
-                    bmpprintFlytemplate.Dispose();
-                    bmpprintFlytemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
-                string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
-                if (System.IO.File.Exists(bmpprintmaskpath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprintmaskpath);
-                    bmpprintmask.Dispose();
-                    bmpprintmask = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
-                string bmpcodepath = $"{PathIndexStr}\\bmpcode.bmp";
-                if (System.IO.File.Exists(bmpcodepath))
-                {
-                    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpcodepath);
-                    bmpcodetemplate.Dispose();
-                    bmpcodetemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
-                                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
-                                                               freeImageBitmap.PixelFormat);
-                    freeImageBitmap.Dispose();
-                }
+
+                //string bmpprinttemplatepath = $"{PathIndexStr}\\bmpprinttemplate.bmp";
+                //if (System.IO.File.Exists(bmpprinttemplatepath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprinttemplatepath);
+                //    bmpprinttemplate.Dispose();
+                //    bmpprinttemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+                this.bmpprinttemplate?.Dispose();
+                this.bmpprinttemplate = loadImage("bmpprinttemplate.bmp");
+
+                //string bmpDefectTemplatepath = $"{PathIndexStr}\\bmpDefectTemplate.bmp";
+                //if (System.IO.File.Exists(bmpDefectTemplatepath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpDefectTemplatepath);
+                //    bmpDefectTemplate.Dispose();
+                //    bmpDefectTemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+                this.bmpDefectTemplate?.Dispose();
+                this.bmpDefectTemplate = loadImage("bmpDefectTemplate.bmp");
+
+                //string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
+                //if (System.IO.File.Exists(bmpprintNoTraytemplatepath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprintNoTraytemplatepath);
+                //    bmpprintNoTraytemplate.Dispose();
+                //    bmpprintNoTraytemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+                //string bmpprintFlytemplatepath = $"{PathIndexStr}\\bmpprintFlytemplate.bmp";
+                //if (System.IO.File.Exists(bmpprintFlytemplatepath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprintFlytemplatepath);
+                //    bmpprintFlytemplate.Dispose();
+                //    bmpprintFlytemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+                this.bmpprintFlytemplate?.Dispose();
+                this.bmpprintFlytemplate = loadImage("bmpprintFlytemplate.bmp");
+
+                //string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
+                //if (System.IO.File.Exists(bmpprintmaskpath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpprintmaskpath);
+                //    bmpprintmask.Dispose();
+                //    bmpprintmask = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+                this.bmpprintmask?.Dispose();
+                this.bmpprintmask = loadImage("bmpprintmask.bmp");
+
+                //string bmpcodepath = $"{PathIndexStr}\\bmpcode.bmp";
+                //if (System.IO.File.Exists(bmpcodepath))
+                //{
+                //    FreeImageBitmap freeImageBitmap = new FreeImageBitmap(bmpcodepath);
+                //    bmpcodetemplate.Dispose();
+                //    bmpcodetemplate = (Bitmap)freeImageBitmap.ToBitmap().Clone(
+                //                                               new Rectangle(0, 0, freeImageBitmap.Width, freeImageBitmap.Height),
+                //                                               freeImageBitmap.PixelFormat);
+                //    freeImageBitmap.Dispose();
+                //}
+                this.bmpcodetemplate?.Dispose();
+                this.bmpcodetemplate = loadImage("bmpcode.bmp");
                 #endregion
 
-                //建立所有的region
+                //建立所有的 Region Cells
                 CreateViews();
+
                 int iOK = ViewTrainLoad();
+
                 if (iOK != 0)
                     JetEazy.BasicSpace.VsMSG.Instance.Warning($"加载参数训练失败！");
             }
@@ -391,21 +605,29 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "xChNum", xChNum.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xChValue", xChValue.ToString(), INIFILE);
 
-            string bmporgpath = $"{PathIndexStr}\\org.bmp";
-            bmpOrg.Save(bmporgpath, System.Drawing.Imaging.ImageFormat.Bmp);
-            string bmporgNoTraypath = $"{PathIndexStr}\\orgNoTray.bmp";
-            bmpOrgNoTray.Save(bmporgNoTraypath, System.Drawing.Imaging.ImageFormat.Bmp);
-            string bmporgFlypath = $"{PathIndexStr}\\orgFly.bmp";
-            bmpOrgFly.Save(bmporgFlypath, System.Drawing.Imaging.ImageFormat.Bmp);
 
-            //建立所有的region
+            saveCamGrid(CarrierEnum.C1, xCamGrid1);
+            saveCamGrid(CarrierEnum.C2, xCamGrid2);
+
+            _bmpHolderOrg1.Save();
+            _bmpHolderOrg2.Save();
+
+            ////string bmporgpath = $"{PathIndexStr}\\org.bmp";
+            ////bmpOrg.Save(bmporgpath, System.Drawing.Imaging.ImageFormat.Bmp);
+            ////string bmporgNoTraypath = $"{PathIndexStr}\\orgNoTray.bmp";
+            ////bmpOrgNoTray.Save(bmporgNoTraypath, System.Drawing.Imaging.ImageFormat.Bmp);
+            //string bmporgFlypath = $"{PathIndexStr}\\orgFly.bmp";
+            //bmpOrgFly.Save(bmporgFlypath, System.Drawing.Imaging.ImageFormat.Bmp);
+            saveImage(bmpOrgFly, "orgFly.bmp");
+
+            // 建立所有的 Region Cells
             CreateViews();
+
             int iOK = ViewTrainLoad();
             if (iOK != 0)
                 JetEazy.BasicSpace.VsMSG.Instance.Warning($"加载参数训练失败！");
 
             //InspectX2Class.Instance.Save();
-
             InspectX3ParaClass.Instance.Save();
             FlyParaClass.Instance.Save();
             NoTrayParaClass.Instance.Save();
@@ -414,18 +636,21 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public void SavePrintTemplate()
         {
             WriteINIValue("Recipe Basic", "xRectRegionPrint", RectFtoStringSimple(xRectRegionPrint), INIFILE);
-            string bmpprinttemplatepath = $"{PathIndexStr}\\bmpprinttemplate.bmp";
-            bmpprinttemplate.Save(bmpprinttemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
-            string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
-            bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
+            //string bmpprinttemplatepath = $"{PathIndexStr}\\bmpprinttemplate.bmp";
+            //bmpprinttemplate.Save(bmpprinttemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
+            saveImage(bmpprinttemplate, "bmpprinttemplate.bmp");
+            //string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
+            //bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
+            saveImage(bmpprintmask, "bmpprintmask.bmp");
             InspectX3ParaClass.Instance.SaveRoi();
             SaveCodeTemplate();
         }
         public void SavePrintTemplateRegionTrain()
         {
             WriteINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(xRegionTrain), INIFILE);
-            string bmpDefectTemplatepath = $"{PathIndexStr}\\bmpDefectTemplate.bmp";
-            bmpDefectTemplate.Save(bmpDefectTemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
+            //string bmpDefectTemplatepath = $"{PathIndexStr}\\bmpDefectTemplate.bmp";
+            //bmpDefectTemplate.Save(bmpDefectTemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
+            saveImage(bmpDefectTemplate, "bmpDefectTemplate.bmp");
         }
         public void SaveLinesRegion()
         {
@@ -436,37 +661,48 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         public void SavePrintNoTrayTemplate()
         {
-            WriteINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(xRectRegionPrintNoTray), INIFILE);
-            string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
-            bmpprintNoTraytemplate.Save(bmpprintNoTraytemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
-            //string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
-            //bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
-            //InspectX2Class.Instance.SaveRoi();
-            //SaveCodeTemplate();
+            // 由 LETIAN 的空盤檢測套件處理
+            //WriteINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(xRectRegionPrintNoTray), INIFILE);
+            //string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
+            //bmpprintNoTraytemplate.Save(bmpprintNoTraytemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
+            ////string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
+            ////bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
+            ////InspectX2Class.Instance.SaveRoi();
+            ////SaveCodeTemplate();
         }
         public void SavePrintFlyTemplate()
         {
             WriteINIValue("Recipe Basic", "xRectRegionPrintFly", RectFtoStringSimple(xRectRegionPrintFly), INIFILE);
-            string bmpprintFlytemplatepath = $"{PathIndexStr}\\bmpprintFlytemplate.bmp";
-            bmpprintFlytemplate.Save(bmpprintFlytemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
-            //string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
-            //bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
-            //InspectX2Class.Instance.SaveRoi();
-            //SaveCodeTemplate();
+            //string bmpprintFlytemplatepath = $"{PathIndexStr}\\bmpprintFlytemplate.bmp";
+            //bmpprintFlytemplate.Save(bmpprintFlytemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
+            saveImage(bmpprintFlytemplate, "bmpprintFlytemplate.bmp");
+            ////string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
+            ////bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
+            ////InspectX2Class.Instance.SaveRoi();
+            ////SaveCodeTemplate();
         }
         public void SaveCodeTemplate()
         {
             WriteINIValue("Recipe Basic", "xRectCodeRegion", RectFtoStringSimple(xRectCodeRegion), INIFILE);
-            string bmpcodepath = $"{PathIndexStr}\\bmpcode.bmp";
-            bmpcodetemplate.Save(bmpcodepath, System.Drawing.Imaging.ImageFormat.Bmp);
+            //string bmpcodepath = $"{PathIndexStr}\\bmpcode.bmp";
+            //bmpcodetemplate.Save(bmpcodepath, System.Drawing.Imaging.ImageFormat.Bmp);
+            saveImage(bmpcodetemplate, "bmpcode.bmp");
         }
-
         public void SaveLotNo()
         {
             WriteINIValue("Collect", "xLotNoStr", xLotNoStr, INIFILE);
         }
 
-        #region 定位TRAIN&RUN
+        #region AOI_FUNCTIONS_FOR_CHIP_LOCATE_TRAIN_AND_RUN_晶粒定位的相關像測函式
+        //----------------------------------------------------------------------
+        // 這些應該放在 AOI MODEL 
+        //----------------------------------------------------------------------
+        // Recipe 是配方材料 (食譜食材)
+        // AoiModel 才是主角 (廚師)
+        //      出各種飯局料理 是 廚師 而不是 食譜食材
+        //      一隻雞 會自己剁雞腿 變成 滷雞腿 或 炸雞腿 是非常違反常理的謬異.
+        //----------------------------------------------------------------------
+
         public Size PrintTemplateSize
         {
             get
@@ -533,7 +769,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //    return (bOK ? 0 : -1);
         //}
 
-
         public int PrintTempFlyTrain()
         {
             mvdprintFlytemp_Find.bmpObj_Image?.Dispose();
@@ -550,6 +785,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             bool bOK = mvdprintFlytemp_Find.HikRunBmp();
             return (bOK ? 0 : -1);
         }
+
         //public int PrintTempFlyRun(CMvdImage eMvdInput)
         //{
         //    mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
@@ -568,7 +804,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //    bool bOK = mvdprintFlytemp_Find.HikRun3(eRectF);
         //    return (bOK ? 0 : -1);
         //}
-
 
         public bool CheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> m_list, out float retAngle, out PointF retCenter)
         {
@@ -688,11 +923,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             cBlobFindToolObj = null;
             return bOK;
         }
-
         #endregion
 
-        #region TCP_DATA
-
+        #region TCP_DATA_沒用到
+#if (OPT_TCP_DATA)
         public int SetByPass(bool[] eBypass)
         {
             if (eBypass == null)
@@ -772,11 +1006,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //}
             return isgood;
         }
-
-        #endregion 
+#endif
+        #endregion
 
         #region 统计数据
-
         public float[] AnalyzeDatas = new float[9];
         public void AnalyzeDatasData()
         {
@@ -818,7 +1051,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             return bOK;
         }
 
-
         //public int PassCount = 0;
         //public int NGCount = 0;
         public void ResetZero()
@@ -844,10 +1076,13 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "PassCount", PassCount.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "NGCount", NGCount.ToString(), INIFILE);
         }
-
-
         #endregion
 
+        #region 校正與座標轉換_GAARA_版本
+        /// <summary>
+        /// 校正與座標轉換: 第一吸嘴排. (GAARA版)
+        /// (載台: 由 xStageNumber Runtime 決定)
+        /// </summary>
         public LineScanCalibrateClass lineScanCalibrate
         {
             get
@@ -855,14 +1090,18 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 switch (xStageNumber)
                 {
                     case StageNumber.N1:
-                        return Traveller106.Universal.LineScanCalibrateClasses[2];
-                        //break;
+                        return Traveller106.Universal.LineScanCalibrateClasses[2];  //Carrier2 Sucker1
+                                                                                    //break;
                     default:
-                        return Traveller106.Universal.LineScanCalibrateClasses[0];
+                        return Traveller106.Universal.LineScanCalibrateClasses[0];  //Carrier1 Sucker1
                         //break;
                 }
             }
         }
+        /// <summary>
+        /// 校正與座標轉換: 第一吸嘴排. (GAARA版)
+        /// (載台: 由 xStageNumber Runtime 決定)
+        /// </summary>
         public LineScanCalibrateClass lineScanCalibrate2
         {
             get
@@ -870,35 +1109,46 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 switch (xStageNumber)
                 {
                     case StageNumber.N1:
-                        return Traveller106.Universal.LineScanCalibrateClasses[3];
+                        return Traveller106.Universal.LineScanCalibrateClasses[3];  //Carrier2 Sucker2
                     //break;
                     default:
-                        return Traveller106.Universal.LineScanCalibrateClasses[1];
+                        return Traveller106.Universal.LineScanCalibrateClasses[1];  //Carrier1 Sucker2
                         //break;
                 }
             }
         }
-
-        RectangleF LeftTopRect
-        {
-            get { return xRegionTrain; }
-        }
+        /// <summary>
+        /// Golden Chip 中心點 pixel coordinates, 以 Golden Region (xRectRegionPrint) 左上角 當相對原點.
+        /// (用於 GAARA版 校正與座標轉換)
+        /// </summary>
         PointF LeftTopRectCenter
         {
             get
             {
+                var LeftTopRect = xRegionTrain;
                 PointF ptCenter
                     = new PointF(LeftTopRect.X + LeftTopRect.Width / 2 + xRectRegionPrint.X,
                                  LeftTopRect.Y + LeftTopRect.Height / 2 + xRectRegionPrint.Y);
                 return ptCenter;
             }
         }
+        #endregion
 
-        public int ViewTrainLoad()
+        /// <summary>
+        /// 只被 Load function 內部調用 海康的 Train functions. 
+        /// (1) PrintTempTrain
+        /// (2) PrintTempFlyTrain
+        /// </summary>
+        private int ViewTrainLoad()
         {
-            int iret = 0;// Base0Train();
+            //-----------------------------------------------------------------------------
+            // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
+            // 不應該由 Recipe 自己調用 !
+            //-----------------------------------------------------------------------------
+            int iret = 0; // Base0Train();
             //if (iret == 0)
             //    iret = Base1Train();
+
             if (iret == 0)
                 iret = PrintTempTrain();
             //if (iret == 0)
@@ -920,12 +1170,38 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //        iret = -1;
             //    }
             //}
+
             if (iret == 0)
                 iret = PrintTempFlyTrain();
             return iret;
         }
+
+        /// <summary>
+        /// 創建 RegionCells.
+        /// (這個應該是放在 AOI MODEL 內)
+        /// </summary>
         public void CreateViews()
         {
+            //-----------------------------------------------------------------------------
+            // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
+            // 不應該由 Recipe 自己調用 !
+            //-----------------------------------------------------------------------------
+            // 已經交由 SysModel.ApplyRecipe 自動建立 Region Cells !!!
+            // GaMvcConfig.SysModel.ApplyRecipe(optWritebackToRecipe: true);
+            return;
+        }
+
+        /// <summary>
+        /// 創建 RegionCells. (Gaara 版)
+        /// (這個應該是放在 AOI MODEL 內)
+        /// </summary>
+        void CreateViews_Gaara()
+        {
+            //-----------------------------------------------------------------------------
+            // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
+            // 不應該由 Recipe 自己調用 !
+            //-----------------------------------------------------------------------------
+
             xRegionCells.Clear();
 
             PointF ptworld = lineScanCalibrate.ViewToWorld(LeftTopRectCenter);
@@ -1016,11 +1292,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //        _index++;
             //    }
             //}
-
         }
 
-#if (MY_BACKUP)
-
+        #region OLD_CODE_沒用到
+#if (GAARA_OLD_BACKUP)
         public void CreateViews()
         {
             xRegionCells.Clear();
@@ -1095,129 +1370,17 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
 #endif
+        #endregion
 
-#if(OPT_REPLACED_BY_GA_IMAGE_UTIL)
-        protected CMvdImage BitmapToCMvdImage(Bitmap bmpInputImg)
-        {
-            CMvdImage cMvdImage = new CMvdImage();
-            System.Drawing.Imaging.PixelFormat bitPixelFormat = bmpInputImg.PixelFormat;
-            BitmapData bmData = bmpInputImg.LockBits(new Rectangle(0, 0, bmpInputImg.Width, bmpInputImg.Height), ImageLockMode.ReadOnly, bitPixelFormat);//锁定
-
-            if (bitPixelFormat == System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
-            {
-                Int32 bitmapDataSize = bmData.Stride * bmData.Height;//bitmap图像缓存长度
-                int offset = bmData.Stride - bmData.Width;
-                Int32 ImageBaseDataSize = bmData.Width * bmData.Height;//imageBaseData_V2图像真正的缓存长度
-                byte[] _BitImageBufferBytes = new byte[bitmapDataSize];
-                byte[] _ImageBaseDataBufferBytes = new byte[ImageBaseDataSize];
-                Marshal.Copy(bmData.Scan0, _BitImageBufferBytes, 0, bitmapDataSize);
-                int bitmapIndex = 0;
-                int ImageBaseDataIndex = 0;
-                for (int i = 0; i < bmData.Height; i++)
-                {
-                    for (int j = 0; j < bmData.Width; j++)
-                    {
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex++];
-                    }
-                    bitmapIndex += offset;
-                }
-                MVD_IMAGE_DATA_INFO stImageData = new MVD_IMAGE_DATA_INFO();
-                stImageData.stDataChannel[0].nRowStep = (uint)bmData.Width;
-                stImageData.stDataChannel[0].nLen = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].nSize = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].arrDataBytes = _ImageBaseDataBufferBytes;
-                cMvdImage.InitImage((uint)bmData.Width, (uint)bmData.Height, MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08, stImageData);
-            }
-            else if (bitPixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb)
-            {
-                Int32 bitmapDataSize = bmData.Stride * bmData.Height;//bitmap图像缓存长度
-                int offset = bmData.Stride - bmData.Width * 3;
-                Int32 ImageBaseDataSize = bmData.Width * bmData.Height * 3;//imageBaseData_V2图像真正的缓存长度
-                byte[] _BitImageBufferBytes = new byte[bitmapDataSize];
-                byte[] _ImageBaseDataBufferBytes = new byte[ImageBaseDataSize];
-                Marshal.Copy(bmData.Scan0, _BitImageBufferBytes, 0, bitmapDataSize);
-                int bitmapIndex = 0;
-                int ImageBaseDataIndex = 0;
-                for (int i = 0; i < bmData.Height; i++)
-                {
-                    for (int j = 0; j < bmData.Width; j++)
-                    {
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex + 2];
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex + 1];
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex];
-                        bitmapIndex += 3;
-                    }
-                    bitmapIndex += offset;
-                }
-                MVD_IMAGE_DATA_INFO stImageData = new MVD_IMAGE_DATA_INFO();
-                stImageData.stDataChannel[0].nRowStep = (uint)bmData.Width * 3;
-                stImageData.stDataChannel[0].nLen = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].nSize = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].arrDataBytes = _ImageBaseDataBufferBytes;
-                cMvdImage.InitImage((uint)bmData.Width, (uint)bmData.Height, MVD_PIXEL_FORMAT.MVD_PIXEL_RGB_RGB24_C3, stImageData);
-            }
-            else if (bitPixelFormat == System.Drawing.Imaging.PixelFormat.Format32bppArgb)
-            {
-                Int32 bitmapDataSize = bmData.Stride * bmData.Height;//bitmap图像缓存长度
-                int offset = bmData.Stride - bmData.Width;
-                Int32 ImageBaseDataSize = bmData.Width * bmData.Height;//imageBaseData_V2图像真正的缓存长度
-                byte[] _BitImageBufferBytes = new byte[bitmapDataSize];
-                byte[] _ImageBaseDataBufferBytes = new byte[ImageBaseDataSize];
-                Marshal.Copy(bmData.Scan0, _BitImageBufferBytes, 0, bitmapDataSize);
-                int bitmapIndex = 0;
-                int ImageBaseDataIndex = 0;
-                for (int i = 0; i < bmData.Height; i++)
-                {
-                    for (int j = 0; j < bmData.Width; j++)
-                    {
-                        // 获取32bpp像素值
-                        byte b = _BitImageBufferBytes[bitmapIndex];
-                        byte g = _BitImageBufferBytes[bitmapIndex + 1];
-                        byte r = _BitImageBufferBytes[bitmapIndex + 2];
-                        byte a = _BitImageBufferBytes[bitmapIndex + 3];
-                        bitmapIndex += 4;
-                        // 转换为灰度值（8bpp）
-                        byte gray = (byte)((r * 0.299 + g * 0.587 + b * 0.114) * (a / 255.0));
-
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = gray;// _BitImageBufferBytes[bitmapIndex++];
-                    }
-                    bitmapIndex += offset;
-                }
-                MVD_IMAGE_DATA_INFO stImageData = new MVD_IMAGE_DATA_INFO();
-                stImageData.stDataChannel[0].nRowStep = (uint)bmData.Width;
-                stImageData.stDataChannel[0].nLen = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].nSize = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].arrDataBytes = _ImageBaseDataBufferBytes;
-                cMvdImage.InitImage((uint)bmData.Width, (uint)bmData.Height, MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08, stImageData);
-            }
-            bmpInputImg.UnlockBits(bmData);  // 解除锁定
-            return cMvdImage;
-        }
-        public void BoundRect(ref RectangleF InnerRect, Size BoundSize)
-        {
-            InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
-            InnerRect.Y = Math.Min(Math.Max(InnerRect.Y, 0), (BoundSize.Height - InnerRect.Height < 0 ? 0 : BoundSize.Height - InnerRect.Height));
-
-            if (BoundSize.Width <= InnerRect.X + InnerRect.Width)
-                InnerRect.Width = BoundValue(InnerRect.Width, BoundSize.Width - InnerRect.X, 1);
-            if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
-                InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
-        }
-        public float BoundValue(float Value, float Max, float Min)
-        {
-            return Math.Max(Math.Min(Value, Max), Min);
-
-        }
-#endif
-
+        #region MISC_UTIL_FUNCTIONS
         /// <summary>
-        /// 绕任意点旋转一个点
+        /// 绕任意点旋转一个点 (這個應該放在 Util 模塊內)
         /// </summary>
         /// <param name="pointToRotate">要旋转的点</param>
         /// <param name="pivotPoint">旋转中心点</param>
         /// <param name="angleDegrees">旋转角度(度)</param>
         /// <returns>旋转后的新点</returns>
-        PointF RotatePointAroundPivot(PointF pointToRotate, PointF pivotPoint, double angleDegrees)
+        static PointF RotatePointAroundPivot(PointF pointToRotate, PointF pivotPoint, double angleDegrees)
         {
             // 将角度转换为弧度
             double angleRadians = angleDegrees * Math.PI / 180.0;
@@ -1241,7 +1404,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             return finalPoint;
         }
+        #endregion
     }
+
 
     public class FlyParaClass : RecipeBaseClass
     {
@@ -1381,6 +1546,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
     }
+
 
     public class InspectX3ParaClass : RecipeBaseClass
     {
@@ -1761,6 +1927,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
     }
 
+
     public class NoTrayParaClass : RecipeBaseClass
     {
         public NoTrayParaClass()
@@ -1854,6 +2021,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
     }
+
 
     public class LineScanCalibrateClass : RecipeBaseClass
     {

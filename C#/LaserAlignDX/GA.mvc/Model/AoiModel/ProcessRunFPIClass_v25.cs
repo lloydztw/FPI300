@@ -2,8 +2,10 @@
 using JetEazy.BasicSpace;
 using JetEazy.EzImage;
 using JetEazy.Match;
+using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
@@ -21,7 +23,7 @@ using VisionDesigner.BoxOverlap;
 using _TM = LeTian.AoiLib.LtDebug;
 
 
-namespace LaserAlignDX.AoiModel.V2
+namespace LaserAlignDX.AoiModel.V25
 {
     public class ProcessRunFPIClass : IProcessRunFPI
     {
@@ -57,7 +59,7 @@ namespace LaserAlignDX.AoiModel.V2
             _DisposeTools();
         }
 
-        #region PRIVATE_DATA
+        #region GLOBAL_MESS
         RecipeFPIX3Class xRecipe
         {
             get { return RecipeFPIX3Class.Instance; }
@@ -76,13 +78,16 @@ namespace LaserAlignDX.AoiModel.V2
         }
         #endregion
 
+        #region KENERL_MEMBERS
         /// <summary>
-        /// 2025-08-28 LETIAN: 巨圖 統一由 FpiBigImagesHolder 保管其生命週期
+        /// 2025-08-28 LETIAN: 巨圖 統一由 TravellerBigImagesHolder 保管其生命週期
         /// </summary>
-        Bitmap PeekLineScanBitmap()
-        {
-            return FpiBigImagesHolder.Instance.LineScanImageHolder?.PeekBitmap();
-        }
+        public GaBigImageHolder LineScanCamImageHolder => GaMvcConfig.SysModel.LineScanImageHolder;
+        /// <summary>
+        /// 2025-09-10 新座標轉換
+        /// </summary>
+        TravellerTransforms transformModel => GaMvcConfig.SysModel.TransformsModel;
+        #endregion
 
         #region PRIVATE_MEMBERS
         //private CMvdImage m_MvdOpeate = new CMvdImage();
@@ -104,22 +109,12 @@ namespace LaserAlignDX.AoiModel.V2
         private string m_PicResultOrgPath = INI.Instance.ResultImagePath;
         private string m_FileName = string.Empty;
         #endregion
-        public string FileName
-        {
-            get { return m_FileName; }
-            set { m_FileName = value; }
-        }
-        public string LotId
-        {
-            get { return m_LotId; }
-            set { m_LotId = value; }
-        }
-        public string StripId
-        {
-            get { return m_StripId; }
-            set { m_StripId = value; }
-        }
 
+        public ScanInspectMode xScanInspectMode
+        {
+            get { return scanInspectMode; }
+            set { scanInspectMode = value; }
+        }
         public bool QrUsed
         {
             get { return m_QrUsed; }
@@ -130,16 +125,28 @@ namespace LaserAlignDX.AoiModel.V2
             get { return m_QrJudged; }
             set { m_QrJudged = value; }
         }
-        public ScanInspectMode xScanInspectMode
+
+        public string LotId
         {
-            get { return scanInspectMode; }
-            set { scanInspectMode = value; }
+            get { return m_LotId; }
+            set { m_LotId = value; }
+        }
+        public string StripId
+        {
+            get { return m_StripId; }
+            set { m_StripId = value; }
+        }
+        public string FileName
+        {
+            get { return m_FileName; }
+            set { m_FileName = value; }
         }
         public string FileBarcodeStr
         {
             get { return m_FileBarcodeStr; }
             set { m_FileBarcodeStr = value; }
         }
+
         public long ElapsedTime
         {
             get { return m_ElapsedTime; }
@@ -180,12 +187,7 @@ namespace LaserAlignDX.AoiModel.V2
                 }
             }
 
-            //if (!myRecipe.Ischip_open_measure)
-            //    return;
-
-            //runTest();
-
-            GaUtil.LOG($"{GetType().Name} [V2] Run", Color.Purple);
+            GaUtil.LOG($"{GetType().Name} [V2.5] Run", Color.Purple);
 
             Thread thread = new Thread(runTest);
             thread.Priority = ThreadPriority.Highest;
@@ -340,8 +342,8 @@ namespace LaserAlignDX.AoiModel.V2
 
                 // 取得線掃巨圖: 轉換 CMvdImage (cMvdInput) 成 Bitmap 
                 // bmpInputImage = GaImageUtil.CMvdImageToBitmap(cMvdInput);
-                // 2025-08-28 LETIAN: 巨圖統一由 FpiBigImagesHolder 管理其生命週期
-                bmpInputImage = PeekLineScanBitmap();
+                // 2025-08-28 LETIAN: 巨圖統一由 TravellerBigImagesHolder 管理其生命週期
+                bmpInputImage = LineScanCamImageHolder.PeekBitmap();
                 _TM.Trace("_Inspect001 : CMvdImage To Bitmap 完成.");
 
                 // 晶粒定位 與 量測
@@ -376,7 +378,9 @@ namespace LaserAlignDX.AoiModel.V2
                 //// 釋放巨圖
                 //bmpInputImage?.Dispose();
                 //bmpInputImage = null;
-                throw ex;
+                //throw ex;
+                LtDebug.LOG.Error(ex, "_Inspect001_LT");
+                fire_AoiEnd();
             }
             finally
             {
@@ -437,9 +441,8 @@ namespace LaserAlignDX.AoiModel.V2
         {
             _PrepareChipMatcher(threadIdx, out IMvdTemplateMatcher chipMatcher);
             _PrepareBoxOverlapTool(threadIdx, out CBoxOverlapTool cBoxOverlapTool);
-
+            
             var fullFovSize = cellsGroup.FullFovRect.Size;
-            //string debugCellCenterStr = "";
             var debugSB = new StringBuilder();
 
             foreach (var gaCell in cellsGroup)
@@ -505,22 +508,25 @@ namespace LaserAlignDX.AoiModel.V2
                     CMvdRectangleF cellmvdRectF = cell.DrawResultRectF();
 
                     //增加重叠区域的判断
-                    //cBoxOverlapTool.ROI1 = new CMvdRectangleF(
-                    //    cell.viewRectF.X + cell.viewRectF.Width / 2,
-                    //    cell.viewRectF.Y + cell.viewRectF.Height / 2,
-                    //    cell.viewRectF.Width,
-                    //    cell.viewRectF.Height);
                     cBoxOverlapTool.ROI1 = GaImageUtil.ToCMvdRectangleF(ref cell.viewRectF);
                     cBoxOverlapTool.ROI2 = cellmvdRectF;
                     cBoxOverlapTool.Run();
 
                     if (cBoxOverlapTool.Result.Overlap >= xInspect.xChipOverlap)
                     {
+#if (OPT_OLD_GAARA || false)
                         //计算偏移值
                         PointF _viewNewRun = new PointF(cellmvdRectF.CenterX, cellmvdRectF.CenterY);
-                        PointF _worldNewRun = LineScanCalibrate1.ViewToWorld(_viewNewRun);
-                        PointF _worldNewRun2 = LineScanCalibrate1.ViewToWorld(_viewNewRun);
+                        PointF _worldNewRun = LineScanCalibrate1.ViewToWorld(_viewNewRun);          // 載台1吸排2
+                        //PointF _worldNewRun2 = LineScanCalibrate1.ViewToWorld(_viewNewRun);       // 載台1吸排2
 
+                        // Lsc0: Carrier1 Sucker1 
+                        // Lsc1: Carrier1 Sucker2
+                        // Lsc2: Carrier2 Sucker1
+                        // Lsc3: Carrier2 Sucker2
+
+                        // OFFSET_X =  載台2吸排1[左上].X - 載台1吸排2[左上].X
+                        // OFFSET_Y =  載台2吸排1[右上].Y - 載台1吸排2[右上].Y
                         PointF ptOffset = new PointF(LineScanCalibrate2.ptsworld[0].X - LineScanCalibrate1.ptsworld[0].X,
                                                      LineScanCalibrate2.ptsworld[1].Y - LineScanCalibrate1.ptsworld[1].Y);
 
@@ -538,9 +544,31 @@ namespace LaserAlignDX.AoiModel.V2
                         cell.RunX = (_worldNewRun.X - cell.OrgX) + INI.Instance.Cal_Bcx;
                         cell.RunY = (_worldNewRun.Y - cell.OrgY) + INI.Instance.Cal_Bcy;
                         cell.RunAngle = cellmvdRectF.Angle + INI.Instance.Cal_Bca;
-
                         cell.GetOffsetResult();
+#else
+                        var box2d = chipMatcher.GetResultBox2D();
+                        var chipLoc = new QVector(box2d.Center.X, box2d.Center.Y);
+                        chipLoc.X += cellRoi.X;
+                        chipLoc.Y += cellRoi.Y;
+                        double angle = box2d.Theta * 180 / Math.PI;
 
+                        var carrierID = CarrierEnum.C1;
+                        var suckerRowID = SuckerRowEnum.S1;
+                        var res = transformModel.CalcPlcCompensation(carrierID, suckerRowID, chipLoc, cell.CellRow, cell.CellCol);
+                        var dV = res[0];
+                        var dErr = res[1];
+
+                        //var T_CM = transformModel.GetCameraMotorTransform(carrierID, suckerRowID);
+                        //var T_CP = transformModel.GetCameraPhysicTransform(carrierID);
+                        //var motorPt = T_CM.Trans(chipLoc);
+                        //var worldPt = T_CP.Trans(chipLoc);
+                        //cell.Sur1 = new PointF((float)motorPt.X, (float)motorPt.Y);
+                        //cell.Sur2 = new PointF((float)worldPt.X, (float)worldPt.Y);
+
+                        cell.RunX = (float)(dV.X + INI.Instance.Cal_Bcx);
+                        cell.RunY = (float)(dV.Y + INI.Instance.Cal_Bcy);
+                        cell.RunAngle = (float)(angle + INI.Instance.Cal_Bca);
+#endif
                         if (xInspect.bOpenLineMeasure)
                         {
                             //_TM.BEGIN("OneChipMeasurement");
@@ -602,6 +630,7 @@ namespace LaserAlignDX.AoiModel.V2
         {
             // 取得 上一輪 晶粒定位 的結果 (xResult)
             var chipLocationResult = matcher.xResults[0];
+            var transCP = transformModel.GetCameraPhysicTransform(CarrierEnum.C1);
 
             #region 邊線處理
 #if (OPT_OLD)
@@ -682,7 +711,7 @@ namespace LaserAlignDX.AoiModel.V2
 
             try
             {
-                RectangleF[] recipeBorderBoxes = new RectangleF[]
+                RectangleF[] rcpBorderBoxes = new RectangleF[]
                 {
                     xRecipe.xLineLeft,
                     xRecipe.xLineTop,
@@ -690,26 +719,29 @@ namespace LaserAlignDX.AoiModel.V2
                     xRecipe.xLineBottom,
                 };
 
-                for (int borderIdx = 0, N = recipeBorderBoxes.Length; borderIdx < N; borderIdx++)
+                for (int borderIdx = 0, N = rcpBorderBoxes.Length; borderIdx < N; borderIdx++)
                 {
                     eBorder = (EdgeBorder)borderIdx;
 
-                    RectangleF borderBox = recipeBorderBoxes[borderIdx];
+                    RectangleF borderBox = rcpBorderBoxes[borderIdx];
+
                     CMvdRectangleF mvdBorderBox = GaImageUtil.ToCMvdRectangleF(ref borderBox);
-                    CMvdRectangleF mvdRoi = cell.PositionFixRun(
+
+                    CMvdRectangleF mvdCellRoi = cell.PositionFixRun(
                                                     mvdBorderBox,
                                                     xRecipe.xRegionTrain,
                                                     Rectangle.Round(cellRoi),
                                                     chipLocationResult) as CMvdRectangleF;
 
-                    cell.LineSegmentRun(borderIdx, cellBmp, mvdRoi);
+                    // 海康線檢 (輸出為 cell.cMvdShapesForFindLineRegion)
+                    cell.LineSegmentRun(borderIdx, cellBmp, mvdCellRoi);
 
                     // Offset
-                    mvdRoi.CenterX += cellRoi.X;
-                    mvdRoi.CenterY += cellRoi.Y;
+                    mvdCellRoi.CenterX += cellRoi.X;
+                    mvdCellRoi.CenterY += cellRoi.Y;
 
                     // 更新到 cell
-                    cell.cMvdShapesForFindLineRegion[borderIdx] = (CMvdShape)mvdRoi.Clone();
+                    cell.cMvdShapesForFindLineRegion[borderIdx] = (CMvdShape)mvdCellRoi.Clone();
                 }
             }
             catch (Exception ex)
@@ -756,34 +788,51 @@ namespace LaserAlignDX.AoiModel.V2
                     }
                 }
 #else
-                if (cell.cMvdLineSegmentFsOut[0] != null && cell.cMvdLineSegmentFsOut[2] != null)
+                var line0 = cell.cMvdLineSegmentFsOut[0]?.ToLineSegment();
+                var line2 = cell.cMvdLineSegmentFsOut[2]?.ToLineSegment();
+                if (line0 != null && line2 != null)
                 {
-                    // 使用 MVD VisionDesigner Tool
-                    using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
-                    {
-                        // Set basic parameter
-                        //cL2LMeasureToolObj.BasicParam.Line1 = getRealLine(cell.cMvdLineSegmentFsOut[0]);
-                        //cL2LMeasureToolObj.BasicParam.Line2 = getRealLine(cell.cMvdLineSegmentFsOut[2]);
+                    //>>> cMvdLineSegmentFsOut 是在 Cell Roi Coordinates
+                    line0.Offset(cellRoi.X, cellRoi.Y);
+                    line2.Offset(cellRoi.X, cellRoi.Y);
 
-                        cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[0];
-                        cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[2];
+                    //// 使用 MVD VisionDesigner Tool
+                    //using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                    //{
+                    //    // Set basic parameter
+                    //    //cL2LMeasureToolObj.BasicParam.Line1 = getRealLine(cell.cMvdLineSegmentFsOut[0]);
+                    //    //cL2LMeasureToolObj.BasicParam.Line2 = getRealLine(cell.cMvdLineSegmentFsOut[2]);
 
-                        // Running
-                        cL2LMeasureToolObj.Run();
+                    //    cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[0];
+                    //    cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[2];
 
-                        // Get the result
-                        var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                    //    // Running
+                    //    cL2LMeasureToolObj.Run();
 
-                        // Update result to cell (pixels to physical)
-                        // 目前只是簡單假設: 線掃 與 載盤 在同一平面
-                        // ToDO: 必須處理透視投影引進的誤差 !!!
-                        cell.RunWidth = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX, 3);
+                    //    // Get the result
+                    //    var cL2LMeasureRes = cL2LMeasureToolObj.Result;
 
-                        //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
-                        //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        LtDebug.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        LtDebug.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
-                    }
+                    //    // Update result to cell (pixels to physical)
+                    //    // 目前只是簡單假設: 線掃 與 載盤 在同一平面
+                    //    // ToDO: 必須處理透視投影引進的誤差 !!!
+                    //    cell.RunWidth = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX, 3);
+
+                    //    //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+                    //    //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+                    //    LtDebug.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                    //    LtDebug.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                    //}
+
+                    // 轉換到 Physic Coordinates 重組 line segment, 再行計算距離.
+                    var P1 = transCP.Trans(line0.P1);
+                    var P2 = transCP.Trans(line0.P2);
+                    var Q1 = transCP.Trans(line2.P1);
+                    var Q2 = transCP.Trans(line2.P2);
+                    var QM = (Q1 + Q2) / 2;
+                    line0 = new EzLSD.LineSegment(P1, P2);
+                    line2 = new EzLSD.LineSegment(Q1, Q2);
+                    double dist = line0.CalcDistance(QM);
+                    cell.RunWidth = (float)Math.Round(dist, 3);
                 }
 #endif
             }
@@ -802,7 +851,7 @@ namespace LaserAlignDX.AoiModel.V2
             #region 寬度量測
             try
             {
-#if OPT_OLD
+#if (OPT_OLD)
                 if (cell.cMvdLineSegmentFsOut[1] != null && cell.cMvdLineSegmentFsOut[3] != null)
                 {
                     // 使用 MVD VisionDesigner Tool
@@ -834,34 +883,51 @@ namespace LaserAlignDX.AoiModel.V2
                     }
                 }
 #else
-                if (cell.cMvdLineSegmentFsOut[1] != null && cell.cMvdLineSegmentFsOut[3] != null)
+                var line1 = cell.cMvdLineSegmentFsOut[1]?.ToLineSegment();
+                var line3 = cell.cMvdLineSegmentFsOut[3]?.ToLineSegment();
+                if (line1 != null && line3 != null)
                 {
-                    // 使用 MVD VisionDesigner Tool
-                    using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
-                    {
-                        // Set basic parameter
-                        //cL2LMeasureToolObj.BasicParam.Line1 = getRealLine(cell.cMvdLineSegmentFsOut[1]);
-                        //cL2LMeasureToolObj.BasicParam.Line2 = getRealLine(cell.cMvdLineSegmentFsOut[3]);
+                    //>>> cMvdLineSegmentFsOut 是在 Cell Roi Coordinates
+                    line1.Offset(cellRoi.X, cellRoi.Y);
+                    line3.Offset(cellRoi.X, cellRoi.Y);
 
-                        cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[1];
-                        cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[3];
+                    //// 使用 MVD VisionDesigner Tool
+                    //using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                    //{
+                    //    // Set basic parameter
+                    //    //cL2LMeasureToolObj.BasicParam.Line1 = getRealLine(cell.cMvdLineSegmentFsOut[1]);
+                    //    //cL2LMeasureToolObj.BasicParam.Line2 = getRealLine(cell.cMvdLineSegmentFsOut[3]);
 
-                        // Running
-                        cL2LMeasureToolObj.Run();
+                    //    cL2LMeasureToolObj.BasicParam.Line1 = cell.cMvdLineSegmentFsOut[1];
+                    //    cL2LMeasureToolObj.BasicParam.Line2 = cell.cMvdLineSegmentFsOut[3];
 
-                        // Get the result
-                        var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                    //    // Running
+                    //    cL2LMeasureToolObj.Run();
 
-                        // Update result to Cell (pixels to physic)
-                        // 目前只是簡單假設: 線掃 與 載盤 在同一平面
-                        // ToDO: 必須處理透視投影引進的誤差 !!!
-                        cell.RunHeight = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY, 3);
+                    //    // Get the result
+                    //    var cL2LMeasureRes = cL2LMeasureToolObj.Result;
 
-                        //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
-                        //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        LtDebug.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        LtDebug.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
-                    }
+                    //    // Update result to Cell (pixels to physic)
+                    //    // 目前只是簡單假設: 線掃 與 載盤 在同一平面
+                    //    // ToDO: 必須處理透視投影引進的誤差 !!!
+                    //    cell.RunHeight = (float)Math.Round(cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY, 3);
+
+                    //    //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
+                    //    //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
+                    //    LtDebug.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                    //    LtDebug.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                    //}
+
+                    // 轉換到 Physic Coordinates 重組 line segment, 再行計算距離.
+                    var P1 = transCP.Trans(line1.P1);
+                    var P2 = transCP.Trans(line1.P2);
+                    var Q1 = transCP.Trans(line3.P1);
+                    var Q2 = transCP.Trans(line3.P2);
+                    var QM = (Q1 + Q2) / 2;
+                    line1 = new EzLSD.LineSegment(P1, P2);
+                    line3 = new EzLSD.LineSegment(Q1, Q2);
+                    double dist = line1.CalcDistance(QM);
+                    cell.RunHeight = (float)Math.Round(dist, 3);
                 }
 #endif
             }
@@ -1190,31 +1256,47 @@ namespace LaserAlignDX.AoiModel.V2
 
                     if (xInspect.bCheckInspect)
                     {
-                        RectangleF _cropDefect = new RectangleF(xRecipe.xRegionTrain.X + _crop.X,
-                            xRecipe.xRegionTrain.Y + _crop.Y,
-                            xRecipe.xRegionTrain.Width,
-                            xRecipe.xRegionTrain.Height);
+                        try
+                        {
+                            RectangleF _cropDefect = new RectangleF(xRecipe.xRegionTrain.X + _crop.X,
+                                xRecipe.xRegionTrain.Y + _crop.Y,
+                                xRecipe.xRegionTrain.Width,
+                                xRecipe.xRegionTrain.Height);
 
-                        cell.bmpItemRun?.Dispose();
-                        cell.bmpItemRun = bmpInputImage.Clone(_cropDefect, PixelFormat.Format8bppIndexed);
+                            cell.bmpItemRun?.Dispose();
+                            cell.bmpItemRun = bmpInputImage.Clone(_cropDefect, PixelFormat.Format8bppIndexed);
 
-                        cell.bmpItemMask?.Dispose();
-                        cell.bmpItemMask = xRecipe.bmpprintmask.Clone(
-                            new Rectangle(0, 0, xRecipe.bmpprintmask.Width, xRecipe.bmpprintmask.Height),
-                            PixelFormat.Format8bppIndexed);
-                        cell.DetectDefects(xRecipe.bmpDefectTemplate, cell.bmpItemRun, cell.bmpItemMask);
+                            cell.bmpItemMask?.Dispose();
+                            cell.bmpItemMask = xRecipe.bmpprintmask.Clone(
+                                new Rectangle(0, 0, xRecipe.bmpprintmask.Width, xRecipe.bmpprintmask.Height),
+                                PixelFormat.Format8bppIndexed);
+                            cell.DetectDefects(xRecipe.bmpDefectTemplate, cell.bmpItemRun, cell.bmpItemMask);
+                        }
+                        catch(Exception ex)
+                        {
+                            LtDebug.LOG.Error(ex, "cell.DetectDefects 異常!");
+                            xInspect.bCheckInspect = false;
+                        }
                     }
 
                     if (m_QrUsed)
                     {
-                        RectangleF _cropCode = new RectangleF(xRecipe.xRectCodeRegion.X + _crop.X,
-                            xRecipe.xRectCodeRegion.Y + _crop.Y,
-                            xRecipe.xRectCodeRegion.Width,
-                            xRecipe.xRectCodeRegion.Height);
+                        try
+                        {
+                            RectangleF _cropCode = new RectangleF(xRecipe.xRectCodeRegion.X + _crop.X,
+                                xRecipe.xRectCodeRegion.Y + _crop.Y,
+                                xRecipe.xRectCodeRegion.Width,
+                                xRecipe.xRectCodeRegion.Height);
 
-                        cell.bmpItemCodeRun?.Dispose();
-                        cell.bmpItemCodeRun = bmpInputImage.Clone(_cropCode, PixelFormat.Format8bppIndexed);
-                        cell.DeCode2D(cell.bmpItemCodeRun, _cropCode.Location, m_QrJudged);
+                            cell.bmpItemCodeRun?.Dispose();
+                            cell.bmpItemCodeRun = bmpInputImage.Clone(_cropCode, PixelFormat.Format8bppIndexed);
+                            cell.DeCode2D(cell.bmpItemCodeRun, _cropCode.Location, m_QrJudged);
+                        }
+                        catch (Exception ex)
+                        {
+                            LtDebug.LOG.Error(ex, "cell.DeCode2D 異常!");
+                            //xInspect.m_QrUsed = false;
+                        }
                     }
                 }
             }
@@ -1278,17 +1360,17 @@ namespace LaserAlignDX.AoiModel.V2
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Restart();
 
-            var aoiModel = LtAoiFactory.InstanceModel();
+            var aoiModel = GaMvcConfig.SysModel.EmptyTrayAoiModel;
 
-            Bitmap bmpInputImage = PeekLineScanBitmap();
+            Bitmap bmpInputImage = LineScanCamImageHolder.PeekBitmap();
             if (bmpInputImage != null)
             {
-                xRecipe.xOutBlocs.Clear();
                 //复位所有数据
+                #region RESET_DATA
+                xRecipe.xOutBlocs.Clear();
                 foreach (var cell in xRecipe.xRegionCells)
-                {
-                    cell.Reset();
-                }
+                    cell?.Reset();
+                #endregion
 
                 aoiModel.RunAll(bmpInputImage, wait: true);
 
@@ -1346,7 +1428,6 @@ namespace LaserAlignDX.AoiModel.V2
             m_ElapsedTime = stopwatch.ElapsedMilliseconds;  //@ for Inspect003
             m_Running = false;
         }
-
         /// <summary>
         /// 空载台检测 : 更新結果 到 Gaara 數據群
         /// </summary>
@@ -1368,39 +1449,57 @@ namespace LaserAlignDX.AoiModel.V2
                 int fullCols = result.FullCols;
 
                 //Z字型对位资料
-                int _index = 0;
-                for (int row = 0; row < fullRows; row++)
+                //int index = 0;
+                //for (int row = 0; row < fullRows; row++)
+                //{
+                //    if (row % 2 == 1)
+                //    {
+                //        for (int col = fullCols - 1; col > -1; col--)
+                //        {
+                //            result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+                //            var cell = xRecipe.xRegionCells[index];
+                //            InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
+                //            //if (bloc == null)
+                //            //    reason = InspectReason.INS_DEFECTERR;
+                //            cell.inspectReason = reason;
+                //            cell.inspectReasons.Add(reason);
+                //            System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                //            index++;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        for (int col = 0; col < fullCols; col++)
+                //        {
+                //            result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+                //            var cell = xRecipe.xRegionCells[index];
+                //            InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
+                //            //if (bloc == null)
+                //            //    reason = InspectReason.INS_DEFECTERR;
+                //            cell.inspectReason = reason;
+                //            cell.inspectReasons.Add(reason);
+                //            System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                //            index++;
+                //        }
+                //    }
+                //}
+
+                int index = 0;
+                var xRegionCells = xRecipe.xRegionCells;
+                foreach((int row, int col) in Zigzag.IterZigzag(fullRows, fullCols))
                 {
-                    if (row % 2 == 1)
-                    {
-                        for (int col = fullCols - 1; col > -1; col--)
-                        {
-                            result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
-                            var cell = xRecipe.xRegionCells[_index];
-                            InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
-                            //if (bloc == null)
-                            //    reason = InspectReason.INS_DEFECTERR;
-                            cell.inspectReason = reason;
-                            cell.inspectReasons.Add(reason);
-                            System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
-                            _index++;
-                        }
-                    }
-                    else
-                    {
-                        for (int col = 0; col < fullCols; col++)
-                        {
-                            result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
-                            var cell = xRecipe.xRegionCells[_index];
-                            InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
-                            //if (bloc == null)
-                            //    reason = InspectReason.INS_DEFECTERR;
-                            cell.inspectReason = reason;
-                            cell.inspectReasons.Add(reason);
-                            System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
-                            _index++;
-                        }
-                    }
+                    if (index >= xRegionCells.Count)
+                        break;
+
+                    var cell = xRegionCells[index];
+                    result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+                    InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
+                    //if (bloc == null)
+                    //    reason = InspectReason.INS_DEFECTERR;
+                    cell.inspectReason = reason;
+                    cell.inspectReasons.Add(reason);
+                    //System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                    index++;
                 }
 
                 #region 收集阵列之外的料件

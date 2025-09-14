@@ -150,6 +150,7 @@ namespace LaserAlignDX.OPSpace
         {
             if (mvdFindLineClass == null)
                 mvdFindLineClass = new MvdFindLineClass();
+
             cMvdLineSegmentFsOut[iSideIndex] = null;
             if (iSideIndex == 0)
             {

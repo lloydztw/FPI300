@@ -120,7 +120,6 @@ namespace LaserAlignDX.AoiModel
             _mvdImage?.Dispose();
             _mvdImage = null;
         }
-
         #endregion
 
         #region IMAGE_UTIL_FUNCTIONS

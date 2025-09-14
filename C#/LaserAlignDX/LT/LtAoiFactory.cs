@@ -14,12 +14,10 @@
 #endregion
 
 
-using EzAoiEmptyTrayInspector.Model;
-using JetEazy.EzImage;
+using EzAoiEmptyTrayInspector;
 using JetEazy.FormSpace;
-using JetEazy.Match;
-using JetEazy.OpenCV;
 using JetEazy.Utils;
+using LaserAlignDX;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -40,87 +38,13 @@ namespace Traveller106
         }
 
         /// <summary>
-        /// 取得 GA 目前參數
-        /// </summary>
-        public static string GetActiveRecipeNameAtFPI30()
-        {
-            return Universal.RCPDB?.RCPItemNow?.Name;
-            //return "000_default";
-        }
-
-        /// <summary>
-        /// 直接取用 AoiModel
-        /// </summary>
-        public static IxEmptyTrayInspector InstanceModel(string recipeName = null)
-        {
-            if (recipeName == null)
-                recipeName = GetActiveRecipeNameAtFPI30();
-
-            var aoiModel = AoiFactory.InstanceModel(recipeName);
-            return aoiModel;
-        }
-
-        /// <summary>
-        /// 開啟 Tool Window
-        /// </summary>
-        public static Form OpenEmptyTrayInspectorTool(Form owner, string recipeName = null, Bitmap bmpToShow = null)
-        {
-            if (recipeName == null)
-                recipeName = GetActiveRecipeNameAtFPI30();
-
-            var frm = AoiFactory.OpenEmptyTrayInspectorTool(owner, recipeName);
-            if (frm == null)
-                return null;
-
-            if (bmpToShow != null)
-            {
-                frm.Load += (s, e) =>
-                {
-                    new Action(() =>
-                    {
-                        System.Threading.Thread.Sleep(2000);
-                        PushBitmap(bmpToShow, "RecipeOrg");
-                    }).BeginInvoke(null, null);
-                };
-            }
-
-            //frm.Show();
-            frm.ShowDialog(owner);
-            return frm;
-        }
-
-        /// <summary>
-        /// 推送影像到 Tool Window
-        /// - AoiFactory 負責接手管控 bmp 生命週期
-        /// - name 為標記名稱
-        /// </summary>
-        public static void PushBitmap(Bitmap bmp, string name)
-        {
-            using (var bridge = new QxImageBridge(bmp))
-            {
-                var qImg = new EzQuickImage(bridge.Image, true);
-                AoiFactory.PushImage(qImg, name);
-            }
-        }
-
-        public static EzBlocsGrid DetectGrid(Bitmap fullfovBmp)
-        {
-            var aoiModel = InstanceModel();
-            aoiModel.RunAll(fullfovBmp, wait: true);
-            var result = aoiModel.GetResult();
-            return result?.Grid;
-        }
-
-        /// <summary>
         /// 釋放所有資源
         /// </summary>
         public static void DisposeAll()
         {
-            AoiFactory.DisposeAll();
+            GaMvcConfig.DisposeAll();
         }
     }
-
-
 
     partial class LtAoiFactory
     {
@@ -129,6 +53,29 @@ namespace Traveller106
         static string _activeRecipeName;
         #endregion
 
+        public static void Migrate()
+        {
+            AoiMigration.MigrateTo(Traveller106.Universal.MAINPATH + "\\EmptyTrayAoi");
+        }
+
+        /// <summary>
+        /// 取得 GA 目前參數
+        /// </summary>
+        public static string GetActiveRecipeNameAtFPI30()
+        {
+            return Universal.RCPDB?.RCPItemNow?.Name;
+            //return "000_default";
+        }
+        public static string RcpGetRecipeFileName(string recipeName)
+        {
+            if (string.IsNullOrEmpty(recipeName))
+            {
+                RcpCheckActive(silent: true);
+                recipeName = _activeRecipeName;
+            }
+            var fileName = System.IO.Path.Combine(_recipePath, recipeName + ".json");
+            return fileName;
+        }
         public static bool RcpCheckActive(bool silent = false)
         {
             var recipeName = _activeRecipeName = GetActiveRecipeNameAtFPI30();
@@ -143,7 +90,11 @@ namespace Traveller106
         }
         public static void RcpSetActive(string recipeName)
         {
-            _activeRecipeName = recipeName;
+            // 當 Gaara Recipe Manager 發生變動
+            if (_activeRecipeName != recipeName)
+                _activeRecipeName = recipeName;
+            var model = GaMvcConfig.SysModel;
+            model.ApplyRecipe(_activeRecipeName);
         }
         public static void RcpRename(string recipeName)
         {

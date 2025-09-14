@@ -2,8 +2,10 @@
 using JetEazy.Interface;
 using OpenCvSharp;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Threading;
 using static JetEazy.CCDSpace.CameraPara;
 
@@ -12,9 +14,10 @@ namespace JetEazy.CCDSpace.CamLinkDriver
 {
     public class Linescan_Sim : IxLineScanCam
     {
-        private string _simImgFileName = "D:\\AUTOMATION\\Eazy FPI30\\_BIN_\\LASER-MAIN_FPIX3\\PIC\\00003\\orgFly.bmp";
         private FreeImageBitmap _freeBmp;
         private Mat _simImg;
+        
+        #region SIM_IMG_FILE_FUNCTIONS
         void disposeImages()
         {
             _freeBmp?.Dispose();
@@ -22,6 +25,63 @@ namespace JetEazy.CCDSpace.CamLinkDriver
             _simImg?.Dispose();
             _simImg = null;
         }
+        void loadSimImage(string inipara)
+        {
+            disposeImages();
+
+            //(1) Parsing
+            string possiblePath = null;
+            string[] strs = inipara.Split('@');
+            foreach (string str in strs)
+            {
+                if(System.IO.Directory.Exists(str))
+                {
+                    possiblePath = str;
+                    break;
+                }
+            }
+
+            //(2) Search for orgFly.jpg or orgFly.bmp
+            if (possiblePath != null)
+            {
+                string path = System.IO.Path.GetDirectoryName(possiblePath);
+                string imgFile = searchImgFile(path + "\\PIC", "orgFly");
+
+                //(3) 使用 OpenCvSharp 載入圖檔, 以保證是 8bbp
+                //    注意: _simImgFileName 可能不支援簡體有中文 !
+                if (!string.IsNullOrEmpty(imgFile))
+                    _simImg = new Mat(imgFile, ImreadModes.Grayscale);
+            }
+
+            //(4) 默認 _simImg
+            if (_simImg == null)
+                _simImg = new Mat(800, 800, MatType.CV_8UC1);
+        }
+        string searchImgFile(string path, string stemName)
+        {
+            var files = System.IO.Directory.GetFiles(path);
+            foreach(var file in files) 
+            {
+                var fname = System.IO.Path.GetFileName(file);
+                foreach (string ext in new[] { ".jpg", ".bmp" })
+                {
+                    var cmpName = stemName + ext;
+                    if (string.Compare(cmpName, fname, true) == 0)
+                        return file;
+                }
+            }
+
+            string[] folders = System.IO.Directory.GetDirectories(path);
+            foreach (string folder in folders)
+            {
+                var found = searchImgFile(folder, stemName);
+                if (found != null) 
+                    return found;
+            }
+
+            return null;
+        }
+        #endregion
 
         #region PRIVATE VAR
         //private string _configFilename = "dvp2Config.ini";
@@ -51,6 +111,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
         public void Init(bool debug, string inipara)
         {
             //m_IsDebug = true;
+            loadSimImage(inipara);
             _camCfg.FromCameraString(inipara);
         }
         public bool IsSim()
@@ -306,12 +367,6 @@ namespace JetEazy.CCDSpace.CamLinkDriver
             //    }
             //}
             //return nRet;
-
-            disposeImages();
-
-            // 使用 OpenCvSharp 載入圖檔, 以保證是 8bbp
-            // 注意: _simImgFileName 不能有中文 !!!
-            _simImg = new Mat(_simImgFileName, ImreadModes.Grayscale);
 
             int ret = _simImg != null ? 0 : -1;
             if (ret == 0)

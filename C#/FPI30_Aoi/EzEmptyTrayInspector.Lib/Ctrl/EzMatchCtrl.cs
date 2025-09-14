@@ -174,6 +174,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         public void Dispose()
         {
+            disconnect_event_handlers();
             auto_dump_large_image();
             _largeIMG?.Dispose();
             _largeIMG = null;
@@ -256,6 +257,33 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             _model.OnMatched += _model_OnMatched;
             _model.OnFinalResulted += _model_OnFinalResulted;
             #endregion
+        }
+        void disconnect_event_handlers()
+        {
+            #region SYS_SETTINGS_EVENT_HANDLERS
+            if (_visionSrc != null)
+            {
+                _visionSrc.ImgFile.OnModified -= visionSrc_File_OnModified;
+                //_visionSrc.Mirror.OnModified += visionSrc_Mirror_OnModified;
+            }
+            #endregion
+
+            #region RECIPE_MGR_EVENT_HANDLERS
+            _recipesMgr.OnRecipeSelectionChanged -= _recipesMgr_OnRecipeSelectionChanged;
+            _recipesMgr.OnRecipeBrowsing -= _recipesMgr_OnRecipeBrowsing;
+            _recipesMgr.OnRecipeEditting -= _recipesMgr_OnRecipeEditting;
+            #endregion
+
+            #region MODEL_EVENT_HANDLERS
+            _model.OnStateChanged -= _model_OnStateChanged;
+            _model.OnMatched -= _model_OnMatched;
+            _model.OnFinalResulted -= _model_OnFinalResulted;
+            #endregion
+
+            if (_sideSettings != null)
+            {
+                _sideSettings.Mirror.OnModified += side_Mirror_OnModified;
+            }
         }
         void connect_recipe_prop_handlers()
         {

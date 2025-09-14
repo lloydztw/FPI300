@@ -13,9 +13,22 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector;
+using JetEazy.EzImage;
+using JetEazy.OpenCV;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
-using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Mvc.Model;
+using System;
+using System.Drawing;
+using System.Windows.Forms;
+using Traveller106;
+
+using FormCalibrationTool = LaserAlignDX.Mvc.Gui.FormCalibrationTool;
+//using FormCalibrationTool = LaserAlignDX.FormSpace.FPI30Form.frmCalibration;
+//using FormRcpEditorTool = LaserAlignDX.FormSpace.frmFPIRecipe;
+//using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRcpEditorTool;
+using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 
 
@@ -29,33 +42,111 @@ namespace LaserAlignDX
     public static class GaMvcConfig
     {
         public static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER = true;
-        
-        public static IProcessRunFPI InstanceAoiModel()
+        public static bool OPT_USE_LETIAN_CALIB = true;
+        public static int TOTAL_FLY_CAMERAS => 4;
+
+        #region PRIVATE_DATA
+        static TravellerSysModel _sysModel;
+        #endregion
+
+        // MODEL ----------------------------------------------------
+        public static ITravelerModel SysModel
+        {
+            get
+            {
+                if (_sysModel == null)
+                {
+                    var aoiModel = InstanceAoiModel();
+                    _sysModel = TravellerSysModel.Instance(aoiModel);
+                }
+                return _sysModel;
+            }
+        }
+        private static IProcessRunFPI InstanceAoiModel()
         {
             // AoiModel 使用 V2
-            return AoiModel.V2.ProcessRunFPIClass.Instance;
+            return AoiModel.V25.ProcessRunFPIClass.Instance;
         }
-        
-        public static GaMainCtrl CreateMainCtrl()
-        {
-            // GaMainCtrl 使用 V2 
-            return new global::LaserAlignDX.Mvc.Ctrl.V2.GaMainCtrl();
-        }
-
         public static IxReportBuilder CreateReportBuilder()
         {
             // 使用力成報表
             return new PowerTechReportBuilder();
         }
 
-        public static TravellerTransforms Transforms
+        // CTRL ----------------------------------------------------
+        public static GaMainCtrl CreateMainCtrl()
         {
-            get => TravellerTransforms.Instance;
+            // GaMainCtrl 使用 V2
+            return new global::LaserAlignDX.Mvc.Ctrl.V2.GaMainCtrl();
         }
 
+        // VIEW ----------------------------------------------------
+        public static void OpenRecipeEditor()
+        {
+            var backID = _sysModel.ActiveCarrierID;
+
+            using (var dlg = new FormRcpEditorTool())
+            {
+                dlg.ShowDialog();
+            }
+
+            //為安全起見, 重新再次載入 Recipe
+            _sysModel.ActiveCarrierID = backID;
+            _sysModel.ApplyRecipe();
+        }
+        public static void OpenCalibrationTool()
+        {
+            var backID = _sysModel.ActiveCarrierID;
+
+            using (var dlg = new FormCalibrationTool())
+            {
+                dlg.ShowDialog();
+            }
+
+            //為安全起見, 重新再次載入 Recipe
+            _sysModel.ActiveCarrierID = backID;
+            _sysModel.ApplyRecipe();
+        }
+        public static void OpenEmptyTrayInspectTool(Form owner, string recipeName = null, Bitmap bmpToShow = null)
+        {
+            if (recipeName == null)
+                recipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
+
+            var frm = AoiFactory.OpenEmptyTrayInspectorTool(owner, recipeName);
+            if (frm == null)
+                return;
+
+            if (bmpToShow != null)
+            {
+                frm.Load += (s, e) =>
+                {
+                    new Action(() =>
+                    {
+                        System.Threading.Thread.Sleep(2000);
+                        PushBitmapToEmptyTrayTool(bmpToShow, $"[參數] {recipeName} (bmpOrg)");
+                    }).BeginInvoke(null, null);
+                };
+            }
+
+            frm.ShowDialog(owner);
+
+            // RESERVED 重新再次載入 RecipeCombo
+            //_sysModel.ApplyRecipe();
+        }
+        public static void PushBitmapToEmptyTrayTool(Bitmap bmp, string name)
+        {
+            using (var bridge = new QxImageBridge(bmp))
+            {
+                var qImg = new EzQuickImage(bridge.Image, true);
+                AoiFactory.PushImage(qImg, name);
+            }
+        }
+
+        // Dispose -------------------------------------------------
         public static void DisposeAll()
         {
-            Transforms?.Dispose();
+            _sysModel?.Dispose();
+            _sysModel = null;
         }
     }
 }

@@ -337,9 +337,11 @@ namespace LeTian.AoiLib
         }
         #endregion
 
+        public static bool OPT_USE_OPENCV_WINDOW = true;
         public static void ShowWindow(string name, Mat img)
         {
-            var hwndCV = createDummyCvWindow();
+            if (OPT_USE_OPENCV_WINDOW)
+                createDummyCvWindow();
 
             if (_viewersDict == null)
                 _viewersDict = new Dictionary<string, CvMatViewer>();
@@ -391,7 +393,9 @@ namespace LeTian.AoiLib
                 }
                 _viewersDict.Clear();
             }
-            Cv2.DestroyAllWindows();
+
+            if (OPT_USE_OPENCV_WINDOW)
+                Cv2.DestroyAllWindows();
         }
         public static void WaitKey()
         {
@@ -415,7 +419,8 @@ namespace LeTian.AoiLib
             //    System.Threading.Thread.Sleep(100);
             //}
 
-            Cv2.WaitKey();
+            if (OPT_USE_OPENCV_WINDOW)
+                Cv2.WaitKey();
         }
 
         #region PRIVATE_FUNCTIONS
@@ -428,7 +433,21 @@ namespace LeTian.AoiLib
         }
         static void destroyDummyCvWindow()
         {
-            Cv2.DestroyWindow(_CV_DUMMY_WIN_NAME);
+            try
+            {
+                if (OPT_USE_OPENCV_WINDOW)
+                {
+                    Cv2.DestroyWindow(_CV_DUMMY_WIN_NAME);
+                }
+                else
+                {
+                    DestroyAllWindows();
+                }
+            }
+            catch
+            {
+
+            }
         }
         static Form createForm(string name, out CvMatViewer viewer)
         {
@@ -442,6 +461,8 @@ namespace LeTian.AoiLib
             frm.Controls.Add(viewer);
             frm.FormClosed += (s, e) => destroyForm(s as Form);
             viewer.KeyPress += (s, e) => destroyDummyCvWindow();
+            if (!OPT_USE_OPENCV_WINDOW)
+                frm.TopMost = true;
             return frm;
         }
         static void destroyForm(Form form)

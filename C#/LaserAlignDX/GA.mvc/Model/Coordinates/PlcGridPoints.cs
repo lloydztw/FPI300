@@ -16,7 +16,7 @@
 
 namespace LaserAlignDX.Model.Coords
 {
-    using P = TravellerCoords.P;
+    using P = JetEazy.QMath.QVector2;
 
     /// <summary>
     /// 空台上的格點 (mm)
@@ -27,12 +27,21 @@ namespace LaserAlignDX.Model.Coords
         protected P _org = new P(0, 0);
         #endregion
 
+        public PlcGridPoints()
+        {
+
+        }
         public PlcGridPoints(int rows = 22, int cols = 7, double pitchX = 9.30, double pitchY = 10.64)
         {
             Rows = rows;
             Cols = cols;
             PitchX = pitchX;
             PitchY = pitchY;
+        }
+        public void Offset(double dx, double dy)
+        {
+            _org.X = dx;
+            _org.Y = dy;
         }
 
         public int Rows
@@ -64,6 +73,10 @@ namespace LaserAlignDX.Model.Coords
 
             double x = PitchX * col + _org.X;
             double y = PitchY * row + _org.Y;
+            //double x = _org.X;
+            //double y = _org.Y;
+            //for (int i = 0; i < col; i++) x += PitchX;
+            //for (int i = 0; i < row; i++) y += PitchY;
             return new P(x, y);
         }
         public P this[int row, int col]

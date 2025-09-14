@@ -13,9 +13,10 @@
  */
 #endregion
 
+using LaserAlignDX.AoiModel;
 using System;
 
-namespace LaserAlignDX.AoiModel
+namespace LaserAlignDX.Mvc.Model
 {
     /// <summary>
     /// 統一管理 巨圖 生命週期
@@ -31,7 +32,7 @@ namespace LaserAlignDX.AoiModel
         }
         #endregion
         
-        public static TravellerBigImagesHolder Instance
+        internal static TravellerBigImagesHolder Instance
         {
             get
             {
@@ -51,7 +52,7 @@ namespace LaserAlignDX.AoiModel
                 return _instance;
             }
         }
-        public static void DisposeAll()
+        internal static void DisposeAll()
         {
             _instance?.Dispose();
             _instance = null;

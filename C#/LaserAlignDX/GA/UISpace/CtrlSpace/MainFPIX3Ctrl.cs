@@ -1,21 +1,12 @@
-﻿using JetEazy.BasicSpace;
-using JetEazy;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using VsCommon.ControlSpace.MachineSpace;
-using Traveller106.FormSpace;
-using Traveller106;
+﻿using JetEazy;
+using JetEazy.BasicSpace;
 using LaserAlignDX.FormSpace;
-using JetEazy.ControlSpace.PLCSpace;
+using System;
+using System.Drawing;
 using System.Threading;
-using LaserAlignDX.FormSpace.FPI30Form;
+using System.Windows.Forms;
+using Traveller106;
+using VsCommon.ControlSpace.MachineSpace;
 
 namespace LaserAlignDX.UISpace.CtrlSpace
 {
@@ -67,7 +58,7 @@ namespace LaserAlignDX.UISpace.CtrlSpace
 
         Button btnSIMData;
         Button btnReady;
-        Button btnCali;
+        Button btnCalib;
 
         public MainFPIX3Ctrl()
         {
@@ -97,7 +88,7 @@ namespace LaserAlignDX.UISpace.CtrlSpace
             lblFlyReady = label7;
             lblFlyDone = label8;
 
-            btnCali = button2;
+            btnCalib = button2;
 
             //btnOn = button6Ctr;
             //btnOff = button1Ctr;
@@ -134,7 +125,7 @@ namespace LaserAlignDX.UISpace.CtrlSpace
 
             btnReady.Click += BtnReady_Click;
             btnSIMData.Click += BtnSIMData_Click;
-            btnCali.Click += BtnCali_Click;
+            btnCalib.Click += BtnCalib_Click;
 
             myTime = new JzTimes();
             myTime.Cut();
@@ -171,11 +162,14 @@ namespace LaserAlignDX.UISpace.CtrlSpace
                 m_ThreadPlc.Start();
             }
         }
-        frmCalibration Calibration = null;
-        private void BtnCali_Click(object sender, EventArgs e)
+
+        private void BtnCalib_Click(object sender, EventArgs e)
         {
-            Calibration = new frmCalibration();
-            Calibration.ShowDialog();
+            //using (var calibTool = new FormCalibration())
+            //{
+            //    calibTool.ShowDialog();
+            //}
+            GaMvcConfig.OpenCalibrationTool();
         }
 
         private void BtnSIMData_Click(object sender, EventArgs e)

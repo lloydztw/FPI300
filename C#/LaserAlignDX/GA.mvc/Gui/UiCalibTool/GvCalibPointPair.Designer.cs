@@ -31,12 +31,12 @@
             this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label3 = new System.Windows.Forms.Label();
             this.numericUpDown2 = new System.Windows.Forms.NumericUpDown();
             this.numericUpDown3 = new System.Windows.Forms.NumericUpDown();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
@@ -125,6 +125,30 @@
             this.tableLayoutPanel1.Size = new System.Drawing.Size(365, 86);
             this.tableLayoutPanel1.TabIndex = 3;
             // 
+            // label4
+            // 
+            this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label4.Font = new System.Drawing.Font("微軟正黑體", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.label4.Location = new System.Drawing.Point(3, 53);
+            this.label4.Name = "label4";
+            this.label4.Padding = new System.Windows.Forms.Padding(2, 0, 0, 0);
+            this.label4.Size = new System.Drawing.Size(94, 33);
+            this.label4.TabIndex = 9;
+            this.label4.Text = "相機 (pix)";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label3
+            // 
+            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.label3.Font = new System.Drawing.Font("微軟正黑體", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.label3.Location = new System.Drawing.Point(3, 20);
+            this.label3.Name = "label3";
+            this.label3.Padding = new System.Windows.Forms.Padding(2, 0, 0, 0);
+            this.label3.Size = new System.Drawing.Size(94, 33);
+            this.label3.TabIndex = 8;
+            this.label3.Text = "馬達 (mm)";
+            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // numericUpDown2
             // 
             this.numericUpDown2.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -180,30 +204,6 @@
             this.label2.TabIndex = 6;
             this.label2.Text = "Y";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label3
-            // 
-            this.label3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label3.Font = new System.Drawing.Font("微軟正黑體", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.label3.Location = new System.Drawing.Point(3, 20);
-            this.label3.Name = "label3";
-            this.label3.Padding = new System.Windows.Forms.Padding(2, 0, 0, 0);
-            this.label3.Size = new System.Drawing.Size(94, 33);
-            this.label3.TabIndex = 8;
-            this.label3.Text = "馬達 (mm)";
-            this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label4
-            // 
-            this.label4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label4.Font = new System.Drawing.Font("微軟正黑體", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.label4.Location = new System.Drawing.Point(3, 53);
-            this.label4.Name = "label4";
-            this.label4.Padding = new System.Windows.Forms.Padding(2, 0, 0, 0);
-            this.label4.Size = new System.Drawing.Size(94, 33);
-            this.label4.TabIndex = 9;
-            this.label4.Text = "相機 (pix)";
-            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // groupBox1
             // 

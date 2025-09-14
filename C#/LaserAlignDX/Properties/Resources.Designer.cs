@@ -63,9 +63,29 @@ namespace LaserAlignDX.Properties {
         /// <summary>
         ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
         /// </summary>
+        internal static System.Drawing.Bitmap ActiveCarrier {
+            get {
+                object obj = ResourceManager.GetObject("ActiveCarrier", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
         internal static System.Drawing.Bitmap banner {
             get {
                 object obj = ResourceManager.GetObject("banner", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
+        internal static System.Drawing.Bitmap PassiveCarrier {
+            get {
+                object obj = ResourceManager.GetObject("PassiveCarrier", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
