@@ -12,7 +12,7 @@
 	GaMainCtrl_v2
 	GaMainCtrl_v3 + GaPlcFlyCameraCtrl (2.6.0.0 之後的版本)
 
-## 目前是使用 v3, 實測穩定沒問題後, 會撤除 v2, v1, v0
+## 目前是使用 v2, 實測穩定沒問題後, 會撤除 v1, v0
 	v0 保留原始 MainX3UI 的控制代碼
 	v1 從冗長的 process_OnMessage, 抽出 UPDATE_MVD_FUNCTIONS
 	v2 使用 ChipCellsViewer 取代原來的 MVSUI 來顯示 晶粒檢測結果
@@ -25,4 +25,8 @@
 		Model\Coordinates
 
 ## 2025-09-09 加入 GaRecipeEditCtrl
-	準備中 ...
+	2025-09-14 搭配
+		Gui\UiRecipeEditor
+			\FormRecipeEditor
+			\FormLightControl
+			\IvRecipeEditor

@@ -29,7 +29,7 @@ namespace LaserAlignDX
 
             var frm = new Traveller106.frmMainDX();
             
-            frm.Load += (s, e) => GaMvcConfig.OpenRecipeEditor();
+            //frm.Load += (s, e) => GaMvcConfig.OpenCalibrationTool();
 
             Application.Run(frm);
         }

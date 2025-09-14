@@ -24,9 +24,12 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LeTian.JxProps.PropertyMeta;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
@@ -45,8 +48,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region RECIPES
-        RecipeFPIX3Class xRecipe => RecipeFPIX3Class.Instance;
-        RecipeParaGridClass xParamGrid => RecipeParaGridClass.Instance;
+        RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
+        RecipeParaGridClass _xParamGrid => RecipeParaGridClass.Instance;
         //JxRecipeCombo _jxRecipeCombo => _sysModel?.GetCurrentRecipe();
         #endregion
 
@@ -138,6 +141,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 var delayAction = new Action(() =>
                 {
+                    makeSomeReadonlyInGaaraRecipe();
                     updateAllRecipeData(false, _currentCarrierID);
                 });
 
@@ -161,16 +165,18 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         private void LtAoi_OnLineScanRequested(object sender, EventArgs e)
         {
-            //new Action(() =>
-            //{
-            //    //System.Threading.Thread.Sleep(2000);
-            //    LtAoiFactory.PushBitmap(xRecipe.bmpOrg, "RecipeOrg");
-            //}).BeginInvoke(null, null);
+            new Action(() =>
+            {
+                System.Threading.Thread.Sleep(500);
+                var bmpOrg = _xRecipe.PeekBmpOrg(_currentCarrierID);
+                var srcName = $"bmpOrg @ {_currentCarrierID}";
+                GaMvcConfig.PushBitmapToEmptyTrayTool(bmpOrg, srcName);
+            }).BeginInvoke(null, null);
         }
         private void Pg_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
             // 取得被改變的屬性名稱
-            string propertyName = e.ChangedItem?.PropertyDescriptor?.Name;
+            //string propertyName = e.ChangedItem?.PropertyDescriptor?.Name;
             _isModified = true;
         }
         #endregion
@@ -208,11 +214,37 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region PRIVATE_UPDATE_FUNCTIONS
+        void makeSomeReadonlyInGaaraRecipe()
+        {
+            // 在設定 SelectedObject 之前，將 一些 屬性設為唯讀
+            var readonlyPropNames = new List<string>()
+            {
+                "xAngle",
+                "xRow",
+                "xColumn",
+                "xLeftTopX",
+                "xLeftTopY",
+                "xRowOffset",
+                "xColumnOffset",
+                "xChipWidth",
+                "xChipHeight",
+                "xRealLeftX",
+                "xRealLeftY",
+                "xRealOffsetX",
+                "xRealOffsetY",
+                "xStageNumber",
+            };
+
+            TypeDescriptor.AddProvider(
+                new CustomReadOnlyTypeDescriptionProvider(_xParamGrid.GetType(), readonlyPropNames),
+                _xParamGrid
+            );
+        }
         void updateAllRecipeData(bool toModel, CarrierEnum carrierID)
         {
             if (toModel)
             {
-                xRecipe.ReleaseOrgBmps(save: true);
+                //xRecipe.ReleaseBmpsOrg(save: true);
             }
             else
             {
@@ -229,7 +261,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             string recipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
             string srcName = $"[參數] {recipeName} (bmpOrg @ {carrierID})";
 
-            Bitmap bmpOrg = xRecipe.PeekOrgBmp(carrierID);
+            Bitmap bmpOrg = _xRecipe.PeekBmpOrg(carrierID);
             
             if (bmpOrg != null)
             {
@@ -253,9 +285,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             // xRecipe 負責接手管理 goldenRegionBmp
             //--------------------------------------------------------------------------------
             Bitmap goldenRegionBmp = BitmapConverter.ToBitmap(goldenRegionImg);
-            xRecipe.xRectRegionPrint = JetEazy.Qcvt.CC(goldenRegionRect);
-            var old = xRecipe.bmpprinttemplate;
-            xRecipe.bmpprinttemplate = goldenRegionBmp;
+            _xRecipe.xRectRegionPrint = JetEazy.Qcvt.CC(goldenRegionRect);
+            var old = _xRecipe.bmpprinttemplate;
+            _xRecipe.bmpprinttemplate = goldenRegionBmp;
             old?.Dispose();
 
             //// 更新至 jxRecipeCombo
@@ -266,7 +298,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             //(1) 顯示 RecipeParaGridClass 參數
             if (_rcpEditUI.wndVisionSettingsPanel is PropertyGrid pg)
             {
-                pg.SelectedObject = xParamGrid;
+                pg.SelectedObject = _xParamGrid;
             }
 
             ////(2) 顯示 jxRecipeComboe
@@ -276,7 +308,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             //    propsViewer.ExpandAll();
             //}
 
-            xParamGrid.xStageNumber = (StageNumber)carrierID;
+            _xParamGrid.xStageNumber = (StageNumber)carrierID;
         }
         void updatePlcCoordsRef(CarrierEnum carrierID)
         {
@@ -316,7 +348,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (bigBmp != null)
             {
                 _isModified = true;
-                xRecipe.TakeInOrgBmp(_currentCarrierID, bigBmp);
+                _xRecipe.TakeInBmpOrg(_currentCarrierID, bigBmp);
                 _wndOwner.BeginInvoke(new Action(() => updateRecipeOrgBmpToViewer(_currentCarrierID)));
             }
 
@@ -340,7 +372,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 if (bigBmp != null)
                 {
                     _isModified = true;
-                    xRecipe.TakeInOrgBmp(_currentCarrierID, bigBmp);
+                    _xRecipe.TakeInBmpOrg(_currentCarrierID, bigBmp);
                     _wndOwner.BeginInvoke(new Action(() => updateRecipeOrgBmpToViewer(_currentCarrierID)));
                 }
             }
@@ -355,7 +387,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var carrierID = this._currentCarrierID;
 
             // 從參數抓取 bmpOrg
-            Bitmap srcBmp = xRecipe.PeekOrgBmp(carrierID);
+            Bitmap srcBmp = _xRecipe.PeekBmpOrg(carrierID);
             if(srcBmp == null)
             {
                 VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
@@ -386,7 +418,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             enableGoldenRegionPicking(false);
 
             CarrierEnum carrierID = _currentCarrierID;
-            var bmpOrg = xRecipe.PeekOrgBmp(carrierID);
+            var bmpOrg = _xRecipe.PeekBmpOrg(carrierID);
             GaMvcConfig.OpenEmptyTrayInspectTool(_wndOwner.FindForm(), bmpToShow: bmpOrg);
         }
         void OpenTemplateMatchWindow()
@@ -420,13 +452,13 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             using (var dlg = new FormLightControl())
             {
-                dlg.LightChannel = xParamGrid.xChNum;
-                dlg.LightValue = xParamGrid.xChValue;
+                dlg.LightChannel = _xParamGrid.xChNum;
+                dlg.LightValue = _xParamGrid.xChValue;
 
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
-                    xParamGrid.xChNum = dlg.LightChannel;
-                    xParamGrid.xChValue = (int)dlg.LightValue;
+                    _xParamGrid.xChNum = dlg.LightChannel;
+                    _xParamGrid.xChValue = (int)dlg.LightValue;
 
                     updateRecipePropertyView(_currentCarrierID);
                 }
@@ -435,7 +467,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         void WriteCoordsRefToPlc()
         {
             string msg;
-            bool ok = _sysModel.WriteCoordsRefToPlc(out msg);
+            bool ok = _sysModel.WriteAllCoordsToPlc(out msg);
             if (ok)
                 VsMSG.Instance.Tishi("座標成功寫入至 PLC.");
             else
@@ -465,25 +497,25 @@ namespace LaserAlignDX.Mvc.Ctrl
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
             var carrierID = _currentCarrierID;
 
-            // 從參數抓取 bmpOrg
-            Bitmap srcBmp = xRecipe.PeekOrgBmp(carrierID);
+            // 從參數取得 bmpOrg
+            Bitmap srcBmp = _xRecipe.PeekBmpOrg(carrierID);
             if (srcBmp == null)
             {
                 VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
                 return;
             }
 
-            // 偵測格點
-            var result = _sysModel.DetectCameraGrid(srcBmp);
-            var camGrid = result?.Grid;
-            if (camGrid == null)
+            // 自動建構 Region Cells
+            _sysModel.ActiveCarrierID = carrierID;
+            var result = _sysModel.AutoBuildRegionCells(srcBmp);
+            if (result == null || result.Grid == null)
                 return;
 
-            // 建構 Region Cells
-            _sysModel.BuildCellRegions(carrierID, camGrid, true);
+            // 設定旗標
             _isModified = true;
             
             // 更新 GUI
+            _cviCamGridBox.TransCameraToWorld = _sysModel.TransformsModel.GetCameraPhysicTransform(carrierID);
             _cviCamGridBox.IsEmptyTrayMode = true;
             _cviCamGridBox.UpdateResult(result);
             _cviCamGridBox.Visible = true;
@@ -500,13 +532,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (reloadGaara)
             {
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
-
-                if (reloadGaara)
-                    xRecipe.Load();
-
-                //_jxRecipeCombo.Load(null);
-                //_sysModel.ApplyRecipe();
-
+                _xRecipe.Load();
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
         }
@@ -515,20 +541,22 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (force || _isModified)
             {
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
-
-                xRecipe.Save();
-                //_jxRecipeCombo.Save(null);
-                //_sysModel.ApplyRecipe();
-
+                _xRecipe.Save();
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
         }
         void CloseWindow(bool confirm)
         {
+            if (_wndOwner == null || !_wndOwner.IsHandleCreated)
+                return;
+
+            var oldCursor = GaUtil.SetCursor (_wndOwner, Cursors.WaitCursor);
+
             if (confirm)
             {
                 // 保存更新的參數
                 updateAllRecipeData(true, _currentCarrierID);
+                _xRecipe.ReleaseBmpsOrg(save: true);
                 SaveSettings();
                 _wndOwner.DialogResult = DialogResult.OK;
             }
@@ -536,10 +564,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 // 還原舊值
                 LoadSettings(true);
+                _xRecipe.ReleaseBmpsOrg(save: false);
                 _wndOwner.DialogResult = DialogResult.Cancel;
             }
 
-            xRecipe.ReleaseOrgBmps(false);
+            GaUtil.SetCursor(_wndOwner, oldCursor);
 
             _wndOwner.Close();
         }

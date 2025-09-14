@@ -1,7 +1,6 @@
 ﻿using Common.RecipeSpace;
 using Eazy_Project_III;
 using EzAoiEmptyTrayInspector.Model;
-using FreeImageAPI;
 using JetEazy;
 using JetEazy.Match;
 using JetEazy.Utils;
@@ -13,7 +12,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
-using System.Windows.Navigation;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
@@ -48,22 +46,22 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         public void Dispose()
         {
-            // To DO: 請重新檢查一遍, 把自己清乾淨 !!!
-            mvdprinttemp_Find?.Dispose();
-            mvdprinttemp_Find = null;
-
-            foreach (var cell in xRegionCells)
-                cell?.Dispose();
-            xRegionCells.Clear();
-
-
+            // 2025-09-14 LETIAN: 初步整理出需要釋放資源的子模塊
+            disposeRegionCells();
             disposeCamGrids();
 
-            bmpOrgFly?.Dispose();
-            bmpOrgFly = null;
-            ReleaseOrgBmps(save: false);
+            disposeMvdTools();
+
+            disposeBmpOrgs();
+            disposeBmpOrgFly();
+
+            disposeGoldenRegionTemplate();
+            disposeDefectInspectTemplate();
+            disposeFlyCamTemplate();
+            disposeCodeTemplate();
         }
 
+        #region REGION_CELLS
         /// <summary>
         /// 個別 晶粒區域 (位於格點範圍)
         /// 這應該放在 AoiResult 而不是 Recipe 區
@@ -74,35 +72,53 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// 這應該放在 AoiResult 而不是 Recipe 區
         /// </summary>
         public List<Rectangle> xOutBlocs = new List<Rectangle>();
+        /// <summary>
+        /// 釋放資源
+        /// </summary>
+        void disposeRegionCells()
+        {
+            foreach (var cell in xRegionCells)
+                cell?.Dispose();
+            xRegionCells.Clear();
+        }
+        #endregion
 
-        #region PRIVATE_ORG_BMP_HOLDERS
+        #region PRIVATE_BMP_HOLDERS
+        /// <summary>
+        /// 使用 RcpBmpHolder 來動態載入 載台1 的 bmpOrg
+        /// </summary>
         readonly RcpBmpHolder _bmpHolderOrg1 = new RcpBmpHolder("org");
+        /// <summary>
+        /// 使用 RcpBmpHolder 來動態載入 載台2 的 bmpOrg
+        /// </summary>
         readonly RcpBmpHolder _bmpHolderOrg2 = new RcpBmpHolder("org2");
         #endregion
 
+        #region 載台的_BMP_ORG_接口
         /// <summary>
         /// 舊接口 只傳回載台1
         /// </summary>
-        public Bitmap bmpOrg
+        private Bitmap bmpOrg
         {
             get
             {
-                return PeekOrgBmp(CarrierEnum.C1);
+                return PeekBmpOrg(CarrierEnum.C1);
             }
         }
-        public Bitmap PeekOrgBmp(CarrierEnum carrierID)
+        public Bitmap PeekBmpOrg(CarrierEnum carrierID)
         {
             return carrierID == CarrierEnum.C1 ? _bmpHolderOrg1.Peek() : _bmpHolderOrg2.Peek();
         }
-        public void TakeInOrgBmp(CarrierEnum carrierID, Bitmap bmp)
+        public void TakeInBmpOrg(CarrierEnum carrierID, Bitmap bmp)
         {
             if (carrierID == CarrierEnum.C1)
                 _bmpHolderOrg1.TakeOver(bmp);
             else
                 _bmpHolderOrg2?.TakeOver(bmp);
         }
-        public void ReleaseOrgBmps(bool save)
+        public void ReleaseBmpsOrg(bool save)
         {
+            // bmpOrg 一般只用於參數編輯時期, 跑線時可以釋放
             if (save)
             {
                 _bmpHolderOrg1.Save();
@@ -111,8 +127,21 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             _bmpHolderOrg1?.Dispose();
             _bmpHolderOrg2?.Dispose();
         }
+        void disposeBmpOrgs()
+        {
+            _bmpHolderOrg1?.Dispose();
+            _bmpHolderOrg2?.Dispose();
+        }
+        #endregion
 
+        #region 飛拍_BMP_ORG
         public Bitmap bmpOrgFly = new Bitmap(1, 1);
+        void disposeBmpOrgFly()
+        {
+            bmpOrgFly?.Dispose();
+            bmpOrgFly = null;
+        }
+        #endregion
 
         #region GOLDEN_REGION_TEMPLATE_晶粒區域樣本
         /// <summary>
@@ -123,13 +152,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// Golden Region Bitmap (晶粒區域粗框)
         /// </summary>
         public Bitmap bmpprinttemplate = new Bitmap(1, 1);
-        #endregion
-
-        #region DEFECT_INSPECTOR_TEMPLATE_瑕疵檢所用到的樣本
-        public Bitmap bmpprintmask = new Bitmap(1, 1);
-        public Bitmap bmpDefectTemplate = new Bitmap(1, 1);
-        #endregion
-
         /// <summary>
         /// Golden Chip Rect
         /// 更精確(內縮)的晶粒矩形區域
@@ -137,14 +159,41 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// 相對於 xRectRegionPrint 的左上角為零點
         /// </summary>
         public RectangleF xRegionTrain = new RectangleF(0, 0, 100, 100);
+        void disposeGoldenRegionTemplate()
+        {
+            bmpcodetemplate?.Dispose();
+            bmpcodetemplate = null;
+        }
+        #endregion
 
-        #region LINE_BORDER_BOXES
+        #region DEFECT_INSPECTOR_TEMPLATE_瑕疵檢所用到的樣本
+        public Bitmap bmpprintmask = new Bitmap(1, 1);
+        public Bitmap bmpDefectTemplate = new Bitmap(1, 1);
+        void disposeDefectInspectTemplate()
+        {
+            this.bmpprintmask?.Dispose();
+            this.bmpprintmask = null;
+            this.bmpDefectTemplate?.Dispose();
+            this.bmpDefectTemplate = null;
+        }
+        #endregion
+
+        #region LINE_BORDER_BOXES_邊線區塊_手拉框
         /// <summary>
-        /// 邊線框
+        /// 邊線框(左)
         /// </summary>
         public RectangleF xLineLeft = new RectangleF(0, 0, 100, 100);
+        /// <summary>
+        /// 邊線框(上)
+        /// </summary>
         public RectangleF xLineTop = new RectangleF(0, 0, 100, 100);
+        /// <summary>
+        /// 邊線框(右)
+        /// </summary>
         public RectangleF xLineRight = new RectangleF(0, 0, 100, 100);
+        /// <summary>
+        /// 邊線框(下)
+        /// </summary>
         public RectangleF xLineBottom = new RectangleF(0, 0, 100, 100);
         #endregion
 
@@ -156,22 +205,42 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #region FLY_CAMERA_TEMPLATE_飛拍樣本
         public RectangleF xRectRegionPrintFly = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpprintFlytemplate = new Bitmap(1, 1);
+        void disposeFlyCamTemplate()
+        {
+            this.bmpprintFlytemplate?.Dispose();
+            this.bmpprintFlytemplate = null;
+        }
         #endregion
 
         #region MVD_AOI_TOOLS_RUNTIME_海康工具相關成員
         public PointF ptPrinttemp = new PointF(-1, -1);
         public MVD_CHIP_MATCHER mvdprinttemp_Find = new MVD_CHIP_MATCHER();
-
         public PointF ptPrintFlytemp = new PointF(-1, -1);
         public MvdFindClass mvdprintFlytemp_Find = new MvdFindClass();
-
         public Mvd2DReaderClass mvd2DReader = new Mvd2DReaderClass();
 
-        public RectangleF xRectCodeRegion = new RectangleF(0, 0, 100, 100);
-        public Bitmap bmpcodetemplate = new Bitmap(1, 1);
+        void disposeMvdTools()
+        {
+            mvdprinttemp_Find?.Dispose();
+            mvdprinttemp_Find = null;
+            mvdprintFlytemp_Find?.Dispose();
+            mvdprintFlytemp_Find = null;
+            mvd2DReader?.Dispose();
+            mvd2DReader = null;
+        }
         #endregion
 
-        #region 參數區_Persistance_Of_RecipeParaGridClass
+        #region CODE_TEMPLATE
+        public RectangleF xRectCodeRegion = new RectangleF(0, 0, 100, 100);
+        public Bitmap bmpcodetemplate = new Bitmap(1, 1);
+        void disposeCodeTemplate()
+        {
+            bmpcodetemplate?.Dispose();
+            bmpcodetemplate = null;
+        }
+        #endregion
+
+        #region 參數區_RecipeParaGridClass
         // 以下成員, 是讓 RecipeParaGridClass 來進行 ini 存取 
         internal int xRow = 1;
         internal int xColumn = 1;
@@ -193,18 +262,18 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public string xLotNoStr = "NONE";
 
         #region NO_USE_本專案沒用到_但是這應該放在_AOI_RESULT_區域
-        public int PassCount = 0;
-        public int NGCount = 0;
+        private int PassCount = 0;
+        private int NGCount = 0;
         #endregion
 
-        #region 实际矩阵XY
+        #region 參數區_实际矩阵XY
         public float xRealLeftX = 0;
         public float xRealLeftY = 0;
         public float xRealOffsetX = 1;
         public float xRealOffsetY = 1;
         #endregion
 
-        #region LT_CAM_GRIDS
+        #region 參數區_LT_CAM_GRIDS
         public EzBlocsGrid xCamGrid1 = null;
         public EzBlocsGrid xCamGrid2 = null;
         void loadCamGrids(CarrierEnum carrierID, out EzBlocsGrid grid)
@@ -238,6 +307,24 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xCamGrid1 = null;
             xCamGrid2?.Dispose();
             xCamGrid2 = null;
+        }
+        #endregion
+
+        #region PRIVATE_LOCAL_BMP_HELPER_FUNCTIONS
+        Bitmap loadImage(string fname)
+        {
+            string fileName = System.IO.Path.Combine(PathIndexStr, fname);
+            if (System.IO.File.Exists(fileName))
+            {
+                return GaImageUtil.LoadBigImage(fileName);
+            }
+            return new Bitmap(1, 1, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+        }
+        void saveImage(Bitmap bmp, string fname)
+        {
+            if (bmp == null) return;
+            string fileName = System.IO.Path.Combine(PathIndexStr, fname);
+            GaImageUtil.SaveBigImage(fileName, bmp);
         }
         #endregion
 
@@ -311,6 +398,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //xRectRegionPrint = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrint", RectFtoStringSimple(xRectRegionPrint), INIFILE));
 
             //xRectCodeRegion = StringtoRectF(ReadINIValue("Recipe Basic", "xRectCodeRegion", RectFtoStringSimple(xRectCodeRegion), INIFILE));
+            
             loadCamGrids(CarrierEnum.C1, out xCamGrid1);
             loadCamGrids(CarrierEnum.C2, out xCamGrid2);
 
@@ -471,7 +559,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 this.bmpcodetemplate = loadImage("bmpcode.bmp");
                 #endregion
 
-                //建立所有的region
+                //建立所有的 Region Cells
                 CreateViews();
 
                 int iOK = ViewTrainLoad();
@@ -517,10 +605,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "xChNum", xChNum.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xChValue", xChValue.ToString(), INIFILE);
 
-            _bmpHolderOrg1.Save();
-            _bmpHolderOrg2.Save();
+
             saveCamGrid(CarrierEnum.C1, xCamGrid1);
             saveCamGrid(CarrierEnum.C2, xCamGrid2);
+
+            _bmpHolderOrg1.Save();
+            _bmpHolderOrg2.Save();
 
             ////string bmporgpath = $"{PathIndexStr}\\org.bmp";
             ////bmpOrg.Save(bmporgpath, System.Drawing.Imaging.ImageFormat.Bmp);
@@ -530,7 +620,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //bmpOrgFly.Save(bmporgFlypath, System.Drawing.Imaging.ImageFormat.Bmp);
             saveImage(bmpOrgFly, "orgFly.bmp");
 
-            // 建立所有的 region
+            // 建立所有的 Region Cells
             CreateViews();
 
             int iOK = ViewTrainLoad();
@@ -538,29 +628,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 JetEazy.BasicSpace.VsMSG.Instance.Warning($"加载参数训练失败！");
 
             //InspectX2Class.Instance.Save();
-
             InspectX3ParaClass.Instance.Save();
             FlyParaClass.Instance.Save();
             NoTrayParaClass.Instance.Save();
         }
-
-        #region PRIVATE_BMP_LOAD_FUNCTIONS
-        Bitmap loadImage(string fname)
-        {
-            string fileName = System.IO.Path.Combine(PathIndexStr, fname);
-            if (System.IO.File.Exists(fileName))
-            {
-                return GaImageUtil.LoadBigImage(fileName);
-            }
-            return new Bitmap(1, 1, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-        }
-        void saveImage(Bitmap bmp, string fname)
-        {
-            if (bmp == null) return;
-            string fileName = System.IO.Path.Combine(PathIndexStr, fname);
-            GaImageUtil.SaveBigImage(fileName, bmp);
-        }
-        #endregion
 
         public void SavePrintTemplate()
         {
@@ -590,6 +661,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         public void SavePrintNoTrayTemplate()
         {
+            // 由 LETIAN 的空盤檢測套件處理
             //WriteINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(xRectRegionPrintNoTray), INIFILE);
             //string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
             //bmpprintNoTraytemplate.Save(bmpprintNoTraytemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
@@ -616,7 +688,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //bmpcodetemplate.Save(bmpcodepath, System.Drawing.Imaging.ImageFormat.Bmp);
             saveImage(bmpcodetemplate, "bmpcode.bmp");
         }
-
         public void SaveLotNo()
         {
             WriteINIValue("Collect", "xLotNoStr", xLotNoStr, INIFILE);
@@ -714,6 +785,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             bool bOK = mvdprintFlytemp_Find.HikRunBmp();
             return (bOK ? 0 : -1);
         }
+
         //public int PrintTempFlyRun(CMvdImage eMvdInput)
         //{
         //    mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
@@ -938,7 +1010,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region 统计数据
-
         public float[] AnalyzeDatas = new float[9];
         public void AnalyzeDatasData()
         {
@@ -980,7 +1051,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             return bOK;
         }
 
-
         //public int PassCount = 0;
         //public int NGCount = 0;
         public void ResetZero()
@@ -1006,8 +1076,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "PassCount", PassCount.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "NGCount", NGCount.ToString(), INIFILE);
         }
-
-
         #endregion
 
         #region 校正與座標轉換_GAARA_版本
@@ -1077,9 +1145,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
             // 不應該由 Recipe 自己調用 !
             //-----------------------------------------------------------------------------
-            int iret = 0;// Base0Train();
+            int iret = 0; // Base0Train();
             //if (iret == 0)
             //    iret = Base1Train();
+
             if (iret == 0)
                 iret = PrintTempTrain();
             //if (iret == 0)
@@ -1101,6 +1170,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //        iret = -1;
             //    }
             //}
+
             if (iret == 0)
                 iret = PrintTempFlyTrain();
             return iret;
@@ -1110,14 +1180,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// 創建 RegionCells.
         /// (這個應該是放在 AOI MODEL 內)
         /// </summary>
-        public void CreateViews(bool writeback = false)
+        public void CreateViews()
         {
             //-----------------------------------------------------------------------------
             // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
             // 不應該由 Recipe 自己調用 !
             //-----------------------------------------------------------------------------
-            // 暫時 醜醜的 掛在此處 ...
-            GaMvcConfig.SysModel.ApplyRecipe(null, writeback);
+            // 已經交由 SysModel.ApplyRecipe 自動建立 Region Cells !!!
+            // GaMvcConfig.SysModel.ApplyRecipe(optWritebackToRecipe: true);
             return;
         }
 
@@ -1126,7 +1196,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// (這個應該是放在 AOI MODEL 內)
         /// </summary>
         void CreateViews_Gaara()
-        { 
+        {
+            //-----------------------------------------------------------------------------
+            // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
+            // 不應該由 Recipe 自己調用 !
+            //-----------------------------------------------------------------------------
+
             xRegionCells.Clear();
 
             PointF ptworld = lineScanCalibrate.ViewToWorld(LeftTopRectCenter);
@@ -1219,8 +1294,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //}
         }
 
+        #region OLD_CODE_沒用到
 #if (GAARA_OLD_BACKUP)
-
         public void CreateViews()
         {
             xRegionCells.Clear();
@@ -1295,7 +1370,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
 #endif
-
+        #endregion
 
         #region MISC_UTIL_FUNCTIONS
         /// <summary>
@@ -1331,6 +1406,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
     }
+
 
     public class FlyParaClass : RecipeBaseClass
     {
@@ -1470,6 +1546,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
     }
+
 
     public class InspectX3ParaClass : RecipeBaseClass
     {
@@ -1850,6 +1927,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
     }
 
+
     public class NoTrayParaClass : RecipeBaseClass
     {
         public NoTrayParaClass()
@@ -1943,6 +2021,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
     }
+
 
     public class LineScanCalibrateClass : RecipeBaseClass
     {

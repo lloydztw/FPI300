@@ -43,7 +43,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         public Bitmap Peek()
         {
-            if (_bmp == null)
+            if (!checkExiting(_bmp))
                 Load();
             return _bmp;
         }
@@ -57,12 +57,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 old?.Dispose();
             }
         }
-        public void Load(bool force = false)
+        public void Load(bool force = false, string ext = null)
         {
             if (_bmp == null || force)
             {
                 var old = _bmp;
-                _bmp = loadImage(_name);
+                _bmp = loadImage(_name, ext);
                 _isDirty = false;
                 old?.Dispose();
             }
@@ -88,14 +88,37 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         #region PRIVATE_FUNCTIONS
-        Bitmap loadImage(string name)
+        bool checkExiting(Bitmap bmp)
         {
-            foreach (var ext in new[] { ".jpg", ".bmp" })
+            if (bmp == null)
+                return false;
+            try
+            {
+                return bmp != null && bmp.Size != Size.Empty;
+            }
+            catch
+            {
+                // 被外部 無預警 調用 Dispose() 清除 了!
+                _bmp = null;
+                return false;
+            }
+        }
+        Bitmap loadImage(string name, string assignedExt = null)
+        {
+            // 如果沒有指定, 優先載入 ".jpg" 其次 ".bmp"
+            var exts = (assignedExt == null) ? 
+                        new[] { ".jpg", ".bmp" }: 
+                        new[] { assignedExt };
+
+            foreach (var ext in exts)
             {
                 string fileName = System.IO.Path.Combine(CommonPath, name + ext);
                 if (System.IO.File.Exists(fileName))
                 {
-                    return GaImageUtil.LoadBigImage(fileName);
+                    var newBmp = GaImageUtil.LoadBigImage(fileName);
+                    if (newBmp != null)
+                        GaUtil.LOG($"RcpBmp [{_name}] 載入 {fileName}");
+                    return newBmp;
                 }
             }
             return null;
@@ -104,6 +127,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         {
             string fileName = System.IO.Path.Combine(CommonPath, name + ext);
             GaImageUtil.SaveBigImage(fileName, bmp);
+            GaUtil.LOG($"RcpBmp [{_name}] 寫入 {fileName}");
         }
         #endregion
     }

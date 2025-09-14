@@ -25,6 +25,9 @@ namespace LaserAlignDX.Mvc.Gui
         {
             InitializeComponent();
 
+            if (DesignMode)
+                return;
+
             rdoCarriers = new RadioButton[] { rdoCarrier1, rdoCarrier2 };
             rdoSuckerRows = new RadioButton[] { rdoSucker1, rdoSucker2 };
             rdoCarrier1.CheckedChanged += RdoCarrier1_CheckedChanged;
@@ -38,7 +41,7 @@ namespace LaserAlignDX.Mvc.Gui
                 ctrl.Attach(this);
             }
 
-            this.Height = Screen.PrimaryScreen.Bounds.Height;
+            //this.Height = Screen.PrimaryScreen.Bounds.Height;
         }
 
         #region GUI_LINKS

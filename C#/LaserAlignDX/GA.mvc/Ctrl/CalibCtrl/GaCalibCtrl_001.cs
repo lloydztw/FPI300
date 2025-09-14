@@ -19,6 +19,7 @@ using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.Interface;
 using JetEazy.Match;
+using JetEazy.OpenCV;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
@@ -30,8 +31,8 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
-using JxCalibAoiRecipe = EzAoiEmptyTrayInspector.Model.JxAoiRecipe;
 using QCoord = JetEazy.QMath.QVector;
+using JxCalibAoiRecipe = EzAoiEmptyTrayInspector.Model.JxAoiRecipe;
 
 
 namespace LaserAlignDX.Mvc.Ctrl
@@ -55,7 +56,6 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region GLOBAL_PATH
         static string CALIB_VISION_FILE => GaMvcPaths.CALIB_VISION_FILE;
         static string CALIB_TRANSFORMS_FILE => GaMvcPaths.CALIB_TRANSFORMS_FILE;
-        static string CALIB_LAST_IMAGE_FILE => System.IO.Path.ChangeExtension(GaMvcPaths.CALIB_VISION_FILE, ".jpg");
         #endregion
 
         #region GLOBAL_MESS
@@ -63,13 +63,20 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             get { return Traveller106.Universal.IxLineScan; }
         }
+        GaBigImageHolder _lineScanImageHolder => GaMvcConfig.SysModel.LineScanImageHolder;
         TravellerTransforms _transforms => GaMvcConfig.SysModel.TransformsModel;
         #endregion
 
         #region CALIB_AOI_MODEL
         ICalibAoiModel _aoiModel => GaMvcConfig.SysModel.CalibAoiModel;
-        JxCalibAoiRecipe _jxGlobalAoiRecipe = new JxCalibAoiRecipe() { Name = "Global Calib" };
+        JxCalibAoiRecipe _jxAoiRecipe;
+        bool _isInGlobalCalibration;
         #endregion
+
+        internal ICalibAoiModel GetAoiModel()
+        {
+            return _aoiModel;
+        }
 
         #region GUI_LINKS
         IvCalibToolUI _calibToolUI;
@@ -98,26 +105,30 @@ namespace LaserAlignDX.Mvc.Ctrl
         SuckerRowEnum _activeSuckerRowID = SuckerRowEnum.S1;
         bool _isCoordModified = false;
         bool _isGoldenPicking = false;
-        bool _isImageChanged = false;
         bool _isRunning = false;        // 因為目前是單執行緒, 所以此變量用處不大.
         #endregion
 
-        public void Attach(IvCalibToolUI toolView)
+        public void Attach(IvCalibToolUI toolView, JxCalibAoiRecipe localRecipe = null)
         {
             _calibToolUI = toolView;
             _btnPickupGolden.Tag = _btnPickupGolden.BackColor;
+
+            _isInGlobalCalibration = (localRecipe == null);
+            _jxAoiRecipe = localRecipe == null ? new JxCalibAoiRecipe() { Name = "Global Calib" } : localRecipe;
 
             initImgViewer();
             LoadSettings();
 
             updateAllData(false);
             connectEventHandlers();
-
         }
         void CleanUp()
         {
-            _jxGlobalAoiRecipe?.Dispose();
-            _jxGlobalAoiRecipe = null;
+            // 卸載 lineScanImageHolder Event Handler
+            _lineScanImageHolder.OnImageChanged -= _lineScanImageHolder_OnImageChanged;
+            // 由於 _jxAoiRecipe 被 _aoiModel 接管, 所以不用 Dispose !!!
+            //_jxAoiRecipe.Dispose();
+            //_jxAoiRecipe = null;
         }
 
         #region PRIVATE_INIT_FUNCTIONS
@@ -164,13 +175,10 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             _cviGoldenBox.OnBoxSelected += (s, e) => BuildGolden();
             _imgViewer.MatViewer.MouseMove += MatViewer_MouseMove;
+            _wndOwner.HandleCreated += (s, e) => updateGuiStatus();
 
-            // 延遲更新
-            _wndOwner.HandleCreated += (s, e) =>
-            {
-                updateGuiStatus();
-                _wndOwner.BeginInvoke((Action)loadLastImage);
-            };
+            // 加載 lineScanImageHolder Event Handler
+            _lineScanImageHolder.OnImageChanged += _lineScanImageHolder_OnImageChanged;
 
             // 自動釋放資源
             _wndOwner.HandleDestroyed += (s, e) => CleanUp();           
@@ -194,25 +202,25 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         private void _lineScanImageHolder_OnImageChanged(object sender, EventArgs e)
         {
-            //if (_wndOwner == null || !_wndOwner.IsHandleCreated)
-            //    return;
+            if (_wndOwner == null || !_wndOwner.IsHandleCreated)
+                return;
 
-            //if (_wndOwner.InvokeRequired)
-            //{
-            //    _wndOwner.Invoke((EventHandler)_lineScanImageHolder_OnImageChanged);
-            //}
-            //else
-            //{
-            //    var bmp = _lineScanImageHolder.PeekBitmap();
-            //    using (var bridge = new QxImageBridge(bmp))
-            //    {
-            //        // 暫時使用 Clone 浪費了內存, 但是比較安全.
-            //        var old = _imgViewer.MatViewer.Image;
-            //        _imgViewer.MatViewer.Image = bridge.Image.Clone();
-            //        old?.Dispose();
-            //        _imgViewer.lblTitle.Text = _lineScanImageHolder.SrcName;
-            //    }
-            //}
+            if (_wndOwner.InvokeRequired)
+            {
+                _wndOwner.Invoke((EventHandler)_lineScanImageHolder_OnImageChanged);
+            }
+            else
+            {
+                var bmp = _lineScanImageHolder.PeekBitmap();
+                using (var bridge = new QxImageBridge(bmp))
+                {
+                    // 暫時使用 Clone 浪費了內存, 但是比較安全.
+                    var old = _imgViewer.MatViewer.Image;
+                    _imgViewer.MatViewer.Image = bridge.Image.Clone();
+                    old?.Dispose();
+                    _imgViewer.lblTitle.Text = _lineScanImageHolder.SrcName;
+                }
+            }
         }
         private void MatViewer_MouseMove(object sender, MouseEventArgs e)
         {
@@ -255,7 +263,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             else
             {
-                panel.BuildGuiCtrls(_jxGlobalAoiRecipe);
+                panel.BuildGuiCtrls(_jxAoiRecipe);
                 panel.ExpandAll();
             }
         }
@@ -369,7 +377,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return;
 
             //(1) 取出參數設定的 pitch, rows, cols
-            var traySettings = _jxGlobalAoiRecipe.TrayMiscSettings;
+            var traySettings = _jxAoiRecipe.TrayMiscSettings;
             var pitchX = (double)traySettings.PitchX.Value;
             var pitchY = (double)traySettings.PitchY.Value;
             var rows = (int)traySettings.FullRows.Value;
@@ -394,10 +402,18 @@ namespace LaserAlignDX.Mvc.Ctrl
             updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);
 
             //(4) 設定 旗標
-            _isCoordModified = true;
+            if (_isInGlobalCalibration)
+                _isCoordModified = true;
         }
         void updateAllCalibKeyPointBoxes()
         {
+            if (!_isInGlobalCalibration)
+            {
+                foreach (var box in _cviCalibPointBoxes)
+                    box.Visible = false;
+                return;
+            }
+
             var carrierID = _activeCarrierID;
             var suckerRowID = _activeSuckerRowID;
 
@@ -452,7 +468,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         #endregion
 
-        void ShowCviResult(bool show, bool clear = false)
+        internal void ShowCviResult(bool show, bool clear = false)
         {
             if (clear)
             {
@@ -466,7 +482,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _imgViewer.MatViewer.Refresh();
             }
         }
-        void EnableGoldenPicking(bool enabled)
+        internal void EnableGoldenPicking(bool enabled)
         {
             enableGoldenPicking(enabled);
         }
@@ -489,7 +505,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var goldenBmp = ImageUtil.CropBmp(ezImage, goldenRect);
 
             //(3) Update to Recipe
-            var matchSetting = _jxGlobalAoiRecipe.VisionSettings.Match;
+            var matchSetting = _jxAoiRecipe.VisionSettings.Match;
             matchSetting.GoldenBmp.Value = goldenBmp;
             matchSetting.GoldenBox.Value = goldenRect;
             updateVisionParams(_activeCarrierID, false);
@@ -529,10 +545,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             return err == ErrCodes.OK;
         }
 
-        void RunAutoFetch()
+        internal void RunAutoFetch(bool inspectEmptyTray = false)
         {
             enableGoldenPicking(false);
-            ShowCviResult(false, clear: true);
+            ShowCviResult(false);
 
             bool ok = BuildGoldenGrid();
             if (!ok)
@@ -549,48 +565,53 @@ namespace LaserAlignDX.Mvc.Ctrl
             var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
 
             //(2) Run Aoi
-            _aoiModel.RunMatch(SideID.A, ezImage);
+            if (inspectEmptyTray)
+            {
+                _aoiModel.RunAll((IEzImage)ezImage, wait: true);
+            }
+            else
+            {
+                _aoiModel.RunMatch(SideID.A, ezImage);
+            }
 
             //(3) Update Result
             var matchResult = _aoiModel.GetMatchResult(SideID.A);
-            var camGrid = matchResult?.Grid;
 
-            if (camGrid != null)
+            //(4) Refine each detail locations
+            _aoiModel.RefineCentroidLocations(matchResult, ezImage);
+
+            //(5) Update Grid 4 Corners To Model
+            if (!inspectEmptyTray && _isInGlobalCalibration)
             {
-                //(4) Refine each detail locations
-                _aoiModel.RefineCentroidLocations(matchResult, ezImage);
-
-                //(5) Update Grid 4 Corners To Model
-                updateCalibKeyPoints(camGrid);
+                updateCalibKeyPoints(matchResult?.Grid);
+            }
+            else
+            {
+                // Caller 必須自己調用 TraverllerTransforms.ConfigPlcGrid
             }
 
             //(6) Update Grid Result
-            _cviResultBox.IsEmptyTrayMode = false;
-            _cviResultBox.TransCameraToMotor = null;
-            _cviResultBox.TransCameraToWorld = null;
+            _cviResultBox.IsEmptyTrayMode = inspectEmptyTray;
+            if (inspectEmptyTray)
+            {
+                _cviResultBox.TransCameraToMotor = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+                _cviResultBox.TransCameraToWorld = _transforms.GetCameraPhysicTransform(_activeCarrierID);
+            }
+            else
+            {
+                _cviResultBox.TransCameraToMotor = null;
+                _cviResultBox.TransCameraToWorld = null;
+            }
             _cviResultBox.UpdateResult(matchResult);
             ShowCviResult(true);
 
-            //(7) Cvi Corners
-            foreach(var cviCorner in _cviCalibPointBoxes)
-            {
-                cviCorner.Visible = camGrid != null;
-            }
-
-            //(8) CleanUp
+            //(7) CleanUp
             ezImage?.Dispose();
 
-            //(9) Cursor
+            //(8) Cursor
             GaUtil.SetCursor(_wndOwner, oldCursor);
-
-            //(10) Warnings
-            if (camGrid == null)
-            {
-                string msg = "無法自動抓到 四角定位點!\n\r請確認以下 參數 是否設定為 true?\n\r\n\r 空盤像測參數 \\ 吸嘴比對設定 \\ 建立網格";
-                MessageBox.Show(msg, "Calib", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }
         }
-        void BuildAllTransforms()
+        internal void BuildAllTransforms()
         {
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 
@@ -604,13 +625,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
 
-        void LoadImage(string fileName = null)
+        void LoadImage()
         {
             enableGoldenPicking(false);
 
-            if (string.IsNullOrEmpty(fileName))
-                fileName = GaUtil.BrowseImageFile();
-
+            string fileName = GaUtil.BrowseImageFile();
             if (fileName != null)
             {
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
@@ -618,9 +637,12 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var bigBmp = GaImageUtil.LoadBigImage(fileName);
                 var srcName = "[校正] " + System.IO.Path.GetFileName(fileName);
 
-                // 2025-09-14 由 _imgViewer 會複製 bigBmp
-                _imgViewer.UpdateImage(bigBmp, srcName, disposeSrc: true);
-                _isImageChanged = true;
+                // 2025-09-09 改用 TravellerBigImagesHolder 統一管理巨圖, 並接管 bigBmp 生命週期
+                _lineScanImageHolder.TakeOver(bigBmp, srcName);
+
+                // MatViewer 會接手管理 Image 生命
+                //_imgViewer.MatViewer.LoadImage(fileName);
+                //_imgViewer.lblTitle.Text = "[校正] " + System.IO.Path.GetFileName(fileName);
 
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
@@ -632,65 +654,80 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             enableGoldenPicking(false);
             updateGuiStatus();
-
-            var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
             var freeBmp = IScanCam.GetFreeImageBitmap();
             if (freeBmp != null)
             {
-                // 2025-09-14 由 _imgViewer 會複製 bigBmp
+                //using (var bmp = freeBmp.ToBitmap())
+                //using (var bridge = new QxImageBridge(bmp))
+                //{
+                //    var old = _imgViewer.MatViewer.Image;
+                //    _imgViewer.MatViewer.Image = bridge.Image.Clone();
+                //}
+
+                // 2025-09-09 改用 TravellerBigImagesHolder 統一管理巨圖, 並接管 bigBmp 生命週期
                 var bigBmp = freeBmp.ToBitmap();
                 var srcName = "[校正] 線掃相機 擷圖";
-                _imgViewer.UpdateImage(bigBmp, srcName, disposeSrc: true);
-                _isImageChanged = true;
+                _lineScanImageHolder.TakeOver(bigBmp, srcName);
             }
-            GaUtil.SetCursor(_wndOwner, oldCursor);
         }
 
         void LoadSettings()
         {
             // (1) Load VISIONS 
-            // 載入全域 Calib Aoi Recipe
-            _jxGlobalAoiRecipe.Load(CALIB_VISION_FILE);
-            _jxGlobalAoiRecipe.VisionSettings.FindAllFailBlocs.Value = false;
-
-            // _aoiModel 會接管 _jxAoiRecipe
-            _aoiModel.SetRecipe(_jxGlobalAoiRecipe);
+            if (_isInGlobalCalibration)
+            {
+                // 載入全域 Calib Aoi Recipe
+                _jxAoiRecipe.Load(CALIB_VISION_FILE);
+                // _aoiModel 會接管 _jxAoiRecipe
+                _aoiModel.SetRecipe(_jxAoiRecipe);
+            }
+            else
+            {
+                // 局域由上層負責 調用 _jxAoiRecipe.Load()
+            }
 
             // (2) Load TRANSFORMS (永遠載入全域設定)
-            _transforms.Load(CALIB_TRANSFORMS_FILE);
+            if (true)
+            {
+                _transforms.Load(CALIB_TRANSFORMS_FILE);
+            }
 
-            // (3) 第一次建置座標轉換
+            // 第一次建置座標轉換
             _transforms.BuildAll();
         }
         void SaveSettings(bool force = false)
         {
-            // 保存全域設定
-            // (1) TRANSFORMS
-            if (force || _isCoordModified)
+            if (_isInGlobalCalibration)
             {
-                _transforms.Save(CALIB_TRANSFORMS_FILE);
-                _transforms.SaveGaaraIniFile();
+                // 保存全域設定
+                // (1) TRANSFORMS
+                if (force || _isCoordModified)
+                {
+                    _transforms.Save(CALIB_TRANSFORMS_FILE);
+                    _transforms.SaveGaaraIniFile();
+                }
+                // (2) VISIONS
+                if (force || _jxAoiRecipe.Modified)
+                {
+                    _jxAoiRecipe.Save(CALIB_VISION_FILE);
+                }
             }
-            // (2) VISIONS
-            if (force || _jxGlobalAoiRecipe.Modified)
+            else
             {
-                _jxGlobalAoiRecipe.Save(CALIB_VISION_FILE);
+                // 局域由上層負責 調用 _jxAoiRecipe.Save()
             }
         }
         void CloseWindow(bool confirm)
         {
             if (confirm)
             {
-                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
                 updateAllData(true);
                 SaveSettings();
-                saveLastImage();
-                GaUtil.SetCursor(_wndOwner, oldCursor);
             }
             else
             {
                 // 還原舊值
-                if (_isCoordModified || _jxGlobalAoiRecipe.Modified)
+                if (_isCoordModified || _jxAoiRecipe.Modified)
                     LoadSettings();
             }
 
@@ -700,26 +737,5 @@ namespace LaserAlignDX.Mvc.Ctrl
             //由上層負責調用 Dispose()
             //frm?.Dispose();
         }
-
-        #region LAST_IMAGE_FUNCTIONS
-        void loadLastImage()
-        {
-            var imgFile = CALIB_LAST_IMAGE_FILE;
-            if (!System.IO.File.Exists(imgFile))
-                return;
-
-            LoadImage(imgFile);
-            _isImageChanged = false;
-        }
-        void saveLastImage()
-        {
-            if (!_isImageChanged)
-                return;
-
-            var imgFile = CALIB_LAST_IMAGE_FILE;
-            var img = _imgViewer.Image;
-            img?.SaveImage(imgFile);
-        }
-        #endregion
     }
 }

@@ -1365,12 +1365,12 @@ namespace LaserAlignDX.AoiModel.V25
             Bitmap bmpInputImage = LineScanCamImageHolder.PeekBitmap();
             if (bmpInputImage != null)
             {
-                xRecipe.xOutBlocs.Clear();
                 //复位所有数据
+                #region RESET_DATA
+                xRecipe.xOutBlocs.Clear();
                 foreach (var cell in xRecipe.xRegionCells)
-                {
-                    cell.Reset();
-                }
+                    cell?.Reset();
+                #endregion
 
                 aoiModel.RunAll(bmpInputImage, wait: true);
 
@@ -1449,39 +1449,57 @@ namespace LaserAlignDX.AoiModel.V25
                 int fullCols = result.FullCols;
 
                 //Z字型对位资料
-                int _index = 0;
-                for (int row = 0; row < fullRows; row++)
+                //int index = 0;
+                //for (int row = 0; row < fullRows; row++)
+                //{
+                //    if (row % 2 == 1)
+                //    {
+                //        for (int col = fullCols - 1; col > -1; col--)
+                //        {
+                //            result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+                //            var cell = xRecipe.xRegionCells[index];
+                //            InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
+                //            //if (bloc == null)
+                //            //    reason = InspectReason.INS_DEFECTERR;
+                //            cell.inspectReason = reason;
+                //            cell.inspectReasons.Add(reason);
+                //            System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                //            index++;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        for (int col = 0; col < fullCols; col++)
+                //        {
+                //            result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+                //            var cell = xRecipe.xRegionCells[index];
+                //            InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
+                //            //if (bloc == null)
+                //            //    reason = InspectReason.INS_DEFECTERR;
+                //            cell.inspectReason = reason;
+                //            cell.inspectReasons.Add(reason);
+                //            System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                //            index++;
+                //        }
+                //    }
+                //}
+
+                int index = 0;
+                var xRegionCells = xRecipe.xRegionCells;
+                foreach((int row, int col) in Zigzag.IterZigzag(fullRows, fullCols))
                 {
-                    if (row % 2 == 1)
-                    {
-                        for (int col = fullCols - 1; col > -1; col--)
-                        {
-                            result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
-                            var cell = xRecipe.xRegionCells[_index];
-                            InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
-                            //if (bloc == null)
-                            //    reason = InspectReason.INS_DEFECTERR;
-                            cell.inspectReason = reason;
-                            cell.inspectReasons.Add(reason);
-                            System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
-                            _index++;
-                        }
-                    }
-                    else
-                    {
-                        for (int col = 0; col < fullCols; col++)
-                        {
-                            result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
-                            var cell = xRecipe.xRegionCells[_index];
-                            InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
-                            //if (bloc == null)
-                            //    reason = InspectReason.INS_DEFECTERR;
-                            cell.inspectReason = reason;
-                            cell.inspectReasons.Add(reason);
-                            System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
-                            _index++;
-                        }
-                    }
+                    if (index >= xRegionCells.Count)
+                        break;
+
+                    var cell = xRegionCells[index];
+                    result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+                    InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
+                    //if (bloc == null)
+                    //    reason = InspectReason.INS_DEFECTERR;
+                    cell.inspectReason = reason;
+                    cell.inspectReasons.Add(reason);
+                    //System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+                    index++;
                 }
 
                 #region 收集阵列之外的料件

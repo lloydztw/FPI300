@@ -188,38 +188,43 @@ namespace EzAoiEmptyTrayInspector
             if (Check(newPath))
                 return;
 
-            _copyFolder(PATH_OLD, newPath, true);
+            _copyFolder(PATH_OLD, newPath, bOverwrite: false);
             Global.APP_PATH.RootPath = newPath;
             System.IO.File.WriteAllText(FILE_TAG, $"{newPath}, {DateTime.Now}", System.Text.Encoding.UTF8);
         }
 
         #region PRIVATE_FUNCTIONS
-        static void _copyFolder(string sourceFolder, string destFolder, bool bCopy)
+        static void _copyFolder(string sourceFolder, string destFolder, bool bOverwrite)
         {
-            if (bCopy)
+            if (true)
             {
                 if (!System.IO.Directory.Exists(destFolder))
                     System.IO.Directory.CreateDirectory(destFolder);
             }
+
             string[] files = System.IO.Directory.GetFiles(sourceFolder);
             foreach (string file in files)
             {
                 string name = System.IO.Path.GetFileName(file);
                 string dest = System.IO.Path.Combine(destFolder, name);
-                if (bCopy)
+
+                if (bOverwrite)
                 {
                     System.IO.File.Copy(file, dest, true);
                 }
                 else
                 {
+                    if (!System.IO.File.Exists(dest))
+                        System.IO.File.Copy(file, dest, true);
                 }
             }
+
             string[] folders = System.IO.Directory.GetDirectories(sourceFolder);
             foreach (string folder in folders)
             {
                 string name = System.IO.Path.GetFileName(folder);
                 string dest = System.IO.Path.Combine(destFolder, name);
-                _copyFolder(folder, dest, bCopy);
+                _copyFolder(folder, dest, bOverwrite);
             }
         }
         #endregion

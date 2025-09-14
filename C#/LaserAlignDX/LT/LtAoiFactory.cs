@@ -38,16 +38,6 @@ namespace Traveller106
         }
 
         /// <summary>
-        /// 推送影像到 Tool Window
-        /// - AoiFactory 負責接手管控 bmp 生命週期
-        /// - name 為標記名稱
-        /// </summary>
-        public static void PushBitmap(Bitmap bmp, string name)
-        {
-            GaMvcConfig.PushBitmapToEmptyTrayTool(bmp, name);
-        }
-
-        /// <summary>
         /// 釋放所有資源
         /// </summary>
         public static void DisposeAll()

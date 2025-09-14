@@ -18,7 +18,6 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.JxProps;
 using LeTian.JxProps.PropertyMeta;
 using Newtonsoft.Json;
-using System.Drawing;
 
 namespace LaserAlignDX.Mvc.Model.Recipe
 {

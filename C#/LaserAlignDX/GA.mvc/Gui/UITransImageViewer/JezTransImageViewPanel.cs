@@ -45,9 +45,16 @@ namespace LaserAlignDX.Mvc.Gui
         }
         void cleanUp()
         {
-            var old = cvMatViewer.Image;
-            cvMatViewer.Image = null;
-            old?.Dispose();
+            try
+            {
+                var old = cvMatViewer.Image;
+                //cvMatViewer.Image = null;
+                old?.Dispose();
+            }
+            catch(Exception ex) 
+            { 
+                System.Diagnostics.Debug.WriteLine(ex.Message);
+            }
         }
 
         #region EVENT_HANDLERS
@@ -91,12 +98,11 @@ namespace LaserAlignDX.Mvc.Gui
                 if (srcBmp != null)
                 {
                     var old = cvMatViewer.Image;
-
                     using (var bridge = new QxImageBridge(srcBmp))
                     {
                         cvMatViewer.Image = bridge.Image.Clone();
                     }
-
+                    old?.Dispose();
                     if (disposeSrc)
                     {
                         srcBmp.Dispose();

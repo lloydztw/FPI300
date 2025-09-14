@@ -32,7 +32,7 @@ namespace LaserAlignDX.AoiModel
     public class CalibAoiModel : ICalibAoiModel
     {
         #region PRIVATE_DATA
-        IxEmptyTrayInspector _imp;
+        IxEmptyTrayInspector _externImp;
         JxAoiRecipe _jxRecipe;
         #endregion
 
@@ -41,115 +41,116 @@ namespace LaserAlignDX.AoiModel
         {
             add
             {
-                _imp.OnMatched += value;
+                _externImp.OnMatched += value;
             }
 
             remove
             {
-                _imp.OnMatched -= value;
+                _externImp.OnMatched -= value;
             }
         }
         public event EventHandler<AoiResultEventArgs> OnFinalResulted
         {
             add
             {
-                _imp.OnFinalResulted += value;
+                _externImp.OnFinalResulted += value;
             }
 
             remove
             {
-                _imp.OnFinalResulted -= value;
+                _externImp.OnFinalResulted -= value;
             }
         }
         public event EventHandler OnStateChanged
         {
             add
             {
-                _imp.OnStateChanged += value;
+                _externImp.OnStateChanged += value;
             }
 
             remove
             {
-                _imp.OnStateChanged -= value;
+                _externImp.OnStateChanged -= value;
             }
         }
-        public int ID => _imp.ID;
-        public object State => _imp.State;
+        public int ID => _externImp.ID;
+        public object State => _externImp.State;
         public int AddRef()
         {
-            return _imp.AddRef();
+            return _externImp.AddRef();
         }
         public ErrCodes BuildGoldenGridTemplate(SideID sideId, IEzImage largeImg)
         {
-            return _imp.BuildGoldenGridTemplate(sideId, largeImg);
+            return _externImp.BuildGoldenGridTemplate(sideId, largeImg);
         }
         public ErrCodes CanMatch(SideID sideId, IEzImage img)
         {
-            return _imp.CanMatch(sideId, img);
+            return _externImp.CanMatch(sideId, img);
         }
         public ErrCodes CanRunAll(IEzImage imgA, IEzImage imgB = null)
         {
-            return _imp.CanRunAll(imgA, imgB);
+            return _externImp.CanRunAll(imgA, imgB);
         }
         public bool CropGoldenTemplate(SideID sideId, IEzImage largeImg, Rectangle goldenRect)
         {
-            return _imp.CropGoldenTemplate(sideId, largeImg, goldenRect);
+            return _externImp.CropGoldenTemplate(sideId, largeImg, goldenRect);
         }
         public MatchResult GetMatchResult(SideID sideId)
         {
-            return _imp.GetMatchResult(sideId);
+            return _externImp.GetMatchResult(sideId);
         }
         public EzEmptyTrayResult GetResult()
         {
-            return _imp.GetResult();
+            return _externImp.GetResult();
         }
         public bool IsError()
         {
-            return _imp.IsError();
+            return _externImp.IsError();
         }
         public bool IsReady()
         {
-            return _imp.IsReady();
+            return _externImp.IsReady();
         }
         public bool IsSafeToExit()
         {
-            return _imp.IsSafeToExit();
+            return _externImp.IsSafeToExit();
         }
         public void ResetAndClear(SideID sideId = SideID.All)
         {
-            _imp.ResetAndClear(sideId);
+            _externImp.ResetAndClear(sideId);
         }
         public void RunAll(IEzImage imgA, IEzImage imgB = null, string outputFile = null, string dumpPath = null, bool wait = false)
         {
-            _imp.RunAll(imgA, imgB, outputFile, dumpPath, wait);
+            _externImp.RunAll(imgA, imgB, outputFile, dumpPath, wait);
         }
         public void RunAll(Bitmap bmp, bool wait = true)
         {
-            _imp.RunAll(bmp, wait);
+            _externImp.RunAll(bmp, wait);
         }
         public void RunMatch(SideID sideId, IEzImage img, string dumpPath = null)
         {
-            _imp.RunMatch(sideId, img, dumpPath);
+            _externImp.RunMatch(sideId, img, dumpPath);
         }
         public void TryApplyFilters(SideID sideId, IEzImage img, JxRotAngleSettings settings, out object result)
         {
-            _imp.TryApplyFilters(sideId, img, settings, out result);
+            _externImp.TryApplyFilters(sideId, img, settings, out result);
         }
         #endregion
 
         public CalibAoiModel(IxEmptyTrayInspector imp)
         {
             // Caller 負責調用 imp.Dispose()
-            _imp = imp;
+            _externImp = imp;
         }
         public void Dispose()
         {
-            //_imp.Dispose();
+            // Caller 負責調用 _externImp.Dispose()
         }
         public void SetRecipe(JxAoiRecipe recipe)
         {
-            // recipe 會由 _imp 持有, 所以不用 Dispose
-            _imp.SetRecipe(recipe);
+            // recipe 會被 _externImp 持有,
+            // 所以 _jxRecipe  不用 Dispose
+            _externImp.SetRecipe(recipe);
             _jxRecipe = recipe;
         }
         public void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg)

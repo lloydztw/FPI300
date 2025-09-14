@@ -13,11 +13,14 @@ namespace LaserAlignDX.BasicSpace
             get { return RecipeFPIX3Class.Instance; }
         }
 
-        public RecipeParaGridClass()
+        #region SINGLETON
+        private RecipeParaGridClass()
         {
 
         }
         private static RecipeParaGridClass _instance = null;
+        #endregion
+
         public static RecipeParaGridClass Instance
         {
             get
@@ -39,6 +42,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xAngle; }
             set { xRecipe.xAngle = value; }
         }
+
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵行数")]
         [DisplayName("A01.行数")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -49,6 +53,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xRow; }
             set { xRecipe.xRow = value; }
         }
+
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵列数")]
         [DisplayName("A02.列数")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -59,6 +64,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xColumn; }
             set { xRecipe.xColumn = value; }
         }
+
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵左上角Chip的左上角图像位置X")]
         [DisplayName("A03.左上角X(pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -69,6 +75,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xLeftTopX; }
             set { xRecipe.xLeftTopX = value; }
         }
+
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵左上角Chip的左上角图像位置Y")]
         [DisplayName("A04.左上角Y(pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -79,6 +86,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xLeftTopY; }
             set { xRecipe.xLeftTopY = value; }
         }
+
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵行间距")]
         [DisplayName("A05.行间距(mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -89,6 +97,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xRowOffset; }
             set { xRecipe.xRowOffset = value; }
         }
+
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵列间距")]
         [DisplayName("A06.列间距(mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -99,6 +108,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xColumnOffset; }
             set { xRecipe.xColumnOffset = value; }
         }
+
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品宽度")]
         [DisplayName("A07.Chip宽度(mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -109,6 +119,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xChipWidth; }
             set { xRecipe.xChipWidth = value; }
         }
+
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品高度")]
         [DisplayName("A08.Chip高度(mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -119,6 +130,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xChipHeight; }
             set { xRecipe.xChipHeight = value; }
         }
+
         [CategoryAttribute(cat1), DescriptionAttribute("模板匹配搜寻范围X扩大的像素")]
         [DisplayName("A09.外扩X(pix)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -129,6 +141,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xExtendx; }
             set { xRecipe.xExtendx = value; }
         }
+
         [CategoryAttribute(cat1), DescriptionAttribute("模板匹配搜寻范围Y扩大的像素")]
         [DisplayName("A10.外扩Y(pix)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -164,12 +177,13 @@ namespace LaserAlignDX.BasicSpace
             set { xRecipe.xChValue = value; }
         }
 
+
         const string cat3 = "03.位置矩阵设定";
 
         [CategoryAttribute(cat3), DescriptionAttribute("")]
         [DisplayName("A00.平台选择")]
         [TypeConverter(typeof(JzEnumConverter))]
-        [Browsable(false)]
+        [Browsable(true)]
         [ReadOnly(false)]
         public StageNumber xStageNumber
         {
@@ -188,6 +202,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xRealLeftX; }
             set { xRecipe.xRealLeftX = value; }
         }
+
         [CategoryAttribute(cat3), DescriptionAttribute("矩阵左上角实际位置Y")]
         [DisplayName("A02.起点Y(mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -199,6 +214,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xRealLeftY; }
             set { xRecipe.xRealLeftY = value; }
         }
+
         [CategoryAttribute(cat3), DescriptionAttribute("矩阵横向产品中心距离")]
         [DisplayName("A03.横向间距(mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -209,6 +225,7 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xRealOffsetX; }
             set { xRecipe.xRealOffsetX = value; }
         }
+
         [CategoryAttribute(cat3), DescriptionAttribute("矩阵纵向产品中心距离")]
         [DisplayName("A04.纵向间距(mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
