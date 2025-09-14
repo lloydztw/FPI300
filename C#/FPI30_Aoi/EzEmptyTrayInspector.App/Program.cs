@@ -11,6 +11,7 @@ namespace EzAoiEmptyTrayInspector
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            AoiMigration.Check();
 
             var frmMain = AoiFactory.OpenEmptyTrayInspectorTool();
             Application.Run(frmMain);

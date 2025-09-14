@@ -31,7 +31,7 @@ namespace Traveller106
         public static readonly bool N_THREADS_ENABLED = true;
         public static readonly int N_THREADS = 16;
 
-        public static bool IsNoUseCCD = false;
+        public static bool IsNoUseCCD = true;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
@@ -70,21 +70,20 @@ namespace Traveller106
                         //      才能放在任意資料夾
                         //      不需要 依附於 最後佈署的資料夾 
                         return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
-                        return $"{Application.StartupPath}";
+                        //return "D:\\AUTOMATION\\Eazy FPI30\\_M02_";
                 }
             }
         }
+        
         public static string UIPATH
         {
             get { return System.IO.Path.Combine(APP_ROOT_PATH, "UI"); }
         }
+        public static string VEROPT => VERSION.ToString() + "-" + OPTION.ToString();
 
-        //public static string CODEPATH = @"D:\AUTOMATION";
-        public static string VEROPT = VERSION.ToString() + "-" + OPTION.ToString();
-        public static string MAINPATH = APP_ROOT_PATH + @"\" + VEROPT;
-        public static string DBPATH = MAINPATH + @"\DB";
-        public static string RCPPATH = MAINPATH + @"\PIC";
-        //public static string UIPATH = CODEPATH + @"\" + VERSION.ToString() + "UI";
+        public static string MAINPATH => APP_ROOT_PATH + @"\" + VEROPT;
+        public static string DBPATH => MAINPATH + @"\DB";
+        public static string RCPPATH => MAINPATH + @"\PIC";
 
         public static string LOG_ROOT
         {

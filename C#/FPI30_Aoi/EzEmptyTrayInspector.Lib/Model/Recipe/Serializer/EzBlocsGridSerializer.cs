@@ -21,7 +21,7 @@ using System.Text;
 
 namespace EzAoiEmptyTrayInspector.Model
 {
-    internal class EzBlocsGridSerializer
+    public class EzBlocsGridSerializer
     {
         const char SEP_B = ':';
 
