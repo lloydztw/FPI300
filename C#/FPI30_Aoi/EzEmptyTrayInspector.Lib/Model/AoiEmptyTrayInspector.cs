@@ -206,9 +206,11 @@ namespace EzAoiEmptyTrayInspector.Model
                     _recipe = recipe;
                     _recipe?.AddRef();  // AddRef 代表 _recipe 被 AoiModel 持有使用中. 
                     old?.Release();
+
+                    _recipe.VisionSettings.Inverse.OnModified += (s, e) => clear_golden_grid_cache();
                 }
 
-                _recipe.VisionSettings.Inverse.OnModified += (s, e) => clear_golden_grid_cache();
+                //>>> _recipe.VisionSettings.Inverse.OnModified += (s, e) => clear_golden_grid_cache();
             }
         }
 

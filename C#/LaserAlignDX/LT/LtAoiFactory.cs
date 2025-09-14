@@ -14,6 +14,7 @@
 #endregion
 
 
+using EzAoiEmptyTrayInspector;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
 using JetEazy.FormSpace;
@@ -128,6 +129,10 @@ namespace Traveller106
         static string _activeRecipeName;
         #endregion
 
+        public static void Migrate()
+        {
+            AoiMigration.MigrateTo(Traveller106.Universal.MAINPATH + "\\EmptyTrayAoi");
+        }
         public static bool RcpCheckActive(bool silent = false)
         {
             var recipeName = _activeRecipeName = GetActiveRecipeNameAtFPI30();

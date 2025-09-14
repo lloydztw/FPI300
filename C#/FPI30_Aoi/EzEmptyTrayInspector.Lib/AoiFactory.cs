@@ -13,7 +13,6 @@
  */
 #endregion
 
-using AwFramework.Gui;
 using AwFramework.Util;
 using EzAoiEmptyTrayInspector.Ctrl;
 using EzAoiEmptyTrayInspector.Gui.Panels;
@@ -147,6 +146,86 @@ namespace EzAoiEmptyTrayInspector
         {
             var btnScan = AppUtil.SearchGui<GwFuncButtonsPanel>(frm, null)?.btnSnapshot;
             return btnScan;
+        }
+        #endregion
+    }
+
+
+    public static class AoiMigration
+    {
+        static string PATH_OLD => @"D:\AUTOMATION\Eazy FPI30\Aoi";
+        static string FILE_TAG => System.IO.Path.Combine(PATH_OLD, "migrated.txt");
+
+        /// <summary>
+        /// 檢查是否已經遷移
+        /// </summary>
+        public static bool Check(string newPath = null)
+        {
+            if (System.IO.File.Exists(FILE_TAG))
+            {
+                string text = System.IO.File.ReadAllText(FILE_TAG, System.Text.Encoding.UTF8);
+                if (string.IsNullOrEmpty(text))
+                    return false;
+
+                string migratedPath = text.Split(',')[0].Trim();
+                if (System.IO.Directory.Exists(migratedPath))
+                {
+                    if (newPath != null && string.Compare(newPath, migratedPath, true) != 0)
+                        return false;
+
+                    Global.APP_PATH.RootPath = migratedPath;
+                    return true;
+                }
+            }
+            return false;
+        }
+        public static void MigrateTo(string newPath)
+        {
+            if (newPath == PATH_OLD)
+                return;
+
+            // 檢查是否已經遷移
+            if (Check(newPath))
+                return;
+
+            _copyFolder(PATH_OLD, newPath, bOverwrite: false);
+            Global.APP_PATH.RootPath = newPath;
+            System.IO.File.WriteAllText(FILE_TAG, $"{newPath}, {DateTime.Now}", System.Text.Encoding.UTF8);
+        }
+
+        #region PRIVATE_FUNCTIONS
+        static void _copyFolder(string sourceFolder, string destFolder, bool bOverwrite)
+        {
+            if (true)
+            {
+                if (!System.IO.Directory.Exists(destFolder))
+                    System.IO.Directory.CreateDirectory(destFolder);
+            }
+
+            string[] files = System.IO.Directory.GetFiles(sourceFolder);
+            foreach (string file in files)
+            {
+                string name = System.IO.Path.GetFileName(file);
+                string dest = System.IO.Path.Combine(destFolder, name);
+
+                if (bOverwrite)
+                {
+                    System.IO.File.Copy(file, dest, true);
+                }
+                else
+                {
+                    if (!System.IO.File.Exists(dest))
+                        System.IO.File.Copy(file, dest, true);
+                }
+            }
+
+            string[] folders = System.IO.Directory.GetDirectories(sourceFolder);
+            foreach (string folder in folders)
+            {
+                string name = System.IO.Path.GetFileName(folder);
+                string dest = System.IO.Path.Combine(destFolder, name);
+                _copyFolder(folder, dest, bOverwrite);
+            }
         }
         #endregion
     }
