@@ -14,7 +14,6 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
-using JetEazy;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.Transform;
@@ -117,7 +116,6 @@ namespace LaserAlignDX.Mvc.Gui
         {
             if (_matchResult != null)
             {
-
                 bool isWorld = viewer.IsInWorldCoordinate();
                 if (!isWorld)
                     viewer.SwitchToWorldCoordinate(gxView);

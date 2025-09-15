@@ -66,7 +66,7 @@ namespace Traveller106
                         //      才能放在任意資料夾
                         //      不需要 依附於 最後佈署的資料夾 
                         //return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
-                        return "D:\\AUTOMATION\\Eazy FPI30\\_M02_try_";
+                        return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
                 }
             }
         }
@@ -78,7 +78,6 @@ namespace Traveller106
         //public static string CODEPATH = @"D:\AUTOMATION";
         public static string VEROPT => VERSION.ToString() + "-" + OPTION.ToString();
         public static string MAINPATH => APP_ROOT_PATH + @"\" + VEROPT;
-        //public static string MAINPATH => "D:\\AUTOMATION\\Eazy FPI30\\LASER-MAIN_FPIX3_@_M02";
 
         public static string DBPATH => MAINPATH + @"\DB";
         public static string RCPPATH => MAINPATH + @"\PIC";
