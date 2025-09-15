@@ -52,9 +52,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             public CellBloc(CELL cell) : base(Rectangle.Empty, 1)
             {
                 Cell = cell;
-                //var rcf = cell.DrawResultRectF();
-                //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(rcf));
-                //Center = new JetEazy.QMath.QVector(rcf.CenterX, rcf.CenterY);
+
+                //var mvdRectF = cell.DrawResultRectF();
+                //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRectF));
+                //Center = new JetEazy.QMath.QVector(mvdRectF.CenterX, mvdRectF.CenterY);
+
                 if (cell.chipLocInCamera != null)
                 {
                     var cc = cell.chipLocInCamera.Center;
@@ -358,32 +360,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     yield return bloc;
             }
         }
-        string formatDisplayText(CellBloc bloc)
-        {
-            //if (cell != null)
-            //{
-            //    bool isEmpty;
-            //    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-            //        isEmpty = false;
-            //    else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
-            //        isEmpty = false;
-            //    else
-            //        isEmpty = true;
-            //    if (isEmpty)
-            //        return $"[{cell.Index}]\n空位";
-            //    string msg = _formatter.Format(cell);
-            //    return msg;
-            //}
-
-            var cell = bloc?.Cell;
-            if (checkResult(cell, out bool pass, out bool empty))
-            {
-                if (empty)
-                    return $"[{cell.Index}]\n缺";
-                return _formatter.Format(cell);
-            }
-            return null;
-        }
         bool checkResult(CELL cell, out bool isPass, out bool isEmpty)
         {
             isPass = false;
@@ -478,6 +454,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     var mvdRect = cell.DrawBaseRectFFixSize(false);
                     var item = new CviRotRectBox(mvdRect.ToBox2D(), Color.Red, 0.25f);
                     _drawItems.Add(item);
+                    //// TEMP
+                    //bloc.Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRect));
+                    //bloc.Center = new JetEazy.QMath.QVector(mvdRect.CenterX, mvdRect.CenterY);
                 }
             }
         }
@@ -609,9 +588,36 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             _cviRegionBox.Visible = true;
 
             //string txt = formatDisplayText(cellBloc);
+
             string txt = composeTooltipTextTrf(cursor, cursor2);
 
             return txt;
+        }
+        string formatDisplayText(CellBloc bloc)
+        {
+            //if (cell != null)
+            //{
+            //    bool isEmpty;
+            //    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+            //        isEmpty = false;
+            //    else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
+            //        isEmpty = false;
+            //    else
+            //        isEmpty = true;
+            //    if (isEmpty)
+            //        return $"[{cell.Index}]\n空位";
+            //    string msg = _formatter.Format(cell);
+            //    return msg;
+            //}
+
+            var cell = bloc?.Cell;
+            if (checkResult(cell, out bool pass, out bool empty))
+            {
+                if (empty)
+                    return $"[{cell.Index}]\n缺";
+                return _formatter.Format(cell);
+            }
+            return null;
         }
         #endregion
 
@@ -647,40 +653,41 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             if (cursorBloc == null)
                 return "";
-            
+
             initDefaultTrfs();
-
-
-            bool showScore = true;
-
-            var sb = new StringBuilder();
 
             var cellBloc = cursorBloc as CellBloc;
             var cell = cellBloc?.Cell;
+            if (cell == null || !checkResult(cell, out bool isPass, out bool isEmpty))
+                return null;
 
-            QxRowCol rowCol = cell != null ? new QxRowCol(cell.CellRow, cell.CellCol) : null;
-            if (rowCol != null)
-                sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(rowCol.Row, rowCol.Col).AppendLine("]");
+            int row = cell.CellRow;
+            int col = cell.CellCol; 
+
+            bool isShowScore = true;
+            var sb = new StringBuilder();
+
+            sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
 
             appendCameraCoords(sb, cursorBloc, cursorBloc2);
 
             if (TransCameraToMotor != null)
             {
                 appendMotorCoords(sb, cursorBloc, cursorBloc2);
-                showScore = false;
+                isShowScore = false;
             }
             if (TransCameraToWorld != null)
             {
                 appendWorldCoords(sb, cursorBloc, cursorBloc2);
-                showScore = false;
+                isShowScore = false;
             }
-            if (TransCameraToMotor != null && TransCameraToMotor != null && cursorBloc2 == null && rowCol != null)
+            if (TransCameraToMotor != null && TransCameraToMotor != null && cursorBloc2 == null)
             {
-                appendPlcCompensation(sb, cursorBloc, rowCol.Row, rowCol.Col);
-                showScore = false;
+                appendPlcCompensation(sb, cursorBloc, row, col);
+                isShowScore = false;
             }
 
-            if (showScore || IsEmptyTrayMode)
+            if (isShowScore || IsEmptyTrayMode)
             {
                 sb.AppendLine();
                 sb.AppendLine($"Score= {cursorBloc.Score:0.00}");
@@ -754,16 +761,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (bloc == null)
                 return;
 
-            var camPt = bloc.Center;
             var cell = (bloc as CellBloc)?.Cell;
-            if (cell != null)
-            {
-                camPt.X = cell.xFindResult.fCenterX;
-                camPt.Y = cell.xFindResult.fCenterY;
-            }
+            var chipLoc = cell?.chipLocInCamera;
+            var chipCentroid = chipLoc != null ?
+                                new QVector(chipLoc.Center.X, chipLoc.Center.Y) :
+                                bloc.Center;
 
             var transformsModel = GaMvcConfig.SysModel.TransformsModel;
-            (var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
+            (var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, chipCentroid, row, col);
 
             //>>> sb.AppendLine();
             sb.AppendLine($"Phy 變動值 ΔX = {dErr.X:0.000} mm");

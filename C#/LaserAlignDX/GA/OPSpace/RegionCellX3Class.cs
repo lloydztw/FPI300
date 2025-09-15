@@ -73,7 +73,7 @@ namespace LaserAlignDX.OPSpace
         public RectangleF viewRectF = new RectangleF();
 
         /// <summary>
-        /// 像測 晶粒定位的中心座標
+        /// 像測 晶粒定位的結果
         /// </summary>
         public QvBox2D chipLocInCamera;
 
