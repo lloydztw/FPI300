@@ -575,30 +575,40 @@ namespace EzAoiEmptyTrayInspector.Model
             clear_result(SideID.A, true);
             clear_result(SideID.B, true);
 
-            var evCompleted = wait ? new ManualResetEvent(false) : null;
-
-            ThreadPool.QueueUserWorkItem((arg) =>
+            if (wait)
             {
-                var args = (object[])arg;
-                var bmp = (Bitmap)args[0];
-                //var A = (IEzImage)args[0];
-                //var B = (IEzImage)args[1];
-                //var F = (string)args[2];
-                //run_all(A, A?.Image as Mat, B?.Image as Mat, F);
-
-                using (var bridge = new QxImageBridge(bmp))
+                using (var bridge = new QxImageBridge(largeBmp))
                 {
                     run_all(null, bridge.Image, null, null);
                 }
+            }
+            else
+            {
+                //var evCompleted = wait ? new ManualResetEvent(false) : null;
 
-                evCompleted?.Set();
-            },
-            new object[] {
-                largeBmp,
-            });
+                ThreadPool.QueueUserWorkItem((arg) =>
+                {
+                    var args = (object[])arg;
+                    var bmp = (Bitmap)args[0];
+                    //var A = (IEzImage)args[0];
+                    //var B = (IEzImage)args[1];
+                    //var F = (string)args[2];
+                    //run_all(A, A?.Image as Mat, B?.Image as Mat, F);
 
-            if (wait)
-                evCompleted.WaitOne(1000 * 60 * 5);
+                    using (var bridge = new QxImageBridge(bmp))
+                    {
+                        run_all(null, bridge.Image, null, null);
+                    }
+
+                    //evCompleted?.Set();
+                },
+                    new object[] {
+                    largeBmp,
+                });
+
+                //if (wait)
+                //    evCompleted.WaitOne(1000 * 60 * 5);
+            }
         }
 
         public AOI_RESULT GetResult()

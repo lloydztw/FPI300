@@ -168,9 +168,11 @@ namespace LaserAlignDX.AoiModel.V25
 
         public void Run()
         {
-            m_IsPass = true;
+            m_Running = true;
+            m_IsPass = false;
             m_ResultDesc = string.Empty;
 
+            #region DIRECTORIES_可以搬到後面處理_才不會有遲滯感覺
             if (INI.Instance.IsSaveDebugBMP)
             {
                 m_PicResultPath = $"{INI.Instance.ResultImagePath}\\linescanImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
@@ -179,7 +181,6 @@ namespace LaserAlignDX.AoiModel.V25
                     System.IO.Directory.CreateDirectory(m_PicResultPath);
                 }
             }
-
             if (INI.Instance.IsSaveDebugOrgBmp)
             {
                 m_PicResultOrgPath = $"{INI.Instance.ResultImagePath}\\linescanImageOrg\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
@@ -188,6 +189,7 @@ namespace LaserAlignDX.AoiModel.V25
                     System.IO.Directory.CreateDirectory(m_PicResultOrgPath);
                 }
             }
+            #endregion
 
             GaUtil.LOG($"{GetType().Name} [V2.5] Run", Color.Purple);
 
@@ -327,7 +329,6 @@ namespace LaserAlignDX.AoiModel.V25
 
                 // 標記起始計時
                 m_ElapsedTime = 0;
-                m_Running = true;
                 var stopwatch = new System.Diagnostics.Stopwatch();
                 stopwatch.Restart();
 
@@ -360,12 +361,12 @@ namespace LaserAlignDX.AoiModel.V25
                 _Inspect001_Async_SaveDebugData(bmpInputImage, debugCellCenterStr, imgPath);
 
                 // 標記終止計時
-                m_IsPass = true;
+                //m_IsPass = true;
                 stopwatch.Stop();
                 m_ElapsedTime = stopwatch.ElapsedMilliseconds;  //@ for Inspect001 計時
                 m_Running = false;
 
-                // 2025-08-28 LETIAN: 巨圖統一由 FpiBigImagesHolder 管理其生命週期
+                // 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
                 //// 釋放巨圖
                 //bmpInputImage?.Dispose();
                 //bmpInputImage = null;
@@ -376,11 +377,12 @@ namespace LaserAlignDX.AoiModel.V25
             {
                 _TM.LOG.Error(ex);
 
-                // 2025-08-28 LETIAN: 巨圖統一由 FpiBigImagesHolder 管理其生命週期
+                // 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
                 //// 釋放巨圖
                 //bmpInputImage?.Dispose();
                 //bmpInputImage = null;
                 //throw ex;
+
                 LtDebug.LOG.Error(ex, "_Inspect001_LT");
                 fire_AoiEnd();
             }
@@ -1357,10 +1359,11 @@ namespace LaserAlignDX.AoiModel.V25
         /// </summary>
         private void _Inspect003_LT()
         {
+            fire_AoiBegin();
+            
             xRecipe.AnalyzeDatasData();
 
             m_ElapsedTime = 0;
-            m_Running = true;
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Restart();
 
@@ -1380,57 +1383,18 @@ namespace LaserAlignDX.AoiModel.V25
 
                 var result = aoiModel.GetResult();
 
-                #region WRITE_TO_LOG
-                string msg;
-                if (result == null)
-                {
-                    msg = "無結果!";
-                    //m_IsPass = false;
-                }
-                else
-                {
-                    //m_IsPass = result.IsPass();
-                    msg = result.ToString();
-                }
-                CommonLogClass.Instance.LogMessage(msg, m_IsPass ? Color.Green : Color.Red);
-                #endregion
-
                 _Inspect003_UpdateResult(result, bmpInputImage, xRecipe);
-
-#if (OPT_OLD)
-                IEzImage ezImage = new EzFreeBitmap(bmpInputImage, true);
-                Task task = new Task(() =>
-                {
-                    try
-                    {
-                        if (INI.Instance.IsSaveDebugBMP)
-                        {
-                            SaveImageWithQuality(ezImage.Bitmap, $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
-                        }
-                        if (INI.Instance.IsSaveDebugOrgBmp)
-                        {
-                            ezImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg");
-                            //bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
-                            //                   ImageFormat.Jpeg);
-                        }
-                        ezImage?.Dispose();
-                    }
-                    catch (Exception e)
-                    {
-                        _LOG($"异常捕获:{e.Message}", Color.Red);
-                    }
-                });
-                task.Start();
-#endif
 
                 // 異步輸出 Debug 數據
                 _Inspect003_Async_SaveDebugData(bmpInputImage);
             }
 
-            m_IsPass = true;//不需要结果 都是记录单颗的数据
+            //m_IsPass = true;//不需要结果 都是记录单颗的数据
             stopwatch.Stop();
             m_ElapsedTime = stopwatch.ElapsedMilliseconds;  //@ for Inspect003
             m_Running = false;
+
+            fire_AoiEnd();
         }
         /// <summary>
         /// 空载台检测 : 更新結果 到 Gaara 數據群
@@ -1446,6 +1410,8 @@ namespace LaserAlignDX.AoiModel.V25
                     Directory.CreateDirectory(imgPath);
             }
             #endregion
+
+            bool isAllPass = result != null;
 
             if (result != null)
             {
@@ -1490,19 +1456,24 @@ namespace LaserAlignDX.AoiModel.V25
 
                 int index = 0;
                 var xRegionCells = xRecipe.xRegionCells;
-                foreach((int row, int col) in Zigzag.IterZigzag(fullRows, fullCols))
+                foreach ((int row, int col) in Zigzag.IterZigzag(fullRows, fullCols))
                 {
                     if (index >= xRegionCells.Count)
                         break;
 
                     var cell = xRegionCells[index];
                     result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
+
                     InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
                     //if (bloc == null)
                     //    reason = InspectReason.INS_DEFECTERR;
                     cell.inspectReason = reason;
                     cell.inspectReasons.Add(reason);
                     //System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+
+                    if (!isOK)
+                        isAllPass = false;
+
                     index++;
                 }
 
@@ -1511,175 +1482,18 @@ namespace LaserAlignDX.AoiModel.V25
                 foreach (var bloc in result.IterOutGridAbnormalBlocs())
                 {
                     xRecipe.xOutBlocs.Add(bloc.Rect);
+                    isAllPass = false;
                 }
 
                 #endregion
-
             }
 
-#if (false)
-                for (int row = 0; row < fullRows; row++)
-                {
-                    for (int col = 0; col < fullCols; col++)
-                    {
-                        result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
-                        var cell = xRecipe.xRegionCells[row * fullCols + col];
-                        InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
-                        cell.inspectReason = reason;
-                        cell.inspectReasons.Add(reason);
+            m_IsPass = isAllPass;
 
-                        //if (bloc != null)
-                        //{
-                        //    // 單位: Pixels
-                        //    var rect = bloc.Rect;
-                        //    if (isOK)
-                        //    {
-                        //        // rest 內有 吸嘴
-                        //        // 如何將 rect 轉換到 cell ???
-                        //    }
-                        //    else
-                        //    {
-                        //        // rect 內有 雜物
-                        //        // 如何將 rect 轉換到 cell ???
-                        //    }
-                        //}
-                        //else
-                        //{
-                        //    // [row, col] 處 沒有找到 定位格點
-                        //}
-
-                System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
-                    }
-                }
-#endif
-
-#if (false)
-            Size _bmpInputSize = new Size((int)cMvdInput.Width, (int)cMvdInput.Height);
-
-            //if (cMvdInput.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
-            //{
-            //    //当前程序仅支持mono8。因此像素格会转换.
-            //    cMvdInput.ConvertImagePixelFormat(MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08);
-            //}
-
-            //Bitmap bmp0 = bmpInputImage.Clone(xRecipe.xRectRegionBase0, PixelFormat.Format8bppIndexed);
-            //Bitmap bmp1 = bmpInputImage.Clone(xRecipe.xRectRegionBase1, PixelFormat.Format8bppIndexed);
-
-            ////计算基准位置 用来检测偏移
-            //mVD_POINT_F0 = _getBasePointF2(bmp0, RegionName.BASE0);
-            //mVD_POINT_F1 = _getBasePointF2(bmp1, RegionName.BASE1);
-
-            //bmp0.Dispose();
-            //bmp1.Dispose();
-
-            //xRecipe.mvdprinttemp_Find.xMvdRun_Image = m_MvdOpeate.Clone();
-            //xRecipe.mvdprinttemp_Find.HikRun4Pre();
-
-            foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
-            {
-                cell.Reset();
-
-                if (INI.Instance.IsSaveTestImage)
-                {
-                    cell.IsSaveDebugPicture = true;
-                    cell.SaveDebugPath = imgPath;
-                }
-
-                //if (cell.ByPass && !INI.Instance.IsForceInspect)
-                //{
-                //    //cell.inspectReason = InspectReason.INS_NOOPEN;
-                //    cell.inspectReasons.Add(InspectReason.INS_NOOPEN);
-                //    continue;
-                //}
-                RectangleF _rectF = new RectangleF(cell.viewRectF.X, cell.viewRectF.Y, cell.viewRectF.Width, cell.viewRectF.Height);
-                _rectF.Inflate(xRecipe.xExtendx, xRecipe.xExtendy);
-                BoundRect(ref _rectF, _bmpInputSize);
-                //xRecipe.mvdprinttemp_Find.bmpRun_Image = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
-                Bitmap bmp2 = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
-                int iOK = xRecipe.PrintTempRun(bmp2);
-
-                //int iOK = xRecipe.PrintTempRun(cMvdInput, _rectF);
-                //xRecipe.mvdprinttemp_Find.xMvdRun_Image = cMvdInput;
-                //int iOK = (xRecipe.mvdprinttemp_Find.HikRun3(_rectF) ? 0 : -1);
-                //int iOK = (xRecipe.mvdprinttemp_Find.HikRun4(_rectF) ? 0 : -1);
-
-                if (iOK == 0)
-                {
-                    cell.xFindResult = xRecipe.mvdprinttemp_Find.xResults[0];
-                    cell.xFindResult.fCenterX += _rectF.X;
-                    cell.xFindResult.fCenterY += _rectF.Y;
-                    RectangleF templaterectf = new RectangleF(0, 0, xRecipe.bmpprinttemplate.Width, xRecipe.bmpprinttemplate.Height);
-                    Rectangle runrectf = new Rectangle(0, 0, _bmpInputSize.Width, _bmpInputSize.Height);
-                    cell.PositionFixRun(templaterectf, runrectf, cell.xFindResult);
-
-                    //判断偏移
-                    //cell.RunX = (cell.DrawResultRectF().CenterX - mVD_POINT_F0.fX - cell.OrgX) * INI.Instance.ImageResolution;
-                    //cell.RunY = (cell.DrawResultRectF().CenterY - mVD_POINT_F0.fY - cell.OrgY) * INI.Instance.ImageResolution;
-
-                    //换算为偏移的位置
-                    //cell.RunX = (cell.DrawResultRectF().CenterX - cell.OrgX) * INI.Instance.ImageResolution;
-                    //cell.RunY = (cell.DrawResultRectF().CenterY - cell.OrgY) * INI.Instance.ImageResolution;
-                    //cell.RunAngle = (cell.DrawResultRectF().Angle - cell.OrgAngle);
-
-                    //计算偏移值
-                    PointF _viewNewRun = new PointF(cell.DrawResultRectF().CenterX, cell.DrawResultRectF().CenterY);
-                    PointF _worldNewRun = LineScanCalibrate.ViewToWorld(_viewNewRun);
-                    cell.RunX = (_worldNewRun.X - cell.OrgX);
-                    cell.RunY = (_worldNewRun.Y - cell.OrgY);
-                    cell.RunAngle = cell.DrawResultRectF().Angle;
-                    cell.GetOffsetResult();
-                }
-                else
-                {
-                    cell.inspectReason = InspectReason.INS_ALIGNERR;
-                    cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
-                }
-
-                bmp2.Dispose();
-            }
-
-            foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
-            {
-                //if (cell.ByPass && !INI.Instance.IsForceInspect)
-                //    continue;
-                if (cell.inspectReason != InspectReason.INS_ALIGNERR)
-                    continue;
-
-                //cell.xInspectPara = InspectX2Class.Instance;
-                //原始切图
-                RectangleF _rectF = new RectangleF(cell.viewRectF.X, cell.viewRectF.Y, cell.viewRectF.Width, cell.viewRectF.Height);
-                _rectF.Inflate(xRecipe.xExtendx, xRecipe.xExtendy);
-                BoundRect(ref _rectF, _bmpInputSize);
-
-                //xRecipe.mvdprinttemp_Find.bmpRun_Image = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
-                Bitmap bmp2 = bmpInputImage.Clone(_rectF, PixelFormat.Format8bppIndexed);
-                cell.CheckBlobNoTray(bmp2);
-
-                ////原始模板的大小
-                //RectangleF templaterectf = new RectangleF(0, 0, xRecipe.bmpprinttemplate.Width, xRecipe.bmpprinttemplate.Height);
-
-                ////定位完成后裁切位置
-                //RectangleF _crop = new RectangleF(cell.DrawResultRectF().CenterX - templaterectf.Width / 2,
-                //    cell.DrawResultRectF().CenterY - templaterectf.Height / 2,
-                //    templaterectf.Width,
-                //    templaterectf.Height);
-
-                //if (InspectX2Class.Instance.bCheckInspect)
-                //{
-                //    cell.bmpItemRun.Dispose();
-                //    cell.bmpItemRun = bmpInputImage.Clone(_crop, PixelFormat.Format8bppIndexed);
-                //    cell.bmpItemMask.Dispose();
-                //    cell.bmpItemMask = xRecipe.bmpprintmask.Clone(
-                //        new Rectangle(0, 0, xRecipe.bmpprintmask.Width, xRecipe.bmpprintmask.Height),
-                //        PixelFormat.Format8bppIndexed);
-                //    cell.DetectDefects(xRecipe.bmpprinttemplate, cell.bmpItemRun, cell.bmpItemMask);
-                //}
-            }
-
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
-            GC.Collect();
-#endif
+            #region WRITE_TO_LOG
+            string msg = result != null ? result.ToString() : "空盤檢測: 無結果";
+            GaUtil.LOG(msg, isAllPass ? Color.Green : Color.Red);
+            #endregion
         }
         /// <summary>
         /// LETIAN: 非同步保存 Debug 數據 搬移至此.

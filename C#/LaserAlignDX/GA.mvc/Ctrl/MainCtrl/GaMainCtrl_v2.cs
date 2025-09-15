@@ -159,21 +159,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         }
 
         #region PROCESSES_這以後要納入_SYS_MODEL
-        BaseProcess m_BuzzerProcess
-        {
-            get { return BuzzerProcess.Instance; }
-        }
-        BaseProcess m_resetprocess
-        {
-            get { return ResetProcess.Instance; }
-        }
         BaseProcess m_LineScanProcess
         {
             get { return LineScanProcess.Instance; }
-        }
-        BaseProcess m_MainProcess
-        {
-            get { return MainProcess.Instance; }
         }
         BaseProcess m_SingleProcess
         {
@@ -192,15 +180,15 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             //----------------------------------------------------------------
             //m_mainprocess.OnCompleted += process_OnCompleted;
             // Buzzer 的結束 用來檢視是否有 NG 發生.
-            m_MainProcess.OnMessage += process_OnMessage;
-            m_MainProcess.OnCompleted += process_OnCompleted;
-            m_BuzzerProcess.OnCompleted += buzzer_OnCompleted;
-            m_resetprocess.OnCompleted += process_OnCompleted;
-
-            m_LineScanProcess.OnCompleted += process_OnCompleted;
+            //m_MainProcess.OnMessage += process_OnMessage;
+            //m_MainProcess.OnCompleted += process_OnCompleted;
+            //m_BuzzerProcess.OnCompleted += buzzer_OnCompleted;
+            //m_resetprocess.OnCompleted += process_OnCompleted;
             //m_LineScanProcess.OnLiveImage += process_OnLiveImage;
-            m_LineScanProcess.OnMessage += handle_aoi_run_message;
             //m_SingleProcess.OnLiveImage += process_OnLiveImage;
+            //m_LineScanProcess.OnCompleted += process_OnCompleted;
+
+            m_LineScanProcess.OnMessage += handle_aoi_run_message;
             m_SingleProcess.OnMessage += handle_aoi_run_message;
 
             _lineScanImageHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
@@ -212,141 +200,41 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         }
         void TickAllProcesses()
         {
-            m_resetprocess.Tick();
-            m_BuzzerProcess.Tick();
             m_LineScanProcess.Tick();
-            m_MainProcess.Tick();
             m_SingleProcess.Tick();
         }
 
-        private void process_OnMessage(object sender, ProcessEventArgs e)
-        {
-            if (sender == m_MainProcess)
-            {
-                if (e.Message.Contains("Reset.Data"))
-                {
-                }
-                else if (e.Message.Contains("Record.Start"))
-                {
-                    FireChangeState(MainS1State.LS_START);
-                }
-                else if (e.Message.Contains("Record.Stop"))
-                {
-                    FireChangeState(MainS1State.LS_STOP);
-                }
-            }
-
-            try
-            {
-                // Do whatever message you want to show to the operators.
-                string msg = $"Process {((BaseProcess)sender).Name}, {e.Message}\n";
-                _LOG(msg, Color.Black);
-            }
-            catch
-            {
-            }
-
-            //CGOperate();
-        }
-        private void process_OnLiveImage(object sender, ProcessEventArgs e)
-        {
-            if (e.Tag != null && e.Tag is Bitmap)
-            {
-                try
-                {
-                    if (_wndOwner.InvokeRequired)
-                    {
-                        EventHandler<ProcessEventArgs> h = process_OnLiveImage;
-                        _wndOwner.Invoke(h, sender, e);
-                    }
-                    else
-                    {
-                        //@LETIAN: 2022/07/01 改用 GdxDispUI 增加一些 fps
-                        // bmp 由 Sender maintains life cycle.
-                        // 在此不用 Dispose
-                        //Bitmap bmp = (Bitmap)e.Tag;
-                        //dispUI1.UpdateLiveImage(bmp);
-                        //DS1.ReplaceDisplayImage(bmp);
-
-                        //問題: 誰負責對新生成的 mvdImage 進行 Dispose() ? 
-                        //DSMain.mvdRenderActivex1.LoadImageFromObject(pRun.cMvdInput.Clone());
-                        //DSMain.mvdRenderActivex1.ClearShapes();
-                        //DSMain.AddCross();
-                        //DSMain.mvdRenderActivex1.Display();
-                        updateMvd_LineScanImage();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    //>>> 此一層的 try - catch 以後可以省略.
-                    //>>> 會由 Event Sender 處理 exception
-                    //throw ex;
-                }
-            }
-        }
-        private void process_OnCompleted(object sender, ProcessEventArgs e)
-        {
-            if (sender == m_resetprocess)
-            {
-                if (m_resetprocess.RelateString == "CloseWindows")
-                {
-                    //執行的關閉流程 這裏則跳出
-                    return;
-                }
-            }
-
-            try
-            {
-                string msg = $"Process {((BaseProcess)sender).Name}, Completed!\n";
-                _LOG(msg, Color.Black);
-            }
-            catch
-            {
-            }
-        }
-        private void buzzer_OnCompleted(object sender, ProcessEventArgs e)
-        {
-            //if (InvokeRequired)
-            //{
-            //    EventHandler<ProcessEventArgs> h = buzzer_OnCompleted;
-            //    BeginInvoke(h, sender, e);
-            //}
-            //else
-            //{
-
-            //}
-        }
         private void handle_aoi_run_message(object sender, ProcessEventArgs e)
         {
             if (sender != m_LineScanProcess && sender != m_SingleProcess)
                 return;
 
-            if (e.Message.Contains("Result.1"))
-            {
-                FireChangeState(MainS1State.M_PASS);
-            }
-            else if (e.Message.Contains("Result.2"))
-            {
-                FireChangeState(MainS1State.M_NG);
-            }
-            else if (e.Message.Contains("Record.Start"))
+            //if (e.Message.Contains("Result.1"))
+            //{
+            //    FireChangeState(MainS1State.M_PASS);
+            //}
+            //else if (e.Message.Contains("Result.2"))
+            //{
+            //    FireChangeState(MainS1State.M_NG);
+            //}
+            if (e.Message.Contains("Record.Start"))
             {
                 //MappingReset();
-                //FireChangeState(MainS1State.LS_START);
+                FireChangeState(MainS1State.LS_START);
             }
             else if (e.Message.Contains("Record.Stop"))
             {
-                //FireChangeState(MainS1State.LS_STOP);
+                FireChangeState(MainS1State.LS_STOP);
             }
             else if (e.Message.Contains("Show.X"))
             {
                 updateMvd_AoiResultData(e);
             }
-            else if (e.Message.Contains("ResultX.Code"))
-            {
-                INI.Instance.CurrentBarcodeStr = e.Tag as string;
-                FireChangeState(MainS1State.M_SHOWCODE, e.Tag as string);
-            }
+            //else if (e.Message.Contains("ResultX.Code"))
+            //{
+            //    INI.Instance.CurrentBarcodeStr = e.Tag as string;
+            //    FireChangeState(MainS1State.M_SHOWCODE, e.Tag as string);
+            //}
 
             try
             {
@@ -367,7 +255,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             }
             else
             {
-                updateMvd_LineScanImage();
+                //updateMvd_LineScanImage();
+                ActiveViewer.UpdateImageSrc(_lineScanImageHolder);
             }
         }
 
@@ -418,6 +307,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 FireChangeState(MainS1State.M_PASS);
             else
                 FireChangeState(MainS1State.M_NG);
+            FireChangeState(MainS1State.LS_STOP);
         }
         #endregion
 
@@ -468,6 +358,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                     _frmAoiProgressing.UpdateProgress(e.CurrentStep);
                     _frmAoiProgressing.Show(_wndOwner);
                     _frmAoiProgressing.BringToFront();
+                    //FireChangeState(MainS1State.S1_RUNNING);
                 }
             }
         }
@@ -482,6 +373,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 _frmAoiProgressing?.Close();
                 _frmAoiProgressing?.Dispose();
                 _frmAoiProgressing = null;
+
+                //ActiveViewer.UpdateCells(xRecipe.xRegionCells, (int)_aoiModel.xScanInspectMode);
+                //generate_report_and_log();
+                //bool isPass = _aoiModel.IsPass;
+                //FireChangeState(isPass ? MainS1State.M_PASS : MainS1State.M_NG);
+                //FireChangeState(MainS1State.S1_READY);
             }
         }
         #endregion
@@ -992,7 +889,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 iShowIndex++;
             }
         }
-#if(NO_USE_CODE)
+#if (NO_USE_CODE)
         void flyProcess(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
         {
             flystopwatch.Restart();
@@ -1759,6 +1656,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
 
         }
 #endif
-        #endregion
+#endregion
     }
 }

@@ -40,7 +40,7 @@ using System.Drawing.Imaging;
 
 namespace LaserAlignDX.UISpace.MainSpace
 {
-    public partial class MainX1UI : UserControl
+    public partial class MainX1UI : UserControl, IMainUI
     {
         Mover myMover = new Mover();
 

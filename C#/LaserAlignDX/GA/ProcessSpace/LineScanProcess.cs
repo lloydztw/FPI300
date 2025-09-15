@@ -154,6 +154,7 @@ namespace TravellerMINIX6.ProcessSpace
 
                         }
                         break;
+
                     case 10200:
                         if (Process.IsTimeup)
                         {
@@ -264,6 +265,7 @@ namespace TravellerMINIX6.ProcessSpace
                             }
                         }
                         break;
+
                     case 10210:
                         if (Process.IsTimeup)
                         {
@@ -295,6 +297,7 @@ namespace TravellerMINIX6.ProcessSpace
                             Process.ID = 30;
                         }
                         break;
+
                     case 30:
                         if (Process.IsTimeup)
                         {
