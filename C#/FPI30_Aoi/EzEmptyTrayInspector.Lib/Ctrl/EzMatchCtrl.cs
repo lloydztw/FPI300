@@ -683,7 +683,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             }
 
             string outputFile = (_appSettings?.OutputResultImageFile) ? GET_OUTPUT_IMAGE_FILE_NAME() : null;
-            _model.RunAll(_largeIMG, null, outputFile, wait: false);
+            _model.RunAll(_largeIMG, null, outputFile, wait: true);
         }
 
 #if (OPT_DUAL)

@@ -671,20 +671,23 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             appendCameraCoords(sb, cursorBloc, cursorBloc2);
 
-            if (TransCameraToMotor != null)
+            if (!IsEmptyTrayMode)
             {
-                appendMotorCoords(sb, cursorBloc, cursorBloc2);
-                isShowScore = false;
-            }
-            if (TransCameraToWorld != null)
-            {
-                appendWorldCoords(sb, cursorBloc, cursorBloc2);
-                isShowScore = false;
-            }
-            if (TransCameraToMotor != null && TransCameraToMotor != null && cursorBloc2 == null)
-            {
-                appendPlcCompensation(sb, cursorBloc, row, col);
-                isShowScore = false;
+                if (TransCameraToMotor != null)
+                {
+                    appendMotorCoords(sb, cursorBloc, cursorBloc2);
+                    isShowScore = false;
+                }
+                if (TransCameraToWorld != null)
+                {
+                    appendWorldCoords(sb, cursorBloc, cursorBloc2);
+                    isShowScore = false;
+                }
+                if (TransCameraToMotor != null && TransCameraToMotor != null && cursorBloc2 == null)
+                {
+                    appendPlcCompensation(sb, cursorBloc, row, col);
+                    isShowScore = false;
+                }
             }
 
             if (isShowScore || IsEmptyTrayMode)
@@ -789,6 +792,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         static string PATH_DUMP => "d:\\paso.log\\chipLoc";
         void DebugMatching(CellBloc cellBloc)
         {
+            if (IsEmptyTrayMode) 
+                return;
             var cell = cellBloc?.Cell;
             if (cell == null) return;
 
