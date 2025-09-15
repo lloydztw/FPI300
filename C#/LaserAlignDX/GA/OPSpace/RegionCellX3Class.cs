@@ -1,4 +1,5 @@
 ﻿using AUVision;
+using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -68,7 +69,13 @@ namespace LaserAlignDX.OPSpace
         public string lblName = "";
         public int CellRow = 0;
         public int CellCol = 0;
+
         public RectangleF viewRectF = new RectangleF();
+
+        /// <summary>
+        /// 像測 晶粒定位的中心座標
+        /// </summary>
+        public QvBox2D chipLocInCamera;
 
         public float OrgX = 0;
         public float OrgY = 0;
@@ -755,6 +762,8 @@ namespace LaserAlignDX.OPSpace
 
         public void Reset()
         {
+            chipLocInCamera = null;
+
             inspectReason = InspectReason.PASS;
             xFindResult = new AUVision.xFindResult();
             inspectReasons.Clear();

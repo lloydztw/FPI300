@@ -23,7 +23,7 @@ namespace LaserAlignDX.Model.Coords
     /// <summary>
     /// 為 TravellerTransforms 外掛轉換 Gaara 數據的函式
     /// </summary>
-    public static class TravellerTransformsExt
+    public static class TravellerTransformsGaaraExt
     {
         const int N_COMBINES = 4;
         const int N_POINTS = TravellerTransforms.N_CALIB_POINTS;

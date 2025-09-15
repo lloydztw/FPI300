@@ -25,10 +25,13 @@ namespace LaserAlignDX.Mvc.Model
         [Description("Machine.PLCIO 還沒配置")]
         NO_PLC_IO,
 
-        [Description("缺少完整的 \"全域校正\" 數據")]
+        [Description("缺少 '全域校正' 數據")]
         NO_CALIB_TRANSFORM,
 
-        [Description("格點或陣列沒有建置")]
+        [Description("Runtime 跑線時期的 PLC格點 沒有設定")]
+        NO_RUNTIME_PLC_GRID,
+
+        [Description("影像 格點或陣列 沒有建置")]
         NO_CAMERA_GRID,
 
         [Description("陣列太小")]

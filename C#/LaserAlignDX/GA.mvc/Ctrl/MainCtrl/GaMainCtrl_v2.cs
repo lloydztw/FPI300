@@ -82,11 +82,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         #region GUI_MEMBERS
         Control _wndOwner;
         IvChipCellsViewer[] _DSMains;
-        IvChipCellsViewer DSMain
+        IvChipCellsViewer ActiveViewer
         {
-            get => _DSMains[(int)_currentCarrierID];
+            get => _DSMains[(int)_activeCarrierID];
         }
-        CarrierEnum _currentCarrierID;
+        CarrierEnum _activeCarrierID;
         #endregion
 
         public override void Attach(Control[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
@@ -388,14 +388,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             // NOTE: 目前 cMvdInput 生命週期由 TravellerBigImagesHolder 保管 !!!
             //       不用重複 Clone() 來餵給 MVS
             //------------------------------------------------------------------------
-            string srcName = _lineScanImageHolder.SrcName;
-            if (srcName != null && (srcName.Contains("校正") || srcName.Contains("參數")))
-                return;
-            DSMain.UpdateImageSrc(_lineScanImageHolder);
+            ActiveViewer.UpdateImageSrc(_lineScanImageHolder);
         }
         void updateMvd_AoiResultData(ProcessEventArgs e)
         {
-            DSMain.UpdateCells(xRecipe.xRegionCells, (int)_aoiModel.xScanInspectMode);
+            ActiveViewer.UpdateCells(xRecipe.xRegionCells, (int)_aoiModel.xScanInspectMode);
 
             //// 清除 MVD canvas
             //DSMain.mvdRenderActivex1.ClearShapes();
@@ -534,12 +531,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             if (promptCheckBusy())
                 return;
 
-            if(_lineScanImageHolder.IsEmpty() || !DSMain.HasImage())
+            if(_lineScanImageHolder.IsEmpty() || !ActiveViewer.HasImage())
                 MenuLoadImage_Click(sender, e);
 
             if (promptCheckImageHolder())
             {
-                DSMain.Reset();
+                ActiveViewer.Reset();
                 LineScanSingleProcess.Instance.Start(ScanInspectMode.MEASUREAOI);
             }
         }
@@ -548,12 +545,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             if (promptCheckBusy())
                 return;
 
-            if (_lineScanImageHolder.IsEmpty() || !DSMain.HasImage())
+            if (_lineScanImageHolder.IsEmpty() || !ActiveViewer.HasImage())
                 MenuLoadImage_Click(sender, e);
 
             if (promptCheckImageHolder())
             {
-                DSMain.Reset();
+                ActiveViewer.Reset();
                 LineScanSingleProcess.Instance.Start(ScanInspectMode.NOTRAY);
             }
         }
@@ -562,12 +559,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             if (promptCheckBusy())
                 return;
 
-            if (_lineScanImageHolder.IsEmpty() || !DSMain.HasImage())
+            if (_lineScanImageHolder.IsEmpty() || !ActiveViewer.HasImage())
                 MenuLoadImage_Click(sender, e);
 
             if (promptCheckImageHolder())
             {
-                DSMain.Reset();
+                ActiveViewer.Reset();
                 LineScanSingleProcess.Instance.Start(ScanInspectMode.QRCODE);
             }
         }
@@ -582,7 +579,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 mxReadPlcStageID(out var activeID);
                 updateCarrierID(activeID);              // By Simulation
             }
-            bool ok = _currentCarrierID == targetID;
+            bool ok = _activeCarrierID == targetID;
             return ok;
         }
         bool promptCheckBusy()
@@ -617,11 +614,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         }
         void updateCarrierID(CarrierEnum carrierID, bool force = false)
         {
-            if (_currentCarrierID != carrierID || force)
+            if (_activeCarrierID != carrierID || force)
             {
-                _currentCarrierID = carrierID;
-                _DSMains[0].IsActive = _currentCarrierID == CarrierEnum.C1;
-                _DSMains[1].IsActive = _currentCarrierID == CarrierEnum.C2;
+                _activeCarrierID = carrierID;
+                _DSMains[0].IsActive = _activeCarrierID == CarrierEnum.C1;
+                _DSMains[1].IsActive = _activeCarrierID == CarrierEnum.C2;
 
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
                 _sysModel.ActiveCarrierID = carrierID;

@@ -449,7 +449,7 @@
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaProgressEventArgs.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\PlcGridPoints.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\TravellerCoordsEnums.cs" />
-    <Compile Include="GA.mvc\Model\Coordinates\TravellerTranformsExt.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\Suppors\TravellerTranformsGaaraExt.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\TravellerTranforms.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />

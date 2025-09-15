@@ -1,5 +1,6 @@
 ﻿using JetEazy.BasicSpace;
 using JetEazy.Utils;
+using LaserAlignDX;
 using LaserAlignDX.AoiModel;
 using NeedleX.ProcessSpace;
 using System;

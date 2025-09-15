@@ -6,6 +6,7 @@ using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
@@ -82,11 +83,12 @@ namespace LaserAlignDX.AoiModel.V25
         /// <summary>
         /// 2025-08-28 LETIAN: 巨圖 統一由 TravellerBigImagesHolder 保管其生命週期
         /// </summary>
-        public GaBigImageHolder LineScanCamImageHolder => GaMvcConfig.SysModel.LineScanImageHolder;
+        public GaBigImageHolder LineScanCamImageHolder => _sysModel.LineScanImageHolder;
         /// <summary>
         /// 2025-09-10 新座標轉換
         /// </summary>
-        TravellerTransforms transformModel => GaMvcConfig.SysModel.TransformsModel;
+        TravellerTransforms _transformModel => _sysModel.TransformsModel;
+        ITravelerModel _sysModel => GaMvcConfig.SysModel;
         #endregion
 
         #region PRIVATE_MEMBERS
@@ -546,17 +548,16 @@ namespace LaserAlignDX.AoiModel.V25
                         cell.RunAngle = cellmvdRectF.Angle + INI.Instance.Cal_Bca;
                         cell.GetOffsetResult();
 #else
-                        var box2d = chipMatcher.GetResultBox2D();
-                        var chipLoc = new QVector(box2d.Center.X, box2d.Center.Y);
-                        chipLoc.X += cellRoi.X;
-                        chipLoc.Y += cellRoi.Y;
-                        double angle = box2d.Theta * 180 / Math.PI;
+                        var chipLoc = chipMatcher.GetResultBox2D();
+                        var chipCentroid = new QVector(chipLoc.Center.X, chipLoc.Center.Y);
+                        chipCentroid.X += cellRoi.X;
+                        chipCentroid.Y += cellRoi.Y;
+                        chipCentroid.X = cell.xFindResult.fCenterX;  // DEBUG_VERIFY
+                        chipCentroid.Y = cell.xFindResult.fCenterY;  // DEBUG_VERIFY
+                        chipLoc.SetCenter((float)chipCentroid.X, (float)chipCentroid.Y);
 
-                        var carrierID = CarrierEnum.C1;
-                        var suckerRowID = SuckerRowEnum.S1;
-                        var res = transformModel.CalcPlcCompensation(carrierID, suckerRowID, chipLoc, cell.CellRow, cell.CellCol);
-                        var dV = res[0];
-                        var dErr = res[1];
+                        CarrierEnum C = _sysModel.ActiveCarrierID;
+                        (var dV, var dErr) = _transformModel.CalcPlcCompensation(C, chipCentroid, cell.CellRow, cell.CellCol);
 
                         //var T_CM = transformModel.GetCameraMotorTransform(carrierID, suckerRowID);
                         //var T_CP = transformModel.GetCameraPhysicTransform(carrierID);
@@ -565,6 +566,9 @@ namespace LaserAlignDX.AoiModel.V25
                         //cell.Sur1 = new PointF((float)motorPt.X, (float)motorPt.Y);
                         //cell.Sur2 = new PointF((float)worldPt.X, (float)worldPt.Y);
 
+                        double angle = chipLoc.Theta * 180 / Math.PI;
+
+                        cell.chipLocInCamera = chipLoc;
                         cell.RunX = (float)(dV.X + INI.Instance.Cal_Bcx);
                         cell.RunY = (float)(dV.Y + INI.Instance.Cal_Bcy);
                         cell.RunAngle = (float)(angle + INI.Instance.Cal_Bca);
@@ -630,7 +634,7 @@ namespace LaserAlignDX.AoiModel.V25
         {
             // 取得 上一輪 晶粒定位 的結果 (xResult)
             var chipLocationResult = matcher.xResults[0];
-            var transCP = transformModel.GetCameraPhysicTransform(CarrierEnum.C1);
+            var transCP = _transformModel.GetCameraPhysicTransform(CarrierEnum.C1);
 
             #region 邊線處理
 #if (OPT_OLD)

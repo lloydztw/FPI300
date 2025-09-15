@@ -771,16 +771,15 @@ namespace LaserAlignDX.Mvc.Gui
                 return;
 
             var transformsModel = GaMvcConfig.SysModel.TransformsModel;
-            var res = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, row, col);
-            var dV = res[0];
-            var dErr = res[1];
+            //(var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, row, col);
+            (var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, row, col);
 
+            //sb.AppendLine();
+            sb.AppendLine($"Phy 變動值 ΔX = {dErr.X:0.000} mm");
+            sb.AppendLine($"Phy 變動值 ΔY = {dErr.Y:0.000} mm");
             sb.AppendLine();
             sb.AppendLine($"PLC 補償量 dX = {dV.X:0.000} mm");
             sb.AppendLine($"PLC 補償量 dY = {dV.Y:0.000} mm");
-            sb.AppendLine();
-            sb.AppendLine($"Phy 變動值 ΔX = {dErr.X:0.000} mm");
-            sb.AppendLine($"Phy 變動值 ΔY = {dErr.Y:0.000} mm");
         }
 
         #region DEBUG_TRACE
@@ -798,9 +797,8 @@ namespace LaserAlignDX.Mvc.Gui
                 for (int c = 0; c < cols; c++)
                 {
                     var bloc = _grid[r, c];
-                    var res = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, r, c);
-                    var dV = res[0];
-                    var dErr = res[1];
+
+                    (var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, r, c);
 
                     double err;
                     if (option == 0)

@@ -18,6 +18,7 @@ using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
+using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model.Coords;
@@ -128,39 +129,46 @@ namespace LaserAlignDX.Mvc.Model
             //return _jxRecipe;
             return _xRecipe;
         }
-        public void ApplyRecipe(string gaaraRecipeName = null, bool optWritebackToRecipe = false)
+        public void ApplyRecipe(params object[] args)
         {
-            // 載入 TransformsModel 設定 (全域)
+            //(0) 載入 TransformsModel 設定 (全域)
             var transformsModel = this.TransformsModel;
             transformsModel.Load(GaMvcPaths.CALIB_TRANSFORMS_FILE);
             transformsModel.BuildAll();
 
-            // 載入 Camera Grid (保存在個別參數)
-            EzBlocsGrid camGrid = ActiveCarrierID == CarrierEnum.C1 ?
-                                    _xRecipe.xCamGrid1 :
-                                    _xRecipe.xCamGrid2;
+            //(1) 載入 Camera Grid (保存在個別參數 _xRecipe 中)
+            var camGridC1 = _xRecipe.xCamGrid1;
+            var camGridC2 = _xRecipe.xCamGrid2;
+            var camGrid = (CarrierEnum.C1 == ActiveCarrierID) ? camGridC1 : camGridC2;
 
-            // 檢查 camGrid 的數據狀態
-            if (checkCameraGrid(ActiveCarrierID, camGrid, notify: true) != null)
+            //(2) 檢查 camGrid 的數據狀態
+            var err = checkCameraGrid(ActiveCarrierID, camGrid, notify: true);
+            if (err != null)
                 return;
 
-            // Config Plc Grid
+            #region LOG
+            string gaaraRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
+            GaUtil.LOG($"[SysModel] 重新載入參數 {gaaraRecipeName}", Color.Blue);
+            #endregion
+
+            //(3) 設定 Runtime 跑線時期 P座標 (PLC) 格點
             var rows = camGrid.Rows;
             var cols = camGrid.Cols;
             //var pitchX = (double)traySettings.PitchX.Value;
             //var pitchY = (double)traySettings.PitchY.Value;
             double pitchX = _xRecipe.xRealOffsetX;
             double pitchY = _xRecipe.xRealOffsetY;
-            transformsModel.ConfigPlcGrid(rows, cols, pitchX, pitchY);
+            var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
+            transformsModel.SetRuntimePlcGrid(plcGrid);
 
-            // 重新載入 EmptyTrayAoiRecipe
+            //(4) 重新載入 EmptyTrayAoiRecipe
             using (var jx = loadEmptyTrayAoiRecipe(false))
             {
                 if (jx != null)
                     EmptyTrayAoiModel.SetRecipe(jx);
             }
 
-            // 自動建立陣列
+            //(5) 自動建立陣列
             buildRegionCells(ActiveCarrierID, camGrid, false);
         }
         public MatchResult AutoBuildRegionCells(Bitmap fullfovBmp)
@@ -376,87 +384,54 @@ namespace LaserAlignDX.Mvc.Model
         }
         string checkCameraGrid(CarrierEnum carrierID, EzBlocsGrid camGrid, bool notify)
         {
-            var errCode = ErrCodes.OK;
-            string errMsg = null;
+            //var errCode = ErrCodes.OK;
+            //string errMsg = null;
 
-            if (camGrid == null)
-            {
-                errCode = ErrCodes.NO_CAMERA_GRID;
-                errMsg = JetEazy.QxNums.GetEnumDescription(carrierID)
-                       + " " + JetEazy.QxNums.GetEnumDescription(errCode)
-                       + " !";
-            }
-            else if (camGrid.Rows < 2 || camGrid.Cols < 2)
-            {
-                errCode = ErrCodes.LOW_GRID_ROWS_COLS;
-                errMsg = JetEazy.QxNums.GetEnumDescription(carrierID)
-                       + " " + JetEazy.QxNums.GetEnumDescription(errCode)
-                       + $" rows={camGrid.Rows}, cols={camGrid.Rows} !";
-            }
-            
-            if (notify)
-                OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
+            //if (camGrid == null)
+            //{
+            //    errCode = ErrCodes.NO_CAMERA_GRID;
+            //    errMsg = JetEazy.QxNums.GetEnumDescription(carrierID)
+            //           + " " + JetEazy.QxNums.GetEnumDescription(errCode)
+            //           + " !";
+            //}
+            //else if (camGrid.Rows < 2 || camGrid.Cols < 2)
+            //{
+            //    errCode = ErrCodes.LOW_GRID_ROWS_COLS;
+            //    errMsg = JetEazy.QxNums.GetEnumDescription(carrierID)
+            //           + " " + JetEazy.QxNums.GetEnumDescription(errCode)
+            //           + $" rows={camGrid.Rows}, cols={camGrid.Rows} !";
+            //}
 
-            return errMsg;
+            //if (notify)
+            //    OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
+            //return errMsg;
+
+            (var errCode, var errMsg) = TransformsModel.checkCameraGrid(carrierID, camGrid);
+
+            if (errCode != ErrCodes.OK)
+            {
+                if (notify)
+                    OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
+                return errMsg;
+            }
+
+            return null;
         }
         #endregion
 
-        public bool GetCoordsRef(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out QVector camCoord, out QVector suckerWorldCoord, out string msg)
-        {
-            camCoord = new QVector(0, 0);
-            suckerWorldCoord = new QVector(0, 0);
-
-            //(0) PlcIO
-            var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
-            if (plcIO == null)
-            {
-                //msg = "Machine.PLCIO 還沒配置!";
-                msg = JetEazy.QxNums.GetEnumDescription(ErrCodes.NO_PLC_IO) + " !";
-                return false;
-            }
-
-            //(1) Transform
-            var transCM = this.TransformsModel.GetCameraMotorTransform(carrierID, suckerRowID);
-            var transCP = this.TransformsModel.GetCameraPhysicTransform(carrierID);
-            if (transCM == null || transCP == null)
-            {
-                //msg = "缺少完整的 \"全域校正\" 數據!";
-                msg = JetEazy.QxNums.GetEnumDescription(ErrCodes.NO_CALIB_TRANSFORM) + " !";
-                return false;
-            }
-
-            //(2) Camera Grid (從 _xRecipe 取得)
-            var camGrid = (carrierID == CarrierEnum.C1) ? _xRecipe.xCamGrid1 : _xRecipe.xCamGrid2;
-
-            //(3) 檢查 camGrid 數據狀態
-            var errMsg = checkCameraGrid(ActiveCarrierID, camGrid, false);
-            if (errMsg != null)
-            {
-                msg = errMsg;
-                return false;
-            }
-
-            //(4) 返回座標值
-            camCoord = camGrid[0, 0].Center;
-            suckerWorldCoord = transCM.Trans(camCoord);
-
-            //(5) Msg
-            msg = JetEazy.QxNums.GetEnumDescription(ErrCodes.OK);
-            return true;
-        }
-        public bool WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camCoord, out PointF suckerCoord, out string msg)
+        bool ITravelerModel.WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camPt, out PointF suckerWorldPt, out string errMsg)
         {
             PointF _P(QVector v) { return v == null ? PointF.Empty : new PointF((float)v.X, (float)v.Y); }
 
-            bool ok = GetCoordsRef(carrierID, suckerRowID, out var camPt, out var suckerPt, out msg);
+            var errCode = TransformsModel.GetCoordsRef(carrierID, out var camCoord, out var worldSucker1, out var worldSucker2, out errMsg);
 
-            camCoord = _P(camPt);
-            suckerCoord = _P(suckerPt);
+            camPt = _P(camCoord);
+            suckerWorldPt = suckerRowID == SuckerRowEnum.S1 ? _P(worldSucker1) : _P(worldSucker2);
 
-            if (ok)
-                mxWriteToPlc(carrierID, suckerRowID, suckerCoord);
+            if (errCode == ErrCodes.OK)
+                mxWriteToPlc(carrierID, suckerRowID, suckerWorldPt);
 
-            return ok;
+            return (errCode == ErrCodes.OK);
         }
         public bool WriteAllCoordsToPlc(out string message)
         {
@@ -479,14 +454,17 @@ namespace LaserAlignDX.Mvc.Model
 
             foreach (CarrierEnum C in carrierIDs)
             {
-                foreach (SuckerRowEnum S in suckerIDs)
+                var err = TransformsModel.GetCoordsRef(C, out var camCoord, out var worldSucker1, out var worldSucker2, out var errMsg);
+                var ok = err == ErrCodes.OK;
+                if (ok)
                 {
-                    bool ok = GetCoordsRef(C, S, out var camPt, out var suckerPt, out var msg);
-                    if (ok)
-                        mxWriteToPlc(C, S, _P(suckerPt));
-                    else
-                        errMsgs.Add(msg);
-                    totalOK &= ok;
+                    mxWriteToPlc(C, SuckerRowEnum.S1, _P(worldSucker1));
+                    mxWriteToPlc(C, SuckerRowEnum.S2, _P(worldSucker2));
+                }
+                else
+                {
+                    errMsgs.Add(errMsg);
+                    totalOK = false;
                 }
             }
 
@@ -495,27 +473,31 @@ namespace LaserAlignDX.Mvc.Model
         }
 
         #region PRIVATE_PLC_FUNCTIONS
-        void mxWriteToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, PointF suckerCoord)
+        void mxWriteToPlc(CarrierEnum C, SuckerRowEnum S, PointF suckerCoord)
         {
             var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
 
-            var NA = PointF.Empty;
+            var _na = PointF.Empty;
 
-            if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S1)
+            if (C == CarrierEnum.C1 && S == SuckerRowEnum.S1)
             {
-                plcIO?.SetStage1((int)suckerRowID, suckerCoord, NA);
+                // 載台1 吸嘴排1 
+                plcIO?.SetStage1((int)S, suckerCoord, _na);
             }
-            else if (carrierID == CarrierEnum.C1 && suckerRowID == SuckerRowEnum.S2)
+            else if (C == CarrierEnum.C1 && S == SuckerRowEnum.S2)
             {
-                plcIO?.SetStage1((int)suckerRowID, NA, suckerCoord);
+                // 載台1 吸嘴排2
+                plcIO?.SetStage1((int)S, _na, suckerCoord);
             }
-            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S1)
+            else if (C == CarrierEnum.C2 && S == SuckerRowEnum.S1)
             {
-                plcIO?.SetStage2((int)suckerRowID, suckerCoord, NA);
+                // 載台2 吸嘴排1
+                plcIO?.SetStage2((int)S, suckerCoord, _na);
             }
-            else if (carrierID == CarrierEnum.C2 && suckerRowID == SuckerRowEnum.S2)
+            else if (C == CarrierEnum.C2 && S == SuckerRowEnum.S2)
             {
-                plcIO?.SetStage2((int)suckerRowID, NA, suckerCoord);
+                // 載台2 吸嘴排2
+                plcIO?.SetStage2((int)S, _na, suckerCoord);
             }
         }
         #endregion

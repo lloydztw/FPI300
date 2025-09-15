@@ -386,7 +386,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             //(2) 將 校正點位群 更新到 座標轉換 系統 (Model)
             if (areRowsColsMatched)
             {
-                _transforms.ConfigPlcGrid(rows, cols, pitchX, pitchY);
+                _transforms.ConfigGlobalCalibPlcGrid(rows, cols, pitchX, pitchY);
                 _transforms.UpdateCalibPoints(_activeCarrierID, _activeSuckerRowID, camGrid);
             }
 

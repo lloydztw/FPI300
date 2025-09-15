@@ -1000,12 +1000,12 @@ namespace LaserAlignDX.FormSpace
 
             var sysModel = GaMvcConfig.SysModel;
 
-            bool ok = sysModel.WriteCoordsToPlc(carrierID, suckerRowID, out var camCoord, out var suckerCoord, out var msg);
+            bool ok = sysModel.WriteCoordsToPlc(carrierID, suckerRowID, out var camCoord, out var suckerCoord, out var errMsg);
 
             if (!ok)
             {
-                updatePlcWritingStatus(msg, Color.Red);
-                VsMSG.Instance.Warning(msg);
+                updatePlcWritingStatus(errMsg, Color.Red);
+                VsMSG.Instance.Warning(errMsg);
             }
             else
             {

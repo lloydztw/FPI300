@@ -312,14 +312,13 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updatePlcCoordsRef(CarrierEnum carrierID)
         {
-            bool ok1 = _sysModel.GetCoordsRef(carrierID, SuckerRowEnum.S1, out var camCoord1, out var worldSucker1, out string msg1);
-            bool ok2 = _sysModel.GetCoordsRef(carrierID, SuckerRowEnum.S2, out var camCoord2, out var worldSucker2, out string msg2);
+            var err = _sysModel.TransformsModel.GetCoordsRef(carrierID, out var camCoord, out var worldSucker1, out var worldSucker2, out var errMsg);
 
-            _rcpEditUI.UpdateCoordsRef(camCoord1, worldSucker1, worldSucker2);
+            _rcpEditUI.UpdateCoordsRef(camCoord, worldSucker1, worldSucker2);
 
-            if (!ok1 || !ok2)
+            if (err != ErrCodes.OK)
             {
-                VsMSG.Instance.Warning(msg1 + "\n\r" + msg2, false);
+                VsMSG.Instance.Warning(errMsg, false);
             }
         }
         void showCviResult(bool show)

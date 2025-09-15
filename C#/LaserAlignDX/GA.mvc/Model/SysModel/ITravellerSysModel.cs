@@ -67,28 +67,22 @@ namespace LaserAlignDX.Mvc.Model
         /// 套用 Gaara 參數
         /// (必須先指定 ActiveCarrierID)
         /// </summary>
-        void ApplyRecipe(string gaaraRecipeName = null, bool optWritebackToRecipe = false);
+        void ApplyRecipe(params object[] args);
 
         /// <summary>
         /// 自動抓取陣列 
         /// (必須先指定 ActiveCarrierID)
-        /// (用於 RecipeEditor)
+        /// (用於 參數編輯模式)
         /// </summary>
         MatchResult AutoBuildRegionCells(Bitmap fullfovBmp);
 
         /// <summary>
-        /// 取得 PLC 所需的參考座標
-        /// (根據各自參數檔數據算出)
-        /// </summary>
-        bool GetCoordsRef(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out QVector camCoord, out QVector suckerWorldCoord, out string msg);
-
-        /// <summary>
-        /// 將 單筆 座標數據 寫入 PLC
+        /// 單筆寫入 座標數據 至 PLC
         /// </summary>
         bool WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camCoord, out PointF suckerCoord, out string msg);
 
         /// <summary>
-        /// 將 所有 座標數據 寫入 PLC
+        /// 一鍵寫入 所有座標數據 至 PLC
         /// </summary>
         bool WriteAllCoordsToPlc(out string msg);
     }

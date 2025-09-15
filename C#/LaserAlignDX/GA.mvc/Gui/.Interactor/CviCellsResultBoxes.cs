@@ -16,6 +16,7 @@
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.OpenCV;
+using JetEazy.QMath;
 using JetEazy.QxCollections;
 using JetEazy.Transform;
 using JetEazy.Utils;
@@ -51,9 +52,21 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             public CellBloc(CELL cell) : base(Rectangle.Empty, 1)
             {
                 Cell = cell;
-                var rcf = cell.DrawResultRectF();
-                Rect = Rectangle.Round(GaImageUtil.ToRectangleF(rcf));
-                Center = new JetEazy.QMath.QVector(rcf.CenterX, rcf.CenterY);
+                //var rcf = cell.DrawResultRectF();
+                //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(rcf));
+                //Center = new JetEazy.QMath.QVector(rcf.CenterX, rcf.CenterY);
+                if (cell.chipLocInCamera != null)
+                {
+                    var cc = cell.chipLocInCamera.Center;
+                    Rect = Rectangle.Round(cell.chipLocInCamera.BoundaryRect);
+                    Center = new QVector(cc.X, cc.Y);
+                }
+                else
+                {
+                    var cc = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
+                    Rect = Rectangle.Round(cell.viewRectF);
+                    Center = new QVector(cc.X, cc.Y);
+                }
             }
             public CELL Cell
             {
@@ -135,6 +148,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             int cols = 0;
             var blocs = new List<EzBloc>();
 
+            #region 蒐集_CELL_BLOCS
             foreach (var cell in cells)
             {
                 if (cell == null) continue;
@@ -147,10 +161,12 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 rows = Math.Max(rows, cell.CellRow + 1);
                 cols = Math.Max(cols, cell.CellCol + 1);
             }
+            #endregion
 
             var builder = new EzBlocsGridBuilder();
             grid = builder.BuildEmptyGrid(blocs, rows, cols);
 
+            #region 將_CELL_BLOCS_填入_GRID
             foreach (CellBloc bloc in blocs)
             {
                 int r = bloc.Cell.CellRow;
@@ -167,6 +183,26 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 bloc.NonEmptyDesc = bloc.Cell.GetNoTrayDesc();
             }
+            #endregion
+
+            #region 將空缺格點_填入_PLACE_HOLDER
+            //var C = GaMvcConfig.SysModel.ActiveCarrierID;
+            //var camGrid = C == CarrierEnum.C1 ? _xRecipe.xCamGrid1 : _xRecipe.xCamGrid2;
+            //for (int r = 0; r < rows; r++)
+            //{
+            //    for (int c = 0; c < cols; c++)
+            //    {
+            //        var cb = (CellBloc)grid.Get(r, c);
+            //        if (cb == null || cb?.Cell?.chipLocInCamera == null)
+            //        {
+            //            var placeHolder = camGrid.Get(r, c);
+            //            var rect = placeHolder.Rect;
+            //            cb = new CellBloc(cb?.Cell, rect);
+            //            grid.Set(r, c, cb);
+            //        }
+            //    }
+            //}
+            #endregion
         }
         void updateOutGridBlocs(IEnumerable<Rectangle> outGridRects, out IList<EzBloc> outGridBlocs)
         {
@@ -404,13 +440,13 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             foreach (var cBloc in iterNonEmptyBlocs(onGrid: true))
             {
                 var rect = JetEazy.Qcvt.CreateCenterRect((float)cBloc.CenterX, (float)cBloc.CenterY, size.Width, size.Height);
-                var item = new CviRotRectBox(ref rect, Color.Red, 0.10f) { Text = "有料" };
+                var item = new CviRotRectBox(ref rect, Color.Red, 0.25f) { Text = "有料" };
                 _drawItems.Add(item);
             }
             foreach (var cBloc in iterNonEmptyBlocs(onGrid: false))
             {
                 var rect = JetEazy.Qcvt.CreateCenterRect((float)cBloc.CenterX, (float)cBloc.CenterY, size.Width, size.Height);
-                var item = new CviRotRectBox(ref rect, Color.DarkOrange, 0.10f) { Text = "疑似有料" };
+                var item = new CviRotRectBox(ref rect, Color.DarkOrange, 0.25f) { Text = "疑似有料" };
                 _drawItems.Add(item);
             }
         }
@@ -432,14 +468,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     // NG
                     var mvdDrawResultRectF = cell.DrawResultRectF();
-                    var item = new CviRotRectBox(mvdDrawResultRectF.ToBox2D(), Color.Red, 0f) { Text = "NG" };
+                    var item = new CviRotRectBox(mvdDrawResultRectF.ToBox2D(), Color.Red, 0.25f) { Text = "NG" };
                     _drawItems.Add(item);
                 }
                 else
                 {
                     // 吸盤空位
                     var mvdRect = cell.DrawBaseRectFFixSize(false);
-                    var item = new CviRotRectBox(mvdRect.ToBox2D(), Color.Red);
+                    var item = new CviRotRectBox(mvdRect.ToBox2D(), Color.Red, 0.25f);
                     _drawItems.Add(item);
                 }
             }
@@ -536,8 +572,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     {
                         var cell = cellBloc.Cell;
                         var cellRect = Rectangle.Round(cell.viewRectF);
-                        cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
                         base.adjustFetchSize(cellRect.Size);
+                        cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
                         _cviRegionBox = new CviRotRectBox(cellRect, Color.White);
                         _cviRegionBox.Visible = false;
                         return;
@@ -549,9 +585,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             if (_grid != null)
             {
-                foreach (var bloc in _grid.IterBlocs())
+                foreach (var bloc in _grid)
+                {
+                    //var cell = (bloc as CellBloc)?.Cell;
+                    //if (cell != null)
+                    //    yield return bloc;
                     if (bloc != null)
                         yield return bloc;
+                }
             }
         }
         protected override string composeTooltipText(EzBloc cursor, EzBloc cursor2)
@@ -562,8 +603,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             _cviRegionBox.Visible = true;
 
             //string txt = formatDisplayText(cellBloc);
+            string txt = composeTooltipTextTrf(cursor, cursor2);
 
-            string txt = composeTooltipText2(cursor, cursor2);
             return txt;
         }
         #endregion
@@ -714,7 +755,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (TransCameraToWorld == null)
                 TransCameraToWorld = GaMvcConfig.SysModel.TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
         }
-        protected string composeTooltipText2(EzBloc cursor, EzBloc cursor2)
+        protected string composeTooltipTextTrf(EzBloc cursor, EzBloc cursor2)
         {
             if (cursor == null)
                 return "";
@@ -826,20 +867,34 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (bloc == null)
                 return;
 
-            var transformsModel = GaMvcConfig.SysModel.TransformsModel;
-            var res = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, row, col);
-            var dV = res[0];
-            var dErr = res[1];
+            var camPt = bloc.Center;
+            var cell = (bloc as CellBloc)?.Cell;
+            if (cell != null)
+            {
+                camPt.X = cell.xFindResult.fCenterX;
+                camPt.Y = cell.xFindResult.fCenterY;
+            }
 
-            sb.AppendLine();
-            sb.AppendLine($"PLC 補償量 dX = {dV.X:0.000} mm");
-            sb.AppendLine($"PLC 補償量 dY = {dV.Y:0.000} mm");
-            sb.AppendLine();
+            var transformsModel = GaMvcConfig.SysModel.TransformsModel;
+            (var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
+
+            //>>> sb.AppendLine();
             sb.AppendLine($"Phy 變動值 ΔX = {dErr.X:0.000} mm");
             sb.AppendLine($"Phy 變動值 ΔY = {dErr.Y:0.000} mm");
+            sb.AppendLine();
+            sb.AppendLine($"PLC 格點 補償量 dX = {dV.X:0.000} mm");
+            sb.AppendLine($"PLC 格點 補償量 dY = {dV.Y:0.000} mm");
+
+            if (cell != null)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"RunX = {cell.RunX:0.000} mm");
+                sb.AppendLine($"RunY = {cell.RunY:0.000} mm");
+            }
         }
 
         #region DEBUG_TRACE
+#if(OPT_RESERVED)
         void scanSelfErrors(int option)
         {
             //if (IsEmptyTrayMode) return;
@@ -854,9 +909,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 for (int c = 0; c < cols; c++)
                 {
                     var bloc = _grid[r, c];
-                    var res = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, r, c);
-                    var dV = res[0];
-                    var dErr = res[1];
+
+                    (var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, r, c);
 
                     double err;
                     if (option == 0)
@@ -885,6 +939,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             else
                 return new SolidBrush(Color.FromArgb(128, Color.Red));
         }
+#endif
         #endregion
     }
 }
