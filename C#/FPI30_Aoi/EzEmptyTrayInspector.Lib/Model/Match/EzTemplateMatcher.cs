@@ -147,7 +147,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             }
         }
 
-        public EzBloc FindBestBloc(Mat image, Mat golden, IEnumerable<CvPoint> anchorsLeftTop = null)
+        public EzBloc FindBestBloc(Mat image, Mat golden, IEnumerable<CvPoint> anchorsLeftTop = null, Func<Mat, Mat> externFilter = null)
         {
             var boundRect = new Rectangle(0, 0, image.Width, image.Height);
 
@@ -162,7 +162,20 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
                 apply_shrink(golden, image, out golden, out image, garbagesCan);
 
-                apply_filters(golden, image, out golden, out image, garbagesCan);
+                // Filter
+                if (externFilter != null)
+                {
+                    var goldenOld = golden;
+                    var imageOld = image;
+                    golden = externFilter(goldenOld);
+                    image = externFilter(imageOld);
+                    if (golden != goldenOld) goldenOld?.Dispose();
+                    if (image != imageOld) imageOld?.Dispose();
+                }
+                else
+                {
+                    apply_filters(golden, image, out golden, out image, garbagesCan);
+                }
 
                 // Match
                 _NOTIFY("Matching (bestBloc)");

@@ -72,6 +72,7 @@ namespace EzAoiEmptyTrayInspector.Model
             {
                 var old = _cacheGoldenGrid;
                 _cacheGoldenGrid = get_goldenGrid_from_jx();
+                old?.Dispose();
             }
             return _cacheGoldenGrid;
         }
@@ -82,9 +83,12 @@ namespace EzAoiEmptyTrayInspector.Model
         {
             if (_cacheGoldenGrid != grid)
             {
-                _cacheGoldenGrid?.Dispose();
+                //_cacheGoldenGrid?.Dispose();
+                //_cacheGoldenGrid = grid;
+                var old = _cacheGoldenGrid;
                 _cacheGoldenGrid = grid;
                 set_goldenGrid_to_jx(_cacheGoldenGrid);
+                old?.Dispose();
             }
         }
 
