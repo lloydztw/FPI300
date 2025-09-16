@@ -769,15 +769,14 @@ namespace LaserAlignDX.Mvc.Gui
                 return;
 
             var transformsModel = GaMvcConfig.SysModel.TransformsModel;
-            //(var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, row, col);
-            (var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, row, col);
+            (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, row, col);
 
             //sb.AppendLine();
-            sb.AppendLine($"Phy 變動值 ΔX = {dErr.X:0.000} mm");
-            sb.AppendLine($"Phy 變動值 ΔY = {dErr.Y:0.000} mm");
+            sb.AppendLine($"Phy 變動值 ΔX = {worldDelta.X:0.000} mm");
+            sb.AppendLine($"Phy 變動值 ΔY = {worldDelta.Y:0.000} mm");
             sb.AppendLine();
-            sb.AppendLine($"PLC 補償量 dX = {dV.X:0.000} mm");
-            sb.AppendLine($"PLC 補償量 dY = {dV.Y:0.000} mm");
+            sb.AppendLine($"PLC 補償量 dX = {motorDelta.X:0.000} mm");
+            sb.AppendLine($"PLC 補償量 dY = {motorDelta.Y:0.000} mm");
         }
 
         #region DEBUG_TRACE
@@ -796,15 +795,15 @@ namespace LaserAlignDX.Mvc.Gui
                 {
                     var bloc = _grid[r, c];
 
-                    (var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, r, c);
+                    (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, r, c);
 
                     double err;
                     if (option == 0)
-                        err = Math.Abs(dErr.X);
+                        err = Math.Abs(worldDelta.X);
                     else if (option == 1)
-                        err = Math.Abs(dErr.Y);
+                        err = Math.Abs(worldDelta.Y);
                     else if (option == 2)
-                        err = Math.Max(Math.Abs(dErr.X), Math.Abs(dErr.Y));
+                        err = Math.Max(Math.Abs(worldDelta.X), Math.Abs(worldDelta.Y));
                     else
                         err = 0;
                     bloc.SQRatio = err;
