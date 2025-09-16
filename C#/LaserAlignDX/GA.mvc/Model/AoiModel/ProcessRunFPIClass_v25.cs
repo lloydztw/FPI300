@@ -445,7 +445,7 @@ namespace LaserAlignDX.AoiModel.V25
         {
             _PrepareChipMatcher(threadIdx, out IMvdTemplateMatcher chipMatcher);
             _PrepareBoxOverlapTool(threadIdx, out CBoxOverlapTool cBoxOverlapTool);
-            
+
             var fullFovSize = cellsGroup.FullFovRect.Size;
             var debugSB = new StringBuilder();
 
@@ -559,7 +559,7 @@ namespace LaserAlignDX.AoiModel.V25
                         chipLoc.SetCenter((float)chipCentroid.X, (float)chipCentroid.Y);
 
                         CarrierEnum C = _sysModel.ActiveCarrierID;
-                        (var dV, var dErr) = _transformModel.CalcPlcCompensation(C, chipCentroid, cell.CellRow, cell.CellCol);
+                        (var motorDelta, var worldDelta) = _transformModel.CalcPlcCompensation(C, chipCentroid, cell.CellRow, cell.CellCol);
 
                         //var T_CM = transformModel.GetCameraMotorTransform(carrierID, suckerRowID);
                         //var T_CP = transformModel.GetCameraPhysicTransform(carrierID);
@@ -571,15 +571,17 @@ namespace LaserAlignDX.AoiModel.V25
                         double angle = chipLoc.Theta * 180 / Math.PI;
 
                         cell.chipLocInCamera = chipLoc;
-                        cell.RunX = (float)(dV.X + INI.Instance.Cal_Bcx);
-                        cell.RunY = (float)(dV.Y + INI.Instance.Cal_Bcy);
                         cell.RunAngle = (float)(angle + INI.Instance.Cal_Bca);
+                        //cell.RunX = (float)(motorDelta.X + INI.Instance.Cal_Bcx);
+                        //cell.RunY = (float)(motorDelta.Y + INI.Instance.Cal_Bcy);
+                        cell.RunX = (float)(worldDelta.X + INI.Instance.Cal_Bcx);
+                        cell.RunY = (float)(worldDelta.Y + INI.Instance.Cal_Bcy);
 #endif
                         if (xInspect.bOpenLineMeasure)
                         {
                             //_TM.BEGIN("OneChipMeasurement");
 
-                            switch(xInspect.MFLType)
+                            switch (xInspect.MFLType)
                             {
                                 //case Eazy_Project_III.MeasureFindLineType.FindLineType_v2:
                                 //    _Inspect001_One_Chip_Measurement_pairLine(cell, cellBmp, cellRoi, chipMatcher);

@@ -771,14 +771,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                                 bloc.Center;
 
             var transformsModel = GaMvcConfig.SysModel.TransformsModel;
-            (var dV, var dErr) = transformsModel.CalcPlcCompensation(ActiveCarrierID, chipCentroid, row, col);
+            (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(ActiveCarrierID, chipCentroid, row, col);
 
             //>>> sb.AppendLine();
-            sb.AppendLine($"Phy 變動值 ΔX = {dErr.X:0.000} mm");
-            sb.AppendLine($"Phy 變動值 ΔY = {dErr.Y:0.000} mm");
+            sb.AppendLine($"Phy 變動值 ΔX = {worldDelta.X:0.000} mm");
+            sb.AppendLine($"Phy 變動值 ΔY = {worldDelta.Y:0.000} mm");
             sb.AppendLine();
-            sb.AppendLine($"PLC 格點 補償量 dX = {dV.X:0.000} mm");
-            sb.AppendLine($"PLC 格點 補償量 dY = {dV.Y:0.000} mm");
+            sb.AppendLine($"PLC 格點 補償量 dX = {motorDelta.X:0.000} mm");
+            sb.AppendLine($"PLC 格點 補償量 dY = {motorDelta.Y:0.000} mm");
 
             if (cell != null)
             {

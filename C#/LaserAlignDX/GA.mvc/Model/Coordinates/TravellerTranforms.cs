@@ -362,8 +362,9 @@ namespace LaserAlignDX.Model.Coords
 
             //(3) 像測現值 轉換至 World Coords
             var curWorldPt = transCP.Trans(camPt);
-            //(4) 自我轉換的誤差
-            var err = targetWorldPt - curWorldPt;
+
+            //(4) World Coordinates 的差異
+            var worldError = targetWorldPt - curWorldPt;
 
             //(5) 目標值 P 轉換至 Motor Coords
             ITransform transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
@@ -378,9 +379,9 @@ namespace LaserAlignDX.Model.Coords
             //(7) 馬達補償量
             var delta1 = targetMotorPt1 - motorPt1;
             var delta2 = targetMotorPt2 - motorPt2;
-            var delta = (delta1.NormLengthSQ < delta2.NormLengthSQ) ? delta1 : delta2;
+            var motorDelta = (delta1.NormLengthSQ < delta2.NormLengthSQ) ? delta1 : delta2;
 
-            return (delta, err);
+            return (motorDelta, worldError);
         }
 
         #region CHECK_FUNCTIONS
