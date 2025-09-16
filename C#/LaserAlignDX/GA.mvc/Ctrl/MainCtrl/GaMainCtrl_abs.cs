@@ -12,7 +12,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Abs
 {
     public abstract class GaMainCtrl : IxTickable
     {
-        public event EventHandler<MainUIStateChangedEventArgs> OnStateChanged;
+        public event EventHandler<MainUiStateEventArgs> OnStateChanged;
 
         public abstract void Tick();
 
@@ -33,7 +33,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Abs
         #region PROTECTED_HELPER_FUNCTIONS
         protected void FireChangeState(MainS1State status, object tag = null)
         {
-            OnStateChanged?.Invoke(this, new MainUIStateChangedEventArgs(status, tag));
+            OnStateChanged?.Invoke(this, new MainUiStateEventArgs(status, tag));
         }
         protected void _LOG(string msg, Color color)
         {

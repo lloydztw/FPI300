@@ -8,6 +8,7 @@ using JetEazy.FormSpace;
 using JetEazy.UISpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.RunSpace;
+using LaserAlignDX.UISpace;
 using NeedleX.ProcessSpace;
 using PhotoMachine.UISpace;
 using System;
@@ -806,12 +807,18 @@ namespace Traveller106
         {
             MAINUI.BackColor = SystemColors.Control;
             MAINUI.Initial(VERSION, OPTION, MACHINECollection.MACHINE);
-            MAINUI.OnChangeState += MAINUI_OnChangeState;
+            MAINUI.OnStateChanged += MAINUI_OnChangeState;
         }
 
         #region EVENT_HANDLERS
-        private void MAINUI_OnChangeState(MainS1State status, object tag = null)
+        private void MAINUI_OnChangeState(object sender, MainUiStateEventArgs e)
         {
+            if (e == null)
+                return;
+
+            var status = e.Status;
+            var tag = e.Tag;
+
             switch (status)
             {
                 case MainS1State.S1_READY:

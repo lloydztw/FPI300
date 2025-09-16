@@ -395,12 +395,6 @@
     <Compile Include="GA.mvc\Model\JxRecipes\JxRecipeCombo.cs" />
     <Compile Include="GA.mvc\Model\JxRecipes\JxRecipeParaGrid.cs" />
     <Compile Include="GA.mvc\GaMvcPaths.cs" />
-    <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
-      <DependentUpon>MainX3UI_lt.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -649,10 +643,51 @@
     <Compile Include="GA\OPSpace\ResultSpace\JzBaseResultClass.cs" />
     <Compile Include="GA\ProcessSpace\AbsProcess.cs" />
     <Compile Include="GA\ProcessSpace\BaseProcess.cs" />
+    <Compile Include="GA\ProcessSpace\BuzzerProcess.cs" />
+    <Compile Include="GA\ProcessSpace\FocusProcess.cs" />
     <Compile Include="GA\ProcessSpace\LineScanProcess.cs" />
     <Compile Include="GA\ProcessSpace\LineScanSingleProcess.cs" />
+    <Compile Include="GA\ProcessSpace\MainProcess.cs" />
+    <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
     <Compile Include="GA\RunSpace\X2\ProcessRunClass.cs" />
+    <Compile Include="GA\UISpace\MainSpace\MainUiFactory.cs" />
     <Compile Include="GA\UISpace\MainSpace\IMainUI.cs" />
+    <Compile Include="GA\UISpace\MainSpace\MainX1UI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\MainX1UI.Designer.cs">
+      <DependentUpon>MainX1UI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\MainX2UI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\MainX2UI.Designer.cs">
+      <DependentUpon>MainX2UI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\MainX3UI_lt.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\MainX3UI_lt.Designer.cs">
+      <DependentUpon>MainX3UI_lt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\MiniMainUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\MiniMainUI.Designer.cs">
+      <DependentUpon>MiniMainUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\NeedleMainUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\NeedleMainUI.Designer.cs">
+      <DependentUpon>NeedleMainUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\TrackItemUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA\UISpace\MainSpace\TrackItemUI.Designer.cs">
+      <DependentUpon>TrackItemUI.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA\Utils\GaMvdConvertor.cs" />
     <Compile Include="LT\DebugUtil\EzTiming.cs" />
     <Compile Include="LT\DebugUtil\LtDebug.cs" />
@@ -750,9 +785,6 @@
     </Compile>
     <Compile Include="LT\DebugUtil\VxDebugDrawer.cs" />
     <Compile Include="LT\UnitTest\UnitTest_ChipMatcher.cs" />
-    <EmbeddedResource Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.resx">
-      <DependentUpon>MainX3UI_lt.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.resx">
       <DependentUpon>FormCalibrationTool.cs</DependentUpon>
     </EmbeddedResource>
@@ -836,6 +868,24 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\WX\frmMainDX.resx">
       <DependentUpon>frmMainDX.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\UISpace\MainSpace\MainX1UI.resx">
+      <DependentUpon>MainX1UI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\UISpace\MainSpace\MainX2UI.resx">
+      <DependentUpon>MainX2UI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\UISpace\MainSpace\MainX3UI_lt.resx">
+      <DependentUpon>MainX3UI_lt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\UISpace\MainSpace\MiniMainUI.resx">
+      <DependentUpon>MiniMainUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\UISpace\MainSpace\NeedleMainUI.resx">
+      <DependentUpon>NeedleMainUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\UISpace\MainSpace\TrackItemUI.resx">
+      <DependentUpon>TrackItemUI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

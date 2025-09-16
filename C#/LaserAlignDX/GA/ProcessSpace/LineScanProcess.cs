@@ -58,7 +58,7 @@ namespace TravellerMINIX6.ProcessSpace
                 {
                     case 5:
 
-                        FireMessage(new ProcessEventArgs("Record.Start"));
+                        FireStarted(new ProcessEventArgs("Record.Start"));
 
                         switch (Process.RelateString)
                         {
@@ -183,7 +183,7 @@ namespace TravellerMINIX6.ProcessSpace
                                         //  不再使用不安全的 cMvdInput !!!
                                         Bitmap bitmap = IScanCam.GetFreeImageBitmap().ToBitmap();
                                         pRun.LineScanCamImageHolder.TakeOver(bitmap, "LineScanCamera");
-                                        FireLiveImaging(bitmap);
+                                        //FireLiveImaging(bitmap);
                                     }
 
                                     switch(Process.RelateString)
@@ -366,7 +366,7 @@ namespace TravellerMINIX6.ProcessSpace
 
                                 MACHINEx3.PLCIO.iScanResult = 1;
                                 _LOG($"{ToChangeLanguage("发送结果为")}{(m_IsPass ? "PASS" : "FAIL")}", Color.Red);
-                                FireMessage(new ProcessEventArgs("Show.X", $"{(pRun.ElapsedTime * 1.0 / 1000).ToString("0.0")} s"));
+                                FireCompleted(new ProcessEventArgs("Show.X", $"{(pRun.ElapsedTime * 1.0 / 1000).ToString("0.0")} s"));
                             }
                         }
                         break;

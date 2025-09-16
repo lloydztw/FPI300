@@ -1,22 +1,23 @@
 ﻿using JetEazy;
 using LaserAlignDX.UISpace;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using VsCommon.ControlSpace.MachineSpace;
 
 namespace Eazy_Project_III.UISpace
 {
-    public partial class MainControlUI : UserControl
+    public partial class MainControlUI : UserControl, IMainUI
     {
-        public event ChangeStateHandler OnChangeState;
+        public event EventHandler<MainUiStateEventArgs> OnStateChanged;
 
-        //VersionEnum VERSION;
-        //OptionEnum OPTION;
-        //LaserAlignDX.UISpace.MainSpace.MainX1UI mainX1;
-        //LaserAlignDX.UISpace.MainSpace.MainX2UI mainX2;
-        //LaserAlignDX.UISpace.MainSpace.MainX3UI mainX3;
-
-        IMainUI mainUI;
+        ///<summary>
+        ///以下元件改由 MainUiFactory 生成
+        ///<br/> LaserAlignDX.UISpace.MainSpace.MainX1UI mainX1;
+        ///<br/> LaserAlignDX.UISpace.MainSpace.MainX2UI mainX2;
+        ///<br/> LaserAlignDX.UISpace.MainSpace.MainX3UI mainX3;
+        ///</summary>
+        IMainUI _mainUI;
 
         public MainControlUI()
         {
@@ -25,53 +26,43 @@ namespace Eazy_Project_III.UISpace
 
         public void Initial(VersionEnum version, OptionEnum option, GeoMachineClass machine)
         {
-            mainUI = createMainUI(version, option, machine);
-            if (mainUI != null)
+            //-------------------------------------------------------------------
+            // 把所有 MainXxUI 抽出共通 Interface, 並把生成的代碼集中至此,
+            // version + option 的 switch case 在此寫一次就好,
+            // 不要凌亂的散落各處.
+            //-------------------------------------------------------------------
+
+            _mainUI = MainUiFactory.CreateMainUI(version, option, machine);
+
+            if (_mainUI != null)
             {
-                mainUI.Init();
-                mainUI.Window.Location = new Point(0, 0);
-                this.Controls.Add(mainUI.Window);
-                mainUI.Window.Dock = DockStyle.Fill;
-                mainUI.OnChangeState += OnFireChangeState;
+                _mainUI.Init();
+                _mainUI.Window.Location = new Point(0, 0);
+                this.Controls.Add(_mainUI.Window);
+                _mainUI.Window.Dock = DockStyle.Fill;
+                _mainUI.OnStateChanged += (s, e) => FireChangeState(s, e);
             }
         }
 
-        IMainUI createMainUI(VersionEnum version, OptionEnum option, GeoMachineClass machine)
+        #region IMainUI_實作
+        Control IMainUI.Window => this;
+        void IMainUI.Init()
         {
-            // 抽出共通的 Interface IMainUI ,
-            // switch case 集中在此寫一次就好.
-            // 不要散亂在各處
-
-            switch (version)
-            {
-                case VersionEnum.LASER:
-                    switch (option)
-                    {
-                        //case OptionEnum.MAIN_X1:
-                        //    return new LaserAlignDX.UISpace.MainSpace.MainX1UI();
-                        case OptionEnum.MAIN_FPIX3:
-                            return new LaserAlignDX.UISpace.MainSpace.MainX3UI();
-                    }
-                    break;
-                case VersionEnum.AOI:
-                    //switch (option)
-                    //{
-                    //    case OptionEnum.MAIN_X2:
-                    //        return new LaserAlignDX.UISpace.MainSpace.MainX2UI();
-                    //}
-                    break;
-            }
-            return null;
         }
+        #endregion
 
+        #region NOT_USED_CODE
+#if (false)
         private void OnFireChangeState(MainS1State status, object tag = null)
         {
-            FireChangeState(status, tag);
+            FireChangeState(this, new MainUIStateChangedEventArgs(status, tag));
         }
         private void UI_OnChangeState(MainS1State status)
         {
-            FireChangeState(status);
+            FireChangeState(this, new MainUIStateChangedEventArgs(status, null));
         }
+#endif
+        #endregion
 
         public void Close()
         {
@@ -115,7 +106,7 @@ namespace Eazy_Project_III.UISpace
             //        break;
             //}
 
-            mainUI?.SetEnable(isenable);
+            _mainUI?.SetEnable(isenable);
         }
         public void SetEnableState(bool isenable)
         {
@@ -142,7 +133,7 @@ namespace Eazy_Project_III.UISpace
             //        break;
             //}
 
-            mainUI?.SetEnableState(isenable);
+            _mainUI?.SetEnableState(isenable);
         }
         public void ChangeRecipe()
         {
@@ -158,9 +149,8 @@ namespace Eazy_Project_III.UISpace
             //        break;
             //}
 
-            mainUI?.ChangeRecipe();
+            _mainUI?.ChangeRecipe();
         }
-
         public void Tick()
         {
             //switch (VERSION)
@@ -186,15 +176,12 @@ namespace Eazy_Project_III.UISpace
             //        break;
             //}
 
-            mainUI?.Tick();
+            _mainUI?.Tick();
         }
 
-        protected void FireChangeState(MainS1State status, object tag = null)
+        protected void FireChangeState(object sender, MainUiStateEventArgs e)
         {
-            if (OnChangeState != null)
-            {
-                OnChangeState(status, tag);
-            }
+            OnStateChanged?.Invoke(sender, e);
         }
     }
 }

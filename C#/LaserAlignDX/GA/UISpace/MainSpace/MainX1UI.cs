@@ -1,49 +1,36 @@
 ﻿using Common.RecipeSpace;
 using Eazy_Project_III;
-using FreeImageAPI;
 using JetEazy.BasicSpace;
-using JetEazy.ControlSpace;
-using JetEazy;
+using JetEazy.DBSpace;
 using JzDisplay;
+using LaserAlignDX.BasicSpace;
+using MoveGraphLibrary;
 using NeedleX.ProcessSpace;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
+using System.Drawing.Imaging;
+using System.IO;
 //using System.Reflection.Emit;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-//using Traveller106;
-using TravellerMINIX6.OPSpace;
-using TravellerMINIX6.ProcessSpace;
-using TravellerMINIX6.UISpace.MainSpace;
-using VsCommon.ControlSpace.IOSpace;
-using JetEazy.DBSpace;
-using VsCommon.ControlSpace.MachineSpace;
-using VsCommon.ControlSpace;
-using AForge.Imaging.Filters;
-using JetEazy.UISpace;
-using PhotoMachine.UISpace;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
-using LaserAlignDX.BasicSpace;
-using MoveGraphLibrary;
-using WorldOfMoveableObjects;
 using Traveller106;
-using JetEazy.FormSpace;
-using OpenCvSharp.Flann;
-using System.IO;
-using System.Drawing.Imaging;
+//using Traveller106;
+using TravellerMINIX6.ProcessSpace;
+using VsCommon.ControlSpace;
+using VsCommon.ControlSpace.MachineSpace;
+using WorldOfMoveableObjects;
 //using Universal = Traveller106.Universal;
+
 
 namespace LaserAlignDX.UISpace.MainSpace
 {
     public partial class MainX1UI : UserControl, IMainUI
     {
-        Mover myMover = new Mover();
+        public event EventHandler<MainUiStateEventArgs> OnStateChanged;
 
+        #region PRIVATE_MEMBERS
+        Mover myMover = new Mover();
         Button btnSoftwareReady;
         Label lblState;
         bool m_plcLineStartOld = false;
@@ -78,7 +65,6 @@ namespace LaserAlignDX.UISpace.MainSpace
             }
         }
 
-
         JetEazy.VersionEnum VERSION
         {
             get
@@ -93,11 +79,14 @@ namespace LaserAlignDX.UISpace.MainSpace
                 return Traveller106.Universal.OPTION;
             }
         }
+        #endregion
 
         public MainX1UI()
         {
             InitializeComponent();
         }
+
+        public Control Window => this;
 
         public void Init()
         {
@@ -625,14 +614,15 @@ namespace LaserAlignDX.UISpace.MainSpace
             //DS3.DefaultView();
         }
 
-        public delegate void ChangeStateHandler(MainS1State status,object tag=null);
-        public event ChangeStateHandler OnChangeState;
+        //----------------------------------------------------------------------------------
+        //以下改用標準 EventHandler 與 EventArgs
+        //----------------------------------------------------------------------------------
+        //public delegate void ChangeStateHandler(MainS1State status,object tag=null);
+        //public event ChangeStateHandler OnChangeState;
+        //----------------------------------------------------------------------------------
         protected void FireChangeState(MainS1State status, object tag = null)
         {
-            if (OnChangeState != null)
-            {
-                OnChangeState(status, tag);
-            }
+            OnStateChanged?.Invoke(this, new MainUiStateEventArgs(status, tag));
         }
 
         private string ToChangeLanguage(string eText)

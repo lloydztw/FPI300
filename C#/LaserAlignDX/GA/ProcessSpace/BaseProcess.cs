@@ -263,7 +263,7 @@ namespace NeedleX.ProcessSpace
         #endregion
 
         #region COMMON_MACHINE_FUCTIONS_FOR_STATION_3
-#if (NOT_USED)
+#if (true)
         protected void SetNormalLight()
         {
             //MACHINE.PLCIO.ADR_RED = false;

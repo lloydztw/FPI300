@@ -1,6 +1,4 @@
-﻿using Common.RecipeSpace;
-using Eazy_Project_III;
-using FreeImageAPI;
+﻿using Eazy_Project_III;
 using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.ControlSpace;
@@ -8,22 +6,12 @@ using JetEazy.DBSpace;
 using JzDisplay;
 using NeedleX.ProcessSpace;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Traveller106;
-using Traveller106.FormSpace;
-using TravellerMINIX6.OPSpace;
 using TravellerMINIX6.ProcessSpace;
-using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.IOSpace;
 using VsCommon.ControlSpace.MachineSpace;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 using Universal = Traveller106.Universal;
 
 namespace TravellerMINIX6.UISpace.MainSpace
@@ -50,6 +38,7 @@ namespace TravellerMINIX6.UISpace.MainSpace
         //        return Traveller106.Universal.MACHINECollection;
         //    }
         //}
+
         protected MiniX6MachineClass MACHINE
         {
             get { return (MiniX6MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }

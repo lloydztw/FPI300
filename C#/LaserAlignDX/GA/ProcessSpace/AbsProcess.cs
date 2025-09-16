@@ -40,6 +40,7 @@ namespace NeedleX.ProcessSpace
         //>>> public event EventHandler OnStateChanged;
         public event EventHandler<ProcessEventArgs> OnNG;
         public event EventHandler<ProcessEventArgs> OnMessage;
+        public event EventHandler<ProcessEventArgs> OnStarted;
         public event EventHandler<ProcessEventArgs> OnCompleted;
         public event EventHandler<ProcessEventArgs> OnLiveImage;
 
@@ -102,6 +103,10 @@ namespace NeedleX.ProcessSpace
         protected void FireMessage(ProcessEventArgs e)
         {
             OnMessage?.Invoke(this, e);
+        }
+        protected void FireStarted(ProcessEventArgs e = null)
+        {
+            OnStarted?.Invoke(this, e);
         }
         protected void FireCompleted(ProcessEventArgs e = null)
         {
