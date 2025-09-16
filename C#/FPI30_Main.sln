@@ -18,8 +18,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".ReadMe", ".ReadMe", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		ReadMe.md = ReadMe.md
-		ReadMe_errors_list.md = ReadMe_errors_list.md
 		Readme_QA.md = Readme_QA.md
+		ReadMe_History.md = ReadMe_History.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzAoiEmptyTrayInspector.TestDemo", "FPI30_Aoi\EzEmptyTrayInspector.TestDemo\EzAoiEmptyTrayInspector.TestDemo.csproj", "{8A30A4F2-222A-498B-9565-6E50103ABF4B}"

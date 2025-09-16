@@ -689,8 +689,6 @@
       <DependentUpon>TrackItemUI.cs</DependentUpon>
     </Compile>
     <Compile Include="GA\Utils\GaMvdConvertor.cs" />
-    <Compile Include="LT\DebugUtil\EzTiming.cs" />
-    <Compile Include="LT\DebugUtil\LtDebug.cs" />
     <Compile Include="LT\LtAoiFactory.cs" />
     <Compile Include="GA\Utils\GaImageUtil.cs" />
     <Compile Include="GA\Utils\GaUtil.cs" />
@@ -783,7 +781,6 @@
     <Compile Include="GA\UISpace\UIMVC\View\PosUI.Designer.cs">
       <DependentUpon>PosUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="LT\DebugUtil\VxDebugDrawer.cs" />
     <Compile Include="LT\UnitTest\UnitTest_ChipMatcher.cs" />
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.resx">
       <DependentUpon>FormCalibrationTool.cs</DependentUpon>

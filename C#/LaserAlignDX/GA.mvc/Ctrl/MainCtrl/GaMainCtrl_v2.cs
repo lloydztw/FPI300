@@ -1,4 +1,20 @@
-﻿using AUVision;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-09-11 開始適用於 2.6.x.x 以後的版本
+ *      2025-08-29 開始準備重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using AUVision;
 using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
 using JetEazy.BasicSpace;
@@ -12,6 +28,7 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
 using LaserAlignDX.UISpace.UIMVC;
 using NeedleX.ProcessSpace;
+using OpenCvSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -197,6 +214,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         private void OnAoiProcess_Started(object sender, ProcessEventArgs e)
         {
             FireChangeState(MainS1State.LS_START);
+            ActiveViewer.Reset();
         }
         private void OnAoiProcess_Completed(object sender, ProcessEventArgs e)
         {
@@ -389,12 +407,41 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         {
             if (Universal.IsNoUseIO)
             {
-                mxSimPlcStageID(targetID);
-                mxReadPlcStageID(out var activeID);
-                updateCarrierID(activeID);              // By Simulation
+                simulateChangeStage(targetID);
             }
             bool ok = _activeCarrierID == targetID;
             return ok;
+        }
+        void simulateChangeStage(CarrierEnum targetID)
+        {
+            if (Universal.IsNoUseIO)
+            {
+                var oldID = _activeCarrierID;
+                if (oldID == targetID)
+                    return;
+
+                mxSimPlcStageID(targetID);
+                mxReadPlcStageID(out var activeID);
+                updateActiveCarrierID(activeID);              //@<<< Simulation
+
+                //-----------------------------------------------------------------------
+                // 【模擬】
+                //  因為 AOI 計算都是使用 _lineScanImageHolder
+                //  所以必須 把 ActiveViewer 的 Image
+                //  載回到 _lineScanImageHolder
+                //-----------------------------------------------------------------------
+                if (ActiveViewer.HasImage() && !_lineScanImageHolder.IsEmpty())
+                {
+                    var matViewer = (ActiveViewer as JezChipCellsViewPanel)?.MatViewer;
+                    var img = matViewer?.Image;
+                    if (img != null)
+                    {
+                        var srcName = _lineScanImageHolder.SrcName;
+                        var bmp = BitmapConverter.ToBitmap(img);
+                        _lineScanImageHolder.TakeOver(bmp, srcName);
+                    }
+                }
+            }
         }
         bool promptCheckBusy()
         {
@@ -426,7 +473,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
         }
-        void updateCarrierID(CarrierEnum carrierID, bool force = false)
+        void updateActiveCarrierID(CarrierEnum carrierID, bool force = false)
         {
             if (_activeCarrierID != carrierID || force)
             {
@@ -449,7 +496,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
 
             // 從 PLC 讀取 指定的 載台號
             mxReadPlcStageID(out var carrierID);
-            updateCarrierID(carrierID);             //by PLC Tick
+            updateActiveCarrierID(carrierID);             //@<<< PLC Tick
         }
 
         void CGOperate()
@@ -461,9 +508,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
     }
 
 
-    //------------------------------------------
-    // 準備分離 PlcFlyCameraCtrl
-    //------------------------------------------
+    //---------------------------------------------
+    // 以下代碼, 準備分離成獨立的 PlcFlyCameraCtrl
+    //---------------------------------------------
     partial class GaMainCtrl
     {
         #region GUI_MEMBERS
