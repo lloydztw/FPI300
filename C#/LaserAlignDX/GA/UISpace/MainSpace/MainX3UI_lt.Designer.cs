@@ -56,7 +56,7 @@
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
             this.tabControl1.Size = new System.Drawing.Size(690, 999);
@@ -66,9 +66,8 @@
             // 
             this.tabPage1.Controls.Add(this.tableLayoutPanel2);
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(4);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(4);
             this.tabPage1.Size = new System.Drawing.Size(682, 970);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "主界面";
@@ -83,39 +82,39 @@
             this.tableLayoutPanel2.Controls.Add(this.mvsui2, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.mvsui1, 0, 0);
             this.tableLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel2.Location = new System.Drawing.Point(4, 4);
-            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(4);
+            this.tableLayoutPanel2.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.Size = new System.Drawing.Size(674, 962);
+            this.tableLayoutPanel2.Size = new System.Drawing.Size(682, 970);
             this.tableLayoutPanel2.TabIndex = 21;
             // 
             // mvsui2
             // 
             this.mvsui2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mvsui2.Location = new System.Drawing.Point(342, 5);
-            this.mvsui2.Margin = new System.Windows.Forms.Padding(5);
+            this.mvsui2.Location = new System.Drawing.Point(342, 1);
+            this.mvsui2.Margin = new System.Windows.Forms.Padding(1);
             this.mvsui2.Name = "mvsui2";
-            this.mvsui2.Size = new System.Drawing.Size(327, 952);
+            this.mvsui2.Size = new System.Drawing.Size(339, 968);
             this.mvsui2.TabIndex = 3;
             // 
             // mvsui1
             // 
             this.mvsui1.BackColor = System.Drawing.Color.Black;
             this.mvsui1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mvsui1.Location = new System.Drawing.Point(5, 5);
-            this.mvsui1.Margin = new System.Windows.Forms.Padding(5);
+            this.mvsui1.Location = new System.Drawing.Point(1, 1);
+            this.mvsui1.Margin = new System.Windows.Forms.Padding(1);
             this.mvsui1.Name = "mvsui1";
-            this.mvsui1.Size = new System.Drawing.Size(327, 952);
+            this.mvsui1.Size = new System.Drawing.Size(339, 968);
             this.mvsui1.TabIndex = 2;
             // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.groupBox1);
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(0, 8, 0, 0);
             this.tabPage2.Size = new System.Drawing.Size(682, 970);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "日志";
@@ -125,11 +124,11 @@
             // 
             this.groupBox1.Controls.Add(this.richTextBox1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(0, 0);
+            this.groupBox1.Location = new System.Drawing.Point(0, 8);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(682, 970);
+            this.groupBox1.Size = new System.Drawing.Size(682, 962);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "日志记录";
@@ -140,7 +139,7 @@
             this.richTextBox1.Location = new System.Drawing.Point(4, 22);
             this.richTextBox1.Margin = new System.Windows.Forms.Padding(4);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(674, 944);
+            this.richTextBox1.Size = new System.Drawing.Size(674, 936);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
@@ -150,10 +149,11 @@
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.label1.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.label1.Location = new System.Drawing.Point(4, 0);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(3, 1);
+            this.label1.Margin = new System.Windows.Forms.Padding(3, 1, 3, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(328, 22);
+            this.label1.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
+            this.label1.Size = new System.Drawing.Size(330, 21);
             this.label1.TabIndex = 20;
             this.label1.Text = "飞拍序号:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
