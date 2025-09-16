@@ -138,7 +138,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             // FLY CAMERA Display UI
             Attach(DsFlys, lblFlyCameraSerialNo);
 
-            _wndOwner.HandleCreated += (s, e) => _wndOwner.BeginInvoke(new Action(() => _LOG("GaMailCtrl [V2]", Color.Blue)));
+            _wndOwner.HandleCreated += (s, e) =>
+            {
+                _wndOwner.BeginInvoke(new Action(() => _LOG("GaMailCtrl [V2]", Color.Blue)));
+                _wndOwner.BeginInvoke(new Action(() => _LOG($"參數資料夾 = {Traveller106.Universal.MAINPATH}", Color.Blue)));
+            };
 
             // Processes
             InitEventHandlers();
