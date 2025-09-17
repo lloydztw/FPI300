@@ -1,4 +1,5 @@
-﻿using Common.RecipeSpace;
+﻿using AUVision;
+using Common.RecipeSpace;
 using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
 using JetEazy.BasicSpace;
@@ -33,6 +34,7 @@ using Traveller106;
 using TravellerMINIX6.ProcessSpace;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
+using VisionDesigner.PositionFix;
 using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
@@ -50,7 +52,7 @@ namespace LaserAlignDX.UISpace.MainSpace
         }
         protected MainFPIX3MachineClass MACHINE
         {
-            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
+            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
         }
 
         const int FLYCOUNT = 4;
@@ -104,6 +106,18 @@ namespace LaserAlignDX.UISpace.MainSpace
                     return mvsui2;
                 }
                 return mvsui1;
+            }
+        }
+        PointF[] FlyOffsetUseStage
+        {
+            get
+            {
+                int iscanIndex = MACHINE.PLCIO.iScanStage;
+                if (iscanIndex == 2)
+                {
+                    return xFlyPara.ptsOffset2;
+                }
+                return xFlyPara.ptsOffset;
             }
         }
 
@@ -165,11 +179,28 @@ namespace LaserAlignDX.UISpace.MainSpace
 
             IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
 
+            HandleDestroyed += (s, e) => IxFlyAreaCam?.StopGrab();
+        }
+
+        private void DSFly0_DoubleClick(object sender, EventArgs e)
+        {
+            
         }
 
         private void LblNumberStr_DoubleClick(object sender, EventArgs e)
         {
             bytesFlyDatas.Clear();
+
+            if (Traveller106.Universal.IsNoUseCCD)
+            {
+                string _flyfilenamepath = JzToolsClass.OpenFilePicker("JPEG Files (*.jpeg)|*.JPEG| + All files (*.*)|*.*", "");
+                if (!string.IsNullOrEmpty(_flyfilenamepath))
+                {
+                    Bitmap bmp = new Bitmap(_flyfilenamepath);
+                    flyProcessPro(1, 0, bmp);
+                    bmp.Dispose();
+                }
+            }
         }
 
         List<byte[]> bytesFlyDatas = new List<byte[]>();
@@ -183,7 +214,11 @@ namespace LaserAlignDX.UISpace.MainSpace
                 return;
             }
 
-            if (MACHINE.PLCIO.bFlyReady)
+            var plcIO = MACHINE?.PLCIO;
+            if (plcIO == null)
+                return;
+
+            if (plcIO.bFlyReady)
             {
                 //转换图像
                 byte[] bmpbytes = new byte[cameraFrame.uBytes];
@@ -195,18 +230,18 @@ namespace LaserAlignDX.UISpace.MainSpace
                 }));
                 if (bytesFlyDatas.Count >= 4)
                 {
-                    MACHINE.PLCIO.bFlyReady = false;
+                    plcIO.bFlyReady = false;
 
-                    int iflystartindex = MACHINE.PLCIO.iFlyStart;
+                    int iflystartindex = plcIO.iFlyStart;
                     iFlyIndex = 3;
                     flyRunning(iflystartindex, cameraFrame);
 
-                    //MACHINE.PLCIO.bFlyDone = true;
+                    //plcIO.bFlyDone = true;
 
-                    MACHINE.PLCIO.iFlyResult(iFlyResult);
-                    MACHINE.PLCIO.rOffset(iFlyOffset);
+                    plcIO.iFlyResult(iFlyResult);
+                    plcIO.rOffset(iFlyOffset);
 
-                    MACHINE.PLCIO.bFlyDone = true;
+                    plcIO.bFlyDone = true;
 
                     bytesFlyDatas.Clear();
 
@@ -227,7 +262,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                     }
                     _LOG("iFlyOffset:" + sb1.ToString(), Color.Black);
 
-                    MACHINE.PLCIO.bFlyReady = true;
+                    plcIO.bFlyReady = true;
                 }
             }
         }
@@ -318,6 +353,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                 iShowIndex++;
             }
         }
+#if(NO_USE_CODE)
         void flyProcess(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
         {
             flystopwatch.Restart();
@@ -455,7 +491,7 @@ namespace LaserAlignDX.UISpace.MainSpace
             //    cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
             //}
         }
-        void flyProcessPro(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, byte[] eBytes)
+        void flyProcessProBAK01(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, byte[] eBytes)
         {
             flystopwatch.Restart();
             ////转换图像
@@ -543,8 +579,20 @@ namespace LaserAlignDX.UISpace.MainSpace
             flystopwatch.Stop();
             long ms = flystopwatch.ElapsedMilliseconds;
 
+            //转正的图形
+            var _MatchResult = xRecipe.mvdprintFlytemp_Find.xResults[0];
+            _MatchResult.fCenterX += _rectF.X;
+            _MatchResult.fCenterY += _rectF.Y;
+            var RectangleShapeBase
+                = new CMvdRectangleF(centerOrg.X, centerOrg.Y, _rectF.Width, _rectF.Height);
             var RectangleShape
-                = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
+                   = PositionFixRun(RectangleShapeBase,
+                                    new RectangleF(0, 0, _rectF.Width, _rectF.Height),
+                                    new Rectangle(0, 0, bmpFlyOperate.Width, bmpFlyOperate.Height),
+                                    _MatchResult) as CMvdRectangleF;
+
+            //var RectangleShape
+            //    = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
             if (iFlyResult[flyIndex] == 1)
                 RectangleShape.BorderColor = new MVD_COLOR(0, 255, 0);
             else
@@ -592,6 +640,206 @@ namespace LaserAlignDX.UISpace.MainSpace
                     break;
                 case 3:
                     DSFly3.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    //DSFly3.mvdRenderActivex1.AddShape(cMvdTextF);
+                    DSFly3.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    DSFly3.mvdRenderActivex1.AddShape(RectangleShape);
+                    DSFly3.AddCross();
+                    DSFly3.mvdRenderActivex1.Display();
+                    break;
+            }
+
+            if (INI.Instance.IsSaveDebugBMP)
+            {
+                string flypath = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{m_StripId}";
+                if (!Directory.Exists(flypath))
+                    Directory.CreateDirectory(flypath);
+                string flyname = $"{m_LotId}-[{flyShowIndex.ToString()}]-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.jpg";
+                cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
+            }
+        }
+#endif
+        void flyProcessPro(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, byte[] eBytes)
+        {
+            int iw = cameraFrame.iWidth;
+            int ih = cameraFrame.iHeight;
+            flyProcessPro(flyStart, flyIndex, ConvertFromMONO(eBytes, iw, ih));
+        }
+        void flyProcessPro(int flyStart, int flyIndex, Bitmap bmpInput)
+        {
+            flystopwatch.Restart();
+            bmpFlyOperate.Dispose();
+            bmpFlyOperate = bmpInput;
+            RectangleF _rectF = new RectangleF(
+                xRecipe.xRectRegionPrintFly.X,
+                xRecipe.xRectRegionPrintFly.Y,
+                xRecipe.xRectRegionPrintFly.Width,
+                xRecipe.xRectRegionPrintFly.Height);
+            _rectF.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
+            BoundRect(ref _rectF, bmpFlyOperate.Size);
+            Bitmap bmptemp = bmpFlyOperate.Clone(_rectF, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+            int iret = xRecipe.PrintTempFlyRun(bmptemp);
+            PointF centerOrg = new PointF(xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
+                xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
+            PointF centerRun = new PointF(xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
+                xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
+
+            float _resolutionFly = INI.Instance.FlyImageResolution;
+
+            int flyShowIndex = flyIndex + 1;
+            switch (flyStart)
+            {
+                case 1:
+                    flyShowIndex = flyIndex + 1;
+                    break;
+                case 2:
+                    flyShowIndex = flyIndex + 1 + 4;
+                    break;
+            }
+
+            switch (flyStart)
+            {
+                case 1:
+
+                    iFlyResult[flyIndex] = (iret == 0 ? 1 : 2);
+                    if (iret == 0)
+                    {
+                        centerRun = new PointF(xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterX + _rectF.X,
+                           xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + _rectF.Y);
+
+                        //算出的pix需加入解析度
+                        iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
+                        iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
+                        iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
+                    }
+                    else
+                    {
+                        iFlyOffset[flyIndex * 3 + 0] = 0;
+                        iFlyOffset[flyIndex * 3 + 1] = 0;
+                        iFlyOffset[flyIndex * 3 + 2] = 0;
+                    }
+
+                    break;
+                case 2:
+
+                    iFlyResult[flyIndex] = (iret == 0 ? 1 : 2);
+                    if (iret == 0)
+                    {
+                        centerRun = new PointF(xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterX + _rectF.X,
+                          xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + _rectF.Y);
+
+                        //算出的pix需加入解析度
+                        iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
+                        iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
+                        iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
+                    }
+                    else
+                    {
+                        iFlyOffset[flyIndex * 3 + 0] = 0;
+                        iFlyOffset[flyIndex * 3 + 1] = 0;
+                        iFlyOffset[flyIndex * 3 + 2] = 0;
+                    }
+
+                    break;
+            }
+
+            CMvdImage cMvdImage = EzMvdImageConvertor.BitmapToCMvdImage(bmpFlyOperate);
+
+            flystopwatch.Stop();
+            long ms = flystopwatch.ElapsedMilliseconds;
+
+            var RectangleShape
+                = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
+            if (iFlyResult[flyIndex] == 1)
+            {
+                //转正的图形
+                var _MatchResult = xRecipe.mvdprintFlytemp_Find.xResults[0];
+                //_MatchResult.fCenterX += _rectF.X;
+                //_MatchResult.fCenterY += _rectF.Y;
+                var RectangleShapeBase
+                    = new CMvdRectangleF(xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
+                                         xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2,
+                                         xRecipe.xRectRegionPrintFly.Width,
+                                         xRecipe.xRectRegionPrintFly.Height);
+
+                //RectangleShapeBase
+                //    = new CMvdRectangleF(0,
+                //                         0,
+                //                         xRecipe.xRectRegionPrintFly.Width,
+                //                         xRecipe.xRectRegionPrintFly.Height);
+                RectangleShape
+                       = PositionFixRun(RectangleShapeBase,
+                                        xRecipe.xRectRegionPrintFly,
+                                        new Rectangle(0, 0, bmpFlyOperate.Width, bmpFlyOperate.Height),
+                                        _MatchResult) as CMvdRectangleF;
+
+                RectangleShape.CenterX += _rectF.X;
+                RectangleShape.CenterY += _rectF.Y;
+            }
+
+            //var RectangleShape
+            //    = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
+            if (iFlyResult[flyIndex] == 1)
+                RectangleShape.BorderColor = new MVD_COLOR(0, 255, 0);
+            else
+                RectangleShape.BorderColor = new MVD_COLOR(255, 0, 0);
+
+            //CMvdTextF cMvdTextF = new CMvdTextF(100, 100, $"耗时:{ms.ToString("0.00")} ms");
+            //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
+            //cMvdTextF.FontWidth = 20;
+            //添加十字线
+            CMvdLineSegmentF v1 = new CMvdLineSegmentF(new MVD_POINT_F(0, bmpFlyOperate.Height / 2),
+                new MVD_POINT_F(bmpFlyOperate.Width, bmpFlyOperate.Height / 2));
+            v1.BorderColor = new MVD_COLOR(255, 215, 0);
+            v1.BorderWidth = 1;
+            CMvdLineSegmentF h1 = new CMvdLineSegmentF(new MVD_POINT_F(bmpFlyOperate.Width / 2, 0),
+                new MVD_POINT_F(bmpFlyOperate.Width / 2, bmpFlyOperate.Height));
+            h1.BorderColor = new MVD_COLOR(255, 215, 0);
+            h1.BorderWidth = 1;
+
+            CMvdTextF cMvdTextFResult = new CMvdTextF(RectangleShape.CenterX,
+                RectangleShape.CenterY,
+                $"[{flyShowIndex}] x:{iFlyOffset[flyIndex * 3 + 0].ToString("0.000")}," +
+                $"y:{iFlyOffset[flyIndex * 3 + 1].ToString("0.000")}," +
+                $"a:{iFlyOffset[flyIndex * 3 + 2].ToString("0.000")}");
+            cMvdTextFResult.BorderColor = new MVD_COLOR(0, 255, 0);
+            cMvdTextFResult.FontWidth = 20;
+
+            switch (flyIndex)
+            {
+                case 0:
+                    DSFly0.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    DSFly0.mvdRenderActivex1.AddShape(v1);
+                    DSFly0.mvdRenderActivex1.AddShape(h1);
+                    //DSFly0.mvdRenderActivex1.AddShape(cMvdTextF);
+                    DSFly0.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    DSFly0.mvdRenderActivex1.AddShape(RectangleShape);
+                    DSFly0.AddCross();
+                    DSFly0.mvdRenderActivex1.Display();
+                    break;
+                case 1:
+                    DSFly1.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    DSFly1.mvdRenderActivex1.AddShape(v1);
+                    DSFly1.mvdRenderActivex1.AddShape(h1);
+                    //DSFly1.mvdRenderActivex1.AddShape(cMvdTextF);
+                    DSFly1.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    DSFly1.mvdRenderActivex1.AddShape(RectangleShape);
+                    DSFly1.AddCross();
+                    DSFly1.mvdRenderActivex1.Display();
+                    break;
+                case 2:
+                    DSFly2.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    DSFly2.mvdRenderActivex1.AddShape(v1);
+                    DSFly2.mvdRenderActivex1.AddShape(h1);
+                    //DSFly2.mvdRenderActivex1.AddShape(cMvdTextF);
+                    DSFly2.mvdRenderActivex1.AddShape(cMvdTextFResult);
+                    DSFly2.mvdRenderActivex1.AddShape(RectangleShape);
+                    DSFly2.AddCross();
+                    DSFly2.mvdRenderActivex1.Display();
+                    break;
+                case 3:
+                    DSFly3.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
+                    DSFly3.mvdRenderActivex1.AddShape(v1);
+                    DSFly3.mvdRenderActivex1.AddShape(h1);
                     //DSFly3.mvdRenderActivex1.AddShape(cMvdTextF);
                     DSFly3.mvdRenderActivex1.AddShape(cMvdTextFResult);
                     DSFly3.mvdRenderActivex1.AddShape(RectangleShape);
@@ -813,6 +1061,44 @@ namespace LaserAlignDX.UISpace.MainSpace
 
             return bitmap;
         }
+        VisionDesigner.PositionFix.CPositionFixTool cPositionFixToolObj = null;
+        /// <summary>
+        /// 计算修正后的位置框
+        /// </summary>
+        /// <param name="eMVDInput">输入转换的形状</param>
+        /// <param name="templateRectF">模板尺寸</param>
+        /// <param name="runRect">输入图片尺寸</param>
+        /// <param name="templateRunResult">定位的结果</param>
+        /// <returns>返回位置的形状</returns>
+        public CMvdShape PositionFixRun(CMvdShape eMVDInput, RectangleF templateRectF, Rectangle runRect, xFindResult templateRunResult)
+        {
+            // CreateInstance
+            if (cPositionFixToolObj == null)
+                cPositionFixToolObj = new CPositionFixTool();
+
+            // Set basic parameter
+
+            cPositionFixToolObj.BasicParam.BasePoint
+                = new VisionDesigner.PositionFix.MVD_FIDUCIAL_POINT_F(
+                    new MVD_POINT_F(templateRectF.X + templateRectF.Width / 2, templateRectF.Y + templateRectF.Height / 2), 0);
+
+            cPositionFixToolObj.BasicParam.RunningPoint
+                = new VisionDesigner.PositionFix.MVD_FIDUCIAL_POINT_F(
+                    new MVD_POINT_F(templateRunResult.fCenterX, templateRunResult.fCenterY), templateRunResult.fAngle);
+
+            cPositionFixToolObj.BasicParam.RunImageSize = new MVD_SIZE_I(runRect.Width, runRect.Height);
+
+            cPositionFixToolObj.BasicParam.FixMode = MVD_POSFIX_MODE.MVD_POSFIX_MODE_HVA;
+
+            cPositionFixToolObj.BasicParam.InitialShape = eMVDInput;
+
+            // Running
+
+            cPositionFixToolObj.Run();
+
+            // Get the result
+            return cPositionFixToolObj.Result.CorrectedShape;
+        }
 
         #endregion
 
@@ -936,7 +1222,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                         {
                             case ScanInspectMode.NOTRAY:
                                 //填写数据 疑似有料
-                                //try
+                                try
                                 {
                                     string strNoTray = cell.GetNoTrayDesc();
                                     if (!string.IsNullOrEmpty(strNoTray))
@@ -957,12 +1243,12 @@ namespace LaserAlignDX.UISpace.MainSpace
                                         DSMain.mvdRenderActivex1.AddShape(mvdRect);
                                     }
                                 }
-                                //catch (Exception ex)
-                                //{
-                                //    string errMsg = $"顯示結果異常: {ex.Message}\n\r\n\r@{ex.StackTrace}";
-                                //    MessageBox.Show(errMsg);
-                                //    return;
-                                //}
+                                catch (Exception ex)
+                                {
+                                    //string errMsg = $"顯示結果異常: {ex.Message}\n\r\n\r@{ex.StackTrace}";
+                                    //MessageBox.Show(errMsg);
+                                    return;
+                                }
                                 break;
                             case ScanInspectMode.MEASUREAOI:
                             case ScanInspectMode.QRCODE:
