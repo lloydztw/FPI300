@@ -2,14 +2,11 @@
 using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
-using LaserAlignDX.GA.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
