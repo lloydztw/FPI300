@@ -31,7 +31,7 @@ namespace LaserAlignDX.BasicSpace
             }
         }
 
-        const string cat1 = "00.基础设定";
+        const string cat1 = "01.基础设定";
         [CategoryAttribute(cat1), DescriptionAttribute("阵列角度")]
         [DisplayName("A00.阵列角度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -154,7 +154,7 @@ namespace LaserAlignDX.BasicSpace
         }
 
 
-        const string cat2 = "01.其他设定";
+        const string cat2 = "02.其他设定";
 
         [CategoryAttribute(cat2), DescriptionAttribute("1-红光 2-白光 3-红白光")]
         [DisplayName("A01.灯光通道")]
