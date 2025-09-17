@@ -292,21 +292,35 @@ namespace LaserAlignDX.Model.Coords
 
             //(2) 檢查 RuntimePlcGrid
             (errCode, errMsg) = checkRuntimePlcGrid();
-            if (errCode == ErrCodes.OK)
+            if (errCode != ErrCodes.OK)
                 return errCode;
 
-            //(3) 根據 Transforms 算出 sucker1 , sucker2 的 world coordinates
+            //(3) 取出 Transforms
             var transCP = this.GetCameraPhysicTransform(C);
             var transCM1 = this.GetCameraMotorTransform(C, SuckerRowEnum.S1);
             var transCM2 = this.GetCameraMotorTransform(C, SuckerRowEnum.S2);
 
-            //(4) 計算
-            QVector worldPt = _runtimePlcGrid[0, 0];
-            camCoord = transCP.InvTrans(worldPt);
-            worldCoordSucker1 = transCM1.Trans(camCoord);
-            worldCoordSucker2 = transCM2.Trans(camCoord);
+            //(4) 計算 (簡單 使用 馬達座標)
+            QVector runtimeWorldPt = _runtimePlcGrid[0, 0];
+            camCoord = transCP.InvTrans(runtimeWorldPt);
+            var s1_motor_coord = transCM1.Trans(camCoord);
+            var s2_motor_coord = transCM2.Trans(camCoord);
+            worldCoordSucker1 = s1_motor_coord;
+            worldCoordSucker2 = s2_motor_coord;
 
-            //(5) Return value
+            ////(5) 計算 (精確使用 World 座標)
+            //transCP.GetCalibCornerPoints().Get(0, out _, out var world_k);
+            //transCM1.GetCalibCornerPoints().Get(0, out _, out var s1_motor_k);
+            //transCM2.GetCalibCornerPoints().Get(0, out _, out var s2_motor_k);
+            //var s1_camera_k = transCM1.InvTrans(s1_motor_k);
+            //var s2_camera_k = transCM2.InvTrans(s2_motor_k);
+            //var s1_world_k = transCP.Trans(s1_camera_k);
+            //var s2_world_k = transCP.Trans(s2_camera_k);
+            //var delta = s2_world_k - s1_world_k;
+            //worldCoordSucker1 = s1_motor_coord;
+            //worldCoordSucker2 = worldCoordSucker1 + delta;
+
+            //(6) Return value
             errMsg = null;
             return ErrCodes.OK;
         }
@@ -394,14 +408,14 @@ namespace LaserAlignDX.Model.Coords
             {
                 errCode = ErrCodes.NO_CAMERA_GRID;
                 errMsg = JetEazy.QxNums.GetEnumDescription(carrierID)
-                       + " " + JetEazy.QxNums.GetEnumDescription(errCode)
+                       + " : " + JetEazy.QxNums.GetEnumDescription(errCode)
                        + " !";
             }
             else if (camGrid.Rows < 2 || camGrid.Cols < 2)
             {
                 errCode = ErrCodes.LOW_GRID_ROWS_COLS;
                 errMsg = JetEazy.QxNums.GetEnumDescription(carrierID)
-                       + " " + JetEazy.QxNums.GetEnumDescription(errCode)
+                       + " : " + JetEazy.QxNums.GetEnumDescription(errCode)
                        + $" rows={camGrid.Rows}, cols={camGrid.Rows} !";
             }
 
@@ -456,7 +470,7 @@ namespace LaserAlignDX.Model.Coords
                 errCode = ErrCodes.NO_RUNTIME_PLC_GRID;
                 errMsg = JetEazy.QxNums.GetEnumDescription(errCode) + " !";
             }
-            if (_runtimePlcGrid.Rows < 2 || _runtimePlcGrid.Cols < 2)
+            else if (_runtimePlcGrid.Rows < 2 || _runtimePlcGrid.Cols < 2)
             {
                 errCode = ErrCodes.LOW_GRID_ROWS_COLS;
                 errMsg = JetEazy.QxNums.GetEnumDescription(errCode) + " !";

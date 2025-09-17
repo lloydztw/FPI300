@@ -318,7 +318,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             if (err != ErrCodes.OK)
             {
-                VsMSG.Instance.Warning(errMsg, false);
+                VsMSG.Instance.Warning(errMsg, true);
             }
         }
         void showCviResult(bool show)

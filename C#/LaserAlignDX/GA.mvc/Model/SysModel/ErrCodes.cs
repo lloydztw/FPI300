@@ -31,10 +31,10 @@ namespace LaserAlignDX.Mvc.Model
         [Description("Runtime 跑線時期的 PLC格點 沒有設定")]
         NO_RUNTIME_PLC_GRID,
 
-        [Description("影像 格點或陣列 沒有建置")]
+        [Description("參數 格點陣列 (Camera Grid) 沒有建置")]
         NO_CAMERA_GRID,
 
-        [Description("陣列太小")]
+        [Description("參數 格點陣列 (Camera Grid) 行列數太小")]
         LOW_GRID_ROWS_COLS,
 
         [Description("無法抓到格點")]

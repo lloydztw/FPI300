@@ -71,7 +71,7 @@ namespace LaserAlignDX.Mvc.Gui
                 viewer.SwitchToWorldCoordinate(gxView);
 
             draw_cursor(viewer, gxView, _cursorBloc2, Color.White);
-            draw_cursor(viewer, gxView, _cursorBloc, Color.Gold);
+            draw_cursor(viewer, gxView, _cursorBloc, Color.Orange);
             draw_line(viewer, gxView, _cursorBloc, _cursorBloc2, Color.Cyan);
 
             if (!isWorld)
@@ -420,6 +420,9 @@ namespace LaserAlignDX.Mvc.Gui
                 viewer.TransViewportToWorld(ref xx, ref yy);
 
                 var bloc = fetchOne(xx, yy);
+
+                if (!viewer.ClientRectangle.Contains(e.X, e.Y))
+                    bloc = null;
 
                 bool isChanged = updateTooltip(bloc, e.X, e.Y, viewer);
 

@@ -138,14 +138,19 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             // FLY CAMERA Display UI
             Attach(DsFlys, lblFlyCameraSerialNo);
 
+            // Even tHandlers
+            InitEventHandlers();
+
+            // 延遲顯示初始設定
             _wndOwner.HandleCreated += (s, e) =>
             {
-                _wndOwner.BeginInvoke(new Action(() => _LOG("GaMailCtrl [V2]", Color.Blue)));
-                _wndOwner.BeginInvoke(new Action(() => _LOG($"參數資料夾 = {Traveller106.Universal.MAINPATH}", Color.Blue)));
+                _wndOwner.BeginInvoke(new Action(() =>
+                {
+                    _LOG("GaMailCtrl [V2]", Color.Blue);
+                    _LOG($"參數資料夾 = {Traveller106.Universal.MAINPATH}", Color.Blue);
+                    _sysModel.ApplyRecipe();
+                }));
             };
-
-            // Processes
-            InitEventHandlers();
         }
 
         IvChipCellsViewer buildChipCellsViewer(Control panel, CarrierEnum carrierID)
@@ -203,10 +208,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             m_SingleProcess.OnStarted += OnAoiProcess_Started;
             m_SingleProcess.OnCompleted += OnAoiProcess_Completed;
 
-            var aoiEngine = _aoiModel;
-            aoiEngine.OnAoiProgressing += AoiEngine_OnAoiProgressing;
-            aoiEngine.OnAoiBegin += AoiEngine_OnAoiBegin;
-            aoiEngine.OnAoiEnd += AoiEngine_OnAoiEnd;
+            _aoiModel.OnAoiProgressing += AoiEngine_OnAoiProgressing;
+            _aoiModel.OnAoiBegin += AoiEngine_OnAoiBegin;
+            _aoiModel.OnAoiEnd += AoiEngine_OnAoiEnd;
+
+            _sysModel.OnError += SysModel_OnError;
         }
         void TickAllProcesses()
         {
@@ -215,6 +221,17 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         }
 
         #region EVENT_HANDLERS
+        private void SysModel_OnError(object sender, ProcessEventArgs e)
+        {
+            if (_wndOwner.InvokeRequired)
+            {
+                _wndOwner.BeginInvoke((EventHandler<ProcessEventArgs>)SysModel_OnError, sender, e);
+            }
+            else
+            {
+                VsMSG.Instance.Warning(e.Message, true);
+            }
+        }
         private void OnAoiProcess_Started(object sender, ProcessEventArgs e)
         {
             FireChangeState(MainS1State.LS_START);

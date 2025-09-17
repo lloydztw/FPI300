@@ -56,11 +56,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 //var mvdRectF = cell.DrawResultRectF();
                 //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRectF));
                 //Center = new JetEazy.QMath.QVector(mvdRectF.CenterX, mvdRectF.CenterY);
-
                 if (cell.chipLocInCamera != null)
                 {
                     var cc = cell.chipLocInCamera.Center;
-                    Rect = Rectangle.Round(cell.chipLocInCamera.BoundaryRect);
+                    Rect = Rectangle.Round(cell.viewRectF);
                     Center = new QVector(cc.X, cc.Y);
                 }
                 else
@@ -555,9 +554,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     {
                         var cell = cellBloc.Cell;
                         var cellRect = Rectangle.Round(cell.viewRectF);
-                        base.adjustFetchSize(cellRect.Size);
                         cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
-                        _cviRegionBox = new CviRotRectBox(cellRect, Color.White);
+                        base.adjustFetchSize(cellRect.Size);
+                        _cviRegionBox = new CviRotRectBox(cellRect, Color.LightBlue);
                         _cviRegionBox.Visible = false;
                         return;
                     }
@@ -625,29 +624,20 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             get => _mode == ScanInspectMode.NOTRAY;
         }
-        public ITransform TransCameraToMotor
-        {
-            get; set;
-        }
-        public ITransform TransCameraToWorld
-        {
-            get; set;
-        }
         public CarrierEnum ActiveCarrierID
         {
             get; set;
         }
-        public SuckerRowEnum ActiveSuckerRowID
+        public TravellerTransforms TransformsModel
         {
-            get; set;
+            get;
+            set;
         }
 
         void initDefaultTrfs()
         {
-            if (TransCameraToMotor == null)
-                TransCameraToMotor = GaMvcConfig.SysModel.TransformsModel.GetCameraMotorTransform(ActiveCarrierID, ActiveSuckerRowID);
-            if (TransCameraToWorld == null)
-                TransCameraToWorld = GaMvcConfig.SysModel.TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+            if (TransformsModel == null)
+                TransformsModel = GaMvcConfig.SysModel.TransformsModel;
         }
         string composeTooltipTextTrf(EzBloc cursorBloc, EzBloc cursorBloc2)
         {
@@ -673,18 +663,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             if (!IsEmptyTrayMode)
             {
-                if (TransCameraToMotor != null)
+                if (TransformsModel != null)
                 {
                     appendMotorCoords(sb, cursorBloc, cursorBloc2);
-                    isShowScore = false;
-                }
-                if (TransCameraToWorld != null)
-                {
                     appendWorldCoords(sb, cursorBloc, cursorBloc2);
-                    isShowScore = false;
-                }
-                if (TransCameraToMotor != null && TransCameraToMotor != null && cursorBloc2 == null)
-                {
                     appendPlcCompensation(sb, cursorBloc, row, col);
                     isShowScore = false;
                 }
@@ -701,77 +683,87 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void appendCameraCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
-            if (bloc == null)
+            var camPt = getCentroid(bloc);
+            if (camPt == null)
                 return;
 
-            sb.Append($"相機座標: ({bloc.Center.X:0.0}, {bloc.Center.Y:0.0})").AppendLine();
+            sb.Append($"相機座標: ({camPt.X:0.0}, {camPt.Y:0.0})").AppendLine();
 
             if (bloc != null && bloc2 != null && bloc != bloc2)
             {
-                var dv = bloc.Center - bloc2.Center;
-                var dist = dv.NormLength;
-                sb.AppendLine($"相機座標 dX = {dv.X:0.0} pix");
-                sb.AppendLine($"相機座標 dY = {dv.Y:0.0} pix");
-                sb.AppendLine($"相機座標 距離 = {dist:0.0} pix");
+                var camPt2 = getCentroid(bloc2);
+                if (camPt2 != null)
+                {
+                    var dv = camPt - camPt2;
+                    var dist = dv.NormLength;
+                    sb.AppendLine($"相機座標 dX = {dv.X:0.0} pix");
+                    sb.AppendLine($"相機座標 dY = {dv.Y:0.0} pix");
+                    sb.AppendLine($"相機座標 距離 = {dist:0.0} pix");
+                }
             }
         }
         void appendMotorCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
-            var transform = TransCameraToMotor;
-            if (bloc == null || transform == null)
+            QVector camPt = getCentroid(bloc);
+            if (camPt == null || TransformsModel == null)
                 return;
 
-            var motorCoord = transform.Trans(bloc.Center);
+            foreach (SuckerRowEnum S in Enum.GetValues(typeof(SuckerRowEnum)))
+            {
+                var transCM = TransformsModel.GetCameraMotorTransform(ActiveCarrierID, S);
+                if (transCM == null) continue;
+                var motorPt = transCM.Trans(camPt);
+                sb.AppendLine()
+                    .Append($"S{(int)S + 1} 馬達座標(X,Y) = (")
+                    .AppendValues((float)motorPt.X, (float)motorPt.Y)
+                    .Append(") mm");
+            }
 
             sb.AppendLine();
-            sb.AppendLine($"吸嘴馬達座標 X = {motorCoord.X:0.000} mm");
-            sb.AppendLine($"載台馬達座標 Y = {motorCoord.Y:0.000} mm");
 
-            if (bloc != null && bloc2 != null && bloc != bloc2)
-            {
-                var motorCoord2 = transform.Trans(bloc2.Center);
-                var dv = motorCoord - motorCoord2;
-                double dist = dv.NormLength;
-                sb.AppendLine($"馬達座標 dX = {dv.X:0.000} mm");
-                sb.AppendLine($"馬達座標 dY = {dv.Y:0.000} mm");
-                sb.AppendLine($"馬達座標 距離 = {dist:0.000} mm");
-            }
+            //if (bloc != null && bloc2 != null && bloc != bloc2)
+            //{
+            //    var motorCoord2 = transform.Trans(bloc2.Center);
+            //    var dv = motorCoord - motorCoord2;
+            //    double dist = dv.NormLength;
+            //    sb.AppendLine($"馬達座標 dX = {dv.X:0.000} mm");
+            //    sb.AppendLine($"馬達座標 dY = {dv.Y:0.000} mm");
+            //    sb.AppendLine($"馬達座標 距離 = {dist:0.000} mm");
+            //}
         }
         void appendWorldCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
-            var transform = TransCameraToWorld;
-            if (bloc == null || transform == null)
+            var transform = TransformsModel?.GetCameraPhysicTransform(ActiveCarrierID);
+            var camPt = getCentroid(bloc);
+            if (camPt == null || transform == null)
                 return;
 
-            var worldCoord = transform.Trans(bloc.Center);
+            var worldPt = transform.Trans(camPt);
 
             sb.AppendLine();
-            sb.AppendLine($"Physic座標 X = {worldCoord.X:0.000} mm");
-            sb.AppendLine($"Physic座標 Y = {worldCoord.Y:0.000} mm");
+            sb.AppendLine($"Physic 座標 X = {worldPt.X:0.000} mm");
+            sb.AppendLine($"Physic 座標 Y = {worldPt.Y:0.000} mm");
 
             if (bloc != null && bloc2 != null && bloc != bloc2)
             {
-                var worldCoord2 = transform.Trans(bloc2.Center);
-                var dv = worldCoord - worldCoord2;
-                double dist = dv.NormLength;
-                sb.AppendLine($"Physic座標 dX = {dv.X:0.000} mm");
-                sb.AppendLine($"Physic座標 dY = {dv.Y:0.000} mm");
-                sb.AppendLine($"Physic座標 距離 = {dist:0.000} mm");
+                var worldPt2 = getCentroid(bloc2);
+                if (worldPt2 != null)
+                {
+                    var dv = worldPt - worldPt2;
+                    double dist = dv.NormLength;
+                    sb.AppendLine($"Physic 座標 dX = {dv.X:0.000} mm");
+                    sb.AppendLine($"Physic 座標 dY = {dv.Y:0.000} mm");
+                    sb.AppendLine($"Physic 座標 距離 = {dist:0.000} mm");
+                }
             }
         }
         void appendPlcCompensation(StringBuilder sb, EzBloc bloc, int row, int col)
         {
-            if (bloc == null)
+            var camPt = getCentroid(bloc);
+            if (camPt == null || TransformsModel == null)
                 return;
 
-            var cell = (bloc as CellBloc)?.Cell;
-            var chipLoc = cell?.chipLocInCamera;
-            var chipCentroid = chipLoc != null ?
-                                new QVector(chipLoc.Center.X, chipLoc.Center.Y) :
-                                bloc.Center;
-
-            var transformsModel = GaMvcConfig.SysModel.TransformsModel;
-            (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(ActiveCarrierID, chipCentroid, row, col);
+            (var motorDelta, var worldDelta) = TransformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
 
             //>>> sb.AppendLine();
             sb.AppendLine($"Phy 變動值 ΔX = {worldDelta.X:0.000} mm");
@@ -780,12 +772,25 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             sb.AppendLine($"PLC 格點 補償量 dX = {motorDelta.X:0.000} mm");
             sb.AppendLine($"PLC 格點 補償量 dY = {motorDelta.Y:0.000} mm");
 
+            var cell = (bloc as CellBloc)?.Cell;
             if (cell != null)
             {
                 sb.AppendLine();
                 sb.AppendLine($"RunX = {cell.RunX:0.000} mm");
                 sb.AppendLine($"RunY = {cell.RunY:0.000} mm");
             }
+        }
+        
+        static QVector getCentroid(EzBloc bloc)
+        {
+            var cell = (bloc as CellBloc)?.Cell;
+            if (cell == null)
+                return bloc?.Center;
+            var cx = cell.xFindResult.fCenterX;
+            var cy = cell.xFindResult.fCenterY;
+            if (cx > 0 && cy > 0)
+                return new QVector(cx, cy);
+            return bloc.Center;
         }
 
         #region DEBUG_FUNCTIONS

@@ -60,7 +60,8 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
 
         public CarrierEnum CarrierID
         {
-            get; set;
+            get => _resultBox.ActiveCarrierID;
+            set => _resultBox.ActiveCarrierID = value;
         }
         public IvImageViewer ImgViewer
         {

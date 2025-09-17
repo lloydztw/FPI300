@@ -359,9 +359,11 @@ namespace LaserAlignDX.AoiModel.V25
 
                 // 異步輸出 Debug 數據
                 _Inspect001_Async_SaveDebugData(bmpInputImage, debugCellCenterStr, imgPath);
+                
+                // PASS / NG
+                m_IsPass = _Inpsect001_Check_TotalPass();
 
                 // 標記終止計時
-                //m_IsPass = true;
                 stopwatch.Stop();
                 m_ElapsedTime = stopwatch.ElapsedMilliseconds;  //@ for Inspect001 計時
                 m_Running = false;
@@ -426,7 +428,8 @@ namespace LaserAlignDX.AoiModel.V25
             {
                 Parallel.For(0, N_GROUPS, gid =>
                 {
-                    debugStrs[gid] = _Inspect001_Chip_Locate_And_Measure(gid, groups[gid], imgPath);
+                    if (gid < groups.Length)
+                        debugStrs[gid] = _Inspect001_Chip_Locate_And_Measure(gid, groups[gid], imgPath);
                 });
             }
 
@@ -1352,6 +1355,23 @@ namespace LaserAlignDX.AoiModel.V25
             },
                 ezImageArg
             );
+        }
+        private bool _Inpsect001_Check_TotalPass()
+        {
+            foreach (var cell in xRecipe.xRegionCells)
+            {
+                if(cell == null) continue;
+                
+                bool isPass = true;
+                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                    isPass = true;
+                else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
+                    isPass = false;
+
+                if (!isPass)
+                    return false;
+            }
+            return true;
         }
         #endregion
 
