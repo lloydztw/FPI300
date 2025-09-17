@@ -1,8 +1,8 @@
 ﻿using Eazy_Project_III;
 using JetEazy.BasicSpace;
 using JetEazy.Interface;
+using LaserAlignDX;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Drawing;
@@ -32,32 +32,20 @@ namespace NeedleX.ProcessSpace
         }
 
         #region COMMON_ACCESS_TO_THE_GLOBAL_COMPONENTS
-        
         protected bool IsNoUseIO
         {
             get { return Universal.IsNoUseIO; }
         }
-
-        //ICam ICamForCali
-        //{
-        //    get { return Universal.CAMERAS[0]; }
-        //}
-        //ICam ICamForBlackBox
-        //{
-        //    get { return Universal.CAMERAS[1]; }
-        //}
-
-        protected ClientSocket X6_HANDLE_CLIENT
-        {
-            get { return Universal.X6_HANDLE_CLIENT; }
-        }
-
         protected IxLineScanCam IScanCam
         {
             get { return Universal.IxLineScan; }
         }
 
         #region NOT_USED
+        //protected ClientSocket X6_HANDLE_CLIENT
+        //{
+        //    get { return Universal.X6_HANDLE_CLIENT; }
+        //}
         //protected RecipeMiniX6Class myRecipe
         //{
         //    get { return RecipeMiniX6Class.Instance; }
@@ -69,13 +57,12 @@ namespace NeedleX.ProcessSpace
         #endregion
 
         /// <summary>
-        /// 主要的 Process
+        /// 主要的 AoiModel
         /// </summary>
-        protected ProcessRunFPIClass pRun
+        protected IProcessRunFPI pRun
         {
-            get { return ProcessRunFPIClass.Instance; }
+            get { return GaMvcConfig.SysModel.AoiModel; }
         }
-
         //protected RecipeMainX2Class xRecipe
         //{
         //    get { return RecipeMainX2Class.Instance; }
@@ -84,14 +71,14 @@ namespace NeedleX.ProcessSpace
         {
             get { return RecipeFPIX3Class.Instance; }
         }
-        protected ICam GetCamera(int camID)
-        {
-            return Universal.CAMERAS[camID];
-        }
-        protected IAxis GetAxis(int axisID)
-        {
-            return ((MiniX6MachineClass)MACHINECollection.MACHINE).PLCMOTIONCollection[axisID];
-        }
+        //protected ICam GetCamera(int camID)
+        //{
+        //    return Universal.CAMERAS[camID];
+        //}
+        //protected IAxis GetAxis(int axisID)
+        //{
+        //    return ((MiniX6MachineClass)MACHINECollection.MACHINE).PLCMOTIONCollection[axisID];
+        //}
         protected MachineCollectionClass MACHINECollection
         {
             get
@@ -99,14 +86,14 @@ namespace NeedleX.ProcessSpace
                 return Universal.MACHINECollection;
             }
         }
-        protected MainX1MachineClass MACHINE
-        {
-            get { return (MainX1MachineClass)Universal.MACHINECollection.MACHINE; }
-        }
-        protected MainX2MachineClass MACHINEx2
-        {
-            get { return (MainX2MachineClass)Universal.MACHINECollection.MACHINE; }
-        }
+        //protected MainX1MachineClass MACHINE
+        //{
+        //    get { return (MainX1MachineClass)Universal.MACHINECollection.MACHINE; }
+        //}
+        //protected MainX2MachineClass MACHINEx2
+        //{
+        //    get { return (MainX2MachineClass)Universal.MACHINECollection.MACHINE; }
+        //}
         protected MainFPIX3MachineClass MACHINEx3
         {
             get { return (MainFPIX3MachineClass)Universal.MACHINECollection.MACHINE; }
@@ -276,6 +263,7 @@ namespace NeedleX.ProcessSpace
         #endregion
 
         #region COMMON_MACHINE_FUCTIONS_FOR_STATION_3
+#if (true)
         protected void SetNormalLight()
         {
             //MACHINE.PLCIO.ADR_RED = false;
@@ -294,6 +282,7 @@ namespace NeedleX.ProcessSpace
             //MACHINE.PLCIO.ADR_YELLOW = false;
             //MACHINE.PLCIO.ADR_GREEN = true;
         }
+#endif
         #endregion
 
         #region PLC_ON_SCANNED_EVENT_HANDLER
@@ -321,9 +310,8 @@ namespace NeedleX.ProcessSpace
         {
             //BarcodeClass.OnChangeState += BarcodeClass_OnChangeState;
         }
-
-
         #endregion
+
         private void BarcodeClass_OnChangeState(string statusstr)
         {
             string[] vs = statusstr.Split('$');
@@ -708,7 +696,6 @@ namespace NeedleX.ProcessSpace
             msg = Name + ", " + msg;
             //GdxGlobal.LOG.Log(msg, args);
         }
-
         /// <summary>
         /// Generic LOG (dual) <br/>
         /// 會額外調用 NLog.Warning <br/>

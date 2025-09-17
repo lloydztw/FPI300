@@ -16,7 +16,7 @@ namespace LaserAlignDX.AoiModel
         protected ProcessRunFPIClass()
         {
             //_imp = IMPLEMENT.Instance;
-            _imp = GaMvcConfig.InstanceAoiModel();
+            _imp = GaMvcConfig.SysModel.AoiModel;
         }
         #endregion
 

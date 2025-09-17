@@ -575,31 +575,42 @@ namespace EzAoiEmptyTrayInspector.Model
             clear_result(SideID.A, true);
             clear_result(SideID.B, true);
 
-            var evCompleted = wait ? new ManualResetEvent(false) : null;
-
-            ThreadPool.QueueUserWorkItem((arg) =>
+            if (wait)
             {
-                var args = (object[])arg;
-                var bmp = (Bitmap)args[0];
-                //var A = (IEzImage)args[0];
-                //var B = (IEzImage)args[1];
-                //var F = (string)args[2];
-                //run_all(A, A?.Image as Mat, B?.Image as Mat, F);
-
-                using (var bridge = new QxImageBridge(bmp))
+                using (var bridge = new QxImageBridge(largeBmp))
                 {
                     run_all(null, bridge.Image, null, null);
                 }
+            }
+            else
+            {
+                //var evCompleted = wait ? new ManualResetEvent(false) : null;
 
-                evCompleted?.Set();
-            },
-            new object[] {
-                largeBmp,
-            });
+                ThreadPool.QueueUserWorkItem((arg) =>
+                {
+                    var args = (object[])arg;
+                    var bmp = (Bitmap)args[0];
+                    //var A = (IEzImage)args[0];
+                    //var B = (IEzImage)args[1];
+                    //var F = (string)args[2];
+                    //run_all(A, A?.Image as Mat, B?.Image as Mat, F);
 
-            if (wait)
-                evCompleted.WaitOne(1000 * 60 * 5);
+                    using (var bridge = new QxImageBridge(bmp))
+                    {
+                        run_all(null, bridge.Image, null, null);
+                    }
+
+                    //evCompleted?.Set();
+                },
+                    new object[] {
+                    largeBmp,
+                });
+
+                //if (wait)
+                //    evCompleted.WaitOne(1000 * 60 * 5);
+            }
         }
+
         public AOI_RESULT GetResult()
         {
             return _finalResult;
@@ -727,6 +738,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
         #region PRIVATE_POST_PREDICT_GRID_NG_BLOCs
         Mat _largeGoldenGridImage;
+#if (false)
         void run_on_grid_ng_predict(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
         {
             Exception errEx = null;
@@ -934,6 +946,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 }
             }
         }
+#endif
         Mat rebuild_golden_grid_image(Scalar backColor, bool useSimpleColorBlock = false)
         {
             if (_recipe == null)
@@ -1022,6 +1035,65 @@ namespace EzAoiEmptyTrayInspector.Model
             }
         }
         #endregion
+
+
+        void run_on_grid_ng_predict(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
+        {
+            Exception errEx = null;
+
+            try
+            {
+                changeState("POST Grid NG Matching", sideId);
+
+                // Null Condition
+                if (srcImg == null || _recipe == null || matchResult == null)
+                    return;
+
+                #region LARGE_GOLDEN_GRID_IMAGE
+                // NOTE: goldenGrid 是由 recipe runtime deSerialize 
+                var goldenGrid = _recipe.TrayMiscSettings.GetGoldenGrid();
+                if (goldenGrid == null)
+                    return;
+                _LOG.Info($"GoldenGrid = {goldenGrid.Rows}x{goldenGrid.Cols}");
+
+                // LARGE GOLDEN GRID IMAGE (rebuilt from recipe)
+                if (_largeGoldenGridImage == null)
+                {
+                    var backColor = true || _recipe.VisionSettings.Inverse.Value ? Scalar.Black : Scalar.White;
+                    _largeGoldenGridImage = rebuild_golden_grid_image(backColor);
+                }
+                if (_largeGoldenGridImage == null)
+                {
+                    _LOG.Warn("[AOI] largetGoldenGridImage 無重建!");
+                    return;
+                }
+                _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, goldenGrid, dumpPath);
+                #endregion
+
+                var predictor = new EzOnGridNgBlocsPredictor();
+                predictor.DumpPath = dumpPath;
+                predictor.SetRecipeParams(_recipe, _largeGoldenGridImage);
+                var newGrid = predictor.Predict(srcImg, matchResult, force);
+
+                matchResult.Grid = newGrid;
+            }
+            catch (Exception ex)
+            {
+                errEx = ex;
+            }
+            finally
+            {
+                if (errEx != null)
+                {
+                    _ERROR(ErrCodes.ON_GRID_TEMPLATE_MATCH_ERROR, sideId, errEx);
+                }
+                else
+                {
+                    changeState("Ready", sideId);
+                    update_one_match_result(sideId, matchResult, notify: true);
+                }
+            }
+        }
 
 
         #region POST_FIND_OUT_GRID_NG_BLOCs

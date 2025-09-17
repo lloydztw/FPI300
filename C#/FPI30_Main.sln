@@ -18,8 +18,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".ReadMe", ".ReadMe", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
 		ReadMe.md = ReadMe.md
-		ReadMe_errors_list.md = ReadMe_errors_list.md
 		Readme_QA.md = Readme_QA.md
+		ReadMe_History.md = ReadMe_History.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzAoiEmptyTrayInspector.TestDemo", "FPI30_Aoi\EzEmptyTrayInspector.TestDemo\EzAoiEmptyTrayInspector.TestDemo.csproj", "{8A30A4F2-222A-498B-9565-6E50103ABF4B}"
@@ -31,6 +31,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Jez Modules", "Jez Modules", "{7A4C5A08-491F-4809-BB45-C2E996222756}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetEazy.VG.Devices", "JetEazy.VG.Camera\JetEazy.VG.Devices.csproj", "{AFA9CF55-2235-415D-B437-F4A62DA34A0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetEazy.Transform", "JetEazy.Calib.Transform\JetEazy.Transform.csproj", "{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -150,6 +152,18 @@ Global
 		{AFA9CF55-2235-415D-B437-F4A62DA34A0C}.Release|x64.Build.0 = Release|x64
 		{AFA9CF55-2235-415D-B437-F4A62DA34A0C}.Release|x86.ActiveCfg = Release|Any CPU
 		{AFA9CF55-2235-415D-B437-F4A62DA34A0C}.Release|x86.Build.0 = Release|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Debug|x64.Build.0 = Debug|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Debug|x86.Build.0 = Debug|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Release|x64.ActiveCfg = Release|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Release|x64.Build.0 = Release|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Release|x86.ActiveCfg = Release|Any CPU
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -163,6 +177,7 @@ Global
 		{8A30A4F2-222A-498B-9565-6E50103ABF4B} = {7A8C945F-BF24-4D6B-849D-939CEA41E7BF}
 		{ECF19B8D-BE9A-4159-8B94-DEFC25A59507} = {7A4C5A08-491F-4809-BB45-C2E996222756}
 		{AFA9CF55-2235-415D-B437-F4A62DA34A0C} = {7A4C5A08-491F-4809-BB45-C2E996222756}
+		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933} = {7A4C5A08-491F-4809-BB45-C2E996222756}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {16A4E0AE-933A-4384-AC0A-76DE7CE40914}

@@ -14,11 +14,9 @@
 #endregion
 
 using JetEazy.Match;
-using JetEazy.OpenCV;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using CvPoint = OpenCvSharp.Point;
 
 
@@ -29,20 +27,16 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
     /// </summary>
     internal class EzOnGridNgBlocsPredictor : EzAoiBase
     {
-        #region RECIPE_PARAMS
+        #region RUNTIME_RECIPE_PARAMS
         JxAoiRecipe _recipe;
+        Mat _largeGoldenGridImage;     
         #endregion
 
-        #region RUNTIME_DATA
-        static Mat _largeGoldenGridImage;               // 暫時用 static
-        static IDisposable _lastLargeGoldenGrid;        // 暫時用 static
-        #endregion
-
-        public void SetRecipe(JxAoiRecipe recipe)
+        public void SetRecipeParams(JxAoiRecipe recipe, Mat lggImage)
         {
             _recipe = recipe;
+            _largeGoldenGridImage = lggImage;
         }
-
         public EzBlocsGrid Predict(Mat srcImg, MatchResult matchResult, bool force = false)
         {
             var dumpPath = this.DumpPath;
@@ -50,8 +44,6 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
             try
             {
-                //changeState("POST Grid NG Matching", sideId);
-
                 // Null Condition
                 if (srcImg == null || _recipe == null || matchResult == null)
                     return resultGrid;
@@ -69,24 +61,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 var goldenGrid = _recipe.TrayMiscSettings.GetGoldenGrid();
                 if (goldenGrid == null)
                     return resultGrid;
-                _LOG.Info($"GoldenGrid = {goldenGrid.Rows}x{goldenGrid.Cols}");
-
-                // LARGE GOLDEN GRID IMAGE (rebuilt from recipe)
-                #region FULL_FOV_GOLDEN_GRID_IMAGE
-                bool needsToRebuild = _lastLargeGoldenGrid != goldenGrid || _largeGoldenGridImage == null;
-                _lastLargeGoldenGrid = goldenGrid;
-                if(needsToRebuild)
-                {
-                    _largeGoldenGridImage?.Dispose();
-                    _largeGoldenGridImage = rebuild_golden_grid_image();
-                }
-                if (_largeGoldenGridImage == null)
-                {
-                    _LOG.Warn("[AOI] largetGoldenGridImage 無重建!");
-                    return resultGrid;
-                }
-                _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, goldenGrid, dumpPath);
-                #endregion
+                //_LOG.Info($"GoldenGrid = {goldenGrid.Rows}x{goldenGrid.Cols}");
 
                 // OFFSET 
                 int offset_x = 0;
@@ -102,7 +77,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                     {
                         var rect = b.Rect;
                         rect.Offset(offset_x, offset_y);
-                        var bloc = new EzBloc(rect, score: -1.0);
+                        var bloc = new EzBloc(rect, score: SCORES.NG_PSEUDO);
                         pseudoBlocs.Add(bloc);
                     }
                 }
@@ -131,22 +106,155 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 {
                     foreach (var b in newGrid.IterBlocs())
                     {
-                        if (b != null && b.Score < 0)
-                            b.Tag = "pseudo";
+                        if (b != null && b.Score <= SCORES.NG_PSEUDO)
+                            b.Tag = "NG_PSEUDO";
                     }
                 }
+
+                // UPDATE to existing matchResult
+                //>>> matchResult.Grid = newGrid;
 
                 return newGrid;
             }
             catch (Exception ex)
             {
-                //errEx = ex;
                 _LOG.Error(ex);
                 throw ex;
             }
+            finally
+            {
+                //if (errEx != null)
+                //{
+                //    _ERROR(ErrCodes.ON_GRID_TEMPLATE_MATCH_ERROR, sideId, errEx);
+                //}
+                //else
+                //{
+                //    changeState("Ready", sideId);
+                //    update_one_match_result(sideId, matchResult, notify: true);
+                //}
+            }
         }
+        
+        void run_on_grid_ng_predict_001(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
+        {
+            //Exception errEx = null;
 
-        #region PRIVATE_AOI_FUNCTIONS
+            //try
+            //{
+            //    changeState("POST Grid NG Matching", sideId);
+
+            //    // Null Condition
+            //    if (srcImg == null || _recipe == null || matchResult == null)
+            //        return;
+
+            //    // FULL rows and cols
+            //    var fullRows = _recipe.TrayMiscSettings.FullRows;
+            //    var fullCols = _recipe.TrayMiscSettings.FullCols;
+
+            //    // INPUT GRID 檢查是否已經滿盤定位
+            //    var inputGrid = matchResult.Grid;
+            //    if (inputGrid != null && inputGrid.Rows >= fullRows && inputGrid.Cols >= fullCols && !force)
+            //        return;
+
+            //    // NOTE: goldenGrid 是由 recipe runtime deSerialize 
+            //    var goldenGrid = _recipe.TrayMiscSettings.GetGoldenGrid();
+            //    if (goldenGrid == null)
+            //        return;
+            //    _LOG.Info($"GoldenGrid = {goldenGrid.Rows}x{goldenGrid.Cols}");
+
+            //    // LARGE GOLDEN GRID IMAGE (rebuilt from recipe)
+            //    if (_largeGoldenGridImage == null)
+            //    {
+            //        var backColor = true || _recipe.VisionSettings.Inverse.Value ? Scalar.Black : Scalar.White;
+            //        _largeGoldenGridImage = rebuild_golden_grid_image(backColor);
+            //    }
+            //    if (_largeGoldenGridImage == null)
+            //    {
+            //        _LOG.Warn("[AOI] largetGoldenGridImage 無重建!");
+            //        return;
+            //    }
+            //    _DUMP_GOLDEN_GRID_IMAGE(_largeGoldenGridImage, goldenGrid, dumpPath);
+
+            //    // OFFSET 
+            //    int offset_x = 0;
+            //    int offset_y = 0;
+            //    if (inputGrid != null)
+            //        find_golden_grid_offset(srcImg, _largeGoldenGridImage, goldenGrid, inputGrid, out offset_x, out offset_y);
+
+            //    // EXISTING BLOCs (排除 null condition)
+            //    var existingBlocs = new List<EzBloc>(matchResult.Blocs);
+            //    existingBlocs.RemoveAll(b => b == null);
+
+            //    // PSEUDO BLOCs (built by goldGrid + offset)
+            //    goldenGrid.RowMin = 0;
+            //    goldenGrid.ColMin = 0;
+            //    int rows = goldenGrid.Rows;
+            //    int cols = goldenGrid.Cols;
+
+            //    EzBloc[,] gridBuf = new EzBloc[rows, cols];
+            //    var pseudoBlocs = new List<EzBloc>();
+            //    for (int ri = 0; ri < rows; ri++)
+            //    {
+            //        for (int ci = 0; ci < cols; ci++)
+            //        {
+            //            var bloc = goldenGrid.Get(ri, ci);
+            //            if (bloc == null) continue;
+
+            //            var pseudo = bloc.Clone();
+            //            pseudo.Score = SCORES.NG_PSEUDO;
+            //            offset(pseudo, offset_x, offset_y);
+
+            //            EzBloc newBlob = pseudo;
+            //            existingBlocs.RemoveAll(b =>
+            //            {
+            //                if (b.Rect.Contains(pseudo.CenterX, pseudo.CenterY))
+            //                {
+            //                    newBlob = b;
+            //                    return true;
+            //                }
+            //                return false;
+            //            });
+
+            //            gridBuf[ri, ci] = newBlob;
+            //            pseudoBlocs.Add(newBlob);
+            //        }
+            //    }
+
+            //    // 重建 newGrid
+            //    var builder = new EzBlocsGridBuilder();
+            //    var newGrid = builder.BuildEmptyGrid(pseudoBlocs, goldenGrid.Rows, goldenGrid.Cols);
+            //    for (int ri = 0; ri < goldenGrid.Rows; ri++)
+            //    {
+            //        for (int ci = 0; ci < goldenGrid.Cols; ci++)
+            //        {
+            //            var bloc = gridBuf[ri, ci];
+            //            newGrid.Set(ri, ci, bloc);
+
+            //            if (bloc != null && bloc.Score <= SCORES.NG_PSEUDO)
+            //                bloc.Tag = "NG_PSEUDO";
+            //        }
+            //    }
+
+            //    // UPDATE to existing matchResult
+            //    matchResult.Grid = newGrid;
+            //}
+            //catch (Exception ex)
+            //{
+            //    errEx = ex;
+            //}
+            //finally
+            //{
+            //    if (errEx != null)
+            //    {
+            //        _ERROR(ErrCodes.ON_GRID_TEMPLATE_MATCH_ERROR, sideId, errEx);
+            //    }
+            //    else
+            //    {
+            //        changeState("Ready", sideId);
+            //        update_one_match_result(sideId, matchResult, notify: true);
+            //    }
+            //}
+        }
         void find_golden_grid_offset(Mat srcImg, Mat goldenGridImage, EzBlocsGrid goldenGrid, EzBlocsGrid inputGrid, out int offset_x, out int offset_y)
         {
             // LARGE GOLDEN TEMPLATE
@@ -155,14 +263,14 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             var ggTemplate = goldenGridImage[ggRect];
 
             // MATCH
-            int shrink = EzAoiBaseUtil.GetShrinkFactor(srcImg);
+            int shrink = EzAoiBaseUtil.GetShrinkFactor(srcImg.Width, srcImg.Height);
             var matcher = new EzTemplateMatcher(shrink);
             var settings = new JxTempMatchSettings();
             settings.ScoreThres.Value = 0.2m;
             matcher.SetRecipe(settings);
 
             // SEARCHING points
-            var bestBloc = matcher.FindBestBloc(srcImg, ggTemplate, iterate_possible_offsets(goldenGrid, inputGrid));
+            var bestBloc = matcher.FindBestBloc(srcImg, ggTemplate, iterate_possible_offsets(goldenGrid, inputGrid), externFilter: filter);
             if (bestBloc != null && bestBloc.Score > 0.01)
             {
                 var newCenter = bestBloc.Center;
@@ -175,6 +283,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 offset_y = 0;
             }
         }
+
         IEnumerable<CvPoint> iterate_possible_offsets_000(EzBlocsGrid goldenGrid, EzBlocsGrid inputGrid)
         {
             int tryCount = 0;
@@ -246,83 +355,47 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 }
             }
         }
-        #endregion
 
-        public static void DisposeAll()
+        /// <summary>
+        /// LETIAN: 2025-09-15 加掛 filter
+        /// </summary>
+        Mat filter(Mat src)
         {
-            _largeGoldenGridImage?.Dispose();
-            _lastLargeGoldenGrid?.Dispose();
-        }
+            Mat output = new Mat();
 
-        #region FULL_FOV_GOLDEN_IMAGE
-        Mat rebuild_golden_grid_image(bool useColorFill = false)
-        {
-            if (_recipe == null)
-                return null;
-
-            var goldenGrid = _recipe.TrayMiscSettings.GetGoldenGrid();
-            if (goldenGrid == null)
-                return null;
-
-            var W = _recipe.TrayMiscSettings.FovWidth;
-            var H = _recipe.TrayMiscSettings.FovHeight;
-            if (W < 10 || H < 10)
-                return null;
-
-            var largeGG = new Mat(H, W, MatType.CV_8UC1);
-            largeGG.SetTo(Scalar.White);
-
-            var goldenBmp = _recipe.VisionSettings.Match.GoldenBmp.Value as Bitmap;
-            if (goldenBmp == null || useColorFill)
-            {
-                foreach (var bloc in goldenGrid.IterBlocs())
-                {
-                    if (bloc != null)
-                    {
-                        var rc = JetEazy.Qcvt.CV(bloc.Rect);
-                        rc.Inflate(-8, -8);
-                        largeGG.Rectangle(rc, Scalar.Gray, -1);
-                    }
-                }
-            }
+            int ogThreshold = _recipe.VisionSettings.OutGridBlocThreshold.Value;
+            if (ogThreshold > 0)
+                Cv2.Threshold(src, output, ogThreshold, 255, ThresholdTypes.Binary);
             else
-            {
-                using (var bridge = new QxImageBridge(goldenBmp))
-                {
-                    var goldenImg = bridge.Image;
-                    int gw = goldenBmp.Width;
-                    int gh = goldenBmp.Height;
+                Cv2.Threshold(src, output, 0, 255, ThresholdTypes.Otsu);
 
-                    foreach (var bloc in goldenGrid.IterBlocs())
-                    {
-                        if (bloc != null)
-                        {
-                            int x = bloc.CenterX - gw / 2;
-                            int y = bloc.CenterY - gh / 2;
-                            int x2 = x + gw;
-                            int y2 = y + gh;
-                            x = Math.Max(x, 0);
-                            y = Math.Max(y, 0);
-                            x2 = Math.Min(x2, W);
-                            y2 = Math.Min(y2, H);
-                            int ww = x2 - x;
-                            int hh = y2 - y;
-                            largeGG[y, y2, x, x2] = goldenImg[0, hh, 0, ww];
-                        }
-                    }
-                }
-            }
+            int dx = Math.Min(8, output.Width);
+            int dy = Math.Min(8, output.Height);
+            var ave = Cv2.Mean(output[0, dy, 0, dx]);
+            bool isBlackGnd = (ave.Val0 < 120);
+            if (!isBlackGnd)
+                Cv2.BitwiseNot(output, output);     // 維持晶粒為 white blob !!!
+            
+            Cv2.Dilate(output, output, null, iterations: 2);
+            Cv2.Erode(output, output, null, iterations: 2);
+            
+            Mat tmp = new Mat();
+            var sz = new OpenCvSharp.Size(3, 3);
+            Cv2.Blur(output, tmp, sz);
+            output?.Dispose();
+            output = tmp;
 
-            //var ggBoundary = JetEazy.Qcvt.CV(goldenGrid.GetBoundary());
-            //largeGG.Rectangle(ggBoundary, Scalar.Black, 5);
-
-            return largeGG;
+            return output;
         }
-        void clear_golden_grid_cache()
+
+        #region PRIVATE_HELPER_FUNCTIONS
+        void offset(EzBloc bloc, int dx, int dy)
         {
-            _recipe?.TrayMiscSettings.GetGoldenGrid(true);
-            _largeGoldenGridImage?.Dispose();
-            _largeGoldenGridImage = null;
+            if (bloc == null)
+                return;
+            var cc = bloc.Center?.Offset(dx, dy);
+            bloc.Rect.Offset(dx, dy);
+            bloc.Center = cc;
         }
         #endregion
 

@@ -36,10 +36,10 @@
             this.picIcon = new System.Windows.Forms.PictureBox();
             this.lblTitle = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.lblShadowInfo = new System.Windows.Forms.Label();
             this.lblBlinker = new System.Windows.Forms.Label();
             this.lblCoordInfo = new System.Windows.Forms.Label();
             this.cvMatViewer = new JetEazy.OpenCV.Viewer.CvMatViewer();
-            this.lblShadowInfo = new System.Windows.Forms.Label();
             this.tableLayoutPanel0.SuspendLayout();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picIcon)).BeginInit();
@@ -61,7 +61,7 @@
             this.tableLayoutPanel0.RowCount = 3;
             this.tableLayoutPanel0.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 38F));
             this.tableLayoutPanel0.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel0.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
+            this.tableLayoutPanel0.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 38F));
             this.tableLayoutPanel0.Size = new System.Drawing.Size(541, 790);
             this.tableLayoutPanel0.TabIndex = 17;
             // 
@@ -111,53 +111,11 @@
             this.panel2.Controls.Add(this.lblBlinker);
             this.panel2.Controls.Add(this.lblCoordInfo);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 741);
+            this.panel2.Location = new System.Drawing.Point(0, 753);
             this.panel2.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(541, 48);
+            this.panel2.Size = new System.Drawing.Size(541, 36);
             this.panel2.TabIndex = 17;
-            // 
-            // lblBlinker
-            // 
-            this.lblBlinker.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.lblBlinker.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblBlinker.ForeColor = System.Drawing.Color.White;
-            this.lblBlinker.Location = new System.Drawing.Point(13, 11);
-            this.lblBlinker.Name = "lblBlinker";
-            this.lblBlinker.Size = new System.Drawing.Size(22, 21);
-            this.lblBlinker.TabIndex = 18;
-            // 
-            // lblCoordInfo
-            // 
-            this.lblCoordInfo.BackColor = System.Drawing.Color.Transparent;
-            this.lblCoordInfo.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblCoordInfo.Font = new System.Drawing.Font("微軟正黑體", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.lblCoordInfo.ForeColor = System.Drawing.Color.Lime;
-            this.lblCoordInfo.Location = new System.Drawing.Point(0, 0);
-            this.lblCoordInfo.Name = "lblCoordInfo";
-            this.lblCoordInfo.Padding = new System.Windows.Forms.Padding(49, 0, 0, 0);
-            this.lblCoordInfo.Size = new System.Drawing.Size(541, 48);
-            this.lblCoordInfo.TabIndex = 17;
-            this.lblCoordInfo.Text = "Camera Viewer";
-            this.lblCoordInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // cvMatViewer
-            // 
-            this.cvMatViewer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.cvMatViewer.ClearLiveBackgroundEnabled = true;
-            this.cvMatViewer.CrosshairsColor = System.Drawing.Color.Gold;
-            this.cvMatViewer.CrosshairsVisible = false;
-            this.cvMatViewer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.cvMatViewer.ForeColor = System.Drawing.Color.Black;
-            this.cvMatViewer.GridLineColor = System.Drawing.Color.LightGray;
-            this.cvMatViewer.GridLinesVisible = false;
-            this.cvMatViewer.Image = null;
-            this.cvMatViewer.Location = new System.Drawing.Point(0, 39);
-            this.cvMatViewer.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
-            this.cvMatViewer.Name = "cvMatViewer";
-            this.cvMatViewer.RulerVisible = false;
-            this.cvMatViewer.Size = new System.Drawing.Size(541, 700);
-            this.cvMatViewer.TabIndex = 16;
             // 
             // lblShadowInfo
             // 
@@ -169,13 +127,56 @@
             this.lblShadowInfo.Text = "label1";
             this.lblShadowInfo.Visible = false;
             // 
-            // JezImageViewPanel
+            // lblBlinker
+            // 
+            this.lblBlinker.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.lblBlinker.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblBlinker.ForeColor = System.Drawing.Color.White;
+            this.lblBlinker.Location = new System.Drawing.Point(13, 10);
+            this.lblBlinker.Name = "lblBlinker";
+            this.lblBlinker.Size = new System.Drawing.Size(16, 16);
+            this.lblBlinker.TabIndex = 18;
+            // 
+            // lblCoordInfo
+            // 
+            this.lblCoordInfo.BackColor = System.Drawing.Color.Transparent;
+            this.lblCoordInfo.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblCoordInfo.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblCoordInfo.ForeColor = System.Drawing.Color.Lime;
+            this.lblCoordInfo.Location = new System.Drawing.Point(0, 0);
+            this.lblCoordInfo.Name = "lblCoordInfo";
+            this.lblCoordInfo.Padding = new System.Windows.Forms.Padding(39, 0, 0, 0);
+            this.lblCoordInfo.Size = new System.Drawing.Size(541, 36);
+            this.lblCoordInfo.TabIndex = 17;
+            this.lblCoordInfo.Text = "Camera Viewer";
+            this.lblCoordInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // cvMatViewer
+            // 
+            this.cvMatViewer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
+            this.cvMatViewer.ClearLiveBackgroundEnabled = true;
+            this.cvMatViewer.CrosshairsColor = System.Drawing.Color.Gold;
+            this.cvMatViewer.CrosshairsVisible = false;
+            this.cvMatViewer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.cvMatViewer.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.cvMatViewer.ForeColor = System.Drawing.Color.Black;
+            this.cvMatViewer.GridLineColor = System.Drawing.Color.LightGray;
+            this.cvMatViewer.GridLinesVisible = false;
+            this.cvMatViewer.Image = null;
+            this.cvMatViewer.Location = new System.Drawing.Point(0, 39);
+            this.cvMatViewer.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
+            this.cvMatViewer.Name = "cvMatViewer";
+            this.cvMatViewer.RulerVisible = false;
+            this.cvMatViewer.Size = new System.Drawing.Size(541, 712);
+            this.cvMatViewer.TabIndex = 16;
+            // 
+            // JezTransImageViewPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tableLayoutPanel0);
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.Name = "JezImageViewPanel";
+            this.Name = "JezTransImageViewPanel";
             this.Size = new System.Drawing.Size(541, 790);
             this.tableLayoutPanel0.ResumeLayout(false);
             this.panel1.ResumeLayout(false);

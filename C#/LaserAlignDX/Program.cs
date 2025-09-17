@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
+using Traveller106;
 
 namespace LaserAlignDX
 {
@@ -14,6 +15,7 @@ namespace LaserAlignDX
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            LtAoiFactory.Migrate();
 
             // 只跑單元測試
             if (run_unit_tests())
@@ -25,8 +27,10 @@ namespace LaserAlignDX
                 return;
             }
 
-            //var frm = new FormCalibration();
             var frm = new Traveller106.frmMainDX();
+            
+            //frm.Load += (s, e) => GaMvcConfig.OpenCalibrationTool();
+
             Application.Run(frm);
         }
 

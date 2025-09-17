@@ -26,7 +26,7 @@ namespace JetEazy.FormSpace
         void Init(string eStrMsg,bool iswarning=false)
         {
             this.Text = (iswarning ? "警告视窗" : "询问视窗");
-            panel1.BackColor = (iswarning ? Color.Red : Color.FromArgb(255, 255, 192));
+            panel1.BackColor = (iswarning ? Color.HotPink : Color.FromArgb(255, 255, 192));
 
             lblMessageText = label1;
             btnCancel = button1;

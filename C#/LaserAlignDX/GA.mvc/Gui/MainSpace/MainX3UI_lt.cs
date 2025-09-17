@@ -1,15 +1,14 @@
-﻿using Eazy_Project_III;
-using JetEazy.BasicSpace;
+﻿using JetEazy.BasicSpace;
 using System.Windows.Forms;
-using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.GaMainCtrl;
+using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 
 
 namespace LaserAlignDX.UISpace.MainSpace
 {
-    public partial class MainX3UI : UserControl //, IMainUI
+    public partial class MainX3UI : UserControl, IMainUI
     {
         //public event EventHandler<MainUIStateChangedEventArgs> OnStateChanged;
-        public delegate void ChangeStateHandler(MainS1State status, object tag = null);
+        //public delegate void ChangeStateHandler(MainS1State status, object tag = null);
         public event ChangeStateHandler OnChangeState;
 
         #region PRIVATE_DATA
@@ -21,18 +20,24 @@ namespace LaserAlignDX.UISpace.MainSpace
             InitializeComponent();
         }
 
+        public Control Window => this;
+
         public void Init()
         {
             CommonLogClass.Instance.SetRichTextBox(richTextBox1);
 
-            _mainCtrl = new GaMainCtrl();
+            _mainCtrl = GaMvcConfig.CreateMainCtrl();
 
             _mainCtrl.Attach( new[] { mvsui1, mvsui2 },
                               new[] { DSFly0, DSFly1, DSFly2, DSFly3 },
                               label1 );
 
             //_mainCtrl.OnStateChanged += (s, e) => OnStateChanged?.Invoke(s, e);
-            _mainCtrl.OnStateChanged += (s, e) => OnChangeState?.Invoke(e.Status, e.Tag);
+
+            _mainCtrl.OnStateChanged += (s, e) =>
+            {
+                OnChangeState?.Invoke(e.Status, e.Tag);
+            };
         }
         
         public void Tick()

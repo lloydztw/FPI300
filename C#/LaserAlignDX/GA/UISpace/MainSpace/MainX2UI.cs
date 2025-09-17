@@ -1,8 +1,6 @@
 ﻿using Eazy_Project_III;
-using FreeImageAPI;
 using JetEazy.BasicSpace;
 using JzDisplay;
-using JzDisplay.UISpace;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace;
@@ -11,7 +9,7 @@ using LaserAlignDX.RunSpace;
 using NeedleX.ProcessSpace;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -20,23 +18,22 @@ using System.Threading.Tasks;
 //using System.Reflection.Emit;
 using System.Windows.Forms;
 using Traveller106;
-using TravellerMINIX6.OPSpace;
 using TravellerMINIX6.ProcessSpace;
 using VisionDesigner;
 using VsCommon.ControlSpace;
 
 namespace LaserAlignDX.UISpace.MainSpace
 {
-    public partial class MainX2UI : UserControl
+    public partial class MainX2UI : UserControl, IMainUI
     {
+        public event EventHandler<MainUiStateEventArgs> OnStateChanged;
 
+        #region GLOBAL_MESS
         List<CollectResultClass> collectResultClasses = new List<CollectResultClass>();
-
         protected RecipeMainX2Class xRecipe
         {
             get { return RecipeMainX2Class.Instance; }
         }
-
         protected MachineCollectionClass MACHINECollection
         {
             get
@@ -48,18 +45,23 @@ namespace LaserAlignDX.UISpace.MainSpace
         {
             get { return (MainX2MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
         }
+        #endregion
 
+        #region PRIVATE_MEMBERS
         bool m_plcStartOld = false;
         bool m_plcGetImageOld = false;
-
         Button btnReady;
         Label[] m_MappingItem;
         Button btnChangeReplaceImage;
+        #endregion
 
         public MainX2UI()
         {
             InitializeComponent();
         }
+
+        public Control Window => this;
+
         public void Init()
         {
             //init_Display();
@@ -683,7 +685,7 @@ namespace LaserAlignDX.UISpace.MainSpace
         }
         public void ChangeRecipe()
         {
-
+            this.MappingInit();
         }
         public void SetEnable(bool isendable)
         {
@@ -1068,14 +1070,16 @@ namespace LaserAlignDX.UISpace.MainSpace
             GC.Collect();
         }
 
-        public delegate void ChangeStateHandler(MainS1State status, object tag = null);
-        public event ChangeStateHandler OnChangeState;
+
+        //----------------------------------------------------------------------------------
+        //以下改用標準 EventHandler 與 EventArgs
+        //----------------------------------------------------------------------------------
+        //public delegate void ChangeStateHandler(MainS1State status, object tag = null);
+        //public event ChangeStateHandler OnChangeState;
+        //----------------------------------------------------------------------------------
         protected void FireChangeState(MainS1State status, object tag = null)
         {
-            if (OnChangeState != null)
-            {
-                OnChangeState(status, tag);
-            }
+            OnStateChanged?.Invoke(this, new MainUiStateEventArgs(status, tag));
         }
 
         #region Add Shpae to display

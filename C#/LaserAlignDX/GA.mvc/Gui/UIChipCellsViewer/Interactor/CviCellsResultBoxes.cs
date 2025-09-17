@@ -29,7 +29,7 @@ using CELL = LaserAlignDX.OPSpace.RegionCellX3Class;
 using InspectParams = LaserAlignDX.OPSpace.RecipeSpace.InspectX3ParaClass;
 using RECIPE = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
 
-namespace LaserAlignDX.UISpace.ChipCellsViewer
+namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 {
     public class CviCellsResultBoxes : CvImageViewerInteractor
     {

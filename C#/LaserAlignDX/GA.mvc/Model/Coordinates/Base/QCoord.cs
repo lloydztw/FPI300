@@ -24,17 +24,13 @@ namespace LaserAlignDX.Model.Coords
     /// </summary>
     public class QCoord : QVector
     {
-        public virtual int ORDER
-        {
-            get; protected set;
-        } = 1;
         public virtual string UNIT
         {
             get; protected set;
         } = "pix";
         public override string ToString()
         {
-            string str = GetType().Name.Replace("Coord", "") + $" ({X:0.000}, {Y:0.000}) {UNIT}";
+            string str = $"({X:0.000}, {Y:0.000}) {UNIT}";
             return str;
         }
 
@@ -43,7 +39,6 @@ namespace LaserAlignDX.Model.Coords
         }
         public QCoord(QCoord c) : base(c)
         {
-            this.ORDER = c.ORDER;
             this.UNIT = c.UNIT;
         }
         public QCoord(QVector v) : base(v)
@@ -52,27 +47,39 @@ namespace LaserAlignDX.Model.Coords
         public QCoord(double x, double y) : base(x, y)
         {
         }
-        public QCoord(double x, double y, int order, string unit) : base(x, y)
+        public QCoord(double x, double y, string unit) : base(x, y)
         {
-            this.ORDER = order;
             this.UNIT = unit;
         }
 
+#if(OPT_RESERVED)
         public QCoord Normalize(bool inplace = false)
         {
+            
+
             if (inplace)
             {
                 if (ORDER > 1)
                 {
                     for (int i = 0, N = this.Length; i < N; i++)
+                    {
                         this[i] /= ORDER;
+                    }
                 }
                 return this;
             }
             else
             {
-                var v =  this / ORDER;
-                return new QCoord(v) { ORDER = this.ORDER, UNIT = this.UNIT };
+                //var v =  this / ORDER;
+                //return new QCoord(v) { ORDER = this.ORDER, UNIT = this.UNIT };
+                int order = Math.Max(this.ORDER, 1);
+                return new QCoord()
+                {
+                    X = this.X / order,
+                    Y = this.Y / order,
+                    ORDER = this.ORDER,
+                    UNIT = this.UNIT,
+                };
             }
         }
         public QCoord DeNormalize(bool inplace = false)
@@ -87,8 +94,16 @@ namespace LaserAlignDX.Model.Coords
             }
             else
             {
-                var v = this * ORDER;
-                return new QCoord(v) { ORDER = this.ORDER, UNIT = this.UNIT };
+                //var v = this * ORDER;
+                //return new QCoord(v) { ORDER = this.ORDER, UNIT = this.UNIT };
+                int order = Math.Max(this.ORDER, 1);
+                return new QCoord()
+                {
+                    X = this.X * order,
+                    Y = this.Y * order,
+                    ORDER = this.ORDER,
+                    UNIT = this.UNIT,
+                };
             }
         }
         public static QCoord[] Normalize(QCoord[] coords, bool inplace = false)
@@ -125,6 +140,7 @@ namespace LaserAlignDX.Model.Coords
                 return ret;
             }
         }
+#endif
 
         public virtual void Load(string iniFileName, string sectName, string keyName)
         {
@@ -134,13 +150,13 @@ namespace LaserAlignDX.Model.Coords
 
             int i = 0;
             if (strs.Length > i) UNIT = strs[i++].Trim();
-            if (strs.Length > i) if (int.TryParse(strs[i++], out int order)) ORDER = order;
-            if (strs.Length > i) if (double.TryParse(strs[i++], out double vx)) X = vx;
-            if (strs.Length > i) if (double.TryParse(strs[i++], out double vy)) Y = vy;
+            if (strs.Length > i) if (int.TryParse(strs[i++].Trim(), out int len)) {}
+            if (strs.Length > i) if (double.TryParse(strs[i++].Trim(), out double vx)) X = vx;
+            if (strs.Length > i) if (double.TryParse(strs[i++].Trim(), out double vy)) Y = vy;
         }
         public virtual void Save(string iniFileName, string sectName, string keyName)
         {
-            string str = $"{UNIT},{ORDER},{X:0.000000},{Y:0.000000}";
+            string str = $"{UNIT}, {Length}, {X:0.000000}, {Y:0.000000}";
             JetEazy.Win32.Win32Ini.Save(str, iniFileName, sectName, keyName);
         }
     }

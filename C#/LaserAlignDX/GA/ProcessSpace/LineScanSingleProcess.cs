@@ -55,7 +55,8 @@ namespace TravellerMINIX6.ProcessSpace
             {
                 case 5:
 
-                    FireMessage(new ProcessEventArgs("Record.Start"));
+                    //FireMessage(new ProcessEventArgs("Record.Start"));
+                    FireStarted();
 
                     if (_modeArg != null)
                     {
@@ -78,7 +79,7 @@ namespace TravellerMINIX6.ProcessSpace
                             //  不再使用不安全的 cMvdInput !!!
                             Bitmap bitmap = GaImageUtil.LoadBigImage(fileName);
                             pRun.LineScanCamImageHolder.TakeOver(bitmap, System.IO.Path.GetFileName(fileName));
-                            FireLiveImaging(bitmap);
+                            //FireLiveImaging(bitmap);
                         }
                         else
                         {
@@ -190,7 +191,7 @@ namespace TravellerMINIX6.ProcessSpace
 
                             #endregion
 
-                            FireMessage(new ProcessEventArgs("Show.X", $"{(pRun.ElapsedTime * 1.0 / 1000).ToString("0.0")} s"));
+                            FireCompleted(new ProcessEventArgs("Show.X", $"{(pRun.ElapsedTime * 1.0 / 1000).ToString("0.0")} s"));
                         }
                     }
                     break;

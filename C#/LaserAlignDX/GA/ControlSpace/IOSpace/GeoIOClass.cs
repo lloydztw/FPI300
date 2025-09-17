@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using JetEazy.ControlSpace;
+using JetEazy.ControlSpace.PLCSpace;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using JetEazy.ControlSpace;
-using JetEazy.ControlSpace.PLCSpace;
+using System.Text;
 
 namespace VsCommon.ControlSpace.IOSpace
 {
@@ -92,6 +89,7 @@ namespace VsCommon.ControlSpace.IOSpace
             Srr.Close();
             Srr.Dispose();
         }
+
         //當有Input Trigger時，產生OnTrigger
         public delegate void TriggerHandler(string eventstring);
         public event TriggerHandler TriggerAction;

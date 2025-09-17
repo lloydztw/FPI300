@@ -21,7 +21,7 @@ namespace LaserAlignDX.Model.Coords
     public enum CarrierEnum : int
     {
         [Description("載台 1")]
-        C1,
+        C1 = 0,
         [Description("載台 2")]
         C2,
     }
@@ -29,7 +29,7 @@ namespace LaserAlignDX.Model.Coords
     public enum SuckerRowEnum : int
     {
         [Description("吸嘴排 1")]
-        S1,
+        S1 = 0,
         [Description("吸嘴排 2")]
         S2,
     }

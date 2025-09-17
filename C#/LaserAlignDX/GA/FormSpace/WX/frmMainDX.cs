@@ -1,27 +1,24 @@
-﻿using Common.RecipeSpace;
-using Eazy_Project_III;
+﻿using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
 using Eazy_Project_III.UISpace;
 using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
 using JetEazy.FormSpace;
-using JetEazy.ImageViewerEx;
 using JetEazy.UISpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.RunSpace;
+using LaserAlignDX.UISpace;
 using NeedleX.ProcessSpace;
 using PhotoMachine.UISpace;
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using System.Xml.Linq;
 using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
-//using Traveller106.OPSpace;
-//using JetEazy;
+
 
 namespace Traveller106
 {
@@ -810,12 +807,18 @@ namespace Traveller106
         {
             MAINUI.BackColor = SystemColors.Control;
             MAINUI.Initial(VERSION, OPTION, MACHINECollection.MACHINE);
-            MAINUI.OnChangeState += MAINUI_OnChangeState;
+            MAINUI.OnStateChanged += MAINUI_OnChangeState;
         }
 
         #region EVENT_HANDLERS
-        private void MAINUI_OnChangeState(MainS1State status, object tag = null)
+        private void MAINUI_OnChangeState(object sender, MainUiStateEventArgs e)
         {
+            if (e == null)
+                return;
+
+            var status = e.Status;
+            var tag = e.Tag;
+
             switch (status)
             {
                 case MainS1State.S1_READY:

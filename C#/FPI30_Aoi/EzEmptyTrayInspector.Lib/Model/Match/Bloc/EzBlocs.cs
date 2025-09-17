@@ -23,7 +23,11 @@ namespace JetEazy.Match
     public partial class EzBloc
     {
         public Rectangle Rect;
-        public QVector Center;
+        public QVector Center
+        {
+            get;
+            set;
+        }
         public double Score;
         public double SQRatio;
         public object Owner;

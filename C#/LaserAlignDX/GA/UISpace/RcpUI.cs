@@ -2,15 +2,11 @@
 using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
 using JetEazy.FormSpace;
-using LaserAlignDX.FormSpace;
+using LaserAlignDX;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Windows.Forms;
 using Traveller106;
-//using Traveller106.OPSpace;
-
-//using Mist.OPSpace;
-//using Mist.DBSpace;
 
 namespace PhotoMachine.UISpace
 {
@@ -427,10 +423,12 @@ namespace PhotoMachine.UISpace
         //frmFPIRecipe frmRecipeSetup = null;
         void showRecipeDialogWindow()
         {
-            using (var frmRecipeSetup = new frmFPIRecipe())
-            {
-                frmRecipeSetup.ShowDialog();
-            }
+            //using (var frmRecipeSetup = new frmFPIRecipe())
+            //{
+            //    frmRecipeSetup.ShowDialog();
+            //}
+
+            GaMvcConfig.OpenRecipeEditor();
 
             //int mode = -1;
             //using (var frm = new frmSelectScanInspectMode())

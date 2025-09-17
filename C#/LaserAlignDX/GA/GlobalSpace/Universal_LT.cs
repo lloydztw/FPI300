@@ -16,13 +16,10 @@ using LaserAlignDX.BasicSpace.ParaSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System.IO;
-using System.Windows.Forms;
 using TravellerMINIX6.OPSpace;
-
-//using Traveller106.OPSpace;
-//using PhotoMachine.ControlSpace.MachineSpace;
 using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
+
 
 namespace Traveller106
 {
@@ -31,19 +28,17 @@ namespace Traveller106
         public static readonly bool N_THREADS_ENABLED = true;
         public static readonly int N_THREADS = 16;
 
-        public static bool IsNoUseCCD = true;
+        public static bool IsNoUseCCD = false;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/09/11";
+        public const string VersionDate = "2025/09/15";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
-        //public static LinescanTypeEnum LINESCANTYPE = LinescanTypeEnum.MIND;
         public static FactoryName FACTORYNAME = FactoryName.NONE;
-
 
         /// <summary>
         /// 这个用来区分是否在图片上画图
@@ -64,26 +59,28 @@ namespace Traveller106
                 switch (OPTION)
                 {
                     default:
+                        //return $"{Application.StartupPath}";
                         // 直接指定成 最後佈署的資料夾
-                        //      "D:\\AUTOMATION\\Eazy FPI30\\_BIN_"
                         // 這樣 原代碼 C# 專案, 
                         //      才能放在任意資料夾
                         //      不需要 依附於 最後佈署的資料夾 
                         return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
-                        return $"{Application.StartupPath}";
+                        //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
                 }
             }
         }
+
         public static string UIPATH
         {
             get { return System.IO.Path.Combine(APP_ROOT_PATH, "UI"); }
         }
 
         //public static string CODEPATH = @"D:\AUTOMATION";
-        public static string VEROPT = VERSION.ToString() + "-" + OPTION.ToString();
-        public static string MAINPATH = APP_ROOT_PATH + @"\" + VEROPT;
-        public static string DBPATH = MAINPATH + @"\DB";
-        public static string RCPPATH = MAINPATH + @"\PIC";
+        public static string VEROPT => VERSION.ToString() + "-" + OPTION.ToString();
+        public static string MAINPATH => APP_ROOT_PATH + @"\" + VEROPT;
+
+        public static string DBPATH => MAINPATH + @"\DB";
+        public static string RCPPATH => MAINPATH + @"\PIC";
         //public static string UIPATH = CODEPATH + @"\" + VERSION.ToString() + "UI";
 
         public static string LOG_ROOT
@@ -122,19 +119,19 @@ namespace Traveller106
             get { return System.IO.Path.Combine(LOG_ROOT, "Tcps"); }
         }
 
-        //public static string MAPPINGDATA = MAINPATH + @"\MAPPINGDATA";//存储tray的数据
-        public static string HISTORY = MAINPATH + @"\HISTORYDATA";//存储tray的数据
-        public static string COLLECT = MAINPATH + @"\COLLECT";
-        //public static string BACKUPDBPATH = MAINPATH + @"\BACKUPDB";
-        public static string WORKPATH = MAINPATH + @"\WORK";
-        //public static string DEBUGRAWPATH = MAINPATH + @"\ORG";              //偵錯儲存的原圖位置
-        public static string DEBUGRESULTPATH = MAINPATH + @"\DEBUG";         //偵錯結果圖位置
-        //public static string TESTRESULTPATH = @"D:\COPYDATA";                               //偵錯結果圖位置
-        public static string DEBUGSRCPATH = MAINPATH + @"\SRCDEBUG";         //離線測試用的原圖位置
-        //public static string OCRIMAGEPATH = @"D:\LOA\OCR\";                                 //保存的OCR测试图位置  
-        //public static string BarcodeIMAGEPATH = @"D:\LOA\Barcode\";                         //保存的OCR测试图位置  
-        //public static string DEBUG_DATA_IMAGE = @"D:\01测试镭雕引导定位存储图片";                         //保存的OCR测试图位置  
-        public static string PATH_CALI = MAINPATH + @"\CALI";
+        //public static string MAPPINGDATA => MAINPATH + @"\MAPPINGDATA";                       //存储tray的数据
+        public static string HISTORY => MAINPATH + @"\HISTORYDATA";                             //存储tray的数据
+        public static string COLLECT => MAINPATH + @"\COLLECT";
+        //public static string BACKUPDBPATH => MAINPATH + @"\BACKUPDB";
+        public static string WORKPATH => MAINPATH + @"\WORK";
+        //public static string DEBUGRAWPATH => MAINPATH + @"\ORG";                              //偵錯儲存的原圖位置
+        public static string DEBUGRESULTPATH => MAINPATH + @"\DEBUG";                           //偵錯結果圖位置
+        //public static string TESTRESULTPATH => @"D:\COPYDATA";                                //偵錯結果圖位置
+        public static string DEBUGSRCPATH => MAINPATH + @"\SRCDEBUG";                           //離線測試用的原圖位置
+        //public static string OCRIMAGEPATH => @"D:\LOA\OCR\";                                  //保存的OCR测试图位置  
+        //public static string BarcodeIMAGEPATH => @"D:\LOA\Barcode\";                          //保存的OCR测试图位置  
+        //public static string DEBUG_DATA_IMAGE => @"D:\01测试镭雕引导定位存储图片";              //保存的OCR测试图位置  
+        public static string PATH_CALI => MAINPATH + @"\CALI";
 
         /// <summary>
         /// 跑线时读到SN.txt里的东西
@@ -142,15 +139,15 @@ namespace Traveller106
         public static string DATASNTXT = "";
         public static string RELATECOLORSTR = "";
         public static string SHOWBMPSTRING = "view.png";
-        public static string PlayerPASSPATH = WORKPATH + @"\TADA.wav";
-        public static string PlayerFAILPATH = WORKPATH + @"\RoutingNG.wav";
-        public static string PlayerOPPWRATPATH = WORKPATH + @"\OPPWRAP.wav";
+        public static string PlayerPASSPATH => WORKPATH + @"\TADA.wav";
+        public static string PlayerFAILPATH => WORKPATH + @"\RoutingNG.wav";
+        public static string PlayerOPPWRATPATH => WORKPATH + @"\OPPWRAP.wav";
         public static string RunDebugOrRelease = "";
         public static string FAILBARCODE = "";
 
         //public static string MainX6_Path = "D:\\CollectPictures\\Inspection\\";
 
-        static string DATACNNSTRING = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + DBPATH + @"\DATA.mdb;Jet OLEDB:Database Password=12892414;";
+        static string DATACNNSTRING => "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + DBPATH + @"\DATA.mdb;Jet OLEDB:Database Password=12892414;";
         static int LanguageIndex = 0;
 
         public static string InitialErrorString = "";
@@ -214,7 +211,7 @@ namespace Traveller106
             //string str = new List<int>(ints).ToString();
 
             bool ret = true;
-            WORKPATH = MAINPATH + @"\WORK";
+            //WORKPATH = MAINPATH + @"\WORK";
 
             try
             {

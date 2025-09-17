@@ -231,6 +231,7 @@
     <Compile Include="Model\Match\Bloc\EzBlocs2.cs" />
     <Compile Include="Model\Match\EzAoiBase.cs" />
     <Compile Include="Model\Match\EzAoiBaseUtil.cs" />
+    <Compile Include="Model\Match\EzOnGridNgBlocsPredictor.cs" />
     <Compile Include="Model\Match\EzRotAngleFinder.cs" />
     <Compile Include="Model\Match\EzOutGridNgBlocsDetector.cs" />
     <Compile Include="Model\Match\EzTemplateMatcher.cs" />
@@ -252,6 +253,9 @@
     <Compile Include="Model\Result\MatchResult.cs" />
     <Compile Include="Model\Utils\ImageUtil.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Utils\DebugUtil\EzTiming.cs" />
+    <Compile Include="Utils\DebugUtil\LtDebug.cs" />
+    <Compile Include="Utils\DebugUtil\VxDebugDrawer.cs" />
     <EmbeddedResource Include="Gui\Forms\FormSplash.resx">
       <DependentUpon>FormSplash.cs</DependentUpon>
     </EmbeddedResource>

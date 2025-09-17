@@ -3,24 +3,26 @@ using JetEazy.BasicSpace;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Interface;
-using JetEazy.Match;
 using JetEazy.Utils;
 using JzDisplay;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Windows.Forms;
-using Traveller106;
 using WorldOfMoveableObjects;
 
 namespace LaserAlignDX.FormSpace
 {
+    /// <summary>
+    /// 參數設定視窗首頁
+    /// (以後請用大寫字母開頭: FrmFPIRecipe)
+    /// </summary>
     public partial class frmFPIRecipe : Form
     {
-        #region PRIVATE_MEMBERS
+        #region GLOBAL_MESS
         protected IxLineScanCam IScanCam
         {
             get { return Traveller106.Universal.IxLineScan; }
@@ -29,6 +31,9 @@ namespace LaserAlignDX.FormSpace
         {
             get { return RecipeFPIX3Class.Instance; }
         }
+        #endregion
+
+        #region PRIVATE_DATA
         //Mover xMover = new Mover();
         Mover xMovers = new Mover();
         bool bSelectRegion = false;
@@ -76,6 +81,26 @@ namespace LaserAlignDX.FormSpace
         Button btnSaveImage => button11;
         #endregion
 
+        #region BMP_ORG_管理
+        //---------------------------------------------------------------------
+        // 2025-09-14 LETIAN: 載台1 與 載台2 各自有自己的 bmpOrg
+        //---------------------------------------------------------------------
+        CarrierEnum ActiveCarrierID => GaMvcConfig.SysModel.ActiveCarrierID;
+        Bitmap peekBmpOrg(bool clone = false)
+        {
+            var bmpOrg = xRecipe.PeekBmpOrg(ActiveCarrierID);
+            return clone ? (Bitmap)bmpOrg?.Clone() : bmpOrg;
+        }
+        void takeInBmpOrg(Bitmap bmp)
+        {
+            if(bmp == null) return;
+            xRecipe.TakeInBmpOrg(ActiveCarrierID, bmp);
+        }
+        void releaseBmpOrg(bool save)
+        {
+            xRecipe.ReleaseBmpsOrg(save);
+        }
+        #endregion
 
         public frmFPIRecipe()
         {
@@ -83,11 +108,7 @@ namespace LaserAlignDX.FormSpace
             this.Load += FrmFPIRecipe_Load;
             this.FormClosed += FrmFPIRecipe_FormClosed;
             this.SizeChanged += FrmFPIRecipe_SizeChanged;
-
-            LtAoiFactory.OnLineScanRequested += LtAoi_OnLineScanRequested;
         }
-
-
 
         private void FrmFPIRecipe_SizeChanged(object sender, EventArgs e)
         {
@@ -99,9 +120,6 @@ namespace LaserAlignDX.FormSpace
             // 注意: xTimer 不用之後, 必須調用 Dispose() !!!
             xTimer?.Dispose();
             xTimer = null;
-
-            // 卸載 EventHandler
-            LtAoiFactory.OnLineScanRequested -= LtAoi_OnLineScanRequested;
         }
 
         private void FrmFPIRecipe_Load(object sender, EventArgs e)
@@ -143,8 +161,8 @@ namespace LaserAlignDX.FormSpace
             xTimer.Enabled = true;
             xTimer.Tick += XTimer_Tick;
 
-            DS1.ReplaceDisplayImage(xRecipe.bmpOrg);
-            DS2.ReplaceDisplayImage(xRecipe.bmpOrgNoTray);
+            DS1.ReplaceDisplayImage(peekBmpOrg(clone: true));
+            //DS2.ReplaceDisplayImage(xRecipe.bmpOrgNoTray);
 
             propertyGrid1.SelectedObject = RecipeParaGridClass.Instance;
 
@@ -171,12 +189,11 @@ namespace LaserAlignDX.FormSpace
 #endif
         }
 
-
-
         //frmNoTrayX3 frmNoTrayX3x = null;
         private void BtnNoTrayTemplateForm_Click(object sender, EventArgs e)
         {
-            openEmptyTrayInspectorTool();
+            GaMvcConfig.OpenEmptyTrayInspectTool(this);
+            propertyGrid1.SelectedObject = RecipeParaGridClass.Instance;
 
             //frmNoTrayX3x = new frmNoTrayX3();
             //frmNoTrayX3x.ShowDialog();
@@ -193,13 +210,10 @@ namespace LaserAlignDX.FormSpace
             string _filepath = JetEazy.BasicSpace.JzToolsClass.SaveFilePicker("JPG Files (*.jpg)|*.JPG|" + "BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
             if (!string.IsNullOrEmpty(_filepath))
             {
-                using (IEzImage ezImage = new EzFreeBitmap(xRecipe.bmpOrg, true))
+                using (IEzImage ezImage = new EzFreeBitmap(peekBmpOrg(), false))
                 {
                     ezImage.Save(_filepath);
                 }
-                //IEzImage ezImage = new EzFreeBitmap(xRecipe.bmpOrg, true);
-                //ezImage.Save(_filepath);
-                //ezImage.Dispose();
                 JetEazy.BasicSpace.VsMSG.Instance.Warning($"{ToChangeLanguage("图片保存完成.路径:")}{Environment.NewLine + _filepath}", false);
             }
         }
@@ -241,14 +255,17 @@ namespace LaserAlignDX.FormSpace
                 switch (xTabIndex)
                 {
                     case 0:
-                        xRecipe.bmpOrg.Dispose();
-                        xRecipe.bmpOrg = IScanCam.GetFreeImageBitmap().ToBitmap();
-                        DS1.ReplaceDisplayImage(xRecipe.bmpOrg);
+                        //xRecipe.bmpOrg.Dispose();
+                        //xRecipe.bmpOrg = IScanCam.GetFreeImageBitmap().ToBitmap();
+                        //DS1.ReplaceDisplayImage(xRecipe.bmpOrg);
+                        var newBmp = IScanCam.GetFreeImageBitmap().ToBitmap();
+                        takeInBmpOrg(newBmp);
+                        DS1.ReplaceDisplayImage(newBmp);
                         break;
                     case 1:
-                        xRecipe.bmpOrgNoTray.Dispose();
-                        xRecipe.bmpOrgNoTray = IScanCam.GetFreeImageBitmap().ToBitmap();
-                        DS2.ReplaceDisplayImage(xRecipe.bmpOrgNoTray);
+                        //xRecipe.bmpOrgNoTray.Dispose();
+                        //xRecipe.bmpOrgNoTray = IScanCam.GetFreeImageBitmap().ToBitmap();
+                        //DS2.ReplaceDisplayImage(xRecipe.bmpOrgNoTray);
                         break;
                 }
 
@@ -406,8 +423,7 @@ namespace LaserAlignDX.FormSpace
                 var newBmp = GaImageUtil.LoadBigImage(fileName);
                 if (newBmp != null)
                 {
-                    xRecipe.bmpOrg?.Dispose();
-                    xRecipe.bmpOrg = newBmp;
+                    takeInBmpOrg(newBmp);
                     DS1.ReplaceDisplayImage(newBmp);
                 }
             }
@@ -418,54 +434,40 @@ namespace LaserAlignDX.FormSpace
         }
         void loadBigImage_for_EmptyTray(string fileName)
         {
-            try
-            {
-                var newBmp = GaImageUtil.LoadBigImage(fileName);
-                if (newBmp != null)
-                {
-                    xRecipe.bmpOrgNoTray?.Dispose();
-                    xRecipe.bmpOrgNoTray = newBmp;
-                    DS2.ReplaceDisplayImage(newBmp);
-                }
-            }
-            catch (Exception ex)
-            {
-                JetEazy.BasicSpace.VsMSG.Instance.Warning(ex.Message);
-            }
+            //try
+            //{
+            //    var newBmp = GaImageUtil.LoadBigImage(fileName);
+            //    if (newBmp != null)
+            //    {
+            //        xRecipe.bmpOrgNoTray?.Dispose();
+            //        xRecipe.bmpOrgNoTray = newBmp;
+            //        DS2.ReplaceDisplayImage(newBmp);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    JetEazy.BasicSpace.VsMSG.Instance.Warning(ex.Message);
+            //}
         }
         #endregion
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
+            releaseBmpOrg(save: false);
             xRecipe.Load();
             this.DialogResult = DialogResult.Cancel;
         }
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
+            releaseBmpOrg(save: true);
             //CoarsePositioningClass.Instance.sCoarsePosList = ctlPosClasses[0].GetPositionList();
             //ModelPositioningClass.Instance.sModelPosList = ctlPosClasses[1].GetPositionList();
-
             //GraphicalObject grobj = myMover[0].Source;
             //myRecipe.rect_start = (grobj as JzRectEAG).GetRect;
             //GraphicalObject grobj1 = myMover[1].Source;
             //myRecipe.rect_end = (grobj1 as JzRectEAG).GetRect;
             this.DialogResult = DialogResult.OK;
-        }
-
-        private void LtAoi_OnLineScanRequested(object sender, EventArgs e)
-        {
-            new Action(() =>
-            {
-                //System.Threading.Thread.Sleep(2000);
-                LtAoiFactory.PushBitmap(xRecipe.bmpOrg, "RecipeOrg");
-            }).BeginInvoke(null, null);
-        }
-
-        void openEmptyTrayInspectorTool()
-        {
-            var frmOwner = FindForm();
-            var tool = LtAoiFactory.OpenEmptyTrayInspectorTool(frmOwner, bmpToShow: xRecipe.bmpOrg);
         }
 
         void init_Display()
@@ -501,7 +503,13 @@ namespace LaserAlignDX.FormSpace
         {
             if (!bSelectRegion)
                 return;
-            BoundRect(ref rectf, xRecipe.bmpOrg.Size);
+
+            var bmpOrg = peekBmpOrg();
+            if (bmpOrg == null) 
+                return;
+
+            BoundRect(ref rectf, bmpOrg.Size);
+
             if (rectf.Width > 1 && rectf.Height > 1)
             {
                 //防止大图的问题 不能new图  通过控件的框显示
@@ -533,17 +541,18 @@ namespace LaserAlignDX.FormSpace
                     //    xRecipe.xRectRegionPrint = rectf;
                     //    xRecipe.bmpprinttemplate = xRecipe.bmpOrg.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
                     //    xRecipe.SavePrintTemplate();
-
                     //    break;
+
                     case MeasureType.MeasureAOI:
                         xRecipe.xRectRegionPrint = rectf;
-                        xRecipe.bmpprinttemplate = xRecipe.bmpOrg.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+                        xRecipe.bmpprinttemplate = bmpOrg.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
                         xRecipe.SavePrintTemplate();
                         break;
+
                     case MeasureType.MeasureNoTray:
-                        xRecipe.xRectRegionPrintNoTray = rectf;
-                        xRecipe.bmpprintNoTraytemplate = xRecipe.bmpOrg.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-                        xRecipe.SavePrintNoTrayTemplate();
+                        //xRecipe.xRectRegionPrintNoTray = rectf;
+                        //xRecipe.bmpprintNoTraytemplate = xRecipe.bmpOrg.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+                        //xRecipe.SavePrintNoTrayTemplate();
                         break;
                 }
 
@@ -557,9 +566,9 @@ namespace LaserAlignDX.FormSpace
                 //g.Dispose();
                 //DS1.ReplaceDisplayImage(bmpx);
                 //bmpx.Dispose();
-
                 //xRecipe.SaveBase();
             }
+
             bSelectRegion = false;
         }
         private void DS_CaptureAction2(RectangleF rectf)
@@ -590,10 +599,10 @@ namespace LaserAlignDX.FormSpace
         }
         private void _autoRowCol()
         {
-            //var fullfovBmp = DS2.GetOrgBMP();
-            //var fullfovBmp = xRecipe.bmpOrg;
-            //var grid = LtAoiFactory.DetectGrid(fullfovBmp);
+            //GaMvcConfig.SysModel.AutoBuildRegionCells(peekBmpOrg());
             xRecipe.CreateViews();
+
+            propertyGrid1.SelectedObject = RecipeParaGridClass.Instance;
 
             DS1.ClearStaticMover();
             DS2.ClearStaticMover();

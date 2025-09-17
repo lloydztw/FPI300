@@ -5,9 +5,7 @@ using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.ControlSpace.PLCSpace;
 using System;
 using System.Threading.Tasks;
-using Traveller106.ControlSpace.IOSpace;
 using VsCommon.ControlSpace.IOSpace;
-using VsCommon.ControlSpace.MachineSpace;
 
 namespace VsCommon.ControlSpace.MachineSpace
 {
