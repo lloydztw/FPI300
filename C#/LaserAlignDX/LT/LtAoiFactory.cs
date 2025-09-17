@@ -18,6 +18,7 @@ using EzAoiEmptyTrayInspector;
 using JetEazy.FormSpace;
 using JetEazy.Utils;
 using LaserAlignDX;
+using LaserAlignDX.Model.Coords;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -66,25 +67,34 @@ namespace Traveller106
             return Universal.RCPDB?.RCPItemNow?.Name;
             //return "000_default";
         }
-        public static string RcpGetRecipeFileName(string recipeName)
+        public static string RcpGetRecipeFileName(string recipeName, CarrierEnum C)
         {
             if (string.IsNullOrEmpty(recipeName))
             {
                 RcpCheckActive(silent: true);
                 recipeName = _activeRecipeName;
             }
-            var fileName = System.IO.Path.Combine(_recipePath, recipeName + ".json");
+
+            var fileName = System.IO.Path.Combine(_recipePath, getFname(recipeName, C));
             return fileName;
+        }
+        public static string RcpStemName(string recipeName, CarrierEnum C)
+        {
+            string fname = getFname(recipeName, C);
+            return System.IO.Path.GetFileNameWithoutExtension(fname);
         }
         public static bool RcpCheckActive(bool silent = false)
         {
             var recipeName = _activeRecipeName = GetActiveRecipeNameAtFPI30();
-            var fileName = System.IO.Path.Combine(_recipePath, recipeName + ".json");
-            if (!System.IO.File.Exists(fileName))
+            foreach (CarrierEnum C in Enum.GetValues(typeof(CarrierEnum)))
             {
-                if (!silent)
-                    PromptWarning($"空盤檢測參數 {recipeName} 還沒建立!");
-                return false;
+                var fileName = System.IO.Path.Combine(_recipePath, getFname(recipeName, C));
+                if (!System.IO.File.Exists(fileName))
+                {
+                    if (!silent)
+                        PromptWarning($"{GaUtil.GetEnumDescription(C)} : 空盤檢測參數 {recipeName} 還沒建立!");
+                    return false;
+                }
             }
             return true;
         }
@@ -100,31 +110,39 @@ namespace Traveller106
         {
             if (_activeRecipeName != recipeName)
             {
-                try
+                foreach (CarrierEnum C in Enum.GetValues(typeof(CarrierEnum)))
                 {
-                    var srcFile = System.IO.Path.Combine(_recipePath, _activeRecipeName + ".json");
-                    var dstFile = System.IO.Path.Combine(_recipePath, recipeName + ".json");
-                    if (System.IO.File.Exists(srcFile))
-                        System.IO.File.Move(srcFile, dstFile);
-                }
-                catch(Exception ex)
-                {
-                    PromptWarning($"空盤檢測參數 無法改名:\n\r {_activeRecipeName} -> {recipeName}");
+                    try
+                    {
+                        var srcFile = System.IO.Path.Combine(_recipePath, getFname(_activeRecipeName, C));
+                        var dstFile = System.IO.Path.Combine(_recipePath, getFname(recipeName, C));
+                        if (System.IO.File.Exists(srcFile))
+                            System.IO.File.Move(srcFile, dstFile);
+                    }
+                    catch (Exception ex)
+                    {
+                        PromptWarning($"{GaUtil.GetEnumDescription(C)} : 空盤檢測參數 無法改名:\n\r {_activeRecipeName} -> {recipeName}");
+                    }
                 }
             }
         }
         public static void RcpDelete(string recipeName)
         {
-            try
+            foreach (CarrierEnum C in Enum.GetValues(typeof(CarrierEnum)))
             {
-                var fileName = System.IO.Path.Combine(_recipePath, recipeName);
-                System.IO.File.Delete(fileName);
-            }
-            catch
-            {
-                PromptWarning($"空盤檢測參數 {recipeName} 無法刪除!");
+                try
+                {
+                    var fileName = System.IO.Path.Combine(_recipePath, getFname(recipeName, C));
+                    System.IO.File.Delete(fileName);
+                }
+                catch
+                {
+                    PromptWarning($"{GaUtil.GetEnumDescription(C)} : 空盤檢測參數 {recipeName} 無法刪除!");
+                }
             }
         }
+
+        #region PRIVATE_FUNCTIONS
         static void PromptWarning(string message)
         {
             #region 暫時直接在此調用 GUI 元件
@@ -136,5 +154,10 @@ namespace Traveller106
             msgBox.ShowDialog(frm);
             #endregion
         }
+        static string getFname(string recipeName, CarrierEnum C)
+        {
+            return C != CarrierEnum.C1 ? $"{recipeName}@{C}.json" : $"{recipeName}.json";
+        }
+        #endregion
     }
 }

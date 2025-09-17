@@ -8,6 +8,7 @@ using JetEazy.BasicSpace;
 using JetEazy.CCDSpace;
 using JetEazy.ControlSpace;
 using JetEazy.DBSpace;
+using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.OPSpace;
 using JetEazy.PropertyGridSpace;
@@ -34,7 +35,7 @@ namespace Traveller106
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/09/16";
+        public const string VersionDate = "2025/09/17";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
@@ -295,7 +296,8 @@ namespace Traveller106
             if (!ret)
             {
                 //InitialErrorString = myLanguage.Messages("msg1", LanguageIndex);
-                JetEazy.BasicSpace.VsMSG.Instance.Warning("plc连接错误，请检查。");
+                //JetEazy.BasicSpace.VsMSG.Instance.Warning("plc连接错误，请检查。");
+                VsMessageBox.Warning("PLC 连接错误，请检查設定!");
                 //return false;
             }
 
@@ -305,7 +307,8 @@ namespace Traveller106
             {
                 //InitialErrorString = myLanguage.Messages("msg1", LanguageIndex);
                 //return false;
-                JetEazy.BasicSpace.VsMSG.Instance.Warning("CCD连接错误，请检查。");
+                //JetEazy.BasicSpace.VsMSG.Instance.Warning("CCD连接错误，请检查。");
+                VsMessageBox.Warning("CCD 连接错误，请检查設定!");
             }
 
             //ret &= MyTcpSocketInitial();

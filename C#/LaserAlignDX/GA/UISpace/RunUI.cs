@@ -19,6 +19,7 @@ using MoveGraphLibrary;
 using VsCommon.ControlSpace.MachineSpace;
 using JetEazy.DBSpace;
 using JetEazy.EzImage;
+using JetEazy.FormSpace;
 
 //using Mist.OPSpace;
 //using Mist.DBSpace;
@@ -270,7 +271,7 @@ namespace PhotoMachine.UISpace
                         ezImage.Save(_filepath);
                     }
                     //IScanCam.GetFreeImageBitmap().Save(_filepath, FreeImageAPI.FREE_IMAGE_FORMAT.FIF_BMP);
-                    JetEazy.BasicSpace.VsMSG.Instance.Warning($"{ToChangeLanguage("图片保存完成.路径:")}{Environment.NewLine + _filepath}", false);
+                    VsMessageBox.Info($"{ToChangeLanguage("图片保存完成.路径:")}{Environment.NewLine + _filepath}");
                 }
             }
 

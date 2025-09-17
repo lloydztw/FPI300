@@ -26,6 +26,7 @@ namespace EzAoiEmptyTrayInspector.Model
     /// </summary>
     public class JxTempMatchSettings : JxContainer
     {
+        public JxRect BoundBox = new JxRect("BoundBox", "邊界框(唯讀)(隱藏)");
         public JxRect GoldenBox = new JxRect("GoldenBox", "參考框(唯讀)(隱藏)");
         public JxBitmap GoldenBmp = new JxBitmap("GoldenBmp", "影像比對樣本");
         public JxNumber GoldenRefAngle = new JxNumber("GoldenRefAngle", "參考角度(唯讀)(隱藏)");
@@ -49,6 +50,7 @@ namespace EzAoiEmptyTrayInspector.Model
         {
             //綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
+                BoundBox,
                 GoldenBox,
                 GoldenBmp,
                 GoldenRefAngle,

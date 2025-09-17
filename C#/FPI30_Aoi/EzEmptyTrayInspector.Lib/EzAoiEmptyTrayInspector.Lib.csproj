@@ -169,6 +169,7 @@
     <Compile Include="Ctrl\EzMatchCtrl.cs" />
     <Compile Include="Ctrl\EzRcpContraintCtrl.cs" />
     <Compile Include="Ctrl\EzMatchRcpEditCtrl.cs" />
+    <Compile Include="Ctrl\Interactor\CviRcpBox.cs" />
     <Compile Include="Ctrl\Interactor\CviFiltersBox.cs" />
     <Compile Include="Ctrl\Interactor\CviMatchResultBoxEt.cs" />
     <Compile Include="Ctrl\Interactor\CviMouseSync.cs" />

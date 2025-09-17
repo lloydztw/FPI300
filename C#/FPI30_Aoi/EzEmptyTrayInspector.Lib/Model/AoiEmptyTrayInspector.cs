@@ -20,6 +20,7 @@ using JetEazy.OpenCV;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.Threading;
 using AOI_RESULT = EzAoiEmptyTrayInspector.Model.EzEmptyTrayResult;
@@ -220,7 +221,6 @@ namespace EzAoiEmptyTrayInspector.Model
             _recipe = null;
         }
 
-
         public void TryApplyFilters(SideID sideId, IEzImage largeImg, JxRotAngleSettings settings, out object result)
         {
             var finder = new EzRotAngleFinder();
@@ -346,13 +346,21 @@ namespace EzAoiEmptyTrayInspector.Model
                 {
                     changeState("MATCH", sideId);
                     clear_result(sideId, true);
-                    run_match(sideId, largeImg.Image as Mat, dumpPath);
+                    run_match_with_bound_roi(sideId, largeImg.Image as Mat, dumpPath);
                 }
                 else
                 {
                     changeState("MATCH (bmp)", sideId);
                     clear_result(sideId, true);
-                    run_match(sideId, largeImg?.Bitmap, dumpPath);
+
+                    var bmp = largeImg.Bitmap;
+                    if (bmp == null)
+                        return;
+
+                    using (var bridge = new QxImageBridge(bmp))
+                    {
+                        run_match_with_bound_roi(sideId, bridge.Image, dumpPath);
+                    }
                 }
             }
         }
@@ -529,25 +537,32 @@ namespace EzAoiEmptyTrayInspector.Model
             clear_result(SideID.A, true);
             clear_result(SideID.B, true);
 
-            var evCompleted = wait ? new ManualResetEvent(false) : null;
-
-            ThreadPool.QueueUserWorkItem((arg) =>
+            if (wait)
             {
-                var args = (object[])arg;
-                var A = (IEzImage)args[0];
-                var B = (IEzImage)args[1];
-                var F = (string)args[2];
-                run_all(A, A?.Image as Mat, B?.Image as Mat, F);
-                evCompleted?.Set();
-            },
-            new object[] {
+                run_all(null, largeImgA.Image as Mat, null, outputFile);
+            }
+            else
+            {
+                var evCompleted = wait ? new ManualResetEvent(false) : null;
+
+                ThreadPool.QueueUserWorkItem((arg) =>
+                {
+                    var args = (object[])arg;
+                    var A = (IEzImage)args[0];
+                    var B = (IEzImage)args[1];
+                    var F = (string)args[2];
+                    run_all(A, A?.Image as Mat, B?.Image as Mat, F);
+                    evCompleted?.Set();
+                },
+                new object[] {
                 largeImgA,
                 largeImgB,
                 outputFile
-            });
+                });
 
-            if (wait)
-                evCompleted.WaitOne(1000 * 60 * 5);
+                if (wait)
+                    evCompleted.WaitOne(1000 * 60 * 5);
+            }
         }
         #endregion
 
@@ -632,21 +647,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
 
         #region PRIVATE_MATCH_FUNCTIONS
-        void run_match(SideID siteId, Bitmap srcBmp, string dumpPath = null)
-        {
-            if (srcBmp != null)
-            {
-                using (var bridge = new QxImageBridge(srcBmp))
-                {
-                    run_match(siteId, bridge.Image, dumpPath);
-                }
-            }
-            else
-            {
-                run_match(siteId, (Mat)null, dumpPath);
-            }
-        }
-        void run_match(SideID sideId, Mat srcImg, string dumpPath = null)
+        void run_match_one(SideID sideId, Mat srcImg, string dumpPath = null)
         {
             MatchResult matchResult = null;
             Exception errEx = null;
@@ -727,6 +728,33 @@ namespace EzAoiEmptyTrayInspector.Model
                 }
             }
         }
+        void run_match_with_bound_roi(SideID sideId, Mat srcImg, string dumpPath = null)
+        {
+            var jxBoundBox = _recipe?.VisionSettings?.Match?.BoundBox;
+            if (jxBoundBox == null)
+            {
+                run_match_one(sideId, srcImg, dumpPath);            //@<<< run_match_with_bound_roi
+                return;
+            }
+
+            var roi = JetEazy.Qcvt.CV(jxBoundBox.Value);
+            var bound = new Rect(0, 0, srcImg.Width, srcImg.Height);
+            if (roi == bound)
+            {
+                run_match_one(sideId, srcImg, dumpPath);            //@<<< run_match_with_bound_roi
+                return;
+            }
+
+            JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+            if (roi.Width < 2 || roi.Height < 2)
+                return;
+
+            run_match_one(sideId, srcImg[roi], dumpPath);           //@<<< run_match_with_bound_roi
+
+            // OFFSET
+            var matchResult = GetMatchResult(sideId);
+            _OFFSET(matchResult, roi.X, roi.Y);
+        }
         void update_one_match_result(SideID sideId, MatchResult result, bool notify = false)
         {
             _matchResults[(int)sideId] = result;
@@ -736,7 +764,7 @@ namespace EzAoiEmptyTrayInspector.Model
         #endregion
 
 
-        #region PRIVATE_POST_PREDICT_GRID_NG_BLOCs
+        #region PRIVATE_LARGE_GRID_IMAGE_FUNCTIONS
         Mat _largeGoldenGridImage;
 #if (false)
         void run_on_grid_ng_predict(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
@@ -1037,6 +1065,7 @@ namespace EzAoiEmptyTrayInspector.Model
         #endregion
 
 
+        #region POST_PREDICT_GRID_NG_BLOCs
         void run_on_grid_ng_predict(SideID sideId, Mat srcImg, MatchResult matchResult, string dumpPath = null, bool force = false)
         {
             Exception errEx = null;
@@ -1094,6 +1123,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 }
             }
         }
+        #endregion
 
 
         #region POST_FIND_OUT_GRID_NG_BLOCs
@@ -1145,7 +1175,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
 
         #region PRIVATE_RUN_ALL
-        void run_all(IEzImage largeImgA, Mat imgA, Mat imgB, string outputFileName)
+        void run_all(IEzImage dummy, Mat imgFullFov, Mat dummy2, string outputFileName)
         {
 #if (OPT_DUAL_MATCH)
             _LOG.Info("[一鍵執行] 開始 ... ");
@@ -1233,16 +1263,35 @@ namespace EzAoiEmptyTrayInspector.Model
             try
             {
                 var tm0 = DateTime.Now;
+                var jxVisionSetting = _recipe.VisionSettings;
+                var jxMatchSetting = _recipe.VisionSettings.Match;
 
-                auto_inverse(imgA, (Bitmap)_recipe.VisionSettings.Match.GoldenBmp.Value);
+                // (1) check imgFullFov
+                if (imgFullFov == null)
+                    return;
 
-                run_match(SideID.A, imgA, _dumpPath);
+                // (2) Bound Roi
+                var roi = JetEazy.Qcvt.CV(jxMatchSetting.BoundBox.Value);
+                var bound = new Rect(0, 0, imgFullFov.Width, imgFullFov.Height);
+                JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+                if (roi.Width < 2 || roi.Height < 2)
+                    return;
 
+                // (3) Img in Roi
+                Mat imgA = (roi != bound) ? imgFullFov[roi] : imgFullFov;
+
+                // (4) auto inverse
+                auto_inverse(imgA, (Bitmap)jxMatchSetting.GoldenBmp.Value);
+
+                // (5) run match one
+                run_match_one(SideID.A, imgA, _dumpPath);
+
+                // (6) Post finders
                 var matchResult = _matchResults[0];
 
                 if (matchResult != null)
                 {
-                    if (_recipe.VisionSettings.FindAllFailBlocs.Value && _recipe.VisionSettings.Match.UseGrid)
+                    if (jxVisionSetting.FindAllFailBlocs.Value && jxMatchSetting.UseGrid)
                     {
                         run_on_grid_ng_predict(SideID.A, imgA, matchResult, _dumpPath);
                         run_off_grid_ng_detect(SideID.A, imgA, matchResult, _dumpPath, out List<EzBloc> ngBloc);
@@ -1250,8 +1299,16 @@ namespace EzAoiEmptyTrayInspector.Model
                     }
                 }
 
-                auto_inverse(imgA, (Bitmap)_recipe.VisionSettings.Match.GoldenBmp.Value);
+                // (7) auto inverse
+                auto_inverse(imgA, (Bitmap)jxMatchSetting.GoldenBmp.Value);
 
+                // (8) kick off some blocs
+                if (roi != bound)
+                {
+                    _OFFSET(matchResult, roi.X, roi.Y);
+                }
+
+                // (9) Final Result
                 var ts = DateTime.Now - tm0;
 
                 finalResult = new AOI_RESULT(matchResult, ts.TotalSeconds)
@@ -1260,7 +1317,8 @@ namespace EzAoiEmptyTrayInspector.Model
                     FullCols = _recipe.TrayMiscSettings.FullCols,
                 };
 
-                dump_result_image(outputFileName, imgA, finalResult);
+                // (10) Dump
+                dump_result_image(outputFileName, imgFullFov, finalResult);
 
             }
             catch (Exception ex)
@@ -1315,6 +1373,40 @@ namespace EzAoiEmptyTrayInspector.Model
             catch (Exception ex)
             {
                 _LOG.Error(ex);
+            }
+        }
+        #endregion
+
+
+        #region HELPER_FUNCTIONS
+        void _OFFSET(MatchResult matchResult, int dx, int dy)
+        {
+            if(matchResult == null) return;
+            var dict = new Dictionary<object, bool>();
+            _OFFSET(matchResult.Blocs, dict, dx, dy);
+            _OFFSET(matchResult.OutGridBlocs, dict, dx, dy);
+            _OFFSET(matchResult.Grid.IterBlocs(), dict, dx, dy);
+        }
+        void _OFFSET(IEnumerable<EzBloc> blocs, Dictionary<object,bool> foundDict, int dx, int dy)
+        {
+            if(blocs == null) return;
+            foreach (var bloc in blocs)
+            {
+                if (bloc == null || foundDict.ContainsKey(bloc))
+                    continue;
+                foundDict.Add(bloc, true);
+                _OFFSET(bloc, dx, dy);
+            }
+        }
+        void _OFFSET(EzBloc bloc, int dx, int dy)
+        {
+            if(bloc == null) return;
+            bloc.Rect.X += dx;
+            bloc.Rect.Y += dy;
+            if (bloc.Center != null)
+            {
+                bloc.Center.X += dx;
+                bloc.Center.Y += dy;
             }
         }
         #endregion

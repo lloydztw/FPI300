@@ -15,6 +15,7 @@
 
 using EzAoiEmptyTrayInspector.Model;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using LeTian.JxProps;
@@ -53,22 +54,20 @@ namespace LaserAlignDX.Mvc.Model.Recipe
 
         public override void Load(string dummyFileName)
         {
-            string emptyTrayRecipeFile = LtAoiFactory.RcpGetRecipeFileName(null);
+            CarrierEnum C = dummyFileName == "C2" ? CarrierEnum.C2 : CarrierEnum.C1;
+            string emptyTrayRecipeFile = LtAoiFactory.RcpGetRecipeFileName(null, C);
             LtDebug.LOG.Debug($"載入 [空盤參數] {emptyTrayRecipeFile}");
             EmptyTrayParams.Load(emptyTrayRecipeFile);
-
             GaGridParams.Load(null);
-
             Modified = false;
         }
         public override void Save(string dummyFileName)
         {
-            string emptyTrayRecipeFile = LtAoiFactory.RcpGetRecipeFileName(null);
+            CarrierEnum C = dummyFileName == "C2" ? CarrierEnum.C2 : CarrierEnum.C1;
+            string emptyTrayRecipeFile = LtAoiFactory.RcpGetRecipeFileName(null, C);
             LtDebug.LOG.Debug($"寫入 [空盤參數] {emptyTrayRecipeFile}");
             EmptyTrayParams.Save(emptyTrayRecipeFile);
-
             GaGridParams.Save(null);
-
             Modified = false;
         }
     }

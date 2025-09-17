@@ -1,5 +1,6 @@
 ﻿using JetEazy.QMath;
 using LaserAlignDX.Mvc.Ctrl;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace LaserAlignDX.Mvc.Gui
@@ -9,9 +10,12 @@ namespace LaserAlignDX.Mvc.Gui
         public FormRecipeEditor()
         {
             InitializeComponent();
+            
             initDataGridView();
             rdoCarriers = new[] { rdoCarrier1, rdoCarrier2 };
-
+            rdoCarrier1.CheckedChanged += (s, e) => updateRdoColor(rdoCarrier1);
+            rdoCarrier2.CheckedChanged += (s, e) => updateRdoColor(rdoCarrier2);
+            
             var ctrl = new GaRecipeEditCtrl();
             ctrl.Attach(this);
         }
@@ -83,5 +87,12 @@ namespace LaserAlignDX.Mvc.Gui
                 ri++;
             }
         }
+
+        #region PRIVATE_GUI_FUNCTIONS
+        void updateRdoColor(RadioButton rdo)
+        {
+            rdo.ForeColor = rdo.Checked ? Color.Black : Color.DimGray;
+        }
+        #endregion
     }
 }

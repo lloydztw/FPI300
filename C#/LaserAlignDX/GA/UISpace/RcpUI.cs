@@ -146,11 +146,11 @@ namespace PhotoMachine.UISpace
         {
             if (RCPItemNow.Index == 0)
             {
-                JetEazy.BasicSpace.VsMSG.Instance.Warning("系统参数无法删除！");
+                VsMessageBox.Warning("系统参数无法删除！");
                 return;
             }
 
-            if (JetEazy.BasicSpace.VsMSG.Instance.Question("是否要删除参数？") == DialogResult.OK)
+            if (VsMessageBox.Question("是否要删除参数？") == DialogResult.OK)
             {
                 int i = 0;
 
@@ -248,9 +248,7 @@ namespace PhotoMachine.UISpace
 
             if (RCPDB.CheckDuplicate(txtName.Text.Trim() + txtVersion.Text.Trim(), RCPItemNow.Index))
             {
-
-                JetEazy.BasicSpace.VsMSG.Instance.Warning("名称或版本已存在，请检查。");
-
+                VsMessageBox.Warning("名称或版本已存在，请检查。");
                 //MessageBox.Show(myLanguage.Messages("msg1", INI.LANGUAGE), "SYS", MessageBoxButtons.OK);
                 txtName.Focus();
             }

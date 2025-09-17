@@ -198,7 +198,8 @@ namespace LaserAlignDX.Mvc.Model
         private JxAoiRecipe loadEmptyTrayAoiRecipe(bool alwayCreateOne)
         {
             var gaaraRcpName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
-            var fileName = LtAoiFactory.RcpGetRecipeFileName(gaaraRcpName);
+            var fileName = LtAoiFactory.RcpGetRecipeFileName(gaaraRcpName, ActiveCarrierID);
+
             if (System.IO.File.Exists(fileName))
             {
                 var jx = new JxAoiRecipe();

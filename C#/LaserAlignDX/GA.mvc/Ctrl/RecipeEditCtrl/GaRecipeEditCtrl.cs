@@ -15,6 +15,7 @@
 
 using Eazy_Project_III;
 using JetEazy.BasicSpace;
+using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
@@ -318,7 +319,8 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             if (err != ErrCodes.OK)
             {
-                VsMSG.Instance.Warning(errMsg, true);
+                //VsMSG.Instance.Warning(errMsg, true);
+                VsMessageBox.Warning(errMsg);
             }
         }
         void showCviResult(bool show)
@@ -389,7 +391,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             Bitmap srcBmp = _xRecipe.PeekBmpOrg(carrierID);
             if(srcBmp == null)
             {
-                VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
+                //VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
+                VsMessageBox.Warning($"參數 @ {carrierID} 沒有影像");
                 return;
             }
 
@@ -405,9 +408,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             GaUtil.SetCursor(_wndOwner, oldCursor);
 
             if (ok)
-                VsMSG.Instance.Warning($"完成保存圖片.\n\r檔名: {dstFileName}", false);
+                //VsMSG.Instance.Warning($"完成保存圖片.\n\r檔名: {dstFileName}", false);
+                VsMessageBox.Info($"完成保存圖片.\n\r檔名: {dstFileName}");
             else
-                VsMSG.Instance.Warning($"無法保存圖片!\n\r檔名: {dstFileName}", true);
+                //VsMSG.Instance.Warning($"無法保存圖片!\n\r檔名: {dstFileName}", true);
+                VsMessageBox.Warning($"無法保存圖片!\n\r檔名: {dstFileName}");
         }
 
         void OpenEmptyTrayInspectWindow()
@@ -465,12 +470,13 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void WriteCoordsRefToPlc()
         {
-            string msg;
-            bool ok = _sysModel.WriteAllCoordsToPlc(out msg);
+            bool ok = _sysModel.WriteAllCoordsToPlc(out string errMsg);
             if (ok)
-                VsMSG.Instance.Tishi("座標成功寫入至 PLC.");
+                //VsMSG.Instance.Tishi("座標成功寫入至 PLC.");
+                VsMessageBox.Info("座標成功寫入至 PLC.");
             else
-                VsMSG.Instance.Warning(msg, true);
+                //VsMSG.Instance.Warning(msg, true);
+                VsMessageBox.Warning(errMsg);
         }
 
         void BuildGoldenRegion()
@@ -500,7 +506,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             Bitmap srcBmp = _xRecipe.PeekBmpOrg(carrierID);
             if (srcBmp == null)
             {
-                VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
+                //VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
+                VsMessageBox.Warning($"{GaUtil.GetEnumDescription(carrierID)} : 參數沒有 bmpOrg 影像!");
                 return;
             }
 

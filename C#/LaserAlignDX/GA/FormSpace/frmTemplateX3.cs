@@ -1,4 +1,5 @@
 ﻿using JetEazy.BasicSpace;
+using JetEazy.FormSpace;
 using JetEazy.Utils;
 using JzDisplay;
 using LaserAlignDX.BasicSpace;
@@ -73,14 +74,12 @@ namespace LaserAlignDX.FormSpace
         Button btnCalRealPointF => button1;
         Button btnWritePLCStage => button2;
 
-
         Button btnAddRegion => button4;
         Button btnDeleteAllRegion => button7;
         Button btnDeleteRegion => button5;
 
         Button btnCreateImageTemplate => button6;
         Button btnSaveInspectPara => button3;
-
         //Button btnOpenImage;
         //Button btnTestImage;
         //Button btnCreateImageTemplate;
@@ -139,12 +138,15 @@ namespace LaserAlignDX.FormSpace
             cboCaliIndex.SelectedIndex = 0;
 
             _addCharRegion();
+
+            if (GaMvcConfig.OPT_USE_LETIAN_CALIB)
+                hidePlcWrittingGui();
         }
 
         private void BtnWritePLCStage_Click(object sender, EventArgs e)
         {
             if (GaMvcConfig.OPT_USE_LETIAN_CALIB)
-                axWriteCalibDataToPlc_LT();
+                return;
             else
                 axWriteCalibDataToPlc_Gaara();
         }
@@ -311,9 +313,17 @@ namespace LaserAlignDX.FormSpace
         }
         private void BtnCreateImageTemplate_Click(object sender, EventArgs e)
         {
-            int iOK = 0;
-            iOK = xRecipe.PrintTempTrain();
-            JetEazy.BasicSpace.VsMSG.Instance.Warning($"{(iOK == 0 ? "创建成功" : "创建失败")}", false);
+            //int iOK = 0;
+            //iOK = xRecipe.PrintTempTrain();
+            //JetEazy.BasicSpace.VsMSG.Instance.Warning($"{(iOK == 0 ? "创建成功" : "创建失败")}", false);
+
+            int err = xRecipe.PrintTempTrain();
+
+            if (err == 0)
+                VsMessageBox.Info("创建成功");
+            else
+                VsMessageBox.Warning("创建失败");
+
         }
         private void BtnSaveInspectPara_Click(object sender, EventArgs e)
         {
@@ -340,7 +350,8 @@ namespace LaserAlignDX.FormSpace
 
             DS3.ReplaceDisplayImage(xRecipe.bmpprintmask);
             xRecipe.SavePrintTemplate();
-            JetEazy.BasicSpace.VsMSG.Instance.Warning($"保存成功", false);
+            //JetEazy.BasicSpace.VsMSG.Instance.Warning($"保存成功", false);
+            VsMessageBox.Info("保存成功");
         }
         #endregion
 
@@ -986,34 +997,6 @@ namespace LaserAlignDX.FormSpace
             SuckerRowEnum suckerRowID = (SuckerRowEnum)(index % 2);
             updatePlcWritingStatus($"{DateTime.Now.ToString()} 載台 {carrierID} 吸嘴 {suckerRowID} 寫入PLC操作完成!", Color.Lime);
         }
-        void axWriteCalibDataToPlc_LT()
-        {
-            ComboBox cboCalibCombination = this.cboCaliIndex;
-            int index = cboCalibCombination.SelectedIndex;
-            if (index == -1)
-                return;
-
-            updatePlcWritingStatus(null, Color.Black);
-
-            CarrierEnum carrierID = (CarrierEnum)(index / 2);
-            SuckerRowEnum suckerRowID = (SuckerRowEnum)(index % 2);
-
-            var sysModel = GaMvcConfig.SysModel;
-
-            bool ok = sysModel.WriteCoordsToPlc(carrierID, suckerRowID, out var camCoord, out var suckerCoord, out var errMsg);
-
-            if (!ok)
-            {
-                updatePlcWritingStatus(errMsg, Color.Red);
-                VsMSG.Instance.Warning(errMsg);
-            }
-            else
-            {
-                updatePlcCoordsToGui(camCoord, suckerCoord);
-                updatePlcWritingStatus($"{DateTime.Now.ToString()} 載台 {carrierID} 吸嘴 {suckerRowID} 寫入PLC操作完成!", Color.Lime);
-            }
-        }
-
         void updatePlcCoordsToGui(PointF camPt, PointF suckerWorldPt)
         {
             txtCamCoord.Text = $"({camPt.X:0.0}, {camPt.Y:0.0}) px";
@@ -1031,6 +1014,25 @@ namespace LaserAlignDX.FormSpace
             lblCompletedInfo.ForeColor = color;
             lblCompletedInfo.BackColor = Color.Black;
             lblCompletedInfo.Visible = true;
+        }
+        #endregion
+
+        #region PRIVATE_GUI_FUNCTIONS
+        void hidePlcWrittingGui()
+        {
+            var wnds = new Control[]
+            {
+                label5,
+                button2,
+                label4,
+                cboCaliIndex,
+                label2,
+                textBox1,
+                label3,
+                textBox2,
+            };
+            foreach (Control w in wnds)
+                w.Visible = false;
         }
         #endregion
     }

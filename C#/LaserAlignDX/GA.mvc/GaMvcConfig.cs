@@ -24,10 +24,9 @@ using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
 
-using FormCalibrationTool = LaserAlignDX.Mvc.Gui.FormCalibrationTool;
 //using FormCalibrationTool = LaserAlignDX.FormSpace.FPI30Form.frmCalibration;
 //using FormRcpEditorTool = LaserAlignDX.FormSpace.frmFPIRecipe;
-//using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRcpEditorTool;
+using FormCalibrationTool = LaserAlignDX.Mvc.Gui.FormCalibrationTool;
 using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 
@@ -41,9 +40,11 @@ namespace LaserAlignDX
     /// </summary>
     public static class GaMvcConfig
     {
+        #region CONFIG
         public static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER = true;
         public static bool OPT_USE_LETIAN_CALIB = true;
         public static int TOTAL_FLY_CAMERAS => 4;
+        #endregion
 
         #region PRIVATE_DATA
         static TravellerSysModel _sysModel;
@@ -112,7 +113,8 @@ namespace LaserAlignDX
             if (recipeName == null)
                 recipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
 
-            var frm = AoiFactory.OpenEmptyTrayInspectorTool(owner, recipeName);
+            var emptyAoiRecipeName = LtAoiFactory.RcpStemName(recipeName, GaMvcConfig.SysModel.ActiveCarrierID);
+            var frm = AoiFactory.OpenEmptyTrayInspectorTool(owner, emptyAoiRecipeName);
             if (frm == null)
                 return;
 

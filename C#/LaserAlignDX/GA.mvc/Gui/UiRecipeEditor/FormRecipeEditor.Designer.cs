@@ -82,10 +82,10 @@
             // 
             // gvCalibPointsDataGridView1
             // 
-            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(734, 12);
+            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(734, 15);
             this.gvCalibPointsDataGridView1.Name = "gvCalibPointsDataGridView1";
             this.gvCalibPointsDataGridView1.SelectedIndex = 0;
-            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(516, 111);
+            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(516, 108);
             this.gvCalibPointsDataGridView1.TabIndex = 38;
             // 
             // btnWriteCoordsToPlc
@@ -93,7 +93,7 @@
             this.btnWriteCoordsToPlc.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
             this.btnWriteCoordsToPlc.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnWriteCoordsToPlc.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnWriteCoordsToPlc.Location = new System.Drawing.Point(601, 15);
+            this.btnWriteCoordsToPlc.Location = new System.Drawing.Point(611, 15);
             this.btnWriteCoordsToPlc.Margin = new System.Windows.Forms.Padding(4);
             this.btnWriteCoordsToPlc.Name = "btnWriteCoordsToPlc";
             this.btnWriteCoordsToPlc.Size = new System.Drawing.Size(115, 108);
@@ -106,7 +106,7 @@
             this.btnSaveImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnSaveImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnSaveImage.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSaveImage.Location = new System.Drawing.Point(16, 92);
+            this.btnSaveImage.Location = new System.Drawing.Point(185, 92);
             this.btnSaveImage.Margin = new System.Windows.Forms.Padding(4);
             this.btnSaveImage.Name = "btnSaveImage";
             this.btnSaveImage.Size = new System.Drawing.Size(120, 31);
@@ -116,10 +116,10 @@
             // 
             // btnOpenFlyCamRcpWindow
             // 
-            this.btnOpenFlyCamRcpWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.btnOpenFlyCamRcpWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.btnOpenFlyCamRcpWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOpenFlyCamRcpWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOpenFlyCamRcpWindow.Location = new System.Drawing.Point(460, 54);
+            this.btnOpenFlyCamRcpWindow.Location = new System.Drawing.Point(471, 54);
             this.btnOpenFlyCamRcpWindow.Margin = new System.Windows.Forms.Padding(4);
             this.btnOpenFlyCamRcpWindow.Name = "btnOpenFlyCamRcpWindow";
             this.btnOpenFlyCamRcpWindow.Size = new System.Drawing.Size(120, 31);
@@ -129,10 +129,10 @@
             // 
             // btnOpenLightCtrlWindow
             // 
-            this.btnOpenLightCtrlWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.btnOpenLightCtrlWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.btnOpenLightCtrlWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOpenLightCtrlWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOpenLightCtrlWindow.Location = new System.Drawing.Point(460, 92);
+            this.btnOpenLightCtrlWindow.Location = new System.Drawing.Point(471, 15);
             this.btnOpenLightCtrlWindow.Margin = new System.Windows.Forms.Padding(4);
             this.btnOpenLightCtrlWindow.Name = "btnOpenLightCtrlWindow";
             this.btnOpenLightCtrlWindow.Size = new System.Drawing.Size(120, 31);
@@ -145,7 +145,7 @@
             this.btnOpenEmptyTrayWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnOpenEmptyTrayWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOpenEmptyTrayWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOpenEmptyTrayWindow.Location = new System.Drawing.Point(314, 15);
+            this.btnOpenEmptyTrayWindow.Location = new System.Drawing.Point(328, 15);
             this.btnOpenEmptyTrayWindow.Margin = new System.Windows.Forms.Padding(4);
             this.btnOpenEmptyTrayWindow.Name = "btnOpenEmptyTrayWindow";
             this.btnOpenEmptyTrayWindow.Size = new System.Drawing.Size(120, 31);
@@ -158,7 +158,7 @@
             this.btnGrabImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnGrabImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGrabImage.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGrabImage.Location = new System.Drawing.Point(16, 15);
+            this.btnGrabImage.Location = new System.Drawing.Point(185, 15);
             this.btnGrabImage.Margin = new System.Windows.Forms.Padding(4);
             this.btnGrabImage.Name = "btnGrabImage";
             this.btnGrabImage.Size = new System.Drawing.Size(120, 31);
@@ -171,7 +171,7 @@
             this.btnCreateCellRegions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnCreateCellRegions.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCreateCellRegions.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCreateCellRegions.Location = new System.Drawing.Point(314, 92);
+            this.btnCreateCellRegions.Location = new System.Drawing.Point(328, 54);
             this.btnCreateCellRegions.Margin = new System.Windows.Forms.Padding(4);
             this.btnCreateCellRegions.Name = "btnCreateCellRegions";
             this.btnCreateCellRegions.Size = new System.Drawing.Size(120, 31);
@@ -181,36 +181,43 @@
             // 
             // rdoCarrier2
             // 
-            this.rdoCarrier2.AutoSize = true;
-            this.rdoCarrier2.Font = new System.Drawing.Font("微軟正黑體", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.rdoCarrier2.Location = new System.Drawing.Point(165, 74);
+            this.rdoCarrier2.Appearance = System.Windows.Forms.Appearance.Button;
+            this.rdoCarrier2.FlatAppearance.CheckedBackColor = System.Drawing.Color.Lime;
+            this.rdoCarrier2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.rdoCarrier2.Font = new System.Drawing.Font("微软雅黑", 16.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rdoCarrier2.ForeColor = System.Drawing.Color.DimGray;
+            this.rdoCarrier2.Location = new System.Drawing.Point(26, 71);
             this.rdoCarrier2.Margin = new System.Windows.Forms.Padding(4);
             this.rdoCarrier2.Name = "rdoCarrier2";
-            this.rdoCarrier2.Size = new System.Drawing.Size(109, 40);
+            this.rdoCarrier2.Size = new System.Drawing.Size(118, 52);
             this.rdoCarrier2.TabIndex = 28;
             this.rdoCarrier2.Text = "載台2";
+            this.rdoCarrier2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rdoCarrier2.UseVisualStyleBackColor = true;
             // 
             // rdoCarrier1
             // 
-            this.rdoCarrier1.AutoSize = true;
+            this.rdoCarrier1.Appearance = System.Windows.Forms.Appearance.Button;
             this.rdoCarrier1.Checked = true;
-            this.rdoCarrier1.Font = new System.Drawing.Font("微軟正黑體", 16.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.rdoCarrier1.Location = new System.Drawing.Point(165, 26);
+            this.rdoCarrier1.FlatAppearance.CheckedBackColor = System.Drawing.Color.Lime;
+            this.rdoCarrier1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.rdoCarrier1.Font = new System.Drawing.Font("微软雅黑", 16.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.rdoCarrier1.Location = new System.Drawing.Point(26, 15);
             this.rdoCarrier1.Margin = new System.Windows.Forms.Padding(4);
             this.rdoCarrier1.Name = "rdoCarrier1";
-            this.rdoCarrier1.Size = new System.Drawing.Size(109, 40);
+            this.rdoCarrier1.Size = new System.Drawing.Size(118, 52);
             this.rdoCarrier1.TabIndex = 27;
             this.rdoCarrier1.TabStop = true;
             this.rdoCarrier1.Text = "載台1";
+            this.rdoCarrier1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rdoCarrier1.UseVisualStyleBackColor = true;
             // 
             // btnOpenTemplateMatchWindow
             // 
-            this.btnOpenTemplateMatchWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.btnOpenTemplateMatchWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.btnOpenTemplateMatchWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOpenTemplateMatchWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOpenTemplateMatchWindow.Location = new System.Drawing.Point(460, 15);
+            this.btnOpenTemplateMatchWindow.Location = new System.Drawing.Point(471, 92);
             this.btnOpenTemplateMatchWindow.Margin = new System.Windows.Forms.Padding(4);
             this.btnOpenTemplateMatchWindow.Name = "btnOpenTemplateMatchWindow";
             this.btnOpenTemplateMatchWindow.Size = new System.Drawing.Size(120, 31);
@@ -220,10 +227,10 @@
             // 
             // btnPickGoldenRegion
             // 
-            this.btnPickGoldenRegion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.btnPickGoldenRegion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.btnPickGoldenRegion.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnPickGoldenRegion.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnPickGoldenRegion.Location = new System.Drawing.Point(314, 54);
+            this.btnPickGoldenRegion.Location = new System.Drawing.Point(328, 92);
             this.btnPickGoldenRegion.Margin = new System.Windows.Forms.Padding(4);
             this.btnPickGoldenRegion.Name = "btnPickGoldenRegion";
             this.btnPickGoldenRegion.Size = new System.Drawing.Size(120, 31);
@@ -236,7 +243,7 @@
             this.btnLoadImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnLoadImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnLoadImage.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnLoadImage.Location = new System.Drawing.Point(16, 54);
+            this.btnLoadImage.Location = new System.Drawing.Point(185, 54);
             this.btnLoadImage.Margin = new System.Windows.Forms.Padding(4);
             this.btnLoadImage.Name = "btnLoadImage";
             this.btnLoadImage.Size = new System.Drawing.Size(120, 31);
@@ -357,7 +364,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "參數設定";
             this.panelTop.ResumeLayout(false);
-            this.panelTop.PerformLayout();
             this.panelBottom.ResumeLayout(false);
             this.tblayoutRight.ResumeLayout(false);
             this.tblayoutMajor.ResumeLayout(false);

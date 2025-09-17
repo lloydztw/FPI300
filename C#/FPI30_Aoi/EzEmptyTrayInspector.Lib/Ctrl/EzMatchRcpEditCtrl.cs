@@ -25,7 +25,9 @@ using LeTian.JxRecipesTool.Ctrl;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using CviGoldenBox = JetEazy.ImageViewerEx.Interactors.CvImageViewerRectBox;
+
+using CviGoldenBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
+using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 
 
 namespace EzAoiEmptyTrayInspector.Ctrl
@@ -79,6 +81,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         IvImageViewer _imgViewer;
         IvFuncButtonsPanel _funcButtonsPanel;
         Button _btnGolden => _funcButtonsPanel?.btnPickGolden;
+        CviBoundBox _cviBoundBox;
         CviGoldenBox _cviGoldenBox;
         CviFiltersBox _cviFiltersBox;
         bool _bypassJxEvents = false;
@@ -120,7 +123,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             _imgSource = imgSrc;
             if (_isRcpEdittingMode)
-                move_box_to_safe_location(_imgSource);
+                move_boxes_to_safe_location(_imgSource);
         }
 
         public bool IsEditting
@@ -153,6 +156,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _btnGolden.Click += BtnGolden_Click;
             if (_imgViewerWindow!=null)
                 _imgViewerWindow.KeyDown += viewer_KeyDown;
+            _cviBoundBox.OnChanged += (s, e) => update_cvi_boxes_to_recipe();
             #endregion
 
             #region MODEL_EVENT
@@ -211,7 +215,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         private void viewer_KeyDown(object sender, KeyEventArgs e)
         {
             if (_isRcpEdittingMode && e.KeyCode == Keys.F3)
-                move_box_to_default_location();
+                move_golden_box_to_default_location();
         }
         private void side_RotAngle_OnModified(object sender, EventArgs e)
         {
@@ -251,7 +255,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         void enterEdittingMode()
         {
             _isRcpEdittingMode = true;
-            update_golden_box_to_gui();
+            update_cvi_boxes_to_gui();
             update_rcp_editor_gui_status();
             refresh(_imgViewerWindow);
             _model?.ResetAndClear();        //@<<<  EzMatchRcpEditingCtrl.enterEdittingMode
@@ -259,7 +263,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         void leaveEdittingMode()
         {
             _isRcpEdittingMode = false;
-            update_golden_box_to_recipe();
+            update_cvi_boxes_to_recipe();
             update_rcp_editor_gui_status();
             refresh(_imgViewerWindow);
         }
@@ -274,11 +278,16 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         #region CVI_BOX_FUNCTIONS
         void init_interactors()
         {
+            _cviBoundBox = new CviGoldenBox(Brushes.Blue, 1, 3);
             _cviGoldenBox = new CviGoldenBox(Brushes.Orange, 1, 3);
             _cviFiltersBox = new CviFiltersBox(Brushes.Lime, 1, 3);
 
             if (_imgViewer != null)
             {
+                _imgViewer.AddInteractor(_cviBoundBox);
+                _cviBoundBox.Enabled = false;
+                _cviBoundBox.Visible = false;
+
                 _imgViewer.AddInteractor(_cviGoldenBox);
                 _cviGoldenBox.Enabled = false;
                 _cviGoldenBox.Visible = false;
@@ -288,58 +297,68 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _cviFiltersBox.Visible = false;
             }
         }
-        void update_golden_box_to_gui()
+        void update_cvi_boxes_to_gui()
         {
-            Rectangle loc = _matchSettings != null ?
-                            _matchSettings.GoldenBox.Value :
-                            Rectangle.Empty;
+            _cviBoundBox.Box = _matchSettings != null ?
+                               _matchSettings.BoundBox.Value :
+                               new Rectangle(0, 0, _imgSource.Width, _imgSource.Height);
 
-            if (loc == Rectangle.Empty)
-            {
-                move_box_to_default_location();
-            }
-            else
-            {
-                _cviGoldenBox.Box = loc;
-                move_box_to_safe_location(_imgSource);
-            }
+            if (_cviBoundBox.Box == Rectangle.Empty)
+                _cviBoundBox.Box = new Rectangle(0, 0, _imgSource.Width, _imgSource.Height);
+
+            _cviGoldenBox.Box = _matchSettings != null ?
+                                _matchSettings.GoldenBox.Value :
+                                Rectangle.Empty;
+            if (_cviGoldenBox.Box == Rectangle.Empty)
+                move_golden_box_to_default_location();
+
+            move_boxes_to_safe_location(_imgSource);
         }
-        void update_golden_box_to_recipe()
+        void update_cvi_boxes_to_recipe()
         {
             if (_matchSettings == null)
                 return;
             _bypassJxEvents = true;
+
             var loc = _cviGoldenBox.Box;
             if (_matchSettings.GoldenBox.Value != loc)
                 _matchSettings.GoldenBox.Value = loc;
+
+            loc = _cviBoundBox.Box;
+            if (_matchSettings.BoundBox.Value != loc)
+                _matchSettings.BoundBox.Value = loc;
+
             _bypassJxEvents = false;
         }
-        void move_box_to_safe_location(Size boundarySize)
+        void move_boxes_to_safe_location(Size boundarySize)
         {
-            var rect = _cviGoldenBox.Box;
-            rect.Width = Math.Min(rect.Width, boundarySize.Width - 1);
-            rect.Height = Math.Min(rect.Height, boundarySize.Height - 1);
-            int x = Math.Max(0, rect.X);
-            int y = Math.Max(0, rect.Y);
-            if (rect.Right > boundarySize.Width)
-                x = boundarySize.Width - rect.Width;
-            if  (rect.Bottom > boundarySize.Height)
-                y = boundarySize.Height - rect.Height;
-            rect.X = x;
-            rect.Y = y;
-            _cviGoldenBox.Box = rect;
-            //int x2 = Math.Min(boundarySize.Width, rect.Right);
-            //int y2 = Math.Min(boundarySize.Height, rect.Bottom);
-            //_cviGoldenBox.Box = new Rectangle(x, y, x2 - x, y2 - y);
+            foreach (var cviBox in new[] { _cviBoundBox, _cviGoldenBox })
+            {
+                var rect = cviBox.Box;
+                rect.Width = Math.Min(rect.Width, boundarySize.Width - 1);
+                rect.Height = Math.Min(rect.Height, boundarySize.Height - 1);
+                int x = Math.Max(0, rect.X);
+                int y = Math.Max(0, rect.Y);
+                if (rect.Right > boundarySize.Width)
+                    x = boundarySize.Width - rect.Width;
+                if (rect.Bottom > boundarySize.Height)
+                    y = boundarySize.Height - rect.Height;
+                rect.X = x;
+                rect.Y = y;
+                cviBox.Box = rect;
+                //int x2 = Math.Min(boundarySize.Width, rect.Right);
+                //int y2 = Math.Min(boundarySize.Height, rect.Bottom);
+                //cviBox.Box = new Rectangle(x, y, x2 - x, y2 - y);
+            }
         }
-        void move_box_to_safe_location(IEzImage imgSrc)
+        void move_boxes_to_safe_location(IEzImage imgSrc)
         {
             if (imgSrc != null)
             {
-                move_box_to_safe_location(imgSrc.Size);
+                move_boxes_to_safe_location(imgSrc.Size);
             }
         }
-        void move_box_to_default_location()
+        void move_golden_box_to_default_location()
         {
             if (_imgViewer == null)
                 return;
@@ -369,7 +388,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             _bypassJxEvents = true;
             try
             {
-                move_box_to_safe_location(_imgSource);
+                move_boxes_to_safe_location(_imgSource);
                 //var rect = _cviGoldenBox.Box;
                 //var golden = ImageUtil.CropBmp(_imgSource, rect);
                 //_matchSettings.GoldenBox.Value = rect;
@@ -423,6 +442,8 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 //setVisible(_btnGolden, _isRcpEdittingMode);
                 setEnable(_btnGolden, _isRcpEdittingMode);
                 _btnGolden.BackColor = _isRcpEdittingMode ? Color.Gold : Color.DarkGray;
+                _cviBoundBox.Visible = _isRcpEdittingMode;
+                _cviBoundBox.Enabled = _isRcpEdittingMode;
                 _cviGoldenBox.Visible = _isRcpEdittingMode;
                 _cviGoldenBox.Enabled = _isRcpEdittingMode;
                 _cviFiltersBox.Visible = _isRcpEdittingMode;

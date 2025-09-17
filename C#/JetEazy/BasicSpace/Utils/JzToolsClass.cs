@@ -93,13 +93,16 @@ namespace JetEazy.BasicSpace
     }
     public class VsMSG
     {
+        #region SINGLETON
         private static readonly VsMSG _instance = new VsMSG();
+        VsMessageBox _messageBox = null;
+        #endregion
+
         public static VsMSG Instance
         {
             get { return _instance; }
         }
 
-        VsMessageBox _messageBox = null;
         /// <summary>
         /// 询问视窗
         /// </summary>

@@ -18,6 +18,7 @@ using AUVision;
 using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
 using JetEazy.BasicSpace;
+using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
@@ -229,7 +230,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
             }
             else
             {
-                VsMSG.Instance.Warning(e.Message, true);
+                VsMessageBox.Warning(e.Message);
             }
         }
         private void OnAoiProcess_Started(object sender, ProcessEventArgs e)

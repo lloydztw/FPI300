@@ -25,10 +25,12 @@ namespace EzAoiEmptyTrayInspector.Model
         {
             get; internal set;
         }
+
         public EzBlocsGrid Grid
         {
             get; internal set;
         }
+
         public IList<EzBloc> Blocs
         {
             get; internal set;

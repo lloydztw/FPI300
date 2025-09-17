@@ -14,6 +14,8 @@
 #endregion
 
 
+using LaserAlignDX.Model.Coords;
+
 namespace LaserAlignDX
 {
     /// <summary>
@@ -23,7 +25,15 @@ namespace LaserAlignDX
     public static class GaMvcPaths
     {
         public static string GA_WORK_PATH => Traveller106.Universal.WORKPATH;
-        public static string CALIB_VISION_FILE => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Vision_Settings.json");
-        public static string CALIB_TRANSFORMS_FILE => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Transforms.ini");
+        public static string CALIB_VISION_FILE(CarrierEnum C)
+        {
+            string ext = C != CarrierEnum.C1 ? $"@{C}.json" : ".json";
+            return System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Vision_Settings" + ext);
+        }
+        public static string CALIB_TRANSFORMS_FILE
+        {
+            // 共用一份
+            get => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Transforms.ini");
+        }
     }
 }
