@@ -16,11 +16,16 @@
 using JetEazy.Utils;
 using System;
 using System.Drawing;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
 {
     public class RcpBmpHolder : IDisposable
     {
+        #region CONFIG
+        static bool OPT_AUTO_CHANGE_BMP_TO_JPG = true;
+        #endregion
+
         internal static Func<string> CommonPathFunc;
         string CommonPath
         {
@@ -117,7 +122,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 {
                     var newBmp = GaImageUtil.LoadBigImage(fileName);
                     if (newBmp != null)
+                    {
                         GaUtil.LOG($"RcpBmp [{_name}] 載入 {fileName}");
+                        autoChangeToJpg(newBmp, fileName);
+                    }
                     return newBmp;
                 }
             }
@@ -128,6 +136,26 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             string fileName = System.IO.Path.Combine(CommonPath, name + ext);
             GaImageUtil.SaveBigImage(fileName, bmp);
             GaUtil.LOG($"RcpBmp [{_name}] 寫入 {fileName}");
+        }
+        void autoChangeToJpg(Bitmap bmp, string srcFileName)
+        {
+            if (!OPT_AUTO_CHANGE_BMP_TO_JPG || bmp == null)
+                return;
+            string ext = System.IO.Path.GetExtension(srcFileName);
+            if (ext != ".jpg")
+            {
+                var dstFileName = System.IO.Path.ChangeExtension(srcFileName, ".jpg");
+                if (!System.IO.File.Exists(dstFileName))
+                    GaImageUtil.SaveBigImage(dstFileName, bmp);
+                try
+                {
+                    System.IO.File.Delete(srcFileName);
+                }
+                catch
+                {
+
+                }
+            }
         }
         #endregion
     }

@@ -60,15 +60,13 @@ namespace Traveller106
                 switch (OPTION)
                 {
                     default:
-                        //return $"{Application.StartupPath}";
                         // 直接指定成 最後佈署的資料夾
-                        //      "D:\\AUTOMATION\\Eazy FPI30\\_BIN_"
                         // 這樣 原代碼 C# 專案, 
                         //      才能放在任意資料夾
                         //      不需要 依附於 最後佈署的資料夾 
                         //return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
-                        //return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
-                        return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
+                        //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
+                        return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
                 }
             }
         }
@@ -140,17 +138,21 @@ namespace Traveller106
         /// 跑线时读到SN.txt里的东西
         /// </summary>
         public static string DATASNTXT = "";
+
+#if (OPT_GAARA_RESERVED)
         public static string RELATECOLORSTR = "";
-        public static string SHOWBMPSTRING = "view.png";
+        public static string SHOWBMPSTRING => "view.png";
         public static string PlayerPASSPATH => WORKPATH + @"\TADA.wav";
         public static string PlayerFAILPATH => WORKPATH + @"\RoutingNG.wav";
         public static string PlayerOPPWRATPATH => WORKPATH + @"\OPPWRAP.wav";
-        public static string RunDebugOrRelease = "";
+        public static string RunDebugOrRelease => "";
         public static string FAILBARCODE = "";
+#endif
 
+#if (OPT_DATA_CNN)
         //public static string MainX6_Path = "D:\\CollectPictures\\Inspection\\";
-
         static string DATACNNSTRING => "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + DBPATH + @"\DATA.mdb;Jet OLEDB:Database Password=12892414;";
+#endif
         static int LanguageIndex = 0;
 
         public static string InitialErrorString = "";
