@@ -27,6 +27,7 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
 using System;
 using System.Drawing;
+using System.Web;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
 using EmptyTrayAoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
@@ -129,6 +130,7 @@ namespace LaserAlignDX.Mvc.Model
             //return _jxRecipe;
             return _xRecipe;
         }
+
         public void ApplyRecipe(params object[] args)
         {
             //(0) 載入 TransformsModel 設定 (全域)
@@ -136,14 +138,16 @@ namespace LaserAlignDX.Mvc.Model
             transformsModel.Load(GaMvcPaths.CALIB_TRANSFORMS_FILE);
             transformsModel.BuildAll();
 
-            //(1) 載入 Camera Grid (保存在個別參數 _xRecipe 中)
+            //(1) 重新載入 _xRecipe
             _xRecipe.Load();
+
+            //(2) 載入 Camera Grid (保存在個別參數 _xRecipe 中)
             var camGridC1 = _xRecipe.xCamGrid1;
             var camGridC2 = _xRecipe.xCamGrid2;
-            var camGrid = (CarrierEnum.C1 == ActiveCarrierID) ? camGridC1 : camGridC2;
+            var runtimeCamGrid = (CarrierEnum.C1 == ActiveCarrierID) ? camGridC1 : camGridC2;
 
-            //(2) 檢查 camGrid 的數據狀態
-            var err = checkCameraGrid(ActiveCarrierID, camGrid, notify: true);
+            //(3) 檢查 camGrid 的數據狀態
+            var err = checkCameraGrid(ActiveCarrierID, runtimeCamGrid, notify: true);
             if (err != null)
                 return;
 
@@ -152,31 +156,37 @@ namespace LaserAlignDX.Mvc.Model
             GaUtil.LOG($"[SysModel] 重新載入參數 {gaaraRecipeName}", Color.Blue);
             #endregion
 
-            //(3) 設定 Runtime 跑線時期 P座標 (PLC) 格點
-            var rows = camGrid.Rows;
-            var cols = camGrid.Cols;
-            //var pitchX = (double)traySettings.PitchX.Value;
-            //var pitchY = (double)traySettings.PitchY.Value;
-            double pitchX = _xRecipe.xRealOffsetX;
-            double pitchY = _xRecipe.xRealOffsetY;
-            var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
-            transformsModel.SetRuntimePlcGrid(plcGrid, camGridC1, camGridC2);
-
-            //(4) 重新載入 EmptyTrayAoiRecipe
+            //(3) 重新載入 EmptyTrayAoiRecipe
             using (var jx = loadEmptyTrayAoiRecipe(false))
             {
                 if (jx != null)
+                {
                     EmptyTrayAoiModel.SetRecipe(jx);
+                }
             }
 
-            //(5) 自動建立陣列
-            buildRegionCells(ActiveCarrierID, camGrid, false);
+            ////(3) PitchX and PitchY 
+            //double pitchX = _xRecipe.xRealOffsetX;  // default from xRecipe
+            //double pitchY = _xRecipe.xRealOffsetY;  // default from xRecipe
+            ////(5) 設定 Runtime 跑線時期 P座標 (PLC) 格點
+            //var rows = camGrid.Rows;
+            //var cols = camGrid.Cols;
+            //var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
+
+            //(4) build Runtime Plc Grid
+            var plcGrid = buildRuntimePlcGrid(runtimeCamGrid);
+
+            //(5) set Runtime Plc Grid
+            transformsModel.UpdateRuntimePlcGrid(plcGrid, camGridC1, camGridC2);
+
+            //(6) 自動建立陣列
+            buildRegionCells(ActiveCarrierID, runtimeCamGrid, false);
         }
         public MatchResult AutoBuildRegionCells(Bitmap fullfovBmp)
         {
+            //(1) 自動抓取 格點
             var matchResult = fetchCameraGrid(fullfovBmp);
             var camGrid = matchResult?.Grid;
-
             if (camGrid == null)
             {
                 //"無法抓到格點!"
@@ -190,7 +200,13 @@ namespace LaserAlignDX.Mvc.Model
                 return null;
             }
 
+            //(2) 建立陣列
             buildRegionCells(ActiveCarrierID, camGrid, true);
+
+            //(3) 更新 camGrid
+            var camGridC1 = ActiveCarrierID == CarrierEnum.C1 ? camGrid : null;
+            var camGridC2 = ActiveCarrierID == CarrierEnum.C2 ? camGrid : null;
+            TransformsModel.UpdateRuntimePlcGrid(null, camGridC1, camGridC2);
 
             return matchResult;
         }
@@ -239,7 +255,38 @@ namespace LaserAlignDX.Mvc.Model
                 return matchResult;
             }
         }
+        private PlcGridPoints buildRuntimePlcGrid(EzBlocsGrid camGrid)
+        {
+            //(1) PitchX and PitchY 
+            double pitchX = _xRecipe.xRealOffsetX;  // default from xRecipe
+            double pitchY = _xRecipe.xRealOffsetY;  // default from xRecipe
+
+            //(2) 重新載入 EmptyTrayAoiRecipe
+            using (var jx = loadEmptyTrayAoiRecipe(false))
+            {
+                if (jx != null)
+                {
+                    //EmptyTrayAoiModel.SetRecipe(jx);
+                    pitchX = (double)jx.TrayMiscSettings.PitchX.Value;
+                    pitchY = (double)jx.TrayMiscSettings.PitchY.Value;
+                }
+            }
+
+            //(3) 設定 Runtime 跑線時期 P座標 (PLC) 格點
+            var rows = camGrid.Rows;
+            var cols = camGrid.Cols;
+            var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
+            return plcGrid;
+        }
+
         private void buildRegionCells(CarrierEnum carrierID, EzBlocsGrid camGrid, bool optWriteBlackToRecipe)
+        {
+            if (TravellerTransforms.OPT_USING_XRECIPE_CAM_GRID)
+                buildRegionCells_motor(carrierID, camGrid, optWriteBlackToRecipe);
+            else
+                buildRegionCells_world(carrierID, camGrid, optWriteBlackToRecipe);
+        }
+        private void buildRegionCells_world(CarrierEnum carrierID, EzBlocsGrid camGrid, bool optWriteBlackToRecipe)
         {
             if (camGrid == null)
             {
@@ -257,8 +304,8 @@ namespace LaserAlignDX.Mvc.Model
             double standardChipHeight = xInpectParam.mHeightStand;
 
             //(1) TransformModel
-            var trfCamToWorld = this.TransformsModel.GetCameraPhysicTransform(carrierID);
-            if (trfCamToWorld == null)
+            var transCP = this.TransformsModel.GetCameraPhysicTransform(carrierID);
+            if (transCP == null)
             {
                 var errCode = ErrCodes.NO_CALIB_TRANSFORM;
                 var errMsg = JetEazy.QxNums.GetEnumDescription(errCode) + " !";
@@ -275,11 +322,11 @@ namespace LaserAlignDX.Mvc.Model
                 var standardChipSize = new QVector(standardChipWidth, standardChipHeight);
 
                 var camPt0 = camGrid[0, 0].Center;
-                var worldPt0 = trfCamToWorld.Trans(camPt0);
+                var worldPt0 = transCP.Trans(camPt0);
                 var goldenP1 = worldPt0 - (standardChipSize / 2);
                 var goldenP2 = worldPt0 + (standardChipSize / 2);
-                goldenP1 = trfCamToWorld.InvTrans(goldenP1);
-                goldenP2 = trfCamToWorld.InvTrans(goldenP2);
+                goldenP1 = transCP.InvTrans(goldenP1);
+                goldenP2 = transCP.InvTrans(goldenP2);
                 var delta = goldenP2 - goldenP1;
 
                 var goldenChipRect = new RectangleF((float)goldenP1.X, (float)goldenP1.Y, (float)delta.X, (float)delta.Y);
@@ -303,7 +350,7 @@ namespace LaserAlignDX.Mvc.Model
                 //cell (OrgX, OrgY) 是 Chip 的中心點?
                 //cell.OrgX = xRealLeftX + j * xRealOffsetX;
                 //cell.OrgY = xRealLeftY + i * xRealOffsetY;
-                var wCenter = trfCamToWorld.Trans(bloc.Center);
+                var wCenter = transCP.Trans(bloc.Center);
                 cell.OrgX = (float)(wCenter.X);    // - standardChipSize.X / 2);
                 cell.OrgY = (float)(wCenter.Y);    // - standardChipSize.Y / 2);
 
@@ -336,10 +383,10 @@ namespace LaserAlignDX.Mvc.Model
 
                 // Camera Grid Points
                 var camPt00 = camGrid[0, 0];
-                var p00 = trfCamToWorld.Trans(camGrid[0, 0].Center);
-                var p01 = trfCamToWorld.Trans(camGrid[0, cols - 1].Center);
-                var p10 = trfCamToWorld.Trans(camGrid[rows - 1, 0].Center);
-                var p11 = trfCamToWorld.Trans(camGrid[rows - 1, cols - 1].Center);
+                var p00 = transCP.Trans(camGrid[0, 0].Center);
+                var p01 = transCP.Trans(camGrid[0, cols - 1].Center);
+                var p10 = transCP.Trans(camGrid[rows - 1, 0].Center);
+                var p11 = transCP.Trans(camGrid[rows - 1, cols - 1].Center);
                 var corners = new[] { p00, p01, p11, p10 }; // 左上, 右上, 右下, 左下
 
                 // xAngle
@@ -384,6 +431,144 @@ namespace LaserAlignDX.Mvc.Model
                 }
             }
         }
+        private void buildRegionCells_motor(CarrierEnum carrierID, EzBlocsGrid runtimeCamGrid, bool optWriteBlackToRecipe)
+        {
+            if (runtimeCamGrid == null)
+            {
+                //>>> camGrid = _jxRecipe.EmptyTrayParams.TrayMiscSettings.GetGoldenGrid(true);
+                return;
+            }
+
+            ErrCodes errCode;
+            string errMsg;
+
+            //(0) Global MESS
+            var xParaGrid = RecipeParaGridClass.Instance;
+            var xInpectParam = InspectX3ParaClass.Instance;
+            var xRegionCells = _xRecipe.xRegionCells;
+            xRegionCells.Clear();
+
+            //(1) TransformModel
+            var transCM1 = this.TransformsModel.GetCameraMotorTransform(carrierID, SuckerRowEnum.S1);
+            var transCP = this.TransformsModel.GetCameraPhysicTransform(carrierID);
+            if (transCP == null || transCM1 == null)
+            {
+                errCode = ErrCodes.NO_CALIB_TRANSFORM;
+                errMsg = JetEazy.QxNums.GetEnumDescription(errCode) + " !";
+                OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
+                return;
+            }
+
+            //(2) goldenChipRect (in camera coordinates)
+            SizeF cellViewSizeF = _xRecipe.xRegionTrain.Size;
+            double standardChipWidth = xInpectParam.mWidthStand;
+            double standardChipHeight = xInpectParam.mHeightStand;
+
+            //(3) CamBasePt and Sucker1_BasePt
+            var camBasePt = runtimeCamGrid[0, 0].Center;
+            var motorBasePt = transCM1.Trans(camBasePt);
+
+            //(4) 從 EmptyTrayAoi 取得 PitchX, PitchY 的設定
+            double pitchX = xParaGrid.xRealOffsetX;
+            double pitchY = xParaGrid.xRealOffsetY;
+            using (var jx = loadEmptyTrayAoiRecipe(false))
+            {
+                var traySettings = jx?.TrayMiscSettings;
+                if (traySettings != null)
+                {
+                    pitchX = (double)traySettings.PitchX.Value;
+                    pitchY = (double)traySettings.PitchY.Value;
+                }
+            }
+
+            //(5) 用 Zigzag 順序加入至 xRegionCells
+            int index = 0;
+            QVector nodeBase = motorBasePt;
+            foreach ((int r, int c, EzBloc bloc) in runtimeCamGrid.IterZigzag())
+            {
+                var cell = new RegionCellX3Class();
+                cell.Index = index;
+                cell.CellRow = r;
+                cell.CellCol = c;
+
+                //cell.lblName = "ROW" + r.ToString("000") + "-COL" + c.ToString("000");
+                //cell.viewRectF = new RectangleF(_baserect.X + j * _coloffset, _baserect.Y + i * _rowoffset, _baserect.Width, _baserect.Height);
+                cell.lblName = $"ROW{r:000}-COL{c:000}";
+                cell.viewRectF = JetEazy.Qcvt.CreateCenterRect((float)bloc.Center.X, (float)bloc.Center.Y, ref cellViewSizeF);
+
+                //cell (OrgX, OrgY) 是 Chip 的中心點?
+                //cell.OrgX = xRealLeftX + j * xRealOffsetX;
+                //cell.OrgY = xRealLeftY + i * xRealOffsetY;
+                cell.OrgX = (float)(nodeBase.X + c * pitchX);
+                cell.OrgY = (float)(nodeBase.Y + r * pitchY);
+
+                xRegionCells.Add(cell);
+                index++;
+            }
+
+            //(6) 更新 數據到 xParaGrid 參數
+            if (optWriteBlackToRecipe)
+            {
+                var rows = runtimeCamGrid.Rows;
+                var cols = runtimeCamGrid.Cols;
+                if (rows < 2 || cols < 2)
+                {
+                    // 上層的 AutoBuildRegionCells 已經警示過了. 
+                    return;
+                }
+
+                // 更新 CameraGrid
+                if (carrierID == CarrierEnum.C1)
+                {
+                    _xRecipe.xCamGrid1?.Dispose();
+                    _xRecipe.xCamGrid1 = runtimeCamGrid;
+                }
+                else
+                {
+                    _xRecipe.xCamGrid2?.Dispose();
+                    _xRecipe.xCamGrid2 = runtimeCamGrid;
+                }
+
+                // Camera Grid Points
+                var p00 = transCM1.Trans(runtimeCamGrid[0, 0].Center);
+                var p01 = transCM1.Trans(runtimeCamGrid[0, cols - 1].Center);
+                var p10 = transCM1.Trans(runtimeCamGrid[rows - 1, 0].Center);
+                var p11 = transCM1.Trans(runtimeCamGrid[rows - 1, cols - 1].Center);
+                var corners = new[] { p00, p01, p11, p10 }; // 左上, 右上, 右下, 左下
+
+                // xAngle
+                var box2D = new QvBox2D();
+                box2D.Corners = Array.ConvertAll(corners, c => new PointF((float)c.X, (float)c.Y));
+                double angle = box2D.Theta * 180.0 / Math.PI;
+                xParaGrid.xAngle = (float)Math.Round(angle, 3);
+
+                // xRows, xColumn
+                xParaGrid.xRow = rows;
+                xParaGrid.xColumn = cols;
+
+                // xLeftTopX, xLeftTopY
+                // 矩阵左上角Chip的左上角图像位置 X, Y
+                xParaGrid.xLeftTopX = (int)(camBasePt.X - cellViewSizeF.Width / 2f);
+                xParaGrid.xLeftTopY = (int)(camBasePt.Y - cellViewSizeF.Height / 2f);
+
+                // xRowOffset, xColumnOffset
+                // Average Row Pitch and Col Pitch (runtime)
+                xParaGrid.xRowOffset = (float)Math.Round((p10 - p00).Y / (rows - 1), 3);
+                xParaGrid.xColumnOffset = (float)Math.Round((p01 - p00).X / (cols - 1), 3);
+
+                // xChipWidth, xChipHeight
+                // Chip Size (runtime)
+                xParaGrid.xChipWidth = (float)Math.Round(standardChipWidth, 3);
+                xParaGrid.xChipHeight = (float)Math.Round(standardChipHeight, 3);
+
+                xParaGrid.xRealLeftX = (float)Math.Round(p00.X, 3);
+                xParaGrid.xRealLeftY = (float)Math.Round(p00.Y, 3);
+
+                // PitchX and PitchY
+                xParaGrid.xRealOffsetX = (float)Math.Round(pitchX, 3);
+                xParaGrid.xRealOffsetY = (float)Math.Round(pitchY, 3);
+            }
+        }
         string checkCameraGrid(CarrierEnum carrierID, EzBlocsGrid camGrid, bool notify)
         {
             //var errCode = ErrCodes.OK;
@@ -421,17 +606,19 @@ namespace LaserAlignDX.Mvc.Model
         }
         #endregion
 
-        bool ITravelerModel.WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camPt, out PointF suckerWorldPt, out string errMsg)
+        bool ITravelerModel.WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camPt, out PointF suckerMotorPt, out string errMsg)
         {
             PointF _P(QVector v) { return v == null ? PointF.Empty : new PointF((float)v.X, (float)v.Y); }
 
-            var errCode = TransformsModel.GetCoordsRef(carrierID, out var camCoord, out var worldSucker1, out var worldSucker2, out errMsg);
+            ErrCodes errCode;
+
+            (errCode, errMsg) = TransformsModel.GetCoordsRef(carrierID, out var camCoord, out var s1MotorCoord, out var s2MotorCoord);
 
             camPt = _P(camCoord);
-            suckerWorldPt = suckerRowID == SuckerRowEnum.S1 ? _P(worldSucker1) : _P(worldSucker2);
+            suckerMotorPt = suckerRowID == SuckerRowEnum.S1 ? _P(s1MotorCoord) : _P(s2MotorCoord);
 
             if (errCode == ErrCodes.OK)
-                mxWriteToPlc(carrierID, suckerRowID, suckerWorldPt);
+                mxWriteToPlc(carrierID, suckerRowID, suckerMotorPt);
 
             return (errCode == ErrCodes.OK);
         }
@@ -454,14 +641,16 @@ namespace LaserAlignDX.Mvc.Model
             var errMsgs = new System.Collections.Generic.List<string>();
             bool totalOK = true;
 
+            ErrCodes err;
+            string errMsg;
+
             foreach (CarrierEnum C in carrierIDs)
             {
-                var err = TransformsModel.GetCoordsRef(C, out var camCoord, out var worldSucker1, out var worldSucker2, out var errMsg);
-                var ok = err == ErrCodes.OK;
-                if (ok)
+                (err, errMsg) = TransformsModel.GetCoordsRef(C, out var camCoord, out var s1MotorCoord, out var s2MotorCoord);
+                if (err == ErrCodes.OK)
                 {
-                    mxWriteToPlc(C, SuckerRowEnum.S1, _P(worldSucker1));
-                    mxWriteToPlc(C, SuckerRowEnum.S2, _P(worldSucker2));
+                    mxWriteToPlc(C, SuckerRowEnum.S1, _P(s1MotorCoord));
+                    mxWriteToPlc(C, SuckerRowEnum.S2, _P(s2MotorCoord));
                 }
                 else
                 {

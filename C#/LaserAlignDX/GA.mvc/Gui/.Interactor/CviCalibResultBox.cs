@@ -795,7 +795,8 @@ namespace LaserAlignDX.Mvc.Gui
                 {
                     var bloc = _grid[r, c];
 
-                    (var motorDelta, var worldDelta) = transformsModel.CalcPlcDetailCompensation(ActiveCarrierID, ActiveSuckerRowID, bloc.Center, r, c);
+                    (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, r, c);
+
 
                     double err;
                     if (option == 0)

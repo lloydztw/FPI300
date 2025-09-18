@@ -313,9 +313,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updatePlcCoordsRef(CarrierEnum carrierID)
         {
-            var err = _sysModel.TransformsModel.GetCoordsRef(carrierID, out var camCoord, out var worldSucker1, out var worldSucker2, out var errMsg);
+            (var err, var errMsg) = _sysModel.TransformsModel.GetCoordsRef(carrierID, out var camCoord, out var s1MotorCoord, out var s2MotorCoord);
 
-            _rcpEditUI.UpdateCoordsRef(camCoord, worldSucker1, worldSucker2);
+            _rcpEditUI.UpdateCoordsRef(camCoord, s1MotorCoord, s2MotorCoord);
 
             if (err != ErrCodes.OK)
             {
@@ -521,6 +521,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             var result = _sysModel.AutoBuildRegionCells(srcBmp);
             if (result == null || result.Grid == null)
                 return;
+
+            // 更新 CoordRef
+            updatePlcCoordsRef(_currentCarrierID);
 
             // 設定旗標
             _isModified = true;

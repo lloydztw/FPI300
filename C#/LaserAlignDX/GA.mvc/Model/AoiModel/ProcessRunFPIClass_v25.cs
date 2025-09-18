@@ -564,21 +564,12 @@ namespace LaserAlignDX.AoiModel.V25
                         CarrierEnum C = _sysModel.ActiveCarrierID;
                         (var motorDelta, var worldDelta) = _transformModel.CalcPlcCompensation(C, chipCentroid, cell.CellRow, cell.CellCol);
 
-                        //var T_CM = transformModel.GetCameraMotorTransform(carrierID, suckerRowID);
-                        //var T_CP = transformModel.GetCameraPhysicTransform(carrierID);
-                        //var motorPt = T_CM.Trans(chipLoc);
-                        //var worldPt = T_CP.Trans(chipLoc);
-                        //cell.Sur1 = new PointF((float)motorPt.X, (float)motorPt.Y);
-                        //cell.Sur2 = new PointF((float)worldPt.X, (float)worldPt.Y);
-
                         double angle = chipLoc.Theta * 180 / Math.PI;
 
                         cell.chipLocInCamera = chipLoc;
                         cell.RunAngle = (float)(angle + INI.Instance.Cal_Bca);
-                        //cell.RunX = (float)(motorDelta.X + INI.Instance.Cal_Bcx);
-                        //cell.RunY = (float)(motorDelta.Y + INI.Instance.Cal_Bcy);
-                        cell.RunX = (float)(worldDelta.X + INI.Instance.Cal_Bcx);
-                        cell.RunY = (float)(worldDelta.Y + INI.Instance.Cal_Bcy);
+                        cell.RunX = (float)(motorDelta.X + INI.Instance.Cal_Bcx);
+                        cell.RunY = (float)(motorDelta.Y + INI.Instance.Cal_Bcy);
 #endif
                         if (xInspect.bOpenLineMeasure)
                         {

@@ -25,6 +25,7 @@ using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
+using NLog.LayoutRenderers;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -652,7 +653,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 return null;
 
             int row = cell.CellRow;
-            int col = cell.CellCol; 
+            int col = cell.CellCol;
 
             bool isShowScore = true;
             var sb = new StringBuilder();
@@ -665,9 +666,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             {
                 if (TransformsModel != null)
                 {
-                    appendMotorCoords(sb, cursorBloc, cursorBloc2);
-                    appendWorldCoords(sb, cursorBloc, cursorBloc2);
-                    appendPlcCompensation(sb, cursorBloc, row, col);
+                    //appendMotorCoords(sb, cursorBloc, cursorBloc2);
+                    //appendWorldCoords(sb, cursorBloc, cursorBloc2);
+                    //appendPlcCompensation(sb, cursorBloc, row, col);
+                    appendDetailCoordsInfo(sb, row, col, cursorBloc, cursorBloc2);
                     isShowScore = false;
                 }
             }
@@ -702,6 +704,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 }
             }
         }
+
+#if(OPT_OLD_CODE)
         void appendMotorCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
             QVector camPt = getCentroid(bloc);
@@ -780,7 +784,85 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 sb.AppendLine($"RunY = {cell.RunY:0.000} mm");
             }
         }
-        
+#endif
+
+        void appendDetailCoordsInfo(StringBuilder sb, int row, int col, EzBloc bloc, EzBloc bloc2)
+        {
+            if (TransformsModel == null)
+                return;
+
+            (var err, var errMsg) = TransformsModel.GetNodeCoords(ActiveCarrierID, row, col, out var _, out var world_target, out var s1_target, out var s2_target);
+            if (err != Model.ErrCodes.OK)
+                return;
+
+            QVector world_current = null;
+            QVector s1_current = null;
+            QVector s2_current = null;
+
+            var camPt = getCentroid(bloc);
+            if (camPt != null)
+            {
+                var tranCM1 = TransformsModel.GetCameraMotorTransform(ActiveCarrierID, SuckerRowEnum.S1);
+                var tranCM2 = TransformsModel.GetCameraMotorTransform(ActiveCarrierID, SuckerRowEnum.S2);
+                var tranCP = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+                s1_current = tranCM1.Trans(camPt);
+                s2_current = tranCM2.Trans(camPt);
+                world_current = tranCP.Trans(camPt);
+            }
+
+            sb.AppendLine().Append("S1 馬達目標(X,Y) = (").AppendValues((float)s1_target.X, (float)s1_target.Y).Append(") mm");
+            if(camPt!=null)
+                sb.AppendLine().Append("S1 馬達座標(X,Y) = (").AppendValues((float)s1_current.X, (float)s1_current.Y).Append(") mm");
+
+            sb.AppendLine();
+            sb.AppendLine().Append("S2 馬達目標(X,Y) = (").AppendValues((float)s2_target.X, (float)s2_target.Y).Append(") mm");
+            if (camPt != null)
+                sb.AppendLine().Append("S2 馬達座標(X,Y) = (").AppendValues((float)s2_current.X, (float)s2_current.Y).Append(") mm");
+
+            sb.AppendLine();
+            sb.AppendLine().Append("Physic 目標(X,Y) = (").AppendValues((float)world_target.X, (float)world_target.Y).Append(") mm");
+            if (camPt != null)
+                sb.AppendLine().Append("Physic 座標(X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+
+            if (camPt != null)
+            {
+                var world_delta = world_current - world_target;
+                var motor_delta = s1_current - s1_target;
+                sb.AppendLine();
+                sb.AppendLine($"Physic 變動值 ΔX = {world_delta.X:0.000} mm");
+                sb.AppendLine($"Physic 變動值 ΔY = {world_delta.Y:0.000} mm");
+                sb.AppendLine();
+                sb.AppendLine($"PLC 格點 補償量 ΔX = {motor_delta.X:0.000} mm");
+                sb.AppendLine($"PLC 格點 補償量 ΔY = {motor_delta.Y:0.000} mm");
+            }
+
+            if (bloc != null && bloc2 != null && bloc != bloc2)
+            {
+                var camPt2 = getCentroid(bloc2);
+                if (camPt2 != null)
+                {
+                    var transCP = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+                    var world_last = transCP.Trans(camPt2);
+                    var dv = world_current - world_last;
+                    double dist = dv.NormLength;
+                    sb.AppendLine();
+                    sb.AppendLine($"Physic 座標 DX = {dv.X:0.000} mm");
+                    sb.AppendLine($"Physic 座標 DY = {dv.Y:0.000} mm");
+                    sb.AppendLine($"Physic 座標 距離 = {dist:0.000} mm");
+                }
+            }
+            else
+            {
+                var cell = (bloc as CellBloc)?.Cell;
+                if (cell != null)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine($"RunX = {cell.RunX:0.000} mm");
+                    sb.AppendLine($"RunY = {cell.RunY:0.000} mm");
+                }
+            }
+        }
+
         static QVector getCentroid(EzBloc bloc)
         {
             var cell = (bloc as CellBloc)?.Cell;
@@ -797,7 +879,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         static string PATH_DUMP => "d:\\paso.log\\chipLoc";
         void DebugMatching(CellBloc cellBloc)
         {
-            if (IsEmptyTrayMode) 
+            if (IsEmptyTrayMode)
                 return;
             var cell = cellBloc?.Cell;
             if (cell == null) return;
