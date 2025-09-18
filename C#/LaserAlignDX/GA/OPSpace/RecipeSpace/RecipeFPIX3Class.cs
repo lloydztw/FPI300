@@ -308,6 +308,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xCamGrid2?.Dispose();
             xCamGrid2 = null;
         }
+        public void SaveCameraGrids()
+        {
+            saveCamGrid(CarrierEnum.C1, xCamGrid1);
+            saveCamGrid(CarrierEnum.C2, xCamGrid2);
+        }
         #endregion
 
         #region PRIVATE_LOCAL_BMP_HELPER_FUNCTIONS

@@ -17,6 +17,7 @@ using EzAoiEmptyTrayInspector;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.EzImage;
+using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Match;
 using JetEazy.Utils;
@@ -280,15 +281,17 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             else
             {
-                var jx = _jxCalibVisionRecipes[(int)_activeCarrierID];
+                var jxRecipe = _jxCalibVisionRecipes[(int)_activeCarrierID];
 
                 if (toReloadRecipe)
                 {
-                    _aoiModel.SetRecipe(jx);
+                    // 設定參數
+                    _aoiModel.SetRecipe(jxRecipe);
+                    // 載入圖片
                     LoadImage(CALIB_LAST_IMAGE_FILE(_activeCarrierID));
                 }
 
-                panel.BuildGuiCtrls(jx);
+                panel.BuildGuiCtrls(jxRecipe);
                 panel.ExpandAll();
             }
         }
@@ -640,6 +643,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             _cviResultBox.TransCameraToWorld = _transforms.GetCameraPhysicTransform(_activeCarrierID);
 
             GaUtil.SetCursor(_wndOwner, oldCursor);
+
+            string name = GaUtil.GetEnumDescription(_activeCarrierID) + " && " + GaUtil.GetEnumDescription(_activeSuckerRowID);
+            VsMessageBox.Info($"{name}\n\r\n\r座標系統建置完成!");
         }
 
         void LoadImage(string fileName = null)
@@ -649,7 +655,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (string.IsNullOrEmpty(fileName))
                 fileName = GaUtil.BrowseImageFile();
 
-            if (fileName != null)
+            if (!string.IsNullOrEmpty(fileName) && System.IO.File.Exists(fileName))
             {
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
                 _wndOwner?.Refresh();
@@ -705,7 +711,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             foreach (var jx in _jxCalibVisionRecipes)
             {
                 jx.Load(CALIB_VISION_FILE((CarrierEnum)i));
-                jx.VisionSettings.FindAllFailBlocs.Value = false;
+                jx.VisionSettings.FindAllFailBlocs.Value = false;           // 強制停用 "尋找所有格外區塊"
+                jx.VisionSettings.Match.BoundBox.Value = Rectangle.Empty;   // 強制停用 "邊界框"
                 i++;
             }
 

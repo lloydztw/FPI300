@@ -17,6 +17,7 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
+using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using System;
 using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
@@ -29,7 +30,10 @@ namespace LaserAlignDX.Model.Coords
     /// </summary>
     public partial class TravellerTransforms : IDisposable
     {
+        #region CONFIG
         public const int N_CALIB_POINTS = 4;
+        static bool OPT_USING_X_CAM_GRID = false;
+        #endregion
 
         #region PRIVATE_GLOBAL_TRANSFORM_MEMBERS
         PlcGridPoints _calibPlcGrid = new PlcGridPoints();
@@ -257,9 +261,11 @@ namespace LaserAlignDX.Model.Coords
         /// <summary>
         /// 設定 Runtime 跑線時期 P座標 (PLC) 格點
         /// </summary>
-        public void SetRuntimePlcGrid(PlcGridPoints plcGrid)
+        public void SetRuntimePlcGrid(PlcGridPoints plcGrid, EzBlocsGrid camGrid1 = null, EzBlocsGrid camGrid2 = null)
         {
             _runtimePlcGrid = plcGrid;
+            _runtimeCamGridC1 = camGrid1;
+            _runtimeCamGridC2 = camGrid2;
         }
 
         #region RESERVED_FUNCTIONS
@@ -295,7 +301,7 @@ namespace LaserAlignDX.Model.Coords
             if (errCode != ErrCodes.OK)
                 return errCode;
 
-            //(3) 取出 Transforms
+            //(3) 取出 Global Transforms
             var transCP = this.GetCameraPhysicTransform(C);
             var transCM1 = this.GetCameraMotorTransform(C, SuckerRowEnum.S1);
             var transCM2 = this.GetCameraMotorTransform(C, SuckerRowEnum.S2);
@@ -308,17 +314,19 @@ namespace LaserAlignDX.Model.Coords
             worldCoordSucker1 = s1_motor_coord;
             worldCoordSucker2 = s2_motor_coord;
 
-            ////(5) 計算 (精確使用 World 座標)
-            //transCP.GetCalibCornerPoints().Get(0, out _, out var world_k);
-            //transCM1.GetCalibCornerPoints().Get(0, out _, out var s1_motor_k);
-            //transCM2.GetCalibCornerPoints().Get(0, out _, out var s2_motor_k);
-            //var s1_camera_k = transCM1.InvTrans(s1_motor_k);
-            //var s2_camera_k = transCM2.InvTrans(s2_motor_k);
-            //var s1_world_k = transCP.Trans(s1_camera_k);
-            //var s2_world_k = transCP.Trans(s2_camera_k);
-            //var delta = s2_world_k - s1_world_k;
-            //worldCoordSucker1 = s1_motor_coord;
-            //worldCoordSucker2 = worldCoordSucker1 + delta;
+            //(5) 使用參數中的 camGrid
+            if (OPT_USING_X_CAM_GRID)
+            {
+                var xCamGrid = C == CarrierEnum.C1 ? _runtimeCamGridC1 : _runtimeCamGridC2;
+                (errCode, errMsg) = checkCameraGrid(C, xCamGrid);
+                var camPt = xCamGrid?.Get(0, 0)?.Center;
+                if (camPt == null || xCamGrid == null)
+                    return ErrCodes.NO_CAMERA_GRID;
+                s1_motor_coord = transCM1.Trans(camPt);
+                s2_motor_coord = transCM2.Trans(camPt);
+                worldCoordSucker1 = s1_motor_coord;
+                worldCoordSucker2 = s2_motor_coord;
+            }
 
             //(6) Return value
             errMsg = null;
@@ -328,7 +336,7 @@ namespace LaserAlignDX.Model.Coords
         /// <summary>
         /// 計算 PLC 補償量
         /// </summary>
-        public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, SuckerRowEnum S, QVector camPt, int rowId, int colId)
+        public (QVector, QVector) CalcPlcDetailCompensation(CarrierEnum C, SuckerRowEnum S, QVector camPt, int rowId, int colId)
         {
             if (_runtimePlcGrid == null)
                 return (new QVector(0, 0), new QVector(0, 0));
@@ -362,7 +370,7 @@ namespace LaserAlignDX.Model.Coords
         /// <summary>
         /// 計算 PLC 補償量
         /// </summary>
-        public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
+        (QVector, QVector) CalcPlcCompensation_000(CarrierEnum C, QVector camPt, int rowId, int colId)
         {
             if (_runtimePlcGrid == null)
                 return (new QVector(0, 0), new QVector(0, 0));
@@ -398,6 +406,56 @@ namespace LaserAlignDX.Model.Coords
             return (motorDelta, worldError);
         }
 
+        /// <summary>
+        /// 計算 PLC 補償量
+        /// </summary>
+        (QVector, QVector) CalcPlcCompensation_001(CarrierEnum C, QVector camPt, int rowId, int colId)
+        {
+            if (!OPT_USING_X_CAM_GRID || _runtimePlcGrid == null)
+                return CalcPlcCompensation_000(C, camPt, rowId, colId);
+
+            //(0) CamBase and SuckerBase
+            var err = GetCoordsRef(C, out var cam_base, out var sucker1_base, out var sucker2_base, out var errMsg);
+            if (err != ErrCodes.OK)
+                return CalcPlcCompensation_000(C, camPt, rowId, colId);
+
+            ITransform transCP = GetCameraPhysicTransform(C);
+            ITransform transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
+            ITransform transCM2 = GetCameraMotorTransform(C, SuckerRowEnum.S2);
+
+            //(1) 目標值 P (World Coords)
+            var targetWorldPt = _runtimePlcGrid[rowId, colId];
+            var targetWorldPt1 = targetWorldPt + sucker1_base;
+            var targetWorldPt2 = targetWorldPt + sucker2_base;
+
+            //(2) 像測現值 轉換至 World Coords
+            var curWorldPt = transCP.Trans(camPt);
+            var curWorldPt1 = curWorldPt + sucker1_base;
+            var curWorldPt2 = curWorldPt + sucker2_base;
+
+            //(3) World Coordinates 的差異
+            var worldError1 = targetWorldPt1 - curWorldPt1;
+            var worldError2 = targetWorldPt2 - curWorldPt2;
+
+            //(4) 馬達補償量
+            var delta1 = worldError1;
+            var delta2 = worldError2;
+            //var motorDelta = (delta1.NormLengthSQ < delta2.NormLengthSQ) ? delta1 : delta2;
+
+            return (delta2, delta1);
+        }
+
+        /// <summary>
+        /// 計算 PLC 補償量
+        /// </summary>
+        public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
+        {
+            if(OPT_USING_X_CAM_GRID)
+                return CalcPlcCompensation_001(C, camPt, rowId, colId);
+            else
+                return CalcPlcCompensation_000(C, camPt, rowId, colId);
+        }
+
         #region CHECK_FUNCTIONS
         internal (ErrCodes, string) checkCameraGrid(CarrierEnum carrierID, EzBlocsGrid camGrid)
         {
@@ -407,16 +465,16 @@ namespace LaserAlignDX.Model.Coords
             if (camGrid == null)
             {
                 errCode = ErrCodes.NO_CAMERA_GRID;
-                errMsg = JetEazy.QxNums.GetEnumDescription(carrierID)
-                       + " : " + JetEazy.QxNums.GetEnumDescription(errCode)
+                errMsg = $"[{JetEazy.QxNums.GetEnumDescription(carrierID)}] "
+                       + JetEazy.QxNums.GetEnumDescription(errCode)
                        + " !";
             }
             else if (camGrid.Rows < 2 || camGrid.Cols < 2)
             {
                 errCode = ErrCodes.LOW_GRID_ROWS_COLS;
-                errMsg = JetEazy.QxNums.GetEnumDescription(carrierID)
-                       + " : " + JetEazy.QxNums.GetEnumDescription(errCode)
-                       + $" rows={camGrid.Rows}, cols={camGrid.Rows} !";
+                errMsg = $"[{JetEazy.QxNums.GetEnumDescription(carrierID)}] "
+                       + JetEazy.QxNums.GetEnumDescription(errCode)
+                       + $"\n\r rows={camGrid.Rows}, cols={camGrid.Rows} !";
             }
 
             return (errCode, errMsg);

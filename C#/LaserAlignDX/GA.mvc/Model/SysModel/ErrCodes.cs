@@ -28,16 +28,19 @@ namespace LaserAlignDX.Mvc.Model
         [Description("缺少 '全域校正' 數據")]
         NO_CALIB_TRANSFORM,
 
-        [Description("Runtime 跑線時期的 PLC格點 沒有設定")]
+        [Description("缺少 跑線時期的 PLC 格點\n\r\n\r請設定 '空盤檢測'")]
         NO_RUNTIME_PLC_GRID,
 
-        [Description("參數 格點陣列 (Camera Grid) 沒有建置")]
+        [Description("參數 格點陣列 (Camera Grid) 沒有建置\n\r\n\r請執行 '生成陣列'")]
         NO_CAMERA_GRID,
 
         [Description("參數 格點陣列 (Camera Grid) 行列數太小")]
         LOW_GRID_ROWS_COLS,
 
         [Description("無法抓到格點")]
-        CAN_NOT_FETCH_CAMERA_GRID
+        CAN_NOT_FETCH_CAMERA_GRID,
+
+        [Description("空盤檢測 參數沒建立")]
+        NO_EMPTY_TRAY_RECIPE,
     }
 }

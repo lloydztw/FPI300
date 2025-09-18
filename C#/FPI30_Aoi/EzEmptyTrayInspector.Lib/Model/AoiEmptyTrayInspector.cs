@@ -731,7 +731,7 @@ namespace EzAoiEmptyTrayInspector.Model
         void run_match_with_bound_roi(SideID sideId, Mat srcImg, string dumpPath = null)
         {
             var jxBoundBox = _recipe?.VisionSettings?.Match?.BoundBox;
-            if (jxBoundBox == null)
+            if (jxBoundBox == null || jxBoundBox.Value == Rectangle.Empty)
             {
                 run_match_one(sideId, srcImg, dumpPath);            //@<<< run_match_with_bound_roi
                 return;
@@ -1273,9 +1273,16 @@ namespace EzAoiEmptyTrayInspector.Model
                 // (2) Bound Roi
                 var roi = JetEazy.Qcvt.CV(jxMatchSetting.BoundBox.Value);
                 var bound = new Rect(0, 0, imgFullFov.Width, imgFullFov.Height);
-                JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
-                if (roi.Width < 2 || roi.Height < 2)
-                    return;
+                if (roi != Rect.Empty)
+                {
+                    JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+                    if (roi.Width < 2 || roi.Height < 2)
+                        return;
+                }
+                else
+                {
+                    roi = bound;
+                }
 
                 // (3) Img in Roi
                 Mat imgA = (roi != bound) ? imgFullFov[roi] : imgFullFov;

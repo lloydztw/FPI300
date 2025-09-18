@@ -485,7 +485,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V2
         }
         void loadLineScanImage(string fileName)
         {
-            if (fileName != null)
+            if (!string.IsNullOrEmpty(fileName) && System.IO.File.Exists(fileName))
             {
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 

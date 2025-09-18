@@ -150,7 +150,7 @@
             this.btnOpenEmptyTrayWindow.Name = "btnOpenEmptyTrayWindow";
             this.btnOpenEmptyTrayWindow.Size = new System.Drawing.Size(120, 31);
             this.btnOpenEmptyTrayWindow.TabIndex = 33;
-            this.btnOpenEmptyTrayWindow.Text = "空載台";
+            this.btnOpenEmptyTrayWindow.Text = "空盤檢測";
             this.btnOpenEmptyTrayWindow.UseVisualStyleBackColor = false;
             // 
             // btnGrabImage

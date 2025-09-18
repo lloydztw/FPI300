@@ -19,6 +19,7 @@ using JetEazy.FormSpace;
 using JetEazy.Utils;
 using LaserAlignDX;
 using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Mvc.Model;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -92,7 +93,7 @@ namespace Traveller106
                 if (!System.IO.File.Exists(fileName))
                 {
                     if (!silent)
-                        PromptWarning($"{GaUtil.GetEnumDescription(C)} : 空盤檢測參數 {recipeName} 還沒建立!");
+                        PromptWarning($"[{GaUtil.GetEnumDescription(C)}] {GaUtil.GetEnumDescription(ErrCodes.NO_EMPTY_TRAY_RECIPE)}\n\r\n\r{recipeName}");
                     return false;
                 }
             }

@@ -766,8 +766,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             (var motorDelta, var worldDelta) = TransformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
 
             //>>> sb.AppendLine();
-            sb.AppendLine($"Phy 變動值 ΔX = {worldDelta.X:0.000} mm");
-            sb.AppendLine($"Phy 變動值 ΔY = {worldDelta.Y:0.000} mm");
+            sb.AppendLine($"Physic 變動值 ΔX = {worldDelta.X:0.000} mm");
+            sb.AppendLine($"Physic 變動值 ΔY = {worldDelta.Y:0.000} mm");
             sb.AppendLine();
             sb.AppendLine($"PLC 格點 補償量 dX = {motorDelta.X:0.000} mm");
             sb.AppendLine($"PLC 格點 補償量 dY = {motorDelta.Y:0.000} mm");

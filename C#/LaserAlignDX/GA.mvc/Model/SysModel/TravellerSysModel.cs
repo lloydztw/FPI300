@@ -160,7 +160,7 @@ namespace LaserAlignDX.Mvc.Model
             double pitchX = _xRecipe.xRealOffsetX;
             double pitchY = _xRecipe.xRealOffsetY;
             var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
-            transformsModel.SetRuntimePlcGrid(plcGrid);
+            transformsModel.SetRuntimePlcGrid(plcGrid, camGridC1, camGridC2);
 
             //(4) 重新載入 EmptyTrayAoiRecipe
             using (var jx = loadEmptyTrayAoiRecipe(false))

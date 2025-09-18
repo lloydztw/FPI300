@@ -337,10 +337,15 @@ namespace LaserAlignDX.Mvc.Ctrl
             enableGoldenRegionPicking(false);
 
             if (fileName == null)
+            {
                 fileName = GaUtil.BrowseImageFile();
-
-            if (fileName == null)
-                return;
+                if (fileName == null) return;
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(fileName) || !System.IO.File.Exists(fileName))
+                    return;
+            }
 
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 
@@ -519,7 +524,9 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             // 設定旗標
             _isModified = true;
-            
+            // 強制保存
+            _xRecipe.SaveCameraGrids();
+
             // 更新 GUI
             _cviCamGridBox.TransCameraToWorld = _sysModel.TransformsModel.GetCameraPhysicTransform(carrierID);
             _cviCamGridBox.IsEmptyTrayMode = true;
