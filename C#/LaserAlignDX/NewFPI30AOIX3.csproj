@@ -359,12 +359,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v2.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaTemplateEditCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCalibResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCellsResultBoxes.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviGoldenPickingBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviLineSegmentsBox.cs" />
+    <Compile Include="GA.mvc\Gui\.Interactor\CviRcpBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviRotRectBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviTransCoordInfo.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\IvDrawItem.cs" />
@@ -382,6 +384,13 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.Designer.cs">
       <DependentUpon>FormLightControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.Designer.cs">
+      <DependentUpon>FormTemplateEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v25.cs" />
@@ -796,6 +805,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.resx">
       <DependentUpon>FormLightControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.resx">
+      <DependentUpon>FormTemplateEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.resx">
       <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>

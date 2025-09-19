@@ -4,7 +4,7 @@ using VisionDesigner.PairLineFind;
 
 namespace LaserAlignDX.BasicSpace
 {
-    using IMPLEMENT = LineFinder.V1.MvdPairLineClass;
+    using IMPLEMENT = LineFinder.V1.MvdPairLineClassV1;
 
     public class MvdPairLineClass : IMvdPairLineFinder
     {

@@ -18,6 +18,8 @@ using JetEazy.EzImage;
 using JetEazy.OpenCV;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
+using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using System;
 using System.Drawing;
@@ -94,6 +96,13 @@ namespace LaserAlignDX
             //為安全起見, 重新再次載入 Recipe
             _sysModel.ActiveCarrierID = backID;
             _sysModel.ApplyRecipe();
+        }
+        public static void OpenTamplateEditor(CarrierEnum C)
+        {
+            using (var dlg = new FormTemplateEditor(C))
+            {
+                dlg.ShowDialog();
+            }
         }
         public static void OpenCalibrationTool()
         {

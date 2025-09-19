@@ -30,6 +30,7 @@ namespace LaserAlignDX
             var frm = new Traveller106.frmMainDX();
             
             //frm.Load += (s, e) => GaMvcConfig.OpenCalibrationTool();
+            //frm.Load += (s, e) => GaMvcConfig.OpenTamplateEditor(Model.Coords.CarrierEnum.C2);
 
             Application.Run(frm);
         }

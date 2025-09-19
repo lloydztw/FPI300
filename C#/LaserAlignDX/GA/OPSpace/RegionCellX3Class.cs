@@ -2,13 +2,12 @@
 using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.BasicSpace.LineFinder.V1;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
@@ -16,6 +15,8 @@ using VisionDesigner.Code2DReader;
 using VisionDesigner.ImageArithmetic;
 using VisionDesigner.PairLineFind;
 using VisionDesigner.PositionFix;
+using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
+
 
 namespace LaserAlignDX.OPSpace
 {
@@ -183,6 +184,8 @@ namespace LaserAlignDX.OPSpace
                 mvdFindLineClass.bFindOrient = false;
                 mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity3;
             }
+
+            mvdFindLineClass.Background = xInspect.CarrierBackground;
             cMvdLineSegmentFsOut[iSideIndex] = mvdFindLineClass.Run(bmp, roi, iSideIndex);
         }
         /// <summary>

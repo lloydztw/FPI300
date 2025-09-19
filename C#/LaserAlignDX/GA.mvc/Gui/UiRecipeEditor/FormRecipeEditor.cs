@@ -1,4 +1,19 @@
-﻿using JetEazy.QMath;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2023 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-09-09 重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using JetEazy.QMath;
 using LaserAlignDX.Mvc.Ctrl;
 using System.Drawing;
 using System.Windows.Forms;

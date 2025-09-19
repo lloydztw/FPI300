@@ -435,10 +435,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             showCviResult(false);
             enableGoldenRegionPicking(false);
 
-            using (var frm = new frmTemplateX3())
-            {
-                frm.ShowDialog();
-            }
+            GaMvcConfig.OpenTamplateEditor(_currentCarrierID);
 
             updateAllRecipeData(false, _currentCarrierID);
         }

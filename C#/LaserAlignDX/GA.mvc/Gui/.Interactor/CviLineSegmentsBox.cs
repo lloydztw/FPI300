@@ -39,6 +39,10 @@ namespace LaserAlignDX.Mvc.Gui
             _color = color;
             _lines = lines;
         }
+        public void Attach(params PointF[][] lines)
+        {
+            _lines = lines;
+        }
         public object Tag
         {
             get;

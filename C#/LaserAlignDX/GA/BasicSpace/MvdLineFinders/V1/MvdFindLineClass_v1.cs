@@ -26,13 +26,13 @@ namespace LaserAlignDX.BasicSpace.LineFinder.V1
     /// <summary>
     /// 修正 原先 Gaara 都沒有釋放 CLineFindTool 與 CMvdImage 寫法
     /// </summary>
-    public class MvdFindLineClass : IMvdLineFinder
+    public class MvdFindLineClassV1 : IMvdLineFinder
     {
         #region MVD_TOOL
         VisionDesigner.LineFind.CLineFindTool _mvdLineFindTool = null;
         #endregion
 
-        public MvdFindLineClass()
+        public MvdFindLineClassV1()
         {
             _mvdLineFindTool = new VisionDesigner.LineFind.CLineFindTool();
         }

@@ -11,13 +11,13 @@ namespace LaserAlignDX.BasicSpace.LineFinder.V1
     /// <summary>
     /// 修正 原先 Gaara 都沒有釋放 CPairLineFindTool 與 CMvdImage 寫法
     /// </summary>
-    internal class MvdPairLineClass : IMvdPairLineFinder
+    internal class MvdPairLineClassV1 : IMvdPairLineFinder
     {
         #region MVD_TOOL
         CPairLineFindTool _mvdPairLineFindTool;
         #endregion
 
-        public MvdPairLineClass()
+        public MvdPairLineClassV1()
         {
             _mvdPairLineFindTool = new CPairLineFindTool();
         }

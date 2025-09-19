@@ -3,7 +3,7 @@ using VisionDesigner;
 
 namespace LaserAlignDX.BasicSpace
 {
-    using IMPLEMENT = LineFinder.V1.MvdFindLineClass;
+    using IMPLEMENT = LineFinder.V1.MvdFindLineClassV1;
 
     public class MvdFindLineClass : IMvdLineFinder
     {
