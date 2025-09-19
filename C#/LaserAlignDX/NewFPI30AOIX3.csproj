@@ -1003,7 +1003,9 @@
     <None Include="Resources\next.png" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="GA.mvc\Model\GaRecipes\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)

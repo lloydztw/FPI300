@@ -254,7 +254,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             SetSelector(OpSelector.Golden);
 
             _editorUI.Window.FindForm().FormClosing += GaTemplateEditCtrl_FormClosing;
-            _editorUI.lblActiveCarrierID.Text = GaUtil.GetEnumDescription(_carrierID);
+            _editorUI.lblActiveCarrierID.Text = GaUtil.GetEnumDescription(_carrierID) + " 晶粒模板設定";
         }
         private void GaTemplateEditCtrl_FormClosing(object sender, FormClosingEventArgs e)
         {

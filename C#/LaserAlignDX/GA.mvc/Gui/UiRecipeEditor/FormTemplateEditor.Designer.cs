@@ -44,6 +44,7 @@
             this.numBorderSize = new System.Windows.Forms.NumericUpDown();
             this.btnAutoLineBorders = new System.Windows.Forms.Button();
             this.tbLayoutSubL = new System.Windows.Forms.TableLayoutPanel();
+            this.lblActiveCarrierID = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.btnTryQrCode = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -58,7 +59,6 @@
             this.btnDefectAdd = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnCreateTemplate = new System.Windows.Forms.Button();
-            this.lblActiveCarrierID = new System.Windows.Forms.Label();
             this.tbLayoutSubM.SuspendLayout();
             this.tbLayoutA.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -232,7 +232,7 @@
             this.labelB.Name = "labelB";
             this.labelB.Size = new System.Drawing.Size(95, 20);
             this.labelB.TabIndex = 69;
-            this.labelB.Text = "帶寬 (pixels)";
+            this.labelB.Text = "外緣 (pixels)";
             // 
             // numBorderSize
             // 
@@ -290,6 +290,21 @@
             this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 34F));
             this.tbLayoutSubL.Size = new System.Drawing.Size(494, 471);
             this.tbLayoutSubL.TabIndex = 76;
+            // 
+            // lblActiveCarrierID
+            // 
+            this.lblActiveCarrierID.BackColor = System.Drawing.Color.Black;
+            this.lblActiveCarrierID.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblActiveCarrierID.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblActiveCarrierID.ForeColor = System.Drawing.Color.Lime;
+            this.lblActiveCarrierID.Location = new System.Drawing.Point(0, 0);
+            this.lblActiveCarrierID.Margin = new System.Windows.Forms.Padding(0);
+            this.lblActiveCarrierID.Name = "lblActiveCarrierID";
+            this.lblActiveCarrierID.Padding = new System.Windows.Forms.Padding(18, 0, 0, 0);
+            this.lblActiveCarrierID.Size = new System.Drawing.Size(494, 36);
+            this.lblActiveCarrierID.TabIndex = 77;
+            this.lblActiveCarrierID.Text = "載台 1";
+            this.lblActiveCarrierID.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // groupBox3
             // 
@@ -484,21 +499,6 @@
             this.btnCreateTemplate.TabIndex = 68;
             this.btnCreateTemplate.Text = "創建 模板";
             this.btnCreateTemplate.UseVisualStyleBackColor = false;
-            // 
-            // lblActiveCarrierID
-            // 
-            this.lblActiveCarrierID.BackColor = System.Drawing.Color.Black;
-            this.lblActiveCarrierID.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lblActiveCarrierID.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblActiveCarrierID.ForeColor = System.Drawing.Color.Lime;
-            this.lblActiveCarrierID.Location = new System.Drawing.Point(0, 0);
-            this.lblActiveCarrierID.Margin = new System.Windows.Forms.Padding(0);
-            this.lblActiveCarrierID.Name = "lblActiveCarrierID";
-            this.lblActiveCarrierID.Padding = new System.Windows.Forms.Padding(18, 0, 0, 0);
-            this.lblActiveCarrierID.Size = new System.Drawing.Size(494, 36);
-            this.lblActiveCarrierID.TabIndex = 77;
-            this.lblActiveCarrierID.Text = "載台 1";
-            this.lblActiveCarrierID.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // FormTemplateEditor
             // 
