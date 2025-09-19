@@ -16,7 +16,7 @@
 
 using System.ComponentModel;
 
-namespace LaserAlignDX.Model.Coords
+namespace LaserAlignDX
 {
     public enum CarrierEnum : int
     {

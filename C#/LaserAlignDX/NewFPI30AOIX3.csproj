@@ -395,14 +395,17 @@
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v25.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
+    <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
+    <Compile Include="GA.mvc\Model\GaRecipes\RcpBmpHolder.cs" />
+    <Compile Include="GA.mvc\Model\GaRecipes\RecipeFPIX3Class.cs" />
+    <Compile Include="GA.mvc\Model\GaRecipes\RecipeParaGridClass.cs" />
+    <Compile Include="GA.mvc\Model\GaRecipes\RegionCellX3Class.cs" />
     <Compile Include="GA.mvc\Model\JxRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\JxRecipes\Supports\JxMetadataUtil.cs" />
     <Compile Include="GA.mvc\Model\JxRecipes\Supports\CsPropertyMetadataUtil.cs" />
     <Compile Include="GA.mvc\Model\SysModel\ErrCodes.cs" />
     <Compile Include="GA.mvc\Model\SysModel\ITravellerSysModel.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerSysModel.cs" />
-    <Compile Include="GA.mvc\Model\JxRecipes\JxRecipeCombo.cs" />
-    <Compile Include="GA.mvc\Model\JxRecipes\JxRecipeParaGrid.cs" />
     <Compile Include="GA.mvc\GaMvcPaths.cs" />
     <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.cs">
       <SubType>Form</SubType>
@@ -447,7 +450,7 @@
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaCellsGroup.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaProgressEventArgs.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\PlcGridPoints.cs" />
-    <Compile Include="GA.mvc\Model\Coordinates\TravellerCoordsEnums.cs" />
+    <Compile Include="GA.mvc\.Enums\CarrierEnum.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\Suppors\TravellerTranformsGaaraExt.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\TravellerTranforms.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
@@ -473,7 +476,6 @@
     <Compile Include="GA\BasicSpace\ParaSpace\MvdFindCircleClass.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\BarcodeAll_MVD.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\ZXingClass.cs" />
-    <Compile Include="GA\BasicSpace\RecipeParaGridClass.cs" />
     <Compile Include="GA\BasicSpace\ShowRectClass.cs" />
     <Compile Include="GA\BasicSpace\TrayClass.cs" />
     <Compile Include="GA\BasicSpace\XinliFindLineClass.cs" />
@@ -637,17 +639,12 @@
     <Compile Include="GA\OPSpace\ChannelBarcodeClass.cs" />
     <Compile Include="GA\OPSpace\MarkItemClass.cs" />
     <Compile Include="GA\OPSpace\ModuleClass.cs" />
-    <Compile Include="GA\OPSpace\RecipeSpace\RcpBmpHolder.cs" />
-    <Compile Include="GA\OPSpace\RecipeSpace\Enums.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeBaseClass.cs" />
-    <Compile Include="GA\OPSpace\RecipeSpace\RecipeFPIX3Class.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeMainX2Class.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeMiniX6Class.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeNeedleClass.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeTrayClass.cs" />
     <Compile Include="GA\OPSpace\RegionCellX2Class.cs" />
-    <Compile Include="GA\OPSpace\RegionCellX3Class.cs" />
-    <Compile Include="GA\OPSpace\RegionCellX3Class_Texts.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\GeoResultClass.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\JzBaseResultClass.cs" />
     <Compile Include="GA\ProcessSpace\AbsProcess.cs" />
@@ -1003,9 +1000,7 @@
     <None Include="Resources\next.png" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="GA.mvc\Model\GaRecipes\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)

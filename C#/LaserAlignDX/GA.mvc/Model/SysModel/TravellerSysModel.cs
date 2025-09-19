@@ -27,7 +27,6 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
 using System;
 using System.Drawing;
-using System.Web;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
 using EmptyTrayAoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
