@@ -1655,7 +1655,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [DisplayName("A00.載台背景")]
         [TypeConverter(typeof(JzEnumConverter))]
         [Browsable(true)]
-        public EdgeBackGroundType CarrierBackground { get; set; }
+        public EdgeBackGroundType xCarrierBackground { get; set; }
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
         [DisplayName("A01.左边查找方向")]
         [Browsable(false)]
@@ -1852,7 +1852,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
             bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", INIFILE) == "1";
             MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
-            CarrierBackground = (EdgeBackGroundType)int.Parse(ReadINIValue("Basic", "CarrierBackground", "0", INIFILE));
+            xCarrierBackground = (EdgeBackGroundType)int.Parse(ReadINIValue("Basic", "CarrierBackground", "0", INIFILE));
             bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
             bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
             bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
@@ -1895,7 +1895,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
-            WriteINIValue("Basic", "CarrierBackground", ((int)CarrierBackground).ToString(), INIFILE);
+            WriteINIValue("Basic", "CarrierBackground", ((int)xCarrierBackground).ToString(), INIFILE);
 
             WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);

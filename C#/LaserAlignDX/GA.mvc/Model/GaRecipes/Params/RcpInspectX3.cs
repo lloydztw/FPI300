@@ -13,6 +13,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 {
     public class InspectX3ParaClass : RecipeBaseClass
     {
+        #region PRIVATE_DATA
+        DtoMeasureSpec _spec = new DtoMeasureSpec();
+        #endregion
+
         #region SINGLETON
         protected InspectX3ParaClass()
         {
@@ -31,25 +35,37 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
 
+        #region 启用设置
         const string _Cat0 = "A00.启用设置";
         [CategoryAttribute(_Cat0), DescriptionAttribute("")]
         [DisplayName("A01.开启尺寸测量")]
         [Browsable(true)]
-        public bool bOpenLineMeasure { get; set; } = false;
+        public bool bOpenLineMeasure
+        {
+            get => _spec.bOpenLineMeasure;
+            set => _spec.bOpenLineMeasure = value;
+        }
+
         [CategoryAttribute(_Cat0), DescriptionAttribute("")]
         [DisplayName("A02.开启缺陷检测")]
-        //[TypeConverter(typeof(NumericUpDownTypeConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
         [Browsable(true)]
-        public bool bCheckInspect { get; set; } = false;
+        public bool bCheckInspect
+        {
+            get => _spec.bCheckInspect;
+            set => _spec.bCheckInspect = value;
+        }
+
         [CategoryAttribute(_Cat0), DescriptionAttribute("")]
         [DisplayName("A03.开启尺寸偏移检测")]
-        //[TypeConverter(typeof(JzEnumConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
         [Browsable(true)]
-        public bool bCheckMeasureOffset { get; set; } = false;
+        public bool bCheckMeasureOffset
+        {
+            get => _spec.bCheckMeasureOffset;
+            set => _spec.bCheckMeasureOffset = value;
+        }
+        #endregion
 
-        #region 基础设置
+        #region 晶粒定位
         const string _Cat1 = "A01.晶粒定位";
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的演算法")]
         [DisplayName("A00.演算法")]
@@ -227,63 +243,92 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
         [Browsable(true)]
-        public float mWidthStand { get; set; } = 9f;
+        public float mWidthStand
+        {
+            get => _spec.mWidthStand;
+            set => _spec.mWidthStand = value;
+        }
 
         [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
         [DisplayName("A01a.宽度上公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
         [Browsable(true)]
-        public float mWidthUpper { get; set; } = 0.05f;
+        public float mWidthUpper
+        {
+            get => _spec.mWidthUpper;
+            set => _spec.mWidthUpper = value;
+        }
 
         [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
         [DisplayName("A01b.宽度下公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
         [Browsable(true)]
-        public float mWidthLower { get; set; } = 0.05f;
+        public float mWidthLower
+        {
+            get => _spec.mWidthLower;
+            set => _spec.mWidthLower = value;
+        }
 
         [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
         [DisplayName("A02.标准高度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
         [Browsable(true)]
-        public float mHeightStand { get; set; } = 9.9f;
+        public float mHeightStand
+        {
+            get => _spec.mHeightStand;
+            set => _spec.mHeightStand = value;
+        }
 
         [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
         [DisplayName("A02a.高度上公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
         [Browsable(true)]
-        public float mHeightUpper { get; set; } = 0.05f;
+        public float mHeightUpper
+        {
+            get => _spec.mHeightUpper;
+            set => _spec.mHeightUpper = value;
+        }
 
         [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
         [DisplayName("A02b.高度下公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
         [Browsable(true)]
-        public float mHeightLower { get; set; } = 0.05f;
-
+        public float mHeightLower
+        {
+            get => _spec.mHeightLower;
+            set => _spec.mHeightLower = value;
+        }
         #endregion
 
         #region 尺寸偏移spec
 
         const string _Cat5 = "A05.尺寸偏移规格设置";
-
         [CategoryAttribute(_Cat5), DescriptionAttribute("单位mm")]
         [DisplayName("A01.X方向偏移")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
         [Browsable(true)]
-        public float XOffset { get; set; } = 0.05f;
+        public float XOffset
+        {
+            get => _spec.XOffset;
+            set => _spec.XOffset = value;
+        }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("单位mm")]
         [DisplayName("A02.Y方向偏移")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
         [Browsable(true)]
-        public float YOffset { get; set; } = 0.05f;
-
+        public float YOffset
+        {
+            get => _spec.YOffset;
+            set => _spec.YOffset = value;
+        }
         #endregion
 
         public override void Load(bool eCancel = false)
@@ -340,6 +385,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             YOffset = float.Parse(ReadINIValue("Basic", "YOffset", "0.05", INIFILE));
 
         }
+        
         public override void Save()
         {
             WriteINIValue("Basic", "xAlgorithm", ((int)xAlgorithm).ToString(), INIFILE);
@@ -382,7 +428,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "mHeightLower", mHeightLower.ToString(), INIFILE);
             WriteINIValue("Basic", "XOffset", XOffset.ToString(), INIFILE);
             WriteINIValue("Basic", "YOffset", YOffset.ToString(), INIFILE);
-
         }
 
         /// <summary>

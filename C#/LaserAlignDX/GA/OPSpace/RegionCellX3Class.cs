@@ -185,7 +185,7 @@ namespace LaserAlignDX.OPSpace
                 mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity3;
             }
 
-            mvdFindLineClass.Background = xInspect.CarrierBackground;
+            mvdFindLineClass.Background = xInspect.xCarrierBackground;
             cMvdLineSegmentFsOut[iSideIndex] = mvdFindLineClass.Run(bmp, roi, iSideIndex);
         }
         /// <summary>

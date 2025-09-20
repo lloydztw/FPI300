@@ -78,7 +78,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region PRIVATE_BMP_HOLDERS
+        #region PRIVATE_個別載台的_BMP_HOLDERS
         /// <summary>
         /// 使用 RcpBmpHolder 來動態載入 載台1 的 bmpOrg
         /// </summary>
@@ -119,10 +119,28 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region 飛拍_BMP_ORG
+        #region 飛拍_BMP_ORG_接口
+        //public Bitmap PeekBmpFlyOrg()
+        //{
+        //    return _bmpHolderOrgFly.Peek();
+        //}
+        //public void TakeInBmpFlyOrg(Bitmap bmp)
+        //{
+        //    _bmpHolderOrgFly.TakeOver(bmp);
+        //}
+        //public void ReleaseBmpFlyOrg(bool save)
+        //{
+        //    // bmpOrgFly 一般只用於參數編輯時期, 跑線時可以釋放
+        //    if (save)
+        //    {
+        //        _bmpHolderOrgFly.Save();
+        //    }
+        //    _bmpHolderOrgFly?.Dispose();
+        //}
         public Bitmap bmpOrgFly = new Bitmap(1, 1);
         void disposeBmpOrgFly()
         {
+            //_bmpHolderOrgFly?.Dispose();
             bmpOrgFly?.Dispose();
             bmpOrgFly = null;
         }
@@ -478,6 +496,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 //                                               freeImageBitmap.PixelFormat);
                 //    freeImageBitmap.Dispose();
                 //}
+
                 this.bmpprinttemplate?.Dispose();
                 this.bmpprinttemplate = loadImage("bmpprinttemplate.bmp");
 
@@ -491,6 +510,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 //                                               freeImageBitmap.PixelFormat);
                 //    freeImageBitmap.Dispose();
                 //}
+
                 this.bmpDefectTemplate?.Dispose();
                 this.bmpDefectTemplate = loadImage("bmpDefectTemplate.bmp");
 
@@ -514,6 +534,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 //                                               freeImageBitmap.PixelFormat);
                 //    freeImageBitmap.Dispose();
                 //}
+
                 this.bmpprintFlytemplate?.Dispose();
                 this.bmpprintFlytemplate = loadImage("bmpprintFlytemplate.bmp");
 
@@ -527,6 +548,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 //                                               freeImageBitmap.PixelFormat);
                 //    freeImageBitmap.Dispose();
                 //}
+
                 this.bmpprintmask?.Dispose();
                 this.bmpprintmask = loadImage("bmpprintmask.bmp");
 
@@ -540,6 +562,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 //                                               freeImageBitmap.PixelFormat);
                 //    freeImageBitmap.Dispose();
                 //}
+
                 this.bmpcodetemplate?.Dispose();
                 this.bmpcodetemplate = loadImage("bmpcode.bmp");
                 #endregion
@@ -590,13 +613,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             _bmpHolderOrg1.Save();
             _bmpHolderOrg2.Save();
-
-            ////string bmporgpath = $"{PathIndexStr}\\org.bmp";
-            ////bmpOrg.Save(bmporgpath, System.Drawing.Imaging.ImageFormat.Bmp);
-            ////string bmporgNoTraypath = $"{PathIndexStr}\\orgNoTray.bmp";
-            ////bmpOrgNoTray.Save(bmporgNoTraypath, System.Drawing.Imaging.ImageFormat.Bmp);
-            //string bmporgFlypath = $"{PathIndexStr}\\orgFly.bmp";
-            //bmpOrgFly.Save(bmporgFlypath, System.Drawing.Imaging.ImageFormat.Bmp);
+            //_bmpHolderOrgFly.Save();
             saveImage(bmpOrgFly, "orgFly.bmp");
 
             // 建立所有的 Region Cells

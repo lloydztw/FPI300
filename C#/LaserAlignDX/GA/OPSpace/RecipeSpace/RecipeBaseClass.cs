@@ -55,11 +55,11 @@ namespace Common.RecipeSpace
         [DllImport("kernel32")]
         private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
 
-        public void WriteINIValue(string section, string key, string value, string filepath)
+        public static void WriteINIValue(string section, string key, string value, string filepath)
         {
             WritePrivateProfileString(section, key, value, filepath);
         }
-        public string ReadINIValue(string section, string key, string defaultvaluestring, string filepath)
+        public static string ReadINIValue(string section, string key, string defaultvaluestring, string filepath)
         {
             string retStr = "";
 

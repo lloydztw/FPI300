@@ -16,16 +16,19 @@
 using JetEazy.Utils;
 using System;
 using System.Drawing;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
 {
+    /// <summary>
+    /// 用來管理 巨大的 bmpOrg 
+    /// </summary>
     public class RcpBmpHolder : IDisposable
     {
         #region CONFIG
         static bool OPT_AUTO_CHANGE_BMP_TO_JPG = true;
         #endregion
 
+        #region EXTERNAL_PATH_PROVIDER_由外部提供共同的資料夾名稱
         internal static Func<string> CommonPathFunc;
         string CommonPath
         {
@@ -34,16 +37,24 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 return (CommonPathFunc == null) ? "" : CommonPathFunc();
             }
         }
+        #endregion
 
         #region PRIVATE_DATA
         Bitmap _bmp;
         string _name;
+        string _ext;
         bool _isDirty;
         #endregion
 
-        public RcpBmpHolder(string name)
+        public RcpBmpHolder(string name, string ext = null)
         {
             _name = name;
+            _ext = ext;
+        }
+        public string Ext
+        {
+            get { return _ext; }
+            set { _ext = value; }
         }
 
         public Bitmap Peek()
@@ -62,21 +73,21 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 old?.Dispose();
             }
         }
-        public void Load(bool force = false, string ext = null)
+        public void Load(bool force = false)
         {
             if (_bmp == null || force)
             {
                 var old = _bmp;
-                _bmp = loadImage(_name, ext);
+                _bmp = loadImage(_name, _ext);
                 _isDirty = false;
                 old?.Dispose();
             }
         }
-        public void Save(bool force = false, string ext = ".jpg")
+        public void Save(bool force = false)
         {
             if (_isDirty || force)
             {
-                saveImage(_bmp, _name, ext);
+                saveImage(_bmp, _name, _ext);
                 _isDirty = false;
             }
         }
@@ -131,8 +142,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
             return null;
         }
-        void saveImage(Bitmap bmp, string name, string ext = ".jpg")
+        void saveImage(Bitmap bmp, string name, string ext = null)
         {
+            if (ext == null)
+                ext = ".jpg";
             string fileName = System.IO.Path.Combine(CommonPath, name + ext);
             GaImageUtil.SaveBigImage(fileName, bmp);
             GaUtil.LOG($"RcpBmp [{_name}] 寫入 {fileName}");

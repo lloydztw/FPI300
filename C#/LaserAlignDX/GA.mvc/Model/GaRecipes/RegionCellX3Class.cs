@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using Traveller106;
 using VisionDesigner;
-using VisionDesigner.BlobFind;
 using VisionDesigner.Code2DReader;
 using VisionDesigner.ImageArithmetic;
 using VisionDesigner.PairLineFind;

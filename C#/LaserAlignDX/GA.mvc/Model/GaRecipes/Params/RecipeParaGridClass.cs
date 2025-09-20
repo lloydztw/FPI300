@@ -155,7 +155,6 @@ namespace LaserAlignDX.BasicSpace
 
 
         const string cat2 = "02.其他设定";
-
         [CategoryAttribute(cat2), DescriptionAttribute("1-红光 2-白光 3-红白光")]
         [DisplayName("A01.灯光通道")]
         [TypeConverter(typeof(JzEnumConverter))]
@@ -179,7 +178,6 @@ namespace LaserAlignDX.BasicSpace
 
 
         const string cat3 = "03.位置矩阵设定";
-
         [CategoryAttribute(cat3), DescriptionAttribute("")]
         [DisplayName("A00.平台选择")]
         [TypeConverter(typeof(JzEnumConverter))]

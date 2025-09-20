@@ -12,11 +12,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
     {
         const int POINT_COUNT = 8;
 
-        public FlyParaClass()
+        #region SINGLETON
+        protected FlyParaClass()
         {
 
         }
         private static FlyParaClass _instance = null;
+        #endregion
+
         public static FlyParaClass Instance
         {
             get

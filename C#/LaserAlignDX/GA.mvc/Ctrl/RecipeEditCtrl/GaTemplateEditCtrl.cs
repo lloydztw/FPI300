@@ -239,7 +239,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                     updateLineSegmentBoxes(true);
                 };
             }
-            _cviQrCodeBox.OnChanged += (s, e) => updateGoldenBoxes(true);
+            _cviQrCodeBox.OnChanged += (s, e) => _isQrCodeModified = true;
 
             if(_editorUI.wndVisionSettingsPanel is PropertyGrid pg)
                 pg.PropertyValueChanged += Pg_PropertyValueChanged;
@@ -421,6 +421,12 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
                 return;
+            }
+
+            if (_cviGoldenChipBox.Box != Rectangle.Round(_xGoldenChipRect))
+            {
+                // 重新 擷取 Golden Chip
+                BuildGoldenChipTemplate();
             }
 
             var rect = Rectangle.Round(_xGoldenChipRect);
@@ -806,7 +812,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             _editorUI.numBorderSize.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.btnTryScanQrCode.Enabled = _opSelector == OpSelector.QrCode;
         }
-
         #endregion
 
         #region AOI_MODEL_FUNCTIONS
