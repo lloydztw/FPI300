@@ -17,7 +17,6 @@ using EzAoiEmptyTrayInspector.Model;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.Transform;
-using LaserAlignDX.Model.Coords;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

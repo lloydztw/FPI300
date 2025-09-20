@@ -13,7 +13,6 @@
  */
 #endregion
 
-using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Ctrl;
 using System.Windows.Forms;
 using DispUI = JzDisplay.UISpace.DispUI;
@@ -51,15 +50,16 @@ namespace LaserAlignDX.Mvc.Gui
         Button IvTemplateEditorUI.btnAutoLineBorders => btnAutoLineBorders;
         NumericUpDown IvTemplateEditorUI.numBorderIndent => numBorderIndent;
         NumericUpDown IvTemplateEditorUI.numBorderSize => numBorderSize;
-        RichTextBox IvTemplateEditorUI.rtbQrCodeResult => rtbCodeContent;
         Button IvTemplateEditorUI.btnTryScanQrCode => btnTryQrCode;
+        Control IvTemplateEditorUI.wndQrCodeResult => rtbCodeContent;
         Control IvTemplateEditorUI.wndVisionSettingsPanel => propertyGrid1;
 
         Button IvTemplateEditorUI.btnDefectRegionAdd => btnDefectAdd;
         Button IvTemplateEditorUI.btnDefectRegionDelete => btnDefectDelete;
         Button IvTemplateEditorUI.btnDefectRegionClearAll => btnDefectClear;
-        Button IvTemplateEditorUI.btnCreateTemplate => btnCreateTemplate;
-        Button IvTemplateEditorUI.btnSaveTemplateAndParams => btnSave;
+        Button IvTemplateEditorUI.btnTrainTemplate => btnTrain;
+        Button IvTemplateEditorUI.btnSaveAllParams => btnSave;
+        Button IvTemplateEditorUI.btnCancel => btnCancel;
 
         #region PRIVATE_FUNCTIONS
         void autoLayout()

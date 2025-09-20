@@ -1,17 +1,12 @@
 ﻿using Common.RecipeSpace;
 using Eazy_Project_III;
 using EzAoiEmptyTrayInspector.Model;
-using JetEazy;
 using JetEazy.Match;
 using JetEazy.Utils;
-using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
-using LaserAlignDX.Model.Coords;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Design;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
@@ -157,8 +152,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region DEFECT_INSPECTOR_TEMPLATE_瑕疵檢所用到的樣本
-        public Bitmap bmpprintmask = new Bitmap(1, 1);
+        /// <summary>
+        /// 實際上就是 Golden Chip Template
+        /// </summary>
         public Bitmap bmpDefectTemplate = new Bitmap(1, 1);
+        public Bitmap bmpprintmask = new Bitmap(1, 1);
         void disposeDefectInspectTemplate()
         {
             this.bmpprintmask?.Dispose();
@@ -187,11 +185,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public RectangleF xLineBottom = new RectangleF(0, 0, 100, 100);
         #endregion
 
-        #region EMPTY_TRAY_TEMPLATE_空盤樣本_目前沒用到
-        //public RectangleF xRectRegionPrintNoTray = new RectangleF(0, 0, 100, 100);
-        //public Bitmap bmpprintNoTraytemplate = new Bitmap(1, 1);
-        #endregion
-
         #region FLY_CAMERA_TEMPLATE_飛拍樣本
         public RectangleF xRectRegionPrintFly = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpprintFlytemplate = new Bitmap(1, 1);
@@ -203,12 +196,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region MVD_AOI_TOOLS_RUNTIME_海康工具相關成員
-        public PointF ptPrinttemp = new PointF(-1, -1);
         public MVD_CHIP_MATCHER mvdprinttemp_Find = new MVD_CHIP_MATCHER();
-        public PointF ptPrintFlytemp = new PointF(-1, -1);
         public MvdFindClass mvdprintFlytemp_Find = new MvdFindClass();
         public Mvd2DReaderClass mvd2DReader = new Mvd2DReaderClass();
-
         void disposeMvdTools()
         {
             mvdprinttemp_Find?.Dispose();
@@ -220,7 +210,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region CODE_TEMPLATE
+        #region QR_CODE_TEMPLATE
         public RectangleF xRectCodeRegion = new RectangleF(0, 0, 100, 100);
         public Bitmap bmpcodetemplate = new Bitmap(1, 1);
         void disposeCodeTemplate()
@@ -363,8 +353,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             xRectCodeRegion = StringtoRectF(ReadINIValue("Recipe Basic", "xRectCodeRegion", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
 
-            ptPrinttemp = StringtoPointF(ReadINIValue("Recipe Basic", "ptPrinttemp", PointFtoStringSimple(new PointF(-1, -1)), INIFILE));
-            ptPrintFlytemp = StringtoPointF(ReadINIValue("Recipe Basic", "ptPrintFlytemp", PointFtoStringSimple(new PointF(-1, -1)), INIFILE));
+            //ptPrinttemp = StringtoPointF(ReadINIValue("Recipe Basic", "ptPrinttemp", PointFtoStringSimple(new PointF(-1, -1)), INIFILE));
+            //ptPrintFlytemp = StringtoPointF(ReadINIValue("Recipe Basic", "ptPrintFlytemp", PointFtoStringSimple(new PointF(-1, -1)), INIFILE));
 
 
             xLineLeft = StringtoRectF(ReadINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
@@ -563,17 +553,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                     JetEazy.BasicSpace.VsMSG.Instance.Warning($"加载参数训练失败！");
             }
 
-            //InspectX2Class.Instance.Initial(Path, Index, "Inspect_default_info.ini");
-            //InspectX2Class.Instance.Load();
-
             InspectX3ParaClass.Instance.Initial(Path, Index, "Inspect_default_info.ini");
             InspectX3ParaClass.Instance.Load();
 
             FlyParaClass.Instance.Initial(Path, Index, "Fly_default_info.ini");
             FlyParaClass.Instance.Load();
-
-            NoTrayParaClass.Instance.Initial(Path, Index, "NoTray_default_info.ini");
-            NoTrayParaClass.Instance.Load();
         }
         public override void Save()
         {
@@ -594,8 +578,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "xRealOffsetY", xRealOffsetY.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xStageNumber", ((int)xStageNumber).ToString(), INIFILE);
 
-            WriteINIValue("Recipe Basic", "ptPrinttemp", PointFtoStringSimple(ptPrinttemp), INIFILE);
-            WriteINIValue("Recipe Basic", "ptPrintFlytemp", PointFtoStringSimple(ptPrintFlytemp), INIFILE);
+            //WriteINIValue("Recipe Basic", "ptPrinttemp", PointFtoStringSimple(ptPrinttemp), INIFILE);
+            //WriteINIValue("Recipe Basic", "ptPrintFlytemp", PointFtoStringSimple(ptPrintFlytemp), INIFILE);
 
             WriteINIValue("Recipe Basic", "xChNum", xChNum.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xChValue", xChValue.ToString(), INIFILE);
@@ -625,9 +609,13 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //InspectX2Class.Instance.Save();
             InspectX3ParaClass.Instance.Save();
             FlyParaClass.Instance.Save();
-            NoTrayParaClass.Instance.Save();
+            //NoTrayParaClass.Instance.Save();
         }
 
+        #region 各別子項的保存函式
+        /// <summary>
+        /// 保存 Region, Mask, 與 QRCode templates (包含 roi)
+        /// </summary>
         public void SavePrintTemplate()
         {
             WriteINIValue("Recipe Basic", "xRectRegionPrint", RectFtoStringSimple(xRectRegionPrint), INIFILE);
@@ -640,6 +628,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             InspectX3ParaClass.Instance.SaveRoi();
             SaveCodeTemplate();
         }
+        /// <summary>
+        /// 保存 Golden Chip Template (包含 roi)
+        /// </summary>
         public void SavePrintTemplateRegionTrain()
         {
             WriteINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(xRegionTrain), INIFILE);
@@ -647,6 +638,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //bmpDefectTemplate.Save(bmpDefectTemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
             saveImage(bmpDefectTemplate, "bmpDefectTemplate.bmp");
         }
+        /// <summary>
+        /// 保存 邊線手拉框
+        /// </summary>
         public void SaveLinesRegion()
         {
             WriteINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(xLineLeft), INIFILE);
@@ -654,17 +648,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(xLineRight), INIFILE);
             WriteINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(xLineBottom), INIFILE);
         }
-        public void SavePrintNoTrayTemplate()
-        {
-            // 由 LETIAN 的空盤檢測套件處理
-            //WriteINIValue("Recipe Basic", "xRectRegionPrintNoTray", RectFtoStringSimple(xRectRegionPrintNoTray), INIFILE);
-            //string bmpprintNoTraytemplatepath = $"{PathIndexStr}\\bmpprintNoTraytemplate.bmp";
-            //bmpprintNoTraytemplate.Save(bmpprintNoTraytemplatepath, System.Drawing.Imaging.ImageFormat.Bmp);
-            ////string bmpprintmaskpath = $"{PathIndexStr}\\bmpprintmask.bmp";
-            ////bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
-            ////InspectX2Class.Instance.SaveRoi();
-            ////SaveCodeTemplate();
-        }
+        /// <summary>
+        /// 保存 飛拍 Template (包含 roi)
+        /// </summary>
         public void SavePrintFlyTemplate()
         {
             WriteINIValue("Recipe Basic", "xRectRegionPrintFly", RectFtoStringSimple(xRectRegionPrintFly), INIFILE);
@@ -676,6 +662,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             ////InspectX2Class.Instance.SaveRoi();
             ////SaveCodeTemplate();
         }
+        /// <summary>
+        /// 保存 QrCode Template (包含 roi)
+        /// </summary>
         public void SaveCodeTemplate()
         {
             WriteINIValue("Recipe Basic", "xRectCodeRegion", RectFtoStringSimple(xRectCodeRegion), INIFILE);
@@ -683,10 +672,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //bmpcodetemplate.Save(bmpcodepath, System.Drawing.Imaging.ImageFormat.Bmp);
             saveImage(bmpcodetemplate, "bmpcode.bmp");
         }
+        /// <summary>
+        /// 保存 LotNo
+        /// </summary>
         public void SaveLotNo()
         {
             WriteINIValue("Collect", "xLotNoStr", xLotNoStr, INIFILE);
         }
+        #endregion
 
         #region AOI_FUNCTIONS_FOR_CHIP_LOCATE_TRAIN_AND_RUN_晶粒定位的相關像測函式
         //----------------------------------------------------------------------
@@ -1141,11 +1134,13 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             // 不應該由 Recipe 自己調用 !
             //-----------------------------------------------------------------------------
             int iret = 0; // Base0Train();
+
             //if (iret == 0)
             //    iret = Base1Train();
 
             if (iret == 0)
                 iret = PrintTempTrain();
+
             //if (iret == 0)
             //{
             //    //计算初始位置
@@ -1168,6 +1163,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             if (iret == 0)
                 iret = PrintTempFlyTrain();
+
             return iret;
         }
 
@@ -1367,7 +1363,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 #endif
         #endregion
 
-        #region MISC_UTIL_FUNCTIONS
+        #region PRIVATE_UTIL_FUNCTIONS
         /// <summary>
         /// 绕任意点旋转一个点 (這個應該放在 Util 模塊內)
         /// </summary>
@@ -1401,754 +1397,4 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
     }
-
-
-    public class FlyParaClass : RecipeBaseClass
-    {
-        const int POINT_COUNT = 8;
-
-        public FlyParaClass()
-        {
-
-        }
-        private static FlyParaClass _instance = null;
-        public static FlyParaClass Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new FlyParaClass();
-                return _instance;
-            }
-        }
-
-        const string _Cat1 = "A01.基础设置";
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的相似程度")]
-        [DisplayName("A01.相似度")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
-        [Browsable(true)]
-        public float xTolerance { get; set; } = 0.5f;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的允许的角度")]
-        [DisplayName("A02.角度")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 360, 1f, 2)]
-        [Browsable(true)]
-        public float xAngle { get; set; } = 30f;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大X方向的像素")]
-        [DisplayName("A03.外扩X")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
-        [Browsable(true)]
-        public int xExtendx { get; set; } = 20;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大Y方向的像素")]
-        [DisplayName("A04.外扩Y")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
-        [Browsable(true)]
-        public int xExtendy { get; set; } = 20;
-
-        const string _Cat2 = "A02.双头吸嘴找角度设置";
-
-        [CategoryAttribute(_Cat2), DescriptionAttribute("两个吸嘴的计算开启")]
-        [DisplayName("A00.开启双头计算")]
-        //[TypeConverter(typeof(NumericUpDownTypeConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
-        [Browsable(true)]
-        public bool xIsOpenMuit { get; set; } = false;
-
-        [CategoryAttribute(_Cat2), DescriptionAttribute("二值化的阈值")]
-        [DisplayName("A01.灰阶阈值")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
-        [Browsable(true)]
-        public int xThresholdValue { get; set; } = 128;
-        [CategoryAttribute(_Cat2), DescriptionAttribute("寻找的特征选择黑色还是白色 吸嘴是黑色选择黑色")]
-        [DisplayName("A02.检测模式")]
-        [TypeConverter(typeof(JzEnumConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 360, 1f, 2)]
-        [Browsable(true)]
-        public BlobMode xBlobMode { get; set; } = BlobMode.Black;
-        [CategoryAttribute(_Cat2), DescriptionAttribute("特征二值化后最小的面积")]
-        [DisplayName("A03.Blob面积最小值")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 999999999)]
-        [Browsable(true)]
-        public int xBlobAreaMin { get; set; } = 5000;
-        [CategoryAttribute(_Cat2), DescriptionAttribute("特征二值化后最大的面积")]
-        [DisplayName("A03.Blob面积最大值")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 999999999)]
-        [Browsable(true)]
-        public int xBlobAreaMax { get; set; } = 99999999;
-
-        [CategoryAttribute(_Cat2), DescriptionAttribute("true水平 false垂直")]
-        [DisplayName("A04.吸嘴是否水平校正")]
-        //[TypeConverter(typeof(NumericUpDownTypeConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
-        [Browsable(true)]
-        public bool xIsShuiPing { get; set; } = true;
-
-        public PointF[] ptsOffset = new PointF[POINT_COUNT];
-        public PointF[] ptsOffset2 = new PointF[POINT_COUNT];
-
-        public override void Load(bool eCancel = false)
-        {
-            xTolerance = float.Parse(ReadINIValue("Fly", "xTolerance", "0.5", INIFILE));
-            xAngle = float.Parse(ReadINIValue("Fly", "xAngle", "30", INIFILE));
-            xExtendx = int.Parse(ReadINIValue("Fly", "xExtendx", "20", INIFILE));
-            xExtendy = int.Parse(ReadINIValue("Fly", "xExtendy", "20", INIFILE));
-
-            xIsOpenMuit = ReadINIValue("Basic", "xIsOpenMuit", "0", INIFILE) == "1";
-            xThresholdValue = int.Parse(ReadINIValue("Basic", "xThresholdValue", "128", INIFILE));
-            xBlobMode = (BlobMode)int.Parse(ReadINIValue("Basic", "xBlobMode", "1", INIFILE));
-            xBlobAreaMin = int.Parse(ReadINIValue("Basic", "xBlobAreaMin", "10", INIFILE));
-            xBlobAreaMax = int.Parse(ReadINIValue("Basic", "xBlobAreaMax", "20000", INIFILE));
-            xIsShuiPing = ReadINIValue("Basic", "xIsShuiPing", "1", INIFILE) == "1";
-
-            int i = 0;
-            while (i < POINT_COUNT)
-            {
-                ptsOffset[i] = StringtoPointF(ReadINIValue("FlyOffset", $"ptsOffset_{i}", $"0,0", INIFILE));
-                ptsOffset2[i] = StringtoPointF(ReadINIValue("FlyOffset2", $"ptsOffset2_{i}", $"0,0", INIFILE));
-
-                i++;
-            }
-        }
-        public override void Save()
-        {
-            WriteINIValue("Fly", "xTolerance", xTolerance.ToString(), INIFILE);
-            WriteINIValue("Fly", "xAngle", xAngle.ToString(), INIFILE);
-            WriteINIValue("Fly", "xExtendx", xExtendx.ToString(), INIFILE);
-            WriteINIValue("Fly", "xExtendy", xExtendy.ToString(), INIFILE);
-
-            WriteINIValue("Basic", "xIsOpenMuit", (xIsOpenMuit ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
-            WriteINIValue("Basic", "xBlobMode", ((int)xBlobMode).ToString(), INIFILE);
-            WriteINIValue("Basic", "xBlobAreaMin", xBlobAreaMin.ToString(), INIFILE);
-            WriteINIValue("Basic", "xBlobAreaMax", xBlobAreaMax.ToString(), INIFILE);
-            WriteINIValue("Basic", "xIsShuiPing", (xIsShuiPing ? "1" : "0"), INIFILE);
-
-            int i = 0;
-            while (i < POINT_COUNT)
-            {
-                WriteINIValue("FlyOffset", $"ptsOffset_{i}", PointFtoStringSimple(ptsOffset[i]), INIFILE);
-                WriteINIValue("FlyOffset2", $"ptsOffset2_{i}", PointFtoStringSimple(ptsOffset2[i]), INIFILE);
-
-                i++;
-            }
-
-        }
-
-    }
-
-
-    public class InspectX3ParaClass : RecipeBaseClass
-    {
-        #region SINGLETON
-        protected InspectX3ParaClass()
-        {
-
-        }
-        private static InspectX3ParaClass _instance = null;
-        #endregion
-        public static InspectX3ParaClass Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new InspectX3ParaClass();
-                return _instance;
-            }
-        }
-
-        const string _Cat0 = "A00.启用设置";
-        [CategoryAttribute(_Cat0), DescriptionAttribute("")]
-        [DisplayName("A01.开启尺寸测量")]
-        [Browsable(true)]
-        public bool bOpenLineMeasure { get; set; } = false;
-        [CategoryAttribute(_Cat0), DescriptionAttribute("")]
-        [DisplayName("A02.开启缺陷检测")]
-        //[TypeConverter(typeof(NumericUpDownTypeConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
-        [Browsable(true)]
-        public bool bCheckInspect { get; set; } = false;
-        [CategoryAttribute(_Cat0), DescriptionAttribute("")]
-        [DisplayName("A03.开启尺寸偏移检测")]
-        //[TypeConverter(typeof(JzEnumConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
-        [Browsable(true)]
-        public bool bCheckMeasureOffset { get; set; } = false;
-
-        #region 基础设置
-        const string _Cat1 = "A01.基础设置";
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的演算法")]
-        [DisplayName("A00.演算法")]
-        [TypeConverter(typeof(JzEnumConverter))]
-        [Browsable(true)]
-        public MatchAlgorithmEnum xAlgorithm { get; set; } = MatchAlgorithmEnum.GridMatch;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的相似程度")]
-        [DisplayName("A01.相似度")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
-        [Browsable(true)]
-        public float xTolerance { get; set; } = 0.5f;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的允许的角度")]
-        [DisplayName("A02.角度")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 360, 1f, 2)]
-        [Browsable(true)]
-        public float xAngle { get; set; } = 30f;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大X方向的像素")]
-        [DisplayName("A03.外扩X")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
-        [Browsable(false)]
-        public int xExtendx { get; set; } = 20;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大Y方向的像素")]
-        [DisplayName("A04.外扩Y")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
-        [Browsable(false)]
-        public int xExtendy { get; set; } = 20;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围内重叠率")]
-        [DisplayName("A05.匹配重叠率")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100)]
-        [Browsable(true)]
-        public int xMaxOverlap { get; set; } = 80;
-
-        [CategoryAttribute(_Cat1), DescriptionAttribute("在搜索范围内重合的比例")]
-        [DisplayName("A06.格点重叠率")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1)]
-        [Browsable(true)]
-        public float xChipOverlap { get; set; } = 0.5f;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的格點門限")]
-        [DisplayName("A07.格點門限")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
-        [Browsable(true)]
-        public int xGridPadThreshold { get; set; } = 0;
-        #endregion
-
-        #region 找直线的参数
-
-        const string _Cat2 = "A02.尺寸检测参数设置";
-        [CategoryAttribute(_Cat2)]
-        [DisplayName("A00.测量方式")]
-        [TypeConverter(typeof(JzEnumConverter))]
-        [Browsable(false)]
-        public MeasureFindLineType MFLType { get; set; } = MeasureFindLineType.FindLineType_v1;
-
-        [CategoryAttribute(_Cat2)]
-        [DisplayName("A00.載台背景")]
-        [TypeConverter(typeof(JzEnumConverter))]
-        [Browsable(true)]
-        public EdgeBackGroundType CarrierBackground { get; set; }
-        [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
-        [DisplayName("A01.左边查找方向")]
-        [Browsable(false)]
-        public bool bPositive0 { get; set; } = true;
-        [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("A02.左边极性")]
-        [Browsable(false)]
-        public bool bEdgePolarity0 { get; set; } = true;
-
-        [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
-        [DisplayName("A03.上边查找方向")]
-        [Browsable(false)]
-        public bool bPositive1 { get; set; } = true;
-        [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("A04.上边极性")]
-        [Browsable(false)]
-        public bool bEdgePolarity1 { get; set; } = true;
-
-        [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
-        [DisplayName("A05.右边查找方向")]
-        [Browsable(false)]
-        public bool bPositive2 { get; set; } = true;
-        [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("A06.右边极性")]
-        [Browsable(false)]
-        public bool bEdgePolarity2 { get; set; } = true;
-
-        [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
-        [DisplayName("A07.下边查找方向")]
-        [Browsable(false)]
-        public bool bPositive3 { get; set; } = true;
-        [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("A08.下边极性")]
-        [Browsable(false)]
-        public bool bEdgePolarity3 { get; set; } = true;
-
-
-        #endregion
-
-        #region 缺陷检测设置
-
-        const string _Cat3 = "A03.缺陷检测参数设置";
-
-        [CategoryAttribute(_Cat3), DescriptionAttribute("")]
-        [DisplayName("A00.二值化阈值")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
-        [Browsable(true)]
-        public int xThresholdValue { get; set; } = 128;
-
-        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
-        [DisplayName("A01.缺陷宽度")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
-        [Browsable(true)]
-        public float xCharWidth { get; set; } = 15.1f;
-        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
-        [DisplayName("A02.缺陷高度")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
-        [Browsable(true)]
-        public float xCharHeight { get; set; } = 15.1f;
-        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
-        [DisplayName("A03.缺陷面积")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
-        [Browsable(true)]
-        public float xCharArea { get; set; } = 30.1f;
-        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
-        [DisplayName("A04.背景缺陷宽度")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
-        [Browsable(false)]
-        public float xBackgroudWidth { get; set; } = 15.1f;
-        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
-        [DisplayName("A05.背景缺陷高度")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
-        [Browsable(false)]
-        public float xBackgroudHeight { get; set; } = 15.1f;
-        [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
-        [DisplayName("A06.背景缺陷面积")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
-        [Browsable(false)]
-        public float xBackgroudArea { get; set; } = 30.1f;
-
-        [Browsable(false)]
-        public int RoiCount { get; set; } = 0;
-        [Browsable(false)]
-        public List<RectangleF> rectangles { get; set; } = new List<RectangleF>();
-
-        #endregion
-
-        #region 尺寸宽度spec
-
-        const string _Cat4 = "A04.尺寸规格设置";
-
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A01.标准宽度")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
-        [Browsable(true)]
-        public float mWidthStand { get; set; } = 9f;
-
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A01a.宽度上公差")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
-        [Browsable(true)]
-        public float mWidthUpper { get; set; } = 0.05f;
-
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A01b.宽度下公差")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
-        [Browsable(true)]
-        public float mWidthLower { get; set; } = 0.05f;
-
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A02.标准高度")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
-        [Browsable(true)]
-        public float mHeightStand { get; set; } = 9.9f;
-
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A02a.高度上公差")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
-        [Browsable(true)]
-        public float mHeightUpper { get; set; } = 0.05f;
-
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A02b.高度下公差")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
-        [Browsable(true)]
-        public float mHeightLower { get; set; } = 0.05f;
-
-        #endregion
-
-        #region 尺寸偏移spec
-
-        const string _Cat5 = "A05.尺寸偏移规格设置";
-
-        [CategoryAttribute(_Cat5), DescriptionAttribute("单位mm")]
-        [DisplayName("A01.X方向偏移")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
-        [Browsable(true)]
-        public float XOffset { get; set; } = 0.05f;
-
-        [CategoryAttribute(_Cat5), DescriptionAttribute("单位mm")]
-        [DisplayName("A02.Y方向偏移")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
-        [Browsable(true)]
-        public float YOffset { get; set; } = 0.05f;
-
-        #endregion
-
-        public override void Load(bool eCancel = false)
-        {
-            xAlgorithm = (MatchAlgorithmEnum)int.Parse(ReadINIValue("Basic", "xAlgorithm", "0", INIFILE));
-            xTolerance = float.Parse(ReadINIValue("Basic", "xTolerance", "0.5", INIFILE));
-            xAngle = float.Parse(ReadINIValue("Basic", "xAngle", "30", INIFILE));
-            xExtendx = int.Parse(ReadINIValue("Basic", "xExtendx", "20", INIFILE));
-            xExtendy = int.Parse(ReadINIValue("Basic", "xExtendy", "20", INIFILE));
-            xMaxOverlap = int.Parse(ReadINIValue("Basic", "xMaxOverlap", "80", INIFILE));
-            xChipOverlap = float.Parse(ReadINIValue("Basic", "xChipOverlap", "0.5", INIFILE));
-            xGridPadThreshold = int.Parse(ReadINIValue("Basic", "xGridPadThreshold", "0", INIFILE));
-
-            bCheckInspect = ReadINIValue("Inspect", "bCheckInspect", "1", INIFILE) == "1";
-            xThresholdValue = int.Parse(ReadINIValue("Inspect", "xThresholdValue", "128", INIFILE));
-            xCharWidth = float.Parse(ReadINIValue("Inspect", "xCharWidth", "15.1", INIFILE));
-            xCharHeight = float.Parse(ReadINIValue("Inspect", "xCharHeight", "15.1", INIFILE));
-            xCharArea = float.Parse(ReadINIValue("Inspect", "xCharArea", "30.1", INIFILE));
-            xBackgroudWidth = float.Parse(ReadINIValue("Inspect", "xBackgroudWidth", "15.1", INIFILE));
-            xBackgroudHeight = float.Parse(ReadINIValue("Inspect", "xBackgroudHeight", "15.1", INIFILE));
-            xBackgroudArea = float.Parse(ReadINIValue("Inspect", "xBackgroudArea", "30.1", INIFILE));
-
-            RoiCount = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
-            int i = 0;
-            rectangles.Clear();
-            while (i < RoiCount)
-            {
-                RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
-                rectangles.Add(rectf);
-
-                i++;
-            }
-
-            bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
-            bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", INIFILE) == "1";
-            MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
-            CarrierBackground = (EdgeBackGroundType)int.Parse(ReadINIValue("Basic", "CarrierBackground", "0", INIFILE));
-            bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
-            bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
-            bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
-            bPositive3 = ReadINIValue("Basic", "bPositive3", "1", INIFILE) == "1";
-            bEdgePolarity0 = ReadINIValue("Basic", "bEdgePolarity0", "1", INIFILE) == "1";
-            bEdgePolarity1 = ReadINIValue("Basic", "bEdgePolarity1", "1", INIFILE) == "1";
-            bEdgePolarity2 = ReadINIValue("Basic", "bEdgePolarity2", "1", INIFILE) == "1";
-            bEdgePolarity3 = ReadINIValue("Basic", "bEdgePolarity3", "1", INIFILE) == "1";
-
-            mWidthStand = float.Parse(ReadINIValue("Basic", "mWidthStand", "9", INIFILE));
-            mWidthUpper = float.Parse(ReadINIValue("Basic", "mWidthUpper", "0.05", INIFILE));
-            mWidthLower = float.Parse(ReadINIValue("Basic", "mWidthLower", "0.05", INIFILE));
-            mHeightStand = float.Parse(ReadINIValue("Basic", "mHeightStand", "9.9", INIFILE));
-            mHeightUpper = float.Parse(ReadINIValue("Basic", "mHeightUpper", "0.05", INIFILE));
-            mHeightLower = float.Parse(ReadINIValue("Basic", "mHeightLower", "0.05", INIFILE));
-            XOffset = float.Parse(ReadINIValue("Basic", "XOffset", "0.05", INIFILE));
-            YOffset = float.Parse(ReadINIValue("Basic", "YOffset", "0.05", INIFILE));
-
-        }
-        public override void Save()
-        {
-            WriteINIValue("Basic", "xAlgorithm", ((int)xAlgorithm).ToString(), INIFILE);
-            WriteINIValue("Basic", "xTolerance", xTolerance.ToString(), INIFILE);
-            WriteINIValue("Basic", "xAngle", xAngle.ToString(), INIFILE);
-            WriteINIValue("Basic", "xExtendx", xExtendx.ToString(), INIFILE);
-            WriteINIValue("Basic", "xExtendy", xExtendy.ToString(), INIFILE);
-            WriteINIValue("Basic", "xMaxOverlap", xMaxOverlap.ToString(), INIFILE);
-            WriteINIValue("Basic", "xChipOverlap", xChipOverlap.ToString(), INIFILE);
-            WriteINIValue("Basic", "xGridPadThreshold", xGridPadThreshold.ToString(), INIFILE);
-
-            WriteINIValue("Inspect", "bCheckInspect", (bCheckInspect ? "1" : "0"), INIFILE);
-            WriteINIValue("Inspect", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xCharWidth", xCharWidth.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xCharHeight", xCharHeight.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xCharArea", xCharArea.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xBackgroudWidth", xBackgroudWidth.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xBackgroudHeight", xBackgroudHeight.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xBackgroudArea", xBackgroudArea.ToString(), INIFILE);
-
-            WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
-            WriteINIValue("Basic", "CarrierBackground", ((int)CarrierBackground).ToString(), INIFILE);
-
-            WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bPositive2", (bPositive2 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bPositive3", (bPositive3 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity0", (bEdgePolarity0 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity1", (bEdgePolarity1 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity2", (bEdgePolarity2 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity3", (bEdgePolarity3 ? "1" : "0"), INIFILE);
-
-            WriteINIValue("Basic", "mWidthStand", mWidthStand.ToString(), INIFILE);
-            WriteINIValue("Basic", "mWidthUpper", mWidthUpper.ToString(), INIFILE);
-            WriteINIValue("Basic", "mWidthLower", mWidthLower.ToString(), INIFILE);
-            WriteINIValue("Basic", "mHeightStand", mHeightStand.ToString(), INIFILE);
-            WriteINIValue("Basic", "mHeightUpper", mHeightUpper.ToString(), INIFILE);
-            WriteINIValue("Basic", "mHeightLower", mHeightLower.ToString(), INIFILE);
-            WriteINIValue("Basic", "XOffset", XOffset.ToString(), INIFILE);
-            WriteINIValue("Basic", "YOffset", YOffset.ToString(), INIFILE);
-
-        }
-
-        public void SaveRoi()
-        {
-            RoiCount = rectangles.Count;
-            WriteINIValue("Inspect", "RoiCount", RoiCount.ToString(), INIFILE);
-            int i = 0;
-            while (i < RoiCount)
-            {
-                WriteINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(rectangles[i]), INIFILE);
-
-                i++;
-            }
-        }
-
-    }
-
-
-    public class NoTrayParaClass : RecipeBaseClass
-    {
-        public NoTrayParaClass()
-        {
-
-        }
-        private static NoTrayParaClass _instance = null;
-        public static NoTrayParaClass Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new NoTrayParaClass();
-                return _instance;
-            }
-        }
-
-        const string _Cat1 = "A01.基础设置";
-        [CategoryAttribute(_Cat1), DescriptionAttribute("二值化的阈值")]
-        [DisplayName("A01.灰阶阈值")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
-        [Browsable(true)]
-        public int xThresholdValue { get; set; } = 128;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("")]
-        [DisplayName("A02.检测模式")]
-        [TypeConverter(typeof(JzEnumConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 360, 1f, 2)]
-        [Browsable(true)]
-        public BlobMode xBlobMode { get; set; } = BlobMode.Black;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("搜寻范围扩大X方向的像素")]
-        [DisplayName("A03.外扩X")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
-        [Browsable(true)]
-        public int xExtendx { get; set; } = 20;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("搜寻范围扩大Y方向的像素")]
-        [DisplayName("A04.外扩Y")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
-        [Browsable(true)]
-        public int xExtendy { get; set; } = 20;
-
-
-        const string _Cat2 = "A02.规格设置";
-        [CategoryAttribute(_Cat2), DescriptionAttribute("特征二值化后最小的面积")]
-        [DisplayName("A01.Blob面积最小值")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 999999999)]
-        [Browsable(true)]
-        public int xBlobAreaMin { get; set; } = 5000;
-        [CategoryAttribute(_Cat2), DescriptionAttribute("特征二值化后最大的面积")]
-        [DisplayName("A02.Blob面积最大值")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 999999999)]
-        [Browsable(true)]
-        public int xBlobAreaMax { get; set; } = 99999999;
-
-        [CategoryAttribute(_Cat2), DescriptionAttribute("")]
-        [DisplayName("A03.存当前测试图")]
-        //[TypeConverter(typeof(NumericUpDownTypeConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 999999999)]
-        [Browsable(true)]
-        public bool xSaveDebugImage { get; set; } = false;
-
-
-
-        public override void Load(bool eCancel = false)
-        {
-            xThresholdValue = int.Parse(ReadINIValue("Basic", "xThresholdValue", "128", INIFILE));
-            xBlobMode = (BlobMode)int.Parse(ReadINIValue("Basic", "xBlobMode", "1", INIFILE));
-            xExtendx = int.Parse(ReadINIValue("Basic", "xExtendx", "20", INIFILE));
-            xExtendy = int.Parse(ReadINIValue("Basic", "xExtendy", "20", INIFILE));
-
-            xBlobAreaMin = int.Parse(ReadINIValue("Basic", "xBlobAreaMin", "5000", INIFILE));
-            xBlobAreaMax = int.Parse(ReadINIValue("Basic", "xBlobAreaMax", "99999999", INIFILE));
-
-            xSaveDebugImage = ReadINIValue("Basic", "xSaveDebugImage", "0", INIFILE) == "1";
-        }
-        public override void Save()
-        {
-            WriteINIValue("Basic", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
-            WriteINIValue("Basic", "xBlobMode", ((int)xBlobMode).ToString(), INIFILE);
-            WriteINIValue("Basic", "xExtendx", xExtendx.ToString(), INIFILE);
-            WriteINIValue("Basic", "xExtendy", xExtendy.ToString(), INIFILE);
-
-            WriteINIValue("Basic", "xBlobAreaMin", xBlobAreaMin.ToString(), INIFILE);
-            WriteINIValue("Basic", "xBlobAreaMax", xBlobAreaMax.ToString(), INIFILE);
-
-            WriteINIValue("Basic", "xSaveDebugImage", (xSaveDebugImage ? "1" : "0"), INIFILE);
-        }
-
-    }
-
-
-    public class LineScanCalibrateClass : RecipeBaseClass
-    {
-        const int POINT_COUNT = 4;
-
-        JetEazy.BasicSpace.CAoiCalibration cAoiCalibration = new JetEazy.BasicSpace.CAoiCalibration();
-        PointF[,] _v1 = new PointF[2, 2];
-        PointF[,] _w1 = new PointF[2, 2];
-
-        //JetEazy.BasicSpace.CAoiCalibration cAoiCalibration2 = new JetEazy.BasicSpace.CAoiCalibration();
-        //PointF[,] _v2 = new PointF[2, 2];
-        //PointF[,] _w2 = new PointF[2, 2];
-
-        public LineScanCalibrateClass()
-        {
-
-        }
-        //private static LineScanCalibrateClass _instance = null;
-        //public static LineScanCalibrateClass Instance
-        //{
-        //    get
-        //    {
-        //        if (_instance == null)
-        //            _instance = new LineScanCalibrateClass();
-        //        return _instance;
-        //    }
-        //}
-        public override void Initial(string epath, int ercpindex, string enamefile)
-        {
-            base.Initial(epath, ercpindex, enamefile);
-            string dir = $"{Path}\\Calibration";
-            INIFILE = $"{dir}\\{Name}";
-        }
-        public override void ChangeIndex(int eindex)
-        {
-            //base.ChangeIndex(eindex);
-        }
-        public PointF ViewToWorld(PointF ptview)
-        {
-            PointF ptworld = new PointF(ptview.X, ptview.Y);
-            cAoiCalibration.TransformViewToWorld(ptview, out ptworld);
-            return ptworld;
-        }
-        public PointF WorldToView(PointF ptworld)
-        {
-            PointF ptview = new PointF(ptworld.X, ptworld.Y);
-            cAoiCalibration.TransformViewToWorld(ptworld, out ptview);
-            return ptview;
-        }
-        //public PointF T2ViewToWorld(PointF ptview)
-        //{
-        //    PointF ptworld = new PointF(ptview.X, ptview.Y);
-        //    cAoiCalibration2.TransformViewToWorld(ptview, out ptworld);
-        //    return ptworld;
-        //}
-        //public PointF T2WorldToView(PointF ptworld)
-        //{
-        //    PointF ptview = new PointF(ptworld.X, ptworld.Y);
-        //    cAoiCalibration2.TransformViewToWorld(ptworld, out ptview);
-        //    return ptview;
-        //}
-
-        public PointF[] ptsview = new PointF[POINT_COUNT];
-        public PointF[] ptsworld = new PointF[POINT_COUNT];
-        //public PointF[] pts2view = new PointF[POINT_COUNT];
-        //public PointF[] pts2world = new PointF[POINT_COUNT];
-
-        //public override void Initial(string epath, int ercpindex, string enamefile)
-        //{
-        //    base.Initial(epath, ercpindex, enamefile);
-        //}
-        public override void Load(bool eCancel = false)
-        {
-            int i = 0;
-            while (i < POINT_COUNT)
-            {
-                ptsview[i] = StringtoPointF(ReadINIValue("Tray", $"ptsview_{i}", $"{i},{i}", INIFILE));
-                ptsworld[i] = StringtoPointF(ReadINIValue("Tray", $"ptsworld_{i}", $"{i},{i}", INIFILE));
-
-                //pts2view[i] = StringtoPointF(ReadINIValue("Tray2", $"pts2view_{i}", $"{i},{i}", INIFILE));
-                //pts2world[i] = StringtoPointF(ReadINIValue("Tray2", $"pts2world_{i}", $"{i},{i}", INIFILE));
-
-                i++;
-            }
-
-            run();
-        }
-        public override void Save()
-        {
-            int i = 0;
-            while (i < POINT_COUNT)
-            {
-                WriteINIValue("Tray", $"ptsview_{i}", PointFtoStringSimple(ptsview[i]), INIFILE);
-                WriteINIValue("Tray", $"ptsworld_{i}", PointFtoStringSimple(ptsworld[i]), INIFILE);
-                //WriteINIValue("Tray2", $"pts2view_{i}", PointFtoStringSimple(pts2view[i]), INIFILE);
-                //WriteINIValue("Tray2", $"pts2world_{i}", PointFtoStringSimple(pts2world[i]), INIFILE);
-
-                i++;
-            }
-
-            run();
-        }
-
-        private void run()
-        {
-            _v1[0, 1] = ptsview[0];
-            _v1[1, 1] = ptsview[1];
-            _v1[0, 0] = ptsview[2];
-            _v1[1, 0] = ptsview[3];
-
-            _w1[0, 1] = ptsworld[0];
-            _w1[1, 1] = ptsworld[1];
-            _w1[0, 0] = ptsworld[2];
-            _w1[1, 0] = ptsworld[3];
-            cAoiCalibration.Dispose();
-            cAoiCalibration.SetCalibrationPoints(_v1, _w1);
-            cAoiCalibration.CalculateTransformMatrix();
-
-            //_v2[0, 1] = pts2view[0];
-            //_v2[1, 1] = pts2view[1];
-            //_v2[0, 0] = pts2view[2];
-            //_v2[1, 0] = pts2view[3];
-
-            //_w2[0, 1] = pts2world[0];
-            //_w2[1, 1] = pts2world[1];
-            //_w2[0, 0] = pts2world[2];
-            //_w2[1, 0] = pts2world[3];
-            //cAoiCalibration2.Dispose();
-            //cAoiCalibration2.SetCalibrationPoints(_v2, _w2);
-            //cAoiCalibration2.CalculateTransformMatrix();
-
-        }
-    }
-
 }

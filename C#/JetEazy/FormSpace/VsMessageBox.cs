@@ -130,7 +130,7 @@ namespace JetEazy.FormSpace
                 this.Text = "提示视窗";
                 this.lblMessage.Text = msg;
                 pictureBox1.BackgroundImage = Properties.Resources.information;
-                panel1.BackColor = Color.FromArgb(255, 255, 192);
+                panel1.BackColor = Color.Ivory;
                 btnCancel.Visible = false;
                 btnOK.Location = new Point(btnCancel.Location.X, btnCancel.Location.Y);
             }
@@ -139,7 +139,7 @@ namespace JetEazy.FormSpace
                 this.Text = "询问视窗";
                 this.lblMessage.Text = msg;
                 pictureBox1.BackgroundImage = Properties.Resources.question;
-                panel1.BackColor = Color.FromArgb(255, 255, 192);
+                panel1.BackColor = Color.Ivory;
             }
         }
         #endregion

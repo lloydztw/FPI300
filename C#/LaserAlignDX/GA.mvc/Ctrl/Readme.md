@@ -30,3 +30,8 @@
 			\FormRecipeEditor
 			\FormLightControl
 			\IvRecipeEditor
+
+## 2025-09-19 加入 GaTemplateEditCtrl
+	搭配 Gui\UiRecipeEditor
+			\FromTemplateEditor
+			\IvTemplateEditorUI

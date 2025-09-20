@@ -58,7 +58,8 @@
             this.btnDefectClear = new System.Windows.Forms.Button();
             this.btnDefectAdd = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
-            this.btnCreateTemplate = new System.Windows.Forms.Button();
+            this.btnTrain = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.tbLayoutSubM.SuspendLayout();
             this.tbLayoutA.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -331,7 +332,7 @@
             this.btnTryQrCode.Name = "btnTryQrCode";
             this.btnTryQrCode.Size = new System.Drawing.Size(116, 46);
             this.btnTryQrCode.TabIndex = 49;
-            this.btnTryQrCode.Text = "測試";
+            this.btnTryQrCode.Text = "掃碼";
             this.btnTryQrCode.UseVisualStyleBackColor = false;
             // 
             // groupBox1
@@ -356,10 +357,10 @@
             this.radioButtonLn.Location = new System.Drawing.Point(67, 61);
             this.radioButtonLn.Margin = new System.Windows.Forms.Padding(4);
             this.radioButtonLn.Name = "radioButtonLn";
-            this.radioButtonLn.Size = new System.Drawing.Size(90, 24);
+            this.radioButtonLn.Size = new System.Drawing.Size(124, 24);
             this.radioButtonLn.TabIndex = 65;
             this.radioButtonLn.TabStop = true;
-            this.radioButtonLn.Text = "四方邊線";
+            this.radioButtonLn.Text = "邊線 檢測範圍";
             this.radioButtonLn.UseVisualStyleBackColor = true;
             // 
             // radioButtonG
@@ -381,10 +382,10 @@
             this.radioButtonQr.Location = new System.Drawing.Point(67, 93);
             this.radioButtonQr.Margin = new System.Windows.Forms.Padding(4);
             this.radioButtonQr.Name = "radioButtonQr";
-            this.radioButtonQr.Size = new System.Drawing.Size(75, 24);
+            this.radioButtonQr.Size = new System.Drawing.Size(109, 24);
             this.radioButtonQr.TabIndex = 63;
             this.radioButtonQr.TabStop = true;
-            this.radioButtonQr.Text = "二维码";
+            this.radioButtonQr.Text = "二維碼 範圍";
             this.radioButtonQr.UseVisualStyleBackColor = true;
             // 
             // btnPickGolden
@@ -397,7 +398,7 @@
             this.btnPickGolden.Name = "btnPickGolden";
             this.btnPickGolden.Size = new System.Drawing.Size(116, 46);
             this.btnPickGolden.TabIndex = 49;
-            this.btnPickGolden.Text = "擷取樣本";
+            this.btnPickGolden.Text = "擷取模板";
             this.btnPickGolden.UseVisualStyleBackColor = false;
             // 
             // tbLayoutB
@@ -423,11 +424,12 @@
             // tbLayoutSubR
             // 
             this.tbLayoutSubR.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.tbLayoutSubR.Controls.Add(this.btnCancel);
             this.tbLayoutSubR.Controls.Add(this.btnDefectDelete);
             this.tbLayoutSubR.Controls.Add(this.btnDefectClear);
             this.tbLayoutSubR.Controls.Add(this.btnDefectAdd);
             this.tbLayoutSubR.Controls.Add(this.btnSave);
-            this.tbLayoutSubR.Controls.Add(this.btnCreateTemplate);
+            this.tbLayoutSubR.Controls.Add(this.btnTrain);
             this.tbLayoutSubR.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tbLayoutSubR.Location = new System.Drawing.Point(1000, 4);
             this.tbLayoutSubR.Margin = new System.Windows.Forms.Padding(4);
@@ -440,10 +442,10 @@
             this.btnDefectDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnDefectDelete.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnDefectDelete.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDefectDelete.Location = new System.Drawing.Point(41, 116);
+            this.btnDefectDelete.Location = new System.Drawing.Point(41, 94);
             this.btnDefectDelete.Margin = new System.Windows.Forms.Padding(4);
             this.btnDefectDelete.Name = "btnDefectDelete";
-            this.btnDefectDelete.Size = new System.Drawing.Size(172, 64);
+            this.btnDefectDelete.Size = new System.Drawing.Size(172, 52);
             this.btnDefectDelete.TabIndex = 72;
             this.btnDefectDelete.Text = "缺陷區域 刪除";
             this.btnDefectDelete.UseVisualStyleBackColor = false;
@@ -453,10 +455,10 @@
             this.btnDefectClear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnDefectClear.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnDefectClear.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDefectClear.Location = new System.Drawing.Point(41, 188);
+            this.btnDefectClear.Location = new System.Drawing.Point(41, 154);
             this.btnDefectClear.Margin = new System.Windows.Forms.Padding(4);
             this.btnDefectClear.Name = "btnDefectClear";
-            this.btnDefectClear.Size = new System.Drawing.Size(172, 64);
+            this.btnDefectClear.Size = new System.Drawing.Size(172, 52);
             this.btnDefectClear.TabIndex = 71;
             this.btnDefectClear.Text = "缺陷區域 清空";
             this.btnDefectClear.UseVisualStyleBackColor = false;
@@ -466,10 +468,10 @@
             this.btnDefectAdd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnDefectAdd.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnDefectAdd.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDefectAdd.Location = new System.Drawing.Point(41, 44);
+            this.btnDefectAdd.Location = new System.Drawing.Point(41, 34);
             this.btnDefectAdd.Margin = new System.Windows.Forms.Padding(4);
             this.btnDefectAdd.Name = "btnDefectAdd";
-            this.btnDefectAdd.Size = new System.Drawing.Size(172, 64);
+            this.btnDefectAdd.Size = new System.Drawing.Size(172, 52);
             this.btnDefectAdd.TabIndex = 70;
             this.btnDefectAdd.Text = "缺陷區域 添加";
             this.btnDefectAdd.UseVisualStyleBackColor = false;
@@ -479,26 +481,40 @@
             this.btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnSave.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSave.Location = new System.Drawing.Point(41, 361);
+            this.btnSave.Location = new System.Drawing.Point(41, 331);
             this.btnSave.Margin = new System.Windows.Forms.Padding(4);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(172, 64);
+            this.btnSave.Size = new System.Drawing.Size(172, 52);
             this.btnSave.TabIndex = 69;
-            this.btnSave.Text = "保存 模板與參數";
+            this.btnSave.Text = "保存 參數";
             this.btnSave.UseVisualStyleBackColor = false;
             // 
-            // btnCreateTemplate
+            // btnTrain
             // 
-            this.btnCreateTemplate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.btnCreateTemplate.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnCreateTemplate.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCreateTemplate.Location = new System.Drawing.Point(41, 286);
-            this.btnCreateTemplate.Margin = new System.Windows.Forms.Padding(4);
-            this.btnCreateTemplate.Name = "btnCreateTemplate";
-            this.btnCreateTemplate.Size = new System.Drawing.Size(172, 64);
-            this.btnCreateTemplate.TabIndex = 68;
-            this.btnCreateTemplate.Text = "創建 模板";
-            this.btnCreateTemplate.UseVisualStyleBackColor = false;
+            this.btnTrain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnTrain.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnTrain.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnTrain.Location = new System.Drawing.Point(41, 271);
+            this.btnTrain.Margin = new System.Windows.Forms.Padding(4);
+            this.btnTrain.Name = "btnTrain";
+            this.btnTrain.Size = new System.Drawing.Size(172, 52);
+            this.btnTrain.TabIndex = 68;
+            this.btnTrain.Text = "檢查 模板";
+            this.btnTrain.UseVisualStyleBackColor = false;
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnCancel.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCancel.Location = new System.Drawing.Point(41, 391);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(172, 52);
+            this.btnCancel.TabIndex = 73;
+            this.btnCancel.Text = "取消 修改";
+            this.btnCancel.UseVisualStyleBackColor = false;
+            this.btnCancel.Visible = false;
             // 
             // FormTemplateEditor
             // 
@@ -509,6 +525,7 @@
             this.Controls.Add(this.tbLayoutA);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
+            this.MinimizeBox = false;
             this.Name = "FormTemplateEditor";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "匹配模板設定";
@@ -552,12 +569,13 @@
         private System.Windows.Forms.Button btnDefectClear;
         private System.Windows.Forms.Button btnDefectAdd;
         private System.Windows.Forms.Button btnSave;
-        private System.Windows.Forms.Button btnCreateTemplate;
+        private System.Windows.Forms.Button btnTrain;
         private System.Windows.Forms.Label labelB;
         private System.Windows.Forms.NumericUpDown numBorderSize;
         private System.Windows.Forms.RadioButton radioButtonLn;
         private System.Windows.Forms.Label labelA;
         private System.Windows.Forms.NumericUpDown numBorderIndent;
         private System.Windows.Forms.Label lblActiveCarrierID;
+        private System.Windows.Forms.Button btnCancel;
     }
 }

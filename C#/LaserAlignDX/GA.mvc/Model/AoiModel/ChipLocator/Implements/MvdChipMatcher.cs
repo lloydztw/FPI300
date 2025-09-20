@@ -40,9 +40,9 @@ namespace LaserAlignDX.AoiModel
 
         #region RECIPE_PARAMS
         RecipeParams _recipeParams;
-        float xMvdAngle => _recipeParams!=null ? _recipeParams.xAngle : 30f;
+        float xMvdAngle => _recipeParams != null ? _recipeParams.xAngle : 30f;
         float xMvdTolerance => _recipeParams != null ? _recipeParams.xTolerance : 0.5f;
-        int xMaxOverlap => _recipeParams!=null ? _recipeParams.xMaxOverlap : 80;
+        int xMaxOverlap => _recipeParams != null ? _recipeParams.xMaxOverlap : 80;
         PointF xMvdFixed { get; set; } = new PointF(-1, -1);
         //public int xMvdMaxOcc { get; set; } = 1;
         #endregion
@@ -506,7 +506,7 @@ namespace LaserAlignDX.AoiModel
 
             #endregion
 
-            if(false && cAlmightyPatmatchToolObj != null)
+            if (false && cAlmightyPatmatchToolObj != null)
             {
                 var oldImage = cAlmightyPatmatchToolObj.InputImage;
                 cAlmightyPatmatchToolObj.Dispose();

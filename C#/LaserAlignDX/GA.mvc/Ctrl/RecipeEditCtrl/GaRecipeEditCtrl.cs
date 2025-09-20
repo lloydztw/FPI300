@@ -436,6 +436,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             enableGoldenRegionPicking(false);
 
             GaMvcConfig.OpenTamplateEditor(_currentCarrierID);
+            updateRecipePropertyView(_currentCarrierID);
 
             updateAllRecipeData(false, _currentCarrierID);
         }

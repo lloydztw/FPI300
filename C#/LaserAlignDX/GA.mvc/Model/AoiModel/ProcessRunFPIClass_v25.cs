@@ -1251,7 +1251,8 @@ namespace LaserAlignDX.AoiModel.V25
                     RectangleF templaterectf = new RectangleF(0, 0, xRecipe.bmpprinttemplate.Width, xRecipe.bmpprinttemplate.Height);
 
                     //定位完成后裁切位置
-                    RectangleF _crop = new RectangleF(cell.DrawResultRectF().CenterX - templaterectf.Width / 2,
+                    RectangleF _crop = new RectangleF(
+                        cell.DrawResultRectF().CenterX - templaterectf.Width / 2,
                         cell.DrawResultRectF().CenterY - templaterectf.Height / 2,
                         templaterectf.Width,
                         templaterectf.Height);
@@ -1260,7 +1261,8 @@ namespace LaserAlignDX.AoiModel.V25
                     {
                         try
                         {
-                            RectangleF _cropDefect = new RectangleF(xRecipe.xRegionTrain.X + _crop.X,
+                            RectangleF _cropDefect = new RectangleF(
+                                xRecipe.xRegionTrain.X + _crop.X,
                                 xRecipe.xRegionTrain.Y + _crop.Y,
                                 xRecipe.xRegionTrain.Width,
                                 xRecipe.xRegionTrain.Height);
@@ -1272,6 +1274,7 @@ namespace LaserAlignDX.AoiModel.V25
                             cell.bmpItemMask = xRecipe.bmpprintmask.Clone(
                                 new Rectangle(0, 0, xRecipe.bmpprintmask.Width, xRecipe.bmpprintmask.Height),
                                 PixelFormat.Format8bppIndexed);
+
                             cell.DetectDefects(xRecipe.bmpDefectTemplate, cell.bmpItemRun, cell.bmpItemMask);
                         }
                         catch(Exception ex)
@@ -1285,7 +1288,8 @@ namespace LaserAlignDX.AoiModel.V25
                     {
                         try
                         {
-                            RectangleF _cropCode = new RectangleF(xRecipe.xRectCodeRegion.X + _crop.X,
+                            RectangleF _cropCode = new RectangleF(
+                                xRecipe.xRectCodeRegion.X + _crop.X,
                                 xRecipe.xRectCodeRegion.Y + _crop.Y,
                                 xRecipe.xRectCodeRegion.Width,
                                 xRecipe.xRectCodeRegion.Height);

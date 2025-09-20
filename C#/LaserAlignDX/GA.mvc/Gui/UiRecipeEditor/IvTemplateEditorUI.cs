@@ -32,14 +32,15 @@ namespace LaserAlignDX.Mvc.Gui
         NumericUpDown numBorderSize { get; }
 
         Button btnTryScanQrCode { get; }
-        RichTextBox rtbQrCodeResult { get; }
+        Control wndQrCodeResult { get; }
 
         Control wndVisionSettingsPanel { get; }
         Button btnDefectRegionAdd { get; }  
         Button btnDefectRegionDelete {  get; }  
         Button btnDefectRegionClearAll { get; }
 
-        Button btnCreateTemplate { get; }
-        Button btnSaveTemplateAndParams { get; }
+        Button btnTrainTemplate { get; }
+        Button btnSaveAllParams { get; }
+        Button btnCancel { get; }
     }
 }

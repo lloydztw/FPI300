@@ -31,8 +31,8 @@ namespace LaserAlignDX.Mvc.Gui
 
         RadioButton[] rdoCarriers { get; }
 
-        Button btnPickGoldenChipRegion { get; }         // 選取標準 晶粒區域 樣本
-        Button btnAutoCreateCellRegions { get; }            // 自動抓取 Cell Regions
+        Button btnPickGoldenChipRegion { get; }             // 選取標準 晶粒區域 樣本
+        Button btnAutoCreateCellRegions { get; }            // 自動抓取 Cell Regions (生成陣列)
 
         Button btnOpenTemplateMatchWindow { get; }
         Button btnOpenEmptyTrayWindow { get; }

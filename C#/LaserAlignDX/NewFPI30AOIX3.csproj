@@ -396,9 +396,12 @@
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v25.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\RcpBmpHolder.cs" />
+    <Compile Include="GA.mvc\Model\GaRecipes\Params\LineScanCalibrateClass.cs" />
+    <Compile Include="GA.mvc\Model\GaRecipes\Params\FlyParaClass.cs" />
+    <Compile Include="GA.mvc\Model\GaRecipes\Params\InspectX3ParaClass.cs" />
+    <Compile Include="GA.mvc\Model\GaRecipes\Supports\RcpBmpHolder.cs" />
     <Compile Include="GA.mvc\Model\GaRecipes\RecipeFPIX3Class.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\RecipeParaGridClass.cs" />
+    <Compile Include="GA.mvc\Model\GaRecipes\Params\RecipeParaGridClass.cs" />
     <Compile Include="GA.mvc\Model\GaRecipes\RegionCellX3Class.cs" />
     <Compile Include="GA.mvc\Model\JxRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\JxRecipes\Supports\JxMetadataUtil.cs" />

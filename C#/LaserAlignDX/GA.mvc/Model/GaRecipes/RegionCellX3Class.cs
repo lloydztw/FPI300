@@ -116,10 +116,10 @@ namespace LaserAlignDX.OPSpace
         public string SaveDebugPath = $"D:\\log\\DebugImage";
 
         //public InspectX3ParaClass xInspectPara = new InspectX3ParaClass();
-        public NoTrayParaClass xNoTrayPara
-        {
-            get { return NoTrayParaClass.Instance; }
-        }
+        //public NoTrayParaClass xNoTrayPara
+        //{
+        //    get { return NoTrayParaClass.Instance; }
+        //}
         public InspectX3ParaClass xInspect
         {
             get { return InspectX3ParaClass.Instance; }
@@ -184,7 +184,7 @@ namespace LaserAlignDX.OPSpace
                 mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity3;
             }
 
-            mvdFindLineClass.Background = xInspect.CarrierBackground;
+            mvdFindLineClass.Background = xInspect.xCarrierBackground;
             cMvdLineSegmentFsOut[iSideIndex] = mvdFindLineClass.Run(bmp, roi, iSideIndex);
         }
         /// <summary>
@@ -882,6 +882,7 @@ namespace LaserAlignDX.OPSpace
             return cPositionFixToolObj.Result.CorrectedShape;
         }
 
+#if (NOT_USED_CODE)
         public CBlobInfo CheckBlobNoTray(Bitmap eBmpRun)
         {
             CBlobInfo cBlobInfo = null;
@@ -966,6 +967,8 @@ namespace LaserAlignDX.OPSpace
             }
             return cBlobInfo;
         }
+#endif
+
         public void DetectDefects(Bitmap eTemplate, Bitmap eBmpRun, Bitmap eBmpMask)
         {
             //string _path = $"D:\\LOA\\{DateTime.Now.ToString("yyyyMMddHH")}";

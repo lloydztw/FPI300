@@ -169,17 +169,18 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         #region GUI_LINKS
         IvTemplateEditorUI _editorUI;
-        Button btnPickGolden => _editorUI.btnPickGolden;
-        Button btnTryScanQrCode => _editorUI.btnTryScanQrCode;
-        Button btnAutoLayoutLineBorders => _editorUI.btnAutoLineBorders;
-        Button btnCreateTemplate => _editorUI.btnCreateTemplate;
-        Button btnSaveTemplateAndParams => _editorUI.btnSaveTemplateAndParams;
-        Button btnDefectRegionAdd => _editorUI.btnDefectRegionAdd;
-        Button btnDefectRegionDelete => _editorUI.btnDefectRegionDelete;
-        Button btnDefectRegionClearAll => _editorUI.btnDefectRegionClearAll;
         DispUI DS1 => _editorUI.DispViewers[0];
         DispUI DS2 => _editorUI.DispViewers[1];
         DispUI DS3 => _editorUI.DispViewers[2];
+        Button btnPickGolden => _editorUI.btnPickGolden;
+        Button btnTryScanQrCode => _editorUI.btnTryScanQrCode;
+        Button btnAutoLayoutLineBorders => _editorUI.btnAutoLineBorders;
+        Button btnDefectRegionAdd => _editorUI.btnDefectRegionAdd;
+        Button btnDefectRegionDelete => _editorUI.btnDefectRegionDelete;
+        Button btnDefectRegionClearAll => _editorUI.btnDefectRegionClearAll;
+        Button btnTrainTemplate => _editorUI.btnTrainTemplate;
+        Button btnSaveAllParams => _editorUI.btnSaveAllParams;
+        Button btnCancel => _editorUI.btnCancel;
         #endregion
 
         #region INTERACTORS
@@ -196,6 +197,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         bool _isQrCodeModified = false;
         bool _isLineBorderModified = false;
         bool _isDefectMaskModified = false;
+        bool _isPropertyModified = false;
         #endregion
 
         public void Attach(IvTemplateEditorUI ui, CarrierEnum C)
@@ -214,14 +216,16 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             _editorUI.Window.HandleCreated += Window_HandleCreated;
             btnPickGolden.Click += (s, e) => BuildGoldenChipTemplate();
-            btnTryScanQrCode.Click += (s, e) => UpdateQrCodeAndTryDecode();
+            btnTryScanQrCode.Click += (s, e) => BuildQRCodeTemplate();
             btnAutoLayoutLineBorders.Click += (s, e) => AutoLayoutLineBorders();
-            btnCreateTemplate.Click += (s, e) => TrainGoldenChipTemplate();
-            btnSaveTemplateAndParams.Click += (s, e) => SaveAllParams(prompt: true);
 
             btnDefectRegionAdd.Click += (s, e) => DfRegion_Add();
             btnDefectRegionDelete.Click += (s, e) => DfRegion_Delete();
             btnDefectRegionClearAll.Click += (s, e) => DfRegion_ClearAll();
+
+            btnTrainTemplate.Click += (s, e) => TrainGoldenChipTemplate();
+            btnSaveAllParams.Click += (s, e) => SaveAllParams(force: true);
+            btnCancel.Click += (s, e) => CancelAndExit();
 
             foreach (var rdoBoxSelector in _editorUI.rdoBoxSelectors)
             {
@@ -235,12 +239,19 @@ namespace LaserAlignDX.Mvc.Ctrl
                     updateLineSegmentBoxes(true);
                 };
             }
-            _cviQrCodeBox.OnChanged += (s, e) => updateGoldenBoxes(true, true);
+            _cviQrCodeBox.OnChanged += (s, e) => updateGoldenBoxes(true);
+
+            if(_editorUI.wndVisionSettingsPanel is PropertyGrid pg)
+                pg.PropertyValueChanged += Pg_PropertyValueChanged;
         }
 
         #region EVENT_HANDLERS
         private void Window_HandleCreated(object sender, EventArgs e)
         {
+            //_editorUI.lblActiveCarrierID.Text = GaUtil.GetEnumDescription(_carrierID) + " 晶粒模板設定";
+            _editorUI.Window.FindForm().FormClosing += GaTemplateEditCtrl_FormClosing;
+
+            updateSubTitle();
             updateDispUI(DS1, _xBmpGoldenRegionTemplate);
             updateDispUI(DS2, _xBmpGoldenChipTemplate);
 
@@ -252,13 +263,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             updateVisionParams();
 
             SetSelector(OpSelector.Golden);
-
-            _editorUI.Window.FindForm().FormClosing += GaTemplateEditCtrl_FormClosing;
-            _editorUI.lblActiveCarrierID.Text = GaUtil.GetEnumDescription(_carrierID) + " 晶粒模板設定";
         }
         private void GaTemplateEditCtrl_FormClosing(object sender, FormClosingEventArgs e)
         {
-            SaveAllParams(prompt: false);
+            SaveAllParams(force: false);
             persistLineBorderIndentExt(true);
         }
         private void RdoBoxSelector_CheckedChanged(object sender, EventArgs e)
@@ -267,6 +275,20 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 int index = Array.IndexOf(_editorUI.rdoBoxSelectors, rdo);
                 SetSelector((OpSelector)index);
+            }
+        }
+        private void Pg_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
+        {
+            _isPropertyModified = true;
+            if (_opSelector == OpSelector.LineBorders)
+            {
+                string propertyName = e.ChangedItem?.PropertyDescriptor?.Name;
+                if (propertyName == "xCarrierBackground")
+                {
+                    //自動刷新 邊線 抓取結果
+                    updateLineSegmentBoxes(true);
+                    refreshDispUI(DS1);
+                }
             }
         }
         private void CviDefectMaskBox_OnChanged(object sender, EventArgs e)
@@ -289,7 +311,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         void initInteractors()
         {
             _cviGoldenChipBox = new CviRcpBox(Brushes.Orange, 1, 3) { Visible = false };
-            _cviQrCodeBox = new CviRcpBox(Brushes.Purple, 1, 3) { Visible = false };
+            _cviQrCodeBox = new CviRcpBox(Brushes.DeepPink, 1, 3) { Visible = false };
             _cviDefectMaskBoxes = new List<CviRcpBox>();
 
             _cviLineBorderBoxes = new CviRcpBox[4];
@@ -344,70 +366,54 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (_opSelector != selector)
             {
                 _opSelector = selector;
+                updateSubTitle();
                 updateGuiStatus();
                 refreshDispUI(DS1);
                 refreshDispUI(DS3);
                 updateLineSegmentBoxes(_opSelector == OpSelector.LineBorders);
             }
         }
-
         void BuildGoldenChipTemplate()
         {
+            // 從 _xBmpGoldenRegionTemplate 切出 bmpTemplate
             var roiRect = _cviGoldenChipBox.Box;
-            var bmpRegion = _xBmpGoldenRegionTemplate;
-            var bound = new Rectangle(0, 0, bmpRegion.Width, bmpRegion.Height);
-            JetEazy.QUtilities.QUtility.ClipBoundary(ref roiRect, ref bound);
-            if (roiRect.Width < 2 || roiRect.Height < 2)
+            var bmpGoldenChip = cropBitmap(_xBmpGoldenRegionTemplate, ref roiRect);
+            if (bmpGoldenChip == null)
                 return;
 
             // 更新 參數
-            var goldenBmp = _xBmpGoldenRegionTemplate.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-            this._xBmpGoldenChipTemplate = goldenBmp;
+            this._xBmpGoldenChipTemplate = bmpGoldenChip;
             this._xGoldenChipRect = roiRect;
 
-            //// 保存 參數 (for Golden Chip template)
-            //if (saveToFile)
-            //    _xRecipe.SavePrintTemplateRegionTrain();
+            // 標記 已改變
             _isGoldenModified = true;
 
             // 更新 GUI
-            updateDispUI(DS2, goldenBmp, autoZoom: true);
+            updateDispUI(DS2, bmpGoldenChip, autoZoom: true);
 
             // 更新 mask
             updateMaskTemplate(false);
         }
-        void UpdateQrCodeAndTryDecode()
+        void BuildQRCodeTemplate()
         {
+            // 從 _xBmpGoldenRegionTemplate 切出 bmp
             var roiRect = _cviQrCodeBox.Box;
-            var bmpRegion = _xBmpGoldenRegionTemplate;
-            var bound = new Rectangle(0, 0, bmpRegion.Width, bmpRegion.Height);
-            JetEazy.QUtilities.QUtility.ClipBoundary(ref roiRect, ref bound);
-            if (roiRect.Width < 2 || roiRect.Height < 2)
+            var bmp = cropBitmap(_xBmpGoldenRegionTemplate, ref roiRect);
+            if (bmp == null)
                 return;
 
             // 更新 參數
-            var bmp = _xBmpGoldenRegionTemplate.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
             this._xBmpQrCodeTemplate = bmp;
             this._xQrCodeRect = roiRect;
 
-            //// 保存 參數 (for QrCode template)
-            //if (saveToFile)
-            //    _xRecipe.SaveCodeTemplate();
+            // 標記 已改變
             _isQrCodeModified = true;
 
             // DECODE
             aoiDecodeQrCode(this._xBmpQrCodeTemplate, out string text);
 
             // 更新 Text
-            _editorUI.rtbQrCodeResult.Text = text;
-        }
-        void TrainGoldenChipTemplate()
-        {
-            int err = _xRecipe.PrintTempTrain();
-            if (err == 0)
-                VsMessageBox.Info("創建成功.");
-            else
-                VsMessageBox.Warning("創建失敗!");
+            _editorUI.wndQrCodeResult.Text = text;
         }
         void AutoLayoutLineBorders()
         {
@@ -417,62 +423,92 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return;
             }
 
-            var rc = Rectangle.Round(_xGoldenChipRect);
+            var rect = Rectangle.Round(_xGoldenChipRect);
             var ind = (int)_editorUI.numBorderIndent.Value;
             var ext = (int)_editorUI.numBorderSize.Value;
-            var W = rc.Width;
-            var H = rc.Height;
-            var ww = (int)(rc.Width * 0.6);
-            var hh = (int)(rc.Height * 0.6);
+            var W = rect.Width;
+            var H = rect.Height;
+            var ww = (int)(rect.Width * 0.6);
+            var hh = (int)(rect.Height * 0.6);
             var dw = W - ww;
             var dh = H - hh;
-            var x = rc.X;
-            var y = rc.Y;
+            var x = rect.X;
+            var y = rect.Y;
 
             int i = 0;
             _cviLineBorderBoxes[i++].Box = new Rectangle(x - ext, y + dh / 2, ind + ext, hh);
             _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, y - ext, ww, ind + ext);
-            _cviLineBorderBoxes[i++].Box = new Rectangle(rc.Right - ind, y + dh / 2, ind + ext, hh);
-            _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, rc.Bottom - ind, ww, ind + ext);
+            _cviLineBorderBoxes[i++].Box = new Rectangle(rect.Right - ind, y + dh / 2, ind + ext, hh);
+            _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, rect.Bottom - ind, ww, ind + ext);
             refreshDispUI(DS1);
 
             updateLineBorderBoxes(true);
             updateLineSegmentBoxes(true);
         }
-        void SaveAllParams(bool prompt)
+        void TrainGoldenChipTemplate()
         {
-            // 根據舊的 Gaara 邏輯
-            // Golden, QrCode, 與 LineBorder 需要自動存檔.
-            // 只剩下 Mask 不會自動存檔
+            int err = _xRecipe.PrintTempTrain();
+            if (err == 0)
+                VsMessageBox.Info("匹配模板 創建成功.");
+            else
+                VsMessageBox.Warning("匹配模板 創建失敗!");
+        }
+        void SaveAllParams(bool force)
+        {
+            bool isAnySaved = false;
 
             if (_isGoldenModified)
             {
+                isAnySaved = true;
                 _isGoldenModified = false;
                 _xRecipe.SavePrintTemplateRegionTrain();
             }
 
             if (_isQrCodeModified)
             {
+                isAnySaved = true;
                 _isQrCodeModified = false;
                 _xRecipe.SaveCodeTemplate();
             }
 
             if (_isLineBorderModified)
             {
+                isAnySaved = true;
                 _isLineBorderModified = false;
                 _xRecipe.SaveLinesRegion();
             }
 
             if (_isDefectMaskModified)
             {
+                isAnySaved = true;
                 _isDefectMaskModified = false;
                 _xRecipe.SavePrintTemplate();
             }
 
-            if (prompt)
+            if (_isPropertyModified)
             {
-                VsMessageBox.Info("保存成功.");
+                isAnySaved = true;
+                _isPropertyModified = false;
+                _xInspectX3.Save();
             }
+
+            if (force)
+                VsMessageBox.Info("參數 保存成功.");
+            else if (isAnySaved)
+                VsMessageBox.Info("參數 已經自動保存.");
+        }
+        void CancelAndExit()
+        {
+            // 此功能保留
+            // 目前架構 尚無法完美取消
+            return;
+
+            _isGoldenModified = false;
+            _isQrCodeModified = false;
+            _isLineBorderModified = false;
+            _isDefectMaskModified = false;
+            _isPropertyModified = false;
+            _editorUI.Window?.FindForm()?.Close();
         }
 
         void DfRegion_Add()
@@ -483,14 +519,14 @@ namespace LaserAlignDX.Mvc.Ctrl
             bool flag = dispUI.Enabled;
             dispUI.Enabled = false;
 
-            // 新增 cviBox
+            // 新增 cviMaskBox
             var count = _cviDefectMaskBoxes.Count;
             var rect = new Rectangle(50 + count * 5, 50 + count * 5, 100, 100);
-            var cviDefectMaskBox = new CviRcpBox(Brushes.Blue, 1, 3);
-            cviDefectMaskBox.OnChanged += CviDefectMaskBox_OnChanged;
+            var cviMaskBox = new CviRcpBox(Brushes.Purple, 1, 3) { Box = rect };
+            cviMaskBox.OnChanged += CviDefectMaskBox_OnChanged;
 
-            _cviDefectMaskBoxes.Add(cviDefectMaskBox);
-            imgViewer.AddInteractor(cviDefectMaskBox);
+            _cviDefectMaskBoxes.Add(cviMaskBox);
+            imgViewer.AddInteractor(cviMaskBox);
 
             // 恢復 dispUI 運作
             dispUI.Enabled = flag;
@@ -516,7 +552,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 移除 _cviActiveMaskBox
             imgViewer.RemoveInteractor(_cviActiveMaskBox);
             _cviDefectMaskBoxes.Remove(_cviActiveMaskBox);
-            _cviActiveMaskBox = null;
+            _cviActiveMaskBox = _cviDefectMaskBoxes.Count > 0 ? _cviDefectMaskBoxes[_cviDefectMaskBoxes.Count - 1] : null;
 
             // 恢復 dispUI 運作
             dispUI.Enabled = flag;
@@ -569,14 +605,27 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             return maskRects;
         }
-        void updateGoldenBoxes(bool toRecipe, bool saveToFile = false)
+        void showInteractors(OpSelector selector)
+        {
+            _cviGoldenChipBox.Visible = selector == OpSelector.Golden;
+            _cviQrCodeBox.Visible = selector == OpSelector.QrCode;
+            foreach (var cviBox in _cviLineBorderBoxes)
+                cviBox.Visible = selector == OpSelector.LineBorders;
+        }
+        void updateSubTitle()
+        {
+            string subTitle = GaUtil.GetEnumDescription(_carrierID);
+            int idx = (int)_opSelector;
+            if (0 <= idx && idx < _editorUI.rdoBoxSelectors.Length)
+                subTitle += " : " + _editorUI.rdoBoxSelectors[idx].Text;
+            _editorUI.lblActiveCarrierID.Text = subTitle;
+        }
+        void updateGoldenBoxes(bool toRecipe)
         {
             if (toRecipe)
             {
                 this._xGoldenChipRect = _cviGoldenChipBox.Box;
                 this._xQrCodeRect = _cviQrCodeBox.Box;
-                if (saveToFile)
-                    _xRecipe.SaveCodeTemplate();
             }
             else
             {
@@ -591,7 +640,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _cviQrCodeBox.Box = rect;
             }
         }
-        void updateLineBorderBoxes(bool toRecipe, bool saveToFile = false)
+        void updateLineBorderBoxes(bool toRecipe)
         {
             if (toRecipe)
             {
@@ -600,8 +649,6 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _xRecipe.xLineTop = _cviLineBorderBoxes[i++].Box;
                 _xRecipe.xLineRight = _cviLineBorderBoxes[i++].Box;
                 _xRecipe.xLineBottom = _cviLineBorderBoxes[i++].Box;
-                //if (saveToFile)
-                //    _xRecipe.SaveLinesRegion();
                 _isLineBorderModified = true;
             }
             else
@@ -704,11 +751,11 @@ namespace LaserAlignDX.Mvc.Ctrl
                         if (rect == Rectangle.Empty)
                             continue;
 
-                        var cviBox = new CviRcpBox(Brushes.Blue, 1, 3) { Box = rect };
-                        cviBox.OnChanged += CviDefectMaskBox_OnChanged;
+                        var cviMaskBox = new CviRcpBox(Brushes.Purple, 1, 3) { Box = rect };
+                        cviMaskBox.OnChanged += CviDefectMaskBox_OnChanged;
 
-                        _cviDefectMaskBoxes.Add(cviBox);
-                        imgViewer.AddInteractor(cviBox);
+                        _cviDefectMaskBoxes.Add(cviMaskBox);
+                        imgViewer.AddInteractor(cviMaskBox);
                     }
                 }
                 #endregion
@@ -729,9 +776,11 @@ namespace LaserAlignDX.Mvc.Ctrl
                 // 更新 參數 (_xBmpMask 會接手 bmpMask 生命)
                 _xBmpMask = bmpMask;
                 _xMaskRects = maskRects;
+                _isDefectMaskModified = true;
             }
             else
             {
+                // CleanUp
                 bmpMask?.Dispose();
             }
 
@@ -757,13 +806,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             _editorUI.numBorderSize.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.btnTryScanQrCode.Enabled = _opSelector == OpSelector.QrCode;
         }
-        void showInteractors(OpSelector selector)
-        {
-            _cviGoldenChipBox.Visible = selector == OpSelector.Golden;
-            _cviQrCodeBox.Visible = selector == OpSelector.QrCode;
-            foreach (var cviBox in _cviLineBorderBoxes)
-                cviBox.Visible = selector == OpSelector.LineBorders;
-        }
+
         #endregion
 
         #region AOI_MODEL_FUNCTIONS
@@ -903,11 +946,19 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 目前邊線 用於 黑色背景 比較準確
             using (MvdFindLineClass lineSegFinder = new MvdFindLineClass())
             {
-                lineSegFinder.Background = _xInspectX3.CarrierBackground;
+                lineSegFinder.Background = _xInspectX3.xCarrierBackground;
                 var mvdLine = lineSegFinder.Run(bmpSrc, boxRect, (int)eBorder);
                 resultLines = new[] { mvdLine };
                 return mvdLine != null;
             }
+        }
+        Bitmap cropBitmap(Bitmap bmpSrc, ref Rectangle roiRect)
+        {
+            GaUtil.Clip(ref roiRect, bmpSrc.Size);
+            if (roiRect.Width < 2 || roiRect.Height < 2)
+                return null;
+            var bmp = bmpSrc.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+            return bmp;
         }
         #endregion
     }
