@@ -1,21 +1,42 @@
-﻿using System;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-09-20 重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using LaserAlignDX.OPSpace.RecipeSpace;
+using System;
 using System.Drawing;
 
-namespace LaserAlignDX.OPSpace.RecipeSpace
+
+namespace LaserAlignDX.Mvc.Model.Recipe
 {
     /// <summary>
     /// DTO (Data Transfer Object) 類別
     /// DTO 是標準用詞 請自行查 ChatGPT or DeepSeek
     /// </summary>
-    internal class DtoBmpTemplate : DtoBase, IDisposable
+    public class DtoBmpTemplate : DtoBase, IDisposable
     {
         #region PRIVATE_DATA
         RcpBmpHolder _bmpHolder;
+        string _sectName;
+        string _keyName;
         #endregion
 
-        public DtoBmpTemplate(string name, string ext = ".bmp")
+        public DtoBmpTemplate(string name, string sectName=null, string keyName = null, string ext = ".bmp")
         {
             _bmpHolder = new RcpBmpHolder(name, ext);
+            _sectName = sectName;
+            _keyName = keyName;
         }
         public void Dispose()
         {
@@ -48,10 +69,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         public void LoadRectF(string iniFileName, string sectName, string keyName)
         {
+            normalize(ref sectName, ref keyName);
             RectF = StringtoRectF(ReadINIValue(sectName, keyName, RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), iniFileName));
         }
         public void SaveRectF(string iniFileName, string sectName, string keyName)
         {
+            normalize(ref sectName, ref keyName);
             WriteINIValue(sectName, keyName, RectFtoStringSimple(RectF), iniFileName);
         }
 
@@ -63,5 +86,19 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         {
             _bmpHolder.Save(force);
         }
+
+        #region PRIVATE_FUNCTIONS
+        private void normalize(ref string sectName, ref string keyName)
+        {
+            if (sectName == null)
+                sectName = _sectName;
+            if (keyName == null)
+                keyName = _keyName;
+            if (sectName == null)
+                sectName = _bmpHolder.Name + "_rect";
+            if (keyName == null)
+                keyName = "rect";
+        }
+        #endregion
     }
 }

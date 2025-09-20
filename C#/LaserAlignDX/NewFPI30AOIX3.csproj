@@ -396,17 +396,6 @@
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v25.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\DTO\DtoBase.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\DTO\DtoBmpTemplate.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\DTO\DtoX3Templates.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\DTO\DtoX3Inspection.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\DTO\DtoMeasureSpec.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\Params\RcpFlyAoiParams.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\Params\RcpInspectX3.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\Params\RcpLineScanCalibration.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\Params\RecipeParaGridClass.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\RecipeFPIX3Class.cs" />
-    <Compile Include="GA.mvc\Model\GaRecipes\Supports\RcpBmpHolder.cs" />
     <Compile Include="GA.mvc\Model\JxRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\JxRecipes\Supports\JxMetadataUtil.cs" />
     <Compile Include="GA.mvc\Model\JxRecipes\Supports\CsPropertyMetadataUtil.cs" />
@@ -483,6 +472,7 @@
     <Compile Include="GA\BasicSpace\ParaSpace\MvdFindCircleClass.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\BarcodeAll_MVD.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\ZXingClass.cs" />
+    <Compile Include="GA\BasicSpace\RecipeParaGridClass.cs" />
     <Compile Include="GA\BasicSpace\ShowRectClass.cs" />
     <Compile Include="GA\BasicSpace\TrayClass.cs" />
     <Compile Include="GA\BasicSpace\XinliFindLineClass.cs" />
@@ -646,7 +636,9 @@
     <Compile Include="GA\OPSpace\ChannelBarcodeClass.cs" />
     <Compile Include="GA\OPSpace\MarkItemClass.cs" />
     <Compile Include="GA\OPSpace\ModuleClass.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\RcpBmpHolder.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeBaseClass.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\RecipeFPIX3Class.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeMainX2Class.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeMiniX6Class.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeNeedleClass.cs" />
@@ -1008,7 +1000,9 @@
     <None Include="Resources\next.png" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="GA.mvc\Model\GaRecipes\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)

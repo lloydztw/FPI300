@@ -6,7 +6,6 @@ using JetEazy.Match;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
-using LaserAlignDX.Model.Coords;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -1851,8 +1850,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
             bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", INIFILE) == "1";
+
             MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
             xCarrierBackground = (EdgeBackGroundType)int.Parse(ReadINIValue("Basic", "CarrierBackground", "0", INIFILE));
+
             bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
             bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
             bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
@@ -1894,9 +1895,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), INIFILE);
+
             WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
             WriteINIValue("Basic", "CarrierBackground", ((int)xCarrierBackground).ToString(), INIFILE);
-
             WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive2", (bPositive2 ? "1" : "0"), INIFILE);
@@ -1929,7 +1930,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 i++;
             }
         }
-
     }
 
 

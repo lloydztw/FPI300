@@ -1,14 +1,29 @@
-﻿using System.Drawing;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-09-20 重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace LaserAlignDX.OPSpace.RecipeSpace
+namespace LaserAlignDX.Mvc.Model.Recipe
 {
     /// <summary>
     /// DTO (Data Transfer Object) 類別
     /// DTO 是標準用詞 請自行查 ChatGPT or DeepSeek
     /// </summary>
-    internal abstract class DtoBase
+    public abstract class DtoBase
     {
         #region PRIVATE_MEMBERS
         [DllImport("kernel32")]
@@ -17,6 +32,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
         #endregion
 
+        #region INI_FUNCTIONS
         protected static void WriteINIValue(string section, string key, string value, string filepath)
         {
             WritePrivateProfileString(section, key, value, filepath);
@@ -37,6 +53,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             return retStr;
         }
+        #endregion
 
         #region HELPER_FUNCTIONS
         protected string RecttoStringSimple(Rectangle Rect)

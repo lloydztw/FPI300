@@ -51,6 +51,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             _name = name;
             _ext = ext;
         }
+        public string Name
+        {
+            get => _name;
+        }
         public string Ext
         {
             get { return _ext; }

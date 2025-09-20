@@ -152,6 +152,7 @@ namespace LaserAlignDX.OPSpace
                 mvdFindLineClass = new MvdFindLineClass();
 
             cMvdLineSegmentFsOut[iSideIndex] = null;
+
             if (iSideIndex == 0)
             {
                 mvdFindLineClass.bPositive = xInspect.bPositive0;

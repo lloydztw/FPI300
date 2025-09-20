@@ -1,30 +1,43 @@
-﻿namespace LaserAlignDX.OPSpace.RecipeSpace
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-09-20 重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+
+namespace LaserAlignDX.Mvc.Model.Recipe
 {
     /// <summary>
     /// DTO (Data Transfer Object) 類別
     /// DTO 是標準用詞 請自行查 ChatGPT or DeepSeek
     /// </summary>
-    internal class DtoMeasureSpec : DtoBase
+    public class DtoX3MeasureSpec : DtoBase
     {
-        #region 启用设置
+        // 启用设置
         public bool bOpenLineMeasure { get; set; } = false;
         public bool bCheckInspect { get; set; } = false;
         public bool bCheckMeasureOffset { get; set; } = false;
-        #endregion
 
-        #region 尺寸宽度spec
+        // 尺寸宽度 spec (mm)
         public float mWidthStand { get; set; } = 9f;
         public float mWidthUpper { get; set; } = 0.05f;
         public float mWidthLower { get; set; } = 0.05f;
         public float mHeightStand { get; set; } = 9.9f;
         public float mHeightUpper { get; set; } = 0.05f;
         public float mHeightLower { get; set; } = 0.05f;
-        #endregion
 
-        #region 尺寸偏移spec
+        // 尺寸偏移 spec (mm)
         public float XOffset { get; set; } = 0.05f;
         public float YOffset { get; set; } = 0.05f;
-        #endregion
 
         public override void Load(string INIFILE, string sectNam = null, string keyName = null)
         {

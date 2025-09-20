@@ -3,6 +3,7 @@ using Eazy_Project_III;
 using JetEazy;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Mvc.Model.Recipe;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -14,7 +15,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
     public class InspectX3ParaClass : RecipeBaseClass
     {
         #region PRIVATE_DATA
-        DtoMeasureSpec _spec = new DtoMeasureSpec();
+        DtoX3MeasureSpec _spec = new DtoX3MeasureSpec();
+        DtoX3Inspect _dto = new DtoX3Inspect();
         #endregion
 
         #region SINGLETON
@@ -71,113 +73,192 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [DisplayName("A00.演算法")]
         [TypeConverter(typeof(JzEnumConverter))]
         [Browsable(true)]
-        public MatchAlgorithmEnum xAlgorithm { get; set; } = MatchAlgorithmEnum.GridMatch;
+        public MatchAlgorithmEnum xAlgorithm
+        {
+            get => _dto.xAlgorithm;
+            set => _dto.xAlgorithm = value;
+        }
 
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的格點門限")]
         [DisplayName("A01.格點門限")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
         [Browsable(true)]
-        public int xGridPadThreshold { get; set; } = 0;
+        public int xGridPadThreshold
+        {
+            get => _dto.xGridPadThreshold;
+            set => _dto.xGridPadThreshold = value;
+        }
 
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的相似程度")]
         [DisplayName("A02.相似度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
         [Browsable(true)]
-        public float xTolerance { get; set; } = 0.5f;
+        public float xTolerance
+        {
+            get => _dto.xTolerance;
+            set => _dto.xTolerance = value;
+        }
 
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的允许的角度")]
         [DisplayName("A03.角度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 360, 1f, 2)]
         [Browsable(true)]
-        public float xAngle { get; set; } = 30f;
+        public float xAngle
+        {
+            get => _dto.xAngle;
+            set => _dto.xAngle = value;
+        }
 
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大X方向的像素")]
         [DisplayName("A04.外扩X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
         [Browsable(false)]
-        public int xExtendx { get; set; } = 20;
+        public int xExtendx
+        {
+            get => _dto.xExtendx;
+            set => _dto.xExtendx = value;
+        }
 
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大Y方向的像素")]
         [DisplayName("A05.外扩Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
         [Browsable(false)]
-        public int xExtendy { get; set; } = 20;
+        public int xExtendy
+        {
+            get => _dto.xExtendy;
+            set => _dto.xExtendy = value;
+        }
 
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围内重叠率")]
         [DisplayName("A06.匹配重叠率")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100)]
         [Browsable(true)]
-        public int xMaxOverlap { get; set; } = 80;
+        public int xMaxOverlap
+        {
+            get => _dto.xMaxOverlap;
+            set => _dto.xMaxOverlap = value;
+        }
 
         [CategoryAttribute(_Cat1), DescriptionAttribute("在搜索范围内重合的比例")]
         [DisplayName("A07.格点重叠率")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1)]
         [Browsable(true)]
-        public float xChipOverlap { get; set; } = 0.5f;
+        public float xChipOverlap
+        {
+            get => _dto.xChipOverlap;
+            set => _dto.xChipOverlap = value;
+        }
         #endregion
 
-        #region 找直线的参数
-
+        #region 找直線設定
         const string _Cat2 = "A02.尺寸检测参数设置";
-
         [CategoryAttribute(_Cat2)]
         [DisplayName("A00.載台背景")]
         [TypeConverter(typeof(JzEnumConverter))]
         [Browsable(true)]
-        public EdgeBackGroundType xCarrierBackground { get; set; }
+        public EdgeBackGroundType xCarrierBackground
+        {
+            get => _dto.xCarrierBackground;
+            set => _dto.xCarrierBackground = value;
+        }
 
+        [Browsable(true)]
+        public RectangleF[] xLineBorderRects
+        {
+            get => _dto.xLineBorderRects;
+            set => _dto.xLineBorderRects = value;
+        }
+        #endregion
+
+        #region 舊的找直线的参数
         [CategoryAttribute(_Cat2)]
         [DisplayName("A00.测量方式")]
         [TypeConverter(typeof(JzEnumConverter))]
         [Browsable(false)]
-        public MeasureFindLineType MFLType { get; set; } = MeasureFindLineType.FindLineType_v1;
+        public MeasureFindLineType MFLType
+        {
+            get => _dto.MFLType;
+            set => _dto.MFLType = value;
+        }
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
         [DisplayName("A01.左边查找方向")]
         [Browsable(false)]
-        public bool bPositive0 { get; set; } = true;
+        public bool bPositive0
+        {
+            get => _dto.xPositives[0];
+            set => _dto.xPositives[0] = value;
+        }
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A02.左边极性")]
         [Browsable(false)]
-        public bool bEdgePolarity0 { get; set; } = true;
+        public bool bEdgePolarity0
+        {
+            get => _dto.xEdgePolarities[0];
+            set => _dto.xEdgePolarities[0] = value;
+        }
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
         [DisplayName("A03.上边查找方向")]
         [Browsable(false)]
-        public bool bPositive1 { get; set; } = true;
+        public bool bPositive1
+        {
+            get => _dto.xPositives[1];
+            set => _dto.xPositives[1] = value;
+        }
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A04.上边极性")]
         [Browsable(false)]
-        public bool bEdgePolarity1 { get; set; } = true;
+        public bool bEdgePolarity1
+        {
+            get => _dto.xEdgePolarities[1];
+            set => _dto.xEdgePolarities[1] = value;
+        }
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
         [DisplayName("A05.右边查找方向")]
         [Browsable(false)]
-        public bool bPositive2 { get; set; } = true;
+        public bool bPositive2
+        {
+            get => _dto.xPositives[2];
+            set => _dto.xPositives[2] = value;
+        }
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A06.右边极性")]
         [Browsable(false)]
-        public bool bEdgePolarity2 { get; set; } = true;
+        public bool bEdgePolarity2
+        {
+            get => _dto.xEdgePolarities[2];
+            set => _dto.xEdgePolarities[2] = value;
+        }
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
         [DisplayName("A07.下边查找方向")]
         [Browsable(false)]
-        public bool bPositive3 { get; set; } = true;
+        public bool bPositive3
+        {
+            get => _dto.xPositives[3];
+            set => _dto.xPositives[3] = value;
+        }
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
         [DisplayName("A08.下边极性")]
         [Browsable(false)]
-        public bool bEdgePolarity3 { get; set; } = true;
+        public bool bEdgePolarity3
+        {
+            get => _dto.xEdgePolarities[3];
+            set => _dto.xEdgePolarities[3] = value;
+        }
         #endregion
 
         #region 缺陷检测设置
@@ -189,49 +270,87 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
         [Browsable(true)]
-        public int xThresholdValue { get; set; } = 128;
+        public int xThresholdValue
+        {
+            get => _dto.xThresholdValue;
+            set => _dto.xThresholdValue = value;
+        }
 
         [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
         [DisplayName("A01.缺陷宽度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(true)]
-        public float xCharWidth { get; set; } = 15.1f;
+        public float xCharWidth
+        {
+            get => _dto.xCharWidth;
+            set => _dto.xCharWidth = value;
+        }
+
         [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
         [DisplayName("A02.缺陷高度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(true)]
-        public float xCharHeight { get; set; } = 15.1f;
+        public float xCharHeight
+        {
+            get => _dto.xCharHeight;
+            set => _dto.xCharHeight = value;
+        }
+
         [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
         [DisplayName("A03.缺陷面积")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(true)]
-        public float xCharArea { get; set; } = 30.1f;
+        public float xCharArea
+        {
+            get => _dto.xCharArea;
+            set => _dto.xCharArea = value;
+        }
+
         [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
         [DisplayName("A04.背景缺陷宽度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(false)]
-        public float xBackgroudWidth { get; set; } = 15.1f;
+        public float xBackgroudWidth
+        {
+            get => _dto.xBackgroudWidth;
+            set => _dto.xBackgroudArea = value;
+        }
+
         [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
         [DisplayName("A05.背景缺陷高度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(false)]
-        public float xBackgroudHeight { get; set; } = 15.1f;
+        public float xBackgroudHeight
+        {
+            get => _dto.xBackgroudHeight;
+            set => _dto.xBackgroudHeight = value;
+        }
+
         [CategoryAttribute(_Cat3), DescriptionAttribute("单位pixel")]
         [DisplayName("A06.背景缺陷面积")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(false)]
-        public float xBackgroudArea { get; set; } = 30.1f;
+        public float xBackgroudArea
+        {
+            get => _dto.xBackgroudArea;
+            set => _dto.xBackgroudArea = value;
+        }
 
         [Browsable(false)]
-        public int RoiCount { get; set; } = 0;
+        public int RoiCount => _dto.RoiCount;
         [Browsable(false)]
-        public List<RectangleF> rectangles { get; set; } = new List<RectangleF>();
+        public List<RectangleF> rectangles
+        {
+            get => _dto.xMaskRects;
+            set => _dto.xMaskRects = value;
+        }
+
         #endregion
 
         #region 尺寸宽度spec
@@ -333,101 +452,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         public override void Load(bool eCancel = false)
         {
-            xAlgorithm = (MatchAlgorithmEnum)int.Parse(ReadINIValue("Basic", "xAlgorithm", "0", INIFILE));
-            xTolerance = float.Parse(ReadINIValue("Basic", "xTolerance", "0.5", INIFILE));
-            xAngle = float.Parse(ReadINIValue("Basic", "xAngle", "30", INIFILE));
-            xExtendx = int.Parse(ReadINIValue("Basic", "xExtendx", "20", INIFILE));
-            xExtendy = int.Parse(ReadINIValue("Basic", "xExtendy", "20", INIFILE));
-            xMaxOverlap = int.Parse(ReadINIValue("Basic", "xMaxOverlap", "80", INIFILE));
-            xChipOverlap = float.Parse(ReadINIValue("Basic", "xChipOverlap", "0.5", INIFILE));
-            xGridPadThreshold = int.Parse(ReadINIValue("Basic", "xGridPadThreshold", "0", INIFILE));
-
-            bCheckInspect = ReadINIValue("Inspect", "bCheckInspect", "1", INIFILE) == "1";
-            xThresholdValue = int.Parse(ReadINIValue("Inspect", "xThresholdValue", "128", INIFILE));
-            xCharWidth = float.Parse(ReadINIValue("Inspect", "xCharWidth", "15.1", INIFILE));
-            xCharHeight = float.Parse(ReadINIValue("Inspect", "xCharHeight", "15.1", INIFILE));
-            xCharArea = float.Parse(ReadINIValue("Inspect", "xCharArea", "30.1", INIFILE));
-            xBackgroudWidth = float.Parse(ReadINIValue("Inspect", "xBackgroudWidth", "15.1", INIFILE));
-            xBackgroudHeight = float.Parse(ReadINIValue("Inspect", "xBackgroudHeight", "15.1", INIFILE));
-            xBackgroudArea = float.Parse(ReadINIValue("Inspect", "xBackgroudArea", "30.1", INIFILE));
-
-            RoiCount = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
-            int i = 0;
-            rectangles.Clear();
-            while (i < RoiCount)
-            {
-                RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
-                rectangles.Add(rectf);
-
-                i++;
-            }
-
-            bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
-            bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", INIFILE) == "1";
-            MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
-            xCarrierBackground = (EdgeBackGroundType)int.Parse(ReadINIValue("Basic", "CarrierBackground", "0", INIFILE));
-            bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
-            bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
-            bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
-            bPositive3 = ReadINIValue("Basic", "bPositive3", "1", INIFILE) == "1";
-            bEdgePolarity0 = ReadINIValue("Basic", "bEdgePolarity0", "1", INIFILE) == "1";
-            bEdgePolarity1 = ReadINIValue("Basic", "bEdgePolarity1", "1", INIFILE) == "1";
-            bEdgePolarity2 = ReadINIValue("Basic", "bEdgePolarity2", "1", INIFILE) == "1";
-            bEdgePolarity3 = ReadINIValue("Basic", "bEdgePolarity3", "1", INIFILE) == "1";
-
-            mWidthStand = float.Parse(ReadINIValue("Basic", "mWidthStand", "9", INIFILE));
-            mWidthUpper = float.Parse(ReadINIValue("Basic", "mWidthUpper", "0.05", INIFILE));
-            mWidthLower = float.Parse(ReadINIValue("Basic", "mWidthLower", "0.05", INIFILE));
-            mHeightStand = float.Parse(ReadINIValue("Basic", "mHeightStand", "9.9", INIFILE));
-            mHeightUpper = float.Parse(ReadINIValue("Basic", "mHeightUpper", "0.05", INIFILE));
-            mHeightLower = float.Parse(ReadINIValue("Basic", "mHeightLower", "0.05", INIFILE));
-            XOffset = float.Parse(ReadINIValue("Basic", "XOffset", "0.05", INIFILE));
-            YOffset = float.Parse(ReadINIValue("Basic", "YOffset", "0.05", INIFILE));
-
+            _spec.Load(INIFILE);
+            _dto.Load(INIFILE);
         }
         
         public override void Save()
         {
-            WriteINIValue("Basic", "xAlgorithm", ((int)xAlgorithm).ToString(), INIFILE);
-            WriteINIValue("Basic", "xTolerance", xTolerance.ToString(), INIFILE);
-            WriteINIValue("Basic", "xAngle", xAngle.ToString(), INIFILE);
-            WriteINIValue("Basic", "xExtendx", xExtendx.ToString(), INIFILE);
-            WriteINIValue("Basic", "xExtendy", xExtendy.ToString(), INIFILE);
-            WriteINIValue("Basic", "xMaxOverlap", xMaxOverlap.ToString(), INIFILE);
-            WriteINIValue("Basic", "xChipOverlap", xChipOverlap.ToString(), INIFILE);
-            WriteINIValue("Basic", "xGridPadThreshold", xGridPadThreshold.ToString(), INIFILE);
-
-            WriteINIValue("Inspect", "bCheckInspect", (bCheckInspect ? "1" : "0"), INIFILE);
-            WriteINIValue("Inspect", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xCharWidth", xCharWidth.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xCharHeight", xCharHeight.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xCharArea", xCharArea.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xBackgroudWidth", xBackgroudWidth.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xBackgroudHeight", xBackgroudHeight.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xBackgroudArea", xBackgroudArea.ToString(), INIFILE);
-
-            WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
-            WriteINIValue("Basic", "CarrierBackground", ((int)xCarrierBackground).ToString(), INIFILE);
-
-            WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bPositive2", (bPositive2 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bPositive3", (bPositive3 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity0", (bEdgePolarity0 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity1", (bEdgePolarity1 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity2", (bEdgePolarity2 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity3", (bEdgePolarity3 ? "1" : "0"), INIFILE);
-
-            WriteINIValue("Basic", "mWidthStand", mWidthStand.ToString(), INIFILE);
-            WriteINIValue("Basic", "mWidthUpper", mWidthUpper.ToString(), INIFILE);
-            WriteINIValue("Basic", "mWidthLower", mWidthLower.ToString(), INIFILE);
-            WriteINIValue("Basic", "mHeightStand", mHeightStand.ToString(), INIFILE);
-            WriteINIValue("Basic", "mHeightUpper", mHeightUpper.ToString(), INIFILE);
-            WriteINIValue("Basic", "mHeightLower", mHeightLower.ToString(), INIFILE);
-            WriteINIValue("Basic", "XOffset", XOffset.ToString(), INIFILE);
-            WriteINIValue("Basic", "YOffset", YOffset.ToString(), INIFILE);
+            _spec.Save(INIFILE);
+            _dto.Save(INIFILE);
         }
 
         /// <summary>
@@ -435,16 +467,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// </summary>
         internal void SaveRoi()
         {
-            RoiCount = rectangles.Count;
-            WriteINIValue("Inspect", "RoiCount", RoiCount.ToString(), INIFILE);
-            int i = 0;
-            while (i < RoiCount)
-            {
-                WriteINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(rectangles[i]), INIFILE);
-
-                i++;
-            }
+            _dto.SaveMaskRects(INIFILE);
         }
 
+        internal void SaveLineBorderRects()
+        {
+            _dto.SaveLineBorderRects(INIFILE);
+        }
     }
 }
