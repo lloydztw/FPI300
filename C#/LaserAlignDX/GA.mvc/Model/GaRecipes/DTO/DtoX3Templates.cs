@@ -16,9 +16,17 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
     /// </summary>
     internal class DtoX3Templates : DtoBase, IDisposable
     {
-        public DtoBmpTemplate _goldenRegionTemplate;
-        public DtoBmpTemplate _goldenChipTemplate;
-        public DtoBmpTemplate _qrCodeTemplate;
+        public DtoBmpTemplate _goldenRegionTemplate =  new DtoBmpTemplate("bmpPrintTemplate");
+        public DtoBmpTemplate _goldenChipTemplate = new DtoBmpTemplate("bmpDefectTemplate");
+        public DtoBmpTemplate _qrCodeTemplate = new DtoBmpTemplate("bmpCode");
+
+        public DtoX3Templates(CarrierEnum carrierID)
+        {
+            string tag = carrierID == CarrierEnum.C1 ? "" : $"@{carrierID}";
+            _goldenRegionTemplate = new DtoBmpTemplate("bmpPrintTemplate" + tag);
+            _goldenChipTemplate = new DtoBmpTemplate("bmpDefectTemplate" + tag);
+            _qrCodeTemplate = new DtoBmpTemplate("bmpCode" + tag);
+        }
 
         public void Dispose()
         {
@@ -30,10 +38,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             _qrCodeTemplate = null;
                 
         }
-        public override void Load(string INIFILE, string sectNam = null, string keyName = null)
+        public override void Load(string iniFile, string sectNam = null, string keyName = null)
         {
         }
-        public override void Save(string INIFILE, string sectNam = null, string keyName = null)
+        public override void Save(string iniFile, string sectNam = null, string keyName = null)
         {
             
         }

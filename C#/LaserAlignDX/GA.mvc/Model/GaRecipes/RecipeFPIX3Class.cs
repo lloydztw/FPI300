@@ -174,6 +174,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// 實際上就是 Golden Chip Template
         /// </summary>
         public Bitmap bmpDefectTemplate = new Bitmap(1, 1);
+        /// <summary>
+        /// 瑕疵檢查的 Mask
+        /// </summary>
         public Bitmap bmpprintmask = new Bitmap(1, 1);
         void disposeDefectInspectTemplate()
         {

@@ -320,7 +320,7 @@ namespace LaserAlignDX.AoiModel.V25
             _TM.Reset();
 
             // 線掃的巨圖
-            Bitmap bmpInputImage = null;
+            Bitmap bmpFullfov = null;
 
             try
             {
@@ -346,19 +346,19 @@ namespace LaserAlignDX.AoiModel.V25
                 // 取得線掃巨圖: 轉換 CMvdImage (cMvdInput) 成 Bitmap 
                 // bmpInputImage = GaImageUtil.CMvdImageToBitmap(cMvdInput);
                 // 2025-08-28 LETIAN: 巨圖統一由 TravellerBigImagesHolder 管理其生命週期
-                bmpInputImage = LineScanCamImageHolder.PeekBitmap();
+                bmpFullfov = LineScanCamImageHolder.PeekBitmap();
                 _TM.Trace("_Inspect001 : CMvdImage To Bitmap 完成.");
 
                 // 晶粒定位 與 量測
-                _Inspect001_Chip_Location_And_Measurement(bmpInputImage, imgPath, out string debugCellCenterStr);
+                _Inspect001_Chip_Location_And_Measurement(bmpFullfov, imgPath, out string debugCellCenterStr);
                 _TM.Trace("_Inspect001 : 晶粒定位 & 量測 完成!");
 
                 // 读码测试
-                _Inspect001_QRCode(bmpInputImage);
+                _Inspect001_QRCode(bmpFullfov);
                 _TM.Trace("_Inspect001 : QRCode 完成!");
 
                 // 異步輸出 Debug 數據
-                _Inspect001_Async_SaveDebugData(bmpInputImage, debugCellCenterStr, imgPath);
+                _Inspect001_Async_SaveDebugData(bmpFullfov, debugCellCenterStr, imgPath);
                 
                 // PASS / NG
                 m_IsPass = _Inpsect001_Check_TotalPass();
@@ -402,7 +402,7 @@ namespace LaserAlignDX.AoiModel.V25
         /// LETIAN: 晶粒定位 與 尺寸量測 
         /// </summary>
         private void _Inspect001_Chip_Location_And_Measurement(
-                            Bitmap bmpInputImage,
+                            Bitmap bmpFullfov,
                             string imgPath,
                             out string debugCellCenterStr)
         {
@@ -411,7 +411,7 @@ namespace LaserAlignDX.AoiModel.V25
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
             int N_GROUPS = MvdCompositeChipMatcher.N_CHANNLS;
 
-            var groups = GaCellsGroup.CollectGroups(N_GROUPS, xRecipe, bmpInputImage);
+            var groups = GaCellsGroup.CollectGroups(N_GROUPS, xRecipe, bmpFullfov);
             string[] debugStrs = new string[groups.Length];
 
             _InstanceBoxOverlapTools(N_GROUPS);
@@ -1236,7 +1236,7 @@ namespace LaserAlignDX.AoiModel.V25
         /// LETIAN: 读码测试 搬移至此.
         /// caller 負責 bmpInputImage 生命
         /// </summary>
-        private void _Inspect001_QRCode(Bitmap bmpInputImage)
+        private void _Inspect001_QRCode(Bitmap bmpFullfov)
         {
             if (m_QrUsed || xInspect.bCheckInspect)
             {
@@ -1244,38 +1244,50 @@ namespace LaserAlignDX.AoiModel.V25
                 {
                     if (cell.ByPass && !INI.Instance.IsForceInspect)
                         continue;
+
                     if (cell.inspectReason == InspectReason.INS_ALIGNERR)
                         continue;
 
-                    //原始模板的大小
-                    RectangleF templaterectf = new RectangleF(0, 0, xRecipe.bmpprinttemplate.Width, xRecipe.bmpprinttemplate.Height);
+                    // Golden Region Size
+                    var regionSize = xRecipe.bmpprinttemplate.Size;
 
-                    //定位完成后裁切位置
-                    RectangleF _crop = new RectangleF(
-                        cell.DrawResultRectF().CenterX - templaterectf.Width / 2,
-                        cell.DrawResultRectF().CenterY - templaterectf.Height / 2,
-                        templaterectf.Width,
-                        templaterectf.Height);
+                    // 定位完成后裁切位置
+                    // RectangleF _crop = new RectangleF(
+                    //    cell.DrawResultRectF().CenterX - regionSize.Width / 2,
+                    //    cell.DrawResultRectF().CenterY - regionSize.Height / 2,
+                    //    regionSize.Width,
+                    //    regionSize.Height);
+
+                    var mvdRect = cell.DrawResultRectF();
+                    var regionRoi = JetEazy.Qcvt.CreateCenterRect(mvdRect.CenterX, mvdRect.CenterY, regionSize.Width, regionSize.Height);
 
                     if (xInspect.bCheckInspect)
                     {
                         try
                         {
-                            RectangleF _cropDefect = new RectangleF(
-                                xRecipe.xRegionTrain.X + _crop.X,
-                                xRecipe.xRegionTrain.Y + _crop.Y,
-                                xRecipe.xRegionTrain.Width,
-                                xRecipe.xRegionTrain.Height);
+                            //RectangleF _cropDefect = new RectangleF(
+                            //    xRecipe.xRegionTrain.X + regionRoi.X,
+                            //    xRecipe.xRegionTrain.Y + regionRoi.Y,
+                            //    xRecipe.xRegionTrain.Width,
+                            //    xRecipe.xRegionTrain.Height);
+                            //cell.bmpItemRun?.Dispose();
+                            //cell.bmpItemRun = bmpFullfov.Clone(_cropDefect, PixelFormat.Format8bppIndexed);
+                            //cell.bmpItemMask?.Dispose();
+                            //cell.bmpItemMask = xRecipe.bmpprintmask.Clone(
+                            //    new Rectangle(0, 0, xRecipe.bmpprintmask.Width, xRecipe.bmpprintmask.Height),
+                            //    PixelFormat.Format8bppIndexed);
+                            //cell.DetectDefects(xRecipe.bmpDefectTemplate, cell.bmpItemRun, cell.bmpItemMask);
+                            
+                            var bmpTemplate = xRecipe.bmpDefectTemplate;
+                            var bmpMask = xRecipe.bmpprintmask;
+                            var roi = xRecipe.xRegionTrain;
+                            roi.X += regionRoi.X;
+                            roi.Y += regionRoi.Y;
 
-                            cell.bmpItemRun?.Dispose();
-                            cell.bmpItemRun = bmpInputImage.Clone(_cropDefect, PixelFormat.Format8bppIndexed);
-
-                            cell.bmpItemMask?.Dispose();
-                            cell.bmpItemMask = xRecipe.bmpprintmask.Clone(
-                                new Rectangle(0, 0, xRecipe.bmpprintmask.Width, xRecipe.bmpprintmask.Height),
-                                PixelFormat.Format8bppIndexed);
-
-                            cell.DetectDefects(xRecipe.bmpDefectTemplate, cell.bmpItemRun, cell.bmpItemMask);
+                            using (var bmpRun = bmpFullfov.Clone(roi, PixelFormat.Format8bppIndexed))
+                            {
+                                cell.DetectDefects(bmpTemplate, bmpRun, bmpMask);
+                            }
                         }
                         catch(Exception ex)
                         {
@@ -1288,15 +1300,22 @@ namespace LaserAlignDX.AoiModel.V25
                     {
                         try
                         {
-                            RectangleF _cropCode = new RectangleF(
-                                xRecipe.xRectCodeRegion.X + _crop.X,
-                                xRecipe.xRectCodeRegion.Y + _crop.Y,
-                                xRecipe.xRectCodeRegion.Width,
-                                xRecipe.xRectCodeRegion.Height);
+                            //RectangleF _cropCode = new RectangleF(
+                            //    xRecipe.xRectCodeRegion.X + regionRoi.X,
+                            //    xRecipe.xRectCodeRegion.Y + regionRoi.Y,
+                            //    xRecipe.xRectCodeRegion.Width,
+                            //    xRecipe.xRectCodeRegion.Height);
+                            //cell.bmpItemCodeRun?.Dispose();
+                            //cell.bmpItemCodeRun = bmpFullfov.Clone(_cropCode, PixelFormat.Format8bppIndexed);
 
-                            cell.bmpItemCodeRun?.Dispose();
-                            cell.bmpItemCodeRun = bmpInputImage.Clone(_cropCode, PixelFormat.Format8bppIndexed);
-                            cell.DeCode2D(cell.bmpItemCodeRun, _cropCode.Location, m_QrJudged);
+                            var roi = xRecipe.xRectCodeRegion;
+                            roi.X += regionRoi.X;
+                            roi.Y += regionRoi.Y;
+                            using (var bmpRun = bmpFullfov.Clone(roi, PixelFormat.Format8bppIndexed))
+                            {
+                                //cell.DeCode2D(cell.bmpItemCodeRun, _cropCode.Location, m_QrJudged);
+                                cell.DeCode2D(bmpRun, roi.Location, m_QrJudged);
+                            }
                         }
                         catch (Exception ex)
                         {
