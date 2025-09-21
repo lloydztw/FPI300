@@ -30,7 +30,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         #region EXTERNAL_PATH_PROVIDER_由外部提供共同的資料夾名稱
         internal static Func<string> CommonPathFunc;
-        string CommonPath
+        internal static string CommonPath
         {
             get
             {
@@ -107,6 +107,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             return holder?.Peek();
         }
 
+        //internal static Bitmap LoadRecipeImage(string name, string ext = null)
+        //{
+        //    return loadImage(name, ext);
+        //}
+
         #region PRIVATE_FUNCTIONS
         bool checkExiting(Bitmap bmp)
         {
@@ -123,7 +128,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 return false;
             }
         }
-        Bitmap loadImage(string name, string assignedExt = null)
+        static Bitmap loadImage(string name, string assignedExt = null)
         {
             // 如果沒有指定, 優先載入 ".jpg" 其次 ".bmp"
             var exts = (assignedExt == null) ? 
@@ -138,23 +143,24 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                     var newBmp = GaImageUtil.LoadBigImage(fileName);
                     if (newBmp != null)
                     {
-                        GaUtil.LOG($"RcpBmp [{_name}] 載入 {fileName}");
-                        autoChangeToJpg(newBmp, fileName);
+                        GaUtil.LOG($"RcpBmp [{name}] 載入 {fileName}");
+                        if (assignedExt == null)
+                            autoChangeToJpg(newBmp, fileName);
                     }
                     return newBmp;
                 }
             }
             return null;
         }
-        void saveImage(Bitmap bmp, string name, string ext = null)
+        static void saveImage(Bitmap bmp, string name, string ext = null)
         {
             if (ext == null)
                 ext = ".jpg";
             string fileName = System.IO.Path.Combine(CommonPath, name + ext);
             GaImageUtil.SaveBigImage(fileName, bmp);
-            GaUtil.LOG($"RcpBmp [{_name}] 寫入 {fileName}");
+            GaUtil.LOG($"RcpBmp [{name}] 寫入 {fileName}");
         }
-        void autoChangeToJpg(Bitmap bmp, string srcFileName)
+        static void autoChangeToJpg(Bitmap bmp, string srcFileName)
         {
             if (!OPT_AUTO_CHANGE_BMP_TO_JPG || bmp == null)
                 return;

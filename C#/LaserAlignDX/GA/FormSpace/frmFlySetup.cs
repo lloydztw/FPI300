@@ -111,6 +111,7 @@ namespace LaserAlignDX.FormSpace
         }
         private void FrmFlySetup_FormClosed(object sender, FormClosedEventArgs e)
         {
+            xRecipe.ReleaseBmpOrgFly(true);
             IxFlyAreaCam.LineTriggerAction -= IxFlyAreaCam_LineTriggerAction;
             Traveller106.Universal.IsOpenFlyForm = false;
         }

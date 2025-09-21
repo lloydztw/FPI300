@@ -24,25 +24,28 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     /// DTO (Data Transfer Object) 類別
     /// DTO 是標準用詞 請自行查 ChatGPT or DeepSeek
     /// </summary>
-    public class DtoBmpTemplate : DtoBase, IDisposable
+    public class DtoBmpTemplateHolder : DtoBase, IDisposable
     {
         #region PRIVATE_DATA
-        Bitmap _templateBmp;
-        string _templateName;
+        RcpBmpHolder _bmpHolder;
+        Bitmap _bmp;
+        string _name;
         string _sectName;
         string _keyName;
         #endregion
 
-        public DtoBmpTemplate(string name, string sectName = null, string keyName = null, string ext = ".bmp")
+        public static string CommonPath = "";
+
+        public DtoBmpTemplateHolder(string name, string sectName=null, string keyName = null, string ext = ".bmp")
         {
-            _templateName = name;
+            //_bmpHolder = new RcpBmpHolder(name, ext);
+            _name = name;
             _sectName = sectName;
             _keyName = keyName;
         }
         public void Dispose()
         {
-            _templateBmp?.Dispose();
-            _templateBmp = null;
+            _bmpHolder?.Dispose();
         }
 
         /// <summary>
@@ -50,16 +53,8 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         /// </summary>
         public Bitmap Bmp
         {
-            get
-            {
-                if (_templateBmp == null)
-                    LoadBmp(true);
-                return _templateBmp;
-            }
-            set
-            {
-                _templateBmp = value;
-            }
+            get => safeGetBitmap();
+            set => _bmpHolder.TakeOver(value);
         }
         public RectangleF RectF
         {
@@ -93,39 +88,17 @@ namespace LaserAlignDX.Mvc.Model.Recipe
 
         public void LoadBmp(bool force = false)
         {
-            if (_templateBmp == null || force)
-            {
-                // 利用 RcpBmpHolder 來加載圖檔
-                using (var holder = new RcpBmpHolder(_templateName, ".bmp"))
-                {
-                    var newBmp = (Bitmap)holder.Peek()?.Clone();
-                    if (newBmp == null)
-                        newBmp = new Bitmap(100, 100, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-                    var old = _templateBmp;
-                    _templateBmp = newBmp;
-                    old?.Dispose();
-                }
-            }
+            _bmpHolder.Load(force);
         }
-        public void SaveBmp()
+        public void SaveBmp(bool force = false)
         {
-            if (_templateBmp != null)
-            {
-                // 利用 RcpBmpHolder 來保存圖檔
-                using (var holder = new RcpBmpHolder(_templateName, ".bmp"))
-                {
-                    holder.TakeOver((Bitmap)_templateBmp.Clone());
-                    holder.Save(true);
-                }
-            }
+            _bmpHolder.Save(force);
         }
 
         #region PRIVATE_FUNCTIONS
         private Bitmap safeGetBitmap()
         {
-            if (_templateBmp == null)
-                LoadBmp(true);
-            return _templateBmp;
+
         }
         private void normalize(ref string sectName, ref string keyName)
         {
@@ -134,7 +107,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             if (keyName == null)
                 keyName = _keyName;
             if (sectName == null)
-                sectName = _templateName + "_sect";
+                sectName = _bmpHolder.Name + "_rect";
             if (keyName == null)
                 keyName = "rect";
         }
