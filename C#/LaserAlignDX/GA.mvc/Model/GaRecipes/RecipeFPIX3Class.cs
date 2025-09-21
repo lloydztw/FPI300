@@ -133,7 +133,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region GOLDEN_REGION_TEMPLATE_晶粒區域樣本
+        #region 模板區_GOLDEN_REGION_TEMPLATE_晶粒區域樣本
         /// <summary>
         /// Golden Region Cell (晶粒區域粗框)
         /// </summary>
@@ -142,13 +142,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// Golden Region Bitmap (晶粒區域粗框)
         /// </summary>
         public Bitmap bmpprinttemplate = new Bitmap(1, 1);
-        /// <summary>
-        /// Golden Chip Rect
-        /// 更精確(內縮)的晶粒矩形區域
-        /// 位於 Golden Region (xRectRegionPrint) 之內
-        /// 相對於 xRectRegionPrint 的左上角為零點
-        /// </summary>
-        public RectangleF xRegionTrain = new RectangleF(0, 0, 100, 100);
         void disposeGoldenRegionTemplate()
         {
             bmpcodetemplate?.Dispose();
@@ -156,9 +149,22 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region DEFECT_INSPECT_TEMPLATE_瑕疵檢所用到的樣本
-        public Bitmap bmpprintmask = new Bitmap(1, 1);
+        #region 模板區_DEFECT_INSPECT_TEMPLATE_瑕疵檢所用到的樣本
+        /// <summary>
+        /// Golden Chip Rect
+        /// 更精確(內縮)的晶粒矩形區域
+        /// 位於 Golden Region (xRectRegionPrint) 之內
+        /// 相對於 xRectRegionPrint 的左上角為零點
+        /// </summary>
+        public RectangleF xRegionTrain = new RectangleF(0, 0, 100, 100);
+        /// <summary>
+        /// 這個其實就是 Golden Chip Template Bitmap
+        /// </summary>
         public Bitmap bmpDefectTemplate = new Bitmap(1, 1);
+        /// <summary>
+        /// Mask Bitmap
+        /// </summary>
+        public Bitmap bmpprintmask = new Bitmap(1, 1);
         void disposeDefectInspectTemplate()
         {
             this.bmpprintmask?.Dispose();
@@ -168,8 +174,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region QR_CODE_TEMPLATE_二維碼
+        #region 模板區_QR_CODE_TEMPLATE_二維碼
+        /// <summary>
+        /// 二維碼框選區
+        /// </summary>
         public RectangleF xRectCodeRegion = new RectangleF(0, 0, 100, 100);
+        /// <summary>
+        /// 二維碼影像樣本
+        /// </summary>
         public Bitmap bmpcodetemplate = new Bitmap(1, 1);
         void disposeCodeTemplate()
         {
@@ -178,7 +190,17 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region LINE_BORDER_BOXES_邊線區塊_手拉框
+        #region 模板區_FLY_CAMERA_TEMPLATE_飛拍樣本
+        public RectangleF xRectRegionPrintFly = new RectangleF(0, 0, 100, 100);
+        public Bitmap bmpprintFlytemplate = new Bitmap(1, 1);
+        void disposeFlyCamTemplate()
+        {
+            this.bmpprintFlytemplate?.Dispose();
+            this.bmpprintFlytemplate = null;
+        }
+        #endregion
+
+        #region 邊線區塊_LINE_BORDER_BOXES_手拉框
         /// <summary>
         /// 邊線框(左)
         /// </summary>
@@ -195,21 +217,26 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// 邊線框(下)
         /// </summary>
         public RectangleF xLineBottom = new RectangleF(0, 0, 100, 100);
-        #endregion
 
-        #region FLY_CAMERA_TEMPLATE_飛拍樣本
-        public RectangleF xRectRegionPrintFly = new RectangleF(0, 0, 100, 100);
-        public Bitmap bmpprintFlytemplate = new Bitmap(1, 1);
-        void disposeFlyCamTemplate()
+        internal void LoadLineBorderRects()
         {
-            this.bmpprintFlytemplate?.Dispose();
-            this.bmpprintFlytemplate = null;
+            xLineLeft = StringtoRectF(ReadINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            xLineTop = StringtoRectF(ReadINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            xLineRight = StringtoRectF(ReadINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            xLineBottom = StringtoRectF(ReadINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+        }
+        public void SaveLineBorderRects()
+        {
+            WriteINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(xLineLeft), INIFILE);
+            WriteINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(xLineTop), INIFILE);
+            WriteINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(xLineRight), INIFILE);
+            WriteINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(xLineBottom), INIFILE);
         }
         #endregion
 
         public string xLotNoStr = "NONE";
 
-        #region 參數區_GRID_PARAMS
+        #region 參數區_PARA_GRID
         // 以下成員, 是讓 RecipeParaGridClass 來進行 ini 存取 
         internal int xRow = 1;
         internal int xColumn = 1;
@@ -235,7 +262,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public float xRealOffsetY = 1;
         #endregion
 
-        #region 參數區_CAM_GRIDS
+        #region 參數區_LT_CAM_GRIDS
         public EzBlocsGrid xCamGrid1 = null;
         public EzBlocsGrid xCamGrid2 = null;
         void loadCamGrids(CarrierEnum carrierID, out EzBlocsGrid grid)
@@ -409,7 +436,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             FlyAoiParams.Save();
         }
 
-        #region 局部保存子項參數
+        #region 子項參數_保存函式_舊接口
         /// <summary>
         /// 保存 Golden Region, Mask, and QRCode templates
         /// </summary>
@@ -423,7 +450,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //bmpprintmask.Save(bmpprintmaskpath, System.Drawing.Imaging.ImageFormat.Bmp);
             saveImage(bmpprintmask, "bmpprintmask.bmp");
             //InspectX3ParaClass.Instance.SaveRoi();
-            this.InspectParams.SaveRoi();
+            this.InspectParams.SaveMaskRects();
             SaveCodeTemplate();
         }
         /// <summary>
@@ -465,10 +492,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// </summary>
         public void SaveLinesRegion()
         {
-            WriteINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(xLineLeft), INIFILE);
-            WriteINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(xLineTop), INIFILE);
-            WriteINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(xLineRight), INIFILE);
-            WriteINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(xLineBottom), INIFILE);
+            //WriteINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(xLineLeft), INIFILE);
+            //WriteINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(xLineTop), INIFILE);
+            //WriteINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(xLineRight), INIFILE);
+            //WriteINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(xLineBottom), INIFILE);
+            SaveLineBorderRects();
         }
         /// <summary>
         /// 保存 LotNo
@@ -1461,8 +1489,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(false)]
         public float xBackgroudArea { get; set; } = 30.1f;
 
+        /// <summary>
+        /// Mask Rectangles 的數量
+        /// </summary>
         [Browsable(false)]
-        public int RoiCount { get; set; } = 0;
+        public int RoiCount => rectangles.Count;
+        /// <summary>
+        /// Mask Rectangles
+        /// </summary>
         [Browsable(false)]
         public List<RectangleF> rectangles { get; set; } = new List<RectangleF>();
 
@@ -1556,16 +1590,15 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xBackgroudHeight = float.Parse(ReadINIValue("Inspect", "xBackgroudHeight", "15.1", INIFILE));
             xBackgroudArea = float.Parse(ReadINIValue("Inspect", "xBackgroudArea", "30.1", INIFILE));
 
-            RoiCount = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
-            int i = 0;
-            rectangles.Clear();
-            while (i < RoiCount)
-            {
-                RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
-                rectangles.Add(rectf);
-
-                i++;
-            }
+            //RoiCount = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
+            //int i = 0;
+            //rectangles.Clear();
+            //while (i < RoiCount)
+            //{
+            //    RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
+            //    rectangles.Add(rectf);
+            //    i++;
+            //}
 
             bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
             bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", INIFILE) == "1";
@@ -1591,6 +1624,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             XOffset = float.Parse(ReadINIValue("Basic", "XOffset", "0.05", INIFILE));
             YOffset = float.Parse(ReadINIValue("Basic", "YOffset", "0.05", INIFILE));
 
+            LoadMaskRects();
         }
         public override void Save()
         {
@@ -1635,18 +1669,28 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "XOffset", XOffset.ToString(), INIFILE);
             WriteINIValue("Basic", "YOffset", YOffset.ToString(), INIFILE);
 
+            //>>> SaveMaskRects();
         }
 
-        public void SaveRoi()
+        internal void LoadMaskRects()
         {
-            RoiCount = rectangles.Count;
-            WriteINIValue("Inspect", "RoiCount", RoiCount.ToString(), INIFILE);
-            int i = 0;
-            while (i < RoiCount)
+            var maskRects = new List<RectangleF>();
+            int count = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
+            for (int i = 0; i < count; i++)
             {
-                WriteINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(rectangles[i]), INIFILE);
-
-                i++;
+                RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
+                maskRects.Add(rectf);
+            }
+            this.rectangles = maskRects;
+        }
+        internal void SaveMaskRects()
+        {
+            var maskRects = this.rectangles;
+            int count = maskRects != null ? maskRects.Count : 0;
+            WriteINIValue("Inspect", "RoiCount", count.ToString(), INIFILE);
+            for (int i = 0; i < count; i++)
+            {
+                WriteINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(maskRects[i]), INIFILE);
             }
         }
     }
