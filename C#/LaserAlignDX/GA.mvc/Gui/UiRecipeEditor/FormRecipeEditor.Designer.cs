@@ -227,7 +227,7 @@
             // 
             // btnPickGoldenRegion
             // 
-            this.btnPickGoldenRegion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.btnPickGoldenRegion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnPickGoldenRegion.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnPickGoldenRegion.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnPickGoldenRegion.Location = new System.Drawing.Point(328, 92);

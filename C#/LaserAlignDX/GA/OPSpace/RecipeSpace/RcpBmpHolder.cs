@@ -20,7 +20,7 @@ using System.Drawing;
 namespace LaserAlignDX.OPSpace.RecipeSpace
 {
     /// <summary>
-    /// 用來管理 巨大的 bmpOrg 
+    /// 用來管理 參數群內 巨大的 bmpOrg 
     /// </summary>
     public class RcpBmpHolder : IDisposable
     {

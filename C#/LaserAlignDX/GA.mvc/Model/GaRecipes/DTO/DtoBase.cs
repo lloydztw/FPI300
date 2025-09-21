@@ -113,10 +113,10 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         }
         #endregion
 
-        public virtual void Load(string iniFileName, string sectName = null, string keyName = null)
+        public virtual void Load(string iniFileName)
         {
         }
-        public virtual void Save(string iniFileName, string sectName = null, string keyName = null)
+        public virtual void Save(string iniFileName)
         {
         }
     }

@@ -57,6 +57,34 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             disposeAllTemplates();
         }
 
+        /// <summary>
+        /// 2025-09-21 支援不同載台 可以混搭黑白背景
+        /// </summary>
+        public CarrierEnum ActiveCarrierID
+        {
+            get;
+            private set;
+        }
+        public bool ChangeActiveCarrier(CarrierEnum C, bool forceToReload = false)
+        {
+            bool isChanged = false;
+
+            if (ActiveCarrierID != C)
+            {
+                ActiveCarrierID = C;
+                isChanged = true;
+            }
+
+            if (isChanged || forceToReload)
+                Load();
+
+            return isChanged;
+        }
+
+        #region CARRIER_TAG_載台標籤
+        string _CARRIER_TAG => ActiveCarrierID != CarrierEnum.C1 ? $"@{ActiveCarrierID}" : "";
+        #endregion
+
         #region RUNTIME_REGION_CELLS
         /// <summary>
         /// 個別 晶粒區域 (位於格點範圍)
@@ -291,14 +319,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// </summary>
         public RectangleF xLineBottom = new RectangleF(0, 0, 100, 100);
 
-        internal void LoadLineBorderRects()
+        internal void LoadLineBorderRects(string carrierTag)
         {
             xLineLeft = StringtoRectF(ReadINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             xLineTop = StringtoRectF(ReadINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             xLineRight = StringtoRectF(ReadINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             xLineBottom = StringtoRectF(ReadINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
         }
-        public void SaveLineBorderRects()
+        public void SaveLineBorderRects(string carrierTag)
         {
             WriteINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(xLineLeft), INIFILE);
             WriteINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(xLineTop), INIFILE);
@@ -382,24 +410,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public FlyParaClass FlyAoiParams => FlyParaClass.Instance;
         #endregion
 
-        #region PRIVATE_LOCAL_BMP_HELPER_FUNCTIONS
-        //Bitmap loadImage(string fname)
-        //{
-        //    string fileName = System.IO.Path.Combine(PathIndexStr, fname);
-        //    if (System.IO.File.Exists(fileName))
-        //    {
-        //        return GaImageUtil.LoadBigImage(fileName);
-        //    }
-        //    return new Bitmap(1, 1, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-        //}
-        //void saveImage(Bitmap bmp, string fname)
-        //{
-        //    if (bmp == null) return;
-        //    string fileName = System.IO.Path.Combine(PathIndexStr, fname);
-        //    GaImageUtil.SaveBigImage(fileName, bmp);
-        //}
-        #endregion
-
         public override void Load(bool eCancel = false)
         {
             xLotNoStr = ReadINIValue("Collect", "xLotNoStr", "NONE", INIFILE);
@@ -441,17 +451,19 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             loadCamGrids(CarrierEnum.C1, out xCamGrid1);
             loadCamGrids(CarrierEnum.C2, out xCamGrid2);
 
-            _dtoGoldenRegionTemplate.Load(INIFILE);
-            _dtoGoldenChipTemplate.Load(INIFILE);
-            _dtoGoldenMaskTemplate.Load(INIFILE);
-            _dtoQrCodeTemplate.Load(INIFILE);
+            //(LD1) 各種模板 (根據載台號 載入不同對應的設定值)
+            _dtoGoldenRegionTemplate.SetTag(_CARRIER_TAG).Load(INIFILE);
+            _dtoGoldenChipTemplate.SetTag(_CARRIER_TAG).Load(INIFILE);
+            _dtoGoldenMaskTemplate.SetTag(_CARRIER_TAG).Load(INIFILE);
+            _dtoQrCodeTemplate.SetTag(_CARRIER_TAG).Load(INIFILE);
+            //(LD2) 飛拍模板 (目前不隨著載台顏色改變)
             _dtoFlyAoiTemplate.Load(INIFILE);
-
-            LoadLineBorderRects();
+            //(LD3) 邊線框 (根據載台號 載入不同對應的設定值)
+            LoadLineBorderRects(_CARRIER_TAG);
 
             if (!eCancel)
             {
-                #region 初始化加载图片
+                #region 舊代碼_初始化加载图片
                 //bmpOrgFly?.Dispose();
                 //bmpOrgFly = RcpBmpHolder.LoadRecipeImage("orgFly");
                 //this.bmpprinttemplate?.Dispose();
@@ -466,14 +478,16 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 //this.bmpcodetemplate = loadImage("bmpcode.bmp");
                 #endregion
 
-                //建立所有的 Region Cells
+                //建立所有的 Region Cells (應該放在 Aoi Model)
                 CreateViews();
                 ViewTrainLoad();
             }
 
-            InspectParams.Initial(Path, Index, "Inspect_default_info.ini");
+            //(LD4) 晶粒檢測參數 (根據載台號 載入不同對應的設定值)
+            InspectParams.Initial(Path, Index, $"Inspect_default_info{_CARRIER_TAG}.ini");
             InspectParams.Load();
 
+            //(LD5) 飛拍檢測參數 (目前不隨著載台顏色改變)
             FlyAoiParams.Initial(Path, Index, "Fly_default_info.ini");
             FlyAoiParams.Load();
         }
@@ -501,17 +515,75 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             saveCamGrid(CarrierEnum.C1, xCamGrid1);
             saveCamGrid(CarrierEnum.C2, xCamGrid2);
 
+            //==============================================================
+            // 以下區塊 是調用 各別保存 函式
+            //--------------------------------------------------------------
+            ////(1) 各種模板 (根據載台號 載入不同對應的設定值)
+            //_dtoGoldenRegionTemplate.SetTag(_CARRIER_TAG).Save(INIFILE);
+            //_dtoGoldenChipTemplate.SetTag(_CARRIER_TAG).Save(INIFILE);
+            //_dtoGoldenMaskTemplate.SetTag(_CARRIER_TAG).Save(INIFILE);
+            //_dtoQrCodeTemplate.SetTag(_CARRIER_TAG).Save(INIFILE);
+            //--------------------------------------------------------------
+            ////(2) 飛拍模板 (目前不隨著載台顏色改變)
+            //_dtoFlyAoiTemplate.Save(INIFILE);
+            //--------------------------------------------------------------
+            ////(3) 邊線框 (根據載台號 載入不同對應的設定值)
+            //SaveLineBorderRects(_CARRIER_TAG);
+            //==============================================================
+
             _bmpHolderOrg1.Save();
             _bmpHolderOrg2.Save();
             _bmpHolderOrgFly.Save();
 
-            // 建立所有的 Region Cells
+            // 建立所有的 Region Cells (應該放在 Aoi Model)
             CreateViews();
             ViewTrainLoad();
 
             InspectParams.Save();
             FlyAoiParams.Save();
         }
+
+        #region 子項模板參數_保存函式
+        public void SaveTemplate(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+                return;
+
+            name = name.ToUpper();
+
+            if (name.Contains("REGION"))
+            {
+                // Golden Region 模板 (根據載台號 存入不同對應的設定值)
+                _dtoGoldenRegionTemplate.SetTag(_CARRIER_TAG).Save(INIFILE);
+            }
+            if (name.Contains("CHIP"))
+            {
+                // Golden Chip 模板 (根據載台號 存入不同對應的設定值)
+                _dtoGoldenChipTemplate.SetTag(_CARRIER_TAG).Save(INIFILE);
+            }
+            if (name.Contains("MASK"))
+            {
+                // Defect Inspect Mask  (根據載台號 存入不同對應的設定值)
+                _dtoGoldenMaskTemplate.SetTag(_CARRIER_TAG).Save(INIFILE);
+                this.InspectParams.SaveMaskRects();
+            }
+            if (name.Contains("QRCODE"))
+            {
+                // QR Code 模板 (根據載台號 存入不同對應的設定值)
+                _dtoQrCodeTemplate.SetTag(_CARRIER_TAG).Save(INIFILE);
+            }
+            if (name.Contains("LINEBORDER"))
+            {
+                // 邊線框 (根據載台號 存入不同對應的設定值)
+                SaveLineBorderRects(_CARRIER_TAG);
+            }
+            if (name.Contains("FLY"))
+            {
+                // 飛拍模板 (目前不隨著載台顏色改變)
+                _dtoFlyAoiTemplate.Save(INIFILE);
+            }
+        }
+        #endregion
 
         #region 子項參數_保存函式_舊接口
         /// <summary>
@@ -524,10 +596,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //saveImage(bmpprintmask, "bmpprintmask.bmp");
             //this.InspectParams.SaveMaskRects();
             //SaveCodeTemplate();
-            _dtoGoldenRegionTemplate.Save(INIFILE);
-            _dtoGoldenMaskTemplate.Save(INIFILE);
-            _dtoQrCodeTemplate.Save(INIFILE);
-            this.InspectParams.SaveMaskRects();
+
+            // 各式模板 (根據載台號 存入不同對應的設定值)
+            SaveTemplate("REGION_CHIP_MASK_QRCODE");
         }
         /// <summary>
         /// 保存 Golden Chip Template
@@ -536,38 +607,33 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         {
             //WriteINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(xRegionTrain), INIFILE);
             //saveImage(bmpDefectTemplate, "bmpDefectTemplate.bmp");
-            _dtoGoldenChipTemplate.Save(INIFILE);
-        }
-        /// <summary>
-        /// 保存 FlyAoi Template
-        /// </summary>
-        public void SavePrintFlyTemplate()
-        {
-            //WriteINIValue("Recipe Basic", "xRectRegionPrintFly", RectFtoStringSimple(xRectRegionPrintFly), INIFILE);
-            //saveImage(bmpprintFlytemplate, "bmpprintFlytemplate.bmp");
-            _dtoFlyAoiTemplate.Save(INIFILE);
+
+            // 晶粒模板 (根據載台號 存入不同對應的設定值)
+            SaveTemplate("CHIP");
         }
         /// <summary>
         /// 保存 QRCode Template
         /// </summary>
         public void SaveCodeTemplate()
         {
-            //WriteINIValue("Recipe Basic", "xRectCodeRegion", RectFtoStringSimple(xRectCodeRegion), INIFILE);
-            ////string bmpcodepath = $"{PathIndexStr}\\bmpcode.bmp";
-            ////bmpcodetemplate.Save(bmpcodepath, System.Drawing.Imaging.ImageFormat.Bmp);
-            //saveImage(bmpcodetemplate, "bmpcode.bmp");
-            _dtoQrCodeTemplate.Save(INIFILE);
+            // QRCODE 模板 (根據載台號 存入不同對應的設定值)
+            SaveTemplate("QRCODE");
+        }
+        /// <summary>
+        /// 保存 FlyAoi Template
+        /// </summary>
+        public void SavePrintFlyTemplate()
+        {
+            // 飛拍模板 (目前不隨著載台顏色改變)
+            SaveTemplate("FLY");
         }
         /// <summary>
         /// 保存 Line Border Rectangles
         /// </summary>
         public void SaveLinesRegion()
         {
-            //WriteINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(xLineLeft), INIFILE);
-            //WriteINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(xLineTop), INIFILE);
-            //WriteINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(xLineRight), INIFILE);
-            //WriteINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(xLineBottom), INIFILE);
-            SaveLineBorderRects();
+            // 邊線框 (根據載台號 存入不同對應的設定值)
+            SaveTemplate("LINE_BORDER");
         }
         /// <summary>
         /// 保存 LotNo
@@ -1275,7 +1341,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public int xExtendy { get; set; } = 20;
 
         const string _Cat2 = "A02.双头吸嘴找角度设置";
-
         [CategoryAttribute(_Cat2), DescriptionAttribute("两个吸嘴的计算开启")]
         [DisplayName("A00.开启双头计算")]
         //[TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -1407,56 +1472,63 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public bool bCheckMeasureOffset { get; set; } = false;
 
-        #region 基础设置
-        const string _Cat1 = "A01.基础设置";
+        #region 晶粒定位
+        const string _Cat1 = "A01.晶粒定位";
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的演算法")]
         [DisplayName("A00.演算法")]
         [TypeConverter(typeof(JzEnumConverter))]
         [Browsable(true)]
         public MatchAlgorithmEnum xAlgorithm { get; set; } = MatchAlgorithmEnum.GridMatch;
+
+        [CategoryAttribute(_Cat1), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '格點門限值'")]
+        [DisplayName("A01.格點門限")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
+        [Browsable(true)]
+        public int xGridPadThreshold { get; set; } = 0;
+
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的相似程度")]
-        [DisplayName("A01.相似度")]
+        [DisplayName("A02.相似度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
         [Browsable(true)]
         public float xTolerance { get; set; } = 0.5f;
+
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的允许的角度")]
-        [DisplayName("A02.角度")]
+        [DisplayName("A03.角度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 360, 1f, 2)]
         [Browsable(true)]
         public float xAngle { get; set; } = 30f;
+
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大X方向的像素")]
-        [DisplayName("A03.外扩X")]
+        [DisplayName("A04.外扩X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
         [Browsable(false)]
         public int xExtendx { get; set; } = 20;
+
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大Y方向的像素")]
-        [DisplayName("A04.外扩Y")]
+        [DisplayName("A05.外扩Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
         [Browsable(false)]
         public int xExtendy { get; set; } = 20;
+
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围内重叠率")]
-        [DisplayName("A05.匹配重叠率")]
+        [DisplayName("A06.匹配重叠率")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100)]
         [Browsable(true)]
         public int xMaxOverlap { get; set; } = 80;
 
         [CategoryAttribute(_Cat1), DescriptionAttribute("在搜索范围内重合的比例")]
-        [DisplayName("A06.格点重叠率")]
+        [DisplayName("A07.格点重叠率")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1)]
         [Browsable(true)]
         public float xChipOverlap { get; set; } = 0.5f;
-        [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的格點門限")]
-        [DisplayName("A07.格點門限")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
-        [Browsable(true)]
-        public int xGridPadThreshold { get; set; } = 0;
+
         #endregion
 
         #region 找直线的参数

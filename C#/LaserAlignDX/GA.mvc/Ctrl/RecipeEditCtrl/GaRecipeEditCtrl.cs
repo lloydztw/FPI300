@@ -143,7 +143,9 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var delayAction = new Action(() =>
                 {
                     makeSomeReadonlyInGaaraRecipe();
+                    _currentCarrierID = _sysModel.ActiveCarrierID;
                     updateAllRecipeData(false, _currentCarrierID);
+                    _rcpEditUI.rdoCarriers[(int)_currentCarrierID].Checked = true;
                 });
 
                 _wndOwner.BeginInvoke(delayAction);
@@ -155,14 +157,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         private void rdoCarrier_CheckedChanged(object sender, EventArgs e)
         {
             var carrierID = rdoCarriers[0].Checked ? CarrierEnum.C1 : CarrierEnum.C2;
-            if (carrierID != _currentCarrierID)
-            {
-                showCviResult(false);
-                enableGoldenRegionPicking(false);
-                _sysModel.ActiveCarrierID = carrierID;
-                _sysModel.ApplyRecipe();
-                updateAllRecipeData(false, carrierID);
-            }
+            ChangeActiveCarrier(carrierID);
         }
         private void LtAoi_OnLineScanRequested(object sender, EventArgs e)
         {
@@ -331,6 +326,22 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         #endregion
 
+        void ChangeActiveCarrier(CarrierEnum C)
+        {
+            if (C != _currentCarrierID)
+            {
+                showCviResult(false);
+                enableGoldenRegionPicking(false);
+
+                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
+                _sysModel.ActiveCarrierID = C;
+                _sysModel.ApplyRecipe();
+                updateAllRecipeData(false, C);
+
+                GaUtil.SetCursor(_wndOwner, oldCursor);
+            }
+        }
         void LoadImage(string fileName = null)
         {
             showCviResult(false);
@@ -436,7 +447,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             enableGoldenRegionPicking(false);
 
             GaMvcConfig.OpenTamplateEditor(_currentCarrierID);
-            updateRecipePropertyView(_currentCarrierID);
 
             updateAllRecipeData(false, _currentCarrierID);
         }
@@ -546,7 +556,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (reloadGaara)
             {
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
                 _xRecipe.Load();
+
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
         }

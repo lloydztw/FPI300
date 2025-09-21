@@ -138,7 +138,7 @@ namespace LaserAlignDX.Mvc.Model
             transformsModel.BuildAll();
 
             //(1) 重新載入 _xRecipe
-            _xRecipe.Load();
+            _xRecipe.ChangeActiveCarrier(ActiveCarrierID, forceToReload: true);
 
             //(2) 載入 Camera Grid (保存在個別參數 _xRecipe 中)
             var camGridC1 = _xRecipe.xCamGrid1;

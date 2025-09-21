@@ -450,6 +450,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             updateLineBorderBoxes(true);
             updateLineSegmentBoxes(true);
+            _isLineBorderModified = true;
         }
         void TrainGoldenChipTemplate()
         {
@@ -462,40 +463,43 @@ namespace LaserAlignDX.Mvc.Ctrl
         void SaveAllParams(bool force)
         {
             bool isAnySaved = false;
+            string target = "";
 
-            if (_isGoldenModified)
+            if (_isGoldenModified || force)
             {
-                isAnySaved = true;
                 _isGoldenModified = false;
-                _xRecipe.SavePrintTemplateRegionTrain();
+                target += "_REGION_CHIP";
             }
 
-            if (_isQrCodeModified)
+            if (_isQrCodeModified || force)
             {
-                isAnySaved = true;
                 _isQrCodeModified = false;
-                _xRecipe.SaveCodeTemplate();
+                target += "_QRCODE";
             }
 
-            if (_isLineBorderModified)
+            if (_isLineBorderModified || force)
             {
-                isAnySaved = true;
                 _isLineBorderModified = false;
-                _xRecipe.SaveLinesRegion();
+                target += "_LINEBORDER";
             }
 
-            if (_isDefectMaskModified)
+            if (_isDefectMaskModified || force)
             {
-                isAnySaved = true;
                 _isDefectMaskModified = false;
-                _xRecipe.SavePrintTemplate();
+                target += "_MASK";
             }
 
-            if (_isPropertyModified)
+            if (_isPropertyModified || force)
             {
-                isAnySaved = true;
                 _isPropertyModified = false;
+                target += "_InspectX3";
                 _xInspectX3.Save();
+            }
+
+            if (!string.IsNullOrEmpty(target))
+            {
+                _xRecipe.SaveTemplate(target);
+                isAnySaved = true;
             }
 
             if (force)

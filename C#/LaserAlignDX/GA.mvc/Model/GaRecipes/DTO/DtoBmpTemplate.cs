@@ -28,14 +28,15 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     {
         #region PRIVATE_DATA
         Bitmap _templateBmp;
-        string _templateName;
+        string _tpName;
         string _sectName;
         string _keyName;
+        string _postTag = "";
         #endregion
 
-        public DtoBmpTemplate(string name, string sectName = null, string keyName = null, string ext = ".bmp")
+        public DtoBmpTemplate(string templateName, string sectName = null, string keyName = null, string ext = ".bmp")
         {
-            _templateName = name;
+            _tpName = templateName;
             _sectName = sectName;
             _keyName = keyName;
         }
@@ -44,6 +45,8 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             _templateBmp?.Dispose();
             _templateBmp = null;
         }
+
+
 
         /// <summary>
         /// 目前須由 Caller 管理 Bmp 生命週期
@@ -66,37 +69,43 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             get; set;
         }
 
-        public override void Load(string iniFileName, string sectName = null, string keyName = null)
+        /// <summary>
+        /// 後綴名, 會決定 Bmp 存取檔的 後綴名稱.
+        /// </summary>
+        public DtoBmpTemplate SetTag(string tag)
         {
-            //xRegionTrain = StringtoRectF(ReadINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
-            LoadRectF(iniFileName, sectName, keyName);
+            _postTag = tag;
+            return this;
+        }
+        public override void Load(string iniFileName)
+        {
+            LoadRectF(iniFileName, _sectName, _keyName);
             LoadBmp(true);
         }
-        public override void Save(string iniFileName, string sectName = null, string keyName = null)
+        public override void Save(string iniFileName)
         {
-            //WriteINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(Roi), iniFileName);
-            //saveImage(bmpDefectTemplate, "bmpDefectTemplate.bmp");
-            SaveRectF(iniFileName, sectName, keyName);
+            SaveRectF(iniFileName, _sectName, _keyName);
             SaveBmp();
         }
 
-        public void LoadRectF(string iniFileName, string sectName, string keyName)
+        void LoadRectF(string iniFileName, string sectName, string keyName)
         {
-            normalize(ref sectName, ref keyName);
+            normalize(ref iniFileName, ref sectName, ref keyName);
             RectF = StringtoRectF(ReadINIValue(sectName, keyName, RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), iniFileName));
         }
-        public void SaveRectF(string iniFileName, string sectName, string keyName)
+        void SaveRectF(string iniFileName, string sectName, string keyName)
         {
-            normalize(ref sectName, ref keyName);
+            normalize(ref iniFileName, ref sectName, ref keyName);
             WriteINIValue(sectName, keyName, RectFtoStringSimple(RectF), iniFileName);
         }
 
-        public void LoadBmp(bool force = false)
+        void LoadBmp(bool force = false)
         {
             if (_templateBmp == null || force)
             {
                 // 利用 RcpBmpHolder 來加載圖檔
-                using (var holder = new RcpBmpHolder(_templateName, ".bmp"))
+                var holderName = _tpName + _postTag;
+                using (var holder = new RcpBmpHolder(holderName, ".bmp"))
                 {
                     var newBmp = (Bitmap)holder.Peek()?.Clone();
                     if (newBmp == null)
@@ -107,12 +116,13 @@ namespace LaserAlignDX.Mvc.Model.Recipe
                 }
             }
         }
-        public void SaveBmp()
+        void SaveBmp()
         {
             if (_templateBmp != null)
             {
                 // 利用 RcpBmpHolder 來保存圖檔
-                using (var holder = new RcpBmpHolder(_templateName, ".bmp"))
+                var holderName = _tpName + _postTag;
+                using (var holder = new RcpBmpHolder(holderName, ".bmp"))
                 {
                     holder.TakeOver((Bitmap)_templateBmp.Clone());
                     holder.Save(true);
@@ -121,22 +131,34 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         }
 
         #region PRIVATE_FUNCTIONS
-        private Bitmap safeGetBitmap()
+        private void normalize(ref string iniFileName, ref string sectName, ref string keyName)
         {
-            if (_templateBmp == null)
-                LoadBmp(true);
-            return _templateBmp;
-        }
-        private void normalize(ref string sectName, ref string keyName)
-        {
+            //if (!string.IsNullOrEmpty(_postTag))
+            //{
+            //    string path = System.IO.Path.GetDirectoryName(iniFileName);
+            //    string stem = System.IO.Path.GetFileNameWithoutExtension(iniFileName);
+            //    string ext = System.IO.Path.GetExtension(iniFileName);
+            //    string[] strs = stem.Split('@');
+            //    stem = strs[0] + _postTag + ext;
+            //    iniFileName = System.IO.Path.Combine(path, stem);
+            //}
+
             if (sectName == null)
                 sectName = _sectName;
             if (keyName == null)
                 keyName = _keyName;
+
             if (sectName == null)
-                sectName = _templateName + "_sect";
+                sectName = _tpName + _postTag + "_SECT";
             if (keyName == null)
-                keyName = "rect";
+                keyName = "RectF";
+
+            // 根據 _postTag 自動變化 sectName
+            if (!string.IsNullOrEmpty(_postTag))
+            {
+                string[] strs = sectName.Split('@');
+                sectName = strs[0] + _postTag;
+            }
         }
         #endregion
     }
