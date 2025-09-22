@@ -239,7 +239,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                     updateLineSegmentBoxes(true);
                 };
             }
-            _cviQrCodeBox.OnChanged += (s, e) => _isQrCodeModified = true;
+            _cviQrCodeBox.OnChanged += (s, e) => BuildQRCodeTemplate(decode: false);
 
             if(_editorUI.wndVisionSettingsPanel is PropertyGrid pg)
                 pg.PropertyValueChanged += Pg_PropertyValueChanged;
@@ -394,7 +394,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 更新 mask
             updateMaskTemplate(false);
         }
-        void BuildQRCodeTemplate()
+        void BuildQRCodeTemplate(bool decode = true)
         {
             // 從 _xBmpGoldenRegionTemplate 切出 bmp
             var roiRect = _cviQrCodeBox.Box;
@@ -409,11 +409,14 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 標記 已改變
             _isQrCodeModified = true;
 
-            // DECODE
-            aoiDecodeQrCode(this._xBmpQrCodeTemplate, out string text);
+            if (decode)
+            {
+                // DECODE
+                aoiDecodeQrCode(this._xBmpQrCodeTemplate, out string text);
 
-            // 更新 Text
-            _editorUI.wndQrCodeResult.Text = text;
+                // 更新 Text
+                _editorUI.wndQrCodeResult.Text = text;
+            }
         }
         void AutoLayoutLineBorders()
         {

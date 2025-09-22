@@ -106,6 +106,7 @@ namespace LaserAlignDX.Mvc.Model
             get
             {
                 var recipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
+                recipeName = LtAoiFactory.RcpStemName(recipeName, ActiveCarrierID);
                 var emptyTrayAoi = EmptyTrayAoiFactory.InstanceModel(recipeName);
                 return emptyTrayAoi;
             }

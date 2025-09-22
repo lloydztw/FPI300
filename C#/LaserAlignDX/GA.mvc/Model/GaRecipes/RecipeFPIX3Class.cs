@@ -321,17 +321,19 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         internal void LoadLineBorderRects(string carrierTag)
         {
-            xLineLeft = StringtoRectF(ReadINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
-            xLineTop = StringtoRectF(ReadINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
-            xLineRight = StringtoRectF(ReadINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
-            xLineBottom = StringtoRectF(ReadINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            string sectName = "Recipe Basic" + carrierTag;
+            xLineLeft = StringtoRectF(ReadINIValue(sectName, "xLineLeft", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            xLineTop = StringtoRectF(ReadINIValue(sectName, "xLineTop", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            xLineRight = StringtoRectF(ReadINIValue(sectName, "xLineRight", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            xLineBottom = StringtoRectF(ReadINIValue(sectName, "xLineBottom", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
         }
         public void SaveLineBorderRects(string carrierTag)
         {
-            WriteINIValue("Recipe Basic", "xLineLeft", RectFtoStringSimple(xLineLeft), INIFILE);
-            WriteINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(xLineTop), INIFILE);
-            WriteINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(xLineRight), INIFILE);
-            WriteINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(xLineBottom), INIFILE);
+            string sectName = "Recipe Basic" + carrierTag;
+            WriteINIValue(sectName, "xLineLeft", RectFtoStringSimple(xLineLeft), INIFILE);
+            WriteINIValue(sectName, "xLineTop", RectFtoStringSimple(xLineTop), INIFILE);
+            WriteINIValue(sectName, "xLineRight", RectFtoStringSimple(xLineRight), INIFILE);
+            WriteINIValue(sectName, "xLineBottom", RectFtoStringSimple(xLineBottom), INIFILE);
         }
         #endregion
 
