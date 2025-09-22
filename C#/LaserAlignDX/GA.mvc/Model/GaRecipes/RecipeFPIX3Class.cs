@@ -754,7 +754,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             bool bOK = mvdprintFlytemp_Find.HikRunBmp();
             return (bOK ? 0 : -1);
         }
-
         //public int PrintTempFlyRun(CMvdImage eMvdInput)
         //{
         //    mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
@@ -773,7 +772,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //    bool bOK = mvdprintFlytemp_Find.HikRun3(eRectF);
         //    return (bOK ? 0 : -1);
         //}
-
         public bool CheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> m_list, out float retAngle, out PointF retCenter)
         {
 

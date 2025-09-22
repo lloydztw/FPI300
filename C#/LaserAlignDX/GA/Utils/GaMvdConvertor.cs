@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.QvMath;
+using JetEazy.Utils;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -236,34 +237,9 @@ namespace LaserAlignDX
             MVD_IMAGE_DATA_INFO _MvdImage = mvdImage.GetImageData();
             MVD_DATA_CHANNEL_INFO ch0 = _MvdImage.stDataChannel[0];
             //Bitmap _bmpFromMVD = ByteArrayToBitmap(ch0.arrDataBytes, (int)ch0.nRowStep, (int)(ch0.nLen / ch0.nRowStep));
-            return ByteArrayToBitmap(ch0.arrDataBytes, (int)ch0.nRowStep, (int)(ch0.nLen / ch0.nRowStep));
+            //return ByteArrayToBitmap(ch0.arrDataBytes, (int)ch0.nRowStep, (int)(ch0.nLen / ch0.nRowStep));
+            return GaImageUtil.CreateBitmapU8(ch0.arrDataBytes, (int)ch0.nRowStep, (int)(ch0.nLen / ch0.nRowStep));
         }
-
-        #region PRIVATE_FUNCTIONS
-        /// <summary>
-        /// 會生成新的 Bitmap.
-        /// Caller 必須接管其生命週期 !!!
-        /// </summary>
-        public static Bitmap ByteArrayToBitmap(byte[] srcArray, int width, int height)
-        {
-            // 创建 Bitmap 对象
-            Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
-            // 设置调色板为灰度
-            ColorPalette palette = bitmap.Palette;
-            for (int i = 0; i < 256; i++)
-            {
-                palette.Entries[i] = Color.FromArgb(i, i, i);
-            }
-            bitmap.Palette = palette;
-            // 锁定 Bitmap 数据
-            BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
-            // 将字节数组复制到 Bitmap 数据中
-            System.Runtime.InteropServices.Marshal.Copy(srcArray, 0, bitmapData.Scan0, srcArray.Length);
-            // 解锁 Bitmap 数据
-            bitmap.UnlockBits(bitmapData);
-            return bitmap;
-        }
-        #endregion
 
         /// <summary>
         /// Runtime 使用 C# Bitmap 來觀察 mvdImage 內容.
