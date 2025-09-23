@@ -358,7 +358,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v2.cs" />
+    <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
+    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v3.cs" />
+    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyAoiResult.cs" />
+    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyMetaData.cs" />
+    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\MvdFlyResultDispUI.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaTemplateEditCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />

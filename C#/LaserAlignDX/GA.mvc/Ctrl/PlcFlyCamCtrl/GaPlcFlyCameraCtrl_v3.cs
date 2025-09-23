@@ -1,6 +1,6 @@
-﻿using AUVision;
-using JetEazy.Interface;
+﻿using JetEazy.Interface;
 using JetEazy.Utils;
+using LaserAlignDX.AoiModel;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.UIMVC;
@@ -8,15 +8,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Web.Management;
 using System.Windows.Forms;
 using Traveller106;
-using VisionDesigner;
 using VisionDesigner.BlobFind;
-using VisionDesigner.PositionFix;
 using VsCommon.ControlSpace.MachineSpace;
 
 // 關聯到 MINIX6 ???
@@ -25,13 +21,6 @@ using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
 
 namespace LaserAlignDX.Mvc.Ctrl.V3
 {
-    public enum PlcFlyResultCode : int
-    {
-        OK = 1,
-        NG = 2,
-        Empty = 3,
-    };
-
     /// <summary>
     /// 重整 MainX3UI 飛拍
     /// 將飛拍控制拉出來到 GaPlcFlyCameraCtrl
@@ -41,7 +30,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     public class GaPlcFlyCameraCtrl : IxTickable
     {
         static int TOTAL_FLY_CAMERAS => GaMvcConfig.TOTAL_FLY_CAMERAS;
-        GaFlyAoiCtrl _flyAoiCtrl = new GaFlyAoiCtrl();
 
         #region MACHINE
         MainFPIX3MachineClass MACHINE
@@ -51,6 +39,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         #endregion
 
         #region GLOBAL_MESS
+        ITravelerModel _sysModel => GaMvcConfig.SysModel;
         RecipeFPIX3Class xRecipe
         {
             get { return RecipeFPIX3Class.Instance; }
@@ -97,25 +86,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         bool m_plcFlyStartOld2 = false;
         #endregion
 
-        #region OFFSETS
-        PointF[] FlyOffsetUseStage
-        {
-            get
-            {
-                int iscanIndex = MACHINE.PLCIO.iScanStage;
-                if (iscanIndex == 2)
-                {
-                    return xFlyPara.ptsOffset2;
-                }
-                return xFlyPara.ptsOffset;
-            }
-        }
-        #endregion
-
         #region LOT_DATA_FROM_PLC
         FlyLotData _lotData = new FlyLotData();
-        //string m_StripId = "Strip_NONE";
-        //string m_LotId = "Lot_NONE";
         #endregion
 
         #region THE_BUFFER_LIST_OF_THE_FLY_DATA_BYTES
@@ -133,13 +105,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         public void Attach(MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
         {
             _wndOwner = DsFlys[0].Parent;
-            _flyAoiCtrl.Attach(DsFlys);
-
+            AttachDispUIs(DsFlys);
             lblSerialNumber = lblFlyCameraSerialNo;
             lblSerialNumber.DoubleClick += (s, e) => clearFlyDataBytes();
             FlyCamera.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
         }
-
         public void Tick()
         {
             TickPlc();
@@ -149,7 +119,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             _framesBufBytes?.Clear();
         }
-
         void updateFlyCameraSerialNumber(int serialNumber)
         {
             _wndOwner?.Invoke(new Action(() =>
@@ -158,7 +127,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 lblSerialNumber.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
             }));
         }
-
         void IxFlyAreaCam_LineTriggerAction(JetEazy.CCDSpace.CameraFrame camFrameInfo, IntPtr pBuffer)
         {
             // 如果 Recipe 編輯窗被打開, 則跳過此 event handler
@@ -195,8 +163,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     //m_iFlyIndex = TOTAL_FLY_CAMERAS - 1;  //<<< 沒啥作用
 
                     // 把收集到的 frame buffers 進行 飛拍 像測
-                    _flyAoiCtrl.RunAoiAll(iflystartindex, _framesBufBytes, camFrameInfo.iWidth, camFrameInfo.iWidth);
-                    _flyAoiCtrl.GetAoiAllResults(out var flyResults, out var flyOffsets);
+                    this.RunAoiAll(iflystartindex, _framesBufBytes, camFrameInfo.iWidth, camFrameInfo.iWidth);
+                    this.GetAoiAllResults(out var flyResults, out var flyOffsets);
 
                     // 回寫飛拍結果給 PLC
                     plcIO.iFlyResult(flyResults);
@@ -231,7 +199,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 }
             }
         }
-
         void TickPlc()
         {
             //btnReady.BackColor = (MACHINE.PLCIO.bSoftwareReady ? Color.Red : Color.FromArgb(192, 255, 192));
@@ -271,7 +238,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                             // 更新 LotData
                             _lotData.StripID = plcIO.sStripID;
                             _lotData.LotID = plcIO.sLotID;
-                            _flyAoiCtrl.LotData = _lotData;
 
                             m_LineScanProcess.Start();
                         }
@@ -360,21 +326,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             _LOG(msg, color);
         }
         #endregion
-    }
-
-    internal class GaFlyAoiCtrl
-    {
-        #region GLOBAL_MESS
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
-        RecipeFPIX3Class xRecipe
-        {
-            get { return RecipeFPIX3Class.Instance; }
-        }
-        FlyParaClass xFlyPara
-        {
-            get { return FlyParaClass.Instance; }
-        }
-        #endregion
 
         #region OFFSETS_IN_RECIPE
         PointF[] FlyOffsetUseStage
@@ -388,6 +339,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         #endregion
 
         #region GUI
+        //Control _wndOwner;
         MvdFlyResultDispUI[] _DispUIs;
         Stopwatch _stopWatch = new Stopwatch();
         #endregion
@@ -397,18 +349,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         float[] m_iFlyOffset = new float[4 * 3];
         #endregion
 
-        public void Attach(MVSUI[] dispUIs)
+        void AttachDispUIs(MVSUI[] dispUIs)
         {
+            _wndOwner = dispUIs[0].Parent;
             _DispUIs = Array.ConvertAll(dispUIs, ui => new MvdFlyResultDispUI(ui));
         }
-
-        public FlyLotData LotData
-        {
-            get;
-            set;
-        }
-
-        public void RunAoiAll(int flyStart, List<byte[]> framesBufBytes, int frameWidth, int frameHeight)
+        void RunAoiAll(int flyStart, List<byte[]> framesBufBytes, int frameWidth, int frameHeight)
         {
             int iShowIdx = 0;
 
@@ -419,13 +365,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 using (var bmpFly = GaImageUtil.CreateBitmapU8(bytes, frameWidth, frameHeight))
                 {
                     var flyID = new FlyID(flyStart, iShowIdx);
-                    RunAoiOne(flyID, bmpFly);
+                    flyRunAoiOne(flyID, bmpFly);
                 }
 
                 //m_iFlyIndex--;  //<<< 沒啥作用
             }
         }
-        public void GetAoiAllResults(out int[] flyResults, out float[] flyOffsets)
+        void GetAoiAllResults(out int[] flyResults, out float[] flyOffsets)
         {
             // flyResults 飛拍結果 定義:
             //      1: Ok,
@@ -438,7 +384,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             flyOffsets = m_iFlyOffset;
         }
 
-        void RunAoiOne(FlyID flyID, Bitmap bmpFly)
+        void flyRunAoiOne(FlyID flyID, Bitmap bmpFly)
         {
             if (FlyParaClass.Instance.xIsOpenMuit)
                 flyProcessProSpecial(flyID, bmpFly);
@@ -729,7 +675,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 #endif
 
             #region UPDATE_RESULT_TO_MVD_DISPLAY
-            var drawData = new MvdFlyDrawData()
+            var drawData = new FlyMetaData()
             {
                 flyID = flyID,
                 flyAoiResult = aoiResult,
@@ -738,7 +684,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 xCentroid = centerRun,
                 xResult = foundResult,
             };
-            _DispUIs[flyID.flyIndex].Update(drawData, this.LotData);
+            _DispUIs[flyID.flyIndex].Update(drawData, this._lotData);
             #endregion
         }
         void flyProcessProSpecial(FlyID flyID, Bitmap bmpFly)
@@ -942,7 +888,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 #endif
 
             #region UPDATE_RESULT_TO_MVD_DISPLAY
-            var drawData = new MvdFlyDrawData()
+            var drawData = new FlyMetaData()
             {
                 flyID = flyID,
                 flyAoiResult = aoiResult,
@@ -950,10 +896,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 roiRect = roiRect,
                 xBlobs = blobsList,
             };
-            _DispUIs[flyID.flyIndex].Update(drawData, this.LotData);
+            _DispUIs[flyID.flyIndex].Update(drawData, this._lotData);
             #endregion
         }
-
         void updateOneResult(FlyID flyID, FlyAoiResult oneResult)
         {
             int flyIndex = flyID.flyIndex;
@@ -972,329 +917,5 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 m_iFlyOffset[flyIndex * 3 + 2] = 0;
             }
         }
-    }
-
-    internal class MvdFlyResultDispUI
-    {
-        #region PRIVATE_DATA
-        MVSUI _dispUI;
-        #endregion
-
-        public MvdFlyResultDispUI(MVSUI host)
-        {
-            _dispUI = host;
-            _dispUI.HandleDestroyed += (s, e) => Dispose();     // 自我清除
-        }
-
-        void Dispose()
-        {
-            disposeMvdTools();
-        }
-
-        public void Update(MvdFlyDrawData drawData, FlyLotData lotData)
-        {
-            var flyID = drawData.flyID;
-            int flyIndex = flyID.flyIndex;
-
-            var mvdShapes = drawData.xBlobs != null ?
-                createMvdDrawItemsWithBlobs(drawData) :
-                createMvdDrawItemsWithCrossLines(drawData);
-
-            using (var mvdImage = GaMvdConvertor.BitmapToCMvdImage(drawData.bmpFly))
-            {
-                updateDisplayUI(_dispUI, mvdImage, mvdShapes);
-
-                if (INI.Instance.IsSaveDebugBMP && lotData != null)
-                    saveFlyCameraImage(mvdImage, flyID.ShowID, lotData.StripID, lotData.LotID);
-            }
-        }
-
-        #region MVD_DISPLAY_FUNCTIONS
-        CMvdShape[] createMvdDrawItemsWithCrossLines(MvdFlyDrawData drawData)
-        {
-            var mvdShapes = new List<CMvdShape>();
-            MVD_COLOR color;
-
-            var flyID = drawData.flyID;
-            var aoiResult = drawData.flyAoiResult;
-            var resultCode = aoiResult.Code;
-            var roiRect = drawData.roiRect;
-            var centerRun = drawData.xCentroid;
-            var templateRect = drawData.xTemplateRect;
-            var imgSize = drawData.bmpFly.Size;
-
-            string text = formatText(flyID.ShowID, aoiResult.OffsetX, aoiResult.OffsetY, aoiResult.OffsetAngle);
-
-            CMvdRectangleF mvdRect;
-
-            if (resultCode == PlcFlyResultCode.OK)
-            {
-                color = new MVD_COLOR(0, 255, 0);
-
-                //-----------------------------------------------------------------------
-                // 使用笨笨的 MVD 找出 Rotated Rectangle (Box2D
-                // 這個很容易用 OpenCvSharp 達成
-                //-----------------------------------------------------------------------
-
-                var mvdRectBase = GaMvdConvertor.ToCMvdRectangleF(ref templateRect);
-                mvdRect = PositionFixRun(mvdRectBase,
-                                         templateRect,
-                                         new Rectangle(Point.Empty, imgSize),
-                                         drawData.xResult) as CMvdRectangleF;
-
-                mvdRect.CenterX += roiRect.X;
-                mvdRect.CenterY += roiRect.Y;
-                mvdShapes.Add(mvdRect);
-            }
-            else
-            {
-                color = new MVD_COLOR(255, 0, 0);
-                mvdRect = new CMvdRectangleF(centerRun.X, centerRun.Y, roiRect.Width, roiRect.Height);
-                mvdShapes.Add(mvdRect);
-            }
-
-            ////var RectangleShape
-            ////    = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
-            //if (iFlyResult[flyIndex] == 1)
-            //    mvdRect.BorderColor = new MVD_COLOR(0, 255, 0);
-            //else
-            //    mvdRect.BorderColor = new MVD_COLOR(255, 0, 0);
-            //CMvdTextF cMvdTextF = new CMvdTextF(100, 100, $"耗时:{ms.ToString("0.00")} ms");
-            //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
-            //cMvdTextF.FontWidth = 20;
-
-            //添加十字线
-            CMvdLineSegmentF v1 = new CMvdLineSegmentF(
-                                        new MVD_POINT_F(0, imgSize.Height / 2),
-                                        new MVD_POINT_F(imgSize.Width, imgSize.Height / 2));
-            v1.BorderColor = new MVD_COLOR(255, 215, 0);
-            v1.BorderWidth = 1;
-            mvdShapes.Add(v1);
-
-            CMvdLineSegmentF h1 = new CMvdLineSegmentF(
-                                        new MVD_POINT_F(imgSize.Width / 2, 0),
-                                        new MVD_POINT_F(imgSize.Width / 2, imgSize.Height));
-            h1.BorderColor = new MVD_COLOR(255, 215, 0);
-            h1.BorderWidth = 1;
-            mvdShapes.Add(h1);
-
-            CMvdTextF mvdText = new CMvdTextF(mvdRect.CenterX, mvdRect.CenterY, text);
-            mvdText.BorderColor = color; // new MVD_COLOR(0, 255, 0);
-            mvdText.FontWidth = 20;
-            mvdShapes.Add(mvdText);
-
-            return mvdShapes.ToArray();
-        }
-        CMvdShape[] createMvdDrawItemsWithBlobs(MvdFlyDrawData drawData)
-        {
-            var mvdShapes = new List<CMvdShape>();
-            MVD_COLOR color;
-
-            var flyID = drawData.flyID;
-            var aoiResult = drawData.flyAoiResult;
-            var resultCode = aoiResult.Code;
-            var roiRect = drawData.roiRect;
-            var blobs = drawData.xBlobs;
-            string text = formatText(flyID.ShowID, aoiResult.OffsetX, aoiResult.OffsetY, aoiResult.OffsetAngle);
-
-            #region MVD_RECTANGLES
-            if (resultCode == PlcFlyResultCode.OK)
-            {
-                color = new MVD_COLOR(0, 255, 0);
-                foreach (var blob in blobs)
-                {
-                    var mvdRect = new CMvdRectangleF(
-                            blob.RectInfo.CenterX + roiRect.X,
-                            blob.RectInfo.CenterY + roiRect.Y,
-                            blob.RectInfo.Width,
-                            blob.RectInfo.Height)
-                    {
-                        BorderColor = color
-                    };
-                    mvdShapes.Add(mvdRect);
-                }
-            }
-            else
-            {
-                color = new MVD_COLOR(255, 0, 0);
-                //RectangleShape1 = new CMvdRectangleF(roiRect.X, roiRect.Y, roiRect.Width, roiRect.Height);
-                //RectangleShape2 = new CMvdRectangleF(roiRect.X, roiRect.Y, roiRect.Width, roiRect.Height);
-                //RectangleShape1.BorderColor = new MVD_COLOR(255, 0, 0);
-                //RectangleShape2.BorderColor = new MVD_COLOR(255, 0, 0);
-                var mvdRect = GaMvdConvertor.ToCMvdRectangleF(ref roiRect);
-                mvdRect.BorderColor = color;
-                mvdShapes.Add(mvdRect);
-            }
-            #endregion
-
-            #region MVD_TEXT
-            //CMvdTextF cMvdTextF = new CMvdTextF(100, 100, $"耗时:{ms.ToString("0.00")} ms");
-            //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
-            //cMvdTextF.FontWidth = 20;
-            var centerPt = JetEazy.Qcvt.Center(ref roiRect);
-            var mvdText = new CMvdTextF(centerPt.X, centerPt.Y, text);
-            //mvdText.BorderColor = new MVD_COLOR(0, 255, 0);
-            mvdText.BorderColor = color;
-            mvdText.FontWidth = 15;
-            mvdShapes.Add(mvdText);
-            #endregion
-
-            return mvdShapes.ToArray();
-        }
-        void updateDisplayUI(MVSUI dispUI, CMvdImage mvdImage, params CMvdShape[] shapes)
-        {
-            var render = dispUI.mvdRenderActivex1;
-            render.LoadImageFromObject(mvdImage);
-
-            foreach (var shape in shapes)
-                if (shape != null)
-                    render.AddShape(shape);
-
-            dispUI.AddCross();
-            render.Display();
-        }
-        string formatText(int flyShowIndex, float offsetX, float offsetY, float offsetAngle)
-        {
-            string text = $"[{flyShowIndex}]" +
-                        $" x:{offsetX:0.000}," +
-                        $" y:{offsetY:0.000}," +
-                        $" a:{offsetAngle:0.000}";
-            return text;
-        }
-        #endregion
-
-        void saveFlyCameraImage(CMvdImage cMvdImage, int flyShowIndex, string stripID, string lotID)
-        {
-            if (INI.Instance.IsSaveDebugBMP)
-            {
-                string flypath = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{stripID}";
-                if (!Directory.Exists(flypath))
-                    Directory.CreateDirectory(flypath);
-                string flyname = $"{lotID}-[{flyShowIndex.ToString()}]-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.jpg";
-                cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
-            }
-        }
-
-        #region MVD_TOOL
-        CPositionFixTool cPositionFixToolObj = null;
-        /// <summary>
-        /// 计算修正后的位置框
-        /// </summary>
-        /// <param name="eMVDInput">输入转换的形状</param>
-        /// <param name="templateRectF">模板尺寸</param>
-        /// <param name="runRect">输入图片尺寸</param>
-        /// <param name="templateRunResult">定位的结果</param>
-        /// <returns>返回位置的形状</returns>
-        CMvdShape PositionFixRun(CMvdShape eMVDInput, RectangleF templateRectF, Rectangle runRect, xFindResult templateRunResult)
-        {
-            // CreateInstance
-            if (cPositionFixToolObj == null)
-                cPositionFixToolObj = new CPositionFixTool();
-
-            // Set basic parameter
-
-            cPositionFixToolObj.BasicParam.BasePoint
-                = new VisionDesigner.PositionFix.MVD_FIDUCIAL_POINT_F(
-                    new MVD_POINT_F(templateRectF.X + templateRectF.Width / 2, templateRectF.Y + templateRectF.Height / 2), 0);
-
-            cPositionFixToolObj.BasicParam.RunningPoint
-                = new VisionDesigner.PositionFix.MVD_FIDUCIAL_POINT_F(
-                    new MVD_POINT_F(templateRunResult.fCenterX, templateRunResult.fCenterY), templateRunResult.fAngle);
-
-            cPositionFixToolObj.BasicParam.RunImageSize = new MVD_SIZE_I(runRect.Width, runRect.Height);
-
-            cPositionFixToolObj.BasicParam.FixMode = MVD_POSFIX_MODE.MVD_POSFIX_MODE_HVA;
-
-            cPositionFixToolObj.BasicParam.InitialShape = eMVDInput;
-
-            // Running
-
-            cPositionFixToolObj.Run();
-
-            // Get the result
-            return cPositionFixToolObj.Result.CorrectedShape;
-        }
-        void disposeMvdTools()
-        {
-            cPositionFixToolObj?.Dispose();
-            cPositionFixToolObj = null;
-        }
-        #endregion
-    }
-
-    internal class MvdFlyDrawData
-    {
-        public FlyID flyID;
-        public FlyAoiResult flyAoiResult;
-        public Bitmap bmpFly;
-        public RectangleF roiRect;
-        public RectangleF xTemplateRect;
-        public xFindResult xResult;
-        public PointF xCentroid;
-        public List<CBlobInfo> xBlobs;
-    };
-
-
-    internal class FlyID
-    {
-        public FlyID(int flyStart, int flyIndex)
-        {
-            this.flyStart = flyStart;
-            this.flyIndex = flyIndex;
-        }
-        /// <summary>
-        /// 來自 PLC 指定
-        /// </summary>
-        public int flyStart
-        {
-            get;
-            private set;
-        }
-        /// <summary>
-        /// 以 0 為基底的 局域 index
-        /// </summary>
-        public int flyIndex
-        {
-            get;
-            private set;
-        }
-        /// <summary>
-        /// 根據 flyStart 與 flyIndex, 取得以 1 為基底的全域 ID
-        /// </summary>
-        public int ShowID
-        {
-            get
-            {
-                int showID = flyIndex + 1;
-                switch (flyStart)
-                {
-                    case 1:
-                        showID = flyIndex + 1;
-                        break;
-                    case 2:
-                        showID = flyIndex + 1 + 4;
-                        break;
-                }
-                return showID;
-            }
-        }
-    }
-
-    internal class FlyAoiResult
-    {
-        public PlcFlyResultCode Code;
-        public float OffsetX;
-        public float OffsetY;
-        public float OffsetAngle;
-        public float[] Offsets
-        {
-            get => new[] {  OffsetX, OffsetY, OffsetAngle }; 
-        }
-    }
-
-    internal class FlyLotData
-    {
-        public string StripID = "Strip_NONE";
-        public string LotID = "Lot_NONE";
     }
 }

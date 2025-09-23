@@ -18,7 +18,6 @@ using JetEazy.EzImage;
 using JetEazy.OpenCV;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
-using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using System;
@@ -79,8 +78,10 @@ namespace LaserAlignDX
         // CTRL ----------------------------------------------------
         public static GaMainCtrl CreateMainCtrl()
         {
-            // GaMainCtrl 使用 V2
-            return new global::LaserAlignDX.Mvc.Ctrl.V2.GaMainCtrl();
+            //// GaMainCtrl 使用 V2
+            //return new global::LaserAlignDX.Mvc.Ctrl.V2.GaMainCtrl();
+            // GaMainCtrl 使用 V3
+            return new global::LaserAlignDX.Mvc.Ctrl.V3.GaMainCtrl();
         }
 
         // VIEW ----------------------------------------------------
