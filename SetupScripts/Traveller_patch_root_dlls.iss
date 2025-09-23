@@ -6,7 +6,7 @@
 [Setup]
 AppPublisher=JetEazy System Co., Ltd.
 AppPublisherURL=http://www.jeteazy.com
-AppVersion=2.6.2.1
+AppVersion=2.6.2.2
 AppCopyright=Copyright (C) 2025 JetEazy System Co., Ltd.
 ;WizardImageFile=JetEazySetup.bmp
 
@@ -15,7 +15,7 @@ DefaultDirName=D:\AUTOMATION\Eazy FPI30
 Compression=lzma
 SolidCompression=yes
 OutputDir=.\bin
-OutputBaseFileName=Traveller_Patch_2.6.2.1_black_online
+OutputBaseFileName=Traveller_Patch_2.6.2.2_black_online
 
 [Files]
 ; BIN & DLL
