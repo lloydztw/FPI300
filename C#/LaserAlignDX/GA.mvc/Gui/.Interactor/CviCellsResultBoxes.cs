@@ -101,6 +101,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         Font _font = null;
         #endregion
 
+        public bool OPT_SHOW_TOOL_TIP_DETAILS => Traveller106.INI.Instance.IsResultShowChar;
+
         public Control lblSummaryTitle
         {
             get;
@@ -579,13 +581,18 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         protected override string composeTooltipText(EzBloc cursor, EzBloc cursor2)
         {
+            if (!OPT_SHOW_TOOL_TIP_DETAILS)
+            {
+                _cviRegionBox.Visible = false;
+                return "";
+            }
+
             var cellBloc = cursor as CellBloc;
 
             _cviRegionBox.Box2D.SetCenter((float)cellBloc.Center.X, (float)cellBloc.Center.Y);
             _cviRegionBox.Visible = true;
 
             //string txt = formatDisplayText(cellBloc);
-
             string txt = composeTooltipTextTrf(cursor, cursor2);
 
             return txt;
@@ -639,46 +646,57 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         string composeTooltipTextTrf(EzBloc cursorBloc, EzBloc cursorBloc2)
         {
-            if (cursorBloc == null)
-                return "";
-
-            initDefaultTrfs();
-
-            var cellBloc = cursorBloc as CellBloc;
-            var cell = cellBloc?.Cell;
-            if (cell == null || !checkResult(cell, out bool isPass, out bool isEmpty))
-                return null;
-
-            int row = cell.CellRow;
-            int col = cell.CellCol;
-
-            bool isShowScore = true;
-            var sb = new StringBuilder();
-
-            sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
-
-            appendCameraCoords(sb, cursorBloc, cursorBloc2);
-
-            if (!IsEmptyTrayMode)
+            try
             {
-                if (TransformsModel != null)
+                if (!OPT_SHOW_TOOL_TIP_DETAILS)
+                    return "";
+
+                if (cursorBloc == null)
+                    return "";
+
+                initDefaultTrfs();
+
+                var cellBloc = cursorBloc as CellBloc;
+                var cell = cellBloc?.Cell;
+                if (cell == null || !checkResult(cell, out bool isPass, out bool isEmpty))
+                    return null;
+
+                int row = cell.CellRow;
+                int col = cell.CellCol;
+
+                bool isShowScore = true;
+                var sb = new StringBuilder();
+
+                sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
+
+
+                appendCameraCoords(sb, cursorBloc, cursorBloc2);
+
+                if (!IsEmptyTrayMode)
                 {
-                    //appendMotorCoords(sb, cursorBloc, cursorBloc2);
-                    //appendWorldCoords(sb, cursorBloc, cursorBloc2);
-                    //appendPlcCompensation(sb, cursorBloc, row, col);
-                    appendDetailCoordsInfo(sb, row, col, cursorBloc, cursorBloc2);
-                    isShowScore = false;
+                    if (TransformsModel != null)
+                    {
+                        //appendMotorCoords(sb, cursorBloc, cursorBloc2);
+                        //appendWorldCoords(sb, cursorBloc, cursorBloc2);
+                        //appendPlcCompensation(sb, cursorBloc, row, col);
+                        appendDetailCoordsInfo(sb, row, col, cursorBloc, cursorBloc2);
+                        isShowScore = false;
+                    }
                 }
-            }
 
-            if (isShowScore || IsEmptyTrayMode)
+                if (isShowScore || IsEmptyTrayMode)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine($"Score= {cursorBloc.Score:0.00}");
+                    sb.AppendLine($"Size= {cursorBloc.Rect.Width}x{cursorBloc.Rect.Height}");
+                }
+
+                return sb.ToString();
+            }
+            catch (Exception ex)
             {
-                sb.AppendLine();
-                sb.AppendLine($"Score= {cursorBloc.Score:0.00}");
-                sb.AppendLine($"Size= {cursorBloc.Rect.Width}x{cursorBloc.Rect.Height}");
+                return "";
             }
-
-            return sb.ToString();
         }
         void appendCameraCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
