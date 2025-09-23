@@ -27,8 +27,8 @@ namespace LaserAlignDX
                 return;
             }
 
-            var frm = new Traveller106.frmMainDX();
-            
+            Form frm = new Traveller106.frmMainDX();
+
             //frm.Load += (s, e) => GaMvcConfig.OpenCalibrationTool();
             //frm.Load += (s, e) => GaMvcConfig.OpenTamplateEditor(Model.Coords.CarrierEnum.C2);
 

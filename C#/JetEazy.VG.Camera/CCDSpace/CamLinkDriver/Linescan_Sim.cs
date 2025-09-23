@@ -881,8 +881,8 @@ namespace JetEazy.CCDSpace.CamLinkDriver
 
             while (_threadRunFlag)
             {
-                // 每隔 50 ms 跑一次
-                System.Threading.Thread.Sleep(50);
+                // 每隔 200 ms 跑一次
+                System.Threading.Thread.Sleep(100);
                 _evGrabStart.WaitOne();
 
                 if (_simImg == null)
@@ -904,6 +904,8 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                     camera.uBytes = totalBytes;
                     camera.iWidth = width;
                     camera.iHeight = height;
+
+                    Cv2.Flip(_simImg, _simImg, FlipMode.X);
 
                     var roi = new Rect(10, 10, 10, 10);
                     Cv2.BitwiseNot(_simImg[roi], _simImg[roi]);

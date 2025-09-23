@@ -71,7 +71,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 }
                 catch (Exception ex)
                 {
-                    LtDebug.LOG.Error(ex, "MvdFlyResultDispUI.Update");
+                    _ERROR(ex, "MvdFlyResultDispUI.Update");
                 }
             }
         }
@@ -80,133 +80,149 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         CMvdShape[] createMvdDrawItemsWithCrossLines(FlyMetaData drawData)
         {
             var mvdShapes = new List<CMvdShape>();
-            MVD_COLOR color;
 
-            var flyID = drawData.flyID;
-            var aoiResult = drawData.flyAoiResult;
-            var resultCode = aoiResult.Code;
-            var roiRect = drawData.roiRect;
-            var centerRun = drawData.xCentroid;
-            var templateRect = drawData.xTemplateRect;
-            var imgSize = drawData.bmpFly.Size;
-
-            string text = formatText(flyID.ShowID, aoiResult.OffsetX, aoiResult.OffsetY, aoiResult.OffsetAngle);
-
-            CMvdRectangleF mvdRect;
-
-            if (resultCode == PlcFlyResultCode.OK)
+            try
             {
-                color = new MVD_COLOR(0, 255, 0);
+                MVD_COLOR color;
 
-                //-----------------------------------------------------------------------
-                // 使用笨笨的 MVD 找出 Rotated Rectangle (Box2D
-                // 這個很容易用 OpenCvSharp 達成
-                //-----------------------------------------------------------------------
+                var flyID = drawData.flyID;
+                var aoiResult = drawData.flyAoiResult;
+                var resultCode = aoiResult.Code;
+                var roiRect = drawData.roiRect;
+                var centerRun = drawData.xCentroid;
+                var templateRect = drawData.xTemplateRect;
+                var imgSize = drawData.bmpFly.Size;
 
-                var mvdRectBase = GaMvdConvertor.ToCMvdRectangleF(ref templateRect);
-                mvdRect = PositionFixRun(mvdRectBase,
-                                         templateRect,
-                                         new Rectangle(Point.Empty, imgSize),
-                                         drawData.xResult) as CMvdRectangleF;
+                string text = formatText(flyID.ShowID, aoiResult.OffsetX, aoiResult.OffsetY, aoiResult.OffsetAngle);
 
-                mvdRect.CenterX += roiRect.X;
-                mvdRect.CenterY += roiRect.Y;
-                mvdShapes.Add(mvdRect);
+                CMvdRectangleF mvdRect;
+
+                if (resultCode == PlcFlyResultCode.OK)
+                {
+                    color = new MVD_COLOR(0, 255, 0);
+
+                    //-----------------------------------------------------------------------
+                    // 使用笨笨的 MVD 找出 Rotated Rectangle (Box2D
+                    // 這個很容易用 OpenCvSharp 達成
+                    //-----------------------------------------------------------------------
+
+                    var mvdRectBase = GaMvdConvertor.ToCMvdRectangleF(ref templateRect);
+                    mvdRect = PositionFixRun(mvdRectBase,
+                                             templateRect,
+                                             new Rectangle(Point.Empty, imgSize),
+                                             drawData.xResult) as CMvdRectangleF;
+
+                    mvdRect.CenterX += roiRect.X;
+                    mvdRect.CenterY += roiRect.Y;
+                    mvdShapes.Add(mvdRect);
+                }
+                else
+                {
+                    color = new MVD_COLOR(255, 0, 0);
+                    mvdRect = new CMvdRectangleF(centerRun.X, centerRun.Y, roiRect.Width, roiRect.Height);
+                    mvdShapes.Add(mvdRect);
+                }
+
+                ////var RectangleShape
+                ////    = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
+                //if (iFlyResult[flyIndex] == 1)
+                //    mvdRect.BorderColor = new MVD_COLOR(0, 255, 0);
+                //else
+                //    mvdRect.BorderColor = new MVD_COLOR(255, 0, 0);
+                //CMvdTextF cMvdTextF = new CMvdTextF(100, 100, $"耗时:{ms.ToString("0.00")} ms");
+                //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
+                //cMvdTextF.FontWidth = 20;
+
+                //添加十字线
+                CMvdLineSegmentF v1 = new CMvdLineSegmentF(
+                                            new MVD_POINT_F(0, imgSize.Height / 2),
+                                            new MVD_POINT_F(imgSize.Width, imgSize.Height / 2));
+                v1.BorderColor = new MVD_COLOR(255, 215, 0);
+                v1.BorderWidth = 1;
+                mvdShapes.Add(v1);
+
+                CMvdLineSegmentF h1 = new CMvdLineSegmentF(
+                                            new MVD_POINT_F(imgSize.Width / 2, 0),
+                                            new MVD_POINT_F(imgSize.Width / 2, imgSize.Height));
+                h1.BorderColor = new MVD_COLOR(255, 215, 0);
+                h1.BorderWidth = 1;
+                mvdShapes.Add(h1);
+
+                CMvdTextF mvdText = new CMvdTextF(mvdRect.CenterX, mvdRect.CenterY, text);
+                mvdText.BorderColor = color; // new MVD_COLOR(0, 255, 0);
+                mvdText.FontWidth = 20;
+                mvdShapes.Add(mvdText);
+
+                return mvdShapes.ToArray();
             }
-            else
+            catch(Exception ex)
             {
-                color = new MVD_COLOR(255, 0, 0);
-                mvdRect = new CMvdRectangleF(centerRun.X, centerRun.Y, roiRect.Width, roiRect.Height);
-                mvdShapes.Add(mvdRect);
+                _ERROR(ex, "createMvdDrawItemsWithCrossLines");
+                return mvdShapes.ToArray();
             }
-
-            ////var RectangleShape
-            ////    = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
-            //if (iFlyResult[flyIndex] == 1)
-            //    mvdRect.BorderColor = new MVD_COLOR(0, 255, 0);
-            //else
-            //    mvdRect.BorderColor = new MVD_COLOR(255, 0, 0);
-            //CMvdTextF cMvdTextF = new CMvdTextF(100, 100, $"耗时:{ms.ToString("0.00")} ms");
-            //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
-            //cMvdTextF.FontWidth = 20;
-
-            //添加十字线
-            CMvdLineSegmentF v1 = new CMvdLineSegmentF(
-                                        new MVD_POINT_F(0, imgSize.Height / 2),
-                                        new MVD_POINT_F(imgSize.Width, imgSize.Height / 2));
-            v1.BorderColor = new MVD_COLOR(255, 215, 0);
-            v1.BorderWidth = 1;
-            mvdShapes.Add(v1);
-
-            CMvdLineSegmentF h1 = new CMvdLineSegmentF(
-                                        new MVD_POINT_F(imgSize.Width / 2, 0),
-                                        new MVD_POINT_F(imgSize.Width / 2, imgSize.Height));
-            h1.BorderColor = new MVD_COLOR(255, 215, 0);
-            h1.BorderWidth = 1;
-            mvdShapes.Add(h1);
-
-            CMvdTextF mvdText = new CMvdTextF(mvdRect.CenterX, mvdRect.CenterY, text);
-            mvdText.BorderColor = color; // new MVD_COLOR(0, 255, 0);
-            mvdText.FontWidth = 20;
-            mvdShapes.Add(mvdText);
-
-            return mvdShapes.ToArray();
         }
         CMvdShape[] createMvdDrawItemsWithBlobs(FlyMetaData drawData)
         {
             var mvdShapes = new List<CMvdShape>();
-            MVD_COLOR color;
-
-            var flyID = drawData.flyID;
-            var aoiResult = drawData.flyAoiResult;
-            var resultCode = aoiResult.Code;
-            var roiRect = drawData.roiRect;
-            var blobs = drawData.xBlobs;
-            string text = formatText(flyID.ShowID, aoiResult.OffsetX, aoiResult.OffsetY, aoiResult.OffsetAngle);
-
-            #region MVD_RECTANGLES
-            if (resultCode == PlcFlyResultCode.OK)
+            try
             {
-                color = new MVD_COLOR(0, 255, 0);
-                foreach (var blob in blobs)
+                MVD_COLOR color;
+                var flyID = drawData.flyID;
+                var aoiResult = drawData.flyAoiResult;
+                var resultCode = aoiResult.Code;
+                var roiRect = drawData.roiRect;
+                var blobs = drawData.xBlobs;
+                string text = formatText(flyID.ShowID, aoiResult.OffsetX, aoiResult.OffsetY, aoiResult.OffsetAngle);
+
+                #region MVD_RECTANGLES
+                if (resultCode == PlcFlyResultCode.OK)
                 {
-                    var mvdRect = new CMvdRectangleF(
-                            blob.RectInfo.CenterX + roiRect.X,
-                            blob.RectInfo.CenterY + roiRect.Y,
-                            blob.RectInfo.Width,
-                            blob.RectInfo.Height)
+                    color = new MVD_COLOR(0, 255, 0);
+                    foreach (var blob in blobs)
                     {
-                        BorderColor = color
-                    };
+                        var mvdRect = new CMvdRectangleF(
+                                blob.RectInfo.CenterX + roiRect.X,
+                                blob.RectInfo.CenterY + roiRect.Y,
+                                blob.RectInfo.Width,
+                                blob.RectInfo.Height)
+                        {
+                            BorderColor = color
+                        };
+                        mvdShapes.Add(mvdRect);
+                    }
+                }
+                else
+                {
+                    color = new MVD_COLOR(255, 0, 0);
+                    //RectangleShape1 = new CMvdRectangleF(roiRect.X, roiRect.Y, roiRect.Width, roiRect.Height);
+                    //RectangleShape2 = new CMvdRectangleF(roiRect.X, roiRect.Y, roiRect.Width, roiRect.Height);
+                    //RectangleShape1.BorderColor = new MVD_COLOR(255, 0, 0);
+                    //RectangleShape2.BorderColor = new MVD_COLOR(255, 0, 0);
+                    var mvdRect = GaMvdConvertor.ToCMvdRectangleF(ref roiRect);
+                    mvdRect.BorderColor = color;
                     mvdShapes.Add(mvdRect);
                 }
+                #endregion
+
+                #region MVD_TEXT
+                //CMvdTextF cMvdTextF = new CMvdTextF(100, 100, $"耗时:{ms.ToString("0.00")} ms");
+                //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
+                //cMvdTextF.FontWidth = 20;
+                var centerPt = JetEazy.Qcvt.Center(ref roiRect);
+                var mvdText = new CMvdTextF(centerPt.X, centerPt.Y, text);
+                //mvdText.BorderColor = new MVD_COLOR(0, 255, 0);
+                mvdText.BorderColor = color;
+                mvdText.FontWidth = 15;
+                mvdShapes.Add(mvdText);
+                #endregion
+
+                return mvdShapes.ToArray();
             }
-            else
+            catch (Exception ex)
             {
-                color = new MVD_COLOR(255, 0, 0);
-                //RectangleShape1 = new CMvdRectangleF(roiRect.X, roiRect.Y, roiRect.Width, roiRect.Height);
-                //RectangleShape2 = new CMvdRectangleF(roiRect.X, roiRect.Y, roiRect.Width, roiRect.Height);
-                //RectangleShape1.BorderColor = new MVD_COLOR(255, 0, 0);
-                //RectangleShape2.BorderColor = new MVD_COLOR(255, 0, 0);
-                var mvdRect = GaMvdConvertor.ToCMvdRectangleF(ref roiRect);
-                mvdRect.BorderColor = color;
-                mvdShapes.Add(mvdRect);
+                _ERROR(ex, "createMvdDrawItemsWithBlobs");
+                return mvdShapes.ToArray();
             }
-            #endregion
-
-            #region MVD_TEXT
-            //CMvdTextF cMvdTextF = new CMvdTextF(100, 100, $"耗时:{ms.ToString("0.00")} ms");
-            //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
-            //cMvdTextF.FontWidth = 20;
-            var centerPt = JetEazy.Qcvt.Center(ref roiRect);
-            var mvdText = new CMvdTextF(centerPt.X, centerPt.Y, text);
-            //mvdText.BorderColor = new MVD_COLOR(0, 255, 0);
-            mvdText.BorderColor = color;
-            mvdText.FontWidth = 15;
-            mvdShapes.Add(mvdText);
-            #endregion
-
-            return mvdShapes.ToArray();
         }
         void updateDisplayUI(MVSUI dispUI, CMvdImage mvdImage, params CMvdShape[] shapes)
         {
@@ -275,5 +291,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             cPositionFixToolObj = null;
         }
         #endregion
+
+        void _ERROR(Exception ex, string message)
+        {
+            LtDebug.LOG.Error(ex, message);
+        }
     }
 }

@@ -21,7 +21,6 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.UIMVC;
 using LeTian.AoiLib;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -45,7 +44,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     /// </summary>
     public class GaPlcFlyCameraCtrl : IxTickable
     {
-        static int TOTAL_FLY_CAMERAS => GaMvcConfig.TOTAL_FLY_CAMERAS;
+        static int TOTAL_FLY_FRAMES_COUNT => GaMvcConfig.TOTAL_FLY_FRAMES_COUNT;
 
         #region MACHINE
         MainFPIX3MachineClass MACHINE
@@ -90,25 +89,20 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             get => Universal.IxFlyAreaCam;
         }
 
-        #region PLC_FLY_CAMERA_EXCHANGE_DATA
-        //int m_iFlyIndex = 0;
-        //int[] m_iFlyResult = new int[4];
-        //float[] m_iFlyOffset = new float[4 * 3];
-        bool m_plcStartOld = false;
-        bool m_plcGetImageOld = false;
-        bool m_plcFlyStartOld1 = false;
-        bool m_plcFlyStartOld2 = false;
+        #region PLC_CACHE_FLAGS
+        volatile bool m_cachePlcStart = false;
+        int m_cachePlcFlyStart = 0;
+        #endregion
+
+        #region THE_ON_THE_FLY_FRAME_BUFFERS
+        volatile bool m_isOnTheFlyFrameEnabled = false;
+        volatile bool m_isOnTheFlyFrameBusy = false;
+        byte[][] m_onTheFlyFrameBuffers = new byte[TOTAL_FLY_FRAMES_COUNT][];
+        int m_onTheFlyFrameCount = 0;
         #endregion
 
         #region LOT_DATA_FROM_PLC
         FlyLotData _lotData = new FlyLotData();
-        #endregion
-
-        #region THE_BUFFER_LIST_OF_THE_FLY_DATA_BYTES
-        /// <summary>
-        /// The buffer List of the fly data bytes
-        /// </summary>
-        List<byte[]> _framesBufBytes = new List<byte[]>();
         #endregion
 
         #region GUI_MEMBERS
@@ -122,7 +116,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             _wndOwner = DsFlys[0].Parent;
             AttachDispUIs(DsFlys);
             lblSerialNumber = lblFlyCameraSerialNo;
-            lblSerialNumber.DoubleClick += (s, e) => clearFlyDataBytes();
+            lblSerialNumber.DoubleClick += (s, e) => resetOnTheFlyFrameCount();
             FlyCamera.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
         }
         public void Tick()
@@ -130,9 +124,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             TickPlc();
         }
 
-        void clearFlyDataBytes()
+        void resetOnTheFlyFrameCount()
         {
-            _framesBufBytes?.Clear();
+            m_onTheFlyFrameCount = 0;
         }
         void updateFlyCameraSerialNumber(int serialNumber)
         {
@@ -159,41 +153,45 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             if (plcIO == null)
                 return;
 
-            if (plcIO.bFlyReady)
+            if (plcIO.bFlyReady && plcIO.iFlyStart > 0)
             {
+                // 防止重複進入
+                if (m_isOnTheFlyFrameBusy || !m_isOnTheFlyFrameEnabled)
+                    return;
+
+                // 設定 線程保護 旗標
+                m_isOnTheFlyFrameBusy = true;
+
                 // 複製 Data Bytes
-                byte[] bmpbytes = new byte[camFrameInfo.uBytes];
-                Marshal.Copy(pBuffer, bmpbytes, 0, bmpbytes.Length);
+                byte[] dataBytes = new byte[camFrameInfo.uBytes];
+                Marshal.Copy(pBuffer, dataBytes, 0, dataBytes.Length);
 
-                // 加入到 _bytesFlyDatas (the frame buffers list)
-                _framesBufBytes.Add(bmpbytes);
+                // 存入 OnTheFlyFrameBuffers
+                // 快取 累加前的 m_onTheFlyFrameCount (防止線程效應)
+                int frameIdx = m_onTheFlyFrameCount++;
+                frameIdx %= TOTAL_FLY_FRAMES_COUNT;
+                m_onTheFlyFrameBuffers[frameIdx] = dataBytes;
 
-                // 更新 gui
-                updateFlyCameraSerialNumber(serialNumber: _framesBufBytes.Count);
+                // 更新 GUI (逆行) 
+                // frameCount 就是 Gaara 的 SerialNumber
+                updateFlyCameraSerialNumber(serialNumber: m_onTheFlyFrameCount);
 
-                // 集滿 所有 (4個) 飛拍 圖像
-                if (_framesBufBytes.Count >= TOTAL_FLY_CAMERAS)
+                // 集滿 所有 4次 飛拍 圖像
+                if (m_onTheFlyFrameCount >= TOTAL_FLY_FRAMES_COUNT)
                 {
                     // 清除 PLC 旗標 bFlyReady
                     plcIO.bFlyReady = false;
 
                     // 讀取 PLC iFlyStart
-                    int iflystartindex = plcIO.iFlyStart;
-                    //m_iFlyIndex = TOTAL_FLY_CAMERAS - 1;  //<<< 沒啥作用
+                    int flyStartIndex = plcIO.iFlyStart;
 
                     // 把收集到的 frame buffers 進行 飛拍 像測
-                    this.RunAoiAll(iflystartindex, _framesBufBytes, camFrameInfo.iWidth, camFrameInfo.iWidth);
+                    this.RunAoiAll(flyStartIndex, m_onTheFlyFrameBuffers, camFrameInfo.iWidth, camFrameInfo.iWidth);
                     this.GetAoiAllResults(out var flyResults, out var flyOffsets);
 
                     // 回寫飛拍結果給 PLC
                     plcIO.iFlyResult(flyResults);
                     plcIO.rOffset(flyOffsets);
-
-                    // 設定 PLC 旗標 bFlyDone
-                    plcIO.bFlyDone = true;
-
-                    // 清除 frame buffers list
-                    _framesBufBytes.Clear();
 
                     #region LOG
                     //int[] ints0 = m_iFlyResult;
@@ -213,115 +211,85 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     _LOG_FLY_RESULTS(flyResults, flyOffsets);
                     #endregion
 
+                    // 重置 m_onTheFlyFrameCount
+                    resetOnTheFlyFrameCount();
+                    // 暫停 OnTheFlyFrameBuf
+                    m_isOnTheFlyFrameEnabled = false;
+
+                    // 設定 PLC 旗標 bFlyDone
+                    plcIO.bFlyDone = true;
+
                     // 設定 PLC 旗標 bFlyReady
                     plcIO.bFlyReady = true;
                 }
+
+                // 清除 線程保護 旗標
+                m_isOnTheFlyFrameBusy = false;
             }
         }
         void TickPlc()
         {
-            //btnReady.BackColor = (MACHINE.PLCIO.bSoftwareReady ? Color.Red : Color.FromArgb(192, 255, 192));
-            //if (m_LineScanProcess.IsOn)
-            //    lblState.Text = ToChangeLanguage("执行-线扫测试中") + m_LineScanProcess.ID.ToString();
-            //else
-            //    lblState.Text = ToChangeLanguage("等待");
-            //if (_lastFlySerialNo != bytesFlyDatas.Count)
-            //{
-            //    _lastFlySerialNo = bytesFlyDatas.Count;
-            //    _wndOwner?.Invoke(new Action(() =>
-            //    {
-            //        lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
-            //        lblNumberStr.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
-            //    }));
-            //}
-
-            var bytesFlyDatas = _framesBufBytes;
-            updateFlyCameraSerialNumber(serialNumber: bytesFlyDatas.Count);
-
             var plcIO = MACHINE?.PLCIO;
             if (plcIO == null)
                 return;
 
             if (plcIO.bSoftwareReady)
             {
-                if (plcIO.bScanStart)
+                // (1) 讀取 PLC bScanStart 訊號
+                bool bScanStart = plcIO.bScanStart;
+                // (1.1) 如果有變化
+                if (bScanStart != m_cachePlcStart)
                 {
-                    if (!m_plcStartOld)
-                    {
-                        m_plcStartOld = true;
+                    m_cachePlcStart = bScanStart;
 
-                        _LOG("接收到plc启动信号", Color.Black);
+                    if (bScanStart)
+                    {
+                        _LOG("接收到 PLC 启动信号", Color.Black);
 
                         if (!m_LineScanProcess.IsOn)
                         {
+                            // 暫時屏蔽 OnTheFlyFrameBuffer
+                            m_isOnTheFlyFrameEnabled = false;
+
                             // 更新 LotData
-                            _lotData = new FlyLotData(
-                                            plcIO.sStripID,
-                                            plcIO.sLotID
-                                        );
+                            string stripID = plcIO.sStripID;
+                            string lotID = plcIO.sLotID;
+                            _lotData = new FlyLotData(stripID, lotID);
+
+                            // 啟動 PROCESS
                             m_LineScanProcess.Start();
                         }
                         else
                         {
-                            _LOG("测试中#PLC重复启动", Color.Black);
+                            _LOG("测试中 PLC 重复启动", Color.Red);
+                            LtDebug.LOG.Error("测试中 PLC 重复启动");
                         }
                     }
                 }
-                else
-                {
-                    m_plcStartOld = false;
-                }
 
-                if (plcIO.iFlyStart == 1)
+                // (2) 讀取 PLC iFlyStart 訊號
+                int iFlyStart = plcIO.iFlyStart;
+                // (2.1) 如果有變化
+                if (iFlyStart != m_cachePlcFlyStart)
                 {
-                    if (!m_plcFlyStartOld1)
+                    m_cachePlcFlyStart = iFlyStart;
+
+                    if (iFlyStart > 0)
                     {
-                        m_plcFlyStartOld1 = true;
-                        bytesFlyDatas.Clear();
-                        _LOG("接收到 PLC 飞拍1 启动信号", Color.Black);
+                        _LOG($"接收到 PLC 飛拍{iFlyStart} 启动信号", Color.Blue);
+
+                        // 重置 OnTheFlyFrameCount
+                        resetOnTheFlyFrameCount();
+                        updateFlyCameraSerialNumber(serialNumber: 0);
+
+                        // 啟用 OnTheFlyFrameBuffer
+                        m_isOnTheFlyFrameEnabled = true;
+                    }
+                    else
+                    {
+                        updateFlyCameraSerialNumber(serialNumber: 0);
                     }
                 }
-                else
-                {
-                    m_plcFlyStartOld1 = false;
-                }
-
-                if (plcIO.iFlyStart == 2)
-                {
-                    if (!m_plcFlyStartOld2)
-                    {
-                        m_plcFlyStartOld2 = true;
-                        bytesFlyDatas.Clear();
-                        _LOG("接收到 PLC 飞拍2 启动信号", Color.Black);
-                    }
-                }
-                else
-                {
-                    m_plcFlyStartOld2 = false;
-                }
-
-
-                //if (plcIO.IsGetImage)
-                //{
-                //    if (!m_plcGetImageOld)
-                //    {
-                //        m_plcGetImageOld = true;
-
-                //        CommonLogClass.Instance.LogMessage("接收到plc抓图信号", Color.Black);
-                //        if (!m_LineScanProcess.IsOn)
-                //        {
-                //            m_LineScanProcess.Start("Snap");
-                //        }
-                //        else
-                //        {
-                //            CommonLogClass.Instance.LogMessage("测试中#PLC重复抓图", Color.Black);
-                //        }
-                //    }
-                //}
-                //else
-                //{
-                //    m_plcGetImageOld = false;
-                //}
             }
         }
 
@@ -342,8 +310,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         void _LOG(string msg, Color color)
         {
-            //>>> GaUtil.LOG(msg, args);
-            _LOG(msg, color);
+            GaUtil.LOG(msg, color);
         }
         #endregion
 
@@ -368,21 +335,19 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             _wndOwner = dispUIs[0].Parent;
             _DispUIs = Array.ConvertAll(dispUIs, ui => new MvdFlyResultDispUI(ui));
         }
-        void RunAoiAll(int flyStart, List<byte[]> framesBufBytes, int frameWidth, int frameHeight)
+        void RunAoiAll(int flyStart, byte[][] framesBufBytes, int frameWidth, int frameHeight)
         {
-            int iShowIdx = 0;
-
-            for (int iFrameIdx = framesBufBytes.Count - 1; iFrameIdx >= 0; iFrameIdx--, iShowIdx++)
+            int index = 0;
+            for (int iFrameIdx = framesBufBytes.Length - 1; iFrameIdx >= 0; iFrameIdx--, index++)
             {
+                // 為何要倒著順序 取出 frame buffer?
                 byte[] bytes = framesBufBytes[iFrameIdx];
 
                 using (var bmpFly = GaImageUtil.CreateBitmapU8(bytes, frameWidth, frameHeight))
                 {
-                    var flyID = new FlyID(flyStart, iShowIdx);
+                    var flyID = new FlyID(flyStart, index);
                     flyRunAoiOne(flyID, bmpFly);
                 }
-
-                //m_iFlyIndex--;  //<<< 沒啥作用
             }
         }
         void GetAoiAllResults(out int[] flyResults, out float[] flyOffsets)
@@ -450,6 +415,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 aoiMetaData.xResult = xRecipe.mvdprintFlytemp_Find.xResults[0];
                 aoiMetaData.xResult.fCenterX += roiRect.X;
                 aoiMetaData.xResult.fCenterY += roiRect.Y;
+                aoiMetaData.xTemplateRect = xRecipe.xRectRegionPrintFly;
                 aoiMetaData.xCentroid = new PointF(aoiMetaData.xResult.fCenterX, aoiMetaData.xResult.fCenterY);
                 aoiMetaData.roiRect = roiRect;
                 aoiMetaData.bmpFly = bmpFly;

@@ -13,6 +13,8 @@
  */
 #endregion
 
+using System;
+using System.ComponentModel;
 using System.Drawing;
 
 
@@ -21,8 +23,11 @@ namespace VsCommon.ControlSpace.IOSpace
     /// <summary>
     /// 模擬 德龍 PLC IO
     /// </summary>
-    public class MainFPIX3IOSim : GeoIOClass, IPlcIoFPIX3
+    public class MainFPIX3IOSim : GeoIOClass, IPlcIoFPIX3Sim
     {
+        public event EventHandler<DoWorkEventArgs> OnRequestSimLineScan;
+        public event EventHandler<DoWorkEventArgs> OnRequestSimFlyCam;
+
         #region 发送数据的格式排列注释
         /*
          * 线扫相机触发方式
@@ -68,7 +73,12 @@ namespace VsCommon.ControlSpace.IOSpace
         //    ADR_ScanStatus = 9,
         //}
 
-        private int _simStageID = 1;
+        private int _simRunCount = 0;
+        private int _simChipCount = 0;
+        private bool _simSoftwareReady = false;
+        private int _simScanResult = 0;
+        private int _simFlyStart = 0;
+        private bool _simFlyDone = false;
 
         public void Initial(string path, JetEazy.ControlSpace.PLCSpace.VsCommPLC[] plc)
         {
@@ -101,9 +111,22 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public bool bSoftwareReady
         {
-            get;
-            set;
+            get => _simSoftwareReady;
+            set
+            {
+                if (_simSoftwareReady != value)
+                {
+                    _simSoftwareReady = value;
+                    if (_simSoftwareReady)
+                    {
+                        ((Action)sim_StartScan).BeginInvoke(null, null);
+                    }
+                }
+            }
         }
+        /// <summary>
+        /// 心跳
+        /// </summary>
         public bool bSyncClock
         {
             get;
@@ -131,6 +154,7 @@ namespace VsCommon.ControlSpace.IOSpace
         {
             get; set;
         }
+
         public bool bQRUsed
         {
             get; set;
@@ -139,6 +163,7 @@ namespace VsCommon.ControlSpace.IOSpace
         {
             get; set;
         }
+
         /// <summary>
         /// PLC->PC 线扫状态,1-尺寸外观,2-读码,3-空载台
         /// </summary>
@@ -152,7 +177,15 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public int iScanResult
         {
-            get; set;
+            get => _simScanResult;
+            set
+            {
+                if (_simScanResult != value)
+                {
+                    _simScanResult = value;
+                    ((Action)sim_StartFly).BeginInvoke(null, null);
+                }
+            }
         }
 
         /// <summary>
@@ -223,10 +256,11 @@ namespace VsCommon.ControlSpace.IOSpace
             get;
             set;
         } = "Strip_NONE";
+
         public int iFlyStart
         {
-            get;
-            set;
+            get => _simFlyStart;
+            set => _simFlyStart = value;
         }
         public bool bFlyReady
         {
@@ -235,8 +269,16 @@ namespace VsCommon.ControlSpace.IOSpace
         }
         public bool bFlyDone
         {
-            get;
-            set;
+            get => _simFlyDone;
+            set
+            {
+                if (_simFlyDone != value)
+                {
+                    _simFlyDone = value;
+                    if (_simFlyDone)
+                        ((Action)sim_NextFly).BeginInvoke(null, null);
+                }
+            }
         }
 
         /// <summary>
@@ -289,7 +331,7 @@ namespace VsCommon.ControlSpace.IOSpace
         {
             get;
             set;
-        }
+        } = "SIM";
 
         /// <summary>
         /// 载台一纠偏计算位置
@@ -345,9 +387,68 @@ namespace VsCommon.ControlSpace.IOSpace
             private set;
         } = 1;
 
-        void IPlcIoFPIX3.simActiveStage(int stageId1)
+        void IPlcIoFPIX3Sim.simActiveStage(int stageId1)
         {
             iScanStage = stageId1 == 2 ? 2 : 1;
+        }
+
+        void sim_StartScan()
+        {
+            _simScanResult = -1;
+
+            _simRunCount++;
+            sStripID = $"Strip_SIM_{_simRunCount:000}";
+            sLotID = $"Lot_SIM_{_simRunCount:000}";
+
+            //*** bFlyReady ***
+            bFlyReady = true;   // 根據 Gaara 描述, 一旦啟動 bSoftwareReady, bFlyReady 就馬上 ON
+
+            // 要求載入模擬影像
+            System.Threading.Thread.Sleep(10);
+            if (OnRequestSimLineScan != null)
+            {
+                var e = new DoWorkEventArgs(this) { Cancel = false };
+                OnRequestSimLineScan(this, e);
+                if (e.Cancel)
+                    return;
+            }
+
+            // 模擬 10 ms 後, 觸發 Line Scan Image
+            System.Threading.Thread.Sleep(10);
+
+            _simFlyDone = false;
+            _simFlyStart = 0;
+
+            bScanStart = true;
+        }
+        
+        void sim_StartFly()
+        {
+            // 模擬 1000 ms 後, iFlyStart = 1
+            System.Threading.Thread.Sleep(1000);
+            _simChipCount = 0;
+            _simFlyStart = 1;
+            bScanStart = false;
+        }
+        void sim_NextFly()
+        {
+            _simChipCount++;
+
+            if (_simChipCount < 154)
+            {
+                // 模擬 1000 ms 後, 變換 iFlyStart
+                System.Threading.Thread.Sleep(100);
+                _simFlyDone = false;
+                _simFlyStart = _simFlyStart == 1 ? 2 : 1;
+            }
+            else
+            {
+                System.Threading.Thread.Sleep(1000);
+                _simFlyStart = 0;
+                System.Threading.Thread.Sleep(1000);
+                _simFlyDone = true;
+                bScanStart = false;
+            }
         }
     }
 }

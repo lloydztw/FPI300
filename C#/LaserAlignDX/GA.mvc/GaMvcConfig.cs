@@ -44,7 +44,7 @@ namespace LaserAlignDX
         #region CONFIG
         public static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER = true;
         public static bool OPT_USE_LETIAN_CALIB = true;
-        public static int TOTAL_FLY_CAMERAS => 4;
+        public static int TOTAL_FLY_FRAMES_COUNT => 4;
         #endregion
 
         #region PRIVATE_DATA

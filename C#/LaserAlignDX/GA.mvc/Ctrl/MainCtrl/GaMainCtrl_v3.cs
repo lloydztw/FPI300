@@ -14,16 +14,13 @@
  */
 #endregion
 
-using AUVision;
 using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
-using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
-using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
@@ -31,18 +28,12 @@ using LaserAlignDX.UISpace.UIMVC;
 using NeedleX.ProcessSpace;
 using OpenCvSharp.Extensions;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+using System.ComponentModel;
 using System.Drawing;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Windows.Forms;
 using Traveller106;
 using TravellerMINIX6.ProcessSpace;
-using VisionDesigner;
-using VisionDesigner.BlobFind;
-using VisionDesigner.PositionFix;
+using VsCommon.ControlSpace.IOSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
 
@@ -77,7 +68,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         void mxSimPlcStageID(CarrierEnum carrierID)
         {
             var plcIO = MACHINE?.PLCIO;
-            plcIO?.simActiveStage((int)carrierID + 1);
+            if (plcIO is IPlcIoFPIX3Sim sim)
+            {
+                sim.simActiveStage((int)carrierID + 1);
+                sim.sRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
+            }
         }
         #endregion
 
@@ -207,20 +202,25 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         void InitEventHandlers()
         {
             _lineScanImageHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
-
             m_LineScanProcess.OnStarted += OnAoiProcess_Started;
             m_LineScanProcess.OnCompleted += OnAoiProcess_Completed;
             m_SingleProcess.OnStarted += OnAoiProcess_Started;
             m_SingleProcess.OnCompleted += OnAoiProcess_Completed;
-
             _aoiModel.OnAoiProgressing += AoiEngine_OnAoiProgressing;
             _aoiModel.OnAoiBegin += AoiEngine_OnAoiBegin;
             _aoiModel.OnAoiEnd += AoiEngine_OnAoiEnd;
-
             _sysModel.OnError += SysModel_OnError;
-
             _wndOwner.HandleDestroyed += (s, e) => _flyCtrl = null;
+
+            // SIMULATION
+            var plcIO = MACHINE?.PLCIO;
+            if (plcIO is IPlcIoFPIX3Sim sim)
+            {
+                sim.sRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
+                sim.OnRequestSimLineScan += Sim_OnRequestSimLineScan;
+            }
         }
+
         void TickAllProcesses()
         {
             m_LineScanProcess.Tick();
@@ -259,6 +259,28 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             else
             {
                 update_LineScanImage();
+            }
+        }
+        private void Sim_OnRequestSimLineScan(object sender, DoWorkEventArgs e)
+        {
+            if(_wndOwner.InvokeRequired)
+            {
+                _wndOwner.Invoke((DoWorkEventHandler)Sim_OnRequestSimLineScan, sender, e);
+            }
+            else
+            {
+                //-----------------------------------------------------------------------
+                // 【模擬】
+                //-----------------------------------------------------------------------
+                if (_lineScanImageHolder.IsEmpty())
+                {
+                    string fileName = GaUtil.BrowseImageFile();
+                    if (fileName != null)
+                    {
+                        loadLineScanImage(fileName);
+                    }
+                }
+                e.Cancel = _lineScanImageHolder.IsEmpty();
             }
         }
         #endregion

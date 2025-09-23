@@ -101,8 +101,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         Font _font = null;
         #endregion
 
-        public bool OPT_SHOW_TOOL_TIP_DETAILS => Traveller106.INI.Instance.IsResultShowChar;
-
         public Control lblSummaryTitle
         {
             get;
@@ -581,12 +579,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         protected override string composeTooltipText(EzBloc cursor, EzBloc cursor2)
         {
-            if (!OPT_SHOW_TOOL_TIP_DETAILS)
-            {
-                _cviRegionBox.Visible = false;
-                return "";
-            }
-
             var cellBloc = cursor as CellBloc;
 
             _cviRegionBox.Box2D.SetCenter((float)cellBloc.Center.X, (float)cellBloc.Center.Y);
@@ -648,9 +640,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             try
             {
-                if (!OPT_SHOW_TOOL_TIP_DETAILS)
-                    return "";
-
                 if (cursorBloc == null)
                     return "";
 

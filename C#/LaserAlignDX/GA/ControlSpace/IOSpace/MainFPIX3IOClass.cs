@@ -498,11 +498,6 @@ namespace VsCommon.ControlSpace.IOSpace
             }
         }
 
-        void IPlcIoFPIX3.simActiveStage(int stageId1)
-        {
-            // 實體 PLCIO 不用實作此函式 !
-        }
-
         AddressClass getCipAdress(string eAdrStr)
         {
             AddressClass address = new AddressClass($"0:Gvl_PhotoPC.{eAdrStr}");
