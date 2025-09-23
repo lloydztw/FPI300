@@ -27,6 +27,8 @@ namespace LaserAlignDX.Mvc.Gui
     {
         public event EventHandler OnCursorsChanged;
 
+        public bool BY_PASS => !Traveller106.INI.Instance.IsResultShowChar;
+
         #region GUI_MEMBERS
         protected ToolTip _toolTip = new ToolTip();
         protected EzBloc _cursorBloc = null;
@@ -332,9 +334,13 @@ namespace LaserAlignDX.Mvc.Gui
         #region PRIVATE_FETCH_FUNCTIONS
         protected EzBloc fetchOne(int x, int y)
         {
+            if (BY_PASS)
+                return null;
+
             var blobs = fetchKNN(x, y, 1, _fetchSize, iterFetchableBlocs());
             if (blobs != null && blobs.Length > 0)
                 return blobs[0];
+
             return null;
         }
         protected EzBloc[] fetchKNN(int x, int y, int kNumber, Size range, IEnumerable<EzBloc> srcBlobs)
@@ -412,7 +418,7 @@ namespace LaserAlignDX.Mvc.Gui
         #region PRIVATE_TOOL_TIP_FUNCTIONS
         bool handleMouseMove(CvImageViewer viewer, MouseEventArgs e)
         {
-            if (Visible && Enabled)
+            if (Visible && Enabled && !BY_PASS)
             {
                 int xx = e.X;
                 int yy = e.Y;

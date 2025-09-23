@@ -79,7 +79,15 @@ namespace LaserAlignDX.AoiModel
 
     public class FlyLotData
     {
-        public string StripID = "Strip_NONE";
-        public string LotID = "Lot_NONE";
+        public string StripID;
+        public string LotID;
+        public FlyLotData(string stripID, string lotID)
+        {
+            StripID = stripID;
+            LotID = lotID;
+        }
+        public FlyLotData() : this("Strip_NONE", "Lot_NONE")
+        {
+        }
     }
 }

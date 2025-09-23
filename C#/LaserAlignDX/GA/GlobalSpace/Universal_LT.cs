@@ -36,7 +36,7 @@ namespace Traveller106
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/09/23";
+        public const string VersionDate = "2025/09/24";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;

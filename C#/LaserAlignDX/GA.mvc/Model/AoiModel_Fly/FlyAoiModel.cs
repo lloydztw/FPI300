@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.Machine;
 using JetEazy.Utils;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -22,6 +23,7 @@ using System.Drawing;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
+using VsCommon.ControlSpace.MachineSpace;
 
 
 namespace LaserAlignDX.AoiModel
@@ -40,13 +42,23 @@ namespace LaserAlignDX.AoiModel
         }
         #endregion
 
-        #region OFFSETS_IN_RECIPE
-        PointF[] FlyOffsetUseStage
+        #region MACHINE
+        MainFPIX3MachineClass MACHINE
+        {
+            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
+        }
+        #endregion
+
+        #region RECIPE_OFFSETS
+        PointF[] _xFlyOffsetUseStage
         {
             get
             {
-                var carrierID = _sysModel.ActiveCarrierID;
-                return carrierID == CarrierEnum.C1 ? _xFlyPara.ptsOffset : _xFlyPara.ptsOffset2;
+                //var carrierID = _sysModel.ActiveCarrierID;
+                //return carrierID == CarrierEnum.C1 ? xFlyPara.ptsOffset : xFlyPara.ptsOffset2;
+                var plcIO = MACHINE?.PLCIO;
+                var stageNo = plcIO != null ? plcIO.iScanStage : 1;
+                return stageNo == 1 ? _xFlyPara.ptsOffset : _xFlyPara.ptsOffset2;
             }
         }
         #endregion
@@ -114,15 +126,17 @@ namespace LaserAlignDX.AoiModel
 
             using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                //int err = _xRecipe.PrintTempFlyRun(bmpCrop);
-                bool ok = this.mvdRunAoi(bmpCrop);
-
+                bool ok = this.runMvd_TemplateMatch(bmpCrop);
                 aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
 
-                aoiMetaData.xTemplateRect = _xRecipe.xRectRegionPrintFly;
+                // 記入 GUI 畫圖所需要的數據
+                aoiMetaData.xBlobs = null;
                 aoiMetaData.xResult = _xRecipe.mvdprintFlytemp_Find.xResults[0];
-                aoiMetaData.bmpFly = bmpFly;
+                aoiMetaData.xTemplateRect = _xRecipe.xRectRegionPrintFly;
                 aoiMetaData.roiRect = roiRect;
+                aoiMetaData.bmpFly = bmpFly;
+                aoiMetaData.flyID = flyID;
+                aoiMetaData.flyAoiResult = aoiResult;
             }
 
             #region OLD_CODE
@@ -218,20 +232,19 @@ namespace LaserAlignDX.AoiModel
             //}
             #endregion
 
-            int showID1 = flyID.ShowID;
-            int flyStart = flyID.flyStart;
-            if (flyStart == 1 || flyStart == 2)
+            if (flyID.flyStart > 0)
             {
                 if (aoiResult.Code == PlcFlyResultCode.OK)
                 {
-                    centerRun.X = aoiMetaData.xResult.fCenterX + roiRect.X;
-                    centerRun.Y = aoiMetaData.xResult.fCenterY + roiRect.Y;
-                    aoiMetaData.xCentroid = centerRun;
+                    //centerRun.X = aoiMetaData.xResult.fCenterX + roiRect.X;
+                    //centerRun.Y = aoiMetaData.xResult.fCenterY + roiRect.Y;
+                    centerRun = aoiMetaData.xCentroid;
 
                     //算出的pix需加入解析度
-                    float _resolutionFly = INI.Instance.FlyImageResolution;
-                    aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[showID1 - 1].X;
-                    aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[showID1 - 1].Y;
+                    int showID1 = flyID.ShowID;
+                    float flyCamResolution = INI.Instance.FlyImageResolution;
+                    aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution + _xFlyOffsetUseStage[showID1 - 1].X;
+                    aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution + _xFlyOffsetUseStage[showID1 - 1].Y;
                     aoiResult.OffsetAngle = aoiMetaData.xResult.fAngle;
                 }
             }
@@ -268,14 +281,16 @@ namespace LaserAlignDX.AoiModel
 
             using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                //bool ok = _xRecipe.CheckSpecialAngle(bmpCrop, out var blobsList, out float angle, out PointF centerPt);
-                bool ok = this.mvdCheckSpecialAngle(bmpCrop, out var blobsList, out float angle, out PointF centerPt);
-
+                bool ok = this.runMvd_CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
                 aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
                 aoiResult.OffsetAngle = ok ? angle : 0f;
 
-                aoiMetaData.xBlobs = blobsList;
-                aoiMetaData.xTemplateRect = _xRecipe.xRectRegionPrintFly;
+                // 記入 GUI 畫圖所需要的數據
+                aoiMetaData.xBlobs = mvdBlobs;
+                aoiMetaData.roiRect = roiRect;
+                aoiMetaData.bmpFly = bmpFly;
+                aoiMetaData.flyID = flyID;
+                aoiMetaData.flyAoiResult = aoiResult;
             }
 
             #region OLD_CODE
@@ -329,20 +344,23 @@ namespace LaserAlignDX.AoiModel
             //}
             #endregion
 
-            int flyStart = flyID.flyStart;
-            if (flyStart == 1 || flyStart == 2)
+            if (flyID.flyStart > 0)
             {
-                //updateOneResult(flyID, aoiResult);
             }
             else
             {
+                // 不應該會執行到此
+                //aoiResult.Code = PlcFlyResultCode.NG;
+                //aoiResult.OffsetX = 0f;
+                //aoiResult.OffsetY = 0f;
+                //aoiResult.OffsetAngle = 0f;
             }
 
             flystopwatch.Stop();
             return aoiResult;
         }
 
-        bool mvdRunAoi(Bitmap bmpFly)
+        bool runMvd_TemplateMatch(Bitmap bmpFly)
         {
             var mvdTool = _xRecipe.mvdprintFlytemp_Find;
 
@@ -355,7 +373,7 @@ namespace LaserAlignDX.AoiModel
 
             return bOK;
         }
-        bool mvdCheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> resultBlobs, out float resultAngle, out PointF resultCenter)
+        bool runMvd_CheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> resultBlobs, out float resultAngle, out PointF resultCenter)
         {
             bool bOK = false;
 

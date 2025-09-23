@@ -22,16 +22,26 @@ using VisionDesigner.BlobFind;
 namespace LaserAlignDX.AoiModel
 {
     /// <summary>
-    /// 用來讓 MVD 畫圖的額外資料
+    /// 用來讓 GUI 畫圖的額外資料
     /// </summary>
     public class FlyMetaData
     {
         public string AlgorithmName;
+        public FlyID flyID;
+        public FlyAoiResult flyAoiResult;
         public Bitmap bmpFly;
         public RectangleF roiRect;
         public RectangleF xTemplateRect;
         public xFindResult xResult;
-        public PointF xCentroid;
+        public PointF xCentroid
+        {
+            get
+            {
+                float x = xResult.fCenterX + roiRect.X;
+                float y = xResult.fCenterY + roiRect.Y;
+                return new PointF(x, y);
+            }
+        }
         public List<CBlobInfo> xBlobs;
     };
 }

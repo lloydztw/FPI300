@@ -21,7 +21,7 @@ namespace LaserAlignDX.AoiModel
         OK = 1,
         NG = 2,
         Empty = 3,
-    }
+    };
 
     public class FlyID
     {
@@ -86,7 +86,7 @@ namespace LaserAlignDX.AoiModel
             StripID = stripID;
             LotID = lotID;
         }
-        public FlyLotData():this("Strip_NONE", "Lot_NONE")
+        public FlyLotData() : this("Strip_NONE", "Lot_NONE")
         {
         }
     }
