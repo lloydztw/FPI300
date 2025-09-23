@@ -1,17 +1,27 @@
-﻿using AUVision;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-09-23 重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using AUVision;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.UISpace.UIMVC;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using Traveller106;
 using VisionDesigner;
-using VisionDesigner.BlobFind;
 using VisionDesigner.PositionFix;
-
-// 關聯到 MINIX6 ???
 
 
 namespace LaserAlignDX.Mvc.Ctrl.V3
@@ -40,7 +50,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             if (_dispUI.InvokeRequired)
             {
-                // 防止 多線呈 的問題
+                // 處理 多線程 的問題
                 _dispUI.Invoke((Action<FlyMetaData, FlyLotData>)Update, drawData, lotData);
             }
             else
@@ -50,16 +60,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     var flyID = drawData.flyID;
                     int flyIndex = flyID.flyIndex;
 
-                    var mvdShapes = drawData.xBlobs != null ?
-                        createMvdDrawItemsWithBlobs(drawData) :
+                    var mvdShapes = (drawData.xBlobs != null)?
+                        createMvdDrawItemsWithBlobs(drawData):
                         createMvdDrawItemsWithCrossLines(drawData);
 
                     using (var mvdImage = GaMvdConvertor.BitmapToCMvdImage(drawData.bmpFly))
                     {
                         updateDisplayUI(_dispUI, mvdImage, mvdShapes);
-
-                        if (INI.Instance.IsSaveDebugBMP && lotData != null)
-                            saveFlyCameraImage(mvdImage, flyID.ShowID, lotData.StripID, lotData.LotID);
                     }
                 }
                 catch (Exception ex)
@@ -222,25 +229,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             return text;
         }
         #endregion
-
-        void saveFlyCameraImage(CMvdImage cMvdImage, int flyShowIndex, string stripID, string lotID)
-        {
-            if (INI.Instance.IsSaveDebugBMP)
-            {
-                try
-                {
-                    string flypath = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{stripID}";
-                    if (!Directory.Exists(flypath))
-                        Directory.CreateDirectory(flypath);
-                    string flyname = $"{lotID}-[{flyShowIndex.ToString()}]-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.jpg";
-                    cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
-                }
-                catch(Exception ex)
-                {
-                    LtDebug.LOG.Error(ex, "MvdFlyResultDispUI.saveFlyCameraImage");
-                }
-            }
-        }
 
         #region MVD_TOOL
         CPositionFixTool cPositionFixToolObj = null;

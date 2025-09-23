@@ -1,18 +1,34 @@
-﻿using JetEazy.Interface;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-09-23 重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.UIMVC;
+using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using Traveller106;
-using VisionDesigner.BlobFind;
 using VsCommon.ControlSpace.MachineSpace;
 
 // 關聯到 MINIX6 ???
@@ -78,10 +94,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         //int m_iFlyIndex = 0;
         //int[] m_iFlyResult = new int[4];
         //float[] m_iFlyOffset = new float[4 * 3];
-
         bool m_plcStartOld = false;
         bool m_plcGetImageOld = false;
-
         bool m_plcFlyStartOld1 = false;
         bool m_plcFlyStartOld2 = false;
         #endregion
@@ -100,6 +114,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         #region GUI_MEMBERS
         Control _wndOwner;
         Control lblSerialNumber;
+        MvdFlyResultDispUI[] _DispUIs;
         #endregion
 
         public void Attach(MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
@@ -127,6 +142,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 lblSerialNumber.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
             }));
         }
+
+        /// <summary>
+        /// 注意: 此 Event Handler 執行於 background thread
+        /// </summary>
         void IxFlyAreaCam_LineTriggerAction(JetEazy.CCDSpace.CameraFrame camFrameInfo, IntPtr pBuffer)
         {
             // 如果 Recipe 編輯窗被打開, 則跳過此 event handler
@@ -236,9 +255,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                         if (!m_LineScanProcess.IsOn)
                         {
                             // 更新 LotData
-                            _lotData.StripID = plcIO.sStripID;
-                            _lotData.LotID = plcIO.sLotID;
-
+                            _lotData = new FlyLotData(
+                                            plcIO.sStripID,
+                                            plcIO.sLotID
+                                        );
                             m_LineScanProcess.Start();
                         }
                         else
@@ -338,12 +358,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         #endregion
 
-        #region GUI
-        //Control _wndOwner;
-        MvdFlyResultDispUI[] _DispUIs;
-        Stopwatch _stopWatch = new Stopwatch();
-        #endregion
-
         #region TOTAL_RESULT_DATA_FOR_PLC
         int[] m_iFlyResult = new int[4];
         float[] m_iFlyOffset = new float[4 * 3];
@@ -390,11 +404,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 flyProcessProSpecial(flyID, bmpFly);
             else
                 flyProcessPro(flyID, bmpFly);
+            saveFlyCamImage(flyID, bmpFly, _lotData);
         }
         void flyProcessPro(FlyID flyID, Bitmap bmpFly)
         {
+            var aoiMetaData = new FlyMetaData();
             var aoiResult = new FlyAoiResult();
-            var flystopwatch = this._stopWatch;
+            var flystopwatch = new Stopwatch();
             flystopwatch.Restart();
 
             #region OLD_CODE
@@ -425,11 +441,21 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             roiRect.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
             GaUtil.Clip(ref roiRect, bmpFly.Size);
 
-            Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-            int err = xRecipe.PrintTempFlyRun(bmpCrop);
-            var foundResult = xRecipe.mvdprintFlytemp_Find.xResults[0];
-            aoiResult.Code = err == 0 ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
-            bmpCrop?.Dispose();
+            using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
+            {
+                int err = xRecipe.PrintTempFlyRun(bmpCrop);
+                aoiResult.Code = err == 0 ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
+
+                // 記入 GUI 畫圖所需要的數據
+                aoiMetaData.xResult = xRecipe.mvdprintFlytemp_Find.xResults[0];
+                aoiMetaData.xResult.fCenterX += roiRect.X;
+                aoiMetaData.xResult.fCenterY += roiRect.Y;
+                aoiMetaData.xCentroid = new PointF(aoiMetaData.xResult.fCenterX, aoiMetaData.xResult.fCenterY);
+                aoiMetaData.roiRect = roiRect;
+                aoiMetaData.bmpFly = bmpFly;
+                aoiMetaData.flyID = flyID;
+                aoiMetaData.flyAoiResult = aoiResult;
+            }
 
             #region OLD_CODE
             //PointF centerOrg = new PointF(
@@ -524,20 +550,22 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             //}
             #endregion
 
-            int showID1 = flyID.ShowID;
             int flyStart = flyID.flyStart;
             if (flyStart == 1 || flyStart == 2)
             {
                 if (aoiResult.Code == PlcFlyResultCode.OK)
                 {
-                    centerRun.X = foundResult.fCenterX + roiRect.X;
-                    centerRun.Y = foundResult.fCenterY + roiRect.Y;
+                    //centerRun.X = foundResult.fCenterX + roiRect.X;
+                    //centerRun.Y = foundResult.fCenterY + roiRect.Y;
+                    centerRun = aoiMetaData.xCentroid;
 
-                    //算出的pix需加入解析度
-                    float _resolutionFly = INI.Instance.FlyImageResolution;
-                    aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[showID1 - 1].X;
-                    aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[showID1 - 1].Y;
-                    aoiResult.OffsetAngle = foundResult.fAngle;
+                    // 算出的 pix 需加入解析度
+                    float flyCamResolution = INI.Instance.FlyImageResolution;
+                    int flyShowID1 = flyID.ShowID;
+
+                    aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
+                    aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
+                    aoiResult.OffsetAngle = aoiMetaData.xResult.fAngle;
                 }
                 updateOneResult(flyID, aoiResult);
             }
@@ -546,7 +574,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
 #if (OPT_OLD_CODE)
             //CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFly);
-
             #region MVD_SHAPES
             var RectangleShape = new CMvdRectangleF(centerRun.X, centerRun.Y, roiRect.Width, roiRect.Height);
 
@@ -673,24 +700,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             //}
             #endregion
 #endif
-
-            #region UPDATE_RESULT_TO_MVD_DISPLAY
-            var drawData = new FlyMetaData()
-            {
-                flyID = flyID,
-                flyAoiResult = aoiResult,
-                bmpFly = bmpFly,
-                roiRect = roiRect,
-                xCentroid = centerRun,
-                xResult = foundResult,
-            };
-            _DispUIs[flyID.flyIndex].Update(drawData, this._lotData);
-            #endregion
+            // 更新 GUI (暫時沿用原來的 逆行 調用處)
+            _DispUIs[flyID.flyIndex].Update(aoiMetaData, this._lotData);
         }
         void flyProcessProSpecial(FlyID flyID, Bitmap bmpFly)
         {
+            var aoiMetaData = new FlyMetaData();
             var aoiResult = new FlyAoiResult();
-            var flystopwatch = this._stopWatch;
+            var flystopwatch = new Stopwatch();
             flystopwatch.Restart();
 
             #region OLD_CODE
@@ -712,14 +729,18 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             roiRect.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
             GaUtil.Clip(ref roiRect, bmpFly.Size);
 
-            PointF centerPt;
-            List<CBlobInfo> blobsList;
-
             using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                bool ok = xRecipe.CheckSpecialAngle(bmpCrop, out blobsList, out float angle, out centerPt);
+                bool ok = xRecipe.CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
                 aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
                 aoiResult.OffsetAngle = ok ? angle : 0f;
+
+                // 記入 GUI 畫圖所需要的數據
+                aoiMetaData.xBlobs = mvdBlobs;
+                aoiMetaData.roiRect = roiRect;
+                aoiMetaData.bmpFly = bmpFly;
+                aoiMetaData.flyID = flyID;
+                aoiMetaData.flyAoiResult = aoiResult;
             }
 
             #region OLD_CODE
@@ -887,18 +908,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             #endregion
 #endif
 
-            #region UPDATE_RESULT_TO_MVD_DISPLAY
-            var drawData = new FlyMetaData()
-            {
-                flyID = flyID,
-                flyAoiResult = aoiResult,
-                bmpFly = bmpFly,
-                roiRect = roiRect,
-                xBlobs = blobsList,
-            };
-            _DispUIs[flyID.flyIndex].Update(drawData, this._lotData);
-            #endregion
+            // 更新 GUI (暫時沿用原來的 逆行 調用處)
+            _DispUIs[flyID.flyIndex].Update(aoiMetaData, this._lotData);
         }
+        
         void updateOneResult(FlyID flyID, FlyAoiResult oneResult)
         {
             int flyIndex = flyID.flyIndex;
@@ -915,6 +928,35 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 m_iFlyOffset[flyIndex * 3 + 0] = 0;
                 m_iFlyOffset[flyIndex * 3 + 1] = 0;
                 m_iFlyOffset[flyIndex * 3 + 2] = 0;
+            }
+        }
+        void saveFlyCamImage(FlyID flyID, Bitmap bmpFly, FlyLotData lotData)
+        {
+            if (INI.Instance.IsSaveDebugBMP)
+            {
+                try
+                {
+                    var tm = DateTime.Now;
+
+                    int flyShowIndex = flyID.ShowID;
+                    string stripID = lotData.StripID;
+                    string lotID = lotData.LotID;
+
+                    //>>> string path = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{stripID}";
+                    string path = System.IO.Path.Combine(INI.Instance.ResultImagePath, "flyImage", tm.ToString("yyyyMMdd"), stripID);
+                    if (!Directory.Exists(path))
+                        Directory.CreateDirectory(path);
+
+                    string fileName = $"{lotID}-[{flyShowIndex}]-{tm.ToString("yyyyMMddHHmmssfff")}.jpg";
+                    fileName = System.IO.Path.Combine(path, fileName);
+
+                    //>>> cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
+                    GaImageUtil.SaveBigImage(fileName, bmpFly);
+                }
+                catch (Exception ex)
+                {
+                    LtDebug.LOG.Error(ex, "GaPlcFlyCameraCtrl.saveFlyCameraImage");
+                }
             }
         }
     }
