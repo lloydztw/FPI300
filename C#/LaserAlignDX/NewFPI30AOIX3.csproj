@@ -358,6 +358,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyAoiResult.cs" />

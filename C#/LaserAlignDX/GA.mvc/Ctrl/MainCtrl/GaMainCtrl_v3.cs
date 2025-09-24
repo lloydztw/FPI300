@@ -116,8 +116,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             get => _DSMains[(int)_activeCarrierID];
         }
         CarrierEnum _activeCarrierID;
-        Timer _timPollingFlyStart = new Timer();
-        int _pollingCountDown = 0;
         #endregion
 
         #region FLY_CTRL
@@ -139,11 +137,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
             // FLY CAMERA Display UI
             _flyCtrl.Attach(DsFlys, lblFlyCameraSerialNo);
-            _flyCtrl.OnFlyStarted += _flyCtrl_OnFlyStarted;
-            _flyCtrl.OnFlyDone += _flyCtrl_OnFlyDone;
-            _timPollingFlyStart.Tick += _timPolling_FlyStartOff;
-            _timPollingFlyStart.Interval = 1000;
-            _pollingCountDown = 100;
+
+            // 自動關閉 ZoomInOut
+            new GaAutoDisableZoomCtrl().Attach(_flyCtrl, _DSMains[0].Window, _DSMains[1].Window);
 
             // Even tHandlers
             InitEventHandlers();
@@ -159,6 +155,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 }));
             };
         }
+
         IvChipCellsViewer buildChipCellsViewer(Control panel, CarrierEnum carrierID)
         {
             //(1) 使用新的 ChipCellsViewer
@@ -254,43 +251,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             FireChangeState(MainS1State.LS_STOP);
             update_AoiResult(e);
             CGOperate();
-        }
-        private void _flyCtrl_OnFlyStarted(object sender, EventArgs e)
-        {
-            if (_wndOwner == null)
-                return;
-
-            if (_wndOwner.InvokeRequired)
-            {
-                _wndOwner?.Invoke((EventHandler)_flyCtrl_OnFlyStarted);
-            }
-            else
-            {
-                _DSMains[0].Window.Enabled = false;
-                _DSMains[1].Window.Enabled = false;
-
-                _timPollingFlyStart.Enabled = false;
-                _timPollingFlyStart.Enabled = true;
-                _pollingCountDown = 5;
-            }
-        }
-        private void _flyCtrl_OnFlyDone(object sender, EventArgs e)
-        {
-            _timPollingFlyStart.Enabled = true;
-            _pollingCountDown = 5;
-        }
-        private void _timPolling_FlyStartOff(object sender, EventArgs e)
-        {
-            if (_pollingCountDown <= 0)
-            {
-                _timPollingFlyStart.Enabled = false;
-                _DSMains[0].Window.Enabled = true;
-                _DSMains[1].Window.Enabled = true;
-            }
-            else
-            {
-                _pollingCountDown--;
-            }
         }
         private void LineScanImageHolder_OnImageChanged(object sender, EventArgs e)
         {

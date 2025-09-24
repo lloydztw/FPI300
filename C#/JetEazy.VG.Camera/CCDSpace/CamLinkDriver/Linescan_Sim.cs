@@ -850,6 +850,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
         }
 
         #region SIM_GRABBING_THREAD
+        private Random _rand = new Random();
         private ManualResetEvent _evGrabStart = new ManualResetEvent(false);
         private Thread _simGrabbingThead = null;
         private volatile bool _threadRunFlag = false;
@@ -905,15 +906,29 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                     camera.iWidth = width;
                     camera.iHeight = height;
 
-                    Cv2.Flip(_simImg, _simImg, FlipMode.Y);
-
-                    var roi = new Rect(10, 10, 10, 10);
-                    Cv2.BitwiseNot(_simImg[roi], _simImg[roi]);
-
-                    unsafe
+                    using (Mat tmp = new Mat())
                     {
-                        IntPtr pBuffer = (IntPtr)_simImg.DataPointer;
-                        FireTrigger(camera, pBuffer);
+                        Cv2.CopyTo(_simImg, tmp);
+
+                        var seed = _rand.NextDouble();
+                        if (seed < 0.3)
+                        {
+                            Cv2.Flip(tmp, tmp, FlipMode.Y);
+                        }
+                        else if (seed < 0.6)
+                        {
+                            var c = _rand.Next(255);
+                            tmp.SetTo(new Scalar(c, c, c));
+                        }
+
+                        var roi = new Rect(10, 10, 10, 10);
+                        Cv2.BitwiseNot(_simImg[roi], _simImg[roi]);
+
+                        unsafe
+                        {
+                            IntPtr pBuffer = (IntPtr)tmp.DataPointer;
+                            FireTrigger(camera, pBuffer);
+                        }
                     }
 
                     m_TriggerOK = true;

@@ -45,7 +45,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     /// </summary>
     public class GaPlcFlyCameraCtrl : IxTickable
     {
+        #region CONFIG
         static int TOTAL_FLY_FRAMES_COUNT => GaMvcConfig.TOTAL_FLY_FRAMES_COUNT;
+        #endregion
 
         public event EventHandler OnFlyStarted;
         public event EventHandler OnFlyDone;
@@ -376,10 +378,17 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
         void flyRunAoiOne(FlyID flyID, Bitmap bmpFly)
         {
-            if (xFlyPara.xIsOpenMuit)
-                flyProcessProSpecial(flyID, bmpFly);
-            else
-                flyProcessPro(flyID, bmpFly);
+            try
+            {
+                if (xFlyPara.xIsOpenMuit)
+                    flyProcessProSpecial(flyID, bmpFly);
+                else
+                    flyProcessPro(flyID, bmpFly);
+            }
+            catch(Exception ex)
+            {
+                LtDebug.LOG.Error(ex, "flyProcessProXxx");
+            }
             saveFlyCamImage(flyID, bmpFly, _lotData);
         }
         void flyProcessPro(FlyID flyID, Bitmap bmpFly)
@@ -423,9 +432,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 aoiResult.Code = err == 0 ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
 
                 // 記入 GUI 畫圖所需要的數據
-                aoiMetaData.xBlobs = null;
-                aoiMetaData.xResult = xRecipe.mvdprintFlytemp_Find.xResults[0];
+                // 注意: xResults.Count 有可能為 0 !!!
+                var xResults = xRecipe.mvdprintFlytemp_Find.xResults;
+                if (xResults.Count > 0)
+                    aoiMetaData.xResult = xResults[0];
+
                 aoiMetaData.xTemplateRect = xRecipe.xRectRegionPrintFly;
+                aoiMetaData.xBlobs = null;
                 aoiMetaData.roiRect = roiRect;
                 aoiMetaData.bmpFly = bmpFly;
                 aoiMetaData.flyID = flyID;

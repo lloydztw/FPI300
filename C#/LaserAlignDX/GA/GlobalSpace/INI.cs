@@ -590,6 +590,7 @@ namespace Traveller106
         //public float take_zposhigh { get; set; } = 43.5f;
 
         #endregion
+
         [Browsable(false)]
         public LangIndex mLangIndex { get; set; } = LangIndex.LangCN;
         [Browsable(false)]
@@ -762,6 +763,12 @@ namespace Traveller106
         [Browsable(true)]
         public bool IsCheat { get; set; } = false;
 
+        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("12.飛拍 自動禁用 圖像縮放")]
+        [Browsable(true)]
+        public bool IsAutoDisableZoom { get; set; } = false;
+
         #endregion
 
         #region SQL_SETUP
@@ -789,7 +796,6 @@ namespace Traveller106
         public string mysql_server_db { get; set; } = "db_2ds_sys";
 
         #endregion
-
 
 
         public void Initial()
@@ -850,6 +856,7 @@ namespace Traveller106
             //IsUseStandBoard = ReadINIValue("Basic", "IsUseStandBoard", (IsUseStandBoard ? "1" : "0"), INIFILE) == "1";
             IsResultShowChar = ReadINIValue("Basic", "IsResultShowChar", (IsResultShowChar ? "1" : "0"), INIFILE) == "1";
             IsCheat = ReadINIValue("Basic", "IsCheat", (IsCheat ? "1" : "0"), INIFILE) == "1";
+            IsAutoDisableZoom = ReadINIValue("Basic", "IsAutoDisableZoom", (IsAutoDisableZoom ? "1" : "0"), INIFILE) == "1";
             //mark_rect = StringtoRect(ReadINIValue("Basic", "mark_rect", RecttoString(mark_rect), INIFILE));
             //mark_org = StringToPointF(ReadINIValue("Basic", "mark_org", PointFtoString(mark_org), INIFILE));
             //mark_thresholdvalue = int.Parse(ReadINIValue("Basic", "mark_thresholdvalue", mark_thresholdvalue.ToString(), INIFILE));
@@ -951,12 +958,16 @@ namespace Traveller106
             WriteINIValue("Basic", "IsSaveTestImage", (IsSaveTestImage ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBMP ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsSaveDebugOrgBmp", (IsSaveDebugOrgBmp ? "1" : "0"), INIFILE);
+
             //WriteINIValue("Basic", "IsOnlyUseLeft", (IsOnlyUseLeft ? "1" : "0"), INIFILE);
             //WriteINIValue("Basic", "BoundaryValue", BoundaryValue.ToString(), INIFILE);
             //WriteINIValue("Basic", "LaserSharePath", LaserSharePath.ToString(), INIFILE);
             //WriteINIValue("Basic", "IsUseStandBoard", (IsUseStandBoard ? "1" : "0"), INIFILE);
+
             WriteINIValue("Basic", "IsResultShowChar", (IsResultShowChar ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsCheat", (IsCheat ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "IsAutoDisableZoom", (IsAutoDisableZoom ? "1" : "0"), INIFILE);
+
             //WriteINIValue("Basic", "mark_rect", RecttoString(mark_rect), INIFILE);
             //WriteINIValue("Basic", "mark_org", PointFtoString(mark_org), INIFILE);
             //WriteINIValue("Basic", "mark_thresholdvalue", mark_thresholdvalue.ToString(), INIFILE);

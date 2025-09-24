@@ -133,7 +133,7 @@ namespace TravellerMINIX6.ProcessSpace
                             //if (MACHINE.PLCIO.LineScanStart)
                             {
                                 MACHINEx3.PLCIO.bScanReady = true;
-                                _LOG($"{ToChangeLanguage("通知plc采集开始")}", Color.Black);
+                                _LOG($"{ToChangeLanguage("通知 PLC 采集开始")}", Color.Black);
                                 //CommonLogClass.Instance.LogMessage("通知plc采集开始... ", Color.Black);
 
                                 Process.NextDuriation = 0;

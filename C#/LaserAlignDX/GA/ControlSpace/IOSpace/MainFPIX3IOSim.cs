@@ -73,9 +73,11 @@ namespace VsCommon.ControlSpace.IOSpace
         //    ADR_ScanStatus = 9,
         //}
 
-        private int _simRunCount = 0;
-        private int _simChipCount = 0;
         private bool _simSoftwareReady = false;
+        private int _simProductionRunCount = 0;
+        private int _simChipLocateOkCount = 0;
+        private int _simNonEmptyCount = 0;
+        private int _simChipFlyCount = 0;
         private int _simScanResult = 0;
         private int _simFlyStart = 0;
         private bool _simFlyDone = false;
@@ -119,7 +121,7 @@ namespace VsCommon.ControlSpace.IOSpace
                     _simSoftwareReady = value;
                     if (_simSoftwareReady)
                     {
-                        ((Action)sim_StartScan).BeginInvoke(null, null);
+                        ((Action)sim_StartScan_ChipLoc).BeginInvoke(null, null);
                     }
                 }
             }
@@ -159,13 +161,14 @@ namespace VsCommon.ControlSpace.IOSpace
         {
             get; set;
         }
+
         public bool bQRJudgeUsed
         {
             get; set;
         }
 
         /// <summary>
-        /// PLC->PC 线扫状态,1-尺寸外观,2-读码,3-空载台
+        /// PLC->PC 线扫状态:  1-尺寸外观, 2-读码, 3-空载台
         /// </summary>
         public int iScanStatus
         {
@@ -183,29 +186,43 @@ namespace VsCommon.ControlSpace.IOSpace
                 if (_simScanResult != value)
                 {
                     _simScanResult = value;
-                    ((Action)sim_StartFly).BeginInvoke(null, null);
+
+                    // 晶粒定位 完成
+                    if (iScanStatus == 1 || iScanStatus == 2)
+                    {
+                        ((Action)sim_StartFly).BeginInvoke(null, null);
+                    }
+
+                    // 空盤檢測 完成
+                    else if (iScanStatus == 3)
+                    {
+                        ((Action)sim_End).BeginInvoke(null, null);
+                    }
                 }
             }
         }
 
         /// <summary>
-        /// PC->PLC 单颗结果,1-Ok,2-外观Ng,3-空,4-读码NG,9-切割NG
+        /// PC->PLC 单颗结果,1-Ok, 2-外观Ng, 3-空, 4-读码NG, 9-切割NG
         /// 单颗的线扫结果(预留300个)
         /// PLC用此信号来将每颗产品放到对应的Tray盘
         /// </summary>
-        /// <param name="singleResults">ARRAY[0..299] OF INT</param>
         public void iSingleResult(int[] singleResults)
         {
-            //if (singleResults == null)
-            //    return;
-            //if (singleResults.Length > 0)
-            //{
-            //    for (int i = 0; i < singleResults.Length; i++)
-            //    {
-            //        AddressClass address = getCipAdress($"iSingleResult[{i}]");
-            //        PLC[address.SiteNo].WriteVari(address.Address0, singleResults[i].ToString());
-            //    }
-            //}
+            int okCount = 0;
+            int ngCount = 0;
+            if(singleResults != null)
+            {
+                foreach (var code in singleResults)
+                {
+                    if (code == 1)
+                        okCount++;
+                    //if (code == 3)
+                    //    ngCount++;
+                }
+            }
+            _simChipLocateOkCount = okCount;
+            //_simNonEmptyCount = ngCount;
         }
         /// <summary>
         /// PC->PLC 读码结果,1-Ok,2-比对Ng,3-空,4-有码未读到
@@ -392,18 +409,27 @@ namespace VsCommon.ControlSpace.IOSpace
             iScanStage = stageId1 == 2 ? 2 : 1;
         }
 
-        void sim_StartScan()
+        void sim_StartScan_ChipLoc()
         {
+            // 告知 PC, 進行 晶粒定位 與 尺寸外觀 檢測
+            iScanStatus = 1;
+
+            // 跑線計數
+            _simProductionRunCount++;
+
+            // 清空上一次結果
+            _simChipLocateOkCount = 0;
             _simScanResult = -1;
+            bScanDone = false;
 
-            _simRunCount++;
-            sStripID = $"Strip_SIM_{_simRunCount:000}";
-            sLotID = $"Lot_SIM_{_simRunCount:000}";
+            // 設定 LOT DATA
+            sStripID = $"Strip_SIM_{_simProductionRunCount:000}";
+            sLotID = $"Lot_SIM_{_simProductionRunCount:000}";
 
-            //*** bFlyReady ***
-            bFlyReady = true;   // 根據 Gaara 描述, 一旦啟動 bSoftwareReady, bFlyReady 就馬上 ON
+            //*** bFlyReady *** 完全由 PC 控制
+            //bFlyReady = true;   // 根據 Gaara 描述, 一旦啟動 bSoftwareReady, bFlyReady 就馬上 ON,
 
-            // 要求載入模擬影像
+            // 要求 載入 模擬影像
             System.Threading.Thread.Sleep(10);
             if (OnRequestSimLineScan != null)
             {
@@ -413,23 +439,49 @@ namespace VsCommon.ControlSpace.IOSpace
                     return;
             }
 
-            // 模擬 10 ms 後, 觸發 Line Scan Image
+            // 模擬 10 ms 後, 觸發 bScanStart 訊號
             System.Threading.Thread.Sleep(10);
-
+            // 清空 flyDone
             _simFlyDone = false;
+            // 清空 flyStart
             _simFlyStart = 0;
-            _simChipCount = 0;
+            // 清空 飛拍計數
+            _simChipFlyCount = 0;
 
+            //觸發 bScanStart 訊號
             bScanStart = true;
+
+            //---------------------------------------------------
+            // 接下來的預期動作是
+            //---------------------------------------------------
+            // (1) 定位
+            //  PC寫入 iSingleResult 
+            //  PC寫入 rScanOffset
+            //  PC寫入 bScanDone = true
+            //  PC寫入 iScanResult = 1
+            //---------------------------------------------------
+            // (2) QR_CODE
+            //  PC寫入 iQRResult
+            //  PC寫入 iSingleResult 
+            //  PC寫入 rScanOffset
+            //  PC寫入 bScanDone = true
+            //  PC寫入 iScanResult = 1
+            //---------------------------------------------------
+            // (3) EmptyTray
+            // PC寫入 iSingleResult 
+            // PC寫入 iScanResult = 1
+            //---------------------------------------------------
         }
-        
         void sim_StartFly()
         {
-            // 模擬 10 ms 後, bScanStart = false
             System.Threading.Thread.Sleep(10);
+
+            // 清除 bScanStart
             bScanStart = false;
+            // 清除 flyStart
             _simFlyStart = 0;
-            _simChipCount = 0;
+            // 清除 飛拍計數
+            _simChipFlyCount = 0;
 
             // 模擬 1000 ms 後, iFlyStart 從 0 變為 1
             System.Threading.Thread.Sleep(1000);
@@ -437,25 +489,94 @@ namespace VsCommon.ControlSpace.IOSpace
         }
         void sim_NextFly()
         {
-            int N = 25;
+            int flyCount = _simChipFlyCount + 4;
+            int flyTargetCount = ((_simChipLocateOkCount + 3) / 4) * 4;
+            bool isLastFly = flyCount >= flyTargetCount;
 
-            _simChipCount++;
-
-            if (_simChipCount < N)
+            if (flyCount <= flyTargetCount)
             {
-                // 模擬 1000 ms 後, 變換 iFlyStart
+                // 模擬 100 ms 後
                 System.Threading.Thread.Sleep(100);
+                _simChipFlyCount = flyCount;
+
+                // 清空 flyDone
                 _simFlyDone = false;
+                // 變換 iFlyStart
                 _simFlyStart = _simFlyStart == 1 ? 2 : 1;
+
+                // 同時啟動 空盤檢測
+                if (isLastFly)
+                    sim_StartScan_EmptyTray();
             }
             else
             {
-                System.Threading.Thread.Sleep(1000);
+                System.Threading.Thread.Sleep(50);
                 _simFlyStart = 0;
-                System.Threading.Thread.Sleep(1000);
                 _simFlyDone = true;
-                bScanStart = false;
+                System.Threading.Thread.Sleep(100);
             }
+        }
+        void sim_StartScan_EmptyTray()
+        {
+            // 告知 PC, 進行 空盤檢測
+            iScanStatus = 3;
+
+            // 清空上一次結果
+            _simChipLocateOkCount = 0;
+            _simScanResult = -1;
+            bScanDone = false;
+
+            //// 設定 LOT DATA
+            //sStripID = $"Strip_SIM_{_simProductionRunCount:000}";
+            //sLotID = $"Lot_SIM_{_simProductionRunCount:000}";
+
+            //// 要求 載入 模擬影像
+            //System.Threading.Thread.Sleep(10);
+            //if (OnRequestSimLineScan != null)
+            //{
+            //    var e = new DoWorkEventArgs(this) { Cancel = false };
+            //    OnRequestSimLineScan(this, e);
+            //    if (e.Cancel)
+            //        return;
+            //}
+
+            // 模擬 1 ms 後, 觸發 bScanStart 訊號
+            System.Threading.Thread.Sleep(1);
+            //// 清空 flyDone
+            //_simFlyDone = false;
+            //// 清空 flyStart
+            //_simFlyStart = 0;
+            //// 清空 飛拍計數
+            //_simChipFlyCount = 0;
+
+            //觸發 bScanStart 訊號
+            bScanStart = true;
+
+            //---------------------------------------------------
+            // 接下來的預期動作是
+            //---------------------------------------------------
+            // (1) 定位
+            //  PC寫入 iSingleResult 
+            //  PC寫入 rScanOffset
+            //  PC寫入 bScanDone = true
+            //  PC寫入 iScanResult = 1
+            //---------------------------------------------------
+            // (2) QR_CODE
+            //  PC寫入 iQRResult
+            //  PC寫入 iSingleResult 
+            //  PC寫入 rScanOffset
+            //  PC寫入 bScanDone = true
+            //  PC寫入 iScanResult = 1
+            //---------------------------------------------------
+            // (3) EmptyTray
+            // PC寫入 iSingleResult 
+            // PC寫入 iScanResult = 1
+            //---------------------------------------------------
+        }
+        void sim_End()
+        {
+            System.Threading.Thread.Sleep(100);
+            bScanStart = false;
         }
     }
 }
