@@ -546,17 +546,24 @@ namespace PhotoMachine.UISpace
             btnSingleSnap.BackColor = (m_SingleProcess.IsOn && m_SingleProcess.RelateString == "Snap" ? Color.Red : Color.FromArgb(192, 255, 192));
             btnSingleTest.BackColor = (m_SingleProcess.IsOn && m_SingleProcess.RelateString == "Test" ? Color.Red : Color.FromArgb(192, 255, 192));
             btnSingleOfflineTest.BackColor = (m_SingleProcess.IsOn && m_SingleProcess.RelateString == "OfflineTest" ? Color.Red : Color.FromArgb(192, 255, 192));
-            btnSoftwareReady.BackColor = (MACHINE.PLCIO.bSoftwareReady ? Color.Green : Color.FromArgb(192, 255, 192));
 
-            if (MACHINE.PLCIO.bSoftwareReady)
+            // 在此又 Polling PLC 了 !!!
+            // polling PLC 必須要集中管理.
+            var plcIO = MACHINE?.PLCIO;
+            if (plcIO != null)
             {
-                if (MACHINE.PLCIO.sRecipeName != RCPDB.RCPItemNow.Name)
+                bool bSoftwareReady = plcIO.bSoftwareReady;
+                btnSoftwareReady.BackColor = bSoftwareReady ? Color.Green : Color.FromArgb(192, 255, 192);
+                btnSoftwareReady.ForeColor = bSoftwareReady ? Color.Yellow : Color.Black;
+                if (plcIO.bSoftwareReady)
                 {
-                    MACHINE.PLCIO.iRecipeNum = 0;
-                    OnTrigger(RunStatusEnum.CHANGERECIPE);
+                    if (plcIO.sRecipeName != RCPDB.RCPItemNow.Name)
+                    {
+                        plcIO.iRecipeNum = 0;
+                        OnTrigger(RunStatusEnum.CHANGERECIPE);
+                    }
                 }
             }
-
         }
 
         public void ClearResult()
