@@ -418,23 +418,30 @@ namespace VsCommon.ControlSpace.IOSpace
 
             _simFlyDone = false;
             _simFlyStart = 0;
+            _simChipCount = 0;
 
             bScanStart = true;
         }
         
         void sim_StartFly()
         {
-            // 模擬 1000 ms 後, iFlyStart = 1
-            System.Threading.Thread.Sleep(1000);
-            _simChipCount = 0;
-            _simFlyStart = 1;
+            // 模擬 10 ms 後, bScanStart = false
+            System.Threading.Thread.Sleep(10);
             bScanStart = false;
+            _simFlyStart = 0;
+            _simChipCount = 0;
+
+            // 模擬 1000 ms 後, iFlyStart 從 0 變為 1
+            System.Threading.Thread.Sleep(1000);
+            _simFlyStart = 1;
         }
         void sim_NextFly()
         {
+            int N = 25;
+
             _simChipCount++;
 
-            if (_simChipCount < 154)
+            if (_simChipCount < N)
             {
                 // 模擬 1000 ms 後, 變換 iFlyStart
                 System.Threading.Thread.Sleep(100);

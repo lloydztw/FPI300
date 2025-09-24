@@ -130,6 +130,11 @@ namespace VsCommon.ControlSpace.IOSpace
                 AddressClass address = ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanStart];
                 return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
             }
+            set
+            {
+                AddressClass address = ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanStart];
+                PLC[address.SiteNo].WriteVari(address.Address0, value.ToString().ToLower());
+            }
         }
         /// <summary>
         /// PC->PLC 线扫准备就绪

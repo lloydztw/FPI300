@@ -272,15 +272,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 //-----------------------------------------------------------------------
                 // 【模擬】
                 //-----------------------------------------------------------------------
-                if (_lineScanImageHolder.IsEmpty())
+                bool isEmpty = !ActiveViewer.HasImage();
+                if (isEmpty)
                 {
+                    checkPlcStageID(_activeCarrierID);
                     string fileName = GaUtil.BrowseImageFile();
                     if (fileName != null)
-                    {
                         loadLineScanImage(fileName);
-                    }
                 }
-                e.Cancel = _lineScanImageHolder.IsEmpty();
+                isEmpty = !ActiveViewer.HasImage();
+                e.Cancel = isEmpty;
             }
         }
         #endregion

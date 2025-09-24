@@ -4,6 +4,7 @@ using JetEazy.DBSpace;
 using JetEazy.EzImage;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Machine;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
 using System;
@@ -153,6 +154,9 @@ namespace PhotoMachine.UISpace
             SizeChanged += RunUI_SizeChanged;
 
             InitializeDataGridView();
+
+            txtLotNo.ReadOnly = true;
+            txtStripID.ReadOnly = true;
         }
 
         private void BtnAutoManual_Click(object sender, EventArgs e)
@@ -162,15 +166,20 @@ namespace PhotoMachine.UISpace
 
         private void BtnSoftwareReady_Click(object sender, EventArgs e)
         {
-            MACHINE.PLCIO.bSoftwareReady = !MACHINE.PLCIO.bSoftwareReady;
-            MACHINE.PLCIO.bFlyReady = !MACHINE.PLCIO.bFlyReady;
-            if (MACHINE.PLCIO.bSoftwareReady)
+            var plcIO = MACHINE?.PLCIO;
+            if (plcIO == null) return;
+
+            bool bReady = !plcIO.bSoftwareReady;    // Toggle bSoftwareReady
+
+            //>>> plcIO.bScanStart = false;
+            plcIO.bSoftwareReady = bReady;
+            plcIO.bFlyReady = bReady;
+            
+            if (bReady)                             
             {
-                MACHINE.PLCIO.iRecipeNum = 0;
+                plcIO.iRecipeNum = 0;
                 OnTrigger(RunStatusEnum.CHANGERECIPE);
             }
-            txtLotNo.Enabled = !MACHINE.PLCIO.bSoftwareReady;
-            txtStripID.Enabled = !MACHINE.PLCIO.bSoftwareReady;
         }
 
         private void BtnClearDataZero_Click(object sender, EventArgs e)
@@ -374,8 +383,8 @@ namespace PhotoMachine.UISpace
             int langindex,
             VersionEnum ver,
             OptionEnum opt)
-        //RESULTClass result,
-        //UseIOClass useio)
+            //RESULTClass result,
+            //UseIOClass useio)
         {
             UIPath = uipath;
             LanguageIndex = langindex;
@@ -443,11 +452,11 @@ namespace PhotoMachine.UISpace
 
         public void SetLotID(string eLot)
         {
-            txtLotNo.Text = eLot;
+            //txtLotNo.Text = eLot;
         }
         public void SetStripID(string eStrip)
         {
-            txtStripID.Text = eStrip;
+            //txtStripID.Text = eStrip;
         }
 
         public bool IsShinning
@@ -552,16 +561,33 @@ namespace PhotoMachine.UISpace
             var plcIO = MACHINE?.PLCIO;
             if (plcIO != null)
             {
+                bool bScanStart = plcIO.bScanStart;
                 bool bSoftwareReady = plcIO.bSoftwareReady;
+                
                 btnSoftwareReady.BackColor = bSoftwareReady ? Color.Green : Color.FromArgb(192, 255, 192);
                 btnSoftwareReady.ForeColor = bSoftwareReady ? Color.Yellow : Color.Black;
-                if (plcIO.bSoftwareReady)
+
+                if (bSoftwareReady)
                 {
                     if (plcIO.sRecipeName != RCPDB.RCPItemNow.Name)
                     {
                         plcIO.iRecipeNum = 0;
                         OnTrigger(RunStatusEnum.CHANGERECIPE);
                     }
+                }
+
+                if (bScanStart)
+                {
+                    if (txtStripID.Tag == null)
+                    {
+                        txtStripID.Tag = "bScanStart";
+                        txtStripID.Text = plcIO.sStripID;
+                        txtLotNo.Text = plcIO.sLotID;
+                    }
+                }
+                else
+                {
+                    txtStripID.Tag = null;
                 }
             }
         }

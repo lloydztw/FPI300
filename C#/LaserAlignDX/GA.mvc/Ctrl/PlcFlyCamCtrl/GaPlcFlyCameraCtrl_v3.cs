@@ -368,7 +368,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
         void flyRunAoiOne(FlyID flyID, Bitmap bmpFly)
         {
-            if (FlyParaClass.Instance.xIsOpenMuit)
+            if (xFlyPara.xIsOpenMuit)
                 flyProcessProSpecial(flyID, bmpFly);
             else
                 flyProcessPro(flyID, bmpFly);

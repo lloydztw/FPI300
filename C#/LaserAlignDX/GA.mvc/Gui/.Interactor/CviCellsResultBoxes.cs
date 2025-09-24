@@ -272,13 +272,19 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     DebugMatchingOff();
                     break;
                 case Keys.F4:
-                    if (_cursorBloc is CellBloc cellBloc)
-                        DebugMatching(cellBloc);
+                    if (!BY_PASS)
+                    {
+                        if (_cursorBloc is CellBloc cellBloc)
+                            DebugMatching(cellBloc);
+                    }
                     break;
                 case Keys.F2:
-                    var oldCursor = GaUtil.SetCursor(viewer.FindForm(), Cursors.AppStarting);
-                    DumpCellRegions();
-                    GaUtil.SetCursor(viewer.FindForm(), oldCursor);
+                    if (!BY_PASS)
+                    {
+                        var oldCursor = GaUtil.SetCursor(viewer.FindForm(), Cursors.AppStarting);
+                        DumpCellRegions();
+                        GaUtil.SetCursor(viewer.FindForm(), oldCursor);
+                    }
                     break;
             }
             base.OnKeyDown(viewer, e);
