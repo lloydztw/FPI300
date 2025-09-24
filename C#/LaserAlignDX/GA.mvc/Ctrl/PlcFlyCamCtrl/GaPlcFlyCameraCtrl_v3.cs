@@ -47,6 +47,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     {
         static int TOTAL_FLY_FRAMES_COUNT => GaMvcConfig.TOTAL_FLY_FRAMES_COUNT;
 
+        public event EventHandler OnFlyStarted;
+        public event EventHandler OnFlyDone;
+
         #region MACHINE
         MainFPIX3MachineClass MACHINE
         {
@@ -92,6 +95,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
         #region PLC_CACHE_FLAGS
         volatile bool m_cachePlcStart = false;
+        volatile bool m_cachePlcFlyDone = false;
         int m_cachePlcFlyStart = 0;
         #endregion
 
@@ -221,6 +225,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                     // 設定 PLC 旗標 bFlyReady
                     plcIO.bFlyReady = true;
+
+                    OnFlyDone?.Invoke(this, null);
                 }
 
                 // 清除 線程保護 旗標
@@ -276,6 +282,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                     if (iFlyStart > 0)
                     {
+                        OnFlyStarted?.Invoke(this, null);
+
                         _LOG($"接收到 PLC 飛拍{iFlyStart} 启动信号", Color.Blue);
 
                         // 重置 OnTheFlyFrameCount
