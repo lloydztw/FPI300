@@ -670,7 +670,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //      出各種飯局料理 是 廚師 而不是 食譜食材
         //      一隻雞 會自己剁雞腿 變成 滷雞腿 或 炸雞腿 是非常違反常理的謬異.
         //----------------------------------------------------------------------
-
         /// <summary>
         /// 這其實等同於 bmpDefectTemplate.Size
         /// </summary>
@@ -774,7 +773,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //    bool bOK = mvdprintFlytemp_Find.HikRun3(eRectF);
         //    return (bOK ? 0 : -1);
         //}
-        public bool CheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> m_list, out float retAngle, out PointF retCenter)
+        public bool CheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> retBlobs, out float retAngle, out PointF retCenter)
         {
 
             bool bOK = false;
@@ -810,19 +809,19 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             cBlobFindToolObj.Run();
             VisionDesigner.BlobFind.CBlobFindResult cBlobFindRes = cBlobFindToolObj.Result;
 
-            m_list = new List<CBlobInfo>();
+            retBlobs = new List<CBlobInfo>();
             foreach (var blob in cBlobFindToolObj.Result.BlobInfo)
             {
                 if (blob.AreaF >= FlyParaClass.Instance.xBlobAreaMin && blob.AreaF <= FlyParaClass.Instance.xBlobAreaMax)
                 {
-                    m_list.Add(blob);
+                    retBlobs.Add(blob);
                 }
             }
 
-            if (m_list.Count == 2)
+            if (retBlobs.Count >= 2)
             {
-                CBlobInfo b0 = m_list[0];
-                CBlobInfo b1 = m_list[1];
+                CBlobInfo b0 = retBlobs[0];
+                CBlobInfo b1 = retBlobs[1];
 
                 // CreateInstance
 

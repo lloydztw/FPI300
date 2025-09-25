@@ -911,15 +911,26 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                         Cv2.CopyTo(_simImg, tmp);
 
                         var seed = _rand.NextDouble();
-                        if (seed < 0.3)
+                        if (seed < 0.75)
                         {
-                            Cv2.Flip(tmp, tmp, FlipMode.Y);
+                            seed = _rand.NextDouble();
+                            if (seed < 0.33)
+                                Cv2.Flip(tmp, tmp, FlipMode.X);
+                            else if (seed < 0.66)
+                                Cv2.Flip(tmp, tmp, FlipMode.Y);
                         }
-                        else if (seed < 0.6)
+                        else
                         {
-                            //var c = _rand.Next(255);
-                            //tmp.SetTo(new Scalar(c, c, c));
-                            Cv2.Randu(tmp, Scalar.All(0), Scalar.All(256));
+                            seed = _rand.NextDouble();
+                            if (seed < 0.5)
+                            {
+                                var c = _rand.Next(255);
+                                tmp.SetTo(new Scalar(c, c, c));
+                            }
+                            else
+                            {
+                                Cv2.Randu(tmp, Scalar.All(0), Scalar.All(256));
+                            }
                         }
 
                         var roi = new Rect(10, 10, 10, 10);

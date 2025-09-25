@@ -192,7 +192,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     int flyStartIndex = plcIO.iFlyStart;
 
                     // 把收集到的 frame buffers 進行 飛拍 像測
-                    this.RunAoiAll(flyStartIndex, m_onTheFlyFrameBuffers, camFrameInfo.iWidth, camFrameInfo.iWidth);
+                    this.RunAoiAll(flyStartIndex, m_onTheFlyFrameBuffers, camFrameInfo.iWidth, camFrameInfo.iHeight);
                     this.GetAoiAllResults(out var flyResults, out var flyOffsets);
 
                     // 回寫飛拍結果給 PLC
@@ -380,7 +380,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             try
             {
-                if (xFlyPara.xIsOpenMuit)
+                if (xFlyPara.xIsOpenMuit)   // 一般都是 false
                     flyProcessProSpecial(flyID, bmpFly);
                 else
                     flyProcessPro(flyID, bmpFly);
@@ -429,6 +429,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
                 int err = xRecipe.PrintTempFlyRun(bmpCrop);
+
                 aoiResult.Code = err == 0 ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
 
                 // 記入 GUI 畫圖所需要的數據
@@ -436,6 +437,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 var xResults = xRecipe.mvdprintFlytemp_Find.xResults;
                 if (xResults.Count > 0)
                     aoiMetaData.xResult = xResults[0];
+                else
+                    aoiMetaData.xResult = null;
 
                 aoiMetaData.xTemplateRect = xRecipe.xRectRegionPrintFly;
                 aoiMetaData.xBlobs = null;
@@ -553,7 +556,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                     aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
                     aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
-                    aoiResult.OffsetAngle = aoiMetaData.xResult.fAngle;
+                    aoiResult.OffsetAngle = (aoiMetaData.xResult != null) ? aoiMetaData.xResult.Value.fAngle : 0f;
                 }
                 updateOneResult(flyID, aoiResult);
             }

@@ -32,14 +32,21 @@ namespace LaserAlignDX.AoiModel
         public Bitmap bmpFly;
         public RectangleF roiRect;
         public RectangleF xTemplateRect;
-        public xFindResult xResult;
+        public xFindResult? xResult;
         public PointF xCentroid
         {
             get
             {
-                float x = xResult.fCenterX + roiRect.X;
-                float y = xResult.fCenterY + roiRect.Y;
-                return new PointF(x, y);
+                if (xResult != null)
+                {
+                    float x = xResult.Value.fCenterX + roiRect.X;
+                    float y = xResult.Value.fCenterY + roiRect.Y;
+                    return new PointF(x, y);
+                }
+                else
+                {
+                    return JetEazy.Qcvt.CenterF(ref roiRect);
+                }
             }
         }
         public List<CBlobInfo> xBlobs;
