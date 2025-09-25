@@ -917,8 +917,9 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                         }
                         else if (seed < 0.6)
                         {
-                            var c = _rand.Next(255);
-                            tmp.SetTo(new Scalar(c, c, c));
+                            //var c = _rand.Next(255);
+                            //tmp.SetTo(new Scalar(c, c, c));
+                            Cv2.Randu(tmp, Scalar.All(0), Scalar.All(256));
                         }
 
                         var roi = new Rect(10, 10, 10, 10);
