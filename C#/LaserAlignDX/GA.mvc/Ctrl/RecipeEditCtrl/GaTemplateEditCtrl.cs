@@ -19,7 +19,6 @@ using JetEazy.Utils;
 using JzDisplay;
 using JzDisplay.UISpace;
 using LaserAlignDX.BasicSpace;
-using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using OpenCvSharp;

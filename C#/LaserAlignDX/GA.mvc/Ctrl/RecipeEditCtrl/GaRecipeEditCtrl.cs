@@ -21,7 +21,6 @@ using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.FormSpace;
-using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
