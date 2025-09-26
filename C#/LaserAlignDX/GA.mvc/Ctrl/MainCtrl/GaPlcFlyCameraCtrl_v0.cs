@@ -1,47 +1,32 @@
 ﻿using AUVision;
-using Common.RecipeSpace;
-using Eazy_Project_III;
-using Eazy_Project_III.FormSpace;
 using JetEazy.BasicSpace;
-using JetEazy.CCDSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
-using JetEazy.XContainer;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.BasicSpace;
-using LaserAlignDX.ControlSpace.MachineSpace;
-using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LaserAlignDX.RunSpace;
 using LaserAlignDX.UISpace.UIMVC;
 using NeedleX.ProcessSpace;
-using OpenCvSharp.XFeatures2D;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Traveller106;
 using TravellerMINIX6.ProcessSpace;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
 using VisionDesigner.PositionFix;
-using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
-namespace LaserAlignDX.UISpace.MainSpace
+
+namespace LaserAlignDX.Mvc.Ctrl.Fly.V0
 {
-    public partial class MainX3UI : UserControl
+    public partial class GaPlyFlyCameraCtrl
     {
+#if (OPT_MainX3)
         List<CollectResultClass> collectResultClasses = new List<CollectResultClass>();
         protected MachineCollectionClass MACHINECollection
         {
@@ -50,18 +35,21 @@ namespace LaserAlignDX.UISpace.MainSpace
                 return Traveller106.Universal.MACHINECollection;
             }
         }
+#endif
+
         protected MainFPIX3MachineClass MACHINE
         {
             get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
         }
 
+        #region PRIVATE_DATA
         const int FLYCOUNT = 4;
         //Bitmap[] bmpFlyOperate = new Bitmap[FLYCOUNT];
         Bitmap bmpFlyOperate = new Bitmap(1, 1);
         int iFlyIndex = 0;
         int[] iFlyResult = new int[4];
         float[] iFlyOffset = new float[4 * 3];
-        Label lblNumberStr;
+        Control lblNumberStr => lblSerialNumber;
 
         bool m_plcStartOld = false;
         bool m_plcGetImageOld = false;
@@ -71,9 +59,9 @@ namespace LaserAlignDX.UISpace.MainSpace
 
         string m_StripId = "Strip_NONE";
         string m_LotId = "Lot_NONE";
+        #endregion
 
-        Button btnReady;
-
+        #region GLOBAL_MESS
         protected RecipeFPIX3Class xRecipe
         {
             get { return RecipeFPIX3Class.Instance; }
@@ -90,12 +78,44 @@ namespace LaserAlignDX.UISpace.MainSpace
         {
             get { return ProcessRunFPIClass.Instance; }
         }
+        #endregion
 
         IxLineScanCam IxFlyAreaCam
         {
             get { return Universal.IxFlyAreaCam; }
         }
+        BaseProcess m_LineScanProcess
+        {
+            get { return LineScanProcess.Instance; }
+        }
 
+        #region GUI_MEMBERS
+        Control _wndOwner;
+        MVSUI[] _DSFLYs;
+        MVSUI DSFly0 => _DSFLYs[0];
+        MVSUI DSFly1 => _DSFLYs[1];
+        MVSUI DSFly2 => _DSFLYs[2];
+        MVSUI DSFly3 => _DSFLYs[3];
+        Control lblSerialNumber;
+        #endregion
+
+        public void Attach(MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
+        {
+            _wndOwner = DsFlys[0].Parent;
+            _DSFLYs = DsFlys;
+            lblSerialNumber = lblFlyCameraSerialNo;
+
+            lblSerialNumber.DoubleClick += LblNumberStr_DoubleClick;
+            IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
+        }
+
+        public void Dispose()
+        {
+            cPositionFixToolObj?.Dispose();
+            cPositionFixToolObj = null;
+        }
+
+#if (OPT_MainX3)
         MVSUI DSMain
         {
             get
@@ -108,6 +128,8 @@ namespace LaserAlignDX.UISpace.MainSpace
                 return mvsui1;
             }
         }
+#endif
+
         PointF[] FlyOffsetUseStage
         {
             get
@@ -121,6 +143,7 @@ namespace LaserAlignDX.UISpace.MainSpace
             }
         }
 
+#if (OPT_MainX3)
         public MainX3UI()
         {
             InitializeComponent();
@@ -184,8 +207,9 @@ namespace LaserAlignDX.UISpace.MainSpace
 
         private void DSFly0_DoubleClick(object sender, EventArgs e)
         {
-            
+
         }
+#endif
 
         private void LblNumberStr_DoubleClick(object sender, EventArgs e)
         {
@@ -204,8 +228,11 @@ namespace LaserAlignDX.UISpace.MainSpace
         }
 
         List<byte[]> bytesFlyDatas = new List<byte[]>();
+
+#if (OPT_MainX3)
         int m_W = 2448;
         int m_H = 2048;
+#endif
 
         private void IxFlyAreaCam_LineTriggerAction(JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
         {
@@ -224,10 +251,12 @@ namespace LaserAlignDX.UISpace.MainSpace
                 byte[] bmpbytes = new byte[cameraFrame.uBytes];
                 Marshal.Copy(pBuffer, bmpbytes, 0, bmpbytes.Length);
                 bytesFlyDatas.Add(bmpbytes);
-                this.Invoke(new Action(() =>
+                
+                _wndOwner?.Invoke(new Action(() =>
                 {
                     lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
                 }));
+                
                 if (bytesFlyDatas.Count >= 4)
                 {
                     plcIO.bFlyReady = false;
@@ -353,7 +382,7 @@ namespace LaserAlignDX.UISpace.MainSpace
                 iShowIndex++;
             }
         }
-#if(NO_USE_CODE)
+#if (NO_USE_CODE)
         void flyProcess(int flyStart, int flyIndex, JetEazy.CCDSpace.CameraFrame cameraFrame, IntPtr pBuffer)
         {
             flystopwatch.Restart();
@@ -1102,6 +1131,7 @@ namespace LaserAlignDX.UISpace.MainSpace
 
         #endregion
 
+#if (OPT_MainX3)
         BaseProcess m_BuzzerProcess
         {
             get { return BuzzerProcess.Instance; }
@@ -1129,7 +1159,9 @@ namespace LaserAlignDX.UISpace.MainSpace
             //if (m_LineScanProcess.IsOn)
             //    m_LineScanProcess.Stop();
         }
+#endif
 
+#if (OPT_MainX3)
         void InitAllProcesses()
         {
             //----------------------------------------------------------------
@@ -1156,8 +1188,6 @@ namespace LaserAlignDX.UISpace.MainSpace
             aoiEngine.OnAoiBegin += AoiEngine_OnAoiBegin;
             aoiEngine.OnAoiEnd += AoiEngine_OnAoiEnd;
         }
-
-
         private void process_OnMessage(object sender, ProcessEventArgs e)
         {
             if (sender == m_MainProcess)
@@ -1472,33 +1502,6 @@ namespace LaserAlignDX.UISpace.MainSpace
             return str;
         }
 
-#if (OPT_MAIN_X6)
-        string mainx6_path = "D:\\CollectPictures";
-        private void MainX6Save()
-        {
-            Task task = new Task(() =>
-            {
-                try
-                {
-                    mainx6_path = "D:\\CollectPictures\\" + JzTimes.DateSerialString + "\\" + (ProcessRunFPIClass.Instance.IsPass ? "P-" : "F-") + ProcessRunFPIClass.Instance.FileBarcodeStr;
-
-                    if (!Directory.Exists(mainx6_path + "\\000"))
-                        Directory.CreateDirectory(mainx6_path + "\\000");
-
-                    int qi = 0;
-                    ProcessRunClass.Instance.cMvdInput.Clone().SaveImage(mainx6_path + "\\000\\P00-" + qi.ToString("000") + ".jpg", MVD_FILE_FORMAT.MVD_FILE_JPEG);
-
-
-                }
-                catch (Exception ex)
-                {
-                    //JetEazy.LoggerClass.Instance.WriteException(ex);
-                }
-            });
-            task.Start();
-        }
-#endif
-
         void TickAllProcesses()
         {
             m_resetprocess.Tick();
@@ -1510,7 +1513,7 @@ namespace LaserAlignDX.UISpace.MainSpace
 
         private void process_OnLiveImage(object sender, ProcessEventArgs e)
         {
-            if (e.Tag != null && e.Tag is Bitmap bmp)
+            if (e.Tag != null && e.Tag is Bitmap)
             {
                 try
                 {
@@ -1521,10 +1524,13 @@ namespace LaserAlignDX.UISpace.MainSpace
                     }
                     else
                     {
-                        //NOTE: bmp 由 sender 維持其生命周期. 在此不用調用 Dispose !!!
-                        //2025-08-28 @LETIAN: 巨圖 Bitmap 統一由 LineScanCamImageHolder 保管其生命週期 !!!
-                        CMvdImage mvdImage = pRun.LineScanCamImageHolder.PeekMvdImage();
-                        DSMain.mvdRenderActivex1.LoadImageFromObject(mvdImage);
+                        //@LETIAN: 2022/07/01 改用 GdxDispUI 增加一些 fps
+                        // bmp 由 Sender maintains life cycle.
+                        // 在此不用 Dispose
+                        //Bitmap bmp = (Bitmap)e.Tag;
+                        //dispUI1.UpdateLiveImage(bmp);
+                        //DS1.ReplaceDisplayImage(bmp);
+                        DSMain.mvdRenderActivex1.LoadImageFromObject(pRun.cMvdInput.Clone());
                         DSMain.mvdRenderActivex1.ClearShapes();
                         DSMain.AddCross();
                         DSMain.mvdRenderActivex1.Display();
@@ -1633,12 +1639,15 @@ namespace LaserAlignDX.UISpace.MainSpace
                 _frmAoiProgressing = null;
             }
         }
+#endif
 
         public void Tick()
         {
             _getPlcRunTick();
-            TickAllProcesses();
+            //TickAllProcesses();
         }
+
+#if (OPT_MainX3)
         public void ChangeRecipe()
         {
 
@@ -1649,6 +1658,7 @@ namespace LaserAlignDX.UISpace.MainSpace
         public void SetEnableState(bool isendable)
         {
         }
+#endif
 
         private void _getPlcRunTick()
         {
@@ -1659,7 +1669,7 @@ namespace LaserAlignDX.UISpace.MainSpace
             //else
             //    lblState.Text = ToChangeLanguage("等待");
 
-            this.Invoke(new Action(() =>
+            _wndOwner?.Invoke(new Action(() =>
             {
                 lblNumberStr.Text = $"飞拍序号:{bytesFlyDatas.Count}";
                 lblNumberStr.BackColor = (Traveller106.Universal.IsOpenFlyForm ? Control.DefaultBackColor : Color.Lime);
@@ -1747,6 +1757,7 @@ namespace LaserAlignDX.UISpace.MainSpace
 
         }
 
+#if (OPT_MainX3)
         void CGOperate()
         {
             GC.Collect();
@@ -1763,7 +1774,9 @@ namespace LaserAlignDX.UISpace.MainSpace
                 OnChangeState(status, tag);
             }
         }
+#endif
 
+#if (OPT_MainX3)
         #region AUTO_LAYOUT
         private void MainX3UI_SizeChanged(object sender, EventArgs e)
         {
@@ -1798,39 +1811,11 @@ namespace LaserAlignDX.UISpace.MainSpace
 #endif
         }
         #endregion
-
-        protected void _LOG(string msg, params object[] args)
-        {
-#if (true)
-            Color color = Color.Black;
-
-            int N = args.Length;
-            if (N > 0 && args[N - 1] is Color)
-            {
-                color = (Color)args[N - 1];
-                N -= 1;
-            }
-
-            var sb = new System.Text.StringBuilder();
-            sb.Append(Name);
-            sb.Append(", ");
-            sb.Append(msg);
-
-            for (int i = 0; i < N; i++)
-            {
-                sb.Append(", ");
-                sb.Append(args[i]);
-            }
-
-            msg = sb.ToString();
-            CommonLogClass.Instance.LogMessage(msg, color);
-            //if (color == Color.Red)
-            //    GdxGlobal.LOG.Warn(msg);
-            //else
-            //    GdxGlobal.LOG.Debug(msg);
 #endif
-            msg = Name + ", " + msg;
-            //GdxGlobal.LOG.Log(msg, args);
+
+        protected void _LOG(string msg, Color color)
+        {
+            GaUtil.LOG(msg, color);
         }
     }
 }

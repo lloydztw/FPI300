@@ -79,7 +79,8 @@ namespace LaserAlignDX.AoiModel.V2
         /// </summary>
         public GaBigImageHolder LineScanCamImageHolder
         {
-            get => TravellerBigImagesHolder.Instance.LineScanImageHolder;
+            //get => TravellerBigImagesHolder.Instance.LineScanImageHolder;
+            get => GaMvcConfig.SysModel.LineScanImageHolder;
         }
         Bitmap PeekLineScanBitmap()
         {
@@ -1280,7 +1281,7 @@ namespace LaserAlignDX.AoiModel.V2
             var stopwatch = new System.Diagnostics.Stopwatch();
             stopwatch.Restart();
 
-            var aoiModel = LtAoiFactory.InstanceModel();
+            var aoiModel = GaMvcConfig.SysModel.EmptyTrayAoiModel;
 
             Bitmap bmpInputImage = PeekLineScanBitmap();
             if (bmpInputImage != null)
@@ -1379,6 +1380,9 @@ namespace LaserAlignDX.AoiModel.V2
                     {
                         for (int col = fullCols - 1; col > -1; col--)
                         {
+                            if (_index >= xRecipe.xRegionCells.Count)
+                                break;
+
                             result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
                             var cell = xRecipe.xRegionCells[_index];
                             InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
@@ -1394,6 +1398,9 @@ namespace LaserAlignDX.AoiModel.V2
                     {
                         for (int col = 0; col < fullCols; col++)
                         {
+                            if (_index >= xRecipe.xRegionCells.Count)
+                                break;
+
                             result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
                             var cell = xRecipe.xRegionCells[_index];
                             InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
