@@ -327,13 +327,11 @@ namespace EzAoiEmptyTrayInspector.Model
                     return ErrCodes.HAS_BEEN_COMBINED;
             }
 #endif
-                return ErrCodes.OK;
+            return ErrCodes.OK;
         }
-        
+
         public void RunMatch(SideID sideId, IEzImage largeImg, string dumpPath = null)
         {
-            // Sync and Blocked
-
             _dumpPath = dumpPath;
 
             if (0 <= (int)sideId && (int)sideId < N_SIDES)
@@ -347,6 +345,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     changeState("MATCH", sideId);
                     clear_result(sideId, true);
                     run_match_with_bound_roi(sideId, largeImg.Image as Mat, dumpPath);
+                    //run_match_with_bound_mask(sideId, largeImg.Image as Mat, dumpPath);
                 }
                 else
                 {
@@ -360,11 +359,12 @@ namespace EzAoiEmptyTrayInspector.Model
                     using (var bridge = new QxImageBridge(bmp))
                     {
                         run_match_with_bound_roi(sideId, bridge.Image, dumpPath);
+                        //run_match_with_bound_mask(sideId, bridge.Image, dumpPath);
                     }
                 }
             }
         }
-        
+
         public MatchResult GetMatchResult(SideID sideId)
         {
             return _matchResults[(int)sideId];
@@ -378,7 +378,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     return false;
             return true;
         }
-#endregion
+        #endregion
 
 
         #region PUBLIC_COMBINE_FUNCTIONS
@@ -489,7 +489,7 @@ namespace EzAoiEmptyTrayInspector.Model
             return count;
         }
 #endif
-#endregion
+        #endregion
 
 
         #region PUBLIC_RUN_ALLS_DUAL
@@ -659,8 +659,8 @@ namespace EzAoiEmptyTrayInspector.Model
                     return;
 
                 var threshold = (double)matchSettings.ScoreThres.Value;
-                var goldenBmp = (Bitmap)matchSettings.GoldenBmp.Value;
-                if (goldenBmp == null)
+                var goldenPlaceHoldBmp = (Bitmap)matchSettings.GoldenBmp.Value;
+                if (goldenPlaceHoldBmp == null)
                     return;
 
                 double globalRotAngle = 0;
@@ -677,7 +677,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     }
                 }
 
-                using (var bridge = new QxImageBridge(goldenBmp))
+                using (var bridge = new QxImageBridge(goldenPlaceHoldBmp))
                 {
                     var tm0 = DateTime.Now;
                     var goldenImg = bridge.Image;
@@ -754,6 +754,35 @@ namespace EzAoiEmptyTrayInspector.Model
             // OFFSET
             var matchResult = GetMatchResult(sideId);
             _OFFSET(matchResult, roi.X, roi.Y);
+        }
+        void run_match_with_bound_mask(SideID sideId, Mat srcImg, string dumpPath = null)
+        {
+            var jxBoundBox = _recipe?.VisionSettings?.Match?.BoundBox;
+            if (jxBoundBox == null || jxBoundBox.Value == Rectangle.Empty)
+            {
+                run_match_one(sideId, srcImg, dumpPath);            //@<<< run_match_with_bound_roi
+                return;
+            }
+
+            var roi = JetEazy.Qcvt.CV(jxBoundBox.Value);
+            var bound = new Rect(0, 0, srcImg.Width, srcImg.Height);
+            if (roi == bound)
+            {
+                run_match_one(sideId, srcImg, dumpPath);            //@<<< run_match_with_bound_roi
+                return;
+            }
+
+            JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+            if (roi.Width < 2 || roi.Height < 2)
+                return;
+
+            using (Mat temp = new Mat(srcImg.Size(), srcImg.Type()))
+            {
+                var mean = srcImg.Mean();
+                temp.SetTo(mean);
+                srcImg[roi].CopyTo(temp[roi]);
+                run_match_one(sideId, temp, dumpPath);              //@<<< run_match_with_bound_mask
+            }
         }
         void update_one_match_result(SideID sideId, MatchResult result, bool notify = false)
         {
@@ -1149,7 +1178,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 }
 
                 var detector = new EzOutGridNgBlocsDetector(EzAoiBaseUtil.GetShrinkFactor(srcImg));
-                
+
                 detector.SetRecipe(_recipe);
 
                 ngBlocs = detector.FindNgBlocs(srcImg, matchedGrid);
@@ -1284,18 +1313,28 @@ namespace EzAoiEmptyTrayInspector.Model
                     roi = bound;
                 }
 
-                // (3) Img in Roi
-                Mat imgA = (roi != bound) ? imgFullFov[roi] : imgFullFov;
+                // (3) usingRoi Flag
+                bool usingRoi = roi != bound;
 
-                // (4) auto inverse
+                // (4) imgA (使用 roi mean color mask 比較不會受到 offset 計算錯誤之影響)
+                Mat imgA = imgFullFov;
+                if (usingRoi)
+                {
+                    var mean = imgFullFov.Mean();
+                    Mat temp = new Mat(imgFullFov.Size(), imgFullFov.Type());
+                    temp.SetTo(mean);
+                    imgFullFov[roi].CopyTo(temp[roi]);
+                    imgA = temp;
+                }
+
+                // (5) auto inverse
                 auto_inverse(imgA, (Bitmap)jxMatchSetting.GoldenBmp.Value);
 
-                // (5) run match one
+                // (6) run match one
                 run_match_one(SideID.A, imgA, _dumpPath);
 
-                // (6) Post finders
+                // (7) Post finders
                 var matchResult = _matchResults[0];
-
                 if (matchResult != null)
                 {
                     if (jxVisionSetting.FindAllFailBlocs.Value && jxMatchSetting.UseGrid)
@@ -1306,16 +1345,16 @@ namespace EzAoiEmptyTrayInspector.Model
                     }
                 }
 
-                // (7) auto inverse
+                // (8) auto inverse
                 auto_inverse(imgA, (Bitmap)jxMatchSetting.GoldenBmp.Value);
 
-                // (8) kick off some blocs
-                if (roi != bound)
+                // (9) Clean UP
+                if (imgA != imgFullFov)
                 {
-                    _OFFSET(matchResult, roi.X, roi.Y);
+                    imgA?.Dispose();
                 }
 
-                // (9) Final Result
+                // (10) Final Result
                 var ts = DateTime.Now - tm0;
 
                 finalResult = new AOI_RESULT(matchResult, ts.TotalSeconds)
@@ -1324,7 +1363,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     FullCols = _recipe.TrayMiscSettings.FullCols,
                 };
 
-                // (10) Dump
+                // (11) Dump
                 dump_result_image(outputFileName, imgFullFov, finalResult);
 
             }
@@ -1369,7 +1408,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 {
                     foreach (var bloc in result.IterSuckerBlocs())
                     {
-                        
+
                     }
                     foreach (var bloc in result.IterAbnormalBlocs())
                     {
@@ -1388,26 +1427,26 @@ namespace EzAoiEmptyTrayInspector.Model
         #region HELPER_FUNCTIONS
         void _OFFSET(MatchResult matchResult, int dx, int dy)
         {
-            if(matchResult == null) return;
+            if (matchResult == null) return;
             var dict = new Dictionary<object, bool>();
             _OFFSET(matchResult.Blocs, dict, dx, dy);
             _OFFSET(matchResult.OutGridBlocs, dict, dx, dy);
             _OFFSET(matchResult.Grid.IterBlocs(), dict, dx, dy);
         }
-        void _OFFSET(IEnumerable<EzBloc> blocs, Dictionary<object,bool> foundDict, int dx, int dy)
+        void _OFFSET(IEnumerable<EzBloc> blocs, Dictionary<object, bool> foundDict, int dx, int dy)
         {
-            if(blocs == null) return;
+            if (blocs == null) return;
             foreach (var bloc in blocs)
             {
                 if (bloc == null || foundDict.ContainsKey(bloc))
                     continue;
-                foundDict.Add(bloc, true);
                 _OFFSET(bloc, dx, dy);
+                foundDict.Add(bloc, true);
             }
         }
         void _OFFSET(EzBloc bloc, int dx, int dy)
         {
-            if(bloc == null) return;
+            if (bloc == null) return;
             bloc.Rect.X += dx;
             bloc.Rect.Y += dy;
             if (bloc.Center != null)

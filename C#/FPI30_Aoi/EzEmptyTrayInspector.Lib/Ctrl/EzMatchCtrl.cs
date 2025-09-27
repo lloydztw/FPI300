@@ -373,21 +373,21 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         private void _model_OnMatched(object sender, MatchResultEventArgs e)
         {
-            // 過濾
-            if (e == null || e.ID != ID)
-                return;
+            //// 過濾
+            //if (e == null || e.ID != ID)
+            //    return;
 
-            if (_frmOwner == null)
-                return;
+            //if (_frmOwner == null)
+            //    return;
 
-            if (_frmOwner.InvokeRequired)
-            {
-                _frmOwner.Invoke((EventHandler<MatchResultEventArgs>)_model_OnMatched, sender, e);
-            }
-            else
-            {
-                update_matched_result(e);
-            }
+            //if (_frmOwner.InvokeRequired)
+            //{
+            //    _frmOwner.Invoke((EventHandler<MatchResultEventArgs>)_model_OnMatched, sender, e);
+            //}
+            //else
+            //{
+            //    update_matched_result(e);
+            //}
         }
         private void _model_OnFinalResulted(object sender, AoiResultEventArgs e)
         {
@@ -908,6 +908,9 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         void update_final_result(AoiResultEventArgs e, bool showMsgBox = false)
         {
+            var ev = new MatchResultEventArgs(SideID.A, e.Result.MatchResult);
+            update_matched_result(ev);
+
 #if (OPT_DUAL_MATCH)
             //refresh(_view.ImageViewer);
             //_instances[0].update_button_status();
