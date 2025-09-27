@@ -24,10 +24,10 @@ using System.Drawing;
 
 namespace LaserAlignDX.AoiModel
 {
-    public interface ICalibAoiModel : IxEmptyTrayInspector
-    {
-        void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg);
-    }
+    //public interface ICalibAoiModel : IxEmptyTrayInspector
+    //{
+    //    void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg);
+    //}
 
     public class CalibAoiModel : ICalibAoiModel
     {

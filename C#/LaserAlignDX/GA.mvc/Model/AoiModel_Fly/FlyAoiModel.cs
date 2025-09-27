@@ -13,9 +13,7 @@
  */
 #endregion
 
-using JetEazy.Machine;
 using JetEazy.Utils;
-using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -31,7 +29,7 @@ namespace LaserAlignDX.AoiModel
     public class FlyAoiModel
     {
         #region GLOBAL_MESS
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        //ITravelerModel _sysModel => GaMvcConfig.SysModel;
         RecipeFPIX3Class _xRecipe
         {
             get { return RecipeFPIX3Class.Instance; }
@@ -64,14 +62,13 @@ namespace LaserAlignDX.AoiModel
         #endregion
 
         #region PRIVATE_MEMBERS
-        Stopwatch _stopWatch = new Stopwatch();
         #endregion
 
         public bool Train(object recipe)
         {
             var bmpFlyTemplate = _xRecipe.bmpprintFlytemplate;
-
             var mvdTool = _xRecipe.mvdprintFlytemp_Find;
+
             mvdTool.bmpObj_Image?.Dispose();
             mvdTool.bmpObj_Image = (Bitmap)bmpFlyTemplate.Clone();
 
@@ -90,49 +87,30 @@ namespace LaserAlignDX.AoiModel
 
         FlyAoiResult flyProcessPro(FlyID flyID, Bitmap bmpFly)
         {
-            var aoiMetaData = new FlyMetaData() { AlgorithmName = "Pro" };
+            var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_TemplateMatch" };
             var aoiResult = new FlyAoiResult() { MetaData = aoiMetaData };
-
-            var flystopwatch = this._stopWatch;
-            flystopwatch.Restart();
-
-            #region OLD_CODE
-            //bmpFlyOperate.Dispose();
-            //bmpFlyOperate = bmpInput;
-            //RectangleF _rectF = new RectangleF(
-            //    xRecipe.xRectRegionPrintFly.X,
-            //    xRecipe.xRectRegionPrintFly.Y,
-            //    xRecipe.xRectRegionPrintFly.Width,
-            //    xRecipe.xRectRegionPrintFly.Height);
-            //_rectF.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
-            //BoundRect(ref _rectF, bmpFlyOperate.Size);
-            #endregion
-
-            #region OLD_CODE_FOR_CENTER_POINTS
-            //PointF centerOrg = new PointF(
-            //    xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-            //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
-            //PointF centerRun = new PointF(
-            //    xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-            //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
-            #endregion
 
             RectangleF roiRect = _xRecipe.xRectRegionPrintFly;
             PointF centerOrg = JetEazy.Qcvt.Center(ref roiRect);
-            PointF centerRun = centerOrg;
-
             roiRect.Inflate(_xFlyPara.xExtendx, _xFlyPara.xExtendy);
             GaUtil.Clip(ref roiRect, bmpFly.Size);
 
             using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                bool ok = this.runMvd_TemplateMatch(bmpCrop);
+                bool ok = runMvd_TemplateMatch(bmpCrop);
+
                 aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
 
                 // 記入 GUI 畫圖所需要的數據
-                aoiMetaData.xBlobs = null;
-                aoiMetaData.xResult = _xRecipe.mvdprintFlytemp_Find.xResults[0];
+                // 注意: xResults.Count 有可能為 0 !!!
+                var xResults = _xRecipe.mvdprintFlytemp_Find.xResults;
+                if (xResults.Count > 0)
+                    aoiMetaData.xResult = xResults[0];
+                else
+                    aoiMetaData.xResult = null;
+
                 aoiMetaData.xTemplateRect = _xRecipe.xRectRegionPrintFly;
+                aoiMetaData.xBlobs = null;
                 aoiMetaData.roiRect = roiRect;
                 aoiMetaData.bmpFly = bmpFly;
                 aoiMetaData.flyID = flyID;
@@ -232,32 +210,38 @@ namespace LaserAlignDX.AoiModel
             //}
             #endregion
 
-            if (flyID.flyStart > 0)
+            int flyStart = flyID.flyStart;
+            if (flyStart >= 1)
             {
                 if (aoiResult.Code == PlcFlyResultCode.OK)
                 {
-                    //centerRun.X = aoiMetaData.xResult.fCenterX + roiRect.X;
-                    //centerRun.Y = aoiMetaData.xResult.fCenterY + roiRect.Y;
-                    centerRun = aoiMetaData.xCentroid;
+                    // 飛拍 像測 抓到的中心點
+                    PointF centerRun = aoiMetaData.xCentroid;
 
-                    //算出的pix需加入解析度
-                    int showID1 = flyID.ShowID;
+                    // 補償量 (算出的 pix 需加入解析度)
                     float flyCamResolution = INI.Instance.FlyImageResolution;
-                    aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution + _xFlyOffsetUseStage[showID1 - 1].X;
-                    aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution + _xFlyOffsetUseStage[showID1 - 1].Y;
-                    aoiResult.OffsetAngle = aoiMetaData.xResult.fAngle;
+                    aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution;    // + _xFlyOffsetUseStage[flyShowID1 - 1].X;
+                    aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution;    // + _xFlyOffsetUseStage[flyShowID1 - 1].Y;
+                    aoiResult.OffsetAngle = (aoiMetaData.xResult != null) ? aoiMetaData.xResult.Value.fAngle : 0f;
+
+                    // 全域調整 (Global Offset)
+                    var gIndex = flyID.ShowID - 1;
+                    var gOffsets = _xFlyOffsetUseStage;
+                    if (0 <= gIndex && gIndex < gOffsets.Length)
+                    {
+                        aoiResult.OffsetX += gOffsets[gIndex].X;
+                        aoiResult.OffsetY += gOffsets[gIndex].Y;
+                    }
                 }
             }
 
-            flystopwatch.Stop();
             return aoiResult;
         }
         FlyAoiResult flyProcessProSpecial(FlyID flyID, Bitmap bmpFly)
         {
-            var aoiMetaData = new FlyMetaData() { AlgorithmName = "ProSpecial" };
+            var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_CheckSpecialAngle" };
             var aoiResult = new FlyAoiResult() { MetaData = aoiMetaData };
-
-            var flystopwatch = this._stopWatch;
+            var flystopwatch = new Stopwatch();
             flystopwatch.Restart();
 
             #region OLD_CODE
@@ -281,7 +265,7 @@ namespace LaserAlignDX.AoiModel
 
             using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                bool ok = this.runMvd_CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
+                bool ok = runMvd_CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
                 aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
                 aoiResult.OffsetAngle = ok ? angle : 0f;
 
@@ -344,19 +328,12 @@ namespace LaserAlignDX.AoiModel
             //}
             #endregion
 
-            if (flyID.flyStart > 0)
+            int flyStart = flyID.flyStart;
+            if (flyStart >= 1)
             {
-            }
-            else
-            {
-                // 不應該會執行到此
-                //aoiResult.Code = PlcFlyResultCode.NG;
-                //aoiResult.OffsetX = 0f;
-                //aoiResult.OffsetY = 0f;
-                //aoiResult.OffsetAngle = 0f;
+                //updateOneResult(flyID, aoiResult);
             }
 
-            flystopwatch.Stop();
             return aoiResult;
         }
 
@@ -375,7 +352,7 @@ namespace LaserAlignDX.AoiModel
         }
         bool runMvd_CheckSpecialAngle(Bitmap ebmpInput, out List<CBlobInfo> resultBlobs, out float resultAngle, out PointF resultCenter)
         {
-            bool bOK = false;
+            bool ok = false;
 
             resultAngle = 0;
             resultCenter = new PointF();
@@ -472,12 +449,12 @@ namespace LaserAlignDX.AoiModel
                         //Console.WriteLine("Distance: {0}", cP2PMeasureRes.Dist);
                     }
 
-                    bOK = true;
+                    ok = true;
                 }
                 #endregion
 
             }
-            return bOK;
+            return ok;
         }
     }
 }

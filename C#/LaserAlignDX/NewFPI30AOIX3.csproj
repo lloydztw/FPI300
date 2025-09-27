@@ -401,6 +401,7 @@
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v25.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\GaRecipes\DTO\DtoBmpTemplate.cs" />
     <Compile Include="GA.mvc\Model\GaRecipes\RecipeFPIX3Class.cs" />
@@ -450,7 +451,6 @@
     <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerBigImagesHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ScanInspectModeEnum.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaBigImageHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaCellsGroup.cs" />
@@ -1007,10 +1007,7 @@
     <None Include="Resources\next.png" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="GA.mvc\Gui\UiFlyCamViewer\" />
-    <Folder Include="GA.mvc\Model\AoiModel_Fly\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)

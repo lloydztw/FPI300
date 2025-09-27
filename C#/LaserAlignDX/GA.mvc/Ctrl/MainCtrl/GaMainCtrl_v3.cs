@@ -149,7 +149,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             {
                 _wndOwner.BeginInvoke(new Action(() =>
                 {
-                    _LOG("GaMailCtrl [V2]", Color.Blue);
+                    _LOG("GaMailCtrl [V3]", Color.Blue);
                     _LOG($"參數資料夾 = {Traveller106.Universal.MAINPATH}", Color.Blue);
                     _sysModel.ApplyRecipe();
                 }));

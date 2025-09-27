@@ -17,11 +17,10 @@ namespace LaserAlignDX.AoiModel
         string LotId { get; set; }
         string StripId { get; set; }
         string FileBarcodeStr { get; set; }
-        string FileName { get; set; }
+        string FileName { get; }
 
         bool QrJudged { get; set; }
         bool QrUsed { get; set; }
-        string ResultDesc { get; }
 
         int[] GetQrResult();
         float[] GetScanOffset();

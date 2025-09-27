@@ -12,7 +12,6 @@ using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.OPSpace;
 using JetEazy.PropertyGridSpace;
-using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace.ParaSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -66,8 +65,8 @@ namespace Traveller106
                         //      才能放在任意資料夾
                         //      不需要 依附於 最後佈署的資料夾 
                         //return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
-                        //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
-                        return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
+                        return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
+                        //return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
                 }
             }
         }
@@ -650,7 +649,6 @@ namespace Traveller106
             IxFlyAreaCam = null;
 
             RecipeFPIX3Class.DisposeAll();
-            ProcessRunFPIClass.DisposeAll();
             LtAoiFactory.DisposeAll();
         }
         public static void Close()

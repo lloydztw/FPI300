@@ -1,6 +1,20 @@
-﻿using EzAoiEmptyTrayInspector.Model;
-using JetEazy.BasicSpace;
-using JetEazy.EzImage;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-08-01 開始重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.Utils;
@@ -31,6 +45,10 @@ namespace LaserAlignDX.AoiModel.V25
         public event EventHandler<GaProgressEventArgs> OnAoiProgressing;
         public event EventHandler<GaProgressEventArgs> OnAoiBegin;
         public event EventHandler<GaProgressEventArgs> OnAoiEnd;
+
+        #region NLOG
+        NLog.Logger _NLOG => _NLOG;
+        #endregion
 
         #region SINGLETON
         protected ProcessRunFPIClass()
@@ -88,28 +106,68 @@ namespace LaserAlignDX.AoiModel.V25
         /// 2025-09-10 新座標轉換
         /// </summary>
         TravellerTransforms _transformModel => _sysModel.TransformsModel;
+        /// <summary>
+        /// SystemModel
+        /// </summary>
         ITravelerModel _sysModel => GaMvcConfig.SysModel;
         #endregion
 
-        #region PRIVATE_MEMBERS
-        //private CMvdImage m_MvdOpeate = new CMvdImage();
+        #region PRIVATE_STATISTICS_DATA
         private long m_ElapsedTime = 0;
         private bool m_Running = false;
-
         private bool m_IsPass = false;
-        private string m_ResultDesc = string.Empty;
-        private string m_FileBarcodeStr = string.Empty;
-        private ScanInspectMode scanInspectMode = ScanInspectMode.MEASUREAOI;
+        #endregion
 
-        private bool m_QrUsed = false;
-        private bool m_QrJudged = false;
+        public long ElapsedTime
+        {
+            get { return m_ElapsedTime; }
+        }
+        public bool Running
+        {
+            get { return m_Running; }
+        }
+        public bool IsPass
+        {
+            get { return m_IsPass; }
+        }
 
-        //VisionDesigner.BoxOverlap.CBoxOverlapTool cBoxOverlapTool = null;
+        #region PRIVATE_LOT_DATA
         private string m_StripId = "Strip_NONE";
         private string m_LotId = "Lot_NONE";
-        private string m_PicResultPath = INI.Instance.ResultImagePath;
-        private string m_PicResultOrgPath = INI.Instance.ResultImagePath;
-        private string m_FileName = string.Empty;
+        private string m_FileBarcodeStr = string.Empty;
+        #endregion
+
+        public string LotId
+        {
+            get { return m_LotId; }
+            set { m_LotId = value; }
+        }
+        public string StripId
+        {
+            get { return m_StripId; }
+            set { m_StripId = value; }
+        }
+        public string FileName
+        {
+            get { return GetLotFileName(LotId, ".txt"); }
+        }
+        public string FileBarcodeStr
+        {
+            get
+            {
+                return m_FileBarcodeStr;
+            }
+            set
+            {
+                m_FileBarcodeStr = value;
+                MarkFileTimeTag();
+            }
+        }
+
+        #region PRIVATE_AOI_RUN_OPTIONS
+        private ScanInspectMode scanInspectMode = ScanInspectMode.MEASUREAOI;
+        private bool m_QrUsed = false;
+        private bool m_QrJudged = false;
         #endregion
 
         public ScanInspectMode xScanInspectMode
@@ -128,81 +186,11 @@ namespace LaserAlignDX.AoiModel.V25
             set { m_QrJudged = value; }
         }
 
-        public string LotId
-        {
-            get { return m_LotId; }
-            set { m_LotId = value; }
-        }
-        public string StripId
-        {
-            get { return m_StripId; }
-            set { m_StripId = value; }
-        }
-        public string FileName
-        {
-            get { return m_FileName; }
-            set { m_FileName = value; }
-        }
-        public string FileBarcodeStr
-        {
-            get { return m_FileBarcodeStr; }
-            set { m_FileBarcodeStr = value; }
-        }
-
-        public long ElapsedTime
-        {
-            get { return m_ElapsedTime; }
-        }
-        public bool Running
-        {
-            get { return m_Running; }
-        }
-        public bool IsPass
-        {
-            get { return m_IsPass; }
-        }
-        public string ResultDesc
-        {
-            get { return m_ResultDesc; }
-        }
-
-        public void Run()
-        {
-            m_Running = true;
-            m_IsPass = false;
-            m_ResultDesc = string.Empty;
-
-            #region DIRECTORIES_可以搬到後面處理_才不會有遲滯感覺
-            if (INI.Instance.IsSaveDebugBMP)
-            {
-                m_PicResultPath = $"{INI.Instance.ResultImagePath}\\linescanImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
-                if (!System.IO.Directory.Exists(m_PicResultPath))
-                {
-                    System.IO.Directory.CreateDirectory(m_PicResultPath);
-                }
-            }
-            if (INI.Instance.IsSaveDebugOrgBmp)
-            {
-                m_PicResultOrgPath = $"{INI.Instance.ResultImagePath}\\linescanImageOrg\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
-                if (!System.IO.Directory.Exists(m_PicResultOrgPath))
-                {
-                    System.IO.Directory.CreateDirectory(m_PicResultOrgPath);
-                }
-            }
-            #endregion
-
-            GaUtil.LOG($"{GetType().Name} [V2.5] Run", Color.Purple);
-
-            Thread thread = new Thread(runTest);
-            thread.Priority = ThreadPriority.Highest;
-            thread.IsBackground = false;
-            thread.Start();
-        }
-
+        #region RESULTS_FOR_PLC
         /// <summary>
         /// 单颗的线扫结果(预留300个) PLC用此信号来将每颗产品放到对应的Tray盘
         /// </summary>
-        /// <returns>ARRAY[0..299] OF INT PC->PLC 单颗结果,1-Ok,2-外观Ng,3-空,4-读码NG,9-切割NG</returns>
+        /// <returns>ARRAY[0..299] OF INT PC->PLC 单颗结果, 1:OK 2:外观NG, 3:空, 4:读码NG, 9:切割NG </returns>
         public int[] GetSingleResult()
         {
             //PC->PLC 单颗结果,1-Ok,2-外观Ng,3-空,4-读码NG,9-切割NG
@@ -227,7 +215,7 @@ namespace LaserAlignDX.AoiModel.V25
         /// <summary>
         /// 单颗产品的读码比对结果(预留300个) 视觉软件需要将读码结果保存在本地或服务器
         /// </summary>
-        /// <returns>ARRAY[0..299] OF INT PC->PLC 读码结果,1-Ok,2-比对Ng,3-空,4-有码未读到</returns>
+        /// <returns>ARRAY[0..299] OF INT PC->PLC 读码结果, 1:OK, 2:比对NG, 3:空, 4:有码未读到</returns>
         public int[] GetQrResult()
         {
             //PC->PLC 读码结果,1-Ok,2-比对Ng,3-空,4-有码未读到
@@ -285,20 +273,46 @@ namespace LaserAlignDX.AoiModel.V25
             }
             return states;
         }
+        #endregion
 
-        #region PRIVATE_GAARA_FUNCTIONS
+        public void Run()
+        {
+            m_Running = true;
+            m_IsPass = false;
+
+            #region DIRECTORIES_可以搬到後面處理_才不會有遲滯感覺
+            //if (INI.Instance.IsSaveDebugBMP)
+            //{
+            //    m_PicResultPath = $"{INI.Instance.ResultImagePath}\\linescanImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
+            //    if (!System.IO.Directory.Exists(m_PicResultPath))
+            //    {
+            //        System.IO.Directory.CreateDirectory(m_PicResultPath);
+            //    }
+            //}
+            //if (INI.Instance.IsSaveDebugOrgBmp)
+            //{
+            //    m_PicResultOrgPath = $"{INI.Instance.ResultImagePath}\\linescanImageOrg\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
+            //    if (!System.IO.Directory.Exists(m_PicResultOrgPath))
+            //    {
+            //        System.IO.Directory.CreateDirectory(m_PicResultOrgPath);
+            //    }
+            //}
+            #endregion
+
+            GaUtil.LOG($"{GetType().Name} [V2.5] Run", Color.Purple);
+
+            Thread thread = new Thread(runTest);
+            thread.Priority = ThreadPriority.Highest;
+            thread.IsBackground = false;
+            thread.Start();
+        }
         private void runTest()
         {
+            //MarkPathFileTimeTag();
+
             switch (scanInspectMode)
             {
-                //case ScanInspectMode.MEASUREAOI:
-                //    _Inspect001();
-                //    break;
-                //case ScanInspectMode.QRCODE:
-                //    _Inspect002();
-                //    break;
                 case ScanInspectMode.NOTRAY:
-                    //_Inspect001();
                     _Inspect003_LT();
                     break;
                 default:
@@ -306,7 +320,6 @@ namespace LaserAlignDX.AoiModel.V25
                     break;
             }
         }
-        #endregion
 
         #region INSPECT_001
         /// <summary>
@@ -319,38 +332,34 @@ namespace LaserAlignDX.AoiModel.V25
             // 效能追蹤
             _TM.Reset();
 
-            // 線掃的巨圖
-            Bitmap bmpFullfov = null;
-
             try
             {
                 xRecipe.AnalyzeDatasData();
                 _TM.Trace("_Inspect001 : xRecipe.AnalyzeDatasData()");
 
                 // 標記起始計時
-                m_ElapsedTime = 0;
                 var stopwatch = new System.Diagnostics.Stopwatch();
                 stopwatch.Restart();
+                m_ElapsedTime = 0;
 
                 // 準備資料夾
-                string imgPath = $"{Universal.LOG_IMG_PATH}\\{JzTimes.DateSerialString}\\{m_FileBarcodeStr}";
+                string imgLogPath = GetLogPath(m_FileBarcodeStr);
 
                 #region PREPARE_PATH
                 if (INI.Instance.IsSaveTestImage)
                 {
-                    if (!Directory.Exists(imgPath))
-                        Directory.CreateDirectory(imgPath);
+                    if (!Directory.Exists(imgLogPath))
+                        Directory.CreateDirectory(imgLogPath);
                 }
                 #endregion
 
-                // 取得線掃巨圖: 轉換 CMvdImage (cMvdInput) 成 Bitmap 
-                // bmpInputImage = GaImageUtil.CMvdImageToBitmap(cMvdInput);
-                // 2025-08-28 LETIAN: 巨圖統一由 TravellerBigImagesHolder 管理其生命週期
-                bmpFullfov = LineScanCamImageHolder.PeekBitmap();
+                // 取得線掃巨圖:
+                // 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
+                Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
                 _TM.Trace("_Inspect001 : CMvdImage To Bitmap 完成.");
 
                 // 晶粒定位 與 量測
-                _Inspect001_Chip_Location_And_Measurement(bmpFullfov, imgPath, out string debugCellCenterStr);
+                _Inspect001_Chip_Location_And_Measurement(bmpFullfov, imgLogPath, out string debugCellCenterStr);
                 _TM.Trace("_Inspect001 : 晶粒定位 & 量測 完成!");
 
                 // 读码测试
@@ -358,7 +367,8 @@ namespace LaserAlignDX.AoiModel.V25
                 _TM.Trace("_Inspect001 : QRCode 完成!");
 
                 // 異步輸出 Debug 數據
-                _Inspect001_Async_SaveDebugData(bmpFullfov, debugCellCenterStr, imgPath);
+                MarkFileTimeTag();
+                _Inspect001_Async_SaveDebugData(bmpFullfov, debugCellCenterStr, imgLogPath);
                 
                 // PASS / NG
                 m_IsPass = _Inpsect001_Check_TotalPass();
@@ -369,23 +379,16 @@ namespace LaserAlignDX.AoiModel.V25
                 m_Running = false;
 
                 // 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
-                //// 釋放巨圖
-                //bmpInputImage?.Dispose();
-                //bmpInputImage = null;
+                // 在此無需釋放 巨圖
 
                 fire_AoiEnd();
             }
             catch (Exception ex)
             {
-                _TM.LOG.Error(ex);
-
                 // 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
-                //// 釋放巨圖
-                //bmpInputImage?.Dispose();
-                //bmpInputImage = null;
-                //throw ex;
+                // 在此無需釋放 巨圖
 
-                LtDebug.LOG.Error(ex, "_Inspect001_LT");
+                _NLOG.Error(ex, "_Inspect001_LT");
                 fire_AoiEnd();
             }
             finally
@@ -705,7 +708,7 @@ namespace LaserAlignDX.AoiModel.V25
             }
             catch (Exception ex)
             {
-                _TM.LOG.Error(ex, $"{borderName} 量測異常");
+                _NLOG.Error(ex, $"{borderName} 量測異常");
                 //throw ex;
             }
 #else
@@ -749,7 +752,7 @@ namespace LaserAlignDX.AoiModel.V25
             catch (Exception ex)
             {
                 string borderName = JetEazy.QxNums.GetEnumDescription(eBorder);
-                LtDebug.LOG.Error(ex, $"{borderName} 定位異常");
+                _NLOG.Error(ex, $"{borderName} 定位異常");
                 throw ex;
             }
 #endif
@@ -785,8 +788,8 @@ namespace LaserAlignDX.AoiModel.V25
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        _TM.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        _TM.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                        _NLOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        _NLOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
 #else
@@ -821,8 +824,8 @@ namespace LaserAlignDX.AoiModel.V25
 
                     //    //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                     //    //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                    //    LtDebug.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                    //    LtDebug.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                    //    _NLOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                    //    _NLOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     //}
 
                     // 轉換到 Physic Coordinates 重組 line segment, 再行計算距離.
@@ -841,12 +844,12 @@ namespace LaserAlignDX.AoiModel.V25
             catch (MvdException ex)
             {
                 //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-                _TM.LOG.Error(ex, "長度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                _NLOG.Error(ex, "長度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
             }
             catch (System.Exception ex)
             {
                 //Console.WriteLine("Fail with error " + ex.Message);
-                _TM.LOG.Error(ex, "長度量測 異常");
+                _NLOG.Error(ex, "長度量測 異常");
             }
             #endregion
 
@@ -880,8 +883,8 @@ namespace LaserAlignDX.AoiModel.V25
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        _TM.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        _TM.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                        _NLOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        _NLOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
 #else
@@ -916,8 +919,8 @@ namespace LaserAlignDX.AoiModel.V25
 
                     //    //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                     //    //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                    //    LtDebug.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                    //    LtDebug.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                    //    _NLOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                    //    _NLOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     //}
 
                     // 轉換到 Physic Coordinates 重組 line segment, 再行計算距離.
@@ -936,12 +939,12 @@ namespace LaserAlignDX.AoiModel.V25
             catch (MvdException ex)
             {
                 //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-                LtDebug.LOG.Error(ex, "寬度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                _NLOG.Error(ex, "寬度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
             }
             catch (System.Exception ex)
             {
                 //Console.WriteLine("Fail with error " + ex.Message);
-                LtDebug.LOG.Error(ex, "寬度量測 異常");
+                _NLOG.Error(ex, "寬度量測 異常");
             }
             #endregion
         }
@@ -1025,7 +1028,7 @@ namespace LaserAlignDX.AoiModel.V25
             }
             catch (Exception ex)
             {
-                LtDebug.LOG.Error(ex, $"{borderName} 量測異常");
+                _NLOG.Error(ex, $"{borderName} 量測異常");
                 //throw ex;
             }
 #else
@@ -1070,7 +1073,7 @@ namespace LaserAlignDX.AoiModel.V25
             }
             catch (Exception ex)
             {
-                LtDebug.LOG.Error(ex, $"{borderName} 定位異常");
+                _NLOG.Error(ex, $"{borderName} 定位異常");
                 throw ex;
             }
 #endif
@@ -1106,8 +1109,8 @@ namespace LaserAlignDX.AoiModel.V25
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        LtDebug.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        LtDebug.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                        _NLOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        _NLOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
 #else
@@ -1136,8 +1139,8 @@ namespace LaserAlignDX.AoiModel.V25
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        LtDebug.LOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        LtDebug.LOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                        _NLOG.Info("長度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        _NLOG.Info("長度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
 #endif
@@ -1145,12 +1148,12 @@ namespace LaserAlignDX.AoiModel.V25
             catch (MvdException ex)
             {
                 //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-                LtDebug.LOG.Error(ex, "長度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                _NLOG.Error(ex, "長度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
             }
             catch (System.Exception ex)
             {
                 //Console.WriteLine("Fail with error " + ex.Message);
-                LtDebug.LOG.Error(ex, "長度量測 異常");
+                _NLOG.Error(ex, "長度量測 異常");
             }
             #endregion
 
@@ -1184,8 +1187,8 @@ namespace LaserAlignDX.AoiModel.V25
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        LtDebug.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        LtDebug.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                        _NLOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        _NLOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
 #else
@@ -1214,8 +1217,8 @@ namespace LaserAlignDX.AoiModel.V25
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        LtDebug.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        LtDebug.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                        _NLOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        _NLOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
 #endif
@@ -1223,12 +1226,12 @@ namespace LaserAlignDX.AoiModel.V25
             catch (MvdException ex)
             {
                 //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-                _TM.LOG.Error(ex, "寬度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                _NLOG.Error(ex, "寬度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
             }
             catch (System.Exception ex)
             {
                 //Console.WriteLine("Fail with error " + ex.Message);
-                _TM.LOG.Error(ex, "寬度量測 異常");
+                _NLOG.Error(ex, "寬度量測 異常");
             }
             #endregion
         }
@@ -1291,7 +1294,7 @@ namespace LaserAlignDX.AoiModel.V25
                         }
                         catch(Exception ex)
                         {
-                            LtDebug.LOG.Error(ex, "cell.DetectDefects 異常!");
+                            _NLOG.Error(ex, "cell.DetectDefects 異常!");
                             xInspect.bCheckInspect = false;
                         }
                     }
@@ -1319,7 +1322,7 @@ namespace LaserAlignDX.AoiModel.V25
                         }
                         catch (Exception ex)
                         {
-                            LtDebug.LOG.Error(ex, "cell.DeCode2D 異常!");
+                            _NLOG.Error(ex, "cell.DeCode2D 異常!");
                             //xInspect.m_QrUsed = false;
                         }
                     }
@@ -1330,44 +1333,56 @@ namespace LaserAlignDX.AoiModel.V25
         /// LETIAN: 非同步保存 Debug 數據 搬移至此.
         /// caller 負責 bmpInputImage 生命
         /// </summary>
-        private void _Inspect001_Async_SaveDebugData(Bitmap bmpInputImage, string debugCellCenterStr, string imgPath)
+        private void _Inspect001_Async_SaveDebugData(Bitmap bmpFullfov, string debugCellCenterStr, string debugDumpPath)
         {
-            IEzImage ezImageArg = new EzFreeBitmap(bmpInputImage, true);
+            if (bmpFullfov == null)
+                return;
+
+            if (!INI.Instance.IsSaveTestImage && !INI.Instance.IsSaveDebugBMP && !INI.Instance.IsSaveDebugOrgBmp)
+                return;
 
             ThreadPool.QueueUserWorkItem(arg =>
             {
                 try
                 {
-                    IEzImage ezImage = arg as IEzImage;
-                    m_FileName = $"{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg";
-                    if (INI.Instance.IsSaveTestImage)
+                    using (Bitmap bmpBig = (Bitmap)arg)
                     {
-                        GaUtil.SaveData(debugCellCenterStr,
-                            imgPath + $"\\PositionFix\\DEBUG_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt");
-                    }
+                        //(1) SAVE debugCellCenterStr
+                        if (INI.Instance.IsSaveTestImage && debugDumpPath != null && debugCellCenterStr != null)
+                        {
+                            //>>> GaUtil.SaveData(debugCellCenterStr, debugDumpPath + $"\\PositionFix\\DEBUG_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt");
 
-                    if (INI.Instance.IsSaveDebugBMP)
-                    {
-                        GaImageUtil.SaveImageWithQuality(ezImage.Bitmap,
-                            $"{m_PicResultPath}\\{m_FileName}",
-                            INI.Instance.ImageQuality);
-                    }
+                            if (!System.IO.Directory.Exists(debugDumpPath))
+                                System.IO.Directory.CreateDirectory(debugDumpPath);
 
-                    if (INI.Instance.IsSaveDebugOrgBmp)
-                    {
-                        ezImage.Save($"{m_PicResultOrgPath}\\{m_FileName}");
-                        //bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
-                        //                   ImageFormat.Jpeg);
-                    }
+                            string fileName = System.IO.Path.Combine(debugDumpPath, GetLotFileName(LotId, ".txt"));
+                            GaUtil.SaveData(debugCellCenterStr, fileName);
+                        }
 
-                    ezImage?.Dispose();
+                        //(2) SAVE debug Bmp
+                        if (INI.Instance.IsSaveDebugBMP)
+                        {
+                            //>>> GaImageUtil.SaveImageWithQuality(ezImage.Bitmap, $"{m_PicResultPath}\\{m_FileName}", INI.Instance.ImageQuality);
+                            string fileName = GetDebugBmpFileName();
+                            GaImageUtil.SaveImageWithQuality(bmpBig, fileName, INI.Instance.ImageQuality);
+                        }
+
+                        //(3) SAVE debug OrgBmp
+                        if (INI.Instance.IsSaveDebugOrgBmp)
+                        {
+                            //>>> ezImage.Save($"{m_PicResultOrgPath}\\{m_FileName}");
+                            string fileName = GetDebugOrgBmpFileName();
+                            GaImageUtil.SaveBigImage(fileName, bmpBig);
+                        }
+                    }
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    _LOG($"异常捕获:{e.Message}", Color.Red);
+                    //_LOG($"异常捕获:{ex.Message}", Color.Red);
+                    _LOG_ERROR(ex, "_Inspect001_Async_SaveDebugData");
                 }
             },
-                ezImageArg
+                bmpFullfov.Clone()
             );
         }
         private bool _Inpsect001_Check_TotalPass()
@@ -1389,7 +1404,7 @@ namespace LaserAlignDX.AoiModel.V25
         }
         #endregion
 
-        #region INSPECT_003
+        #region INSPECT_003_EMPTY_TRAY
         /// <summary>
         /// 空载台检测
         /// </summary>
@@ -1405,8 +1420,8 @@ namespace LaserAlignDX.AoiModel.V25
 
             var aoiModel = GaMvcConfig.SysModel.EmptyTrayAoiModel;
 
-            Bitmap bmpInputImage = LineScanCamImageHolder.PeekBitmap();
-            if (bmpInputImage != null)
+            Bitmap bmpFullFov = LineScanCamImageHolder.PeekBitmap();
+            if (bmpFullFov != null)
             {
                 //复位所有数据
                 #region RESET_DATA
@@ -1415,14 +1430,15 @@ namespace LaserAlignDX.AoiModel.V25
                     cell?.Reset();
                 #endregion
 
-                aoiModel.RunAll(bmpInputImage, wait: true);
+                aoiModel.RunAll(bmpFullFov, wait: true);
 
                 var result = aoiModel.GetResult();
 
-                _Inspect003_UpdateResult(result, bmpInputImage, xRecipe);
+                _Inspect003_UpdateResult(result, bmpFullFov, xRecipe);
 
                 // 異步輸出 Debug 數據
-                _Inspect003_Async_SaveDebugData(bmpInputImage);
+                MarkFileTimeTag();
+                _Inspect003_Async_SaveDebugData(bmpFullFov);
             }
 
             //m_IsPass = true;//不需要结果 都是记录单颗的数据
@@ -1435,16 +1451,15 @@ namespace LaserAlignDX.AoiModel.V25
         /// <summary>
         /// 空载台检测 : 更新結果 到 Gaara 數據群
         /// </summary>
-        private void _Inspect003_UpdateResult(EzEmptyTrayResult result, Bitmap bmpInputImage, RecipeFPIX3Class dst)
+        private void _Inspect003_UpdateResult(EzEmptyTrayResult result, Bitmap bmpFullFov, RecipeFPIX3Class xRecipe)
         {
-            string imgPath = $"{Universal.LOG_IMG_PATH}\\{JzTimes.DateSerialString}\\{m_FileBarcodeStr}";
-
+            //string imgPath = $"{Universal.LOG_IMG_PATH}\\{JzTimes.DateSerialString}\\{m_FileBarcodeStr}";
             #region PREPARE_PATH
-            if (INI.Instance.IsSaveTestImage)
-            {
-                if (!Directory.Exists(imgPath))
-                    Directory.CreateDirectory(imgPath);
-            }
+            //if (INI.Instance.IsSaveTestImage)
+            //{
+            //    if (!Directory.Exists(imgPath))
+            //        Directory.CreateDirectory(imgPath);
+            //}
             #endregion
 
             bool isAllPass = result != null;
@@ -1535,38 +1550,84 @@ namespace LaserAlignDX.AoiModel.V25
         /// LETIAN: 非同步保存 Debug 數據 搬移至此.
         /// 此函式 負責 bmpInputImage 生命
         /// </summary>
-        private void _Inspect003_Async_SaveDebugData(Bitmap bmpInputImage)
+        private void _Inspect003_Async_SaveDebugData(Bitmap bmpFullFov)
         {
-            IEzImage ezImageArg = new EzFreeBitmap(bmpInputImage, true);
-
+            if (!INI.Instance.IsSaveDebugBMP || bmpFullFov == null)
+                return;
+                
             ThreadPool.QueueUserWorkItem(arg =>
             {
                 try
                 {
-                    IEzImage ezImage = arg as IEzImage;
-
-                    if (INI.Instance.IsSaveDebugBMP)
+                    using (Bitmap bmpBig = (Bitmap)arg)
                     {
-                        GaImageUtil.SaveImageWithQuality(ezImage.Bitmap,
-                            $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
-                    }
+                        if (INI.Instance.IsSaveDebugBMP)
+                        {
+                            //GaImageUtil.SaveImageWithQuality(bmpBig,
+                            //    $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);
+                            string fileName = GetDebugBmpFileName();
+                            GaImageUtil.SaveImageWithQuality(bmpBig, fileName, INI.Instance.ImageQuality);
+                        }
 
-                    if (INI.Instance.IsSaveDebugOrgBmp)
-                    {
-                        ezImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg");
-                        //bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
-                        //                   ImageFormat.Jpeg);
+                        if (INI.Instance.IsSaveDebugOrgBmp)
+                        {
+                            //ezImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg");
+                            //bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",
+                            //                   ImageFormat.Jpeg);
+                            string fileName = GetDebugOrgBmpFileName();
+                            GaImageUtil.SaveBigImage(fileName, bmpBig);
+                        }
                     }
-
-                    ezImage?.Dispose();
                 }
-                catch (Exception e)
+                catch (Exception ex)
                 {
-                    _LOG($"异常捕获:{e.Message}", Color.Red);
+                    //_LOG($"异常捕获:{ex.Message}", Color.Red);
+                    _LOG_ERROR(ex, "_Inspect003_Async_SaveDebugData");
                 }
             },
-                ezImageArg
+                bmpFullFov.Clone()
             );
+        }
+        #endregion
+
+        #region PRIVATE_PATH_FILE_FUNCTIONS
+        private DateTime _timeTag = DateTime.Now;
+        /// <summary>
+        /// 標定統一的存檔時間
+        /// </summary>
+        void MarkFileTimeTag()
+        {
+            _timeTag = DateTime.Now;
+        }
+        string GetLotFileName(string tag, string ext)
+        {
+            //m_FileName = $"{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg";
+            return $"{tag}-{_timeTag:yyyyMMddHHmmss}.{ext}";
+        }
+        string GetDebugBmpFileName()
+        {
+            return GetDebugImgSaveFileName("LineScanImage", StripId, LotId);
+        }
+        string GetDebugOrgBmpFileName()
+        {
+            return GetDebugImgSaveFileName("LineScanImageOrg", StripId, LotId);
+        }
+        string GetDebugImgSaveFileName(string subFolder, string stripID, string lotID, bool autoCreateDir = true)
+        {
+            //>>> m_PicResultOrgPath = $"{INI.Instance.ResultImagePath}\\linescanImageOrg\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
+            //>>> m_PicResultOrgPath = $"{INI.Instance.ResultImagePath}\\linescanImageOrg\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
+
+            string path = System.IO.Path.Combine(INI.Instance.ResultImagePath, subFolder, _timeTag.ToString("yyyyMMdd"), stripID);
+            if (autoCreateDir && !System.IO.Directory.Exists(path))
+            {
+                System.IO.Directory.CreateDirectory(path);
+            }
+            string file = $"{lotID}-{_timeTag:yyyyMMddHHmmss}.jpg";
+            return System.IO.Path.Combine(path, file);
+        }
+        string GetLogPath(string subFolder)
+        {
+            return System.IO.Path.Combine(Universal.LOG_IMG_PATH, _timeTag.ToString("yyyyMMdd"), subFolder);
         }
         #endregion
 
@@ -1608,56 +1669,15 @@ namespace LaserAlignDX.AoiModel.V25
         #endregion
 
         #region LOG_FUNCTIONS
-        protected void _LOG(string msg, params object[] args)
+        void _LOG_ERROR(Exception ex, string message)
         {
-#if (true)
-            Color color = Color.Black;
-
-            int N = args.Length;
-            if (N > 0 && args[N - 1] is Color)
-            {
-                color = (Color)args[N - 1];
-                N -= 1;
-            }
-
-            var sb = new System.Text.StringBuilder();
-            //sb.Append(Name);
-            sb.Append(", ");
-            sb.Append(msg);
-
-            for (int i = 0; i < N; i++)
-            {
-                sb.Append(", ");
-                sb.Append(args[i]);
-            }
-
-            msg = sb.ToString();
-            CommonLogClass.Instance.LogMessage(msg, color);
-            //if (color == Color.Red)
-            //    GdxGlobal.LOG.Warn(msg);
-            //else
-            //    GdxGlobal.LOG.Debug(msg);
-#endif
+            _NLOG.Error(ex, message);
+            GaUtil.LOG($"[異常] {ex.Message}", Color.Red);
         }
         #endregion
 
         #region RUNTIME_TOOLS
         List<CBoxOverlapTool> _boxOverlapTools = new List<CBoxOverlapTool>();
-        /// <summary>
-        /// 转换虚拟的直线
-        /// </summary>
-        /// <param name="viewLine">输入虚拟直线</param>
-        /// <returns>返回实体直线</returns>
-        CMvdLineSegmentF getRealLine(CMvdLineSegmentF viewLine)
-        {
-            PointF p1view = new PointF(viewLine.StartPoint.fX, viewLine.StartPoint.fY);
-            PointF p2view = new PointF(viewLine.EndPoint.fX, viewLine.EndPoint.fY);
-
-            PointF p1world = LineScanCalibrate1.ViewToWorld(p1view);
-            PointF p2world = LineScanCalibrate1.ViewToWorld(p2view);
-
-            return new CMvdLineSegmentF(new MVD_POINT_F(p1world.X, p1world.Y), new MVD_POINT_F(p2world.X, p2world.Y));
-        }
         #endregion
 
         void _PrepareChipMatcher(int threadIdx, out IMvdTemplateMatcher chipMatcher)
