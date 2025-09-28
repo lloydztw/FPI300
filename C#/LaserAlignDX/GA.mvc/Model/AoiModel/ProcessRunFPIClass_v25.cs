@@ -1602,7 +1602,7 @@ namespace LaserAlignDX.AoiModel.V25
         string GetLotFileName(string tag, string ext)
         {
             //m_FileName = $"{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg";
-            return $"{tag}-{_timeTag:yyyyMMddHHmmss}.{ext}";
+            return $"{tag}-{_timeTag:yyyyMMddHHmmss}{ext}";
         }
         string GetDebugBmpFileName()
         {

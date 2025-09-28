@@ -14,12 +14,14 @@
 #endregion
 
 using AUVision;
+using JetEazy.QvMath;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.UISpace.UIMVC;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using VisionDesigner;
 using VisionDesigner.PositionFix;
 
@@ -48,12 +50,12 @@ namespace LaserAlignDX.Mvc.Gui
 
         //Control IvFlyCamViewUI.Window => _dispUI;
 
-        public void Update(FlyMetaData flyMetaData, FlyLotData lotData)
+        public void Update(FlyMetaData flyMetaData)
         {
             if (_dispUI.InvokeRequired)
             {
                 // 處理 多線程 的問題
-                _dispUI.Invoke((Action<FlyMetaData, FlyLotData>)Update, flyMetaData, lotData);
+                _dispUI.Invoke((Action<FlyMetaData>)Update);
             }
             else
             {
@@ -85,7 +87,8 @@ namespace LaserAlignDX.Mvc.Gui
 
             try
             {
-                if (flyMetaData.xResult != null)
+                var xResultBox2D = flyMetaData?.xResultBox2D;
+                if (xResultBox2D != null)
                 {
                     MVD_COLOR color;
 
@@ -102,31 +105,47 @@ namespace LaserAlignDX.Mvc.Gui
 
                     CMvdRectangleF mvdRect;
 
-                    if (resultCode == PlcFlyResultCode.OK && flyMetaData.xResult != null)
+                    if (resultCode == PlcFlyResultCode.OK)
                     {
+                        // OK (Green)
                         color = new MVD_COLOR(0, 255, 0);
+
                         //-----------------------------------------------------------------------
-                        // 使用笨笨的 MVD 找出 Rotated Rectangle (Box2D
+                        // 使用笨笨的 MVD 找出 Rotated Rectangle (Box2D)
                         // 這個很容易用 OpenCvSharp 達成
                         //-----------------------------------------------------------------------
-                        var mvdRectBase = GaMvdConvertor.ToCMvdRectangleF(ref templateRect);
-                        mvdRect = PositionFixRun(mvdRectBase,
-                                                 templateRect,
-                                                 new Rectangle(Point.Empty, imgSize),
-                                                 flyMetaData.xResult.Value) as CMvdRectangleF;
+                        //var mvdRectBase = GaMvdConvertor.ToCMvdRectangleF(ref templateRect);
+                        //mvdRect = PositionFixRun(mvdRectBase,
+                        //                         templateRect,
+                        //                         new Rectangle(Point.Empty, imgSize),
+                        //                         flyMetaData.xResult.Value) as CMvdRectangleF;
+                        //mvdRect.CenterX += roiRect.X;
+                        //mvdRect.CenterY += roiRect.Y;
+                        //mvdRect.BorderColor = color;
 
-                        mvdRect.CenterX += roiRect.X;
-                        mvdRect.CenterY += roiRect.Y;
-                        mvdRect.BorderColor = color;
+                        var angle = (float)(xResultBox2D.Theta * 180 / Math.PI);
+                        var cx = xResultBox2D.Center.X;
+                        var cy = xResultBox2D.Center.Y;
+                        var cw = xResultBox2D.MinAreaRectSize.Width;
+                        var ch = xResultBox2D.MinAreaRectSize.Height;
+                        cx += roiRect.X;
+                        cy += roiRect.Y;
+
+                        mvdRect = new CMvdRectangleF(cx, cy, cw, ch)
+                        {
+                            Angle = angle,
+                            BorderColor = color,
+                        };
                         mvdShapes.Add(mvdRect);
                     }
                     else
                     {
+                        // NG (RED)
                         color = new MVD_COLOR(255, 0, 0);
-
-                        // NG
-                        mvdRect = new CMvdRectangleF(centerRun.X, centerRun.Y, templateRect.Width, templateRect.Height);
-                        mvdRect.BorderColor = color;
+                        mvdRect = new CMvdRectangleF(centerRun.X, centerRun.Y, templateRect.Width, roiRect.Height)
+                        {
+                            BorderColor = color
+                        };
                         mvdShapes.Add(mvdRect);
                     }
 
@@ -162,7 +181,7 @@ namespace LaserAlignDX.Mvc.Gui
 
                     CMvdTextF mvdText = new CMvdTextF(mvdRect.CenterX, mvdRect.CenterY, text);
                     mvdText.BorderColor = color; // new MVD_COLOR(0, 255, 0);
-                    mvdText.FontWidth = 20;
+                    mvdText.FontWidth = 16;
                     mvdShapes.Add(mvdText);
                 }
                 return mvdShapes.ToArray();
@@ -185,7 +204,7 @@ namespace LaserAlignDX.Mvc.Gui
                 var resultCode = aoiResult.Code;
                 var roiRect = flyMetaData.roiRect;
                 var blobs = flyMetaData.xBlobs;
-                if (blobs != null && blobs.Count >= 2)
+                if (blobs != null && blobs.Length >= 2)
                 {
                     string text = formatText(flyID.ShowID, aoiResult.OffsetX, aoiResult.OffsetY, aoiResult.OffsetAngle);
 
@@ -193,14 +212,23 @@ namespace LaserAlignDX.Mvc.Gui
                     if (resultCode == PlcFlyResultCode.OK)
                     {
                         color = new MVD_COLOR(0, 255, 0);
-                        foreach (var blob in blobs)
+                        foreach (QvBox2D blob in blobs)
                         {
-                            var mvdRect = new CMvdRectangleF(
-                                    blob.RectInfo.CenterX + roiRect.X,
-                                    blob.RectInfo.CenterY + roiRect.Y,
-                                    blob.RectInfo.Width,
-                                    blob.RectInfo.Height)
+                            //var mvdRect = new CMvdRectangleF(
+                            //        blob.RectInfo.CenterX + roiRect.X,
+                            //        blob.RectInfo.CenterY + roiRect.Y,
+                            //        blob.RectInfo.Width,
+                            //        blob.RectInfo.Height)
+                            //{
+                            //    BorderColor = color
+                            //};
+                            var cx = (float)blob.Center.X + roiRect.X;
+                            var cy = (float)blob.Center.Y + roiRect.Y;
+                            var size = blob.MinAreaRectSize;
+                            var angle = (float)(blob.Theta * 180.0 / Math.PI);
+                            var mvdRect = new CMvdRectangleF(cx, cy, size.Width, size.Height)
                             {
+                                Angle = angle,
                                 BorderColor = color
                             };
                             mvdShapes.Add(mvdRect);

@@ -22,7 +22,6 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.UIMVC;
 using LeTian.AoiLib;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -395,8 +394,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_TemplateMatch" };
             var aoiResult = new FlyAoiResult();
-            var flystopwatch = new Stopwatch();
-            flystopwatch.Restart();
+            //var flystopwatch = new Stopwatch();
+            //flystopwatch.Restart();
 
             #region OLD_CODE
             //bmpFlyOperate.Dispose();
@@ -433,12 +432,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 aoiResult.Code = err == 0 ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
 
                 // 記入 GUI 畫圖所需要的數據
-                // 注意: xResults.Count 有可能為 0 !!!
-                var xResults = xRecipe.mvdprintFlytemp_Find.xResults;
-                if (xResults.Count > 0)
-                    aoiMetaData.xResult = xResults[0];
+                // 注意: mvdRects.Count 有可能為 0 !!!
+                var mvdRects = xRecipe.mvdprintFlytemp_Find.xMvdResultRects;
+                if (mvdRects.Count > 0)
+                    aoiMetaData.xResultBox2D = mvdRects[0]?.ToBox2D();
                 else
-                    aoiMetaData.xResult = null;
+                    aoiMetaData.xResultBox2D = null;
 
                 aoiMetaData.xTemplateRect = xRecipe.xRectRegionPrintFly;
                 aoiMetaData.xBlobs = null;
@@ -556,150 +555,22 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                     aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
                     aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
-                    aoiResult.OffsetAngle = (aoiMetaData.xResult != null) ? aoiMetaData.xResult.Value.fAngle : 0f;
+                    aoiResult.OffsetAngle = (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
                 }
                 updateOneResult(flyID, aoiResult);
             }
 
-            flystopwatch.Stop();
+            //flystopwatch.Stop();
 
-#if (OPT_OLD_CODE)
-            //CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFly);
-            #region MVD_SHAPES
-            var RectangleShape = new CMvdRectangleF(centerRun.X, centerRun.Y, roiRect.Width, roiRect.Height);
-
-            if (iFlyResult[flyIndex] == 1)
-            {
-                //转正的图形
-                var _MatchResult = xRecipe.mvdprintFlytemp_Find.xResults[0];
-                //_MatchResult.fCenterX += _rectF.X;
-                //_MatchResult.fCenterY += _rectF.Y;
-                var RectangleShapeBase
-                    = new CMvdRectangleF(xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-                                         xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2,
-                                         xRecipe.xRectRegionPrintFly.Width,
-                                         xRecipe.xRectRegionPrintFly.Height);
-
-                //RectangleShapeBase
-                //    = new CMvdRectangleF(0,
-                //                         0,
-                //                         xRecipe.xRectRegionPrintFly.Width,
-                //                         xRecipe.xRectRegionPrintFly.Height);
-                RectangleShape
-                       = PositionFixRun(RectangleShapeBase,
-                                        xRecipe.xRectRegionPrintFly,
-                                        new Rectangle(0, 0, bmpFly.Width, bmpFly.Height),
-                                        _MatchResult) as CMvdRectangleF;
-
-                RectangleShape.CenterX += roiRect.X;
-                RectangleShape.CenterY += roiRect.Y;
-            }
-
-            //var RectangleShape
-            //    = new CMvdRectangleF(centerRun.X, centerRun.Y, _rectF.Width, _rectF.Height);
-            if (iFlyResult[flyIndex] == 1)
-                RectangleShape.BorderColor = new MVD_COLOR(0, 255, 0);
-            else
-                RectangleShape.BorderColor = new MVD_COLOR(255, 0, 0);
-
-            //CMvdTextF cMvdTextF = new CMvdTextF(100, 100, $"耗时:{ms.ToString("0.00")} ms");
-            //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
-            //cMvdTextF.FontWidth = 20;
-            //添加十字线
-            CMvdLineSegmentF v1 = new CMvdLineSegmentF(
-                new MVD_POINT_F(0, bmpFly.Height / 2),
-                new MVD_POINT_F(bmpFly.Width, bmpFly.Height / 2));
-            v1.BorderColor = new MVD_COLOR(255, 215, 0);
-            v1.BorderWidth = 1;
-
-            CMvdLineSegmentF h1 = new CMvdLineSegmentF(
-                new MVD_POINT_F(bmpFly.Width / 2, 0),
-                new MVD_POINT_F(bmpFly.Width / 2, bmpFly.Height));
-            h1.BorderColor = new MVD_COLOR(255, 215, 0);
-            h1.BorderWidth = 1;
-
-            CMvdTextF cMvdTextFResult = new CMvdTextF(
-                RectangleShape.CenterX,
-                RectangleShape.CenterY,
-                $"[{flyShowIndex}] x:{iFlyOffset[flyIndex * 3 + 0].ToString("0.000")}," +
-                $"y:{iFlyOffset[flyIndex * 3 + 1].ToString("0.000")}," +
-                $"a:{iFlyOffset[flyIndex * 3 + 2].ToString("0.000")}");
-            cMvdTextFResult.BorderColor = new MVD_COLOR(0, 255, 0);
-            cMvdTextFResult.FontWidth = 20;
-
-            #endregion
-
-            #region UPDATE_MVD_DISPLAY
-            //---------------------------------------------------------------------
-            // UGLY_CODE
-            //---------------------------------------------------------------------
-            //switch (flyIndex)
-            //{
-            //    case 0:
-            //        DSFly0.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-            //        DSFly0.mvdRenderActivex1.AddShape(v1);
-            //        DSFly0.mvdRenderActivex1.AddShape(h1);
-            //        //DSFly0.mvdRenderActivex1.AddShape(cMvdTextF);
-            //        DSFly0.mvdRenderActivex1.AddShape(cMvdTextFResult);
-            //        DSFly0.mvdRenderActivex1.AddShape(RectangleShape);
-            //        DSFly0.AddCross();
-            //        DSFly0.mvdRenderActivex1.Display();
-            //        break;
-            //    case 1:
-            //        DSFly1.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-            //        DSFly1.mvdRenderActivex1.AddShape(v1);
-            //        DSFly1.mvdRenderActivex1.AddShape(h1);
-            //        //DSFly1.mvdRenderActivex1.AddShape(cMvdTextF);
-            //        DSFly1.mvdRenderActivex1.AddShape(cMvdTextFResult);
-            //        DSFly1.mvdRenderActivex1.AddShape(RectangleShape);
-            //        DSFly1.AddCross();
-            //        DSFly1.mvdRenderActivex1.Display();
-            //        break;
-            //    case 2:
-            //        DSFly2.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-            //        DSFly2.mvdRenderActivex1.AddShape(v1);
-            //        DSFly2.mvdRenderActivex1.AddShape(h1);
-            //        //DSFly2.mvdRenderActivex1.AddShape(cMvdTextF);
-            //        DSFly2.mvdRenderActivex1.AddShape(cMvdTextFResult);
-            //        DSFly2.mvdRenderActivex1.AddShape(RectangleShape);
-            //        DSFly2.AddCross();
-            //        DSFly2.mvdRenderActivex1.Display();
-            //        break;
-            //    case 3:
-            //        DSFly3.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-            //        DSFly3.mvdRenderActivex1.AddShape(v1);
-            //        DSFly3.mvdRenderActivex1.AddShape(h1);
-            //        //DSFly3.mvdRenderActivex1.AddShape(cMvdTextF);
-            //        DSFly3.mvdRenderActivex1.AddShape(cMvdTextFResult);
-            //        DSFly3.mvdRenderActivex1.AddShape(RectangleShape);
-            //        DSFly3.AddCross();
-            //        DSFly3.mvdRenderActivex1.Display();
-            //        break;
-            //}
-            var dispUI = _DSFLYs[flyIndex];
-            updateToMvdDisplay(dispUI, cMvdImage, cMvdTextFResult, v1, h1, cMvdTextFResult, RectangleShape);
-            #endregion
-
-            #region OLD_CODE
-            //if (INI.Instance.IsSaveDebugBMP)
-            //{
-            //    string flypath = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{m_StripId}";
-            //    if (!Directory.Exists(flypath))
-            //        Directory.CreateDirectory(flypath);
-            //    string flyname = $"{m_LotId}-[{flyShowIndex.ToString()}]-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.jpg";
-            //    cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
-            //}
-            #endregion
-#endif
             // 更新 GUI (暫時沿用原來的 逆行 調用處)
-            _DispUIs[flyID.flyIndex].Update(aoiMetaData, this._lotData);
+            _DispUIs[flyID.flyIndex].Update(aoiMetaData);
         }
         void flyProcessProSpecial(FlyID flyID, Bitmap bmpFly)
         {
             var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_CheckSpecialAngle" };
             var aoiResult = new FlyAoiResult();
-            var flystopwatch = new Stopwatch();
-            flystopwatch.Restart();
+            //var flystopwatch = new Stopwatch();
+            //flystopwatch.Restart();
 
             #region OLD_CODE
             //////转换图像
@@ -727,7 +598,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 aoiResult.OffsetAngle = ok ? angle : 0f;
 
                 // 記入 GUI 畫圖所需要的數據
-                aoiMetaData.xBlobs = mvdBlobs;
+                aoiMetaData.xBlobs = mvdBlobs != null ? Array.ConvertAll(mvdBlobs.ToArray(), bi => bi.RectInfo.ToBox2D()) : null;
                 aoiMetaData.roiRect = roiRect;
                 aoiMetaData.bmpFly = bmpFly;
                 aoiMetaData.flyID = flyID;
@@ -791,116 +662,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 updateOneResult(flyID, aoiResult);
             }
             
-            flystopwatch.Stop();
-
-#if (OPT_OLD_MVD)
-            CMvdImage cMvdImage = GaImageUtil.BitmapToCMvdImage(bmpFly);
-            
-            #region MVD_RECTANGLES
-            var RectangleShape1 = new CMvdRectangleF(roiRect.X, roiRect.Y, roiRect.Width, roiRect.Height);
-            var RectangleShape2 = new CMvdRectangleF(roiRect.X, roiRect.Y, roiRect.Width, roiRect.Height);
-
-            if (bOK)
-            {
-                RectangleShape1 = new CMvdRectangleF(
-                    blobsList[0].RectInfo.CenterX + roiRect.X,
-                    blobsList[0].RectInfo.CenterY + roiRect.Y,
-                    blobsList[0].RectInfo.Width,
-                    blobsList[0].RectInfo.Height);
-                RectangleShape2 = new CMvdRectangleF(
-                    blobsList[1].RectInfo.CenterX + roiRect.X,
-                    blobsList[1].RectInfo.CenterY + roiRect.Y,
-                    blobsList[1].RectInfo.Width,
-                    blobsList[1].RectInfo.Height);
-            }
-
-            if (iFlyResult[flyIndex] == 1)
-                RectangleShape1.BorderColor = new MVD_COLOR(0, 255, 0);
-            else
-                RectangleShape1.BorderColor = new MVD_COLOR(255, 0, 0);
-            if (iFlyResult[flyIndex] == 1)
-                RectangleShape2.BorderColor = new MVD_COLOR(0, 255, 0);
-            else
-                RectangleShape2.BorderColor = new MVD_COLOR(255, 0, 0);
-            #endregion
-
-            #region MVD_TEXT
-            //CMvdTextF cMvdTextF = new CMvdTextF(100, 100, $"耗时:{ms.ToString("0.00")} ms");
-            //cMvdTextF.BorderColor = new MVD_COLOR(0, 255, 0);
-            //cMvdTextF.FontWidth = 20;
-            CMvdTextF cMvdTextFResult = new CMvdTextF(
-                    centerPt.X + roiRect.X,
-                    centerPt.Y + roiRect.Y,
-                    $"[{flyShowIndex}] " +
-                    $"x:{iFlyOffset[flyIndex * 3 + 0].ToString("0.000")}," +
-                    $"y:{iFlyOffset[flyIndex * 3 + 1].ToString("0.000")}," +
-                    $"a:{iFlyOffset[flyIndex * 3 + 2].ToString("0.000")}"
-                );
-            cMvdTextFResult.BorderColor = new MVD_COLOR(0, 255, 0);
-            cMvdTextFResult.FontWidth = 15;
-            #endregion
-
-            #region UPDATE_MVD_DISPLAY
-            //---------------------------------------------------------------------
-            // UGLY_CODE
-            //---------------------------------------------------------------------
-            //switch (flyIndex)
-            //{
-            //    case 0:
-            //        DSFly0.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-            //        //DSFly0.mvdRenderActivex1.AddShape(cMvdTextF);
-            //        DSFly0.mvdRenderActivex1.AddShape(cMvdTextFResult);
-            //        DSFly0.mvdRenderActivex1.AddShape(RectangleShape1);
-            //        DSFly0.mvdRenderActivex1.AddShape(RectangleShape2);
-            //        DSFly0.AddCross();
-            //        DSFly0.mvdRenderActivex1.Display();
-            //        break;
-            //    case 1:
-            //        DSFly1.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-            //        //DSFly1.mvdRenderActivex1.AddShape(cMvdTextF);
-            //        DSFly1.mvdRenderActivex1.AddShape(cMvdTextFResult);
-            //        DSFly1.mvdRenderActivex1.AddShape(RectangleShape1);
-            //        DSFly1.mvdRenderActivex1.AddShape(RectangleShape2);
-            //        DSFly1.AddCross();
-            //        DSFly1.mvdRenderActivex1.Display();
-            //        break;
-            //    case 2:
-            //        DSFly2.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-            //        //DSFly2.mvdRenderActivex1.AddShape(cMvdTextF);
-            //        DSFly2.mvdRenderActivex1.AddShape(cMvdTextFResult);
-            //        DSFly2.mvdRenderActivex1.AddShape(RectangleShape1);
-            //        DSFly2.mvdRenderActivex1.AddShape(RectangleShape2);
-            //        DSFly2.AddCross();
-            //        DSFly2.mvdRenderActivex1.Display();
-            //        break;
-            //    case 3:
-            //        DSFly3.mvdRenderActivex1.LoadImageFromObject(cMvdImage);
-            //        //DSFly3.mvdRenderActivex1.AddShape(cMvdTextF);
-            //        DSFly3.mvdRenderActivex1.AddShape(cMvdTextFResult);
-            //        DSFly3.mvdRenderActivex1.AddShape(RectangleShape1);
-            //        DSFly3.mvdRenderActivex1.AddShape(RectangleShape2);
-            //        DSFly3.AddCross();
-            //        DSFly3.mvdRenderActivex1.Display();
-            //        break;
-            //}
-            var dispUI = _DSFLYs[flyIndex];
-            updateToMvdDisplay(dispUI, cMvdImage, cMvdTextFResult, RectangleShape1, RectangleShape2);
-            #endregion
-
-            #region OLD_CODE
-            //if (INI.Instance.IsSaveDebugBMP)
-            //{
-            //    //string flypath = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{m_StripId}";
-            //    //if (!Directory.Exists(flypath))
-            //    //    Directory.CreateDirectory(flypath);
-            //    //string flyname = $"{m_LotId}-[{flyShowIndex.ToString()}]-{DateTime.Now.ToString("yyyyMMddHHmmssfff")}.jpg";
-            //    //cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
-            //}
-            #endregion
-#endif
+            //flystopwatch.Stop();
 
             // 更新 GUI (暫時沿用原來的 逆行 調用處)
-            _DispUIs[flyID.flyIndex].Update(aoiMetaData, this._lotData);
+            _DispUIs[flyID.flyIndex].Update(aoiMetaData);
         }
         
         void updateOneResult(FlyID flyID, FlyAoiResult oneResult)

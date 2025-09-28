@@ -1,17 +1,11 @@
-﻿using LaserAlignDX.OPSpace;
+﻿using AUVision;
 using System;
 using System.Collections.Generic;
-using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Menu;
-using VisionDesigner.AlmightyPatMatch;
-using VisionDesigner;
-using AUVision;
-using ZXing;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using VisionDesigner;
+using VisionDesigner.AlmightyPatMatch;
 
 namespace LaserAlignDX.BasicSpace
 {
@@ -26,6 +20,8 @@ namespace LaserAlignDX.BasicSpace
         VisionDesigner.AlmightyPatMatch.CAlmightyPatMatchTool cAlmightyPatmatchToolObj = null;
 
         public List<xFindResult> xResults = new List<xFindResult>();
+        public List<CMvdRectangleF> xMvdResultRects = new List<CMvdRectangleF>();
+
         public float xMvdAngle { get; set; } = 5;
         public int xMvdMaxOcc { get; set; } = 1;
         public float xMvdTolerance { get; set; } = 0.5f;
@@ -40,6 +36,7 @@ namespace LaserAlignDX.BasicSpace
         {
             Dispose();
         }
+
         public bool HikTrainBmp()
         {
             xMvdObj_Image?.Dispose();
@@ -262,6 +259,7 @@ namespace LaserAlignDX.BasicSpace
             bool bOK = false;
 
             xResults.Clear();
+            xMvdResultRects.Clear();
 
             #region HIK_RUN
 
@@ -336,6 +334,7 @@ namespace LaserAlignDX.BasicSpace
                             result.fScore = item.Score;
 
                             xResults.Add(result);
+                            xMvdResultRects.Add(item.MatchBox);
                         }
                     }
                 }
@@ -363,6 +362,7 @@ namespace LaserAlignDX.BasicSpace
             bool bOK = true;
 
             xResults.Clear();
+            xMvdResultRects.Clear();
 
             #region HIK_RUN
 
@@ -405,6 +405,7 @@ namespace LaserAlignDX.BasicSpace
             bool bOK = false;
 
             xResults.Clear();
+
 
             #region HIK_RUN
 

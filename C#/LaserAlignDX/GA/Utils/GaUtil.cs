@@ -126,7 +126,7 @@ namespace JetEazy.Utils
 
             try
             {
-                stm = new System.IO.StreamWriter(fileName, false, System.Text.Encoding.Default);
+                stm = new System.IO.StreamWriter(fileName, false, System.Text.Encoding.UTF8);
                 stm.WriteLine(DataStr);
                 stm.Flush();
                 stm.Close();

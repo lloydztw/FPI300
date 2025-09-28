@@ -74,7 +74,6 @@ namespace LaserAlignDX.AoiModel
         public float OffsetX;
         public float OffsetY;
         public float OffsetAngle;
-        public FlyMetaData MetaData;
     }
 
     public class FlyLotData

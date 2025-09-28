@@ -14,7 +14,9 @@
 #endregion
 
 using JetEazy.Utils;
+using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -26,7 +28,7 @@ using VsCommon.ControlSpace.MachineSpace;
 
 namespace LaserAlignDX.AoiModel
 {
-    public class FlyAoiModel
+    public class FlyAoiModel : IDisposable
     {
         #region GLOBAL_MESS
         //ITravelerModel _sysModel => GaMvcConfig.SysModel;
@@ -61,9 +63,19 @@ namespace LaserAlignDX.AoiModel
         }
         #endregion
 
-        #region PRIVATE_MEMBERS
+        #region MVD_TOOLS
+        public MvdFindClass _mvdFindTool = new MvdFindClass();
         #endregion
 
+        internal FlyAoiModel()
+        {
+        }
+        public void Dispose()
+        {
+            _mvdFindTool?.bmpRun_Image?.Dispose();
+            _mvdFindTool?.Dispose();
+            _mvdFindTool = null;
+        }
         public bool Train(object recipe)
         {
             var bmpFlyTemplate = _xRecipe.bmpprintFlytemplate;
@@ -88,7 +100,7 @@ namespace LaserAlignDX.AoiModel
         FlyAoiResult flyProcessPro(FlyID flyID, Bitmap bmpFly)
         {
             var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_TemplateMatch" };
-            var aoiResult = new FlyAoiResult() { MetaData = aoiMetaData };
+            var aoiResult = new FlyAoiResult();
 
             RectangleF roiRect = _xRecipe.xRectRegionPrintFly;
             PointF centerOrg = JetEazy.Qcvt.Center(ref roiRect);
@@ -102,12 +114,12 @@ namespace LaserAlignDX.AoiModel
                 aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
 
                 // 記入 GUI 畫圖所需要的數據
-                // 注意: xResults.Count 有可能為 0 !!!
-                var xResults = _xRecipe.mvdprintFlytemp_Find.xResults;
-                if (xResults.Count > 0)
-                    aoiMetaData.xResult = xResults[0];
+                // 注意: mvdRects.Count 有可能為 0 !!!
+                var mvdRects = _xRecipe.mvdprintFlytemp_Find.xMvdResultRects;
+                if (mvdRects.Count > 0)
+                    aoiMetaData.xResultBox2D = mvdRects[0]?.ToBox2D();
                 else
-                    aoiMetaData.xResult = null;
+                    aoiMetaData.xResultBox2D = null;
 
                 aoiMetaData.xTemplateRect = _xRecipe.xRectRegionPrintFly;
                 aoiMetaData.xBlobs = null;
@@ -222,7 +234,7 @@ namespace LaserAlignDX.AoiModel
                     float flyCamResolution = INI.Instance.FlyImageResolution;
                     aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution;    // + _xFlyOffsetUseStage[flyShowID1 - 1].X;
                     aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution;    // + _xFlyOffsetUseStage[flyShowID1 - 1].Y;
-                    aoiResult.OffsetAngle = (aoiMetaData.xResult != null) ? aoiMetaData.xResult.Value.fAngle : 0f;
+                    aoiResult.OffsetAngle = (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
 
                     // 全域調整 (Global Offset)
                     var gIndex = flyID.ShowID - 1;
@@ -240,7 +252,7 @@ namespace LaserAlignDX.AoiModel
         FlyAoiResult flyProcessProSpecial(FlyID flyID, Bitmap bmpFly)
         {
             var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_CheckSpecialAngle" };
-            var aoiResult = new FlyAoiResult() { MetaData = aoiMetaData };
+            var aoiResult = new FlyAoiResult();
             var flystopwatch = new Stopwatch();
             flystopwatch.Restart();
 
@@ -265,12 +277,12 @@ namespace LaserAlignDX.AoiModel
 
             using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                bool ok = runMvd_CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
+                bool ok = runMvd_CheckSpecialAngle(bmpCrop, out var mvdBlobsInfos, out float angle, out PointF centerPt);
                 aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
                 aoiResult.OffsetAngle = ok ? angle : 0f;
 
                 // 記入 GUI 畫圖所需要的數據
-                aoiMetaData.xBlobs = mvdBlobs;
+                aoiMetaData.xBlobs = Array.ConvertAll(mvdBlobsInfos.ToArray(), bi => bi?.RectInfo?.ToBox2D());
                 aoiMetaData.roiRect = roiRect;
                 aoiMetaData.bmpFly = bmpFly;
                 aoiMetaData.flyID = flyID;
@@ -339,8 +351,7 @@ namespace LaserAlignDX.AoiModel
 
         bool runMvd_TemplateMatch(Bitmap bmpFly)
         {
-            var mvdTool = _xRecipe.mvdprintFlytemp_Find;
-
+            var mvdTool = _mvdFindTool;
             mvdTool.xMvdAngle = _xFlyPara.xAngle;
             mvdTool.xMvdTolerance = _xFlyPara.xTolerance;
 

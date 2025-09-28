@@ -13,10 +13,8 @@
  */
 #endregion
 
-using AUVision;
-using System.Collections.Generic;
+using JetEazy.QvMath;
 using System.Drawing;
-using VisionDesigner.BlobFind;
 
 
 namespace LaserAlignDX.AoiModel
@@ -32,16 +30,26 @@ namespace LaserAlignDX.AoiModel
         public Bitmap bmpFly;
         public RectangleF roiRect;
         public RectangleF xTemplateRect;
-        public xFindResult? xResult;
         public PointF xCentroid
         {
             get
             {
-                if (xResult != null)
+                //if (xResult != null)
+                //{
+                //    float x = xResult.Value.fCenterX + roiRect.X;
+                //    float y = xResult.Value.fCenterY + roiRect.Y;
+                //    return new PointF(x, y);
+                //}
+                //else
+                //{
+                //    return JetEazy.Qcvt.CenterF(ref roiRect);
+                //}
+                if (xResultBox2D != null)
                 {
-                    float x = xResult.Value.fCenterX + roiRect.X;
-                    float y = xResult.Value.fCenterY + roiRect.Y;
-                    return new PointF(x, y);
+                    var cc = xResultBox2D.Center;
+                    cc.X += roiRect.X;
+                    cc.Y += roiRect.Y;
+                    return cc;
                 }
                 else
                 {
@@ -49,6 +57,7 @@ namespace LaserAlignDX.AoiModel
                 }
             }
         }
-        public List<CBlobInfo> xBlobs;
+        public QvBox2D xResultBox2D;
+        public QvBox2D[] xBlobs;
     };
 }

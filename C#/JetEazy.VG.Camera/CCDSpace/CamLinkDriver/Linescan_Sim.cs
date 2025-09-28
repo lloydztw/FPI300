@@ -876,6 +876,8 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                 _simGrabbingThead = null;
             }
         }
+        #endregion
+
         void sim_grabbing()
         {
             System.Diagnostics.Debug.WriteLine("Thread[{0}] running ...", Thread.CurrentThread.Name);
@@ -906,39 +908,33 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                     camera.iWidth = width;
                     camera.iHeight = height;
 
-                    using (Mat tmp = new Mat())
+                    using (Mat imgWork = new Mat())
                     {
-                        Cv2.CopyTo(_simImg, tmp);
+                        Cv2.CopyTo(_simImg, imgWork);
 
                         var seed = _rand.NextDouble();
-                        if (seed < 0.75)
+                        if (seed < 0.80)
                         {
                             seed = _rand.NextDouble();
                             if (seed < 0.33)
-                                Cv2.Flip(tmp, tmp, FlipMode.X);
-                            else if (seed < 0.66)
-                                Cv2.Flip(tmp, tmp, FlipMode.Y);
-                        }
-                        else
-                        {
-                            seed = _rand.NextDouble();
-                            if (seed < 0.5)
                             {
-                                var c = _rand.Next(255);
-                                tmp.SetTo(new Scalar(c, c, c));
+                                Cv2.Flip(imgWork, imgWork, FlipMode.X);
                             }
                             else
                             {
-                                Cv2.Randu(tmp, Scalar.All(0), Scalar.All(256));
+                                var angleD = 30.0;
+                                var angle = _rand.NextDouble() * angleD - (angleD / 2);
+                                getRotatedImage(_simImg, imgWork, angle);
                             }
                         }
-
-                        var roi = new Rect(10, 10, 10, 10);
-                        Cv2.BitwiseNot(_simImg[roi], _simImg[roi]);
+                        else
+                        {
+                            genRandomImage(imgWork);
+                        }
 
                         unsafe
                         {
-                            IntPtr pBuffer = (IntPtr)tmp.DataPointer;
+                            IntPtr pBuffer = (IntPtr)imgWork.DataPointer;
                             FireTrigger(camera, pBuffer);
                         }
                     }
@@ -949,36 +945,6 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                 }
 
                 m_dfDisplayCount++;
-
-                //try
-                //{
-                //    //if (bmp != null)
-                //    //    bmp.Dispose();
-
-                //    //imageMutex.WaitOne();
-                //    ////FreeImageAPI.FreeImageBitmap bmp = null;
-
-                //    //if (refFrame.format == dvpImageFormat.FORMAT_BGR24 || refFrame.format == dvpImageFormat.FORMAT_RGB24)
-                //    //{
-                //    //    bmp = new FreeImageAPI.FreeImageBitmap(refFrame.iWidth, refFrame.iHeight, refFrame.iWidth * 3, PixelFormat.Format24bppRgb, pBuffer);
-
-                //    //}
-                //    //else if (refFrame.format == dvpImageFormat.FORMAT_MONO)
-                //    //{
-                //    //    bmp = new FreeImageAPI.FreeImageBitmap(refFrame.iWidth, refFrame.iHeight, refFrame.iWidth, PixelFormat.Format8bppIndexed, pBuffer);
-                //    //    //m_Buffer = pBuffer;
-                //    //    //m_Width = refFrame.iWidth;
-                //    //    //m_Height = refFrame.iHeight;
-                //    //}
-                //    //bmp.Rotate(_camCfg.Rotate);
-                //    //m_bmpCurrent = bmp.ToBitmap();
-                //    m_TriggerOK = true;
-                //}
-                //finally
-                //{
-                //    //imageMutex.ReleaseMutex();
-                //}
-
                 m_TriggerOK = true;
                 m_TriggerComplete = true;
             }
@@ -987,7 +953,41 @@ namespace JetEazy.CCDSpace.CamLinkDriver
 
             System.Diagnostics.Debug.WriteLine("Thread[{0}] terminated !", Thread.CurrentThread.Name);
         }
-        #endregion
+
+        void getRotatedImage(Mat srcImg, Mat dstImg, double angle)
+        {
+            // 1. 計算影像中心點 (Center of Rotation)
+            // 由於 Point2f 使用 float，我們將寬度和高度轉換為 float 並除以 2。
+            Point2f center = new Point2f(
+                (float)srcImg.Cols / 2.0f,
+                (float)srcImg.Rows / 2.0f
+            );
+
+            // 2. 取得旋轉矩陣 (Rotation Matrix)
+            // Cv2.GetRotationMatrix2D(中心點, 角度, 縮放比例)
+            // 角度是以「度」為單位。正值表示逆時針旋轉。
+            // 縮放比例設為 1.0 表示不縮放。
+            using (Mat rotationMatrix = Cv2.GetRotationMatrix2D(center, angle, 1.0))
+            {
+
+                // 3. 執行仿射變換 (Affine Transformation)
+                // Cv2.WarpAffine(來源影像, 輸出影像, 旋轉矩陣, 輸出影像大小)
+                Cv2.WarpAffine(srcImg, dstImg, rotationMatrix, srcImg.Size());
+            }
+        }
+        void genRandomImage(Mat dstImg)
+        {
+            var seed = _rand.NextDouble();
+            if (seed < 0.5)
+            {
+                var c = _rand.Next(255);
+                dstImg.SetTo(new Scalar(c, c, c));
+            }
+            else
+            {
+                Cv2.Randu(dstImg, Scalar.All(0), Scalar.All(256));
+            }
+        }
 
         #region HELPER_FUNCTION
         PixelFormat getPixelFormat(Mat mat)
