@@ -55,7 +55,7 @@ namespace LaserAlignDX.Mvc.Gui
             if (_dispUI.InvokeRequired)
             {
                 // 處理 多線程 的問題
-                _dispUI.Invoke((Action<FlyMetaData>)Update);
+                _dispUI.Invoke((Action<FlyMetaData>)Update, flyMetaData);
             }
             else
             {
