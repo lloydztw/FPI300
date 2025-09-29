@@ -155,7 +155,7 @@
             this.label1.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
             this.label1.Size = new System.Drawing.Size(330, 21);
             this.label1.TabIndex = 20;
-            this.label1.Text = "飞拍序号:";
+            this.label1.Text = "飛拍序號:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // tableLayoutPanel1

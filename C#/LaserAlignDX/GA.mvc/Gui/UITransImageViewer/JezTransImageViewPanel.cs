@@ -19,6 +19,7 @@ using JetEazy.OpenCV.Viewer;
 using JetEazy.Transform;
 using OpenCvSharp;
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -81,6 +82,9 @@ namespace LaserAlignDX.Mvc.Gui
         {
             get => cvMatViewer;
         }
+
+        public Control TitleBar => panel1;
+        public Control StatusBar => panel2;
 
         public Mat Image
         {

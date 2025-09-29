@@ -28,7 +28,7 @@ using VsCommon.ControlSpace.MachineSpace;
 
 namespace LaserAlignDX.AoiModel
 {
-    public class FlyAoiModel : IDisposable
+    public class FlyAoiModel : IFlyAoiModel
     {
         #region GLOBAL_MESS
         //ITravelerModel _sysModel => GaMvcConfig.SysModel;
@@ -67,15 +67,30 @@ namespace LaserAlignDX.AoiModel
         public MvdFindClass _mvdFindTool = new MvdFindClass();
         #endregion
 
-        internal FlyAoiModel()
+        #region SINGLETON
+        static FlyAoiModel _instance = null;
+        protected FlyAoiModel()
         {
+        }
+        #endregion
+
+        public static FlyAoiModel Instance
+        {
+            get
+            {
+                if(_instance == null)
+                    _instance = new FlyAoiModel();
+                return _instance;
+            }
         }
         public void Dispose()
         {
             _mvdFindTool?.bmpRun_Image?.Dispose();
             _mvdFindTool?.Dispose();
             _mvdFindTool = null;
+            _instance = null;
         }
+
         public bool Train(object recipe)
         {
             var bmpFlyTemplate = _xRecipe.bmpprintFlytemplate;
@@ -100,7 +115,7 @@ namespace LaserAlignDX.AoiModel
         FlyAoiResult flyProcessPro(FlyID flyID, Bitmap bmpFly)
         {
             var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_TemplateMatch" };
-            var aoiResult = new FlyAoiResult();
+            var aoiResult = new FlyAoiResult() { MetaData = aoiMetaData };
 
             RectangleF roiRect = _xRecipe.xRectRegionPrintFly;
             PointF centerOrg = JetEazy.Qcvt.Center(ref roiRect);
@@ -252,7 +267,7 @@ namespace LaserAlignDX.AoiModel
         FlyAoiResult flyProcessProSpecial(FlyID flyID, Bitmap bmpFly)
         {
             var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_CheckSpecialAngle" };
-            var aoiResult = new FlyAoiResult();
+            var aoiResult = new FlyAoiResult() { MetaData = aoiMetaData };
             var flystopwatch = new Stopwatch();
             flystopwatch.Restart();
 

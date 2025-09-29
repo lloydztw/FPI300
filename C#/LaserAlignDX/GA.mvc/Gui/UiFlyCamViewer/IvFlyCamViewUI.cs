@@ -22,6 +22,6 @@ namespace LaserAlignDX.Mvc.Gui
     public interface IvFlyCamViewUI
     {
         Control Window { get; }
-        void Update(FlyMetaData flyMetaData, FlyLotData lotData);
+        void Update(FlyAoiResult flyAoiResult);
     }
 }

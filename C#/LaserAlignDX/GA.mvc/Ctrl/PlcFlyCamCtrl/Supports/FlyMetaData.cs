@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.QvMath;
+using System.Collections.Generic;
 using System.Drawing;
 
 
@@ -25,8 +26,8 @@ namespace LaserAlignDX.AoiModel
     public class FlyMetaData
     {
         public string AlgorithmName;
-        public FlyID flyID;
         public FlyAoiResult flyAoiResult;
+        public FlyID flyID;
         public Bitmap bmpFly;
         public RectangleF roiRect;
         public RectangleF xTemplateRect;
@@ -34,21 +35,11 @@ namespace LaserAlignDX.AoiModel
         {
             get
             {
-                //if (xResult != null)
-                //{
-                //    float x = xResult.Value.fCenterX + roiRect.X;
-                //    float y = xResult.Value.fCenterY + roiRect.Y;
-                //    return new PointF(x, y);
-                //}
-                //else
-                //{
-                //    return JetEazy.Qcvt.CenterF(ref roiRect);
-                //}
                 if (xResultBox2D != null)
                 {
                     var cc = xResultBox2D.Center;
-                    cc.X += roiRect.X;
-                    cc.Y += roiRect.Y;
+                    //cc.X += roiRect.X;
+                    //cc.Y += roiRect.Y;
                     return cc;
                 }
                 else
@@ -59,5 +50,24 @@ namespace LaserAlignDX.AoiModel
         }
         public QvBox2D xResultBox2D;
         public QvBox2D[] xBlobs;
-    };
+
+        public static void Offset(QvBox2D box2D, float dx, float dy)
+        {
+            if (box2D != null)
+            {
+                var cc = box2D.Center;
+                cc.X += dx;
+                cc.Y += dy;
+                box2D.SetCenter(cc);
+            }
+        }
+        public static void Offset(IEnumerable<QvBox2D> box2Ds, float dx, float dy)
+        {
+            if (box2Ds != null)
+            {
+                foreach (var box2D in box2Ds)
+                    Offset(box2D, dx, dy);
+            }
+        }
+    }
 }

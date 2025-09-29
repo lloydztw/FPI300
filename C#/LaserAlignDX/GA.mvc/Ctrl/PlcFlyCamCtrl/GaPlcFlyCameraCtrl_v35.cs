@@ -19,7 +19,6 @@ using LaserAlignDX.AoiModel;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LaserAlignDX.UISpace.UIMVC;
 using LeTian.AoiLib;
 using System;
 using System.Drawing;
@@ -29,8 +28,6 @@ using System.Text;
 using System.Windows.Forms;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
-
-// 關聯到 MINIX6 ???
 using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
 
 
@@ -114,10 +111,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         #region GUI_MEMBERS
         Control _wndOwner;
         Control lblSerialNumber;
-        MvdFlyResultDispUI[] _DispUIs;
+        IvFlyCamViewUI[] _DispUIs;
         #endregion
 
-        public void Attach(MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
+        public void Attach(Control[] DsFlys, Control lblFlyCameraSerialNo)
         {
             _wndOwner = DsFlys[0].Parent;
             AttachDispUIs(DsFlys);
@@ -346,11 +343,41 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         float[] m_iFlyOffset = new float[4 * 3];
         #endregion
 
-        void AttachDispUIs(MVSUI[] dispUIs)
+        void AttachDispUIs(Control[] dispUIs)
         {
             _wndOwner = dispUIs[0].Parent;
-            _DispUIs = Array.ConvertAll(dispUIs, ui => new MvdFlyResultDispUI(ui));
+            _DispUIs = Array.ConvertAll(dispUIs, ui => buildFlyCamViewer(ui));
         }
+        IvFlyCamViewUI buildFlyCamViewer(Control panel)
+        {
+            //(1.1) 如果傳進來的已經是 JezChipCellsViewPanel
+            if (panel is JezFlyViewPanel jezViewer)
+            {
+                return jezViewer;
+            }
+            //(1.2) 如果傳進來的是其他視窗控件
+            else if (panel is Control childWnd)
+            {
+                // 生成新的 JezFlyViewPanel
+                var viewer = new JezFlyViewPanel
+                {
+                    Location = childWnd.Location,
+                    Size = childWnd.Size,
+                    Dock = childWnd.Dock,
+                    Visible = true,
+                };
+                // 與舊的 childWnd 互換角色
+                var parent = childWnd.Parent;
+                childWnd.Visible = false;
+                parent.Controls.Add(viewer);
+                return viewer;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         void RunAoiAll(int flyStart, byte[][] framesBufBytes, int frameWidth, int frameHeight)
         {
             int index = 0;
@@ -388,7 +415,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 else
                     flyProcessPro(flyID, bmpFly);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LtDebug.LOG.Error(ex, "flyProcessProXxx");
             }
@@ -668,13 +695,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             {
                 updateOneResult(flyID, aoiResult);
             }
-            
+
             //flystopwatch.Stop();
 
             // 更新 GUI (暫時沿用原來的 逆行 調用處)
             _DispUIs[flyID.flyIndex].Update(aoiResult);
         }
-        
+
         void updateOneResult(FlyID flyID, FlyAoiResult oneResult)
         {
             int flyIndex = flyID.flyIndex;

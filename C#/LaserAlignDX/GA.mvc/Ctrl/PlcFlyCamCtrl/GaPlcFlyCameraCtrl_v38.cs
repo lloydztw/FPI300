@@ -37,10 +37,7 @@ using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
 namespace LaserAlignDX.Mvc.Ctrl.V3
 {
     /// <summary>
-    /// 重整 MainX3UI 飛拍
-    /// 將飛拍控制拉出來到 GaPlcFlyCameraCtrl
-    /// ToDO: 
-    /// 需要把 flyProcessPro 與 flyProcessProSpecial 的 AOI 部分 抽離到 AoiModel 模塊內
+    /// 使用 IFlyAoiModel
     /// </summary>
     public class GaPlcFlyCameraCtrl : IxTickable
     {
@@ -60,6 +57,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
         #region GLOBAL_MESS
         ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        IFlyAoiModel _flyAoiModel => _sysModel.FlyAoiModel;
         RecipeFPIX3Class xRecipe
         {
             get { return RecipeFPIX3Class.Instance; }
@@ -139,11 +137,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             _wndOwner?.Invoke(new Action(() =>
             {
-                var color = (serialNumber < 0 || Traveller106.Universal.IsOpenFlyForm) ? Color.Transparent : Color.Lime;
-                var text = "飛拍序號";
+                Color color = serialNumber < 0 || Traveller106.Universal.IsOpenFlyForm ? Color.Transparent : Color.Lime;
+                string text = "飛拍序號";
                 if (serialNumber > 0) text += $" : {serialNumber}";
-                lblSerialNumber.Text = text;
                 lblSerialNumber.BackColor = color;
+                lblSerialNumber.Text = text;
             }));
         }
 
@@ -327,20 +325,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         #endregion
 
-        #region RECIPE_OFFSETS
-        PointF[] FlyOffsetUseStage
-        {
-            get
-            {
-                //var carrierID = _sysModel.ActiveCarrierID;
-                //return carrierID == CarrierEnum.C1 ? xFlyPara.ptsOffset : xFlyPara.ptsOffset2;
-                var plcIO = MACHINE?.PLCIO;
-                var stageNo = plcIO != null ? plcIO.iScanStage : 1;
-                return stageNo == 1 ? xFlyPara.ptsOffset : xFlyPara.ptsOffset2;
-            }
-        }
-        #endregion
-
         #region TOTAL_RESULT_DATA_FOR_PLC
         int[] m_iFlyResult = new int[4];
         float[] m_iFlyOffset = new float[4 * 3];
@@ -383,298 +367,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             try
             {
-                if (xFlyPara.xIsOpenMuit)   // 一般都是 false
-                    flyProcessProSpecial(flyID, bmpFly);
-                else
-                    flyProcessPro(flyID, bmpFly);
+                var aoiResult = _flyAoiModel.RunAoiOne(flyID, bmpFly);
+                updateOneResult(flyID, aoiResult);
+                _DispUIs[flyID.flyIndex].Update(aoiResult?.MetaData);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                LtDebug.LOG.Error(ex, "flyProcessProXxx");
+                LtDebug.LOG.Error(ex, "flyRunAoiOne");
             }
             saveFlyCamImage(flyID, bmpFly, _lotData);
         }
-        void flyProcessPro(FlyID flyID, Bitmap bmpFly)
-        {
-            var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_TemplateMatch" };
-            var aoiResult = new FlyAoiResult() { MetaData = aoiMetaData };
-            //var flystopwatch = new Stopwatch();
-            //flystopwatch.Restart();
-
-            #region OLD_CODE
-            //bmpFlyOperate.Dispose();
-            //bmpFlyOperate = bmpInput;
-            //RectangleF _rectF = new RectangleF(
-            //    xRecipe.xRectRegionPrintFly.X,
-            //    xRecipe.xRectRegionPrintFly.Y,
-            //    xRecipe.xRectRegionPrintFly.Width,
-            //    xRecipe.xRectRegionPrintFly.Height);
-            //_rectF.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
-            //BoundRect(ref _rectF, bmpFlyOperate.Size);
-            #endregion
-
-            #region OLD_CODE_FOR_CENTER_POINTS
-            //PointF centerOrg = new PointF(
-            //    xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-            //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
-            //PointF centerRun = new PointF(
-            //    xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-            //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
-            #endregion
-
-            RectangleF roiRect = xRecipe.xRectRegionPrintFly;
-            PointF centerOrg = JetEazy.Qcvt.Center(ref roiRect);
-            PointF centerRun = centerOrg;
-
-            roiRect.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
-            GaUtil.Clip(ref roiRect, bmpFly.Size);
-
-            using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
-            {
-                int err = xRecipe.PrintTempFlyRun(bmpCrop);
-
-                aoiResult.Code = err == 0 ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
-
-                // 記入 GUI 畫圖所需要的數據
-                // 注意: mvdRects.Count 有可能為 0 !!!
-                var mvdRects = xRecipe.mvdprintFlytemp_Find.xMvdResultRects;
-                if (mvdRects.Count > 0)
-                    aoiMetaData.xResultBox2D = mvdRects[0]?.ToBox2D();
-                else
-                    aoiMetaData.xResultBox2D = null;
-                FlyMetaData.Offset(aoiMetaData.xResultBox2D, roiRect.X, roiRect.Y);
-
-                aoiMetaData.xTemplateRect = xRecipe.xRectRegionPrintFly;
-                aoiMetaData.xBlobs = null;
-                aoiMetaData.roiRect = roiRect;
-                aoiMetaData.bmpFly = bmpFly;
-                aoiMetaData.flyID = flyID;
-                aoiMetaData.flyAoiResult = aoiResult;
-            }
-
-            #region OLD_CODE
-            //PointF centerOrg = new PointF(
-            //    xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-            //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
-            //PointF centerRun = new PointF(
-            //    xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-            //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
-            #endregion
-
-            #region OLD_CODE
-            //int flyShowIndex = flyIndex + 1;
-            //switch (flyStart)
-            //{
-            //    case 1:
-            //        flyShowIndex = flyIndex + 1;
-            //        break;
-            //    case 2:
-            //        flyShowIndex = flyIndex + 1 + 4;
-            //        break;
-            //}
-            #endregion
-
-            #region OLD_CODE
-            //float _resolutionFly = INI.Instance.FlyImageResolution;
-            //switch (flyStart)
-            //{
-            //    case 1:
-            //        iFlyResult[flyIndex] = (err == 0 ? 1 : 2);
-            //        if (err == 0)
-            //        {
-            //            //centerRun = new PointF(
-            //            //        xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterX + _rectF.X,
-            //            //        xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + _rectF.Y);
-            //            ////算出的pix需加入解析度
-            //            //iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
-            //            //iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
-            //            //iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
-
-            //            centerRun.X = foundResult.fCenterX + roiRect.X;
-            //            centerRun.Y = foundResult.fCenterY + roiRect.Y;
-
-            //            //算出的pix需加入解析度
-            //            offsetX = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
-            //            offsetY = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
-            //            offsetAngle = foundResult.fAngle;
-
-            //            iFlyOffset[flyIndex * 3 + 0] = offsetX;
-            //            iFlyOffset[flyIndex * 3 + 1] = offsetY;
-            //            iFlyOffset[flyIndex * 3 + 2] = offsetAngle;
-            //        }
-            //        else
-            //        {
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = 0;
-            //        }
-            //        break;
-
-            //    case 2:
-            //        iFlyResult[flyIndex] = (err == 0 ? 1 : 2);
-            //        if (err == 0)
-            //        {
-            //            //centerRun = new PointF(
-            //            //    xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterX + roiRect.X,
-            //            //    xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + roiRect.Y);
-
-            //            ////算出的pix需加入解析度
-            //            //iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
-            //            //iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
-            //            //iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
-
-            //            centerRun.X = foundResult.fCenterX + roiRect.X;
-            //            centerRun.Y = foundResult.fCenterY + roiRect.Y;
-
-            //            //算出的 pix 需加入解析度
-            //            offsetX = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
-            //            offsetY = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
-            //            offsetAngle = foundResult.fAngle;
-
-            //            iFlyOffset[flyIndex * 3 + 0] = offsetX;
-            //            iFlyOffset[flyIndex * 3 + 1] = offsetY;
-            //            iFlyOffset[flyIndex * 3 + 2] = offsetAngle;
-            //        }
-            //        else
-            //        {
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = 0;
-            //        }
-            //        break;
-            //}
-            #endregion
-
-            int flyStart = flyID.flyStart;
-            if (flyStart == 1 || flyStart == 2)
-            {
-                if (aoiResult.Code == PlcFlyResultCode.OK)
-                {
-                    //centerRun.X = foundResult.fCenterX + roiRect.X;
-                    //centerRun.Y = foundResult.fCenterY + roiRect.Y;
-                    centerRun = aoiMetaData.xCentroid;
-
-                    // 算出的 pix 需加入解析度
-                    float flyCamResolution = INI.Instance.FlyImageResolution;
-                    int flyShowID1 = flyID.ShowID;
-
-                    aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
-                    aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
-                    aoiResult.OffsetAngle = (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
-                }
-                updateOneResult(flyID, aoiResult);
-            }
-
-            //flystopwatch.Stop();
-
-            // 更新 GUI (暫時沿用原來的 逆行 調用處)
-            _DispUIs[flyID.flyIndex].Update(aoiResult);
-        }
-        void flyProcessProSpecial(FlyID flyID, Bitmap bmpFly)
-        {
-            var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_CheckSpecialAngle" };
-            var aoiResult = new FlyAoiResult() { MetaData = aoiMetaData };
-            //var flystopwatch = new Stopwatch();
-            //flystopwatch.Restart();
-
-            #region OLD_CODE
-            //////转换图像
-            ////byte[] bmpbytes = new byte[cameraFrame.uBytes];
-            ////Marshal.Copy(pBuffer, bmpbytes, 0, bmpbytes.Length);
-            //int iw = cameraFrame.iWidth;
-            //int ih = cameraFrame.iHeight;
-            //bmpFlyOperate.Dispose();
-            //bmpFlyOperate = ConvertFromMONO(eBytes, iw, ih);
-            //RectangleF _rectF = new RectangleF(
-            //    xRecipe.xRectRegionPrintFly.X,
-            //    xRecipe.xRectRegionPrintFly.Y,
-            //    xRecipe.xRectRegionPrintFly.Width,
-            //    xRecipe.xRectRegionPrintFly.Height);
-            #endregion
-
-            RectangleF roiRect = xRecipe.xRectRegionPrintFly;
-            roiRect.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
-            GaUtil.Clip(ref roiRect, bmpFly.Size);
-
-            using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
-            {
-                bool ok = xRecipe.CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
-                aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
-                aoiResult.OffsetAngle = ok ? angle : 0f;
-
-                // 記入 GUI 畫圖所需要的數據
-                aoiMetaData.xBlobs = mvdBlobs != null ? Array.ConvertAll(mvdBlobs.ToArray(), bi => bi.RectInfo.ToBox2D()) : null;
-                FlyMetaData.Offset(aoiMetaData.xBlobs, roiRect.X, roiRect.Y);
-
-                aoiMetaData.roiRect = roiRect;
-                aoiMetaData.bmpFly = bmpFly;
-                aoiMetaData.flyID = flyID;
-                aoiMetaData.flyAoiResult = aoiResult;
-            }
-
-            #region OLD_CODE
-            //int flyShowIndex = flyIndex + 1;
-            //switch (flyStart)
-            //{
-            //    case 1:
-            //        flyShowIndex = flyIndex + 1;
-            //        break;
-            //    case 2:
-            //        flyShowIndex = flyIndex + 1 + 4;
-            //        break;
-            //}
-            #endregion
-
-            #region OLD_CODE
-            //switch (flyStart)
-            //{
-            //    case 1:
-            //        iFlyResult[flyIndex] = (bOK ? 1 : 2);
-            //        if (bOK)
-            //        {
-            //            //算出的pix需加入解析度
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = angle;
-            //        }
-            //        else
-            //        {
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = 0;
-            //        }
-            //        break;
-            //    case 2:
-            //        iFlyResult[flyIndex] = (bOK ? 1 : 2);
-            //        if (bOK)
-            //        {
-            //            //算出的pix需加入解析度
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = angle;
-            //        }
-            //        else
-            //        {
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = 0;
-            //        }
-            //        break;
-            //}
-            #endregion
-
-            int flyStart = flyID.flyStart;
-            if (flyStart == 1 || flyStart == 2)
-            {
-                updateOneResult(flyID, aoiResult);
-            }
-            
-            //flystopwatch.Stop();
-
-            // 更新 GUI (暫時沿用原來的 逆行 調用處)
-            _DispUIs[flyID.flyIndex].Update(aoiResult);
-        }
-        
         void updateOneResult(FlyID flyID, FlyAoiResult oneResult)
         {
             int flyIndex = flyID.flyIndex;

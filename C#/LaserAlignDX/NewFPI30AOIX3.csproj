@@ -360,10 +360,9 @@
   <ItemGroup>
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
-    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v3.cs" />
+    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v35.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyAoiResult.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyMetaData.cs" />
-    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\MvdFlyResultDispUI.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaTemplateEditCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
@@ -372,11 +371,20 @@
     <Compile Include="GA.mvc\Gui\.Interactor\CviGoldenPickingBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviLineSegmentsBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviRcpBox.cs" />
+    <Compile Include="GA.mvc\Gui\.Interactor\CviFlyAoiResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviRotRectBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviTransCoordInfo.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\IvDrawItem.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_abs.cs" />
+    <Compile Include="GA.mvc\Gui\UiFlyCamViewer\IvFlyCamViewUI.cs" />
+    <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.Designer.cs">
+      <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiFlyCamViewer\MvdFlyResultDispUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -803,6 +811,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiChipCellsViewer\JezChipCellsViewPanel.resx">
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.resx">
+      <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.resx">
       <DependentUpon>FormRecipeEditor.cs</DependentUpon>

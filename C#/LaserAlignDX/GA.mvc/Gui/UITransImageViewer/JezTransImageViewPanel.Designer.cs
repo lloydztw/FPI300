@@ -59,9 +59,9 @@
             this.tableLayoutPanel0.Margin = new System.Windows.Forms.Padding(3, 1, 3, 1);
             this.tableLayoutPanel0.Name = "tableLayoutPanel0";
             this.tableLayoutPanel0.RowCount = 3;
-            this.tableLayoutPanel0.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 38F));
+            this.tableLayoutPanel0.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel0.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel0.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 38F));
+            this.tableLayoutPanel0.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel0.Size = new System.Drawing.Size(541, 790);
             this.tableLayoutPanel0.TabIndex = 17;
             // 
@@ -75,7 +75,7 @@
             this.panel1.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
             this.panel1.Name = "panel1";
             this.panel1.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
-            this.panel1.Size = new System.Drawing.Size(541, 36);
+            this.panel1.Size = new System.Drawing.Size(541, 38);
             this.panel1.TabIndex = 18;
             // 
             // picIcon
@@ -86,7 +86,7 @@
             this.picIcon.Location = new System.Drawing.Point(8, 5);
             this.picIcon.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.picIcon.Name = "picIcon";
-            this.picIcon.Size = new System.Drawing.Size(26, 26);
+            this.picIcon.Size = new System.Drawing.Size(26, 28);
             this.picIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picIcon.TabIndex = 18;
             this.picIcon.TabStop = false;
@@ -100,7 +100,7 @@
             this.lblTitle.Location = new System.Drawing.Point(8, 5);
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Padding = new System.Windows.Forms.Padding(49, 0, 0, 0);
-            this.lblTitle.Size = new System.Drawing.Size(525, 26);
+            this.lblTitle.Size = new System.Drawing.Size(525, 28);
             this.lblTitle.TabIndex = 17;
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -111,10 +111,10 @@
             this.panel2.Controls.Add(this.lblBlinker);
             this.panel2.Controls.Add(this.lblCoordInfo);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(0, 753);
+            this.panel2.Location = new System.Drawing.Point(0, 751);
             this.panel2.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(541, 36);
+            this.panel2.Size = new System.Drawing.Size(541, 38);
             this.panel2.TabIndex = 17;
             // 
             // lblShadowInfo
@@ -146,7 +146,7 @@
             this.lblCoordInfo.Location = new System.Drawing.Point(0, 0);
             this.lblCoordInfo.Name = "lblCoordInfo";
             this.lblCoordInfo.Padding = new System.Windows.Forms.Padding(39, 0, 0, 0);
-            this.lblCoordInfo.Size = new System.Drawing.Size(541, 36);
+            this.lblCoordInfo.Size = new System.Drawing.Size(541, 38);
             this.lblCoordInfo.TabIndex = 17;
             this.lblCoordInfo.Text = "Camera Viewer";
             this.lblCoordInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -163,11 +163,11 @@
             this.cvMatViewer.GridLineColor = System.Drawing.Color.LightGray;
             this.cvMatViewer.GridLinesVisible = false;
             this.cvMatViewer.Image = null;
-            this.cvMatViewer.Location = new System.Drawing.Point(0, 39);
+            this.cvMatViewer.Location = new System.Drawing.Point(0, 41);
             this.cvMatViewer.Margin = new System.Windows.Forms.Padding(0, 1, 0, 1);
             this.cvMatViewer.Name = "cvMatViewer";
             this.cvMatViewer.RulerVisible = false;
-            this.cvMatViewer.Size = new System.Drawing.Size(541, 712);
+            this.cvMatViewer.Size = new System.Drawing.Size(541, 708);
             this.cvMatViewer.TabIndex = 16;
             // 
             // JezTransImageViewPanel
