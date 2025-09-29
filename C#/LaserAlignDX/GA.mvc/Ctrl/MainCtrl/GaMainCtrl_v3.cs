@@ -24,7 +24,6 @@ using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
-using LaserAlignDX.UISpace.UIMVC;
 using NeedleX.ProcessSpace;
 using OpenCvSharp.Extensions;
 using System;
@@ -122,7 +121,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         GaPlcFlyCameraCtrl _flyCtrl = new GaPlcFlyCameraCtrl();
         #endregion
 
-        public override void Attach(Control[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo)
+        public override void Attach(Control[] DsMains, Control[] DsFlys, Control lblFlyCameraSerialNo)
         {
             // CHIP_CELLS_VIEWERS
             _DSMains = new[]
@@ -159,46 +158,36 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         IvChipCellsViewer buildChipCellsViewer(Control panel, CarrierEnum carrierID)
         {
             //(1) 使用新的 ChipCellsViewer
-            if (OPT_USE_LETIAN_CHIP_CELL_VIEWER)
+            //(1.1) 如果傳進來的已經是 JezChipCellsViewPanel
+            if (panel is JezChipCellsViewPanel jezViewer)
             {
-                //(1.1) 如果傳進來的已經是 JezChipCellsViewPanel
-                if (panel is JezChipCellsViewPanel jezViewer)
-                {
-                    jezViewer.CarrierID = carrierID;
-                    jezViewer.IsActive = carrierID == CarrierEnum.C1;
-                    connectPopupMenuEvents(jezViewer, carrierID);
-                    return jezViewer;
-                }
-                //(1.2) 如果傳進來的是其他視窗控件
-                else if (panel is Control childWnd)
-                {
-                    // 生成新的 JezChipCellsViewPanel
-                    var viewer = new JezChipCellsViewPanel
-                    {
-                        CarrierID = carrierID,
-                        Location = childWnd.Location,
-                        Size = childWnd.Size,
-                        Dock = childWnd.Dock,
-                        Visible = true,
-                        IsActive = carrierID == CarrierEnum.C1,
-                    };
-                    // 與舊的 childWnd 互換角色
-                    var parent = childWnd.Parent;
-                    childWnd.Visible = false;
-                    parent.Controls.Add(viewer);
-                    connectPopupMenuEvents(viewer, carrierID);
-                    return viewer;
-                }
-                else
-                {
-                    return null;
-                }
+                jezViewer.CarrierID = carrierID;
+                jezViewer.IsActive = carrierID == CarrierEnum.C1;
+                connectPopupMenuEvents(jezViewer, carrierID);
+                return jezViewer;
             }
-            //(2) 使用舊有的 MVSUI
+            //(1.2) 如果傳進來的是其他視窗控件
+            else if (panel is Control childWnd)
+            {
+                // 生成新的 JezChipCellsViewPanel
+                var viewer = new JezChipCellsViewPanel
+                {
+                    CarrierID = carrierID,
+                    Location = childWnd.Location,
+                    Size = childWnd.Size,
+                    Dock = childWnd.Dock,
+                    Visible = true,
+                    IsActive = carrierID == CarrierEnum.C1,
+                };
+                // 與舊的 childWnd 互換角色
+                var parent = childWnd.Parent;
+                childWnd.Visible = false;
+                parent.Controls.Add(viewer);
+                connectPopupMenuEvents(viewer, carrierID);
+                return viewer;
+            }
             else
             {
-                if (panel is MVSUI mvsui)
-                    return new MvsChipCellsViewer(mvsui);
                 return null;
             }
         }

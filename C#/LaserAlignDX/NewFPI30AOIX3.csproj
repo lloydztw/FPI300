@@ -377,6 +377,12 @@
     <Compile Include="GA.mvc\Gui\.Interactor\IvDrawItem.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_abs.cs" />
+    <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
+      <DependentUpon>MainX3UI_lt.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\IvFlyCamViewUI.cs" />
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.cs">
       <SubType>UserControl</SubType>
@@ -384,7 +390,6 @@
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.Designer.cs">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiFlyCamViewer\MvdFlyResultDispUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -442,7 +447,6 @@
     <Compile Include="GA.mvc\Gui\UiChipCellsViewer\JezChipCellsViewPanel.Designer.cs">
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiChipCellsViewer\MvsChipCellsViewer.cs" />
     <Compile Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -685,12 +689,6 @@
     <Compile Include="GA\UISpace\MainSpace\MainX2UI.Designer.cs">
       <DependentUpon>MainX2UI.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA\UISpace\MainSpace\MainX3UI_lt.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\MainSpace\MainX3UI_lt.Designer.cs">
-      <DependentUpon>MainX3UI_lt.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA\UISpace\MainSpace\MiniMainUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -803,6 +801,9 @@
       <DependentUpon>PosUI.cs</DependentUpon>
     </Compile>
     <Compile Include="LT\UnitTest\UnitTest_ChipMatcher.cs" />
+    <EmbeddedResource Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.resx">
+      <DependentUpon>MainX3UI_lt.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.resx">
       <DependentUpon>FormCalibrationTool.cs</DependentUpon>
     </EmbeddedResource>
@@ -898,9 +899,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\UISpace\MainSpace\MainX2UI.resx">
       <DependentUpon>MainX2UI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\MainSpace\MainX3UI_lt.resx">
-      <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\UISpace\MainSpace\MiniMainUI.resx">
       <DependentUpon>MiniMainUI.cs</DependentUpon>

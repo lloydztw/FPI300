@@ -16,7 +16,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Abs
 
         public abstract void Tick();
 
-        public abstract void Attach(Control[] DsMains, MVSUI[] DsFlys, Control lblFlyCameraSerialNo);
+        public abstract void Attach(Control[] DsMains, Control[] DsFlys, Control lblFlyCameraSerialNo);
 
         #region 對上層 MainControlUI 所需要的接口
         public virtual void ChangeRecipe()

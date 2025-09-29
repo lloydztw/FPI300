@@ -1,4 +1,5 @@
 ﻿using JetEazy.BasicSpace;
+using System;
 using System.Windows.Forms;
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 
@@ -7,9 +8,7 @@ namespace LaserAlignDX.UISpace.MainSpace
 {
     public partial class MainX3UI : UserControl, IMainUI
     {
-        //public event EventHandler<MainUIStateChangedEventArgs> OnStateChanged;
-        //public delegate void ChangeStateHandler(MainS1State status, object tag = null);
-        public event ChangeStateHandler OnChangeState;
+        public event EventHandler<MainUiStateEventArgs> OnStateChanged;
 
         #region PRIVATE_DATA
         GaMainCtrl _mainCtrl;
@@ -36,7 +35,8 @@ namespace LaserAlignDX.UISpace.MainSpace
 
             _mainCtrl.OnStateChanged += (s, e) =>
             {
-                OnChangeState?.Invoke(e.Status, e.Tag);
+                //OnChangeState?.Invoke(e.Status, e.Tag);
+                OnStateChanged(s, e);
             };
         }
         
