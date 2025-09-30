@@ -17,6 +17,7 @@
 namespace LaserAlignDX.Mvc.Model.Recipe
 {
     /// <summary>
+    /// 規格 (兩載台共用一份)
     /// DTO (Data Transfer Object) 類別
     /// DTO 是標準用詞 請自行查 ChatGPT or DeepSeek
     /// </summary>
@@ -47,15 +48,17 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         // 尺寸宽度 spec (mm)
         public float mWidthStand { get; set; } = 9.0f;
         public float mHeightStand { get; set; } = 9.9f;
-        public float mWidthPercentage { get; set; } = 1f;
-        public float mHeightPercentage { get; set; } = 1f;
+        public float mWidthPercentage { get; set; } = 0.5f;
+        public float mHeightPercentage { get; set; } = 0.5f;
 
         // 尺寸偏移 spec (mm)
-        public float PadEdgePercentageX { get; set; } = 0.05f;
-        public float PadEdgePercentageY { get; set; } = 0.05f;
+        public float PadEdgePercentageX { get; set; } = 0.5f;
+        public float PadEdgePercentageY { get; set; } = 0.5f;
 
         public override void Load(string iniFileName)
         {
+            normalizeFileName(ref iniFileName);
+
             bCheckInspect = ReadINIValue("Basic", "bCheckInspect", "1", iniFileName) == "1";
             bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", iniFileName) == "1";
             bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", iniFileName) == "1";
@@ -63,15 +66,16 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             mWidthStand = float.Parse(ReadINIValue("Basic", "mWidthStand", "9", iniFileName));
             mHeightStand = float.Parse(ReadINIValue("Basic", "mHeightStand", "9.9", iniFileName));
 
-            mWidthPercentage = float.Parse(ReadINIValue("Basic", "mWidthPercentage", "1.0", iniFileName));
-            mHeightPercentage = float.Parse(ReadINIValue("Basic", "mHeightPercentage", "1.0", iniFileName));
+            mWidthPercentage = float.Parse(ReadINIValue("Basic", "mWidthPercentage", "0.5", iniFileName));
+            mHeightPercentage = float.Parse(ReadINIValue("Basic", "mHeightPercentage", "0.5", iniFileName));
 
-            PadEdgePercentageX = float.Parse(ReadINIValue("Basic", "PadEdgePercentageX", "1.0", iniFileName));
-            PadEdgePercentageY = float.Parse(ReadINIValue("Basic", "PadEdgePercentageY", "1.0", iniFileName));
-
+            PadEdgePercentageX = float.Parse(ReadINIValue("Basic", "PadEdgePercentageX", "0.5", iniFileName));
+            PadEdgePercentageY = float.Parse(ReadINIValue("Basic", "PadEdgePercentageY", "0.5", iniFileName));
         }
         public override void Save(string iniFileName)
         {
+            normalizeFileName(ref iniFileName);
+
             WriteINIValue("Basic", "bCheckInspect", (bCheckInspect ? "1" : "0"), iniFileName);
             WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), iniFileName);
             WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), iniFileName);
@@ -83,6 +87,12 @@ namespace LaserAlignDX.Mvc.Model.Recipe
 
             WriteINIValue("Basic", "PadEdgePercentageX", PadEdgePercentageX.ToString(), iniFileName);
             WriteINIValue("Basic", "PadEdgePercentageY", PadEdgePercentageY.ToString(), iniFileName);
+        }
+
+        void normalizeFileName(ref string iniFileName)
+        {
+            var path = System.IO.Path.GetDirectoryName(iniFileName);
+            iniFileName = System.IO.Path.Combine(path, "Inspect_spec.ini");
         }
     }
 }

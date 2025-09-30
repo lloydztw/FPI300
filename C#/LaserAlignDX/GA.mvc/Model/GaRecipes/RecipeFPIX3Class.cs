@@ -407,10 +407,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region 參數區_規格
-        private DtoX3MeasureSpec _xSpec => DtoX3MeasureSpec.Instance;
-        #endregion
-
         #region 參數區_其他子群
         public InspectX3ParaClass InspectParams => InspectX3ParaClass.Instance;
         public FlyParaClass FlyAoiParams => FlyParaClass.Instance;
@@ -491,14 +487,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 ViewTrainLoad();
             }
 
-            //(LD4) 規格 (兩載台共用一份)
-            _xSpec.Load(INIFILE);
-
-            //(LD5) 晶粒檢測參數 (根據載台號 載入不同對應的設定值)
+            //(LD4) 晶粒檢測參數 (根據載台號 載入不同對應的設定值)
             InspectParams.Initial(Path, Index, $"Inspect_default_info{_CARRIER_TAG}.ini");
             InspectParams.Load();
 
-            //(LD6) 飛拍檢測參數 (目前不隨著載台顏色改變)
+            //(LD5) 飛拍檢測參數 (目前不隨著載台顏色改變)
             FlyAoiParams.Initial(Path, Index, "Fly_default_info.ini");
             FlyAoiParams.Load();
         }
@@ -550,8 +543,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             CreateViews();
             ViewTrainLoad();
 
-            //規格 (兩載台共用一份)
-            _xSpec.Save(INIFILE);
             InspectParams.Save();
             FlyAoiParams.Save();
         }
@@ -568,6 +559,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             {
                 // Golden Region 模板 (根據載台號 存入不同對應的設定值)
                 _dtoGoldenRegionTemplate.SetTag(_CARRIER_TAG).Save(INIFILE);
+                //InspectParams.Save();
             }
             if (name.Contains("CHIP"))
             {
@@ -589,6 +581,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             {
                 // 邊線框 (根據載台號 存入不同對應的設定值)
                 SaveLineBorderRects(_CARRIER_TAG);
+                //InspectParams.Save();
             }
             if (name.Contains("FLY"))
             {
@@ -1552,57 +1545,100 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         #endregion
 
-        #region 找直线的参数
+        #region 晶粒尺寸計算参数
 
         const string _Cat2 = "A02.尺寸检测参数设置";
-        [CategoryAttribute(_Cat2)]
-        [DisplayName("A00.测量方式")]
-        [TypeConverter(typeof(JzEnumConverter))]
-        [Browsable(false)]
-        public MeasureFindLineType MFLType { get; set; } = MeasureFindLineType.FindLineType_v1;
 
         [CategoryAttribute(_Cat2)]
         [DisplayName("A00.載台背景")]
         [TypeConverter(typeof(JzEnumConverter))]
         [Browsable(true)]
         public EdgeBackGroundType xCarrierBackground { get; set; }
+
+        [CategoryAttribute(_Cat2), DescriptionAttribute("單位 mm")]
+        [DisplayName("A01.樣本寬度")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float xTemplateChipWidth
+        {
+            get;
+            set;
+        }
+
+        [CategoryAttribute(_Cat2), DescriptionAttribute("單位 mm")]
+        [DisplayName("A02.樣本高度")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float xTemplateChipHeight
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// 縮放尺度 W (Runtime 自動計算)
+        /// </summary>
+        [Browsable(false)]
+        public double xChipDimScaleW
+        {
+            get;
+            set;
+        } = 1.0;
+        /// <summary>
+        /// 縮放尺度 H (Runtime 自動計算)
+        /// </summary>
+        [Browsable(false)]
+        public double xChipDimScaleH
+        {
+            get;
+            set;
+        } = 1.0;
+        #endregion
+
+        #region 找直线的参数_(舊)
+        [CategoryAttribute(_Cat2)]
+        [DisplayName("B00.测量方式")]
+        [TypeConverter(typeof(JzEnumConverter))]
+        [Browsable(false)]
+        public MeasureFindLineType MFLType { get; set; } = MeasureFindLineType.FindLineType_v1;
+
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
-        [DisplayName("A01.左边查找方向")]
+        [DisplayName("B01.左边查找方向")]
         [Browsable(false)]
         public bool bPositive0 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("A02.左边极性")]
+        [DisplayName("B02.左边极性")]
         [Browsable(false)]
         public bool bEdgePolarity0 { get; set; } = true;
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
-        [DisplayName("A03.上边查找方向")]
+        [DisplayName("B03.上边查找方向")]
         [Browsable(false)]
         public bool bPositive1 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("A04.上边极性")]
+        [DisplayName("B04.上边极性")]
         [Browsable(false)]
         public bool bEdgePolarity1 { get; set; } = true;
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从左到右 true正向 false反向")]
-        [DisplayName("A05.右边查找方向")]
+        [DisplayName("B05.右边查找方向")]
         [Browsable(false)]
         public bool bPositive2 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("A06.右边极性")]
+        [DisplayName("B06.右边极性")]
         [Browsable(false)]
         public bool bEdgePolarity2 { get; set; } = true;
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("从上到下 true正向 false反向")]
-        [DisplayName("A07.下边查找方向")]
+        [DisplayName("B07.下边查找方向")]
         [Browsable(false)]
         public bool bPositive3 { get; set; } = true;
         [CategoryAttribute(_Cat2), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("A08.下边极性")]
+        [DisplayName("B08.下边极性")]
         [Browsable(false)]
         public bool bEdgePolarity3 { get; set; } = true;
-
-
         #endregion
 
         #region 缺陷检测设置
@@ -1673,7 +1709,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [CategoryAttribute(_Cat4), DescriptionAttribute("單位 mm")]
         [DisplayName("A01.標準寬度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.01f, 3)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
         public float mWidthStand
         {
@@ -1684,7 +1720,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [CategoryAttribute(_Cat4), DescriptionAttribute("單位 mm")]
         [DisplayName("A02.標準高度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.01f, 3)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
         public float mHeightStand
         {
@@ -1695,7 +1731,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [CategoryAttribute(_Cat4), DescriptionAttribute("單位 %")]
         [DisplayName("A03.寬度誤差百分比 %")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100f, 1f, 2)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100f, 0.1f, 2)]
         [Browsable(true)]
         public float mWidthPercentage
         {
@@ -1706,7 +1742,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [CategoryAttribute(_Cat4), DescriptionAttribute("單位 %")]
         [DisplayName("A04.高度誤差百分比 %")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100f, 1f, 2)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100f, 0.1f, 2)]
         [Browsable(true)]
         public float mHeightPercentage
         {
@@ -1722,7 +1758,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 %")]
         [DisplayName("A01.格點晶粒邊緣偏移(X方向)%")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 1f, 2)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 0.1f, 2)]
         [Browsable(true)]
         public float PadEdgePercentageX
         {
@@ -1733,7 +1769,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 %")]
         [DisplayName("A02.格點晶粒邊緣偏移(Y方向)%")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 1f, 2)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 0.1f, 2)]
         [Browsable(true)]
         public float PadEdgePercentageY
         {
@@ -1762,9 +1798,25 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xBackgroudHeight = float.Parse(ReadINIValue("Inspect", "xBackgroudHeight", "15.1", INIFILE));
             xBackgroudArea = float.Parse(ReadINIValue("Inspect", "xBackgroudArea", "30.1", INIFILE));
 
-            MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
             xCarrierBackground = (EdgeBackGroundType)int.Parse(ReadINIValue("Basic", "CarrierBackground", "0", INIFILE));
+            xTemplateChipWidth = float.Parse(ReadINIValue("Basic", "xTemplateChipWidth", "0.0", INIFILE));
+            xTemplateChipHeight = float.Parse(ReadINIValue("Basic", "xTemplateChipHeight", "0.0", INIFILE));
+            xChipDimScaleW = double.Parse(ReadINIValue("Basic", "xChipDimScaleW", "1.0", INIFILE));
+            xChipDimScaleH = double.Parse(ReadINIValue("Basic", "xChipDimScaleH", "1.0", INIFILE));
 
+            if (xTemplateChipWidth <= 0)
+                xTemplateChipWidth = _spec.mWidthStand;
+            if (xTemplateChipHeight <= 0) 
+                xTemplateChipHeight = _spec.mHeightStand;
+
+            if (xChipDimScaleW <= 0)
+                xChipDimScaleW = 1.0;
+            if (xChipDimScaleH <= 0)
+                xChipDimScaleH = 1.0;
+            //---------------------------------------------------------------------------------------------------
+            // 以下參數 目前沒有用到
+            //---------------------------------------------------------------------------------------------------
+            MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
             bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
             bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
             bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
@@ -1786,6 +1838,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //mHeightPercentage = float.Parse(ReadINIValue("Basic", "mHeightPercentage", "1.0", INIFILE));
             //XOffset = float.Parse(ReadINIValue("Basic", "XOffset", "0.05", INIFILE));
             //YOffset = float.Parse(ReadINIValue("Basic", "YOffset", "0.05", INIFILE));
+            _spec.Load(INIFILE);
 
             //---------------------------------------------------------------------------------------------------
             // 以下改由 LoadMaskRects 處理
@@ -1821,8 +1874,16 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Inspect", "xBackgroudHeight", xBackgroudHeight.ToString(), INIFILE);
             WriteINIValue("Inspect", "xBackgroudArea", xBackgroudArea.ToString(), INIFILE);
 
-            WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
             WriteINIValue("Basic", "CarrierBackground", ((int)xCarrierBackground).ToString(), INIFILE);
+            WriteINIValue("Basic", "xTemplateChipWidth", xTemplateChipWidth.ToString(), INIFILE);
+            WriteINIValue("Basic", "xTemplateChipHeight", xTemplateChipHeight.ToString(), INIFILE);
+            WriteINIValue("Basic", "xChipDimScaleW", xChipDimScaleW.ToString(), INIFILE);
+            WriteINIValue("Basic", "xChipDimScaleH", xChipDimScaleH.ToString(), INIFILE);
+
+            //---------------------------------------------------------------------------------------------------
+            // 以下參數 目前沒有用到
+            //---------------------------------------------------------------------------------------------------
+            WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
             WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bPositive2", (bPositive2 ? "1" : "0"), INIFILE);
@@ -1844,6 +1905,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //WriteINIValue("Basic", "mHeightPercentage", mHeightPercentage.ToString(), INIFILE);
             //WriteINIValue("Basic", "XOffset", XOffset.ToString(), INIFILE);
             //WriteINIValue("Basic", "YOffset", YOffset.ToString(), INIFILE);
+            _spec.Save(INIFILE);
 
             //>>> SaveMaskRects();
         }

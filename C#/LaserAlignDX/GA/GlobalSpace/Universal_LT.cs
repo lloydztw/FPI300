@@ -29,7 +29,6 @@ namespace Traveller106
         public static readonly int N_THREADS = 16;
 
         public static bool IsNoUseCCD = false;
-
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;

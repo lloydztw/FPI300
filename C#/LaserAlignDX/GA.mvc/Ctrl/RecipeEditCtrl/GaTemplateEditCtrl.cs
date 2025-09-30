@@ -20,7 +20,9 @@ using JzDisplay;
 using JzDisplay.UISpace;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Mvc.Gui;
+using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LeTian.AoiLib;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System;
@@ -48,6 +50,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         #region GLOBAL_MESS
         CarrierEnum _carrierID;
+        ITravelerModel _sysModel => GaMvcConfig.SysModel;
         #endregion
 
         #region RECIPE_PARAMS
@@ -691,15 +694,25 @@ namespace LaserAlignDX.Mvc.Ctrl
             else
             {
                 var bmpSrcRegion = _xBmpGoldenRegionTemplate;
+                var edgeLines = new List<EzLSD.LineSegment>();
+
                 foreach (EdgeBorder eBorder in Enum.GetValues(typeof(EdgeBorder)))
                 {
                     int idx = (int)eBorder;
                     var borderRect = _cviLineBorderBoxes[idx].Box;
+
                     bool ok = aoiTryRunFindLineSegment(eBorder, bmpSrcRegion, borderRect, out var mvdLines);
                     var linesOut = GaMvdExt.ToCSharpLines(mvdLines);
                     _cviLineSegmentBoxes[idx].Attach(linesOut);
                     _cviLineSegmentBoxes[idx].Visible = ok;
+
+                    if (mvdLines.Length > 0)
+                        edgeLines.Add(mvdLines[0]?.ToLineSegment());
+                    else
+                        edgeLines.Add(null);
                 }
+
+                aoiCalcGoldenChipDimension(edgeLines);
             }
         }
         void persistLineBorderIndentExt(bool save)
@@ -961,6 +974,27 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var mvdLine = lineSegFinder.Run(bmpSrc, boxRect, (int)eBorder);
                 resultLines = new[] { mvdLine };
                 return mvdLine != null;
+            }
+        }
+        void aoiCalcGoldenChipDimension(List<EzLSD.LineSegment> lines)
+        {
+            var regionRoi = _xRecipe.xRectRegionPrint;
+            foreach(var line in lines)
+                line?.Offset(regionRoi.X, regionRoi.Y);
+
+            var aoiModel = _sysModel?.AoiModel;
+            if (aoiModel != null)
+            {
+                bool ok = aoiModel.CalcChipDimension(lines.ToArray(), out SizeF chipDim, false);
+                if (ok)
+                {
+                    System.Diagnostics.Trace.WriteLine($"Chip Dim = {chipDim.Width:0.000} x {chipDim.Height:0.000}");
+                    if (chipDim.Width > 0)
+                        _xInspectX3.xChipDimScaleW = (double)_xInspectX3.xTemplateChipWidth / chipDim.Width;
+                    if (chipDim.Height > 0)
+                        _xInspectX3.xChipDimScaleH = (double)_xInspectX3.xTemplateChipHeight / chipDim.Height;
+                    _isPropertyModified = true;
+                }
             }
         }
         Bitmap cropBitmap(Bitmap bmpSrc, ref Rectangle roiRect)
