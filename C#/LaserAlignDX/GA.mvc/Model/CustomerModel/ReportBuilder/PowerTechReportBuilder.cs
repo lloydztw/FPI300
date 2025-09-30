@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.Utils;
+using LaserAlignDX.BasicSpace;
 using System;
 using System.Text;
 using Traveller106;
@@ -127,8 +128,8 @@ namespace LaserAlignDX.Model
             sb.AppendValues(
                 cell.RunWidth,
                 cell.RunHeight,
-                cell.RunXOffset,
-                cell.RunYOffset,
+                cell.PadEdgeDiffX,
+                cell.PadEdgeDiffY,
 
                 cell.OrgX,
                 cell.OrgY,
@@ -136,10 +137,10 @@ namespace LaserAlignDX.Model
                 cell.RunY,
                 cell.RunAngle,
 
-                cell.DisLeft,
-                cell.DisRight,
-                cell.DisTop,
-                cell.DisBottom
+                cell.PadEdgeSizes[(int)EdgeBorder.Left],        // 左 (報表順序)
+                cell.PadEdgeSizes[(int)EdgeBorder.Right],       // 右 (報表順序)
+                cell.PadEdgeSizes[(int)EdgeBorder.Top],         // 上 (報表順序)
+                cell.PadEdgeSizes[(int)EdgeBorder.Bottom]       // 下 (報表順序)
             ).Append(",");
 
             sb.AppendPointF(cell.Sur1).Append(",");

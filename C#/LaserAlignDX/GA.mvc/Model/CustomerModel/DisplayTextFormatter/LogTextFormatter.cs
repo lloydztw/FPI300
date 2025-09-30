@@ -124,8 +124,8 @@ namespace LaserAlignDX.Model
             {
                 //str += $"X方向偏移[{cell.RunXOffset.ToString(_digitFormat)}]" + ",";
                 //str += $"Y方向偏移[{cell.RunYOffset.ToString(_digitFormat)}]" + ",";
-                sb.Append("X方向偏移[").AppendValues(cell.RunXOffset).Append("],");
-                sb.Append("Y方向偏移[").AppendValues(cell.RunYOffset).Append("],");
+                sb.Append("X方向偏移[").AppendValues(cell.PadEdgeDiffX).Append("],");
+                sb.Append("Y方向偏移[").AppendValues(cell.PadEdgeDiffY).Append("],");
             }
             //str += $"{cell.SetBarcodeStr}" + ",";
             //if (cell.RunCodeInfo != null)

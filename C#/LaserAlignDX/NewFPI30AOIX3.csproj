@@ -411,12 +411,13 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v25.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v26.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\GaRecipes\DTO\DtoBmpTemplate.cs" />
+    <Compile Include="GA.mvc\Model\GaRecipes\DTO\DtoX3MeasureSpec.cs" />
     <Compile Include="GA.mvc\Model\GaRecipes\RecipeFPIX3Class.cs" />
     <Compile Include="GA.mvc\Model\GaRecipes\RecipeParaGridClass.cs" />
     <Compile Include="GA.mvc\Model\GaRecipes\Supports\RcpBmpHolder.cs" />
@@ -473,7 +474,6 @@
     <Compile Include="GA.mvc\Model\Coordinates\TravellerTranforms.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />
-    <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\MainDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\StringBuilderExt.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\IxReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\PowerTechReportBuilder.cs" />

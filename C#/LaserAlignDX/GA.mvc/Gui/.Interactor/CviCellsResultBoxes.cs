@@ -19,7 +19,6 @@ using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
@@ -97,7 +96,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #endregion
 
         #region GUI_MEMBERS
-        IxDispTextFormatter _formatter = new MainDispTextFormatter();
+        //IxDispTextFormatter _formatter = new MainDispTextFormatter();
         Font _font = null;
         #endregion
 
@@ -597,28 +596,29 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         string formatDisplayText(CellBloc bloc)
         {
-            //if (cell != null)
+            ////if (cell != null)
+            ////{
+            ////    bool isEmpty;
+            ////    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+            ////        isEmpty = false;
+            ////    else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
+            ////        isEmpty = false;
+            ////    else
+            ////        isEmpty = true;
+            ////    if (isEmpty)
+            ////        return $"[{cell.Index}]\n空位";
+            ////    string msg = _formatter.Format(cell);
+            ////    return msg;
+            ////}
+
+            //var cell = bloc?.Cell;
+            //if (checkResult(cell, out bool pass, out bool empty))
             //{
-            //    bool isEmpty;
-            //    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-            //        isEmpty = false;
-            //    else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
-            //        isEmpty = false;
-            //    else
-            //        isEmpty = true;
-            //    if (isEmpty)
-            //        return $"[{cell.Index}]\n空位";
-            //    string msg = _formatter.Format(cell);
-            //    return msg;
+            //    if (empty)
+            //        return $"[{cell.Index}]\n缺";
+            //    return _formatter.Format(cell);
             //}
 
-            var cell = bloc?.Cell;
-            if (checkResult(cell, out bool pass, out bool empty))
-            {
-                if (empty)
-                    return $"[{cell.Index}]\n缺";
-                return _formatter.Format(cell);
-            }
             return null;
         }
         #endregion

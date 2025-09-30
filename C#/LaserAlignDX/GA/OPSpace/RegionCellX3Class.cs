@@ -1,4 +1,5 @@
 ﻿using AUVision;
+using Eazy_Project_III;
 using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
@@ -7,7 +8,9 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.Windows.Controls;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
@@ -61,13 +64,16 @@ namespace LaserAlignDX.OPSpace
             mvdPairLineClass = null;
         }
 
+        // INDEX
         public int Index = 0;
         public string Name = "";
-        public string Result = "";
         public string lblName = "";
         public int CellRow = 0;
         public int CellCol = 0;
 
+        /// <summary>
+        /// ROI (camera coordinate) (單位 pixel)
+        /// </summary>
         public RectangleF viewRectF = new RectangleF();
 
         /// <summary>
@@ -90,19 +96,32 @@ namespace LaserAlignDX.OPSpace
         /// 测量结果高度
         /// </summary>
         public float RunHeight = 0;
-        /// <summary>
-        /// 测量X方向偏移
-        /// </summary>
-        public float RunXOffset = 0;
-        /// <summary>
-        /// 测量Y方向偏移
-        /// </summary>
-        public float RunYOffset = 0;
 
-        public float DisLeft = 0;
-        public float DisTop = 0;
-        public float DisRight = 0;
-        public float DisBottom = 0;
+        /// <summary>
+        /// 格點型晶粒 邊緣厚度 左右差 (X方向)
+        /// </summary>
+        public float PadEdgeDiffX
+        {
+            get => PadEdgeSizes[(int)EdgeBorder.Left] - PadEdgeSizes[(int)EdgeBorder.Right];
+        }
+        /// <summary>
+        /// 格點型晶粒 邊緣厚度 上下差 (Y方向)
+        /// </summary>
+        public float PadEdgeDiffY
+        {
+            get => PadEdgeSizes[(int)EdgeBorder.Top] - PadEdgeSizes[(int)EdgeBorder.Bottom];
+        }
+        /// <summary>
+        /// 格點型晶粒 邊緣厚度 (順序: 左上右下)
+        /// </summary>
+        public float[] PadEdgeSizes = new float[4];
+
+        #region OLD_CODE
+        //public float DisLeft = 0;
+        //public float DisTop = 0;
+        //public float DisRight = 0;
+        //public float DisBottom = 0;
+        #endregion
 
         public PointF Sur1 = new PointF();
         public PointF Sur2 = new PointF();
@@ -181,6 +200,7 @@ namespace LaserAlignDX.OPSpace
             mvdFindLineClass.Background = xInspect.xCarrierBackground;
             cMvdLineSegmentFsOut[iSideIndex] = mvdFindLineClass.Run(bmp, roi, iSideIndex);
         }
+
         /// <summary>
         /// 寻找平行线
         /// </summary>
@@ -189,6 +209,8 @@ namespace LaserAlignDX.OPSpace
         /// <param name="r">寻找的ROI</param>
         public void pairLineSegmentRun(int iSideIndex, Bitmap bmp, CMvdRectangleF r)
         {
+            // 停用, 改用新的計算方式 !!!
+#if (OPT_LEGACY)
             if (mvdPairLineClass == null)
                 mvdPairLineClass = new MvdPairLineClass();
             cMvdLineSegmentFsOut[iSideIndex] = null;
@@ -390,9 +412,7 @@ namespace LaserAlignDX.OPSpace
                     }
                 }
             }
-
-            
-
+#endif
         }
 
         public C2DCodeInfo RunCodeInfo = null;
@@ -560,55 +580,66 @@ namespace LaserAlignDX.OPSpace
         /// 获取尺寸计算的结果
         /// </summary>
         /// <returns>true:OK false:NG</returns>
-        public bool GetMeasureResult()
+        public bool PackMeasureResult()
         {
             bool bOK = true;
+
             if (xInspect.bOpenLineMeasure)
             {
-                float tmpwidth = RunWidth;
-                float tmpheight = RunHeight;
+                //float tmpwidth = RunWidth;
+                //float tmpheight = RunHeight;
 
-                if (INI.Instance.IsCheat)
-                {
-                    if (RunWidth < xInspect.mWidthStand - xInspect.mWidthLower || RunWidth > xInspect.mWidthStand + xInspect.mWidthUpper)
-                    {
-                        if (RunWidth >= xInspect.mWidthStand - xInspect.mWidthLower - 0.02 && RunWidth < xInspect.mWidthStand - xInspect.mWidthLower)
-                            RunWidth = RunWidth + 0.027f;
-                        if (RunWidth > xInspect.mWidthStand + xInspect.mWidthUpper && RunWidth <= xInspect.mWidthStand + xInspect.mWidthUpper + 0.02)
-                            RunWidth = RunWidth - 0.027f;
-                    }
-                    if (RunHeight < xInspect.mHeightStand - xInspect.mHeightLower || RunHeight > xInspect.mHeightStand + xInspect.mHeightUpper)
-                    {
-                        if (RunHeight >= xInspect.mHeightStand - xInspect.mHeightLower - 0.02 && RunHeight < xInspect.mHeightStand - xInspect.mHeightLower)
-                            RunHeight = RunHeight + 0.027f;
-                        if (RunHeight > xInspect.mHeightStand + xInspect.mHeightUpper && RunHeight <= xInspect.mHeightStand + xInspect.mHeightUpper + 0.02)
-                            RunHeight = RunHeight - 0.027f;
-                    }
-                }
+                //if (INI.Instance.IsCheat)
+                //{
+                //    if (RunWidth < xInspect.mWidthStand - xInspect.mWidthLower || RunWidth > xInspect.mWidthStand + xInspect.mWidthPercentage)
+                //    {
+                //        if (RunWidth >= xInspect.mWidthStand - xInspect.mWidthLower - 0.02 && RunWidth < xInspect.mWidthStand - xInspect.mWidthLower)
+                //            RunWidth = RunWidth + 0.027f;
+                //        if (RunWidth > xInspect.mWidthStand + xInspect.mWidthPercentage && RunWidth <= xInspect.mWidthStand + xInspect.mWidthPercentage + 0.02)
+                //            RunWidth = RunWidth - 0.027f;
+                //    }
+                //    if (RunHeight < xInspect.mHeightStand - xInspect.mHeightLower || RunHeight > xInspect.mHeightStand + xInspect.mHeightPercentage)
+                //    {
+                //        if (RunHeight >= xInspect.mHeightStand - xInspect.mHeightLower - 0.02 && RunHeight < xInspect.mHeightStand - xInspect.mHeightLower)
+                //            RunHeight = RunHeight + 0.027f;
+                //        if (RunHeight > xInspect.mHeightStand + xInspect.mHeightPercentage && RunHeight <= xInspect.mHeightStand + xInspect.mHeightPercentage + 0.02)
+                //            RunHeight = RunHeight - 0.027f;
+                //    }
+                //}
 
-                if (RunWidth < xInspect.mWidthStand - xInspect.mWidthLower || RunWidth > xInspect.mWidthStand + xInspect.mWidthUpper)
-                {
+                //if (RunWidth < xInspect.mWidthStand - xInspect.mWidthLower || RunWidth > xInspect.mWidthStand + xInspect.mWidthPercentage)
+                //{
+                //    bOK = false;
+                //}
+                //else if (RunHeight < xInspect.mHeightStand - xInspect.mHeightLower || RunHeight > xInspect.mHeightStand + xInspect.mHeightPercentage)
+                //{
+                //    bOK = false;
+                //}
+
+                var deltaW = Math.Abs(xInspect.mWidthStand - RunWidth) / (xInspect.mWidthStand + 1e-9) * 100.0;
+                var deltaH = Math.Abs(xInspect.mHeightStand - RunHeight) / (xInspect.mHeightStand + 1e-9) * 100.0;
+                if (deltaW > xInspect.mWidthPercentage || deltaH > xInspect.mHeightPercentage)
                     bOK = false;
-                }
-                else if (RunHeight < xInspect.mHeightStand - xInspect.mHeightLower || RunHeight > xInspect.mHeightStand + xInspect.mHeightUpper)
+
+                if (bOK && xInspect.bCheckMeasureOffset && xInspect.xAlgorithm == AoiModel.MatchAlgorithmEnum.GridMatch)
                 {
-                    bOK = false;
+                    //RunXOffset = Math.Abs(DisLeft - DisRight);
+                    //RunYOffset = Math.Abs(DisTop - DisBottom);
+                    //if (RunXOffset > xInspect.XOffset)
+                    //{
+                    //    bOK = false;
+                    //}
+                    //else if (RunYOffset > xInspect.YOffset)
+                    //{
+                    //    bOK = false;
+                    //}
+
+                    var deltaX = Math.Abs(PadEdgeDiffX) / (xInspect.mWidthStand + 1e-9) * 100.0;
+                    var deltaY = Math.Abs(PadEdgeDiffY) / (xInspect.mHeightStand + 1e-9) * 100.0;
+                    if (deltaX > xInspect.PadEdgePercentageX || deltaY > xInspect.PadEdgePercentageY)
+                        bOK = false;
                 }
 
-
-                if (xInspect.bCheckMeasureOffset)
-                {
-                    RunXOffset = Math.Abs(DisLeft - DisRight);
-                    RunYOffset = Math.Abs(DisTop - DisBottom);
-                    if (RunXOffset > xInspect.XOffset)
-                    {
-                        bOK = false;
-                    }
-                    else if (RunYOffset > xInspect.YOffset)
-                    {
-                        bOK = false;
-                    }
-                }
                 if (!bOK)
                 {
                     inspectReason = InspectReason.INS_CUTTINGERR;
@@ -806,13 +837,14 @@ namespace LaserAlignDX.OPSpace
 
             RunWidth = 0;
             RunHeight = 0;
-            RunXOffset = 0;
-            RunYOffset = 0;
+            PadEdgeSizes = new float[4];
 
-            DisLeft = 0;
-            DisTop = 0;
-            DisRight = 0;
-            DisBottom = 0;
+            //PadEdgeDiffX = 0;
+            //PadEdgeDiffY = 0;
+            //DisLeft = 0;
+            //DisTop = 0;
+            //DisRight = 0;
+            //DisBottom = 0;
         }
 
         /// <summary>
@@ -896,12 +928,12 @@ namespace LaserAlignDX.OPSpace
 
         public void DetectDefects(Bitmap bmpTemplate, Bitmap bmpRun, Bitmap bmpMask)
         {
-            //string _path = $"D:\\LOA\\{DateTime.Now.ToString("yyyyMMddHH")}";
-            if (IsSaveDebugPicture)
-            {
-                if (!System.IO.Directory.Exists(SaveDebugPath + "\\Detect"))
-                    System.IO.Directory.CreateDirectory(SaveDebugPath + "\\Detect");
-            }
+            //string dumpFolder = System.IO.Path.Combine(SaveDebugPath, "Detect");
+            //if (IsSaveDebugPicture)
+            //{
+            //    if (!System.IO.Directory.Exists(dumpFolder))
+            //        System.IO.Directory.CreateDirectory(dumpFolder);
+            //}
 
             CMvdRectangleF _roi = new CMvdRectangleF(bmpTemplate.Width / 2, bmpTemplate.Height / 2, bmpTemplate.Width, bmpTemplate.Height);
 
@@ -990,21 +1022,30 @@ namespace LaserAlignDX.OPSpace
 
                 if (IsSaveDebugPicture)
                 {
-                    cImageBinaryToolObj?.Result?.OutputImage?.SaveImage($"{SaveDebugPath}\\Detect\\{lblName}_Diff2.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
-                    cBlobFindToolObj?.RegionImage?.SaveImage($"{SaveDebugPath}\\Detect\\{lblName}_Diff2_1.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
-                    //if (cBlobFindRes.BlobImage != null)
-                    cBlobFindRes?.BlobImage?.SaveImage($"{SaveDebugPath}\\Detect\\{lblName}_Diff3.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    //cImageBinaryToolObj?.Result?.OutputImage?.SaveImage($"{SaveDebugPath}\\Detect\\{lblName}_Diff2.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    //cBlobFindToolObj?.RegionImage?.SaveImage($"{SaveDebugPath}\\Detect\\{lblName}_Diff2_1.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    ////if (cBlobFindRes.BlobImage != null)
+                    //cBlobFindRes?.BlobImage?.SaveImage($"{SaveDebugPath}\\Detect\\{lblName}_Diff3.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+
+                    string dumpFolder = System.IO.Path.Combine(SaveDebugPath, "Detect");
+                    if (!System.IO.Directory.Exists(dumpFolder))
+                        System.IO.Directory.CreateDirectory(dumpFolder);
+
+                    string fileStem = System.IO.Path.Combine(dumpFolder, lblName);
+                    cImageBinaryToolObj?.Result?.OutputImage?.SaveImage(fileStem + "_Diff2.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    cBlobFindToolObj?.RegionImage?.SaveImage(fileStem + "_Diff2_1.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    cBlobFindRes?.BlobImage?.SaveImage(fileStem + "_Diff3.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
                 }
             }
         }
 
         public void DeCode2D(Bitmap eBmpRun, PointF Poi_CodeBase, bool eJudged = false)
         {
-            if (IsSaveDebugPicture)
-            {
-                if (!System.IO.Directory.Exists(SaveDebugPath + "\\Code"))
-                    System.IO.Directory.CreateDirectory(SaveDebugPath + "\\Code");
-            }
+            //if (IsSaveDebugPicture)
+            //{
+            //    if (!System.IO.Directory.Exists(SaveDebugPath + "\\Code"))
+            //        System.IO.Directory.CreateDirectory(SaveDebugPath + "\\Code");
+            //}
 
             if (mvd2DReader == null)
                 mvd2DReader = new Mvd2DReaderClass();
@@ -1047,10 +1088,17 @@ namespace LaserAlignDX.OPSpace
 
                 #region GENERATE_MVD_GUI_COMPONENT_UGLY_CODE
                 DrawBarcodePosition = null;
+
                 if (IsSaveDebugPicture)
                 {
-                    mvd2DReader.MvdRunImage.SaveImage($"{SaveDebugPath}\\Code\\{lblName}_Run.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    string dumpFolder = System.IO.Path.Combine(SaveDebugPath, "Code");
+                    if (!System.IO.Directory.Exists(dumpFolder))
+                        System.IO.Directory.CreateDirectory(dumpFolder);
+
+                    string fileName = System.IO.Path.Combine(dumpFolder, $"{lblName}_Run.bmp");
+                    mvd2DReader.MvdRunImage.SaveImage(fileName, MVD_FILE_FORMAT.MVD_FILE_BMP);
                 }
+
                 #endregion
             }
         }

@@ -46,8 +46,6 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             _templateBmp = null;
         }
 
-
-
         /// <summary>
         /// 目前須由 Caller 管理 Bmp 生命週期
         /// </summary>

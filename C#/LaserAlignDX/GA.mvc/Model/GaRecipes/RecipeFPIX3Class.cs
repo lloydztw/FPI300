@@ -358,7 +358,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         internal StageNumber xStageNumber = StageNumber.N0;
         #endregion
 
-        #region 參數區_实际矩阵XY
+        #region 參數區_实际矩阵XY_即將被新的座標系統完全取代
         public float xRealLeftX = 0;
         public float xRealLeftY = 0;
         public float xRealOffsetX = 1;
@@ -405,6 +405,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             saveCamGrid(CarrierEnum.C1, xCamGrid1);
             saveCamGrid(CarrierEnum.C2, xCamGrid2);
         }
+        #endregion
+
+        #region 參數區_規格
+        private DtoX3MeasureSpec _xSpec => DtoX3MeasureSpec.Instance;
         #endregion
 
         #region 參數區_其他子群
@@ -458,8 +462,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             _dtoGoldenChipTemplate.SetTag(_CARRIER_TAG).Load(INIFILE);
             _dtoGoldenMaskTemplate.SetTag(_CARRIER_TAG).Load(INIFILE);
             _dtoQrCodeTemplate.SetTag(_CARRIER_TAG).Load(INIFILE);
-            //(LD2) 飛拍模板 (目前不隨著載台顏色改變)
+
+            //(LD2) 飛拍模板 (兩載台共用一份)
             _dtoFlyAoiTemplate.Load(INIFILE);
+
             //(LD3) 邊線框 (根據載台號 載入不同對應的設定值)
             LoadLineBorderRects(_CARRIER_TAG);
 
@@ -485,11 +491,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 ViewTrainLoad();
             }
 
-            //(LD4) 晶粒檢測參數 (根據載台號 載入不同對應的設定值)
+            //(LD4) 規格 (兩載台共用一份)
+            _xSpec.Load(INIFILE);
+
+            //(LD5) 晶粒檢測參數 (根據載台號 載入不同對應的設定值)
             InspectParams.Initial(Path, Index, $"Inspect_default_info{_CARRIER_TAG}.ini");
             InspectParams.Load();
 
-            //(LD5) 飛拍檢測參數 (目前不隨著載台顏色改變)
+            //(LD6) 飛拍檢測參數 (目前不隨著載台顏色改變)
             FlyAoiParams.Initial(Path, Index, "Fly_default_info.ini");
             FlyAoiParams.Load();
         }
@@ -541,6 +550,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             CreateViews();
             ViewTrainLoad();
 
+            //規格 (兩載台共用一份)
+            _xSpec.Save(INIFILE);
             InspectParams.Save();
             FlyAoiParams.Save();
         }
@@ -1427,9 +1438,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
                 i++;
             }
-
         }
-
     }
 
 
@@ -1441,6 +1450,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         }
         private static InspectX3ParaClass _instance = null;
+        private DtoX3MeasureSpec _spec => DtoX3MeasureSpec.Instance;
         #endregion
 
         public static InspectX3ParaClass Instance
@@ -1453,23 +1463,35 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
 
-        const string _Cat0 = "A00.启用设置";
+        #region 檢測項目_(兩載台共用)
+        const string _Cat0 = "A00.檢測項目";
         [CategoryAttribute(_Cat0), DescriptionAttribute("")]
-        [DisplayName("A01.开启尺寸测量")]
+        [DisplayName("A01.啟用 尺寸量測")]
         [Browsable(true)]
-        public bool bOpenLineMeasure { get; set; } = false;
+        public bool bOpenLineMeasure 
+        {
+            get => _spec.bOpenLineMeasure;
+            set => _spec.bOpenLineMeasure = value;
+        }
+
         [CategoryAttribute(_Cat0), DescriptionAttribute("")]
-        [DisplayName("A02.开启缺陷检测")]
-        //[TypeConverter(typeof(NumericUpDownTypeConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
+        [DisplayName("A02.啟用 缺陷檢測")]
         [Browsable(true)]
-        public bool bCheckInspect { get; set; } = false;
+        public bool bCheckInspect
+        {
+            get => _spec.bCheckInspect;
+            set => _spec.bCheckInspect = value;
+        }
+
         [CategoryAttribute(_Cat0), DescriptionAttribute("")]
-        [DisplayName("A03.开启尺寸偏移检测")]
-        //[TypeConverter(typeof(JzEnumConverter))]
-        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
+        [DisplayName("A03.啟用 尺寸偏移檢測")]
         [Browsable(true)]
-        public bool bCheckMeasureOffset { get; set; } = false;
+        public bool bCheckMeasureOffset
+        {
+            get => _spec.bCheckMeasureOffset;
+            set => _spec.bCheckMeasureOffset = value;
+        }
+        #endregion
 
         #region 晶粒定位
         const string _Cat1 = "A01.晶粒定位";
@@ -1644,71 +1666,80 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         #endregion
 
-        #region 尺寸宽度spec
+        #region 尺寸_SPEC_(兩載台共用)
 
         const string _Cat4 = "A04.尺寸规格设置";
 
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A01.标准宽度")]
+        [CategoryAttribute(_Cat4), DescriptionAttribute("單位 mm")]
+        [DisplayName("A01.標準寬度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.01f, 3)]
         [Browsable(true)]
-        public float mWidthStand { get; set; } = 9f;
+        public float mWidthStand
+        {
+            get => _spec.mWidthStand;
+            set => _spec.mWidthStand = value;
+        }
 
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A01a.宽度上公差")]
+        [CategoryAttribute(_Cat4), DescriptionAttribute("單位 mm")]
+        [DisplayName("A02.標準高度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.01f, 3)]
         [Browsable(true)]
-        public float mWidthUpper { get; set; } = 0.05f;
+        public float mHeightStand
+        {
+            get => _spec.mHeightStand;
+            set => _spec.mHeightStand = value;
+        }
 
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A01b.宽度下公差")]
+        [CategoryAttribute(_Cat4), DescriptionAttribute("單位 %")]
+        [DisplayName("A03.寬度誤差百分比 %")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100f, 1f, 2)]
         [Browsable(true)]
-        public float mWidthLower { get; set; } = 0.05f;
+        public float mWidthPercentage
+        {
+            get => _spec.mWidthPercentage;
+            set => _spec.mWidthPercentage = value;
+        }
 
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A02.标准高度")]
+        [CategoryAttribute(_Cat4), DescriptionAttribute("單位 %")]
+        [DisplayName("A04.高度誤差百分比 %")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100f, 1f, 2)]
         [Browsable(true)]
-        public float mHeightStand { get; set; } = 9.9f;
-
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A02a.高度上公差")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
-        [Browsable(true)]
-        public float mHeightUpper { get; set; } = 0.05f;
-
-        [CategoryAttribute(_Cat4), DescriptionAttribute("单位mm")]
-        [DisplayName("A02b.高度下公差")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
-        [Browsable(true)]
-        public float mHeightLower { get; set; } = 0.05f;
-
+        public float mHeightPercentage
+        {
+            get => _spec.mHeightPercentage;
+            set => _spec.mHeightPercentage = value;
+        }
         #endregion
 
-        #region 尺寸偏移spec
+        #region 尺寸偏移_SPEC_(兩載台共用)
 
         const string _Cat5 = "A05.尺寸偏移规格设置";
 
-        [CategoryAttribute(_Cat5), DescriptionAttribute("单位mm")]
-        [DisplayName("A01.X方向偏移")]
+        [CategoryAttribute(_Cat5), DescriptionAttribute("單位 %")]
+        [DisplayName("A01.格點晶粒邊緣偏移(X方向)%")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 1f, 2)]
         [Browsable(true)]
-        public float XOffset { get; set; } = 0.05f;
+        public float PadEdgePercentageX
+        {
+            get => _spec.PadEdgePercentageX;
+            set => _spec.PadEdgePercentageX = value;
+        }
 
-        [CategoryAttribute(_Cat5), DescriptionAttribute("单位mm")]
-        [DisplayName("A02.Y方向偏移")]
+        [CategoryAttribute(_Cat5), DescriptionAttribute("單位 %")]
+        [DisplayName("A02.格點晶粒邊緣偏移(Y方向)%")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 3)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 1f, 2)]
         [Browsable(true)]
-        public float YOffset { get; set; } = 0.05f;
+        public float PadEdgePercentageY
+        {
+            get => _spec.PadEdgePercentageY;
+            set => _spec.PadEdgePercentageY = value;
+        }
 
         #endregion
 
@@ -1723,7 +1754,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xChipOverlap = float.Parse(ReadINIValue("Basic", "xChipOverlap", "0.5", INIFILE));
             xGridPadThreshold = int.Parse(ReadINIValue("Basic", "xGridPadThreshold", "0", INIFILE));
 
-            bCheckInspect = ReadINIValue("Inspect", "bCheckInspect", "1", INIFILE) == "1";
             xThresholdValue = int.Parse(ReadINIValue("Inspect", "xThresholdValue", "128", INIFILE));
             xCharWidth = float.Parse(ReadINIValue("Inspect", "xCharWidth", "15.1", INIFILE));
             xCharHeight = float.Parse(ReadINIValue("Inspect", "xCharHeight", "15.1", INIFILE));
@@ -1731,19 +1761,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xBackgroudWidth = float.Parse(ReadINIValue("Inspect", "xBackgroudWidth", "15.1", INIFILE));
             xBackgroudHeight = float.Parse(ReadINIValue("Inspect", "xBackgroudHeight", "15.1", INIFILE));
             xBackgroudArea = float.Parse(ReadINIValue("Inspect", "xBackgroudArea", "30.1", INIFILE));
-
-            //RoiCount = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
-            //int i = 0;
-            //rectangles.Clear();
-            //while (i < RoiCount)
-            //{
-            //    RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
-            //    rectangles.Add(rectf);
-            //    i++;
-            //}
-
-            bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
-            bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", INIFILE) == "1";
 
             MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
             xCarrierBackground = (EdgeBackGroundType)int.Parse(ReadINIValue("Basic", "CarrierBackground", "0", INIFILE));
@@ -1757,14 +1774,31 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             bEdgePolarity2 = ReadINIValue("Basic", "bEdgePolarity2", "1", INIFILE) == "1";
             bEdgePolarity3 = ReadINIValue("Basic", "bEdgePolarity3", "1", INIFILE) == "1";
 
-            mWidthStand = float.Parse(ReadINIValue("Basic", "mWidthStand", "9", INIFILE));
-            mWidthUpper = float.Parse(ReadINIValue("Basic", "mWidthUpper", "0.05", INIFILE));
-            mWidthLower = float.Parse(ReadINIValue("Basic", "mWidthLower", "0.05", INIFILE));
-            mHeightStand = float.Parse(ReadINIValue("Basic", "mHeightStand", "9.9", INIFILE));
-            mHeightUpper = float.Parse(ReadINIValue("Basic", "mHeightUpper", "0.05", INIFILE));
-            mHeightLower = float.Parse(ReadINIValue("Basic", "mHeightLower", "0.05", INIFILE));
-            XOffset = float.Parse(ReadINIValue("Basic", "XOffset", "0.05", INIFILE));
-            YOffset = float.Parse(ReadINIValue("Basic", "YOffset", "0.05", INIFILE));
+            //---------------------------------------------------------------------------------------------------
+            // 以下改由 DtoX3MeasureSpec 於上層 RecipeFPIX3Class 處理
+            //---------------------------------------------------------------------------------------------------
+            //bCheckInspect = ReadINIValue("Inspect", "bCheckInspect", "1", INIFILE) == "1";
+            //bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
+            //bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", INIFILE) == "1";
+            //mWidthStand = float.Parse(ReadINIValue("Basic", "mWidthStand", "9", INIFILE));
+            //mHeightStand = float.Parse(ReadINIValue("Basic", "mHeightStand", "9.9", INIFILE));
+            //mWidthPercentage = float.Parse(ReadINIValue("Basic", "mWidthPercentage", "1.0", INIFILE));
+            //mHeightPercentage = float.Parse(ReadINIValue("Basic", "mHeightPercentage", "1.0", INIFILE));
+            //XOffset = float.Parse(ReadINIValue("Basic", "XOffset", "0.05", INIFILE));
+            //YOffset = float.Parse(ReadINIValue("Basic", "YOffset", "0.05", INIFILE));
+
+            //---------------------------------------------------------------------------------------------------
+            // 以下改由 LoadMaskRects 處理
+            //---------------------------------------------------------------------------------------------------
+            //RoiCount = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
+            //int i = 0;
+            //rectangles.Clear();
+            //while (i < RoiCount)
+            //{
+            //    RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
+            //    rectangles.Add(rectf);
+            //    i++;
+            //}
 
             LoadMaskRects();
         }
@@ -1779,7 +1813,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "xChipOverlap", xChipOverlap.ToString(), INIFILE);
             WriteINIValue("Basic", "xGridPadThreshold", xGridPadThreshold.ToString(), INIFILE);
 
-            WriteINIValue("Inspect", "bCheckInspect", (bCheckInspect ? "1" : "0"), INIFILE);
             WriteINIValue("Inspect", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
             WriteINIValue("Inspect", "xCharWidth", xCharWidth.ToString(), INIFILE);
             WriteINIValue("Inspect", "xCharHeight", xCharHeight.ToString(), INIFILE);
@@ -1787,9 +1820,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Inspect", "xBackgroudWidth", xBackgroudWidth.ToString(), INIFILE);
             WriteINIValue("Inspect", "xBackgroudHeight", xBackgroudHeight.ToString(), INIFILE);
             WriteINIValue("Inspect", "xBackgroudArea", xBackgroudArea.ToString(), INIFILE);
-
-            WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), INIFILE);
 
             WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
             WriteINIValue("Basic", "CarrierBackground", ((int)xCarrierBackground).ToString(), INIFILE);
@@ -1802,14 +1832,18 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "bEdgePolarity2", (bEdgePolarity2 ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "bEdgePolarity3", (bEdgePolarity3 ? "1" : "0"), INIFILE);
 
-            WriteINIValue("Basic", "mWidthStand", mWidthStand.ToString(), INIFILE);
-            WriteINIValue("Basic", "mWidthUpper", mWidthUpper.ToString(), INIFILE);
-            WriteINIValue("Basic", "mWidthLower", mWidthLower.ToString(), INIFILE);
-            WriteINIValue("Basic", "mHeightStand", mHeightStand.ToString(), INIFILE);
-            WriteINIValue("Basic", "mHeightUpper", mHeightUpper.ToString(), INIFILE);
-            WriteINIValue("Basic", "mHeightLower", mHeightLower.ToString(), INIFILE);
-            WriteINIValue("Basic", "XOffset", XOffset.ToString(), INIFILE);
-            WriteINIValue("Basic", "YOffset", YOffset.ToString(), INIFILE);
+            //---------------------------------------------------------------------------------------------------
+            // 以下改由 DtoX3MeasureSpec 於上層 RecipeFPIX3Class 處理
+            //---------------------------------------------------------------------------------------------------
+            //WriteINIValue("Inspect", "bCheckInspect", (bCheckInspect ? "1" : "0"), INIFILE);
+            //WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
+            //WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), INIFILE);
+            //WriteINIValue("Basic", "mWidthStand", mWidthStand.ToString(), INIFILE);
+            //WriteINIValue("Basic", "mHeightStand", mHeightStand.ToString(), INIFILE);
+            //WriteINIValue("Basic", "mWidthPercentage", mWidthPercentage.ToString(), INIFILE);
+            //WriteINIValue("Basic", "mHeightPercentage", mHeightPercentage.ToString(), INIFILE);
+            //WriteINIValue("Basic", "XOffset", XOffset.ToString(), INIFILE);
+            //WriteINIValue("Basic", "YOffset", YOffset.ToString(), INIFILE);
 
             //>>> SaveMaskRects();
         }
@@ -1838,6 +1872,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
     }
 
 
+    /// <summary>
+    /// 即將被新座標系統完全取代
+    /// </summary>
     public class LineScanCalibrateClass : RecipeBaseClass
     {
         const int POINT_COUNT = 4;
@@ -1970,5 +2007,4 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         }
     }
-
 }

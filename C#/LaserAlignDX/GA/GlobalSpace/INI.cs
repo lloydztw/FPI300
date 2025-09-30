@@ -224,7 +224,6 @@ namespace Traveller106
 
         public CAoiCalibration MSRCalibration1 = new CAoiCalibration();
         public CAoiCalibration MSRCalibration2 = new CAoiCalibration();
-
         /// <summary>
         /// 相机拍摄标准版与标准板之间的标定
         /// </summary>
@@ -256,10 +255,6 @@ namespace Traveller106
         //[DisplayName("01.保存结果图")]
         //[Browsable(false)]
         //public bool IsSaveResultImage { get; set; } = false;
-
-        
-
-        
 
         [CategoryAttribute(LSCat1), DescriptionAttribute("")]
         [Editor(typeof(SetFilePathPropertyEditor), typeof(UITypeEditor))]
@@ -389,9 +384,6 @@ namespace Traveller106
         ////[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
         //[DisplayName("04.线扫Z拍照位置")]
         //public float linescan_Zpos_start { get; set; } = 0;
-
-
-
         #endregion
 
         #region 其他设置
@@ -591,6 +583,7 @@ namespace Traveller106
 
         #endregion
 
+        #region 其他專案設定
         [Browsable(false)]
         public LangIndex mLangIndex { get; set; } = LangIndex.LangCN;
         [Browsable(false)]
@@ -652,127 +645,135 @@ namespace Traveller106
         [DisplayName("记录当前条码")]
         [Browsable(false)]
         public string CurrentBarcodeStr { get; set; } = "";
+        #endregion
 
+        #region X3_AOI_SETUP
 
-        #region AOI_SETUP
-
-        [CategoryAttribute(LSCat1), DescriptionAttribute("单位(mm/pixel)")]
+        //----------------------------------------------------------------------------------------------------
+        const string X3_Cat1 = "A01.相機設定";
+        [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
         [DisplayName("01.图像解析度")]
         [Browsable(true)]
         public float ImageResolution { get; set; } = 0.0134f;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("单位(mm/pixel)")]
+        [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
         [DisplayName("01a.图像X方向精度")]
         [Browsable(true)]
         public float ImageResolutionX { get; set; } = 0.0073f;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("单位(mm/pixel)")]
+        [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
         [DisplayName("01b.图像Y方向精度")]
         [Browsable(true)]
         public float ImageResolutionY { get; set; } = 0.00715f;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("单位(mm/pixel)")]
+        [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
-        [DisplayName("01c.飞拍图像解析度")]
+        [DisplayName("02.飞拍图像解析度")]
         [Browsable(true)]
         public float FlyImageResolution { get; set; } = 0.034f;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("单位(毫秒)")]
+        [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位(毫秒)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999)]
-        [DisplayName("02.取像延时")]
+        [DisplayName("03.取像延时")]
         [Browsable(true)]
         public int DelayImageTime { get; set; } = 1000;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
-        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("03.存储压缩图片")]
-        [Browsable(true)]
-        public bool IsSaveDebugBMP { get; set; } = false;
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        //----------------------------------------------------------------------------------------------------
+        const string X3_Cat2 = "A02.圖檔保存設定";
+        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
         [Editor(typeof(SetFilePathPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("03A.结果图路径")]
+        [DisplayName("01.结果图路径")]
         [Browsable(true)]
         public string ResultImagePath { get; set; } = "D:\\01FPI30ImagePath";
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+
+        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("03B.存储原始图片")]
+        [DisplayName("02.存储压缩图片")]
+        [Browsable(true)]
+        public bool IsSaveDebugBMP { get; set; } = false;
+
+        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("03.存储原始图片")]
         [Browsable(true)]
         public bool IsSaveDebugOrgBmp { get; set; } = false;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("03B.结果图质量")]
+        [DisplayName("04.结果图质量")]
         [Browsable(true)]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100)]
         public long ImageQuality { get; set; } = 10;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("true开 false关")]
-        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("04.保存Strip资料")]
-        [Browsable(false)]
-        public bool IsSaveStripImage { get; set; } = false;
-
-        [CategoryAttribute(LSCat1), DescriptionAttribute("true开 false关")]
+        [CategoryAttribute(X3_Cat2), DescriptionAttribute("true开 false关")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
         [DisplayName("05.保存单颗测试图")]
         [Browsable(true)]
         public bool IsSaveTestImage { get; set; } = false;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("true开 false关")]
+        [CategoryAttribute(X3_Cat2), DescriptionAttribute("true开 false关")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("06.强制全检")]
+        [DisplayName("06.保存Strip资料")]
+        [Browsable(false)]
+        public bool IsSaveStripImage { get; set; } = false;
+
+        //----------------------------------------------------------------------------------------------------
+        const string X3_Cat3 = "A03.全域補償設定";
+        [CategoryAttribute(X3_Cat3), DescriptionAttribute("true开 false关")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("01.强制全检")]
         [Browsable(true)]
         public bool IsForceInspect { get; set; } = true;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        [CategoryAttribute(X3_Cat3), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("07.线扫补偿X")]
+        [DisplayName("02.线扫补偿X")]
         [Browsable(true)]
         public float Cal_Bcx { get; set; } = 0;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        [CategoryAttribute(X3_Cat3), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("08.线扫补偿Y")]
+        [DisplayName("03.线扫补偿Y")]
         [Browsable(true)]
         public float Cal_Bcy { get; set; } = 0;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        [CategoryAttribute(X3_Cat3), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("09.线扫补偿角度")]
+        [DisplayName("04.线扫补偿角度")]
         [Browsable(true)]
         public float Cal_Bca { get; set; } = 0;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        //----------------------------------------------------------------------------------------------------
+        const string X3_Cat4 = "A04.其他設定";
+        [CategoryAttribute(X3_Cat4), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("10.结果显示数据")]
+        [DisplayName("01.结果显示数据")]
         [Browsable(true)]
         public bool IsResultShowChar { get; set; } = false;
 
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
+        [CategoryAttribute(X3_Cat4), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("11.增强抓边")]
-        [Browsable(true)]
-        public bool IsCheat { get; set; } = false;
-
-        [CategoryAttribute(LSCat1), DescriptionAttribute("")]
-        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("12.飛拍 自動禁用 圖像縮放")]
+        [DisplayName("02.飛拍自動停止縮放")]
         [Browsable(true)]
         public bool IsAutoDisableZoom { get; set; } = false;
 
+        [CategoryAttribute(X3_Cat4), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("03.增强抓边")]
+        [Browsable(false)]
+        public bool IsCheat { get; set; } = false;
         #endregion
 
         #region SQL_SETUP
-
         const string LSCat7 = "A03.SQL设置";
         [CategoryAttribute(LSCat7), DescriptionAttribute("")]
         [DisplayName("00.服务器ip")]
@@ -794,7 +795,6 @@ namespace Traveller106
         [DisplayName("04.数据库名称")]
         [Browsable(false)]
         public string mysql_server_db { get; set; } = "db_2ds_sys";
-
         #endregion
 
 
