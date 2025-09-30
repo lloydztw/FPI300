@@ -44,10 +44,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     /// </summary>
     public partial class GaMainCtrl : Abs.GaMainCtrl, IxTickable
     {
-        #region CONFIG
-        static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER => GaMvcConfig.OPT_USE_LETIAN_CHIP_CELL_VIEWER;
-        #endregion
-
         #region MACHINE
         MainFPIX3MachineClass MACHINE
         {
@@ -157,8 +153,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
         IvChipCellsViewer buildChipCellsViewer(Control panel, CarrierEnum carrierID)
         {
-            //(1) 使用新的 ChipCellsViewer
-            //(1.1) 如果傳進來的已經是 JezChipCellsViewPanel
+            //使用新的 ChipCellsViewer
+            //(1) 如果傳進來的已經是 JezChipCellsViewPanel
             if (panel is JezChipCellsViewPanel jezViewer)
             {
                 jezViewer.CarrierID = carrierID;
@@ -166,7 +162,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 connectPopupMenuEvents(jezViewer, carrierID);
                 return jezViewer;
             }
-            //(1.2) 如果傳進來的是其他視窗控件
+            //(2) 如果傳進來的是其他視窗控件
             else if (panel is Control childWnd)
             {
                 // 生成新的 JezChipCellsViewPanel
@@ -186,6 +182,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 connectPopupMenuEvents(viewer, carrierID);
                 return viewer;
             }
+            //(3) 不支援
             else
             {
                 return null;

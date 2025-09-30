@@ -26,7 +26,6 @@
 	TravellerTransforms
 
 # 4. CustomerModel
-	DisplayTextFormatter (檢測結果 客製格式化文字)
 	ReportBuilders		 (檢測結果 報表生成)
 
 # 5. Recipe

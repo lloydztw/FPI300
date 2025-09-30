@@ -350,12 +350,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         IvFlyCamViewUI buildFlyCamViewer(Control panel)
         {
-            //(1.1) 如果傳進來的已經是 JezChipCellsViewPanel
+            //(1) 如果傳進來的已經是 JezFlyViewPanel
             if (panel is JezFlyViewPanel jezViewer)
             {
                 return jezViewer;
             }
-            //(1.2) 如果傳進來的是其他視窗控件
+            //(2) 如果傳進來的是其他視窗控件
             else if (panel is Control childWnd)
             {
                 // 生成新的 JezFlyViewPanel
@@ -372,6 +372,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 parent.Controls.Add(viewer);
                 return viewer;
             }
+            //(3) 不支援
             else
             {
                 return null;

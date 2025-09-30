@@ -42,7 +42,6 @@ namespace LaserAlignDX
     public static class GaMvcConfig
     {
         #region CONFIG
-        public static bool OPT_USE_LETIAN_CHIP_CELL_VIEWER = true;
         public static bool OPT_USE_LETIAN_CALIB = true;
         public static int TOTAL_FLY_FRAMES_COUNT => 4;
         #endregion
