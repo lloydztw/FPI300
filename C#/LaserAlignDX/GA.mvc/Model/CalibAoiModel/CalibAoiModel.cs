@@ -123,9 +123,9 @@ namespace LaserAlignDX.AoiModel
         {
             _externImp.RunAll(imgA, imgB, outputFile, dumpPath, wait);
         }
-        public void RunAll(Bitmap bmp, bool wait = true)
+        public void RunAll(Bitmap bmp, bool wait = true, string dumpPath = null)
         {
-            _externImp.RunAll(bmp, wait);
+            _externImp.RunAll(bmp, wait, dumpPath);
         }
         public void RunMatch(SideID sideId, IEzImage img, string dumpPath = null)
         {

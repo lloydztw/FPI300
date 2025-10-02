@@ -314,10 +314,12 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             BrowseFile();
         }
+#if (OPT_DUAL_MATCH)
         private void BtnRunMatch_Click(object sender, EventArgs e)
         {
             RunOneMatch();
         }
+#endif
         private void BtnClear_Click(object sender, EventArgs e)
         {
             ResetAndClear();
@@ -373,6 +375,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         private void _model_OnMatched(object sender, MatchResultEventArgs e)
         {
+#if (OPT_DUAL_MATCH)
             //// 過濾
             //if (e == null || e.ID != ID)
             //    return;
@@ -388,6 +391,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             //{
             //    update_matched_result(e);
             //}
+#endif
         }
         private void _model_OnFinalResulted(object sender, AoiResultEventArgs e)
         {
@@ -580,21 +584,28 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         void ResetAndClear()
         {
-            //>>> clearViewportsSyncOffset();
+            ////>>> clearViewportsSyncOffset();
+            //if (_model != null)
+            //{
+            //    _model?.ResetAndClear((SideID)ID);      //@<<< EzMatchCtrl.ResetAndClear
+            //}
+            //else
+            //{
+            //    _frmOwner.Invoke(new Action(() =>
+            //    {
+            //        update_matched_result(null);
+            //        _cviMatchResultBox.Reset();
+            //        refresh(_view.ImageViewer);
+            //    }));
+            //}
 
-            if (_model != null)
+            _model?.ResetAndClear((SideID)ID);      //@<<< EzMatchCtrl.ResetAndClear
+            _frmOwner.Invoke(new Action(() =>
             {
-                _model?.ResetAndClear((SideID)ID);      //@<<< EzMatchCtrl.ResetAndClear
-            }
-            else
-            {
-                _frmOwner.Invoke(new Action(() =>
-                {
-                    update_matched_result(null);
-                    _cviMatchResultBox.Reset();
-                    refresh(_view.ImageViewer);
-                }));
-            }
+                update_matched_result(null);
+                _cviMatchResultBox.Reset();
+                refresh(_view.ImageViewer);
+            }));
         }
 
         bool _canMatch(bool prompt)
@@ -607,7 +618,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         bool _canRunAll(bool prompt)
         {
-#if (OPT_DUAL)
+#if (OPT_DUAL_MATCH)
             if (ID == SideID.A)
             {
                 var ImgA = _instances[0]?._largeIMG;
@@ -627,6 +638,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             return ok;
         }
 
+#if (OPT_DUAL_MATCH)
         void RunOneMatch()
         {
             if (!_canMatch(true))
@@ -656,6 +668,8 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 refresh(_view.ImageViewer);
             });
         }
+#endif
+
         void RunAll()
         {
 #if (OPT_DUAL_MATCH)
@@ -683,7 +697,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             }
 
             string outputFile = (_appSettings?.OutputResultImageFile) ? GET_OUTPUT_IMAGE_FILE_NAME() : null;
-            _model.RunAll(_largeIMG, null, outputFile, wait: false);
+            _model.RunAll(_largeIMG, outputFile: outputFile, wait: false);
         }
 
 #if (OPT_DUAL)

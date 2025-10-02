@@ -77,7 +77,7 @@ namespace EzAoiEmptyTrayInspector.Model
         /// <summary>
         /// 執行 所有 AOI 運算
         /// </summary>
-        void RunAll(Bitmap bmp, bool wait = true);
+        void RunAll(Bitmap bmp, bool wait = true, string dumpPath = null);
 
         ///// <summary>
         ///// 檢測結果

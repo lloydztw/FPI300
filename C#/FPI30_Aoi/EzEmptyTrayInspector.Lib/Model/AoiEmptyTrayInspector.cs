@@ -492,8 +492,7 @@ namespace EzAoiEmptyTrayInspector.Model
         #endregion
 
 
-        #region PUBLIC_RUN_ALLS_DUAL
-        public ErrCodes CanRunAll(IEzImage imgA, IEzImage imgB)
+        public ErrCodes CanRunAll(IEzImage imgA, IEzImage imgB = null)
         {
             if (_recipe == null)
                 return ErrCodes.NO_RECIPE;
@@ -520,7 +519,8 @@ namespace EzAoiEmptyTrayInspector.Model
 #endif
             return ErrCodes.OK;
         }
-        public void RunAll(IEzImage largeImgA, IEzImage largeImgB, string outputFile = null, string dumpPath = null, bool wait = false)
+
+        public void RunAll(IEzImage largeImgA, IEzImage largeImgB = null, string outputFile = null, string dumpPath = null, bool wait = false)
         {
             // Async !!!
             //>>> System.Diagnostics.Debug.Assert(largeImgA != largeImgB);
@@ -564,21 +564,10 @@ namespace EzAoiEmptyTrayInspector.Model
                     evCompleted.WaitOne(1000 * 60 * 5);
             }
         }
-        #endregion
 
-
-        public void RunAll(Bitmap largeBmp, bool wait = false)
+        public void RunAll(Bitmap largeBmp, bool wait = false, string dumpPath = null)
         {
-            //// Async !!!
-            ////>>> System.Diagnostics.Debug.Assert(largeImgA != largeImgB);
-
-            //var err = CanRunAll(largeImgA, largeImgB);
-            //if (err != ErrCodes.OK)
-            //{
-            //    _ERROR(err);
-            //    return;
-            //}
-            //_dumpPath = dumpPath;
+            _dumpPath = dumpPath;
 
             if (largeBmp == null)
             {
@@ -639,9 +628,10 @@ namespace EzAoiEmptyTrayInspector.Model
 
             if ((int)sideId < _matchResults.Length)
                 _matchResults[(int)sideId] = null;
-
+#if (OPT_DUAL_MATCH)
             if (notify)
                 OnMatched?.Invoke(this, new MatchResultEventArgs(sideId, null));
+#endif
         }
         #endregion
 
@@ -1105,13 +1095,20 @@ namespace EzAoiEmptyTrayInspector.Model
 
                 // Null Condition
                 if (srcImg == null || _recipe == null || matchResult == null)
+                {
+                    _LOG.Warn("The src Image or recipe, or matchResult is null!");
                     return;
+                }
 
                 #region LARGE_GOLDEN_GRID_IMAGE
                 // NOTE: goldenGrid 是由 recipe runtime deSerialize 
                 var goldenGrid = _recipe.TrayMiscSettings.GetGoldenGrid();
                 if (goldenGrid == null)
+                {
+                    _LOG.Error("Recipe.TrayMiscSettings 的 Golden Grid 沒有建置!");
                     return;
+                }
+
                 _LOG.Info($"GoldenGrid = {goldenGrid.Rows}x{goldenGrid.Cols}");
 
                 // LARGE GOLDEN GRID IMAGE (rebuilt from recipe)

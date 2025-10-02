@@ -365,9 +365,14 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
             int ogThreshold = _recipe.VisionSettings.OutGridBlocThreshold.Value;
             if (ogThreshold > 0)
+            {
                 Cv2.Threshold(src, output, ogThreshold, 255, ThresholdTypes.Binary);
+            }
             else
-                Cv2.Threshold(src, output, 0, 255, ThresholdTypes.Otsu);
+            {
+                double thres = Cv2.Threshold(src, output, 0, 255, ThresholdTypes.Otsu);
+                _LOG.Info($"OG_THRESHOLD = {(int)thres}");
+            }
 
             int dx = Math.Min(8, output.Width);
             int dy = Math.Min(8, output.Height);

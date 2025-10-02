@@ -65,7 +65,7 @@ namespace EzAoiEmptyTrayInspector
                 using (IEzImage img = new EzQuickImage())
                 {
                     img.Load(TEST_IMAGE_FILE, 8);
-                    aoiModel.RunAll(img, wait: true);
+                    aoiModel.RunAll(img.Bitmap, wait: true);
                 }
             }
             else
