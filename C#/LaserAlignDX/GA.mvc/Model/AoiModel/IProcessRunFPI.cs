@@ -1,4 +1,5 @@
 ﻿using LeTian.AoiLib;
+using NeedleX.ProcessSpace;
 using System;
 using System.Drawing;
 
@@ -9,6 +10,7 @@ namespace LaserAlignDX.AoiModel
         event EventHandler<GaProgressEventArgs> OnAoiProgressing;
         event EventHandler<GaProgressEventArgs> OnAoiBegin;
         event EventHandler<GaProgressEventArgs> OnAoiEnd;
+        event EventHandler<ProcessEventArgs> OnError;
 
         ScanInspectMode xScanInspectMode { get; set; }
 

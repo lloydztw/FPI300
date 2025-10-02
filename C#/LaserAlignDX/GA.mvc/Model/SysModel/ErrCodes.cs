@@ -42,5 +42,8 @@ namespace LaserAlignDX.Mvc.Model
 
         [Description("空盤檢測 參數沒建立")]
         NO_EMPTY_TRAY_RECIPE,
+
+        [Description("線掃AOI 運行異常 (可能沒有加密狗)")]
+        EXCEPTION_AT_AOI_RUN,
     }
 }

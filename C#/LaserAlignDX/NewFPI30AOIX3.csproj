@@ -411,7 +411,7 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v26.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v27.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />

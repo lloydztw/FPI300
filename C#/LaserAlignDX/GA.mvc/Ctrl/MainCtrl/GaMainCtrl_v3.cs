@@ -198,6 +198,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             _aoiModel.OnAoiProgressing += AoiEngine_OnAoiProgressing;
             _aoiModel.OnAoiBegin += AoiEngine_OnAoiBegin;
             _aoiModel.OnAoiEnd += AoiEngine_OnAoiEnd;
+            _aoiModel.OnError += SysModel_OnError;
             _sysModel.OnError += SysModel_OnError;
             _wndOwner.HandleDestroyed += (s, e) => _flyCtrl = null;
 

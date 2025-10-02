@@ -139,16 +139,41 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 延遲更新參數
             _rcpEditUI.Window.HandleCreated += (s, e) =>
             {
-                var delayAction = new Action(() =>
+                //var delayAction = new Action(() =>
+                //{
+                //    var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+                //    makeSomeReadonlyInGaaraRecipe();
+                //    _currentCarrierID = _sysModel.ActiveCarrierID;
+                //    updateAllRecipeData(false, _currentCarrierID);
+                //    _rcpEditUI.rdoCarriers[(int)_currentCarrierID].Checked = true;
+                //    GaUtil.SetCursor(_wndOwner, oldCursor);
+                //});
+                //_wndOwner.BeginInvoke(delayAction);
+                new Action(() =>
                 {
-                    makeSomeReadonlyInGaaraRecipe();
-                    _currentCarrierID = _sysModel.ActiveCarrierID;
-                    updateAllRecipeData(false, _currentCarrierID);
-                    _rcpEditUI.rdoCarriers[(int)_currentCarrierID].Checked = true;
-                });
-
-                _wndOwner.BeginInvoke(delayAction);
+                    System.Threading.Thread.Sleep(100);
+                    postInit();
+                }).BeginInvoke(null, null);
             };
+        }
+        void postInit()
+        {
+            if (_wndOwner.InvokeRequired)
+            {
+                _wndOwner.BeginInvoke((Action)postInit);
+            }
+            else
+            {
+                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+                _wndOwner.Refresh();
+
+                makeSomeReadonlyInGaaraRecipe();
+                _currentCarrierID = _sysModel.ActiveCarrierID;
+                updateAllRecipeData(false, _currentCarrierID);
+                _rcpEditUI.rdoCarriers[(int)_currentCarrierID].Checked = true;
+
+                GaUtil.SetCursor(_wndOwner, oldCursor);
+            }
         }
         #endregion
 

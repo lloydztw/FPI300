@@ -85,6 +85,31 @@ namespace JetEazy.Utils
         {
             return Clip(ref rect, boundSize.Width, boundSize.Height);
         }
+        public static bool Clip(ref PointF pt, ref RectangleF rect)
+        {
+            bool clipped = false;
+            if(pt.X < rect.Left)
+            {
+                pt.X = rect.Left;
+                clipped = true;
+            }
+            if (pt.X > rect.Right - 1)
+            {
+                pt.X = rect.Right - 1;
+                clipped = true;
+            }
+            if(pt.Y < rect.Top)
+            {
+                pt.Y = rect.Top;
+                clipped = true;
+            }
+            if (pt.Y > rect.Bottom - 1)
+            {
+                pt.X -= rect.Bottom - 1;
+                clipped = true;
+            }
+            return clipped;
+        }
 
         public static void BoundRect(ref Rectangle rect, Size boundSize)
         {
@@ -207,6 +232,7 @@ namespace JetEazy.Utils
                 {
                     frmOwner.Cursor = cursor;
                     frmOwner.Invalidate();
+                    //frmOwner.Refresh();
                 }
                 return old;
             }
