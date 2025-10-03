@@ -510,8 +510,11 @@ namespace LaserAlignDX.AoiModel.V27
                     cell.xFindResult.fCenterY += cellRoi.Y;
 
                     //(4.1) 晶粒定位中心點(camera coorindates)
-                    var chipBox2D = toBox2D(ref cell.xFindResult, xRecipe.xRegionTrain.Size);
+                    var chipSize = xRecipe.xRegionTrain.Size;
+                    var chipBox2D = toBox2D(ref cell.xFindResult, chipSize);
                     var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
+                    //(4.2) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF
+                    cell.SetMvdRunPositionFix(GaMvdExt.ToCMvdRectangleF(chipBox2D));
 
                     #region DEBUG_STRING
                     //debugCellCenterStr += $"INDEX:{cell.Index}#";

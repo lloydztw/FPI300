@@ -20,14 +20,13 @@ namespace LaserAlignDX.Model
     {
         public string StripID;
         public string LotID;
-
-        public LotData() : this("Strip_NONE", "Lot_NONE")
-        {
-        }
         public LotData(string stripID, string lotID)
         {
             StripID = stripID;
             LotID = lotID;
+        }
+        public LotData() : this("Strip_NONE", "Lot_NONE")
+        {
         }
     }
 }

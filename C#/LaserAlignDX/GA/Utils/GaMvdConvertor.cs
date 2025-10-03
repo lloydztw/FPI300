@@ -41,7 +41,7 @@ namespace LaserAlignDX
             var ch = mvdRectF.Height;
             var angle = mvdRectF.Angle;
             var box2D = new QvBox2D();
-            box2D.SetBox(new PointF(cx, cy), new SizeF(cw, ch));
+            box2D.SetBox(PointF.Empty, new SizeF(cw, ch));
             box2D.SetCenter(cx, cy);
             box2D.SetTheta(angle * Math.PI / 180);
             return box2D;
@@ -60,6 +60,16 @@ namespace LaserAlignDX
                             viewRectF.Width,
                             viewRectF.Height
                         );
+        }
+        public static CMvdRectangleF ToCMvdRectangleF(QvBox2D box2D)
+        {
+            if (box2D == null)
+                return null;
+            var size = box2D.MinAreaRectSize;
+            return new CMvdRectangleF(box2D.Center.X, box2D.Center.Y, size.Width, size.Height)
+            {
+                Angle = (float)(box2D.Theta * 180.0 / Math.PI)
+            };
         }
 
         public static PointF[] ToCSharpLine(this CMvdLineSegmentF mvdLine)

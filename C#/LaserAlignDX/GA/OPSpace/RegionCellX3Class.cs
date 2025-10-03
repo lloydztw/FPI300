@@ -467,6 +467,10 @@ namespace LaserAlignDX.OPSpace
 
             return MvdRunPositionFix;
         }
+        public void SetMvdRunPositionFix(CMvdRectangleF mvdRect)
+        {
+            MvdRunPositionFix = mvdRect;
+        }
 
         /// <summary>
         /// 画出有无料的位置框
