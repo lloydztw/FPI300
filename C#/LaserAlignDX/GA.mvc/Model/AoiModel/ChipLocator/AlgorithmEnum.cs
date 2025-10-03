@@ -24,9 +24,9 @@ namespace LaserAlignDX.AoiModel
     /// </summary>
     public enum MatchAlgorithmEnum
     {
-        [Description("格點晶粒")]
+        [Description("格點型 晶粒")]
         GridMatch,
-        [Description("其他晶粒")]
+        [Description("一般型 晶粒")]
         TemplateMatch,
     };
 }

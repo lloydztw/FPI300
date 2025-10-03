@@ -18,6 +18,8 @@ using LaserAlignDX.AoiModel;
 using LeTian.AoiLib;
 using System;
 using System.Drawing;
+using PlcFlyResultCode = LaserAlignDX.PlcResultCode;
+
 
 namespace LaserAlignDX.Mvc.Gui
 {

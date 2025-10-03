@@ -16,12 +16,14 @@
 
 using JetEazy.Utils;
 using LaserAlignDX.Model;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using NeedleX.ProcessSpace;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using Traveller106;
@@ -41,49 +43,90 @@ namespace LaserAlignDX.AoiModel
         #endregion
 
         #region GLOBAL_MESS
-        RecipeFPIX3Class _xRecipe
+        protected RecipeFPIX3Class _xRecipe
         {
             get => RecipeFPIX3Class.Instance;
         }
         #endregion
 
+        #region KENERL_MEMBERS
+        /// <summary>
+        /// 2025-08-28 LETIAN: 巨圖 統一由 TravellerBigImagesHolder 保管其生命週期
+        /// </summary>
+        public GaBigImageHolder LineScanCamImageHolder => _sysModel.LineScanImageHolder;
+        /// <summary>
+        /// SystemModel
+        /// </summary>
+        protected ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        /// <summary>
+        /// 當下的載台
+        /// </summary>
+        protected CarrierEnum getActiveCarrierID()
+        {
+            return _sysModel.ActiveCarrierID;
+        }
+        #endregion
+
         #region PRIVATE_STATISTICS_DATA
-        private long m_ElapsedTime = 0;
-        private bool m_Running = false;
-        private bool m_IsPass = false;
+        private long _elapsedTime = 0;
+        private bool _isRunning = false;
+        private bool _isPass = false;
+        private Stopwatch _stopwatch = new Stopwatch();
+        #endregion
+
+        #region PROTECTED_STATISTICS_FUNCTIONS
+        protected void markRunStart()
+        {
+            _elapsedTime = 0;
+            _isRunning = true;
+            _isPass = false;
+            _stopwatch.Restart();
+        }
+        protected void markRunEnd(bool pass)
+        {
+            _stopwatch.Stop();
+            _elapsedTime = _stopwatch.ElapsedMilliseconds;
+            _isPass = pass;
+            _isRunning = false;
+        }
         #endregion
 
         public long ElapsedTime
         {
-            get { return m_ElapsedTime; }
+            get { return _elapsedTime; }
         }
         public bool Running
         {
-            get { return m_Running; }
+            get { return _isRunning; }
         }
         public bool IsPass
         {
-            get { return m_IsPass; }
+            get { return _isPass; }
         }
+
+        #region LOT_DATA
+        LotData _lotData = new LotData();
+        string _fileBarcodeStr = string.Empty;
+        #endregion
 
         public LotData LotData
         {
-            get;
-            set;
-        } = new LotData();
+            get => _lotData;
+            set => _lotData = value;
+        }
         public string LotId
         {
             //get { return m_LotId; }
             //set { m_LotId = value; }
-            get => LotData.LotID;
-            set => LotData.LotID = value;
+            get => _lotData.LotID;
+            set => _lotData.LotID = value;
         }
         public string StripId
         {
             //get { return m_StripId; }
             //set { m_StripId = value; }
-            get => LotData.StripID;
-            set => LotData.StripID = value;
+            get => _lotData.StripID;
+            set => _lotData.StripID = value;
         }
         public string FileName
         {
@@ -93,22 +136,21 @@ namespace LaserAlignDX.AoiModel
         {
             get
             {
-                return m_FileBarcodeStr;
+                return _fileBarcodeStr;
             }
             set
             {
-                m_FileBarcodeStr = value;
-                MarkFileTimeTag();
+                _fileBarcodeStr = value;
+                markFileTimeTag();
             }
         }
 
         #region PRIVATE_PATH_FILE_FUNCTIONS
-        string m_FileBarcodeStr = string.Empty;
         DateTime _timeTag = DateTime.Now;
         /// <summary>
         /// 標定統一的存檔時間
         /// </summary>
-        void MarkFileTimeTag()
+        protected void markFileTimeTag()
         {
             _timeTag = DateTime.Now;
         }
@@ -186,11 +228,25 @@ namespace LaserAlignDX.AoiModel
         #endregion
 
         #region LOG_FUNCTIONS
-        void _LOG_ERROR(Exception ex, string message)
+        protected void _LOG_ERROR(Exception ex, string message)
         {
             _NLOG.Error(ex, message);
             GaUtil.LOG($"[異常] {ex.Message}", Color.Red);
         }
         #endregion
+
+        public abstract void Run();
+
+        /// <summary>
+        /// 复位所有数据
+        /// </summary>
+        protected void ResetCellsResultData()
+        {
+            _xRecipe.xOutBlocs?.Clear();
+            var cells = _xRecipe.xRegionCells;
+            if (cells != null)
+                foreach (var cell in cells)
+                    cell?.Reset();
+        }
     }
 }

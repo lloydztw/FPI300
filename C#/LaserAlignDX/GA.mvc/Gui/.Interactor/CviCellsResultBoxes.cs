@@ -464,7 +464,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void updateDrawItems_For_ChipMeasure()
         {
-            if (!_inspectParams.bOpenLineMeasure)
+            if (!_inspectParams.optChipMeasurement)
                 return;
 
             var drawItemsOfBorderBoxes = new List<IvDrawItem>();
@@ -494,7 +494,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 }
 
                 // 繪件: cMvdLineSegmentFsInSide
-                if (_inspectParams.bCheckMeasureOffset)
+                if (_inspectParams.optChipEdgesDiffCompare)
                 {
                     //var linesIn = MvdConvertor.ToCSharpLines(cell.cMvdLineSegmentFsInSide);
                     var linesIn = GaMvdExt.ToCSharpLines(offset, cell.cMvdLineSegmentFsInSide);
@@ -820,8 +820,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 world_current = tranCP.Trans(camPt);
             }
 
-
-
             sb.AppendLine().Append("S1 馬達目標(X,Y) = (").AppendValues((float)s1_target.X, (float)s1_target.Y).Append(") mm");
             if(camPt!=null)
                 sb.AppendLine().Append("S1 馬達座標(X,Y) = (").AppendValues((float)s1_current.X, (float)s1_current.Y).Append(") mm");
@@ -870,14 +868,19 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     sb.AppendLine();
                     sb.AppendLine($"RunX = {cell.RunX:0.000} mm");
                     sb.AppendLine($"RunY = {cell.RunY:0.000} mm");
-                    if (_xRecipe.InspectParams.bOpenLineMeasure)
+
+                    if (_xRecipe.InspectParams.optChipMeasurement)
                     {
                         var cW = _xRecipe.InspectParams.mWidthStand;
                         var cH = _xRecipe.InspectParams.mHeightStand;
-                        var dx = (cW - cell.RunWidth) / (cW + 1e-9) * 100.0;
-                        var dy = (cH - cell.RunHeight) / (cH + 1e-9) * 100.0;
-                        sb.AppendLine().Append($"晶粒 寬= {cell.RunWidth:0.000} mm").Append($" (Δ= {dx:0.00} %)");
-                        sb.AppendLine().Append($"晶粒 高= {cell.RunHeight:0.000} mm").Append($" (Δ= {dy:0.00} %)");
+                        //var dx = (cW - cell.RunWidth) / (cW + 1e-9) * 100.0;
+                        //var dy = (cH - cell.RunHeight) / (cH + 1e-9) * 100.0;
+                        //sb.AppendLine().Append($"晶粒 寬= {cell.RunWidth:0.000} mm").Append($" (Δ= {dx:0.00} %)");
+                        //sb.AppendLine().Append($"晶粒 高= {cell.RunHeight:0.000} mm").Append($" (Δ= {dy:0.00} %)");
+                        var dx = Math.Round(cW - cell.RunWidth, 3);
+                        var dy = Math.Round(cH - cell.RunHeight, 3);
+                        sb.AppendLine().Append($"晶粒_寬 = {cell.RunWidth:0.000} mm").Append($" (ΔW = {dx:0.000} mm)");
+                        sb.AppendLine().Append($"晶粒_高 = {cell.RunHeight:0.000} mm").Append($" (ΔH = {dy:0.000} mm)");
                     }
                 }
             }

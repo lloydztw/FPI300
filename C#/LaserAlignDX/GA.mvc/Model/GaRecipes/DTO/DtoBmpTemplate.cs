@@ -89,12 +89,17 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         void LoadRectF(string iniFileName, string sectName, string keyName)
         {
             normalize(ref iniFileName, ref sectName, ref keyName);
-            RectF = StringtoRectF(ReadINIValue(sectName, keyName, RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), iniFileName));
+            
+            //>>> RectF = StringtoRectF(ReadINIValue(sectName, keyName, RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), iniFileName));
+            Read(iniFileName, sectName, keyName, new RectangleF(0, 0, 100, 100), out RectangleF rect);
+            RectF = rect;
         }
         void SaveRectF(string iniFileName, string sectName, string keyName)
         {
             normalize(ref iniFileName, ref sectName, ref keyName);
-            WriteINIValue(sectName, keyName, RectFtoStringSimple(RectF), iniFileName);
+
+            //>>> WriteINIValue(sectName, keyName, RectFtoStringSimple(RectF), iniFileName);
+            Write(iniFileName, sectName, keyName, RectF);
         }
 
         void LoadBmp(bool force = false)

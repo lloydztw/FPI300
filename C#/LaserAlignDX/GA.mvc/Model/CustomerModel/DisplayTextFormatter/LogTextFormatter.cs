@@ -113,14 +113,14 @@ namespace LaserAlignDX.Model
             //str += $"{cell.RunY.ToString(_digitFormat)}" + ",";
             //str += $"{cell.RunAngle.ToString(_digitFormat)}" + ",";
             sb.Append("").AppendValues(cell.RunX, cell.RunY, cell.RunAngle).Append(",");
-            if (cell.xInspect.bOpenLineMeasure)
+            if (cell.xInspect.optChipMeasurement)
             {
                 //str += $"宽度[{cell.RunWidth.ToString(_digitFormat)}]" + ",";
                 //str += $"高度[{cell.RunHeight.ToString(_digitFormat)}]" + ",";
                 sb.Append("宽度[").AppendValues(cell.RunWidth).Append("],");
                 sb.Append("高度[").AppendValues(cell.RunHeight).Append("],");
             }
-            if (cell.xInspect.bCheckMeasureOffset)
+            if (cell.xInspect.optChipEdgesDiffCompare)
             {
                 //str += $"X方向偏移[{cell.RunXOffset.ToString(_digitFormat)}]" + ",";
                 //str += $"Y方向偏移[{cell.RunYOffset.ToString(_digitFormat)}]" + ",";

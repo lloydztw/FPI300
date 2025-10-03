@@ -8,53 +8,131 @@ using System.Windows.Forms.Design;
 
 namespace JetEazy
 {
+    /// <summary>
+    /// LETIAN: 修改於 2025-10-03
+    /// </summary>
     public class NumericUpDownTypeConverter : TypeConverter
     {
+        private int _digits = 3;
+
+        public NumericUpDownTypeConverter()
+        {
+        }
+        public NumericUpDownTypeConverter(int digits)
+        {
+            _digits = digits;
+        }
+
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
         {
             // Attempt to do them all
             return true;
         }
-
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
             try
             {
-                string Value;
-                if (!(value is string))
-                {
-                    Value = Convert.ChangeType(value, context.PropertyDescriptor.PropertyType).ToString();
-                }
+                string valueStr;
+                if( value is string str)
+                    valueStr = str;
                 else
-                    Value = value as string;
+                    valueStr = Convert.ChangeType(value, context.PropertyDescriptor.PropertyType).ToString();
+
                 decimal decVal;
-                if (!decimal.TryParse(Value, out decVal))
+                if (!decimal.TryParse(valueStr, out decVal))
                     decVal = decimal.One;
+
                 MinMaxAttribute attr = (MinMaxAttribute)context.PropertyDescriptor.Attributes[typeof(MinMaxAttribute)];
                 if (attr != null)
                 {
                     decVal = attr.PutInRange(decVal);
                 }
+
                 return Convert.ChangeType(decVal, context.PropertyDescriptor.PropertyType);
+
+#if(OPT_REVISING)
+                MinMaxAttribute attr = (MinMaxAttribute)context.PropertyDescriptor.Attributes[typeof(MinMaxAttribute)];
+                int digits = attr != null ? attr.DecimalPlaces : _digits;
+
+                if (value is float valueF)
+                {
+                    // 使用 "F3" 格式字串來固定顯示三位小數
+                    return valueF.ToString($"F{digits}", culture);
+                }
+                else if (value is double valueD)
+                {
+                    // 使用 "F3" 格式字串來固定顯示三位小數
+                    return valueD.ToString($"F{digits}", culture);
+                }
+                else if (value is decimal valueM)
+                {
+                    return valueM.ToString($"F{digits}", culture);
+                }
+                else
+                {
+                    string valueStr;
+                    if (value is string str)
+                        valueStr = str;
+                    else
+                        valueStr = Convert.ChangeType(value, context.PropertyDescriptor.PropertyType).ToString();
+
+                    decimal decVal;
+                    if (!decimal.TryParse(valueStr, out decVal))
+                        decVal = decimal.One;
+
+                    if (attr != null)
+                        decVal = attr.PutInRange(decVal);
+
+                    var ret = Convert.ChangeType(decVal, context.PropertyDescriptor.PropertyType);
+                    return ret;
+                }
+#endif
             }
             catch
             {
                 return base.ConvertFrom(context, culture, value);
             }
         }
-
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
             try
             {
-                return destinationType == typeof(string)
-                   ? Convert.ChangeType(value, context.PropertyDescriptor.PropertyType).ToString()
-                   : Convert.ChangeType(value, destinationType);
+                MinMaxAttribute attr = (MinMaxAttribute)context.PropertyDescriptor.Attributes[typeof(MinMaxAttribute)];
+                int digits = attr != null ? attr.DecimalPlaces : _digits;
+
+                if (destinationType == typeof(string))
+                {
+                    if (value is float valueF)
+                    {
+                        // 使用 "F3" 格式字串來固定顯示三位小數
+                        return valueF.ToString($"F{digits}", culture);
+                    }
+                    else if (value is double valueD)
+                    {
+                        // 使用 "F3" 格式字串來固定顯示三位小數
+                        return valueD.ToString($"F{digits}", culture);
+                    }
+                    else if (value is decimal valueM)
+                    {
+                        return valueM.ToString($"F{digits}", culture);
+                    }
+                    else
+                    {
+                        Convert.ChangeType(value, context.PropertyDescriptor.PropertyType).ToString();
+                    }
+                }
+                else
+                {
+                    Convert.ChangeType(value, destinationType);
+                }
             }
-            catch { }
+            catch
+            {
+            }
             return base.ConvertTo(context, culture, value, destinationType);
         }
     }
+
     // ReSharper disable MemberCanBePrivate.Global
     /// <summary>
     /// Attribute to allow ranges to be added to the numeric updowner
@@ -145,6 +223,7 @@ namespace JetEazy
             return checkedValue;
         }
     }
+
     // ReSharper restore MemberCanBePrivate.Global
     public class NumericUpDownTypeEditor : UITypeEditor
     {
@@ -194,14 +273,12 @@ namespace JetEazy
                     };
                     frmsvr.DropDownControl(nmr);
                     context.OnComponentChanged();
-                    return Convert.ChangeType(nmr.Value, context.PropertyDescriptor.PropertyType);
+                    var ret = Convert.ChangeType(nmr.Value, context.PropertyDescriptor.PropertyType);
+                    return ret;
                 }
             }
             catch { }
             return value;
         }
-    }
-    public class Class1
-    {
     }
 }

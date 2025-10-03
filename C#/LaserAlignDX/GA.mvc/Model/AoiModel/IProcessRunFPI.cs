@@ -1,7 +1,8 @@
 ﻿using LeTian.AoiLib;
-using NeedleX.ProcessSpace;
 using System;
 using System.Drawing;
+using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
+
 
 namespace LaserAlignDX.AoiModel
 {

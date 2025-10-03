@@ -65,7 +65,7 @@ namespace Traveller106
                         //      不需要 依附於 最後佈署的資料夾 
                         //return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
                         //return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
-                        //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
+                        return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
                         return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
                 }
             }

@@ -40,59 +40,102 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             }
         }
 
-        // 启用设置
-        public bool bOpenLineMeasure { get; set; } = false;
-        public bool bCheckInspect { get; set; } = false;
-        public bool bCheckMeasureOffset { get; set; } = false;
+        // 啟用尺寸量測
+        public bool optChipMeasurement = false;
+        // 啟用 邊緣寬度 比對 (限有格點Pad的晶粒)
+        public bool optChipEdgesCompare = false;
+        // 啟用 瑕疵 與 QRCode 檢測
+        public bool optChipDefectsInspect = false;
+        // 尺寸與瑕疵檢測進階選項量: 使用整盤 NG 百分比 
+        public bool optUseTrayNgPercentage = false;
+        // 尺寸與瑕疵檢測進階選項量: 顯示個別 NG
+        public bool optShowIndividualNG = false;
+        // 尺寸與瑕疵檢測進階選項量: 整盤 NG 百分比
+        public float TrayNgPercentage = 5.0f;
 
         // 尺寸宽度 spec (mm)
-        public float mWidthStand { get; set; } = 9.0f;
-        public float mHeightStand { get; set; } = 9.9f;
-        public float mWidthPercentage { get; set; } = 0.5f;
-        public float mHeightPercentage { get; set; } = 0.5f;
+        public float StandardWidth = 9.0f;
+        public float StandardHeight = 9.9f;
+        public readonly DtoRange StandardDimRangeW = new DtoRange(9.0f - 0.050f, 9.0f + 0.050f);
+        public readonly DtoRange StandardDimRangeH = new DtoRange(9.9f - 0.050f, 9.9f + 0.050f);
 
         // 尺寸偏移 spec (mm)
-        public float PadEdgePercentageX { get; set; } = 0.5f;
-        public float PadEdgePercentageY { get; set; } = 0.5f;
+        public float PadEdgeDiffMaxX = 0.050f;
+        public float PadEdgeDiffMaxY = 0.050f;
+
 
         public override void Load(string iniFileName)
         {
             normalizeFileName(ref iniFileName);
 
-            bCheckInspect = ReadINIValue("Basic", "bCheckInspect", "1", iniFileName) == "1";
-            bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", iniFileName) == "1";
-            bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", iniFileName) == "1";
+            string sectName = "Basic";
 
-            mWidthStand = float.Parse(ReadINIValue("Basic", "mWidthStand", "9", iniFileName));
-            mHeightStand = float.Parse(ReadINIValue("Basic", "mHeightStand", "9.9", iniFileName));
+            Read(iniFileName, sectName, "optChipMeasurement", false, out optChipMeasurement);
+            Read(iniFileName, sectName, "optChipEdgesCompare", false, out optChipEdgesCompare);
+            Read(iniFileName, sectName, "optChipDefectsInspect", false, out optChipDefectsInspect);
+            Read(iniFileName, sectName, "optUseTrayNgPercentage", false, out optUseTrayNgPercentage);
+            Read(iniFileName, sectName, "optShowIndividualNG", true, out optShowIndividualNG);
 
-            mWidthPercentage = float.Parse(ReadINIValue("Basic", "mWidthPercentage", "0.5", iniFileName));
-            mHeightPercentage = float.Parse(ReadINIValue("Basic", "mHeightPercentage", "0.5", iniFileName));
+            Read(iniFileName, sectName, "TrayNgPercentage", 5.0f, out TrayNgPercentage);
+            Read(iniFileName, sectName, "StandardWidth", 9.0f, out StandardWidth);
+            Read(iniFileName, sectName, "StandardHeight", 9.9f, out StandardHeight);
 
-            PadEdgePercentageX = float.Parse(ReadINIValue("Basic", "PadEdgePercentageX", "0.5", iniFileName));
-            PadEdgePercentageY = float.Parse(ReadINIValue("Basic", "PadEdgePercentageY", "0.5", iniFileName));
+            StandardDimRangeW.Load(iniFileName, sectName, "StandardDimRangeW");
+            StandardDimRangeH.Load(iniFileName, sectName, "StandardDimRangeH");
+
+            Read(iniFileName, sectName, "PadEdgeDiffMaxX", 0.050f, out PadEdgeDiffMaxX);
+            Read(iniFileName, sectName, "PadEdgeDiffMaxY", 0.050f, out PadEdgeDiffMaxY);
         }
         public override void Save(string iniFileName)
         {
             normalizeFileName(ref iniFileName);
 
-            WriteINIValue("Basic", "bCheckInspect", (bCheckInspect ? "1" : "0"), iniFileName);
-            WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), iniFileName);
-            WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), iniFileName);
+            string sectName = "Basic";
 
-            WriteINIValue("Basic", "mWidthStand", mWidthStand.ToString(), iniFileName);
-            WriteINIValue("Basic", "mHeightStand", mHeightStand.ToString(), iniFileName);
-            WriteINIValue("Basic", "mWidthPercentage", mWidthPercentage.ToString(), iniFileName);
-            WriteINIValue("Basic", "mHeightPercentage", mHeightPercentage.ToString(), iniFileName);
+            Write(iniFileName, sectName, "optChipMeasurement", optChipMeasurement);
+            Write(iniFileName, sectName, "optChipEdgesCompare", optChipEdgesCompare);
+            Write(iniFileName, sectName, "optChipDefectsInspect", optChipDefectsInspect);
+            Write(iniFileName, sectName, "optUseTrayNgPercentage", optUseTrayNgPercentage);
+            Write(iniFileName, sectName, "optShowIndividualNG", optShowIndividualNG);
 
-            WriteINIValue("Basic", "PadEdgePercentageX", PadEdgePercentageX.ToString(), iniFileName);
-            WriteINIValue("Basic", "PadEdgePercentageY", PadEdgePercentageY.ToString(), iniFileName);
+            Write(iniFileName, sectName, "TrayNgPercentage", TrayNgPercentage);
+            Write(iniFileName, sectName, "StandardWidth", StandardWidth);
+            Write(iniFileName, sectName, "StandardHeight",StandardHeight);
+
+            StandardDimRangeW.Save(iniFileName, sectName, "StandardDimRangeW");
+            StandardDimRangeH.Save(iniFileName, sectName, "StandardDimRangeH");
+
+            Write(iniFileName, sectName, "PadEdgeDiffMaxX", PadEdgeDiffMaxX);
+            Write(iniFileName, sectName, "PadEdgeDiffMaxY", PadEdgeDiffMaxY);
         }
 
         void normalizeFileName(ref string iniFileName)
         {
             var path = System.IO.Path.GetDirectoryName(iniFileName);
             iniFileName = System.IO.Path.Combine(path, "Inspect_spec.ini");
+        }
+    }
+
+
+    public class DtoRange
+    {
+        public float Min;
+        public float Max;
+
+        public DtoRange(float min, float max)
+        {
+            Min = min;
+            Max = max;
+        }
+        public void Load(string iniFileName, string sectName, string keyName)
+        {
+            DtoBase.Read(iniFileName, sectName, keyName + "_min", Min, out Min);
+            DtoBase.Read(iniFileName, sectName, keyName + "_max", Max, out Max);
+        }
+        public void Save(string iniFileName, string sectName, string keyName)
+        {
+            DtoBase.Write(iniFileName, sectName, keyName + "_min", Min);
+            DtoBase.Write(iniFileName, sectName, keyName + "_max", Max);
         }
     }
 }

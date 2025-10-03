@@ -24,16 +24,19 @@ using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
-using NeedleX.ProcessSpace;
 using OpenCvSharp.Extensions;
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
-using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace.IOSpace;
 using VsCommon.ControlSpace.MachineSpace;
+
+using BaseProcess = NeedleX.ProcessSpace.BaseProcess;
+using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
+using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
+using LineScanSingleProcess = TravellerMINIX6.ProcessSpace.LineScanSingleProcess;
 
 
 namespace LaserAlignDX.Mvc.Ctrl.V3

@@ -12,7 +12,7 @@ namespace Common.RecipeSpace
         void Save();
     }
 
-    public class RecipeBaseClass : IRecipe
+    public class RecipeBaseClass : JetEazy.Utils.WinIni, IRecipe
     {
         private string m_path = "";
         private string m_name = "";
@@ -49,7 +49,10 @@ namespace Common.RecipeSpace
             get { return m_index; }
             //set { m_index = value; }
         }
+
         #region INI Access Functions
+
+#if(OPT_LEGACY)
         [DllImport("kernel32")]
         private static extern long WritePrivateProfileString(string section, string key, string val, string filePath);
         [DllImport("kernel32")]
@@ -75,6 +78,8 @@ namespace Common.RecipeSpace
 
             return retStr;
         }
+#endif
+
         #endregion
 
         [Browsable(false)]
@@ -88,7 +93,6 @@ namespace Common.RecipeSpace
             get;
             protected set;
         } = "";
-
         //public string INI_PATH = "";
 
         public virtual void Initial(string epath, int ercpindex, string enamefile)
@@ -116,6 +120,7 @@ namespace Common.RecipeSpace
         {
         }
 
+        #region UGLY_SERIALIZATION_FUNCTIONS
         public string RecttoStringSimple(Rectangle Rect)
         {
             return Rect.X.ToString() + "," + Rect.Y.ToString() + "," + Rect.Width.ToString() + "," + Rect.Height.ToString();
@@ -194,5 +199,6 @@ namespace Common.RecipeSpace
             Swr.Close();
             Swr.Dispose();
         }
+        #endregion
     }
 }

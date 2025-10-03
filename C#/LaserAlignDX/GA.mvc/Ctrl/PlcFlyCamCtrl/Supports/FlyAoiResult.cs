@@ -16,13 +16,6 @@
 
 namespace LaserAlignDX.AoiModel
 {
-    public enum PlcFlyResultCode : int
-    {
-        OK = 1,
-        NG = 2,
-        Empty = 3,
-    };
-
     public class FlyID
     {
         public FlyID(int flyStart, int flyIndex)
@@ -70,7 +63,7 @@ namespace LaserAlignDX.AoiModel
 
     public class FlyAoiResult
     {
-        public PlcFlyResultCode Code;
+        public PlcResultCode Code;
         public float OffsetX;
         public float OffsetY;
         public float OffsetAngle;

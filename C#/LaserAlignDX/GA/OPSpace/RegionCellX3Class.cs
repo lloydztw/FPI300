@@ -588,7 +588,7 @@ namespace LaserAlignDX.OPSpace
         {
             bool bOK = true;
 
-            if (xInspect.bOpenLineMeasure)
+            if (xInspect.optChipMeasurement)
             {
                 //float tmpwidth = RunWidth;
                 //float tmpheight = RunHeight;
@@ -611,36 +611,17 @@ namespace LaserAlignDX.OPSpace
                 //    }
                 //}
 
-                //if (RunWidth < xInspect.mWidthStand - xInspect.mWidthLower || RunWidth > xInspect.mWidthStand + xInspect.mWidthPercentage)
-                //{
-                //    bOK = false;
-                //}
-                //else if (RunHeight < xInspect.mHeightStand - xInspect.mHeightLower || RunHeight > xInspect.mHeightStand + xInspect.mHeightPercentage)
-                //{
-                //    bOK = false;
-                //}
-
-                var deltaW = Math.Abs(xInspect.mWidthStand - RunWidth) / (xInspect.mWidthStand + 1e-9) * 100.0;
-                var deltaH = Math.Abs(xInspect.mHeightStand - RunHeight) / (xInspect.mHeightStand + 1e-9) * 100.0;
-                if (deltaW > xInspect.mWidthPercentage || deltaH > xInspect.mHeightPercentage)
-                    bOK = false;
-
-                if (bOK && xInspect.bCheckMeasureOffset && xInspect.xAlgorithm == AoiModel.MatchAlgorithmEnum.GridMatch)
+                if (RunWidth < xInspect.mWidthStandMin || RunWidth > xInspect.mWidthStandMax)
                 {
-                    //RunXOffset = Math.Abs(DisLeft - DisRight);
-                    //RunYOffset = Math.Abs(DisTop - DisBottom);
-                    //if (RunXOffset > xInspect.XOffset)
-                    //{
-                    //    bOK = false;
-                    //}
-                    //else if (RunYOffset > xInspect.YOffset)
-                    //{
-                    //    bOK = false;
-                    //}
-
-                    var deltaX = Math.Abs(PadEdgeDiffX) / (xInspect.mWidthStand + 1e-9) * 100.0;
-                    var deltaY = Math.Abs(PadEdgeDiffY) / (xInspect.mHeightStand + 1e-9) * 100.0;
-                    if (deltaX > xInspect.PadEdgePercentageX || deltaY > xInspect.PadEdgePercentageY)
+                    bOK = false;
+                }
+                else if (RunHeight < xInspect.mHeightStandMin || RunHeight > xInspect.mHeightStandMax)
+                {
+                    bOK = false;
+                }
+                if (bOK && xInspect.optChipEdgesDiffCompare && xInspect.xAlgorithm == AoiModel.MatchAlgorithmEnum.GridMatch)
+                {
+                    if (Math.Abs(PadEdgeDiffX) > xInspect.PadEdgeDiffMaxX || Math.Abs(PadEdgeDiffY) > xInspect.PadEdgeDiffMaxY)
                         bOK = false;
                 }
 
