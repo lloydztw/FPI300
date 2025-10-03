@@ -30,14 +30,15 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
 
+        #region A01
         const string _Cat1 = "A01.基础设置";
+
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的相似程度")]
         [DisplayName("A01.相似度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
         [Browsable(true)]
         public float xTolerance { get; set; } = 0.5f;
-
 
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的允许的角度")]
         [DisplayName("A02.角度")]
@@ -46,7 +47,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public float xAngle { get; set; } = 30f;
 
-
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大X方向的像素")]
         [DisplayName("A03.外扩X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -54,15 +54,15 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public int xExtendx { get; set; } = 20;
 
-
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大Y方向的像素")]
         [DisplayName("A04.外扩Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
         [Browsable(true)]
         public int xExtendy { get; set; } = 20;
+        #endregion
 
-
+        #region A02
         const string _Cat2 = "A02.双头吸嘴找角度设置";
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("两个吸嘴的计算开启")]
@@ -72,14 +72,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public bool xIsOpenMuit { get; set; } = false;
 
-
         [CategoryAttribute(_Cat2), DescriptionAttribute("二值化的阈值")]
         [DisplayName("A01.灰阶阈值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
         [Browsable(true)]
         public int xThresholdValue { get; set; } = 128;
-
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("寻找的特征选择黑色还是白色 吸嘴是黑色选择黑色")]
         [DisplayName("A02.检测模式")]
@@ -88,14 +86,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public BlobMode xBlobMode { get; set; } = BlobMode.Black;
 
-
         [CategoryAttribute(_Cat2), DescriptionAttribute("特征二值化后最小的面积")]
         [DisplayName("A03.Blob面积最小值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 999999999)]
         [Browsable(true)]
         public int xBlobAreaMin { get; set; } = 5000;
-
 
         [CategoryAttribute(_Cat2), DescriptionAttribute("特征二值化后最大的面积")]
         [DisplayName("A03.Blob面积最大值")]
@@ -104,17 +100,20 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public int xBlobAreaMax { get; set; } = 99999999;
 
-
         [CategoryAttribute(_Cat2), DescriptionAttribute("true水平 false垂直")]
         [DisplayName("A04.吸嘴是否水平校正")]
         //[TypeConverter(typeof(NumericUpDownTypeConverter))]
         //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
         [Browsable(true)]
         public bool xIsShuiPing { get; set; } = true;
+        #endregion
 
-
+        #region GLOBAL_OFFSETS
+        [Browsable(false)]
         public PointF[] ptsOffset = new PointF[POINT_COUNT];
+        [Browsable(false)]
         public PointF[] ptsOffset2 = new PointF[POINT_COUNT];
+        #endregion
 
         public override void Load(bool eCancel = false)
         {
@@ -161,8 +160,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
                 i++;
             }
-
         }
-
     }
+
 }

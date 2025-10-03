@@ -90,14 +90,6 @@ namespace LaserAlignDX.AoiModel.V27
         {
             get { return InspectX3ParaClass.Instance; }
         }
-        LineScanCalibrateClass LineScanCalibrate1
-        {
-            get { return xRecipe.lineScanCalibrate; }
-        }
-        LineScanCalibrateClass LineScanCalibrate2
-        {
-            get { return xRecipe.lineScanCalibrate2; }
-        }
         #endregion
 
         #region KENERL_MEMBERS

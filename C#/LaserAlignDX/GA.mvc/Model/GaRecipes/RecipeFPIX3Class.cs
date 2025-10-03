@@ -1317,33 +1317,41 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
 
+        #region A01
         const string _Cat1 = "A01.基础设置";
+
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的相似程度")]
         [DisplayName("A01.相似度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
         [Browsable(true)]
         public float xTolerance { get; set; } = 0.5f;
+
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的允许的角度")]
         [DisplayName("A02.角度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 360, 1f, 2)]
         [Browsable(true)]
         public float xAngle { get; set; } = 30f;
+
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大X方向的像素")]
         [DisplayName("A03.外扩X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
         [Browsable(true)]
         public int xExtendx { get; set; } = 20;
+
         [CategoryAttribute(_Cat1), DescriptionAttribute("模板轮廓匹配的搜寻范围扩大Y方向的像素")]
         [DisplayName("A04.外扩Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
         [Browsable(true)]
         public int xExtendy { get; set; } = 20;
+        #endregion
 
+        #region A02
         const string _Cat2 = "A02.双头吸嘴找角度设置";
+
         [CategoryAttribute(_Cat2), DescriptionAttribute("两个吸嘴的计算开启")]
         [DisplayName("A00.开启双头计算")]
         //[TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -1357,18 +1365,21 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
         [Browsable(true)]
         public int xThresholdValue { get; set; } = 128;
+
         [CategoryAttribute(_Cat2), DescriptionAttribute("寻找的特征选择黑色还是白色 吸嘴是黑色选择黑色")]
         [DisplayName("A02.检测模式")]
         [TypeConverter(typeof(JzEnumConverter))]
         //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 360, 1f, 2)]
         [Browsable(true)]
         public BlobMode xBlobMode { get; set; } = BlobMode.Black;
+
         [CategoryAttribute(_Cat2), DescriptionAttribute("特征二值化后最小的面积")]
         [DisplayName("A03.Blob面积最小值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 999999999)]
         [Browsable(true)]
         public int xBlobAreaMin { get; set; } = 5000;
+
         [CategoryAttribute(_Cat2), DescriptionAttribute("特征二值化后最大的面积")]
         [DisplayName("A03.Blob面积最大值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -1382,9 +1393,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
         [Browsable(true)]
         public bool xIsShuiPing { get; set; } = true;
+        #endregion
 
+        #region GLOBAL_OFFSETS
+        [Browsable(false)]
         public PointF[] ptsOffset = new PointF[POINT_COUNT];
+        [Browsable(false)]
         public PointF[] ptsOffset2 = new PointF[POINT_COUNT];
+        #endregion
 
         public override void Load(bool eCancel = false)
         {
@@ -1494,7 +1510,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         [CategoryAttribute(_Cat02), DescriptionAttribute("")]
         [DisplayName("01 啟用 整盤 NG百分比 判定")]
-        [Browsable(true)]
+        [Browsable(false)]
         public bool optUseTrayNgPercentage
         {
             get => _spec.optUseTrayNgPercentage;
@@ -1505,7 +1521,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [DisplayName("02 整盤 NG百分比 上限 (%)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 0.5f, 1)]
-        [Browsable(true)]
+        [Browsable(false)]
         public float TryNgPercentage
         {
             get => _spec.TrayNgPercentage;
@@ -1514,7 +1530,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         [CategoryAttribute(_Cat02), DescriptionAttribute("")]
         [DisplayName("03 顯示 個別 NG 檢測結果")]
-        [Browsable(true)]
+        [Browsable(false)]
         public bool optShowIndividualNG
         {
             get => _spec.optShowIndividualNG;
@@ -1982,143 +1998,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             {
                 WriteINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(maskRects[i]), INIFILE);
             }
-        }
-    }
-
-
-    /// <summary>
-    /// 即將被新座標系統完全取代
-    /// </summary>
-    public class LineScanCalibrateClass : RecipeBaseClass
-    {
-        const int POINT_COUNT = 4;
-
-        JetEazy.BasicSpace.CAoiCalibration cAoiCalibration = new JetEazy.BasicSpace.CAoiCalibration();
-        PointF[,] _v1 = new PointF[2, 2];
-        PointF[,] _w1 = new PointF[2, 2];
-
-        //JetEazy.BasicSpace.CAoiCalibration cAoiCalibration2 = new JetEazy.BasicSpace.CAoiCalibration();
-        //PointF[,] _v2 = new PointF[2, 2];
-        //PointF[,] _w2 = new PointF[2, 2];
-
-        public LineScanCalibrateClass()
-        {
-
-        }
-        //private static LineScanCalibrateClass _instance = null;
-        //public static LineScanCalibrateClass Instance
-        //{
-        //    get
-        //    {
-        //        if (_instance == null)
-        //            _instance = new LineScanCalibrateClass();
-        //        return _instance;
-        //    }
-        //}
-        public override void Initial(string epath, int ercpindex, string enamefile)
-        {
-            base.Initial(epath, ercpindex, enamefile);
-            string dir = $"{Path}\\Calibration";
-            INIFILE = $"{dir}\\{Name}";
-        }
-        public override void ChangeIndex(int eindex)
-        {
-            //base.ChangeIndex(eindex);
-        }
-        public PointF ViewToWorld(PointF ptview)
-        {
-            PointF ptworld = new PointF(ptview.X, ptview.Y);
-            cAoiCalibration.TransformViewToWorld(ptview, out ptworld);
-            return ptworld;
-        }
-        public PointF WorldToView(PointF ptworld)
-        {
-            PointF ptview = new PointF(ptworld.X, ptworld.Y);
-            cAoiCalibration.TransformViewToWorld(ptworld, out ptview);
-            return ptview;
-        }
-        //public PointF T2ViewToWorld(PointF ptview)
-        //{
-        //    PointF ptworld = new PointF(ptview.X, ptview.Y);
-        //    cAoiCalibration2.TransformViewToWorld(ptview, out ptworld);
-        //    return ptworld;
-        //}
-        //public PointF T2WorldToView(PointF ptworld)
-        //{
-        //    PointF ptview = new PointF(ptworld.X, ptworld.Y);
-        //    cAoiCalibration2.TransformViewToWorld(ptworld, out ptview);
-        //    return ptview;
-        //}
-
-        public PointF[] ptsview = new PointF[POINT_COUNT];
-        public PointF[] ptsworld = new PointF[POINT_COUNT];
-        //public PointF[] pts2view = new PointF[POINT_COUNT];
-        //public PointF[] pts2world = new PointF[POINT_COUNT];
-
-        //public override void Initial(string epath, int ercpindex, string enamefile)
-        //{
-        //    base.Initial(epath, ercpindex, enamefile);
-        //}
-        public override void Load(bool eCancel = false)
-        {
-            int i = 0;
-            while (i < POINT_COUNT)
-            {
-                ptsview[i] = StringtoPointF(ReadINIValue("Tray", $"ptsview_{i}", $"{i},{i}", INIFILE));
-                ptsworld[i] = StringtoPointF(ReadINIValue("Tray", $"ptsworld_{i}", $"{i},{i}", INIFILE));
-
-                //pts2view[i] = StringtoPointF(ReadINIValue("Tray2", $"pts2view_{i}", $"{i},{i}", INIFILE));
-                //pts2world[i] = StringtoPointF(ReadINIValue("Tray2", $"pts2world_{i}", $"{i},{i}", INIFILE));
-
-                i++;
-            }
-
-            run();
-        }
-        public override void Save()
-        {
-            int i = 0;
-            while (i < POINT_COUNT)
-            {
-                WriteINIValue("Tray", $"ptsview_{i}", PointFtoStringSimple(ptsview[i]), INIFILE);
-                WriteINIValue("Tray", $"ptsworld_{i}", PointFtoStringSimple(ptsworld[i]), INIFILE);
-                //WriteINIValue("Tray2", $"pts2view_{i}", PointFtoStringSimple(pts2view[i]), INIFILE);
-                //WriteINIValue("Tray2", $"pts2world_{i}", PointFtoStringSimple(pts2world[i]), INIFILE);
-
-                i++;
-            }
-
-            run();
-        }
-
-        private void run()
-        {
-            _v1[0, 1] = ptsview[0];
-            _v1[1, 1] = ptsview[1];
-            _v1[0, 0] = ptsview[2];
-            _v1[1, 0] = ptsview[3];
-
-            _w1[0, 1] = ptsworld[0];
-            _w1[1, 1] = ptsworld[1];
-            _w1[0, 0] = ptsworld[2];
-            _w1[1, 0] = ptsworld[3];
-            cAoiCalibration.Dispose();
-            cAoiCalibration.SetCalibrationPoints(_v1, _w1);
-            cAoiCalibration.CalculateTransformMatrix();
-
-            //_v2[0, 1] = pts2view[0];
-            //_v2[1, 1] = pts2view[1];
-            //_v2[0, 0] = pts2view[2];
-            //_v2[1, 0] = pts2view[3];
-
-            //_w2[0, 1] = pts2world[0];
-            //_w2[1, 1] = pts2world[1];
-            //_w2[0, 0] = pts2world[2];
-            //_w2[1, 0] = pts2world[3];
-            //cAoiCalibration2.Dispose();
-            //cAoiCalibration2.SetCalibrationPoints(_v2, _w2);
-            //cAoiCalibration2.CalculateTransformMatrix();
-
         }
     }
 }

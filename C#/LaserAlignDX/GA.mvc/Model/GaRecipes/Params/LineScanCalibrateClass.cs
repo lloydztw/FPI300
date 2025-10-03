@@ -4,6 +4,9 @@ using System.Drawing;
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
 {
+    /// <summary>
+    /// 即將被新座標系統完全取代
+    /// </summary>
     public class LineScanCalibrateClass : RecipeBaseClass
     {
         const int POINT_COUNT = 4;
@@ -136,5 +139,4 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         }
     }
-
 }
