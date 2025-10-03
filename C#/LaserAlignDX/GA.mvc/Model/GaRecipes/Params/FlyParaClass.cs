@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Drawing.Design;
 
 
-namespace LaserAlignDX.OPSpace.RecipeSpace
+namespace LaserAlignDX.Mvc.Model.Recipes
 {
     public class FlyParaClass : RecipeBaseClass
     {
@@ -162,5 +162,4 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
     }
-
 }
