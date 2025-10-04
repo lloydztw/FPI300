@@ -188,13 +188,13 @@ namespace LaserAlignDX.AoiModel
 
         #region EVENT_FUNCTIONS
         int _progressCount = 0;
-        protected void fire_AoiBegin()
+        protected void fire_AoiBegin(string message = null)
         {
             _progressCount = 0;
             if (OnAoiBegin != null)
             {
                 int total = _xRecipe.xRegionCells.Count;
-                OnAoiBegin?.Invoke(this, new GaProgressEventArgs(total, 0));
+                OnAoiBegin?.Invoke(this, new GaProgressEventArgs(total, 0, message));
             }
         }
         protected void fire_AoiEnd()
@@ -221,9 +221,17 @@ namespace LaserAlignDX.AoiModel
                 OnAoiProgressing?.Invoke(this, new GaProgressEventArgs(total, currentStep));
             }
         }
+        protected void fire_AoiProgressing(object sender, GaProgressEventArgs e)
+        {
+            OnAoiProgressing?.Invoke(sender, e);
+        }
         protected void fire_AoiError(ErrCodes err, string message)
         {
             OnError?.Invoke(this, new ProcessEventArgs(message, err));
+        }
+        protected void fire_AoiError(object sender, ProcessEventArgs e)
+        {
+            OnError?.Invoke(sender, e);
         }
         #endregion
 

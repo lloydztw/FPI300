@@ -132,9 +132,12 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void CleanUp()
         {
+            CalibAoiModel.OPT_DUMP = false;
+
             for (int i = 0, N = _jxCalibVisionRecipes.Length; i < N; i++)
             {
                 var old = _jxCalibVisionRecipes[i];
+                disconnectPropEventHandlers(old);
                 _jxCalibVisionRecipes[i] = null;
                 old?.Dispose();
             }
@@ -198,6 +201,14 @@ namespace LaserAlignDX.Mvc.Ctrl
                     updateGuiStatus();
                 }));
             };
+        }
+        void connectPropEventHandlers(JxCalibAoiRecipe rcp)
+        {
+
+        }
+        void disconnectPropEventHandlers(JxCalibAoiRecipe rcp)
+        {
+
         }
         #endregion
 
@@ -524,6 +535,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var goldenRect = _cviGoldenBox.Box;
             JetEazy.QUtilities.QUtility.ClipBoundary(ref goldenRect, ref boundRect);
             var goldenBmp = ImageUtil.CropBmp(ezImage, goldenRect);
+            //_aoiModel.CropGoldenTemplate(SideID.A, ezImage, goldenRect);
 
             //(3) Update to Recipe
             var jxRecipe = _jxCalibVisionRecipes[(int)_activeCarrierID];
@@ -713,6 +725,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 jx.Load(CALIB_VISION_FILE((CarrierEnum)i));
                 jx.VisionSettings.FindAllFailBlocs.Value = false;           // 強制停用 "尋找所有格外區塊"
                 jx.VisionSettings.Match.BoundBox.Value = Rectangle.Empty;   // 強制停用 "邊界框"
+                connectPropEventHandlers(jx);
                 i++;
             }
 

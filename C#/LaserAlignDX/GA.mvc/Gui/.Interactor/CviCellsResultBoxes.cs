@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.FormSpace;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.OpenCV;
@@ -265,6 +266,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #region OVERRIDES
         public override void OnKeyDown(CvImageViewer viewer, KeyEventArgs e)
         {
+            if (!Visible)
+                return;
+
             switch(e.KeyCode)
             {
                 case Keys.Escape:
@@ -286,6 +290,12 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     }
                     break;
             }
+
+            if (e.Control && e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9)
+            {
+                DumpChipDims((int)e.KeyCode - (int)Keys.D0);
+            }
+
             base.OnKeyDown(viewer, e);
         }
         public override void OnDraw(CvImageViewer viewer, Graphics gxView)
@@ -1012,6 +1022,30 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
 
             MessageBox.Show($"已存入 Region Cell Images 至\n\r{dstPath}", "DEBUG", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+        void DumpChipDims(int col)
+        {
+            if (_grid == null || col < 0 || col >= _grid.Cols)
+                return;
+
+            var sb = new StringBuilder();
+            for (int r = 0; r < _grid.Rows; r++)
+            {
+                var cb = _grid.Get(r, col) as CellBloc;
+                var cell = cb?.Cell;
+                if (cell == null) continue;
+                var w = cell.RunWidth;
+                var h = cell.RunHeight;
+                if (w > 0 && h > 0)
+                    sb.AppendValues(w, h).AppendLine();
+            }
+
+            if (!System.IO.Directory.Exists(PATH_DUMP))
+                System.IO.Directory.CreateDirectory(PATH_DUMP);
+
+            string fileName = System.IO.Path.Combine(PATH_DUMP, $"measurement_{col}.csv");
+            GaUtil.SaveData(sb.ToString(), fileName);
+            VsMessageBox.Info($"已保存 尺寸數據 至 {fileName}");
         }
         #endregion
     }

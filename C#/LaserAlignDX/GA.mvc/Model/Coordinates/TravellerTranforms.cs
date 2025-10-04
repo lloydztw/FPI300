@@ -232,8 +232,14 @@ namespace LaserAlignDX.Model.Coords
             int cols = camGrid.Cols;
             var pts = new QVector[rows, cols];
             for (int r = 0; r < rows; r++)
+            {
                 for (int c = 0; c < cols; c++)
-                    pts[r, c] = camGrid[r, c].Center;
+                {
+                    var node = camGrid.Get(r, c);
+                    bool ok = node != null && node.IsMajorNode();
+                    pts[r, c] = ok ? node.Center : null;
+                }
+            }
             return pts;
         }
         QVector[,] toCalibGrid(PlcGridPoints plcGrid)

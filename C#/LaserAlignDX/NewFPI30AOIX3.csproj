@@ -411,7 +411,13 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
+    <Compile Include="GA.mvc\Model\.Common\AoiBase.cs" />
+    <Compile Include="GA.mvc\Model\.Common\LotData.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_ChipMeasure.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_ChipLoc.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_EmptyTray.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v30.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v27.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />

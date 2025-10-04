@@ -344,6 +344,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     _frmAoiProgressing.Show(_wndOwner);
                     _frmAoiProgressing.BringToFront();
                 }
+
+                if (e.Message != null)
+                    _frmAoiProgressing.UpdateMessage(e.Message);
             }
         }
         private void AoiEngine_OnAoiEnd(object sender, GaProgressEventArgs e)

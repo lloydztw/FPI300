@@ -43,10 +43,16 @@ namespace JetEazy.Transform
                 {
                     for (int c = 0; c < cols; c++)
                     {
-                        trf._srcPoints[r, c] = new QVector((double)r, (double)c);
-                        trf._dstPoints[r, c] = new QVector((double)r, (double)c);
-                        trf._srcPoints[r, c].LoadIni(iniFileName, sectName, $"SRC_KP_{r}_{c}");
-                        trf._dstPoints[r, c].LoadIni(iniFileName, sectName, $"DST_KP_{r}_{c}");
+                        //trf._srcPoints[r, c] = new QVector((double)r, (double)c);
+                        //trf._dstPoints[r, c] = new QVector((double)r, (double)c);
+                        //trf._srcPoints[r, c].LoadIni(iniFileName, sectName, $"SRC_KP_{r}_{c}");
+                        //trf._dstPoints[r, c].LoadIni(iniFileName, sectName, $"DST_KP_{r}_{c}");
+                        var src = new QVector((double)r, (double)c);
+                        var dst = new QVector(src);
+                        bool ok = src.LoadIni(iniFileName, sectName, $"SRC_KP_{r}_{c}");
+                        ok &= dst.LoadIni(iniFileName, sectName, $"DST_KP_{r}_{c}");
+                        trf._srcPoints[r, c] = ok ? src : null;
+                        trf._dstPoints[r, c] = ok ? dst : null;
                     }
                 }
             }
@@ -123,22 +129,34 @@ namespace JetEazy.Transform
 
     public static class QVector_Ini
     {
-        public static void LoadIni(this QVector v, string iniFileName, string sectName, string keyName)
+        public static bool LoadIni(this QVector v, string iniFileName, string sectName, string keyName)
         {
             string str = "";
             JetEazy.Win32.Win32Ini.Load(ref str, iniFileName, sectName, keyName);
-            var strs = str.Split(',');
+            if (string.IsNullOrEmpty(str))
+                return false;
 
+            var strs = str.Split(',');
+            int nDim = 0;
             int i = 0;
             if (strs.Length > i) strs[i++].Trim();
             if (strs.Length > i) if (int.TryParse(strs[i++].Trim(), out int len)) { }
-            if (strs.Length > i) if (double.TryParse(strs[i++].Trim(), out double vx)) v.X = vx;
-            if (strs.Length > i) if (double.TryParse(strs[i++].Trim(), out double vy)) v.Y = vy;
+            if (strs.Length > i) if (double.TryParse(strs[i++].Trim(), out double vx)) { v.X = vx; nDim++; }
+            if (strs.Length > i) if (double.TryParse(strs[i++].Trim(), out double vy)) { v.Y = vy; nDim++; }
+
+            return nDim >= 2;
         }
         public static void SaveIni(this QVector v, string iniFileName, string sectName, string keyName)
         {
-            string str = $"QVector, {v.Length}, {v.X:0.000000}, {v.Y:0.000000}";
-            JetEazy.Win32.Win32Ini.Save(str, iniFileName, sectName, keyName);
+            if (v != null)
+            {
+                string str = $"QVector, {v.Length}, {v.X:0.000000}, {v.Y:0.000000}";
+                JetEazy.Win32.Win32Ini.Save(str, iniFileName, sectName, keyName);
+            }
+            else
+            {
+                JetEazy.Win32.Win32Ini.Save("", iniFileName, sectName, keyName);
+            }
         }
     }
 }

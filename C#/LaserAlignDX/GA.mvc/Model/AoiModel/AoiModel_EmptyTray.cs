@@ -36,7 +36,8 @@ namespace LaserAlignDX.AoiModel.V3
         {
             try
             {
-                fire_AoiBegin();
+                fire_AoiBegin("空盤檢測");
+
                 markRunStart();
 
                 _xRecipe.AnalyzeDatasData();    //<<< 在本專案, 貌似沒啥用處

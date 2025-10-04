@@ -150,8 +150,11 @@ namespace JetEazy.Transform
             {
                 for (int c = 0; c < cols; c++)
                 {
-                    _srcPoints[r, c] = new QVector(srcPoints[r, c]);
-                    _dstPoints[r, c] = new QVector(dstPoints[r, c]);
+                    var src = srcPoints[r, c];
+                    var dst = dstPoints[r, c];
+                    bool ok = src != null && dst != null;
+                    _srcPoints[r, c] = ok ? new QVector(src) : null;    // new QVector(srcPoints[r, c]);
+                    _dstPoints[r, c] = ok ? new QVector(dst) : null;    // new QVector(dstPoints[r, c]);
                 }
             }
 
@@ -355,6 +358,9 @@ namespace JetEazy.Transform
 
             foreach (var coord in coords)
             {
+                if (coord == null)
+                    continue;
+
                 for (int i = 0; i < N_DIMS; i++)
                 {
                     v_min[i] = Math.Min(v_min[i], coord[i]);
@@ -390,6 +396,7 @@ namespace JetEazy.Transform
             var pts = new List<Point2d>();
             foreach(var c in coords)
             {
+                if (c == null) continue;
                 var pt = new Point2d()
                 {
                     X = ranges[0].Normalize(c.X),

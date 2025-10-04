@@ -17,6 +17,8 @@ using EzAoiEmptyTrayInspector.Model;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.Transform;
+using JetEazy.Utils;
+using LaserAlignDX.AoiModel;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -79,30 +81,24 @@ namespace LaserAlignDX.Mvc.Gui
         #region OVERRIDES
         public override void OnKeyDown(CvImageViewer viewer, KeyEventArgs e)
         {
-            bool needsToRefresh = false;
+            if (!Visible)
+                return;
 
-            //if (e.Control && _cursorBloc != null)
-            //{
-            //    _cursorBloc2 = _cursorBloc;
-            //    needsToRefresh = true;
-            //}
-            //else if (e.KeyCode == Keys.Escape && _cursorBloc2 != null)
-            //{
-            //    _cursorBloc2 = null;
-            //    needsToRefresh = true;
-            //}
-            //else
-            //{
-            //}
+            bool needsToRefresh = false;
 
             if (true || !IsEmptyTrayMode)
             {
                 switch (e.KeyCode)
                 {
-                    case Keys.Escape: scanSelfErrors(_debugOption = -1); needsToRefresh = true; break;
                     case Keys.X: scanSelfErrors(_debugOption = 0); needsToRefresh = true; break;
                     case Keys.Y: scanSelfErrors(_debugOption = 1); needsToRefresh = true; break;
                     case Keys.B: scanSelfErrors(_debugOption = 2); needsToRefresh = true; break;
+                    case Keys.D: CalibAoiModel.OPT_DUMP = true; break;
+                    case Keys.Escape: 
+                        scanSelfErrors(_debugOption = -1);
+                        CalibAoiModel.OPT_DUMP = false;
+                        needsToRefresh = true; 
+                        break;
                 }
             }
 
@@ -788,6 +784,10 @@ namespace LaserAlignDX.Mvc.Gui
             int cols = _grid.Cols;
             var transformsModel = GaMvcConfig.SysModel.TransformsModel;
 
+            double maxErr = 0;
+            int maxErrRow = -1;
+            int maxErrCol = -1;
+
             for (int r = 0; r < rows; r++)
             {
                 for (int c = 0; c < cols; c++)
@@ -795,7 +795,6 @@ namespace LaserAlignDX.Mvc.Gui
                     var bloc = _grid[r, c];
 
                     (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, r, c);
-
 
                     double err;
                     if (option == 0)
@@ -807,8 +806,18 @@ namespace LaserAlignDX.Mvc.Gui
                     else
                         err = 0;
                     bloc.SQRatio = err;
+
+                    if(maxErr < err)
+                    {
+                        maxErr = err;
+                        maxErrRow = r;
+                        maxErrCol = c;
+                    }
                 }
             }
+
+            string msg = $"格位座標 最大誤差 在 [{maxErrRow},{maxErrCol}] = {maxErr:0.000}";
+            GaUtil.LOG(msg, Color.Purple);
         }
         Brush getDebugBrush(EzBloc bloc)
         {

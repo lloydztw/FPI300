@@ -58,5 +58,13 @@ namespace Eazy_Project_III.FormSpace
             progressBar1.Value = current;
             progressBar1.Refresh();
         }
+        public void UpdateMessage(string message)
+        {
+            if(!string.IsNullOrEmpty(message))
+            {
+                lblMessage.Text = message;
+                lblMessage.Visible = true;
+            }
+        }
     }
 }

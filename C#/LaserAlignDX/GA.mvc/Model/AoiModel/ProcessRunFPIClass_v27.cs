@@ -371,7 +371,7 @@ namespace LaserAlignDX.AoiModel.V27
                 // 異步輸出 Debug 數據
                 MarkFileTimeTag();
                 _Inspect001_Async_SaveDebugData(bmpFullfov, debugCellCenterStr, imgLogPath);
-                
+
                 // PASS / NG
                 m_IsPass = _Inpsect001_Check_TotalPass();
 
@@ -772,7 +772,7 @@ namespace LaserAlignDX.AoiModel.V27
                 cell.RunWidth = dimension.Width;
                 cell.RunHeight = dimension.Height;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _NLOG.Error(ex, "晶粒 長寬量測 異常");
             }
@@ -873,7 +873,7 @@ namespace LaserAlignDX.AoiModel.V27
                             //    new Rectangle(0, 0, xRecipe.bmpprintmask.Width, xRecipe.bmpprintmask.Height),
                             //    PixelFormat.Format8bppIndexed);
                             //cell.DetectDefects(xRecipe.bmpDefectTemplate, cell.bmpItemRun, cell.bmpItemMask);
-                            
+
                             var bmpTemplate = xRecipe.bmpDefectTemplate;
                             var bmpMask = xRecipe.bmpprintmask;
                             var roi = xRecipe.xRegionTrain;
@@ -885,7 +885,7 @@ namespace LaserAlignDX.AoiModel.V27
                                 cell.DetectDefects(bmpTemplate, bmpRun, bmpMask);
                             }
                         }
-                        catch(Exception ex)
+                        catch (Exception ex)
                         {
                             _NLOG.Error(ex, "cell.DetectDefects 異常!");
                             xInspect.optChipDefectsInspect = false;
@@ -1025,8 +1025,8 @@ namespace LaserAlignDX.AoiModel.V27
         {
             foreach (var cell in xRecipe.xRegionCells)
             {
-                if(cell == null) continue;
-                
+                if (cell == null) continue;
+
                 bool isPass = true;
                 if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                     isPass = true;
@@ -1038,7 +1038,7 @@ namespace LaserAlignDX.AoiModel.V27
             }
             return true;
         }
-#endregion
+        #endregion
 
         public bool CalcChipDimension(EzLSD.LineSegment[] lines, out SizeF chipSize, bool usePostScale)
         {
@@ -1141,7 +1141,7 @@ namespace LaserAlignDX.AoiModel.V27
         private void _Inspect003_LT()
         {
             fire_AoiBegin();
-            
+
             xRecipe.AnalyzeDatasData();
 
             m_ElapsedTime = 0;
@@ -1284,7 +1284,7 @@ namespace LaserAlignDX.AoiModel.V27
         {
             if (!INI.Instance.IsSaveDebugBMP || bmpFullFov == null)
                 return;
-                
+
             ThreadPool.QueueUserWorkItem(arg =>
             {
                 try
@@ -1436,7 +1436,7 @@ namespace LaserAlignDX.AoiModel.V27
             {
                 // 轉至 local coordinate
                 var box2D = chipBox2D;
-                if(!isLocalCoordinate)
+                if (!isLocalCoordinate)
                 {
                     box2D = chipBox2D.Clone();
                     var cc = box2D.Center;

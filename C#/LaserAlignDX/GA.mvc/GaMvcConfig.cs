@@ -66,7 +66,8 @@ namespace LaserAlignDX
         private static IProcessRunFPI InstanceAoiModel()
         {
             // AoiModel 使用 V27
-            return AoiModel.V27.ProcessRunFPIClass.Instance;
+            //return AoiModel.V27.ProcessRunFPIClass.Instance;
+            return AoiModel.V3.ProcessRunFPIClass.Instance;
         }
         public static IxReportBuilder CreateReportBuilder()
         {
