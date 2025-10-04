@@ -38,26 +38,8 @@ namespace LaserAlignDX.AoiModel.V3
         InspectX3ParaClass _xInspect => base._xRecipe.InspectParams;
         #endregion
 
-        #region KENERL_MEMBERS
-        ///// <summary>
-        ///// 2025-08-28 LETIAN: 巨圖 統一由 TravellerBigImagesHolder 保管其生命週期
-        ///// </summary>
-        //public GaBigImageHolder LineScanCamImageHolder => _sysModel.LineScanImageHolder;
-        ///// <summary>
-        ///// 2025-09-10 新座標轉換
-        ///// </summary>
-        //TravellerTransforms _transformModel => _sysModel.TransformsModel;
-        ///// <summary>
-        ///// SystemModel
-        ///// </summary>
-        //ITravelerModel _sysModel => GaMvcConfig.SysModel;
-        ///// <summary>
-        ///// 當下的載台
-        ///// </summary>
-        //CarrierEnum getActiveCarrierID()
-        //{
-        //    return _sysModel.ActiveCarrierID;
-        //}
+        #region RUNTIME_DATA
+        GaCellsGroup[] _cellGroups;
         #endregion
 
         public bool QrUsed
@@ -70,6 +52,12 @@ namespace LaserAlignDX.AoiModel.V3
             get;
             set;
         }
+
+        public void SetCellGroups(GaCellsGroup[] cellGroups)
+        {
+            this._cellGroups = cellGroups;
+        }
+
         public override void Run()
         {
             bool go = _xInspect.optChipMeasurement || _xInspect.optChipDefectsInspect || QrUsed;
@@ -115,8 +103,10 @@ namespace LaserAlignDX.AoiModel.V3
 
             //_TM.RESET_ACCUM();
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            int N_GROUPS = MvdCompositeChipMatcher.N_CHANNLS;
-            var groups = GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
+            //int N_GROUPS = MvdCompositeChipMatcher.N_CHANNLS;
+            //var groups = GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
+            int N_GROUPS = _cellGroups.Length;
+            var groups = _cellGroups;
 
             if (!usingMultiThread)
             {

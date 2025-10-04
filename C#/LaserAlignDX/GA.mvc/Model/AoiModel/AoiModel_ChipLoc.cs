@@ -46,6 +46,22 @@ namespace LaserAlignDX.AoiModel.V3
         TravellerTransforms _transformModel => _sysModel.TransformsModel;
         #endregion
 
+        #region RUNTIME_DATA
+        GaCellsGroup[] _cellGroups;
+        #endregion
+
+
+        public GaCellsGroup[] CellGroups
+        {
+            get { return _cellGroups; }
+        }
+        public void ClearCellGroups()
+        {
+            var old = _cellGroups;
+            _cellGroups = null;
+            GaCellsGroup.CleanUp(old);
+        }
+
         public override void Run()
         {
             fire_AoiBegin("晶粒定位");
@@ -112,6 +128,8 @@ namespace LaserAlignDX.AoiModel.V3
             }
         }
 
+        #region PRIVATE_FUNCTIONS
+
         /// <summary>
         /// LETIAN: 晶粒定位
         /// </summary>
@@ -120,9 +138,12 @@ namespace LaserAlignDX.AoiModel.V3
             _TM.RESET_ACCUM();
 
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            int N_GROUPS = MvdCompositeChipMatcher.N_CHANNLS;
 
+            ClearCellGroups();
+            int N_GROUPS = MvdCompositeChipMatcher.N_CHANNLS;
             var groups = GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
+            _cellGroups = groups;
+
             string[] debugStrs = new string[groups.Length];
 
             //_InstanceBoxOverlapTools(N_GROUPS);
@@ -293,7 +314,8 @@ namespace LaserAlignDX.AoiModel.V3
                     cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
                 }
 
-                cellBmp.Dispose();
+                //>>> 後面還要使用, 在此不要調用 cellBmp.Dispose() !!!
+                //>>> cellBmp.Dispose();
             }
 
             return debugSB.ToString();
@@ -465,6 +487,8 @@ namespace LaserAlignDX.AoiModel.V3
 
             return overlapRatio;
         }
+
+        #endregion
 
         #region HELPERS
         QvBox2D toBox2D(ref AUVision.xFindResult xResult, SizeF size, float offsetX = 0f, float offsetY = 0f)

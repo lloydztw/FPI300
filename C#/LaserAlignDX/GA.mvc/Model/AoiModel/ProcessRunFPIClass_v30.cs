@@ -292,8 +292,16 @@ namespace LaserAlignDX.AoiModel.V3
                 fire_AoiBegin();
                 markRunStart();
 
+                // 定位
                 _aoiChipLoc.Run();
+                var cellGroups = _aoiChipLoc.CellGroups;
+
+                // 量測
+                _aoiChipMeasure.SetCellGroups(cellGroups);
                 _aoiChipMeasure.Run();
+
+                // 釋放 多執行續的 CellGroups
+                _aoiChipLoc.ClearCellGroups();
 
                 bool pass = _Check_TotalPass();
                 markRunEnd(pass);

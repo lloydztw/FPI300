@@ -17,13 +17,12 @@ using EzAoiEmptyTrayInspector;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
 using JetEazy.Match;
+using JetEazy.QMath;
 using JetEazy.Utils;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Controls;
-using System.Windows.Forms;
 
 
 namespace LaserAlignDX.AoiModel
@@ -137,26 +136,10 @@ namespace LaserAlignDX.AoiModel
         {
             _externImp.TryApplyFilters(sideId, img, settings, out result);
         }
-        #endregion
-
-        public CalibAoiModel(IxEmptyTrayInspector imp)
-        {
-            // Caller 負責調用 imp.Dispose()
-            _externImp = imp;
-        }
-        public void Dispose()
-        {
-            // Caller 負責調用 _externImp.Dispose()
-        }
-        public void SetRecipe(JxAoiRecipe recipe)
-        {
-            // recipe 會被 _externImp 持有,
-            // 所以 _jxRecipe  不用 Dispose
-            _externImp.SetRecipe(recipe);
-            _jxRecipe = recipe;
-        }
         public bool CropGoldenTemplate(SideID sideId, IEzImage largeImg, Rectangle goldenRect)
         {
+            // 目前 在此 '不需要' 精選
+            // 由 RefineCentroidLocations 負責 調整 更精確位置
             #region 自動精選_goldenRect
             if (false)
             {
@@ -190,37 +173,93 @@ namespace LaserAlignDX.AoiModel
                 }
             }
             #endregion
+
             return _externImp.CropGoldenTemplate(sideId, largeImg, goldenRect);
         }
-        public void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg)
+        #endregion
+
+        public CalibAoiModel(IxEmptyTrayInspector imp)
+        {
+            // Caller 負責調用 imp.Dispose()
+            _externImp = imp;
+        }
+        public void Dispose()
+        {
+            // Caller 負責調用 _externImp.Dispose()
+        }
+        public void SetRecipe(JxAoiRecipe recipe)
+        {
+            // recipe 會被 _externImp 持有,
+            // 所以 _jxRecipe  不用 Dispose
+            _externImp.SetRecipe(recipe);
+            _jxRecipe = recipe;
+        }
+
+        public MatchResult FetchGridNodes(Mat fullfovImg)
+        {
+            //(1) Peek the ezImage
+            using (var ezImage = new EzQuickImage(fullfovImg, deepCopy: false))
+            {
+                //(2) Run Aoi
+                _externImp.RunMatch(SideID.A, ezImage);
+
+                //(3) Result
+                var matchResult = _externImp.GetMatchResult(SideID.A);
+
+                //(4) Refine each detail locations
+                this.RefineCentroidLocations(matchResult, ezImage);
+
+                return matchResult;
+            }
+        }
+        
+        Mat TryRun(Mat fullfovImg, out MatchResult matchResult, bool optOutputBindaryImage = false)
+        {
+            //(1) Peek the ezImage
+            using (var ezImage = new EzQuickImage(fullfovImg, deepCopy: false))
+            {
+                //(2) Run Aoi
+                _externImp.RunMatch(SideID.A, ezImage);
+
+                //(3) Result
+                matchResult = _externImp.GetMatchResult(SideID.A);
+
+                //(4) Refine each detail locations
+                this.RefineCentroidLocations(matchResult, ezImage);
+
+                return null;
+            }
+        }
+        Mat RefineCentroidLocations_000(MatchResult matchResult, Mat fullfovImg, bool optOutputBindaryImage = false)
         {
             var grid = matchResult?.Grid;
             if (grid == null || _jxRecipe == null)
-                return;
+                return null;
 
             bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
             if (isBlackCarrier)
             {
-                RefineCentroidLocations_BlackCarrier(matchResult, fullfovImg);
+                return _RefineCentroidLocations_BlackCarrier(matchResult, fullfovImg, optOutputBindaryImage);
             }
             else
             {
-                RefineCentroidLocations_WhiteCarrier(matchResult, fullfovImg);
+                return  _RefineCentroidLocations_WhiteCarrier(matchResult, fullfovImg, optOutputBindaryImage);
             }
         }
-        
-        void RefineCentroidLocations_WhiteCarrier(MatchResult matchResult, Mat fullfovImg)
+        Mat _RefineCentroidLocations_WhiteCarrier(MatchResult matchResult, Mat fullfovImg, bool optOutputBinaryImage = false)
         {
             var grid = matchResult?.Grid;
             if (grid == null || _jxRecipe == null)
-                return;
+                return null;
 
             //bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
             int thresh = _jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
-
             var bound = new Rect(0, 0, fullfovImg.Width, fullfovImg.Height);
             int rows = grid.Rows;
             int cols = grid.Cols;
+
+            Mat imgOutput = optOutputBinaryImage ? Mat.Zeros(fullfovImg.Size(), MatType.CV_8UC1) : null;
+
             for (int r = 0; r < rows; r++)
             {
                 for (int c = 0; c < cols; c++)
@@ -236,15 +275,15 @@ namespace LaserAlignDX.AoiModel
                     {
                         // 將 白色載台影像 反向, 形成 淺色晶粒 深色背景
                         Cv2.BitwiseNot(img, img);
-
                         if (thresh <= 0)
                             Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
                         else
                             Cv2.Threshold(img, binary, thresh, 255, ThresholdTypes.Binary);
 
-                        //_DUMP(img, "img", r, c);
+                        _DUMP(img, "img", r, c);
                         _DUMP(binary, "binary", r, c);
-                        binary.Mean();
+                        if (imgOutput != null)
+                            imgOutput[roi] = binary;
 
                         findWhiteBlobs(binary, out var whiteBlobs);
                         if (whiteBlobs.Count == 0) continue;
@@ -260,19 +299,25 @@ namespace LaserAlignDX.AoiModel
                     }
                 }
             }
+
+            return imgOutput;
         }
-        void RefineCentroidLocations_BlackCarrier(MatchResult matchResult, Mat fullfovImg)
+        Mat _RefineCentroidLocations_BlackCarrier(MatchResult matchResult, Mat fullfovImg, bool optOutputBinaryImage = false)
         {
             var grid = matchResult?.Grid;
             if (grid == null || _jxRecipe == null)
-                return;
+                return null;
 
-            //bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
+            //>>> bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
             int thresh = _jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
-
             var bound = new Rect(0, 0, fullfovImg.Width, fullfovImg.Height);
             int rows = grid.Rows;
             int cols = grid.Cols;
+
+            Mat imgOutput = null;
+            if (optOutputBinaryImage)
+                imgOutput = Mat.Zeros(fullfovImg.Size(), MatType.CV_8UC1);
+
             for (int r = 0; r < rows; r++)
             {
                 for (int c = 0; c < cols; c++)
@@ -292,16 +337,16 @@ namespace LaserAlignDX.AoiModel
                             Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
                         else
                             Cv2.Threshold(img, binary, thresh, 255, ThresholdTypes.Binary);
-                        
+
                         Cv2.Erode(binary, binary, null, iterations: 2);
                         Cv2.Dilate(binary, binary, null, iterations: 2);
-
                         Cv2.Rectangle(binary, new Rect(0, 0, binary.Width, binary.Height), Scalar.White, 2);
                         Cv2.FloodFill(binary, new OpenCvSharp.Point(0, 0), Scalar.Black);
 
-                        //_DUMP(img, "img", r, c);
+                        _DUMP(img, "img", r, c);
                         _DUMP(binary, "binary", r, c);
-                        binary.Mean();
+                        if (imgOutput != null)
+                            imgOutput[roi] = binary;
 
                         findWhiteBlobs(binary, out var whiteBlobs);
                         if (whiteBlobs.Count == 0) continue;
@@ -318,9 +363,234 @@ namespace LaserAlignDX.AoiModel
                     }
                 }
             }
+
+            return imgOutput;
         }
-        
-        #region PRIVATE_FUNCTIONS
+
+        Mat RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg, bool optOutputBinaryImage = false)
+        {
+            var grid = matchResult?.Grid;
+            if (grid == null || _jxRecipe == null)
+                return null;
+
+            int thresh = _jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
+            var bound = new Rect(0, 0, fullfovImg.Width, fullfovImg.Height);
+            int rows = grid.Rows;
+            int cols = grid.Cols;
+
+            bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
+            var findLocalCenter = isBlackCarrier ?
+                (Func<Mat, Mat, int, QVector>)this.FindLocalCenter_black_carrier_cc :
+                (Func<Mat, Mat, int, QVector>)this.FindLocalCenter_white_carrier;
+
+            Mat imgOutput = null;
+            if (optOutputBinaryImage)
+                imgOutput = Mat.Zeros(fullfovImg.Size(), MatType.CV_8UC1);
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    var bloc = grid.Get(r, c);
+                    if (bloc == null)
+                        continue;
+
+                    var roi = JetEazy.Qcvt.CV(bloc.Rect);
+                    JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+
+                    using (var img = fullfovImg[roi].Clone())
+                    using (var binary = new Mat())
+                    {
+                        var center = findLocalCenter(img, binary, thresh);
+
+                        _DUMP(img, "img", r, c);
+                        _DUMP(binary, "binary", r, c);
+
+                        if (imgOutput != null)
+                            imgOutput[roi] = binary;
+
+                        if (center == null)
+                            continue;
+
+                        center.X += roi.X;
+                        center.Y += roi.Y;
+                        bloc.Center = center;
+                        var rect = JetEazy.Qcvt.CreateCenterRect((float)center.X, (float)center.Y, (float)bloc.Rect.Width, (float)bloc.Rect.Height);
+                        bloc.Rect = Rectangle.Round(rect);
+                    }
+                }
+            }
+
+            return imgOutput;
+        }
+        QVector FindLocalCenter_white_carrier(Mat img, Mat binary, int thresh)
+        {
+            // 將 白色載台影像 反向, 形成 淺色晶粒 深色背景
+            Cv2.BitwiseNot(img, img);
+            if (thresh <= 0)
+                Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
+            else
+                Cv2.Threshold(img, binary, thresh, 255, ThresholdTypes.Binary);
+
+            //_DUMP(img, "img", r, c);
+            //_DUMP(binary, "binary", r, c);
+            //if (imgOutput != null)
+            //    imgOutput[roi] = binary;
+
+            findWhiteBlobs(binary, out var whiteBlobs);
+            if (whiteBlobs.Count == 0)
+                return null;
+
+            whiteBlobs.Sort((b1, b2) => b2.Pixels - b1.Pixels);
+
+            // 使用質心 (for 白色載台)
+            var center = whiteBlobs[0].Center;
+            //center.X += roi.X;
+            //center.Y += roi.Y;
+            //bloc.Center = center;
+            //var rc = JetEazy.Qcvt.CreateCenterRect((float)center.X, (float)center.Y, (float)bloc.Rect.Width, (float)bloc.Rect.Height);
+            //bloc.Rect = Rectangle.Round(rc);
+            return center;
+        }
+        QVector FindLocalCenter_black_carrier(Mat img, Mat binary, int thresh)
+        {
+            if (thresh <= 0)
+                Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
+            else
+                Cv2.Threshold(img, binary, thresh, 255, ThresholdTypes.Binary);
+
+            Cv2.Erode(binary, binary, null, iterations: 2);
+            Cv2.Dilate(binary, binary, null, iterations: 2);
+            Cv2.Rectangle(binary, new Rect(0, 0, binary.Width, binary.Height), Scalar.White, 2);
+            Cv2.FloodFill(binary, new OpenCvSharp.Point(0, 0), Scalar.Black);
+
+            findWhiteBlobs(binary, out var whiteBlobs);
+            if (whiteBlobs.Count == 0)
+                return null;
+
+            whiteBlobs.Sort((b1, b2) => b2.Pixels - b1.Pixels);
+
+            // 黑色載台 使用 質心誤差大, 改用 rect 中心
+            //>>> var center = whiteBlobs[0].Center;
+            var cc = JetEazy.Qcvt.CenterF(ref whiteBlobs[0].Rect);
+            var center = new QVector(cc.X, cc.Y);
+            return center;
+        }
+        QVector FindLocalCenter_black_carrier_cc(Mat img, Mat binary, int thresh)
+        {
+            if (thresh <= 0)
+                Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
+            else
+                Cv2.Threshold(img, binary, thresh, 255, ThresholdTypes.Binary);
+
+            //Cv2.Erode(binary, binary, null, iterations: 2);
+            //Cv2.Dilate(binary, binary, null, iterations: 2);
+            //Cv2.Rectangle(binary, new Rect(0, 0, binary.Width, binary.Height), Scalar.White, 2);
+            //Cv2.FloodFill(binary, new OpenCvSharp.Point(0, 0), Scalar.Black);
+
+            // 執行 FindContours
+            Cv2.FindContours(
+                binary,
+                out var contours,
+                out var hierarchy,
+                mode: RetrievalModes.Tree,                      // 對應 cv2.RETR_TREE
+                method: ContourApproximationModes.ApproxSimple  // 對應 cv2.CHAIN_APPROX_SIMPLE
+            );
+
+            // 3. 找到最大輪廓的索引和面積
+            double maxArea = 0;
+            int maxContourIndex = -1;
+            for (int i = 0; i < contours.Length; i++)
+            {
+                // 獲取當前輪廓 (Point[] 型別)
+                var contour = contours[i];
+
+                // 計算輪廓面積
+                double area = Cv2.ContourArea(contour);
+                if (area > maxArea)
+                {
+                    maxArea = area;
+                    maxContourIndex = i;
+                }
+            }
+
+            // 4. 計算幾何矩 (Moments)
+            var bestContour = contours[maxContourIndex];
+            Moments M = Cv2.Moments(bestContour);
+            // 4.1 初始化質心座標
+            double cX = -1;
+            double cY = -1;
+            // 4.2 確保 M00 (面積) 不為零，避免除以零錯誤
+            // 零階矩 M.M00 代表輪廓的面積
+            if (M.M00 != 0)
+            {
+                // 3. 計算質心座標 (Centroid)
+                cX = (M.M10 / M.M00);
+                cY = (M.M01 / M.M00);
+            }
+            else
+            {
+                int n = 0;
+                cX = 0;
+                cY = 0;
+                foreach (var pt in bestContour)
+                {
+                    cX += pt.X;
+                    cY += pt.Y;
+                    n++;
+                }
+                if (n > 1)
+                {
+                    cX /= n;
+                    cY /= n;
+                }
+            }
+
+            var center = new QVector(cX, cY);
+            return center;
+        }
+
+        #region PRIVATE_CHECK_FUNCTIONS
+        bool checkIfDarkBackground(Mat img)
+        {
+            Mat imgU8 = GaImageUtil.ToU8(img);
+
+            int bw = 8;
+            int W = imgU8.Width;
+            int H = imgU8.Height;
+            var bound = new Rect(0, 0, W, H);
+            var rois = new Rect[]
+            {
+                new Rect(0,0, bw,bw),
+                new Rect(W-bw,0, bw,bw),
+                new Rect(W-bw,H-bw, bw,bw),
+                new Rect(0,H-bw, bw,bw),
+            };
+
+            var meanColor = imgU8.Mean().Val0;
+            int countDark = 0;
+            int countLight = 0;
+            for (int i = 0, len = rois.Length; i < len; i++)
+            {
+                var roi = rois[i];
+                JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+                if (roi.Width < 1 || roi.Height < 1)
+                    continue;
+                var color = (imgU8[roi]).Mean().Val0;
+                if (color < meanColor)
+                    countDark++;
+                else
+                    countLight++;
+            }
+
+            if (imgU8 != img)
+                imgU8?.Dispose();
+
+            return countDark > countLight;
+        }
+        #endregion
+
+        #region PRIVATE_BLOB_FUNCTIONS
         void findWhiteBlobs(Mat img, out List<EzBloc> keyBlocs)
         {
             //var gc = new List<IDisposable>();
@@ -384,43 +654,6 @@ namespace LaserAlignDX.AoiModel
             //foreach (var obj in gc)
             //    obj?.Dispose();
             #endregion
-        }
-        bool checkIfDarkBackground(Mat img)
-        {
-            Mat imgU8 = GaImageUtil.ToU8(img);
-
-            int bw = 8;
-            int W = imgU8.Width;
-            int H = imgU8.Height;
-            var bound = new Rect(0, 0, W, H);
-            var rois = new Rect[]
-            {
-                new Rect(0,0, bw,bw),
-                new Rect(W-bw,0, bw,bw),
-                new Rect(W-bw,H-bw, bw,bw),
-                new Rect(0,H-bw, bw,bw),
-            };
-
-            var meanColor = imgU8.Mean().Val0;
-            int countDark = 0;
-            int countLight = 0;
-            for (int i = 0, len = rois.Length; i < len; i++)
-            {
-                var roi = rois[i];
-                JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
-                if (roi.Width < 1 || roi.Height < 1)
-                    continue;
-                var color = (imgU8[roi]).Mean().Val0;
-                if (color < meanColor)
-                    countDark++;
-                else
-                    countLight++;
-            }
-
-            if (imgU8 != img)
-                imgU8?.Dispose();
-
-            return countDark > countLight;
         }
         #endregion
 

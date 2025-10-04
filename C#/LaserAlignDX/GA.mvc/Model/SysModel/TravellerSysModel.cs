@@ -240,19 +240,22 @@ namespace LaserAlignDX.Mvc.Model
 
                 aoiModel.SetRecipe(jx);
 
-                aoiModel.RunAll(fullfovBmp, wait: true);
+                //aoiModel.RunAll(fullfovBmp, wait: true);
+                //var matchResult = aoiModel.GetMatchResult(SideID.A);
+                //if (matchResult != null)
+                //{
+                //    using (var bridge = new QxImageBridge(fullfovBmp))
+                //    {
+                //        aoiModel.RefineCentroidLocations(matchResult, bridge.Image, false);
+                //    }
+                //}
+                //return matchResult;
 
-                var matchResult = aoiModel.GetMatchResult(SideID.A);
-
-                if (matchResult != null)
+                using (var bridge = new QxImageBridge(fullfovBmp))
                 {
-                    using (var bridge = new QxImageBridge(fullfovBmp))
-                    {
-                        aoiModel.RefineCentroidLocations(matchResult, bridge.Image);
-                    }
+                    var matchResult = aoiModel.FetchGridNodes(bridge.Image);
+                    return matchResult;
                 }
-
-                return matchResult;
             }
         }
         private PlcGridPoints buildRuntimePlcGrid(EzBlocsGrid camGrid)

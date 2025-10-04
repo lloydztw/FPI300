@@ -598,45 +598,46 @@ namespace LaserAlignDX.Mvc.Ctrl
             //(0) Cursor
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 
-            //(1) Peek the ezImage
-            var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
+            #region OLD_CODE
+            ////(A1) Peek the ezImage
+            //var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
 
-            //(2) Run Aoi
-            _aoiModel.RunMatch(SideID.A, ezImage);
+            ////(A2) Run Aoi
+            //_aoiModel.RunMatch(SideID.A, ezImage);
 
-            //(3) Update Result
-            var matchResult = _aoiModel.GetMatchResult(SideID.A);
+            ////(A3) Update Result
+            //var matchResult = _aoiModel.GetMatchResult(SideID.A);
+            //var camGrid = matchResult?.Grid;
+
+            //if (camGrid != null)
+            //{
+            //    //(A4) Refine each detail locations
+            //    _aoiModel.RefineCentroidLocations(matchResult, ezImage);
+
+            //    //(A5) Update Grid 4 Corners To Model
+            //    updateCalibKeyPoints(camGrid);
+            //}
+            #endregion
+
+            //(1) Run AOI
+            var matchResult = _aoiModel.FetchGridNodes(fullfovImg);
             var camGrid = matchResult?.Grid;
 
-            if (camGrid != null)
-            {
-                //(4) Refine each detail locations
-                _aoiModel.RefineCentroidLocations(matchResult, ezImage);
-
-                //(5) Update Grid 4 Corners To Model
-                updateCalibKeyPoints(camGrid);
-            }
-
-            //(6) Update Grid Result
+            //(2) Update Grid Result
             _cviResultBox.IsEmptyTrayMode = false;
             _cviResultBox.TransCameraToMotor = null;
             _cviResultBox.TransCameraToWorld = null;
             _cviResultBox.UpdateResult(matchResult);
             ShowCviResult(true);
 
-            //(7) Cvi Corners
-            foreach(var cviCorner in _cviCalibPointBoxes)
-            {
-                cviCorner.Visible = camGrid != null;
-            }
+            //(3) Cvi Corners Boxes
+            foreach(var cviCornerBox in _cviCalibPointBoxes)
+                cviCornerBox.Visible = camGrid != null;
 
-            //(8) CleanUp
-            ezImage?.Dispose();
-
-            //(9) Cursor
+            //(4) Cursor
             GaUtil.SetCursor(_wndOwner, oldCursor);
 
-            //(10) Warnings
+            //(5) Warnings
             if (camGrid == null)
             {
                 string msg = "無法自動抓到 四角定位點!\n\r請確認以下 參數 是否設定為 true?\n\r\n\r 空盤像測參數 \\ 吸嘴比對設定 \\ 建立網格";
