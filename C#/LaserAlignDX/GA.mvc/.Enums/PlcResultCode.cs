@@ -17,7 +17,12 @@ using System.ComponentModel;
 
 namespace LaserAlignDX
 {
-    //PC->PLC 单颗结果,1-Ok,2-外观Ng,3-空,4-读码NG,9-切割NG
+    //PC->PLC 单颗结果:
+    //  1: Ok
+    //  2: 外观NG
+    //  3: 空
+    //  4: 读码NG
+    //  9: 切割NG
 
     public enum PlcResultCode : int
     {

@@ -31,7 +31,7 @@ using Traveller106;
 
 namespace LaserAlignDX.AoiModel
 {
-    public abstract class AoiBase
+    public abstract class AoiModelBase
     {
         public event EventHandler<GaProgressEventArgs> OnAoiProgressing;
         public event EventHandler<GaProgressEventArgs> OnAoiBegin;

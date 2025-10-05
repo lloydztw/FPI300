@@ -15,6 +15,7 @@
 
 
 using JetEazy.QMath;
+using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace;
@@ -32,10 +33,14 @@ using _TM = LeTian.AoiLib.LtDebug;
 
 namespace LaserAlignDX.AoiModel.V3
 {
-    public class AoiModel_ChipMeasure : AoiBase
+    public class AoiModel_ChipMeasure : AoiModelBase
     {
         #region GLOBAL_MESS
         InspectX3ParaClass _xInspect => base._xRecipe.InspectParams;
+        #endregion
+
+        #region KERNEL_MEMBERS
+        ITransform _transToWorld;
         #endregion
 
         #region RUNTIME_DATA
@@ -69,6 +74,9 @@ namespace LaserAlignDX.AoiModel.V3
                 fire_AoiBegin();
                 markRunStart();
 
+                var activeCarrierID = getActiveCarrierID();
+                _transToWorld = _sysModel.TransformsModel.GetCameraPhysicTransform(activeCarrierID);
+
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
                 RunChipsMeasurement(bmpFullfov);
                 RunDefectsAndQrCode(bmpFullfov);
@@ -98,39 +106,49 @@ namespace LaserAlignDX.AoiModel.V3
         {
             if (!_xInspect.optChipMeasurement)
                 return;
-            
+
             fire_AoiBegin("晶粒尺寸量測");
 
             //_TM.RESET_ACCUM();
+
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            //int N_GROUPS = MvdCompositeChipMatcher.N_CHANNLS;
-            //var groups = GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
-            int N_GROUPS = _cellGroups.Length;
-            var groups = _cellGroups;
+
+            #region 準備_CELL_GROUPS
+            int N_GROUPS = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;
+            var groups = _cellGroups != null ? _cellGroups : GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
+            #endregion
 
             if (!usingMultiThread)
             {
                 // 單線程 (驗證用)
                 for (int gid = 0; gid < groups.Length; gid++)
                 {
-                    RunChipMeasurementOneT(gid, groups[gid]);
+                    RunChipsMeasurementOneT(gid, groups[gid]);
                 }
             }
             else
             {
+                // 多線程
                 Parallel.For(0, N_GROUPS, gid =>
                 {
                     if (gid < groups.Length)
-                        RunChipMeasurementOneT(gid, groups[gid]);
+                        RunChipsMeasurementOneT(gid, groups[gid]);
                 });
             }
 
-            _TM.DUMP_ACCUM();
+            #region CLEAN_UP
+            if (groups != _cellGroups)
+            {
+                GaCellsGroup.DisposeAll(groups);
+            }
+            #endregion
+
+            //_TM.DUMP_ACCUM();
         }
         /// <summary>
         /// LETIAN: 晶粒定位 與 尺寸量測 (區域) (限用於同一線程內)
         /// </summary>
-        private void RunChipMeasurementOneT(int threadIdx, GaCellsGroup cellsGroup)
+        private void RunChipsMeasurementOneT(int threadIdx, GaCellsGroup cellsGroup)
         {
             var fullFovSize = cellsGroup.FullFovRect.Size;
             var debugSB = new StringBuilder();
@@ -161,8 +179,6 @@ namespace LaserAlignDX.AoiModel.V3
         {
             // 取得 上一輪 晶粒定位 的結果 (Box2D)
             var chipBox2D = cell.chipLocInCamera;
-            var activeCarrierID = getActiveCarrierID();
-            var transCP = _sysModel.TransformsModel.GetCameraPhysicTransform(activeCarrierID);
 
             #region 邊線處理
             EdgeBorder eBorder = EdgeBorder.Left;
@@ -336,10 +352,10 @@ namespace LaserAlignDX.AoiModel.V3
                     var bottom = (corners[2] + corners[3]) / 2;
 
                     //轉換到 world
-                    left = transCP.Trans(left);
-                    right = transCP.Trans(right);
-                    top = transCP.Trans(top);
-                    bottom = transCP.Trans(bottom);
+                    left = ToWorld(left);
+                    top = ToWorld(top);
+                    right = ToWorld(right);
+                    bottom = ToWorld(bottom);
 
                     if (line0 != null && line2 != null)
                     {
@@ -476,10 +492,6 @@ namespace LaserAlignDX.AoiModel.V3
         public bool CalcChipDimension(EzLSD.LineSegment[] lines, out SizeF chipSize, bool usePostScale)
         {
             chipSize = SizeF.Empty;
-            var activeCarrierID = getActiveCarrierID();
-            var transCP = _sysModel?.TransformsModel?.GetCameraPhysicTransform(activeCarrierID);
-            if (transCP == null)
-                return false;
 
             #region 長度量測
             bool ok1 = false;
@@ -489,32 +501,27 @@ namespace LaserAlignDX.AoiModel.V3
                 var line2 = lines[2];     //右邊線
                 if (line0 != null && line2 != null)
                 {
+                    //(0) ROI Offset
                     //line0.Offset(cellRoi.X, cellRoi.Y);
                     //line2.Offset(cellRoi.X, cellRoi.Y);
 
-                    // 轉換到 Physic Coordinates 重組 line segment, 再行計算距離.
-                    var P1 = transCP.Trans(line0.P1);
-                    var P2 = transCP.Trans(line0.P2);
-                    var Q1 = transCP.Trans(line2.P1);
-                    var Q2 = transCP.Trans(line2.P2);
+                    //(1) 轉換到 Physic Coordinates 重組 line segment, 再行計算距離.
+                    var P1 = ToWorld(line0.P1);
+                    var P2 = ToWorld(line0.P2);
+                    var Q1 = ToWorld(line2.P1);
+                    var Q2 = ToWorld(line2.P2);
                     line0 = new EzLSD.LineSegment(P1, P2);
                     line2 = new EzLSD.LineSegment(Q1, Q2);
 
-                    // 計算點線距離
+                    //(2) 計算點線距離
                     var P = (P1 + P2) / 2.0;
                     double dist = line2.CalcDistance(P);
                     chipSize.Width = (float)dist;   // Math.Round(dist, 3);
                     ok1 = true;
                 }
             }
-            catch (MvdException ex)
+            catch (Exception ex)
             {
-                //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-                _LOG_ERROR(ex, $"長度量測 異常: ErrorCode = 0x{ex.ErrorCode:X}");
-            }
-            catch (System.Exception ex)
-            {
-                //Console.WriteLine("Fail with error " + ex.Message);
                 _LOG_ERROR(ex, "長度量測 異常");
             }
             #endregion
@@ -527,31 +534,28 @@ namespace LaserAlignDX.AoiModel.V3
                 var line3 = lines[3];     //下邊線
                 if (line1 != null && line3 != null)
                 {
+                    //(0) ROI Offset
                     //line1.Offset(cellRoi.X, cellRoi.Y);
                     //line3.Offset(cellRoi.X, cellRoi.Y);
 
-                    // 轉換到 Physic Coordinates 重組 line segment, 再行計算距離.
-                    var P1 = transCP.Trans(line1.P1);
-                    var P2 = transCP.Trans(line1.P2);
-                    var Q1 = transCP.Trans(line3.P1);
-                    var Q2 = transCP.Trans(line3.P2);
+                    //(1) 轉換到 Physic Coordinates 重組 line segment, 再行計算距離.
+                    var P1 = ToWorld(line1.P1);
+                    var P2 = ToWorld(line1.P2);
+                    var Q1 = ToWorld(line3.P1);
+                    var Q2 = ToWorld(line3.P2);
+                    P1 = ToWorld(line1.P1);
                     line1 = new EzLSD.LineSegment(P1, P2);
                     line3 = new EzLSD.LineSegment(Q1, Q2);
 
-                    // 計算點線距離
+                    //(2) 計算點線距離
                     var P = (P1 + P2) / 2.0;
                     double dist = line3.CalcDistance(P);
                     chipSize.Height = (float)dist;  // Math.Round(dist, 3);
                     ok2 = true;
                 }
             }
-            catch (MvdException ex)
+            catch (Exception ex)
             {
-                _LOG_ERROR(ex, $"寬度量測 異常: ErrorCode = 0x{ex.ErrorCode:X}");
-            }
-            catch (System.Exception ex)
-            {
-                //Console.WriteLine("Fail with error " + ex.Message);
                 _LOG_ERROR(ex, "寬度量測 異常");
             }
             #endregion
@@ -569,5 +573,21 @@ namespace LaserAlignDX.AoiModel.V3
 
             return ok1 && ok2;
         }
+
+        #region PRIVATE_TRANSFER_FUNCTIONS
+        QVector ToWorld(QVector p)
+        {
+            if (p == null)
+                return p;
+            
+            if (_transToWorld != null && false)
+                return _transToWorld.Trans(p);
+
+            var q = new QVector(p);
+            q.X = p.X * Traveller106.INI.Instance.ImageResolutionX;
+            q.Y = p.Y * Traveller106.INI.Instance.ImageResolutionY;
+            return q;
+        }
+        #endregion
     }
 }

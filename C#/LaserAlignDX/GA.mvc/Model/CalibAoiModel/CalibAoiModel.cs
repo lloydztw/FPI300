@@ -212,7 +212,8 @@ namespace LaserAlignDX.AoiModel
                 return matchResult;
             }
         }
-        
+
+#if (OPT_RESERVED)
         Mat TryRun(Mat fullfovImg, out MatchResult matchResult, bool optOutputBindaryImage = false)
         {
             //(1) Peek the ezImage
@@ -366,7 +367,7 @@ namespace LaserAlignDX.AoiModel
 
             return imgOutput;
         }
-
+#endif
         Mat RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg, bool optOutputBinaryImage = false)
         {
             var grid = matchResult?.Grid;
@@ -452,7 +453,7 @@ namespace LaserAlignDX.AoiModel
             //bloc.Rect = Rectangle.Round(rc);
             return center;
         }
-        QVector FindLocalCenter_black_carrier(Mat img, Mat binary, int thresh)
+        QVector FindLocalCenter_black_carrier_00(Mat img, Mat binary, int thresh)
         {
             if (thresh <= 0)
                 Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
@@ -483,8 +484,8 @@ namespace LaserAlignDX.AoiModel
             else
                 Cv2.Threshold(img, binary, thresh, 255, ThresholdTypes.Binary);
 
-            //Cv2.Erode(binary, binary, null, iterations: 2);
-            //Cv2.Dilate(binary, binary, null, iterations: 2);
+            Cv2.Erode(binary, binary, null, iterations: 1);
+            Cv2.Dilate(binary, binary, null, iterations: 1);
             //Cv2.Rectangle(binary, new Rect(0, 0, binary.Width, binary.Height), Scalar.White, 2);
             //Cv2.FloodFill(binary, new OpenCvSharp.Point(0, 0), Scalar.Black);
 
@@ -518,8 +519,8 @@ namespace LaserAlignDX.AoiModel
             var bestContour = contours[maxContourIndex];
             Moments M = Cv2.Moments(bestContour);
             // 4.1 初始化質心座標
-            double cX = -1;
-            double cY = -1;
+            double cX = 0;
+            double cY = 0;
             // 4.2 確保 M00 (面積) 不為零，避免除以零錯誤
             // 零階矩 M.M00 代表輪廓的面積
             if (M.M00 != 0)
@@ -531,8 +532,6 @@ namespace LaserAlignDX.AoiModel
             else
             {
                 int n = 0;
-                cX = 0;
-                cY = 0;
                 foreach (var pt in bestContour)
                 {
                     cX += pt.X;
@@ -545,7 +544,8 @@ namespace LaserAlignDX.AoiModel
                     cY /= n;
                 }
             }
-
+            cX = Math.Round(cX, 3);
+            cY = Math.Round(cY, 3);
             var center = new QVector(cX, cY);
             return center;
         }

@@ -25,7 +25,7 @@ using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 
 namespace LaserAlignDX.AoiModel.V3
 {
-    public class ProcessRunFPIClass : AoiBase, IProcessRunFPI
+    public class ProcessRunFPIClass : AoiModelBase, IProcessRunFPI
     {
         #region SINGLETON
         protected ProcessRunFPIClass()
@@ -99,7 +99,7 @@ namespace LaserAlignDX.AoiModel.V3
 
         void initSubModels()
         {
-            var subModels = new AoiBase[] { _aoiChipLoc, _aoiChipMeasure, _aoiEmptyTray };
+            var subModels = new AoiModelBase[] { _aoiChipLoc, _aoiChipMeasure, _aoiEmptyTray };
             foreach(var subModel in subModels)
             {
                 //model.OnAoiBegin+=
@@ -301,9 +301,9 @@ namespace LaserAlignDX.AoiModel.V3
                 _aoiChipMeasure.Run();
 
                 // 釋放 多執行續的 CellGroups
-                _aoiChipLoc.ClearCellGroups();
+                _aoiChipLoc.DisposeCellGroups();
 
-                bool pass = _Check_TotalPass();
+                bool pass = _CheckChipsTotalPass();
                 markRunEnd(pass);
                 fire_AoiEnd();
             }
@@ -328,14 +328,28 @@ namespace LaserAlignDX.AoiModel.V3
 
         private void _RunEmptyTray()
         {
-            fire_AoiBegin();
-            markRunStart();
-            _aoiEmptyTray.Run();
-            markRunEnd(_aoiEmptyTray.IsPass);
-            fire_AoiEnd();
+            try
+            {
+                fire_AoiBegin();
+                markRunStart();
+
+                _aoiEmptyTray.Run();
+
+                markRunEnd(_aoiEmptyTray.IsPass);
+                fire_AoiEnd();
+            }
+            catch (Exception ex)
+            {
+                markRunEnd(false);
+                //fire_AoiEnd();
+                var errCode = Mvc.Model.ErrCodes.EXCEPTION_AT_AOI_RUN;
+                string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
+                fire_AoiError(errCode, errMsg);
+                _LOG_ERROR(ex, "_RunEmptyTray");
+            }
         }
 
-        private bool _Check_TotalPass()
+        private bool _CheckChipsTotalPass()
         {
             foreach (var cell in _xRecipe.xRegionCells)
             {

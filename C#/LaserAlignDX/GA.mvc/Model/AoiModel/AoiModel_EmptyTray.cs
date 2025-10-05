@@ -30,7 +30,7 @@ namespace LaserAlignDX.AoiModel.V3
     /// <summary>
     /// 空載台檢測
     /// </summary>
-    public class AoiModel_EmptyTray : AoiBase
+    public class AoiModel_EmptyTray : AoiModelBase
     {
         public override void Run()
         {

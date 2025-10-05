@@ -87,6 +87,10 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         public static GaCellsGroup[] CollectGroups(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
         {
+            return CollectGroups_000_spanY(N, xRecipe, fullFovBmp);
+        }
+        static GaCellsGroup[] CollectGroups_000_spanY(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
+        {
             float x_min = float.MaxValue;
             float y_min = float.MaxValue;
             float x_max = float.MinValue;
@@ -139,10 +143,7 @@ namespace LaserAlignDX.AoiModel
 
             return groups;
         }
-        /// <summary>
-        /// caller 負責 fullFovBmp 生命週期
-        /// </summary>
-        public static GaCellsGroup[] CollectGroups_001_simple(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
+        static GaCellsGroup[] CollectGroups_001_simple(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
         {
             var allSrcCells = xRecipe.xRegionCells;
             int totalCount = allSrcCells.Count;
@@ -173,8 +174,10 @@ namespace LaserAlignDX.AoiModel
 
             return groups;
         }
-
-        public static void CleanUp(GaCellsGroup[] groups)
+        /// <summary>
+        /// 釋放資源
+        /// </summary>
+        public static void DisposeAll(GaCellsGroup[] groups)
         {
             if (groups == null) return;
             foreach (var g in groups)

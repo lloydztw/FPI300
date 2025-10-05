@@ -34,7 +34,7 @@ using _TM = LeTian.AoiLib.LtDebug;
 
 namespace LaserAlignDX.AoiModel.V3
 {
-    public class AoiModel_ChipLoc : AoiBase
+    public class AoiModel_ChipLoc : AoiModelBase
     {
         #region GLOBAL_MESS
         #endregion
@@ -55,11 +55,11 @@ namespace LaserAlignDX.AoiModel.V3
         {
             get { return _cellGroups; }
         }
-        public void ClearCellGroups()
+        public void DisposeCellGroups()
         {
             var old = _cellGroups;
             _cellGroups = null;
-            GaCellsGroup.CleanUp(old);
+            GaCellsGroup.DisposeAll(old);
         }
 
         public override void Run()
@@ -139,7 +139,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
 
-            ClearCellGroups();
+            DisposeCellGroups();
             int N_GROUPS = MvdCompositeChipMatcher.N_CHANNLS;
             var groups = GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
             _cellGroups = groups;

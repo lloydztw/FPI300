@@ -619,7 +619,7 @@ namespace LaserAlignDX.OPSpace
                 {
                     bOK = false;
                 }
-                if (bOK && xInspect.optChipEdgesDiffCompare && xInspect.xAlgorithm == AoiModel.MatchAlgorithmEnum.GridMatch)
+                if (bOK && xInspect.optChipEdgesDiffCompare && xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
                 {
                     if (Math.Abs(PadEdgeDiffX) > xInspect.PadEdgeDiffMaxX || Math.Abs(PadEdgeDiffY) > xInspect.PadEdgeDiffMaxY)
                         bOK = false;
