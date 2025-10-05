@@ -162,7 +162,7 @@ namespace LaserAlignDX.AoiModel.V3
                 //(1) 進度條事件
                 fire_AoiProgressing(cell);
 
-                bool go = cell.chipLocInCamera != null;
+                bool go = cell.ChipData.ChipBox2D != null && cell.inspectReason == InspectReason.PASS;
                 if (go)
                 {
                     //(2) 量測單一晶粒
@@ -178,7 +178,7 @@ namespace LaserAlignDX.AoiModel.V3
         private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
         {
             // 取得 上一輪 晶粒定位 的結果 (Box2D)
-            var chipBox2D = cell.chipLocInCamera;
+            var chipBox2D = cell.ChipData.ChipBox2D;
 
             #region 邊線處理
             EdgeBorder eBorder = EdgeBorder.Left;

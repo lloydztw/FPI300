@@ -426,6 +426,7 @@
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaCellsGroup.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaProgressEventArgs.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
+    <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellX3Class.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
@@ -673,7 +674,6 @@
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeNeedleClass.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeTrayClass.cs" />
     <Compile Include="GA\OPSpace\RegionCellX2Class.cs" />
-    <Compile Include="GA\OPSpace\RegionCellX3Class.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\GeoResultClass.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\JzBaseResultClass.cs" />
     <Compile Include="GA\ProcessSpace\AbsProcess.cs" />

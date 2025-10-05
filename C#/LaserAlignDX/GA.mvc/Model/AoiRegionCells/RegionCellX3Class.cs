@@ -18,7 +18,7 @@ namespace LaserAlignDX.OPSpace
     public class RegionCellX3Class : IDisposable
     {
         #region MVD_TOOLS
-        VisionDesigner.PositionFix.CPositionFixTool cPositionFixToolObj = null;// new VisionDesigner.PositionFix.CPositionFixTool();
+        CPositionFixTool cPositionFixToolObj = null;// new VisionDesigner.PositionFix.CPositionFixTool();
         CImageArithmeticTool cImageArithmeticToolObj = null;// new CImageArithmeticTool();
         VisionDesigner.ImageBinary.CImageBinaryTool cImageBinaryToolObj = null;// new VisionDesigner.ImageBinary.CImageBinaryTool();
         VisionDesigner.ImageMorph.CImageMorphTool cImageMorphToolObj = null;// new VisionDesigner.ImageMorph.CImageMorphTool();
@@ -69,6 +69,7 @@ namespace LaserAlignDX.OPSpace
         public string lblName = "";
         public int CellRow = 0;
         public int CellCol = 0;
+        public bool ByPass = false;
 
         /// <summary>
         /// ROI (FullFov Camera Coordinates) (單位 pixel)
@@ -80,12 +81,35 @@ namespace LaserAlignDX.OPSpace
         /// </summary>
         public GaChipData ChipData = new GaChipData();
 
+        /// <summary>
+        /// 理想 格位中心座標 X (單位 mm)
+        /// </summary>
         public float OrgX = 0;
+        /// <summary>
+        /// 理想 格位中心座標 Y (單位 mm)
+        /// </summary>
         public float OrgY = 0;
+        /// <summary>
+        /// PLC 定位補償 X (單位 mm)
+        /// </summary>
         public float RunX = 0;
+        /// <summary>
+        /// PLC 定位補償 Y (單位 mm)
+        /// </summary>
         public float RunY = 0;
+        /// <summary>
+        /// PLC 定位角度 A (單位 degree)
+        /// </summary>
         public float RunAngle = 0;
-        
+        /// <summary>
+        /// 推算馬達座標: 吸嘴排1 (單位 mm)
+        /// </summary>
+        public PointF Sur1 = new PointF();
+        /// <summary>
+        /// 推算馬達座標: 吸嘴排2 (單位 mm)
+        /// </summary>
+        public PointF Sur2 = new PointF();
+
         /// <summary>
         /// 测量结果: 晶粒宽度 (單位 mm)
         /// </summary>
@@ -125,12 +149,6 @@ namespace LaserAlignDX.OPSpace
         {
             get => ChipData.ChipDimension.PadEdgeSizes;
         }
-
-        public PointF Sur1 = new PointF();
-        public PointF Sur2 = new PointF();
-
-        public bool ByPass = false;
-        
 
         #region FILE_PATH
         public bool IsSaveDebugPicture = false;

@@ -5,7 +5,6 @@ using JetEazy;
 using JetEazy.FormSpace;
 using JetEazy.Match;
 using JetEazy.Utils;
-using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Mvc.Model.Recipe;
 using System;

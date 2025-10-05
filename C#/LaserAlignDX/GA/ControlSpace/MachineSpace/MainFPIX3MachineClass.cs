@@ -3,10 +3,6 @@ using JetEazy.BasicSpace;
 using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.ControlSpace.PLCSpace;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VsCommon.ControlSpace.IOSpace;
 
 namespace VsCommon.ControlSpace.MachineSpace
@@ -59,13 +55,17 @@ namespace VsCommon.ControlSpace.MachineSpace
             IsNoUseIO = isnouseio;
             IsNoUseMotor = isnousemotor;
 
+            //LETIAN: @2025-10-05
+            string iniPath = System.IO.Path.Combine(WORKPATH, myMachineEA.ToString());
+
             i = 0;
             while (i < PLCCount)
             {
                 PLCCollection[i] = new VsCommPLC();
 
-                //if (!isnouseio)
-                ret &= PLCCollection[i].Open(WORKPATH + "\\" + myMachineEA.ToString() + "\\PLCCONTROL" + i.ToString() + ".INI", isnouseio);
+                //>>> ret &= PLCCollection[i].Open(WORKPATH + "\\" + myMachineEA.ToString() + "\\PLCCONTROL" + i.ToString() + ".INI", isnouseio);
+                string iniFileName = System.IO.Path.Combine(iniPath, $"PlcControl{i}.ini");
+                ret &= PLCCollection[i].Open(iniFileName, isnouseio);
 
                 PLCCollection[i].Name = "PLC" + i.ToString();
                 PLCCollection[i].ReadAction += ReadAction;
@@ -77,7 +77,8 @@ namespace VsCommon.ControlSpace.MachineSpace
             while (i < MotionCount)
             {
                 PLCMOTIONCollection[i] = new PLCMotionClass();
-                PLCMOTIONCollection[i].Intial(WORKPATH + "\\" + myMachineEA.ToString(), (MotionEnum)i, PLCCollection, IsNoUseMotor);
+                //>>> PLCMOTIONCollection[i].Intial(WORKPATH + "\\" + myMachineEA.ToString(), (MotionEnum)i, PLCCollection, IsNoUseMotor);
+                PLCMOTIONCollection[i].Intial(iniPath, (MotionEnum)i, PLCCollection, IsNoUseMotor);
 
                 i++;
             }
@@ -86,7 +87,9 @@ namespace VsCommon.ControlSpace.MachineSpace
             while (i < LightCount)
             {
                 LightCollection[i] = new VsLight();
-                LightCollection[i].Open(WORKPATH + "\\" + myMachineEA.ToString() + "\\LightCONTROL" + i.ToString() + ".INI", isnouseio);
+                //>>> LightCollection[i].Open(WORKPATH + "\\" + myMachineEA.ToString() + "\\LightCONTROL" + i.ToString() + ".INI", isnouseio);
+                string iniFileName = System.IO.Path.Combine(iniPath, $"LightControl{i}.ini");
+                LightCollection[i].Open(iniFileName, isnouseio);
 
                 i++;
             }
@@ -97,7 +100,8 @@ namespace VsCommon.ControlSpace.MachineSpace
             else
                 PLCIO = new MainFPIX3IOClass();
 
-            PLCIO.Initial(WORKPATH + "\\" + myMachineEA.ToString(), PLCCollection);
+            //>>> PLCIO.Initial(WORKPATH + "\\" + myMachineEA.ToString(), PLCCollection);
+            PLCIO.Initial(iniPath, PLCCollection);
 
             return ret;
         }

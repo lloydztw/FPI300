@@ -17,6 +17,7 @@
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
+using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
@@ -44,6 +45,9 @@ namespace LaserAlignDX.AoiModel.V3
         /// 2025-09-10 新座標轉換
         /// </summary>
         TravellerTransforms _transformModel => _sysModel.TransformsModel;
+        ITransform _transCP;
+        ITransform _transCS1;
+        ITransform _transCS2;
         #endregion
 
         #region RUNTIME_DATA
@@ -64,20 +68,20 @@ namespace LaserAlignDX.AoiModel.V3
 
         public override void Run()
         {
-            fire_AoiBegin("晶粒定位");
-
-            // 效能追蹤
-            _TM.Reset();
-
             try
             {
+                fire_AoiBegin("晶粒定位");
+
+                //(0) 效能追蹤
+                _TM.Reset();
+
                 //_xRecipe.AnalyzeDatasData();
                 //_TM.Trace("_Inspect001 : xRecipe.AnalyzeDatasData()");
 
-                // 標記起始計時
+                //(1) 標記起始計時
                 markRunStart();
 
-                // 準備資料夾
+                //(2) 準備資料夾
                 string imgLogPath = GetLogPath(this.FileBarcodeStr);
 
                 #region PREPARE_PATH
@@ -88,21 +92,24 @@ namespace LaserAlignDX.AoiModel.V3
                 }
                 #endregion
 
-                // 取得線掃巨圖: 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
+                //(3) 取得座標轉換
+                var activeCarrierID = getActiveCarrierID();
+                _transCP = _transformModel.GetCameraPhysicTransform(activeCarrierID);
+                _transCS1 = _transformModel.GetCameraMotorTransform(activeCarrierID, SuckerRowEnum.S1);
+                _transCS2 = _transformModel.GetCameraMotorTransform(activeCarrierID, SuckerRowEnum.S2);
+
+                //(4) 取得線掃巨圖: 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
 
-                // 晶粒定位
+                //(5) 晶粒定位
                 RunChipsLocate(bmpFullfov, imgLogPath, out string debugCellCenterStr);
                 _TM.Trace("_Inspect001 : 晶粒定位 & 量測 完成!");
 
-                // 異步輸出 Debug 數據
+                //(6) 異步輸出 Debug 數據
                 markFileTimeTag();
                 saveDebugDataAsync(bmpFullfov, debugCellCenterStr, imgLogPath);
 
-                //// PASS / NG
-                //bool isPass = _Inpsect001_Check_TotalPass();
-
-                // 標記終止計時
+                //(7) 標記終止計時
                 markRunEnd(true);
                 fire_AoiEnd();
             }
@@ -191,15 +198,10 @@ namespace LaserAlignDX.AoiModel.V3
                 //(1) 清除上一次結果
                 cell.Reset();
 
-                #region DEBUG
-                //if (cell.Index != 66)
-                //    continue;
-                #endregion
-
                 //(2) 像測 (使用 chipMatcher)
-                //>>> _TM.BEGIN("_RunChipTemplateMatch");
+                // _TM.BEGIN("_RunChipTemplateMatch");
                 bool bOK = chipMatcher.RunMatch(cellBmp);
-                //>>> _TM.END("_RunChipTemplateMatch");
+                // _TM.END("_RunChipTemplateMatch");
 
                 //(3) 異步保存 Cell 圖像檔案
                 if (INI.Instance.IsSaveTestImage)
@@ -209,12 +211,15 @@ namespace LaserAlignDX.AoiModel.V3
                     saveCellBmpAsync(cellBmp, cell);
                 }
 
+                //(4) 防止因為 xResults.Count == 0 的意外狀況
+                bOK &= (chipMatcher.xResults.Count > 0);
+
                 if (bOK)
                 {
-                    //(4) 使用 xResults[0] 當 Chip Center
+                    //(4.0) 使用 xResults[0] 當 Chip Center
                     cell.xFindResult = chipMatcher.xResults[0];
-                    var org_center_x = cell.xFindResult.fCenterX;
-                    var org_center_y = cell.xFindResult.fCenterY;
+                    var debug_org_center_x = cell.xFindResult.fCenterX;
+                    var debug_org_center_y = cell.xFindResult.fCenterY;
                     cell.xFindResult.fCenterX += cellRoi.X;
                     cell.xFindResult.fCenterY += cellRoi.Y;
 
@@ -222,96 +227,75 @@ namespace LaserAlignDX.AoiModel.V3
                     var chipSize = _xRecipe.xRegionTrain.Size;
                     var chipBox2D = toBox2D(ref cell.xFindResult, chipSize);
                     var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
-                    //(4.2) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF
-                    cell.SetMvdRunPositionFix(GaMvdExt.ToCMvdRectangleF(chipBox2D));
-                    //(4.3) 記入 chipBox2D
-                    cell.chipLocInCamera = chipBox2D;
 
-                    #region DEBUG_STRING
+                    //(4.2) 將定位結果記入 cell.ChipData
+                    cell.ChipData.ChipBox2D = chipBox2D;
+                    cell.ChipData.PadGrids = chipMatcher.GetResultPadsGrid();
+
+                    //(4.3) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF
+                    cell.SetMvdRunPositionFix(GaMvdExt.ToCMvdRectangleF(chipBox2D));
+
+                    #region 加入_DEBUG_STRING
                     //debugCellCenterStr += $"INDEX:{cell.Index}#";
                     //debugCellCenterStr += $"VIEW:{cellRoi.X};{cellRoi.Y}#";
                     //debugCellCenterStr += $"ORG:{cell.xFindResult.fCenterX};{cell.xFindResult.fCenterY}#";
                     //debugCellCenterStr += $"DES:{cell.xFindResult.fCenterX};{cell.xFindResult.fCenterY}{Environment.NewLine}";
                     debugSB.Append("INDEX:").Append(cell.Index).Append("#");
                     debugSB.Append("VIEW:").Append(cellRoi.X).Append(";").Append(cellRoi.Y).Append("#");
-                    debugSB.Append("ORG:").Append(org_center_x).Append(";").Append(org_center_y).Append("#");
+                    debugSB.Append("ORG:").Append(debug_org_center_x).Append(";").Append(debug_org_center_y).Append("#");
                     debugSB.Append("DES:").Append(cell.xFindResult.fCenterX).Append(";").Append(cell.xFindResult.fCenterY).AppendLine();
                     #endregion
 
                     //(5) 判定重疊區域比例
-                    bool isOverlapOK = true;
                     var xInspect = _xRecipe.InspectParams;
                     if (xInspect.xChipOverlap > 0)
                     {
-                        //(5.1) 使用 QvBox2D 計算 重疊率
+                        //(5.1) 直接使用 QvBox2D 計算 重疊率
                         double overlapRatio = calcOverlap(gaCell, chipBox2D, isLocalCoordinate: false);
-                        //(5.2) 判定結果
-                        isOverlapOK = overlapRatio >= xInspect.xChipOverlap;
+
+                        //(5.2) 重疊率 判定結果
+                        bOK = overlapRatio >= xInspect.xChipOverlap;
                     }
 
-                    if (isOverlapOK)
+                    if (bOK)
                     {
                         //(6) 根據不同載台, 計算補償量
                         var activeCarrierID = getActiveCarrierID();
                         (var motorDelta, var worldDelta) = _transformModel.CalcPlcCompensation(activeCarrierID, chipCentroid, cell.CellRow, cell.CellCol);
                         double angle = chipBox2D.Theta * 180 / Math.PI;
-                        cell.RunAngle = (float)(angle + INI.Instance.Cal_Bca);
-                        cell.RunX = (float)(motorDelta.X + INI.Instance.Cal_Bcx);
-                        cell.RunY = (float)(motorDelta.Y + INI.Instance.Cal_Bcy);
 
-#if (false)
-                        //(7) 量測尺寸
-                        if (xInspect.optChipMeasurement)
+                        //(6.1) 記入 Runtime (Gaara) 所需要的數據
+                        cell.RunAngle = (float)Math.Round((angle + INI.Instance.Cal_Bca),3);
+                        cell.RunX = (float)Math.Round((motorDelta.X + INI.Instance.Cal_Bcx), 3);
+                        cell.RunY = (float)Math.Round((motorDelta.Y + INI.Instance.Cal_Bcy), 3);
+
+                        //(6.2) 記入 Gaara Sur1 與 Sur2
+                        if (_transCS1 != null)
                         {
-                            //_TM.BEGIN("OneChipMeasurement");
-
-                            #region OLD_CODE
-                            //switch (xInspect.MFLType)
-                            //{
-                            //    //case Eazy_Project_III.MeasureFindLineType.FindLineType_v2:
-                            //    //    _Inspect001_One_Chip_Measurement_pairLine(cell, cellBmp, cellRoi, chipMatcher);
-                            //    //    break;
-                            //    default:
-                            //        _Inspect001_One_Chip_Measurement(cell, cellBmp, cellRoi, chipMatcher);
-                            //        //Bitmap bmp = cellBmp.Clone(new Rectangle(0, 0, cellBmp.Width, cellBmp.Height), cellBmp.PixelFormat);
-                            //        //AForge.Imaging.Filters.SobelEdgeDetector detector = new AForge.Imaging.Filters.SobelEdgeDetector();
-                            //        //Bitmap bmp1 = detector.Apply(bmp);
-                            //        //AForge.Imaging.Filters.Closing closing = new AForge.Imaging.Filters.Closing();
-                            //        //Bitmap bmp2 = closing.Apply(bmp1);
-                            //        //AForge.Imaging.Filters.SISThreshold sISThreshold = new AForge.Imaging.Filters.SISThreshold();
-                            //        //Bitmap bmp3 = sISThreshold.Apply(bmp2);
-                            //        //Bitmap bmp4 = GaImageUtil.ToU8(bmp3, true);
-                            //        //_Inspect001_One_Chip_Measurement(cell, bmp4, cellRoi, chipMatcher);
-
-                            //        //bmp.Dispose();
-                            //        //bmp1.Dispose();
-                            //        //bmp2.Dispose();
-                            //        //bmp3.Dispose();
-                            //        //bmp4.Dispose();
-
-                            //        break;
-                            //}
-                            #endregion
-
-                            _Inspect001_One_Chip_Measurement(cell, cellBmp, cellRoi, chipMatcher);
-
-                            //(9) 打包 "尺寸判断" 结果
-                            cell.PackMeasureResult();
-
-                            //_TM.END("OneChipMeasurement");
+                            var mp = _transCS1.Trans(chipCentroid);
+                            cell.Sur1 = new PointF((float)mp.X, (float)mp.Y);
                         }
-#endif
-                    }
-                    else
-                    {
-                        cell.inspectReason = InspectReason.INS_ALIGNERR;
-                        cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
+                        if (_transCS2 != null)
+                        {
+                            var mp = _transCS2.Trans(chipCentroid);
+                            cell.Sur2 = new PointF((float)mp.X, (float)mp.Y);
+                        }
+
+                        //(6.3) 記入 ChipData.Coords
+                        cell.ChipData.ChipCoords.Angle = cell.RunAngle;
+                        cell.ChipData.ChipCoords.Centroid = _transCP?.Trans(chipCentroid);
                     }
                 }
-                else
+
+                //(7) 設定 Inspect Result Code
+                if (!bOK)
                 {
                     cell.inspectReason = InspectReason.INS_ALIGNERR;
                     cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
+                }
+                else
+                {
+                    cell.inspectReason = InspectReason.PASS;
                 }
 
                 //>>> 後面還要使用, 在此不要調用 cellBmp.Dispose() !!!

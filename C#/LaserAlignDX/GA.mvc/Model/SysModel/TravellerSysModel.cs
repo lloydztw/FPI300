@@ -26,6 +26,7 @@ using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
@@ -299,9 +300,9 @@ namespace LaserAlignDX.Mvc.Model
 
             //(0) Global MESS
             var xParaGrid = RecipeParaGridClass.Instance;
-            var xInpectParam = InspectX3ParaClass.Instance;
+            var xInpectParam = _xRecipe.InspectParams;
             var xRegionCells = _xRecipe.xRegionCells;
-            xRegionCells.Clear();
+            clearRegionCells(xRegionCells);
 
             double standardChipWidth = xInpectParam.mWidthStand;
             double standardChipHeight = xInpectParam.mHeightStand;
@@ -449,7 +450,7 @@ namespace LaserAlignDX.Mvc.Model
             var xParaGrid = RecipeParaGridClass.Instance;
             var xInpectParam = InspectX3ParaClass.Instance;
             var xRegionCells = _xRecipe.xRegionCells;
-            xRegionCells.Clear();
+            clearRegionCells(xRegionCells);
 
             //(1) TransformModel
             var transCM1 = this.TransformsModel.GetCameraMotorTransform(carrierID, SuckerRowEnum.S1);
@@ -572,6 +573,23 @@ namespace LaserAlignDX.Mvc.Model
                 xParaGrid.xRealOffsetY = (float)Math.Round(pitchY, 3);
             }
         }
+        private void clearRegionCells(List<RegionCellX3Class> xRegionCells)
+        {
+            try
+            {
+                if (xRegionCells != null)
+                {
+                    foreach (var xCell in xRegionCells)
+                        xCell?.Dispose();
+                    xRegionCells.Clear();
+                }
+            }
+            catch(Exception ex)
+            {
+                GaUtil.LOG_ERROR(ex, "clearRegionCells");
+            }
+        }
+
         string checkCameraGrid(CarrierEnum carrierID, EzBlocsGrid camGrid, bool notify)
         {
             //var errCode = ErrCodes.OK;

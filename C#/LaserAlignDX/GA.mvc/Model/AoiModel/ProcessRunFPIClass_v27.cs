@@ -492,12 +492,12 @@ namespace LaserAlignDX.AoiModel.V27
                     _Inspect001_Async_SaveCellBmp(cellBmp, cell);
                 }
 
-                if (bOK)
+                if (bOK && chipMatcher.xResults.Count > 0)
                 {
                     //(4) 使用 xResults[0] 當 Chip Center
                     cell.xFindResult = chipMatcher.xResults[0];
-                    var org_center_x = cell.xFindResult.fCenterX;
-                    var org_center_y = cell.xFindResult.fCenterY;
+                    var debug_org_center_x = cell.xFindResult.fCenterX;
+                    var debug_org_center_y = cell.xFindResult.fCenterY;
                     cell.xFindResult.fCenterX += cellRoi.X;
                     cell.xFindResult.fCenterY += cellRoi.Y;
 
@@ -505,7 +505,12 @@ namespace LaserAlignDX.AoiModel.V27
                     var chipSize = xRecipe.xRegionTrain.Size;
                     var chipBox2D = toBox2D(ref cell.xFindResult, chipSize);
                     var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
-                    //(4.2) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF
+
+                    //(4.2) 將定位結果記入 cell.ChipData
+                    cell.ChipData.ChipBox2D = chipBox2D;
+                    cell.ChipData.PadGrids = chipMatcher.GetResultPadsGrid();
+
+                    //(4.3) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF
                     cell.SetMvdRunPositionFix(GaMvdExt.ToCMvdRectangleF(chipBox2D));
 
                     #region DEBUG_STRING
@@ -515,7 +520,7 @@ namespace LaserAlignDX.AoiModel.V27
                     //debugCellCenterStr += $"DES:{cell.xFindResult.fCenterX};{cell.xFindResult.fCenterY}{Environment.NewLine}";
                     debugSB.Append("INDEX:").Append(cell.Index).Append("#");
                     debugSB.Append("VIEW:").Append(cellRoi.X).Append(";").Append(cellRoi.Y).Append("#");
-                    debugSB.Append("ORG:").Append(org_center_x).Append(";").Append(org_center_y).Append("#");
+                    debugSB.Append("ORG:").Append(debug_org_center_x).Append(";").Append(debug_org_center_y).Append("#");
                     debugSB.Append("DES:").Append(cell.xFindResult.fCenterX).Append(";").Append(cell.xFindResult.fCenterY).AppendLine();
                     #endregion
 
@@ -557,9 +562,6 @@ namespace LaserAlignDX.AoiModel.V27
                         cell.RunAngle = (float)(angle + INI.Instance.Cal_Bca);
                         cell.RunX = (float)(motorDelta.X + INI.Instance.Cal_Bcx);
                         cell.RunY = (float)(motorDelta.Y + INI.Instance.Cal_Bcy);
-
-                        //(7) 記入 chipBox2D
-                        cell.chipLocInCamera = chipBox2D;
 
                         //(8) 量測尺寸
                         if (xInspect.optChipMeasurement)
@@ -626,8 +628,11 @@ namespace LaserAlignDX.AoiModel.V27
         private void _Inspect001_One_Chip_Measurement(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi, IMvdTemplateMatcher matcher = null)
         {
             // 取得 上一輪 晶粒定位 的結果 (xResult)
+            if (matcher.xResults.Count == 0)
+                return;
+
             var chipLocationResult = matcher.xResults[0];
-            var chipBox2D = cell.chipLocInCamera;
+            var chipBox2D = cell.ChipData.ChipBox2D;
             var activeCarrierID = getActiveCarrierID();
             var transCP = _transformModel.GetCameraPhysicTransform(activeCarrierID);
 

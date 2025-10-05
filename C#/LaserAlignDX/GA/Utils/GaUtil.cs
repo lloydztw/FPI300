@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.BasicSpace;
+using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using System.Reflection;
@@ -244,7 +245,6 @@ namespace JetEazy.Utils
         /// </summary>
         public static void LOG(string msg, params object[] args)
         {
-#if (true)
             Color color = Color.Black;
 
             int N = args.Length;
@@ -271,7 +271,12 @@ namespace JetEazy.Utils
             //    GdxGlobal.LOG.Warn(msg);
             //else
             //    GdxGlobal.LOG.Debug(msg);
-#endif
+        }
+        public static void LOG_ERROR(Exception ex, string msg)
+        {
+            LtDebug.LOG.Error(ex, msg);
+            string errMsg = $"[異常] {msg}\n\r\t{ex.Message}";
+            CommonLogClass.Instance.LogMessage(errMsg, Color.Red);
         }
     }
 }

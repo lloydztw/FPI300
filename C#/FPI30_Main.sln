@@ -34,6 +34,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetEazy.VG.Devices", "JetEa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetEazy.Transform", "JetEazy.Calib.Transform\JetEazy.Transform.csproj", "{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traveller.Data.Packer", "Traveller.Data.Packer\Traveller.Data.Packer.csproj", "{F22A8909-F1E9-430C-B395-D9222E311961}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -164,6 +166,18 @@ Global
 		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Release|x64.Build.0 = Release|Any CPU
 		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Release|x86.ActiveCfg = Release|Any CPU
 		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933}.Release|x86.Build.0 = Release|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Debug|x64.Build.0 = Debug|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Debug|x86.Build.0 = Debug|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Release|x64.ActiveCfg = Release|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Release|x64.Build.0 = Release|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Release|x86.ActiveCfg = Release|Any CPU
+		{F22A8909-F1E9-430C-B395-D9222E311961}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -178,6 +192,7 @@ Global
 		{ECF19B8D-BE9A-4159-8B94-DEFC25A59507} = {7A4C5A08-491F-4809-BB45-C2E996222756}
 		{AFA9CF55-2235-415D-B437-F4A62DA34A0C} = {7A4C5A08-491F-4809-BB45-C2E996222756}
 		{A39132CC-9E48-4E8C-90C1-D4A39DBE1933} = {7A4C5A08-491F-4809-BB45-C2E996222756}
+		{F22A8909-F1E9-430C-B395-D9222E311961} = {7A4C5A08-491F-4809-BB45-C2E996222756}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {16A4E0AE-933A-4384-AC0A-76DE7CE40914}

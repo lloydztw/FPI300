@@ -54,9 +54,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 //var mvdRectF = cell.DrawResultRectF();
                 //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRectF));
                 //Center = new JetEazy.QMath.QVector(mvdRectF.CenterX, mvdRectF.CenterY);
-                if (cell.chipLocInCamera != null)
+
+                var chipBox2D = cell?.ChipData?.ChipBox2D;
+                if (chipBox2D != null)
                 {
-                    var cc = cell.chipLocInCamera.Center;
+                    var cc = chipBox2D.Center;
                     Rect = Rectangle.Round(cell.viewRectF);
                     Center = new QVector(cc.X, cc.Y);
                 }

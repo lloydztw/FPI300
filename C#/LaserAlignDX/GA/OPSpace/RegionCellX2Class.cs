@@ -1,25 +1,17 @@
 ﻿using AUVision;
-using Common.RecipeSpace;
-using JetEazy.PlugSpace.BarcodeEx;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using Traveller106;
 using VisionDesigner;
 using VisionDesigner.Code2DReader;
 using VisionDesigner.ImageArithmetic;
-using VisionDesigner.ImageRegionCopy;
 using VisionDesigner.PositionFix;
-using ZXing;
 
 namespace LaserAlignDX.OPSpace
 {
