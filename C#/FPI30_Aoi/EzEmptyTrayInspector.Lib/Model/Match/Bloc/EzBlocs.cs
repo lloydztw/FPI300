@@ -75,5 +75,16 @@ namespace JetEazy.Match
         {
             return Tag is QuadLinkNode;
         }
+
+        /// <summary>
+        /// 2025-10-06 新增
+        /// </summary>
+        public void Offset(float dx, float dy)
+        {
+            var cc = Center?.Offset(dx, dy);
+            Rect.Offset((int)Math.Round(dx), (int)Math.Round(dy));
+            if (cc != null)
+                Center = cc;
+        }
     }
 }

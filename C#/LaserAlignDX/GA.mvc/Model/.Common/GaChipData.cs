@@ -18,12 +18,18 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
 using LeTian.AoiLib;
+using System.Drawing;
 
 
 namespace LaserAlignDX.Model
 {
     public class GaChipData
     {
+        /// <summary>
+        /// 運算截圖時的 Roi (單位 pixels) (FullFov Cammera Coordinates)
+        /// </summary>
+        public RectangleF Roi { get; set; }
+
         /// <summary>
         /// 晶粒定位結果 (單位 pixels) (FullFov Cammera Coordinates)
         /// </summary>
@@ -32,7 +38,7 @@ namespace LaserAlignDX.Model
         /// <summary>
         /// 格點型晶粒的 PAD 格點 (單位 pixels) (FullFov Cammera Coordinates)
         /// </summary>
-        public EzBlocsGrid PadGrids { get; set; } = null;
+        public EzBlocsGrid PadsGrid { get; set; } = null;
 
         /// <summary>
         /// 抓到的邊線 (左上右下) (單位 pixels) (FullFov Cammera Coordinates)
@@ -41,10 +47,15 @@ namespace LaserAlignDX.Model
         public EzLSD.LineSegment[] LineSegments { get; set; } = new EzLSD.LineSegment[4];
 
         /// <summary>
+        /// 邊線拉框 (左上右下) (單位 pixels) (FullFov Cammera Coordinates)
+        /// </summary>
+        public QvBox2D[] LineBorderBoxes { get; set; } = new QvBox2D[4];
+
+        /// <summary>
         /// 尺寸量測點 (左上右下) (單位 pixels) (FullFov Cammera Coordinates)
         /// (除錯用)
         /// </summary>
-        public QVector[] MeasureCalcPoints { get; set; } = new QVector[4];
+        public QVector[] DimMeasurePoints { get; set; } = new QVector[4];
 
         /// <summary>
         /// 定位後之世界座標

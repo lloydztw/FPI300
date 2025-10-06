@@ -14,6 +14,7 @@
 #endregion
 
 
+using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
@@ -229,10 +230,13 @@ namespace LaserAlignDX.AoiModel.V3
                     var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
 
                     //(4.2) 將定位結果記入 cell.ChipData
+                    cell.ChipData.Roi = cellRoi;
                     cell.ChipData.ChipBox2D = chipBox2D;
-                    cell.ChipData.PadGrids = chipMatcher.GetResultPadsGrid();
+                    cell.ChipData.PadsGrid = chipMatcher.GetResultPadsGrid();
+                    cell.ChipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
+                    chipMatcher.GetResultBox2D();
 
-                    //(4.3) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF
+                    //(4.3) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
                     cell.SetMvdRunPositionFix(GaMvdExt.ToCMvdRectangleF(chipBox2D));
 
                     #region 加入_DEBUG_STRING
@@ -252,7 +256,6 @@ namespace LaserAlignDX.AoiModel.V3
                     {
                         //(5.1) 直接使用 QvBox2D 計算 重疊率
                         double overlapRatio = calcOverlap(gaCell, chipBox2D, isLocalCoordinate: false);
-
                         //(5.2) 重疊率 判定結果
                         bOK = overlapRatio >= xInspect.xChipOverlap;
                     }
@@ -490,6 +493,14 @@ namespace LaserAlignDX.AoiModel.V3
             box.SetCenter(center);
             box.SetTheta(angle / 180.0 * Math.PI);
             return box;
+        }
+        void offset(EzBlocsGrid grid, float dx, float dy)
+        {
+            foreach(var bloc in grid)
+            {
+                if (bloc == null) continue;
+                //
+            }
         }
         #endregion
     }

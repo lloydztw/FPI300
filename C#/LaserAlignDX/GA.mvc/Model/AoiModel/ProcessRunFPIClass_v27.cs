@@ -507,10 +507,12 @@ namespace LaserAlignDX.AoiModel.V27
                     var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
 
                     //(4.2) 將定位結果記入 cell.ChipData
+                    cell.ChipData.Roi = cellRoi;
                     cell.ChipData.ChipBox2D = chipBox2D;
-                    cell.ChipData.PadGrids = chipMatcher.GetResultPadsGrid();
+                    cell.ChipData.PadsGrid = chipMatcher.GetResultPadsGrid();
+                    cell.ChipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
 
-                    //(4.3) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF
+                    //(4.3) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
                     cell.SetMvdRunPositionFix(GaMvdExt.ToCMvdRectangleF(chipBox2D));
 
                     #region DEBUG_STRING

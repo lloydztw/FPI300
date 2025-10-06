@@ -18,6 +18,7 @@ using JetEazy.QxCollections;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Windows;
 
 
 namespace JetEazy.Match
@@ -176,6 +177,18 @@ namespace JetEazy.Match
             subGrid.RowMin = 0;
             subGrid.ColMin = 0;
             return subGrid;
+        }
+
+        /// <summary>
+        /// 2025-10-06 新增
+        /// </summary>
+        public void Offset(float dx, float dy)
+        {
+            foreach(var bloc in IterBlocs())
+            {
+                bloc?.Offset(dx, dy);
+            }
+            _boundary.Offset((int)Math.Round(dx), (int)Math.Round(dy));
         }
     }
 }

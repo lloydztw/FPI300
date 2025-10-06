@@ -15,6 +15,7 @@
 
 
 using JetEazy.QMath;
+using NLog.Targets;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -72,6 +73,16 @@ namespace LeTian.AoiLib
             {
                 return CalculateIntersectPoint(this, line2);
             }
+            public QVector CalcTheNearestPoint(QVector targetPt)
+            {
+                var V = ToVector(true);
+                var U = new QVector(V.Y, -V.X);
+                var p2 = targetPt + U * 10;
+                var lineN = new LineSegment(targetPt, p2);
+                var result = CalcIntersectedPoint(lineN);
+                return result;
+            }
+
             public double CalcDistance(PointF point)
             {
                 return CalculateDistance(this, point.X, point.Y);
@@ -87,7 +98,12 @@ namespace LeTian.AoiLib
                 _p2.X += dx;
                 _p2.Y += dy;
             }
-            
+
+            public QVector GetMidPoint()
+            {
+                var mid = (_p1 + _p2) / 2.0;
+                return mid;
+            }
             public QVector ToVector(bool normalize = false)
             {
                 //var p1 = new QVector(P1.X, P1.Y);
@@ -97,13 +113,9 @@ namespace LeTian.AoiLib
                     vect = vect / vect.NormLength;
                 return vect;
             }
-            public QVector GetMidPoint()
+            public PointF[] ToCSharpLine()
             {
-                //var x = (_p1.X + _p2.X) / 2.0;
-                //var y = (_p1.Y + _p2.Y) / 2.0;
-                //return new QVector(x, y);
-                var mid = (_p1 + _p2) / 2.0;
-                return mid;
+                return new[] { P1F, P2F }; 
             }
 
             public LineSegment CreateNewScale(double xscale, double yscale)

@@ -247,7 +247,7 @@ namespace LaserAlignDX.AoiModel.V3
 
         public bool CalcChipDimension(EzLSD.LineSegment[] lines, out SizeF chipSize, bool usePostScale)
         {
-            return _aoiChipMeasure.CalcChipDimension(lines, out chipSize, usePostScale);
+            return _aoiChipMeasure.CalcChipDimension(lines, out chipSize, out var _, usePostScale);
         }
 
         public override void Run()
