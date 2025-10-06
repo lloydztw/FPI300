@@ -39,6 +39,7 @@ namespace JetEazy.Match
         /// </summary>
         public static void CalcRotatedBox2D(IxGridMap<EzBloc> grid, out QvBox2D box2d, bool useBoundaryPoints = false)
         {
+            // 注意: Cv2.MinAreaRect 無法反映 透視投影 效果 !!!
             var rotRect = useBoundaryPoints ? 
                 Cv2.MinAreaRect(IterBoundaryPoints(grid)):
                 Cv2.MinAreaRect(IterCentroids(grid));
@@ -140,9 +141,29 @@ namespace JetEazy.Match
         /// <summary>
         /// 枚舉中心點
         /// </summary>
-        public static IEnumerable<Point> IterCentroids(IxGridMap<EzBloc> grid)
+        public static IEnumerable<Point2f> IterCentroids(IxGridMap<EzBloc> grid)
         {
             if (grid == null)
+                yield break;
+
+            var r = grid.Rows - 1;
+            var c = grid.Cols - 1;
+            var corners = new[]
+            {
+                grid.Get(0,0),
+                grid.Get(0,c),
+                grid.Get(r,c),
+                grid.Get(r,0),
+            };
+            
+            int count = 0;
+            foreach (var bloc in corners)
+            {
+                if (bloc == null) continue;
+                yield return new Point2f((float)bloc.Center.X, (float)bloc.Center.Y);
+                count++;
+            }
+            if (count >= 4)
                 yield break;
 
             for (int row = grid.RowMin; row < grid.RowMax; row++)
@@ -151,21 +172,15 @@ namespace JetEazy.Match
                 {
                     var bloc = grid.Get(row, col);
                     if (bloc != null)
-                        yield return new Point(bloc.CenterX, bloc.CenterY);
+                        yield return new Point2f((float)bloc.Center.X, (float)bloc.Center.Y);
                 }
             }
-
-            //foreach (var bloc in grid)
-            //{
-            //    if (bloc != null)
-            //        yield return new Point(bloc.CenterX, bloc.CenterY);
-            //}
         }
 
         /// <summary>
         /// 枚舉邊界點
         /// </summary>
-        public static IEnumerable<Point> IterBoundaryPoints(IxGridMap<EzBloc> grid)
+        public static IEnumerable<Point2f> IterBoundaryPoints(IxGridMap<EzBloc> grid)
         {
             if (grid == null)
                 yield break;
@@ -177,11 +192,11 @@ namespace JetEazy.Match
                     var bloc = grid.Get(row, col);
                     if (bloc == null) continue;
                     if (!bloc.IsMajorNode())
-                        yield return new Point(bloc.CenterX, bloc.CenterY);
-                    yield return new Point(bloc.Rect.Left, bloc.Rect.Top);
-                    yield return new Point(bloc.Rect.Right, bloc.Rect.Top);
-                    yield return new Point(bloc.Rect.Right, bloc.Rect.Bottom);
-                    yield return new Point(bloc.Rect.Left, bloc.Rect.Bottom);
+                        yield return new Point2f((float)bloc.Center.X, (float)bloc.Center.Y);
+                    yield return new Point2f(bloc.Rect.Left, bloc.Rect.Top);
+                    yield return new Point2f(bloc.Rect.Right, bloc.Rect.Top);
+                    yield return new Point2f(bloc.Rect.Right, bloc.Rect.Bottom);
+                    yield return new Point2f(bloc.Rect.Left, bloc.Rect.Bottom);
                 }
             }
 
@@ -516,7 +531,6 @@ namespace JetEazy.Match
             //GaUtil.SaveData(debugText, $"d:\\paso.log\\line_points_{_debugCount++}.csv");
             #endregion
         }
-
         int _debugCount = 0;
         #endregion
     }

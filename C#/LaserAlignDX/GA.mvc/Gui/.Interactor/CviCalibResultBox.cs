@@ -632,7 +632,7 @@ namespace LaserAlignDX.Mvc.Gui
                 }
             }
         }
-        protected override IEnumerable<EzBloc> iterFetchableBlocs()
+        protected override IEnumerable<EzBloc> iterFetchableBlocs(int camX, int camY)
         {
             if (_grid != null)
             {

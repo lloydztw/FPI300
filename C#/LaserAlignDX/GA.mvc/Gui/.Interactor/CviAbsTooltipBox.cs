@@ -52,10 +52,14 @@ namespace LaserAlignDX.Mvc.Gui
                 needsToRefresh = true;
             }
             // 清除 cursor2
-            else if (e.KeyCode == Keys.Escape && _cursorBloc2 != null)
+            else if (e.KeyCode == Keys.Escape)  // && _cursorBloc2 != null)
             {
-                _cursorBloc2 = null;
-                needsToRefresh = true;
+                if (_cursorBloc != null)
+                {
+                    _cursorBloc2 = null;
+                    needsToRefresh = true;
+                }
+                _toolTip.Hide(viewer);
             }
             else
             {
@@ -337,7 +341,7 @@ namespace LaserAlignDX.Mvc.Gui
             if (BY_PASS)
                 return null;
 
-            var blobs = fetchKNN(x, y, 1, _fetchSize, iterFetchableBlocs());
+            var blobs = fetchKNN(x, y, 1, _fetchSize, iterFetchableBlocs(x,y));
             if (blobs != null && blobs.Length > 0)
                 return blobs[0];
 
@@ -458,7 +462,7 @@ namespace LaserAlignDX.Mvc.Gui
 
                 string txt = composeTooltipText(_cursorBloc, _cursorBloc2);
                 if (!string.IsNullOrEmpty(txt))
-                    _toolTip.Show(txt, wnd, vx + 10, vy + 10, 5000);
+                    _toolTip.Show(txt, wnd, vx + 10, vy + 10);
 
                 _hitPt = new Point(vx, vy);
 
@@ -488,7 +492,7 @@ namespace LaserAlignDX.Mvc.Gui
             OnCursorsChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        protected virtual IEnumerable<EzBloc> iterFetchableBlocs()
+        protected virtual IEnumerable<EzBloc> iterFetchableBlocs(int camX, int camY)
         {
             yield break;
         }

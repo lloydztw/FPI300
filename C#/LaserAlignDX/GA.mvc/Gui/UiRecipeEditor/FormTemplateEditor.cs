@@ -49,7 +49,9 @@ namespace LaserAlignDX.Mvc.Gui
         Button IvTemplateEditorUI.btnPickGolden => btnPickGolden;
         Button IvTemplateEditorUI.btnAutoLineBorders => btnAutoLineBorders;
         NumericUpDown IvTemplateEditorUI.numBorderIndent => numBorderIndent;
-        NumericUpDown IvTemplateEditorUI.numBorderSize => numBorderSize;
+        NumericUpDown IvTemplateEditorUI.numBorderExtend => numBorderSize;
+        NumericUpDown IvTemplateEditorUI.numLineSpanPercentage => numSpanRatio;
+
         Button IvTemplateEditorUI.btnTryScanQrCode => btnTryQrCode;
         Control IvTemplateEditorUI.wndQrCodeResult => rtbCodeContent;
         Control IvTemplateEditorUI.wndVisionSettingsPanel => propertyGrid1;

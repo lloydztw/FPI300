@@ -8,5 +8,8 @@
     <Setting Name="lineBorderExt" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">32</Value>
     </Setting>
+    <Setting Name="lineSpanPercentage" Type="System.Single" Scope="User">
+      <Value Profile="(Default)">90</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

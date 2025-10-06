@@ -46,5 +46,17 @@ namespace LaserAlignDX.Properties {
                 this["lineBorderExt"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("90")]
+        public float lineSpanPercentage {
+            get {
+                return ((float)(this["lineSpanPercentage"]));
+            }
+            set {
+                this["lineSpanPercentage"] = value;
+            }
+        }
     }
 }

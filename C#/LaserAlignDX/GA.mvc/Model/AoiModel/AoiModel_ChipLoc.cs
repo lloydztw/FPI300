@@ -234,7 +234,6 @@ namespace LaserAlignDX.AoiModel.V3
                     cell.ChipData.ChipBox2D = chipBox2D;
                     cell.ChipData.PadsGrid = chipMatcher.GetResultPadsGrid();
                     cell.ChipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
-                    chipMatcher.GetResultBox2D();
 
                     //(4.3) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
                     cell.SetMvdRunPositionFix(GaMvdExt.ToCMvdRectangleF(chipBox2D));

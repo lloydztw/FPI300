@@ -13,6 +13,7 @@
  */
 #endregion
 
+using AForge.Imaging;
 using JetEazy.FormSpace;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
@@ -345,8 +346,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         private void CviCellsResultBoxes_OnCursorsChanged(object sender, EventArgs e)
         {
             var cursorBloc = GetCursorBloc(0);
-            _cviRegionBox.Visible = cursorBloc != null;
-            _cviRegionBox.Tag = (cursorBloc as CellBloc)?.Cell;
+            var cellBloc = cursorBloc is CellBloc cb ? cb : cursorBloc?.Tag as CellBloc;
+            var activeCell = cellBloc?.Cell;
+            _cviRegionBox.Tag = activeCell;
+            _cviRegionBox.Visible = cursorBloc != null; // == cellBloc;
         }
         #endregion
 
@@ -559,21 +562,21 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 //}
                 #endregion
 
+                #region DIM_MEASURE_POINTS
+                var dimMeasurePoints = cell.ChipData.DimMeasurePoints;
+                if (dimMeasurePoints != null)
+                    _chipDimMeasurePoints.Add(cell, dimMeasurePoints);
+                #endregion
+
                 #region PADS_BOX2D
                 var padsGrid = cell.ChipData.PadsGrid;
                 if (padsGrid != null)
                 {
                     Color itemColor = cell.inspectReason == InspectReason.PASS ? Color.Lime : Color.Red;
-                    EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var padsBox2D, true);
+                    EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var padsBox2D, false);
                     var item = new CviRotRectBox(padsBox2D, itemColor, 0.20f) { Tag = cell };
                     _drawItemsEx.Add(item);
                 }
-                #endregion
-
-                #region DIM_MEASURE_POINTS
-                var dimMeasurePoints = cell.ChipData.DimMeasurePoints;
-                if (dimMeasurePoints != null)
-                    _chipDimMeasurePoints.Add(cell, dimMeasurePoints);
                 #endregion
             }
 
@@ -649,8 +652,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var pen = viewer.GetOnePixelPen(color);
             var cx = (float)pt.X;
             var cy = (float)pt.Y;
-            //gxView.DrawLine(pen, cx - sz, cy, cx + sz, cy);
-            //gxView.DrawLine(pen, cx, cy - sz, cx, cy + sz);
+            //>>> gxView.DrawLine(pen, cx - sz, cy, cx + sz, cy);
+            //>>> gxView.DrawLine(pen, cx, cy - sz, cx, cy + sz);
             var rect = new RectangleF(cx - sz, cy - sz, sz * 2, sz * 2);
             gxView.DrawEllipse(pen, rect);
         }
@@ -658,7 +661,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             if (pt == null || pt2 == null)
                 return;
-            float sz = 20;
             var pen = viewer.GetOnePixelPen(color);
             var cx = (float)pt.X;
             var cy = (float)pt.Y;
@@ -708,6 +710,20 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
     partial class CviCellsResultBoxes
     {
+        public bool IsEmptyTrayMode
+        {
+            get => _mode == ScanInspectMode.NOTRAY;
+        }
+        public CarrierEnum ActiveCarrierID
+        {
+            get; set;
+        }
+        public TravellerTransforms TransformsModel
+        {
+            get;
+            set;
+        }
+
         #region TOOL_TIP_FUNCTIONS
         void autoAdjustFetchSize()
         {
@@ -728,29 +744,96 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 }
             }
         }
-        protected override IEnumerable<EzBloc> iterFetchableBlocs()
+        EzBloc createPseudoBloc(QVector pt, object tag)
+        {
+            if (pt == null)
+                return null;
+            int sz = 50;
+            var cx = (int)pt.X;
+            var cy = (int)pt.Y;
+            var rect = new Rectangle(cx - sz, cy - sz, sz * 2, sz * 2);
+            var pseudoBloc = new EzBloc(rect, 0, tag: tag)
+            {
+                Center = pt
+            };
+            return pseudoBloc;
+        }
+        protected override IEnumerable<EzBloc> iterFetchableBlocs(int camX, int camY)
         {
             if (_grid != null)
             {
                 foreach (var bloc in _grid)
                 {
-                    if (bloc != null)
-                        yield return bloc;
-                    //else
-                    //    System.Diagnostics.Debug.WriteLine("EMPTY_BLOC!");
+                    if (bloc == null)
+                    {
+                        //>>> DEBUG <<< System.Diagnostics.Debug.WriteLine("EMPTY_BLOC!");
+                        continue;
+                    }
+
+                    //(1) Cell Bloc
+                    yield return bloc;
+
+                    var cell = (bloc as CellBloc)?.Cell;
+                    var chipBox2D = cell.ChipData?.ChipBox2D;
+                    if (chipBox2D != null && chipBox2D.BoundaryRect.Contains(camX, camY))
+                    {
+                        bool isFetched = false;
+
+                        //(2) iterate MEASURE Points
+                        var measurePts = cell?.ChipData.DimMeasurePoints;
+                        if (measurePts != null)
+                        {
+                            foreach (var pt in measurePts)
+                            {
+                                if (pt == null) continue;
+                                var pseudoBloc = createPseudoBloc(pt, bloc);
+                                yield return pseudoBloc;
+                                isFetched = true;
+                            }
+                        }
+
+                        //(3) iterate PAD Points
+                        var padsGrid = cell?.ChipData.PadsGrid;
+                        if (padsGrid != null)
+                        {
+                            var r = padsGrid.Rows - 1;
+                            var c = padsGrid.Cols - 1;
+                            var pads = new[] {
+                                padsGrid.Get(0, 0)?.Center,
+                                padsGrid.Get(0, c)?.Center,
+                                padsGrid.Get(r, c)?.Center,
+                                padsGrid.Get(r, 0)?.Center,
+                            };
+                            foreach (var pad in pads)
+                            {
+                                if (pad == null) continue;
+                                var pseudoBloc = createPseudoBloc(pad, bloc);
+                                yield return pseudoBloc;
+                                isFetched = true;
+                            }
+                        }
+
+                        if (isFetched)
+                            yield break;
+                    }
                 }
             }
         }
         protected override string composeTooltipText(EzBloc cursor, EzBloc cursor2)
         {
-            var cellBloc = cursor as CellBloc;
+            if (cursor is CellBloc cellBloc)
+            {
+                _cviRegionBox.Box2D.SetCenter((float)cellBloc.Center.X, (float)cellBloc.Center.Y);
+                _cviRegionBox.Visible = true;
+            }
+            else if(cursor is EzBloc bloc &&  bloc.Tag is CellBloc cb)
+            {
+                _cviRegionBox.Box2D.SetCenter((float)cb.Center.X, (float)cb.Center.Y);
+                _cviRegionBox.Visible = true;
+            }
 
-            _cviRegionBox.Box2D.SetCenter((float)cellBloc.Center.X, (float)cellBloc.Center.Y);
-            _cviRegionBox.Visible = true;
-
-            //string txt = formatDisplayText(cellBloc);
+            // string txt = formatDisplayText(cellBloc);
             string txt = composeTooltipTextTrf(cursor, cursor2);
-
             return txt;
         }
         string formatDisplayText(CellBloc bloc)
@@ -782,20 +865,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         #endregion
 
-        public bool IsEmptyTrayMode
-        {
-            get => _mode == ScanInspectMode.NOTRAY;
-        }
-        public CarrierEnum ActiveCarrierID
-        {
-            get; set;
-        }
-        public TravellerTransforms TransformsModel
-        {
-            get;
-            set;
-        }
-
         #region DETAIL_TOOL_TIP_FUNCTIONS
         void initDefaultTrfs()
         {
@@ -811,18 +880,23 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 initDefaultTrfs();
 
-                var cellBloc = cursorBloc as CellBloc;
+                var cursorCellBloc = cursorBloc as CellBloc;
+                var cellBloc = cursorCellBloc != null ? cursorCellBloc : cursorBloc.Tag as CellBloc;
+
                 var cell = cellBloc?.Cell;
                 if (cell == null || !checkResult(cell, out bool isPass, out bool isEmpty))
                     return null;
 
                 int row = cell.CellRow;
-                int col = cell.CellCol;
+                int col = cell.CellCol; 
 
                 bool isShowScore = true;
                 var sb = new StringBuilder();
 
-                sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
+                if (cell != null)
+                {
+                    sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
+                }
 
                 appendCameraCoords(sb, cursorBloc, cursorBloc2);
 
@@ -830,10 +904,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     if (TransformsModel != null)
                     {
-                        //appendMotorCoords(sb, cursorBloc, cursorBloc2);
-                        //appendWorldCoords(sb, cursorBloc, cursorBloc2);
-                        //appendPlcCompensation(sb, cursorBloc, row, col);
-                        appendDetailCoordsInfo(sb, row, col, cursorBloc, cursorBloc2);
+                        if (cursorCellBloc != null)
+                            appendDetailCoordsInfo(sb, row, col, cursorBloc, cursorBloc2);
+                        else
+                            appendMeasurePointInfo(sb, cursorBloc, cursorBloc2);
                         isShowScore = false;
                     }
                 }
@@ -897,6 +971,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 world_current = tranCP.Trans(camPt);
             }
 
+            #region S1_S2_馬達座標
             sb.AppendLine().Append("S1 馬達目標(X,Y) = (").AppendValues((float)s1_target.X, (float)s1_target.Y).Append(") mm");
             if(camPt!=null)
                 sb.AppendLine().Append("S1 馬達座標(X,Y) = (").AppendValues((float)s1_current.X, (float)s1_current.Y).Append(") mm");
@@ -904,12 +979,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             sb.AppendLine().Append("S2 馬達目標(X,Y) = (").AppendValues((float)s2_target.X, (float)s2_target.Y).Append(") mm");
             if (camPt != null)
                 sb.AppendLine().Append("S2 馬達座標(X,Y) = (").AppendValues((float)s2_current.X, (float)s2_current.Y).Append(") mm");
+            #endregion
 
+            #region PHYSIC_目標座標
             sb.AppendLine();
             sb.AppendLine().Append("Physic 目標(X,Y) = (").AppendValues((float)world_target.X, (float)world_target.Y).Append(") mm");
             if (camPt != null)
                 sb.AppendLine().Append("Physic 座標(X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+            #endregion
 
+            #region 變動值
             if (camPt != null)
             {
                 var world_delta = world_current - world_target;
@@ -921,9 +1000,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 sb.AppendLine($"PLC 格點 補償量 ΔX = {motor_delta.X:0.000} mm");
                 sb.AppendLine($"PLC 格點 補償量 ΔY = {motor_delta.Y:0.000} mm");
             }
+            #endregion
 
             if (bloc != null && bloc2 != null && bloc != bloc2)
             {
+                #region 量測兩點距離
                 var camPt2 = getCentroid(bloc2);
                 if (camPt2 != null)
                 {
@@ -936,29 +1017,111 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     sb.AppendLine($"Physic 座標 DY = {dv.Y:0.000} mm");
                     sb.AppendLine($"Physic 座標 距離 = {dist:0.000} mm");
                 }
+                #endregion
             }
             else
             {
                 var cell = (bloc as CellBloc)?.Cell;
                 if (cell != null)
                 {
+                    #region 最後補償量
                     sb.AppendLine();
                     sb.AppendLine($"RunX = {cell.RunX:0.000} mm");
                     sb.AppendLine($"RunY = {cell.RunY:0.000} mm");
+                    #endregion
 
                     if (_xRecipe.InspectParams.optChipMeasurement)
                     {
+                        #region 尺寸量測結果
                         var cW = _xRecipe.InspectParams.mWidthStand;
                         var cH = _xRecipe.InspectParams.mHeightStand;
-                        //var dx = (cW - cell.RunWidth) / (cW + 1e-9) * 100.0;
-                        //var dy = (cH - cell.RunHeight) / (cH + 1e-9) * 100.0;
-                        //sb.AppendLine().Append($"晶粒 寬= {cell.RunWidth:0.000} mm").Append($" (Δ= {dx:0.00} %)");
-                        //sb.AppendLine().Append($"晶粒 高= {cell.RunHeight:0.000} mm").Append($" (Δ= {dy:0.00} %)");
                         var dx = Math.Round(cW - cell.RunWidth, 3);
                         var dy = Math.Round(cH - cell.RunHeight, 3);
-                        sb.AppendLine().Append($"晶粒_寬 = {cell.RunWidth:0.000} mm").Append($" (ΔW = {dx:0.000} mm)");
-                        sb.AppendLine().Append($"晶粒_高 = {cell.RunHeight:0.000} mm").Append($" (ΔH = {dy:0.000} mm)");
+                        sb.AppendLine().Append($"晶粒.寬 = {cell.RunWidth:0.000} mm").Append($" (ΔW = {dx:0.000} mm)");
+                        sb.AppendLine().Append($"晶粒.高 = {cell.RunHeight:0.000} mm").Append($" (ΔH = {dy:0.000} mm)");
+                        #endregion
+
+                        #region 尺寸量測詳細點位
+                        var meansurePts = cell?.ChipData?.DimMeasurePoints;
+                        if (meansurePts != null && meansurePts.Length >= 4 &&
+                            meansurePts[0] != null && meansurePts[1] != null &&
+                            meansurePts[2] != null && meansurePts[3] != null)
+                        {
+                            var dpX = (meansurePts[0] - meansurePts[2]).NormLength;
+                            var dpY = (meansurePts[1] - meansurePts[3]).NormLength;
+                            sb.AppendLine();
+                            sb.AppendLine().Append($"晶粒.寬 = {dpX:0.0} pix");
+                            sb.AppendLine().Append($"晶粒.高 = {dpY:0.0} pix");
+                        }
+                        #endregion
+
+                        #region 晶粒_PADS
+                        var padsGrid = cell?.ChipData?.PadsGrid;
+                        if (padsGrid != null)
+                        {
+                            var p0 = padsGrid.Get(0, 0)?.Center;
+                            var p1 = padsGrid.Get(0, padsGrid.Cols - 1)?.Center;
+                            var p2 = padsGrid.Get(padsGrid.Rows - 1, 0)?.Center;
+                            if (p0 != null && p1 != null && p2 != null)
+                            {
+                                var pW = (p0 - p1).NormLength;
+                                var pH = (p0 - p2).NormLength;
+                                sb.AppendLine();
+                                sb.AppendLine().Append($"PAD.寬 = {pW:0.0} pix");
+                                sb.AppendLine().Append($"PAD.高 = {pH:0.0} pix");
+                            }
+                        }
+                        #endregion
                     }
+                }
+            }
+        }
+        void appendMeasurePointInfo(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        {
+            if (TransformsModel == null)
+                return;
+
+
+            QVector world_current = null;
+
+            var camPt = bloc.Center;
+            if (camPt != null)
+            {
+                //var tranCM1 = TransformsModel.GetCameraMotorTransform(ActiveCarrierID, SuckerRowEnum.S1);
+                //var tranCM2 = TransformsModel.GetCameraMotorTransform(ActiveCarrierID, SuckerRowEnum.S2);
+
+                var tranCP = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+
+                world_current = tranCP.Trans(camPt);
+
+                sb.AppendLine().Append("Physic 座標(X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+            }
+
+            //if (camPt != null)
+            //{
+            //    var world_delta = world_current - world_target;
+            //    var motor_delta = s1_current - s1_target;
+            //    sb.AppendLine();
+            //    sb.AppendLine($"Physic 變動值 ΔX = {world_delta.X:0.000} mm");
+            //    sb.AppendLine($"Physic 變動值 ΔY = {world_delta.Y:0.000} mm");
+            //    sb.AppendLine();
+            //    sb.AppendLine($"PLC 格點 補償量 ΔX = {motor_delta.X:0.000} mm");
+            //    sb.AppendLine($"PLC 格點 補償量 ΔY = {motor_delta.Y:0.000} mm");
+            //}
+
+            if (bloc != null && bloc2 != null && bloc != bloc2)
+            {
+                var camPt2 = bloc2.Center;
+                if (camPt2 != null)
+                {
+                    var transCP = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+                    var world_last = transCP.Trans(camPt2);
+                    var dv = world_current - world_last;
+                    double dist = dv.NormLength;
+                    sb.AppendLine();
+                    sb.AppendLine($"Physic 座標 DX = {dv.X:0.000} mm");
+                    sb.AppendLine($"Physic 座標 DY = {dv.Y:0.000} mm");
+                    sb.AppendLine($"Physic 座標 距離 = {dist:0.000} mm");
                 }
             }
         }

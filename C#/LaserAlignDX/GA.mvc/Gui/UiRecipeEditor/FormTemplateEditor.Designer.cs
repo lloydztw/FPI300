@@ -54,12 +54,14 @@
             this.btnPickGolden = new System.Windows.Forms.Button();
             this.tbLayoutB = new System.Windows.Forms.TableLayoutPanel();
             this.tbLayoutSubR = new System.Windows.Forms.Panel();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.btnDefectDelete = new System.Windows.Forms.Button();
             this.btnDefectClear = new System.Windows.Forms.Button();
             this.btnDefectAdd = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnTrain = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
+            this.label2 = new System.Windows.Forms.Label();
+            this.numSpanRatio = new System.Windows.Forms.NumericUpDown();
             this.tbLayoutSubM.SuspendLayout();
             this.tbLayoutA.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -70,6 +72,7 @@
             this.groupBox1.SuspendLayout();
             this.tbLayoutB.SuspendLayout();
             this.tbLayoutSubR.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numSpanRatio)).BeginInit();
             this.SuspendLayout();
             // 
             // tbLayoutSubM
@@ -179,6 +182,8 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.label2);
+            this.groupBox2.Controls.Add(this.numSpanRatio);
             this.groupBox2.Controls.Add(this.labelA);
             this.groupBox2.Controls.Add(this.numBorderIndent);
             this.groupBox2.Controls.Add(this.labelB);
@@ -197,7 +202,7 @@
             // labelA
             // 
             this.labelA.AutoSize = true;
-            this.labelA.Location = new System.Drawing.Point(49, 43);
+            this.labelA.Location = new System.Drawing.Point(50, 31);
             this.labelA.Name = "labelA";
             this.labelA.Size = new System.Drawing.Size(95, 20);
             this.labelA.TabIndex = 71;
@@ -205,7 +210,7 @@
             // 
             // numBorderIndent
             // 
-            this.numBorderIndent.Location = new System.Drawing.Point(167, 40);
+            this.numBorderIndent.Location = new System.Drawing.Point(168, 28);
             this.numBorderIndent.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -229,7 +234,7 @@
             // labelB
             // 
             this.labelB.AutoSize = true;
-            this.labelB.Location = new System.Drawing.Point(49, 76);
+            this.labelB.Location = new System.Drawing.Point(50, 64);
             this.labelB.Name = "labelB";
             this.labelB.Size = new System.Drawing.Size(95, 20);
             this.labelB.TabIndex = 69;
@@ -237,7 +242,7 @@
             // 
             // numBorderSize
             // 
-            this.numBorderSize.Location = new System.Drawing.Point(167, 73);
+            this.numBorderSize.Location = new System.Drawing.Point(168, 61);
             this.numBorderSize.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -437,6 +442,20 @@
             this.tbLayoutSubR.Size = new System.Drawing.Size(256, 473);
             this.tbLayoutSubR.TabIndex = 77;
             // 
+            // btnCancel
+            // 
+            this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnCancel.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCancel.Location = new System.Drawing.Point(41, 391);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(172, 52);
+            this.btnCancel.TabIndex = 73;
+            this.btnCancel.Text = "取消 修改";
+            this.btnCancel.UseVisualStyleBackColor = false;
+            this.btnCancel.Visible = false;
+            // 
             // btnDefectDelete
             // 
             this.btnDefectDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
@@ -502,19 +521,33 @@
             this.btnTrain.Text = "檢查 模板";
             this.btnTrain.UseVisualStyleBackColor = false;
             // 
-            // btnCancel
+            // label2
             // 
-            this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
-            this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnCancel.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(41, 391);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(172, 52);
-            this.btnCancel.TabIndex = 73;
-            this.btnCancel.Text = "取消 修改";
-            this.btnCancel.UseVisualStyleBackColor = false;
-            this.btnCancel.Visible = false;
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(50, 97);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(96, 20);
+            this.label2.TabIndex = 73;
+            this.label2.Text = "跨度比例 (%)";
+            // 
+            // numSpanRatio
+            // 
+            this.numSpanRatio.DecimalPlaces = 1;
+            this.numSpanRatio.Location = new System.Drawing.Point(168, 94);
+            this.numSpanRatio.Minimum = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+            this.numSpanRatio.Name = "numSpanRatio";
+            this.numSpanRatio.Size = new System.Drawing.Size(123, 27);
+            this.numSpanRatio.TabIndex = 72;
+            this.numSpanRatio.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numSpanRatio.Value = new decimal(new int[] {
+            90,
+            0,
+            0,
+            0});
             // 
             // FormTemplateEditor
             // 
@@ -541,6 +574,7 @@
             this.groupBox1.PerformLayout();
             this.tbLayoutB.ResumeLayout(false);
             this.tbLayoutSubR.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.numSpanRatio)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -577,5 +611,7 @@
         private System.Windows.Forms.NumericUpDown numBorderIndent;
         private System.Windows.Forms.Label lblActiveCarrierID;
         private System.Windows.Forms.Button btnCancel;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.NumericUpDown numSpanRatio;
     }
 }

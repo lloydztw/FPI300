@@ -29,7 +29,8 @@ namespace LaserAlignDX.Mvc.Gui
         Button btnPickGolden {  get; }
         Button btnAutoLineBorders { get; }
         NumericUpDown numBorderIndent { get; }
-        NumericUpDown numBorderSize { get; }
+        NumericUpDown numBorderExtend { get; }
+        NumericUpDown numLineSpanPercentage { get; }
 
         Button btnTryScanQrCode { get; }
         Control wndQrCodeResult { get; }

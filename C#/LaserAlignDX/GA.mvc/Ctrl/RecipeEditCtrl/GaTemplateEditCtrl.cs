@@ -436,11 +436,13 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             var rect = Rectangle.Round(_xGoldenChipRect);
             var ind = (int)_editorUI.numBorderIndent.Value;
-            var ext = (int)_editorUI.numBorderSize.Value;
+            var ext = (int)_editorUI.numBorderExtend.Value;
+            var ratio = (double)_editorUI.numLineSpanPercentage.Value * 0.01;
+
             var W = rect.Width;
             var H = rect.Height;
-            var ww = (int)(rect.Width * 0.6);
-            var hh = (int)(rect.Height * 0.6);
+            var ww = (int)(rect.Width * ratio);
+            var hh = (int)(rect.Height * ratio);
             var dw = W - ww;
             var dh = H - hh;
             var x = rect.X;
@@ -719,18 +721,19 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             try
             {
+                var settings = Properties.Settings.Default;
                 if (save)
                 {
-                    Properties.Settings.Default.lineBorderIndent = (int)_editorUI.numBorderIndent.Value;
-                    Properties.Settings.Default.lineBorderExt = (int)_editorUI.numBorderSize.Value;
-                    Properties.Settings.Default.Save();
+                    settings.lineBorderIndent = (int)_editorUI.numBorderIndent.Value;
+                    settings.lineBorderExt = (int)_editorUI.numBorderExtend.Value;
+                    settings.lineSpanPercentage = (float)_editorUI.numLineSpanPercentage.Value;
+                    settings.Save();
                 }
                 else
                 {
-                    var indent = Properties.Settings.Default.lineBorderIndent;
-                    var ext = Properties.Settings.Default.lineBorderExt;
-                    _editorUI.numBorderIndent.Value = indent;
-                    _editorUI.numBorderSize.Value = ext;
+                    safeSet(_editorUI.numBorderIndent, settings.lineBorderIndent);
+                    safeSet(_editorUI.numBorderExtend, settings.lineBorderExt);
+                    safeSet(_editorUI.numLineSpanPercentage, (decimal)settings.lineSpanPercentage);
                 }
             }
             catch
@@ -828,8 +831,14 @@ namespace LaserAlignDX.Mvc.Ctrl
             _editorUI.btnPickGolden.Enabled = _opSelector == OpSelector.Golden;
             _editorUI.btnAutoLineBorders.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.numBorderIndent.Enabled = _opSelector == OpSelector.LineBorders;
-            _editorUI.numBorderSize.Enabled = _opSelector == OpSelector.LineBorders;
+            _editorUI.numBorderExtend.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.btnTryScanQrCode.Enabled = _opSelector == OpSelector.QrCode;
+        }
+        void safeSet(NumericUpDown num, decimal value)
+        {
+            value = Math.Min(num.Maximum, value);
+            value = Math.Max(num.Minimum, value);
+            num.Value = value;
         }
         #endregion
 
