@@ -33,7 +33,6 @@ using System.Windows.Forms;
 using VisionDesigner;
 
 using CELL = LaserAlignDX.OPSpace.RegionCellX3Class;
-using InspectParams = LaserAlignDX.OPSpace.RecipeSpace.InspectX3ParaClass;
 using RECIPE = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
 
 
@@ -87,21 +86,12 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             get => RECIPE.Instance;
         }
-        InspectParams _inspectParams
-        {
-            get => InspectParams.Instance;
-        }
         #endregion
 
         #region PRIVATE_DATA
         ScanInspectMode _mode;
         EzBlocsGrid _grid;
         IList<EzBloc> _outGridBlocs;
-        #endregion
-
-        #region GUI_MEMBERS
-        //IxDispTextFormatter _formatter = new MainDispTextFormatter();
-        Font _font = null;
         #endregion
 
         public Control lblSummaryTitle
@@ -115,6 +105,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         List<IvDrawItem> _drawItems = new List<IvDrawItem>();
         List<IvDrawItem> _drawItemsEx = new List<IvDrawItem>();
         Dictionary<object, QVector[]> _chipDimMeasurePoints = new Dictionary<object, QVector[]>();
+        Font _font = null;
         #endregion
 
         public CviCellsResultBoxes()
@@ -332,14 +323,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 try
                 {
-                    draw_DimMeasurePoints(viewer, gxView);
-
-                    foreach (var item in _drawItemsEx)
-                        item.OnDraw(viewer, gxView);
-
-                    foreach (var item in _drawItems)
-                        item.OnDraw(viewer, gxView);
-
+                    draw_ChipsLoc(viewer, gxView);
+                    draw_ChipDetails(viewer, gxView);
                     draw_QrCodes(viewer, gxView);
                 }
                 catch (Exception ex)
@@ -361,6 +346,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             var cursorBloc = GetCursorBloc(0);
             _cviRegionBox.Visible = cursorBloc != null;
+            _cviRegionBox.Tag = (cursorBloc as CellBloc)?.Cell;
         }
         #endregion
 
@@ -480,33 +466,34 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0 && chipBox2D != null)
                 {
                     // PASS
-                    var item = new CviRotRectBox(chipBox2D, Color.Lime, 0f);
+                    var item = new CviRotRectBox(chipBox2D, Color.Lime, 0f) { Tag = cell };
                     _drawItems.Add(item);
                 }
                 else if (cell.inspectReason != InspectReason.INS_ALIGNERR && chipBox2D != null)
                 {
                     // NG
-                    var item = new CviRotRectBox(chipBox2D, Color.Red, 0.25f) { Text = "NG" };
+                    var item = new CviRotRectBox(chipBox2D, Color.Red, 0.25f) { Text = "NG", Tag = cell };
                     _drawItems.Add(item);
                 }
                 else
                 {
                     // 格點 (吸盤) 空位
-                    var cc = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
-                    var rect = JetEazy.Qcvt.CreateCenterRect(cc.X, cc.Y, 200f, 200f);
+                    var center = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
+                    var rect = JetEazy.Qcvt.CreateCenterRect(center.X, center.Y, 200f, 200f);
                     var box2D = new QvBox2D();
                     box2D.SetBox(rect.Location, rect.Size);
-                    var item = new CviRotRectBox(box2D, Color.Purple, 0.10f);
+                    var item = new CviRotRectBox(box2D, Color.Purple, 0.10f) { Tag = cell };
                     _drawItems.Add(item);
                 }
 
                 #region PADS_BOX2D
-                var padsGrid = cell.ChipData.PadsGrid;
-                if (padsGrid != null)
-                {
-                    EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var padsBox2D, true);
-                    _drawItemsEx.Add(new CviRotRectBox(padsBox2D, Color.Purple));
-                }
+                //var padsGrid = cell.ChipData.PadsGrid;
+                //if (padsGrid != null)
+                //{
+                //    EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var padsBox2D, true);
+                //    var item = new CviRotRectBox(padsBox2D, itemColor, 0.20f) { Tag = cell };
+                //    _drawItemsEx.Add(item);
+                //}
                 #endregion
             }
         }
@@ -529,7 +516,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 foreach (var lineSeg in cell.ChipData.LineSegments)
                 {
                     if (lineSeg != null)
-                        drawItemsOfLineSegments.Add(new CviLineSegmentsBox(Color.Cyan, lineSeg.ToCSharpLine()));
+                        drawItemsOfLineSegments.Add(new CviLineSegmentsBox(Color.Cyan, lineSeg.ToCSharpLine()) { Tag = cell });
                 }
                 // 繪件: 邊線 (左上右下) (舊版)
                 if (drawItemsOfLineSegments.Count == 0)
@@ -539,7 +526,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     var offset = cellRect.Location;
                     var linesOut = GaMvdExt.ToCSharpLines(offset, cell.cMvdLineSegmentFsOut);
                     if (linesOut != null && linesOut.Length > 0)
-                        drawItemsOfLineSegments.Add(new CviLineSegmentsBox(Color.Cyan, linesOut));
+                        drawItemsOfLineSegments.Add(new CviLineSegmentsBox(Color.Cyan, linesOut) { Tag = cell });
                 }
                 #endregion
 
@@ -548,7 +535,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 foreach (var borderBox in cell.ChipData.LineBorderBoxes)
                 {
                     if (borderBox != null)
-                        drawItemsOfBorderBoxes.Add(new CviRotRectBox(borderBox, Color.DarkBlue));
+                        drawItemsOfBorderBoxes.Add(new CviRotRectBox(borderBox, Color.DarkBlue) { Tag = cell });
                 }
                 // 繪件: 邊線手拉框 (舊版)
                 if (drawItemsOfBorderBoxes.Count == 0)
@@ -556,7 +543,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     foreach (var mvdShape in cell.cMvdShapesForFindLineRegion)
                     {
                         if (mvdShape is CMvdRectangleF mvdRect)
-                            drawItemsOfBorderBoxes.Add(new CviRotRectBox(mvdRect.ToBox2D(), Color.DarkBlue));
+                            drawItemsOfBorderBoxes.Add(new CviRotRectBox(mvdRect.ToBox2D(), Color.DarkBlue) { Tag = cell });
                     }
                 }
                 #endregion
@@ -572,6 +559,17 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 //}
                 #endregion
 
+                #region PADS_BOX2D
+                var padsGrid = cell.ChipData.PadsGrid;
+                if (padsGrid != null)
+                {
+                    Color itemColor = cell.inspectReason == InspectReason.PASS ? Color.Lime : Color.Red;
+                    EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var padsBox2D, true);
+                    var item = new CviRotRectBox(padsBox2D, itemColor, 0.20f) { Tag = cell };
+                    _drawItemsEx.Add(item);
+                }
+                #endregion
+
                 #region DIM_MEASURE_POINTS
                 var dimMeasurePoints = cell.ChipData.DimMeasurePoints;
                 if (dimMeasurePoints != null)
@@ -579,28 +577,69 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 #endregion
             }
 
-            _drawItems.AddRange(drawItemsOfLineSegments);
-            _drawItems.AddRange(drawItemsOfBorderBoxes);
+            _drawItemsEx.AddRange(drawItemsOfLineSegments);
+            _drawItemsEx.AddRange(drawItemsOfBorderBoxes);
         }
         #endregion
 
-        #region DRAW_DIM_MEASURE_POINTS_FUNCTIONS
-        void draw_DimMeasurePoints(CvImageViewer viewer, Graphics gxView)
+        #region DRAW_FUNCTIONS
+        void draw_ChipsLoc(CvImageViewer viewer, Graphics gxView)
+        {
+            var activeCell = _cviRegionBox?.Tag;
+            var forceDraw = !_xRecipe.InspectParams.optChipMeasurement;
+            foreach (var item in _drawItems)
+            {
+                if (item == null) continue;
+                if (forceDraw || item.Tag != activeCell)
+                    item.OnDraw(viewer, gxView);
+            }
+        }
+        void draw_ChipDetails(CvImageViewer viewer, Graphics gxView)
         {
             if (!_xRecipe.InspectParams.optChipMeasurement)
                 return;
 
-            foreach (var kv in _chipDimMeasurePoints)
+            var activeCell = _cviRegionBox?.Tag;
+
+            foreach (var item in _drawItemsEx)
             {
-                var points = kv.Value;
-                if (points != null)
+                if (item == null) continue;
+                if (item.Tag == activeCell)
+                    item.OnDraw(viewer, gxView);
+            }
+
+            draw_DimMeasurePoints(viewer, gxView, activeCell);
+        }
+        #endregion
+
+        #region DRAW_DIM_MEASURE_POINTS_FUNCTIONS
+        void draw_DimMeasurePoints(CvImageViewer viewer, Graphics gxView, object activeCell)
+        {
+            if (!_xRecipe.InspectParams.optChipMeasurement)
+                return;
+
+            if (_chipDimMeasurePoints.TryGetValue(activeCell, out var measurePts))
+            {
+                if (measurePts != null)
                 {
-                    foreach (var p in points)
+                    foreach (var p in measurePts)
                         draw_MeasurePoint(viewer, gxView, p, Color.Yellow);
-                    draw_MeasureLine(viewer, gxView, points[0], points[2], Color.Yellow);
-                    draw_MeasureLine(viewer, gxView, points[1], points[3], Color.Yellow);
+                    draw_MeasureLine(viewer, gxView, measurePts[0], measurePts[2], Color.Yellow);
+                    draw_MeasureLine(viewer, gxView, measurePts[1], measurePts[3], Color.Yellow);
                 }
             }
+
+            //foreach (var kv in _chipDimMeasurePoints)
+            //{
+            //    var points = kv.Value;
+            //    if (points != null)
+            //    {
+            //        foreach (var p in points)
+            //            draw_MeasurePoint(viewer, gxView, p, Color.Yellow);
+            //        draw_MeasureLine(viewer, gxView, points[0], points[2], Color.Yellow);
+            //        draw_MeasureLine(viewer, gxView, points[1], points[3], Color.Yellow);
+            //    }
+            //}
         }
         void draw_MeasurePoint(CvImageViewer viewer, Graphics gxView, QVector pt, Color color)
         {
@@ -695,13 +734,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             {
                 foreach (var bloc in _grid)
                 {
-                    //var cell = (bloc as CellBloc)?.Cell;
-                    //if (cell != null)
-                    //    yield return bloc;
                     if (bloc != null)
                         yield return bloc;
-                    else
-                        System.Diagnostics.Debug.WriteLine("EMPTY_BLOC!");
+                    //else
+                    //    System.Diagnostics.Debug.WriteLine("EMPTY_BLOC!");
                 }
             }
         }
@@ -787,7 +823,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 var sb = new StringBuilder();
 
                 sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
-
 
                 appendCameraCoords(sb, cursorBloc, cursorBloc2);
 
@@ -964,7 +999,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             string dumpFile = System.IO.Path.Combine(dstPath, fname);
 
             // (3) Thresh and Golden
-            var thresh = InspectParams.Instance.xGridPadThreshold;
+            var thresh = _xRecipe.InspectParams.xGridPadThreshold;
             var goldenBmp = _xRecipe.bmpprinttemplate;
             var extendX = _xRecipe.xExtendx;
             var extendY = _xRecipe.xExtendy;

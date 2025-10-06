@@ -420,20 +420,24 @@ namespace LaserAlignDX.Mvc.Gui
         {
             if (Visible && Enabled && !BY_PASS)
             {
-                int xx = e.X;
-                int yy = e.Y;
+                EzBloc bloc = null;
 
-                viewer.TransViewportToWorld(ref xx, ref yy);
+                if (e.Button == MouseButtons.None)
+                {
+                    int xx = e.X;
+                    int yy = e.Y;
+                    viewer.TransViewportToWorld(ref xx, ref yy);
 
-                var bloc = fetchOne(xx, yy);
+                    bloc = fetchOne(xx, yy);
 
-                if (!viewer.ClientRectangle.Contains(e.X, e.Y))
-                    bloc = null;
+                    if (!viewer.ClientRectangle.Contains(e.X, e.Y))
+                        bloc = null;
+                }
 
                 bool isChanged = updateTooltip(bloc, e.X, e.Y, viewer);
-
                 return isChanged;
             }
+
             return false;
         }
         bool updateTooltip(EzBloc curBloc, int vx, int vy, Control wnd)
@@ -454,7 +458,7 @@ namespace LaserAlignDX.Mvc.Gui
 
                 string txt = composeTooltipText(_cursorBloc, _cursorBloc2);
                 if (!string.IsNullOrEmpty(txt))
-                    _toolTip.Show(txt, wnd, vx + 10, vy + 10);
+                    _toolTip.Show(txt, wnd, vx + 10, vy + 10, 5000);
 
                 _hitPt = new Point(vx, vy);
 
