@@ -1038,8 +1038,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         var cH = _xRecipe.InspectParams.mHeightStand;
                         var dx = Math.Round(cW - cell.RunWidth, 3);
                         var dy = Math.Round(cH - cell.RunHeight, 3);
-                        sb.AppendLine().Append($"晶粒.寬 = {cell.RunWidth:0.000} mm").Append($" (ΔW = {dx:0.000} mm)");
-                        sb.AppendLine().Append($"晶粒.高 = {cell.RunHeight:0.000} mm").Append($" (ΔH = {dy:0.000} mm)");
+                        sb.AppendLine().Append($"晶粒.寬 = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
+                        sb.AppendLine().Append($"晶粒.高 = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
                         #endregion
 
                         #region 尺寸量測詳細點位

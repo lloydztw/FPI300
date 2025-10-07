@@ -14,6 +14,8 @@
 #endregion
 
 
+using System;
+
 namespace LaserAlignDX.Mvc.Model.Recipe
 {
     /// <summary>
@@ -54,10 +56,8 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         public float TrayNgPercentage = 5.0f;
 
         // 尺寸宽度 spec (mm)
-        public float StandardWidth = 9.0f;
-        public float StandardHeight = 9.9f;
-        public readonly DtoRange StandardDimRangeW = new DtoRange(9.0f - 0.050f, 9.0f + 0.050f);
-        public readonly DtoRange StandardDimRangeH = new DtoRange(9.9f - 0.050f, 9.9f + 0.050f);
+        public readonly DtoSpecValue StandardWidth = new DtoSpecValue(9.0f, 0.050f, 0.050f);
+        public readonly DtoSpecValue StandardHeight = new DtoSpecValue(9.9f, 0.050f, 0.050f);
 
         // 尺寸偏移 spec (mm)
         public float PadEdgeDiffMaxX = 0.050f;
@@ -77,12 +77,9 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             Read(iniFileName, sectName, "optShowIndividualNG", true, out optShowIndividualNG);
 
             Read(iniFileName, sectName, "TrayNgPercentage", 5.0f, out TrayNgPercentage);
-            Read(iniFileName, sectName, "StandardWidth", 9.0f, out StandardWidth);
-            Read(iniFileName, sectName, "StandardHeight", 9.9f, out StandardHeight);
 
-            StandardDimRangeW.Load(iniFileName, sectName, "StandardDimRangeW");
-            StandardDimRangeH.Load(iniFileName, sectName, "StandardDimRangeH");
-
+            StandardWidth.Load(iniFileName, sectName, "StandardWidth");
+            StandardHeight.Load(iniFileName, sectName, "StandardHeight");
             Read(iniFileName, sectName, "PadEdgeDiffMaxX", 0.050f, out PadEdgeDiffMaxX);
             Read(iniFileName, sectName, "PadEdgeDiffMaxY", 0.050f, out PadEdgeDiffMaxY);
         }
@@ -99,12 +96,9 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             Write(iniFileName, sectName, "optShowIndividualNG", optShowIndividualNG);
 
             Write(iniFileName, sectName, "TrayNgPercentage", TrayNgPercentage);
-            Write(iniFileName, sectName, "StandardWidth", StandardWidth);
-            Write(iniFileName, sectName, "StandardHeight",StandardHeight);
 
-            StandardDimRangeW.Save(iniFileName, sectName, "StandardDimRangeW");
-            StandardDimRangeH.Save(iniFileName, sectName, "StandardDimRangeH");
-
+            StandardWidth.Save(iniFileName, sectName, "StandardWidth");
+            StandardHeight.Save(iniFileName, sectName, "StandardHeight");
             Write(iniFileName, sectName, "PadEdgeDiffMaxX", PadEdgeDiffMaxX);
             Write(iniFileName, sectName, "PadEdgeDiffMaxY", PadEdgeDiffMaxY);
         }
@@ -117,25 +111,31 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     }
 
 
-    public class DtoRange
+    public class DtoSpecValue
     {
-        public float Min;
-        public float Max;
+        public float Standard;
+        public float DeltaUpper;
+        public float DeltaLower;
+        public float Max => Standard + DeltaUpper;
+        public float Min => Standard - DeltaLower;
 
-        public DtoRange(float min, float max)
+        public DtoSpecValue(float value, float deltaLower, float deltaUpper)
         {
-            Min = min;
-            Max = max;
+            Standard = value;
+            DeltaUpper = Math.Abs(deltaUpper);
+            DeltaLower = Math.Abs(deltaLower);
         }
         public void Load(string iniFileName, string sectName, string keyName)
         {
-            DtoBase.Read(iniFileName, sectName, keyName + "_min", Min, out Min);
-            DtoBase.Read(iniFileName, sectName, keyName + "_max", Max, out Max);
+            DtoBase.Read(iniFileName, sectName, keyName, Standard, out Standard);
+            DtoBase.Read(iniFileName, sectName, keyName + "_delta_upper", DeltaUpper, out DeltaUpper);
+            DtoBase.Read(iniFileName, sectName, keyName + "_delta_lower", DeltaLower, out DeltaLower);
         }
         public void Save(string iniFileName, string sectName, string keyName)
         {
-            DtoBase.Write(iniFileName, sectName, keyName + "_min", Min);
-            DtoBase.Write(iniFileName, sectName, keyName + "_max", Max);
+            DtoBase.Write(iniFileName, sectName, keyName, Standard);
+            DtoBase.Write(iniFileName, sectName, keyName + "_delta_upper", DeltaUpper);
+            DtoBase.Write(iniFileName, sectName, keyName + "_delta_lower", DeltaLower);
         }
     }
 }

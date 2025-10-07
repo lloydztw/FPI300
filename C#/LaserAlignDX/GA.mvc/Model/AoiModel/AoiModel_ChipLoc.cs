@@ -61,6 +61,7 @@ namespace LaserAlignDX.AoiModel.V3
         {
             get { return _cellGroups; }
         }
+
         public void DisposeCellGroups()
         {
             var old = _cellGroups;
@@ -140,7 +141,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 參數校正使用
         /// </summary>
-        public bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
+        internal bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
         {
             chipData = null;
             prepareChipMatcher(0, out IMvdTemplateMatcher chipMatcher);
@@ -168,6 +169,7 @@ namespace LaserAlignDX.AoiModel.V3
             }
             return ok;
         }
+
 
         #region PRIVATE_FUNCTIONS
 

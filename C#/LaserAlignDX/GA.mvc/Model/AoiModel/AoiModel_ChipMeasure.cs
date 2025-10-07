@@ -14,7 +14,6 @@
 #endregion
 
 
-using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model.Coords;
@@ -256,7 +255,6 @@ namespace LaserAlignDX.AoiModel.V3
                 }
 
                 //(2) 使用 Micro Transform 計算
-                //>>> CalcChipDimension(lines, out SizeF dimension, out var camMeasurePts, true);
                 var err = _microTransform.CalcChipDimension(out SizeF dimension, lines, cell.ChipData);
                 _microTransform.GetDimMeasurePoints(lines, out var camMeasurePts);
 

@@ -1758,30 +1758,30 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public float mWidthStand
         {
-            get => _spec.StandardWidth;
-            set => _spec.StandardWidth = value;
+            get => _spec.StandardWidth.Standard;
+            set => _spec.StandardWidth.Standard = value;
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("01a 寬度上限")]
+        [DisplayName("01a 寬度上公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
-        public float mWidthStandMax
+        public float mWidthDeltaUpper
         {
-            get => _spec.StandardDimRangeW.Max;
-            set => _spec.StandardDimRangeW.Max = value;
+            get => _spec.StandardWidth.DeltaUpper;
+            set => _spec.StandardWidth.DeltaUpper = value;
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("01b 寬度下限")]
+        [DisplayName("01b 寬度下公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
-        public float mWidthStandMin
+        public float mWidthDeltaLower
         {
-            get => _spec.StandardDimRangeW.Min;
-            set => _spec.StandardDimRangeW.Min = value;
+            get => _spec.StandardWidth.DeltaLower;
+            set => _spec.StandardWidth.DeltaLower = value;
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
@@ -1791,30 +1791,52 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public float mHeightStand
         {
-            get => _spec.StandardHeight;
-            set => _spec.StandardHeight = value;
+            get => _spec.StandardHeight.Standard;
+            set => _spec.StandardHeight.Standard = value;
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("02a 高度上限")]
+        [DisplayName("02a 高度上公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
+        public float mHeightDeltaUpper
+        {
+            get => _spec.StandardHeight.DeltaUpper;
+            set => _spec.StandardHeight.DeltaUpper = value;
+        }
+
+        [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
+        [DisplayName("02b 高度下公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float mHeightDeltaLower
+        {
+            get => _spec.StandardHeight.DeltaLower;
+            set => _spec.StandardHeight.DeltaLower = value;
+        }
+
+
+        [Browsable(false)]
+        public float mWidthStandMax
+        {
+            get => _spec.StandardWidth.Max;
+        }
+        [Browsable(false)]
+        public float mWidthStandMin
+        {
+            get => _spec.StandardWidth.Min;
+        }
+        [Browsable(false)]
         public float mHeightStandMax
         {
-            get => _spec.StandardDimRangeH.Max;
-            set => _spec.StandardDimRangeH.Max = value;
+            get => _spec.StandardHeight.Max;
         }
-
-        [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("02b 高度下限")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
-        [Browsable(true)]
+        [Browsable(false)]
         public float mHeightStandMin
         {
-            get => _spec.StandardDimRangeH.Min;
-            set => _spec.StandardDimRangeH.Min = value;
+            get => _spec.StandardHeight.Min;
         }
         #endregion
 
@@ -1872,9 +1894,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xChipDimScaleH = double.Parse(ReadINIValue("Basic", "xChipDimScaleH", "1.0", INIFILE));
 
             if (xTemplateChipWidth <= 0)
-                xTemplateChipWidth = _spec.StandardWidth;
+                xTemplateChipWidth = _spec.StandardWidth.Standard;
             if (xTemplateChipHeight <= 0) 
-                xTemplateChipHeight = _spec.StandardHeight;
+                xTemplateChipHeight = _spec.StandardHeight.Standard;
 
             if (xChipDimScaleW <= 0)
                 xChipDimScaleW = 1.0;
