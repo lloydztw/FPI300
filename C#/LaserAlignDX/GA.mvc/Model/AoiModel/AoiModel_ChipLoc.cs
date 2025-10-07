@@ -20,6 +20,7 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
+using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
@@ -134,6 +135,38 @@ namespace LaserAlignDX.AoiModel.V3
                 //GC.WaitForPendingFinalizers();
                 //GC.Collect();
             }
+        }
+
+        /// <summary>
+        /// 參數校正使用
+        /// </summary>
+        public bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
+        {
+            chipData = null;
+            prepareChipMatcher(0, out IMvdTemplateMatcher chipMatcher);
+            bool ok = chipMatcher.RunMatch(cellBmp);
+            if (ok)
+            {
+                //(4.0) 使用 xResults[0] 當 Chip Center
+                var xFindResult = chipMatcher.xResults[0];
+                //var debug_org_center_x = cell.xFindResult.fCenterX;
+                //var debug_org_center_y = cell.xFindResult.fCenterY;
+                xFindResult.fCenterX += cellRoi.X;
+                xFindResult.fCenterY += cellRoi.Y;
+
+                //(4.1) 晶粒定位中心點(camera coorindates)
+                var chipSize = _xRecipe.xRegionTrain.Size;
+                var chipBox2D = toBox2D(ref xFindResult, chipSize);
+                var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
+
+                //(4.2) 將定位結果記入 cell.ChipData
+                chipData = new GaChipData();
+                chipData.Roi = cellRoi;
+                chipData.ChipBox2D = chipBox2D;
+                chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
+                chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
+            }
+            return ok;
         }
 
         #region PRIVATE_FUNCTIONS

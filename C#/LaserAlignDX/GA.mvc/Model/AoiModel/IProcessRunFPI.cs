@@ -1,4 +1,5 @@
-﻿using LeTian.AoiLib;
+﻿using LaserAlignDX.Mvc.Model;
+using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
@@ -38,6 +39,6 @@ namespace LaserAlignDX.AoiModel
 
         void Run();
 
-        bool CalcChipDimension(EzLSD.LineSegment[] lines, out SizeF chipSize, bool usePostScale);
+        ErrCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi);
     }
 }

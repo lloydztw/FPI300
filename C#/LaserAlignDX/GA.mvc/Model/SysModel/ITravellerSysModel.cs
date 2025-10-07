@@ -46,6 +46,8 @@ namespace LaserAlignDX.Mvc.Model
         /// 座標轉換系統
         /// </summary>
         TravellerTransforms TransformsModel { get; }
+
+        QMicroChipTransform GetMicroTransform(CarrierEnum carrierID);
         
         /// <summary>
         /// 跑線巨圖管理者

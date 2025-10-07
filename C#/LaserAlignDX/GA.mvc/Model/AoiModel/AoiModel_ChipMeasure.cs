@@ -14,10 +14,10 @@
 #endregion
 
 
-using JetEazy.QMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
@@ -28,7 +28,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Traveller106;
 using VisionDesigner;
-using _TM = LeTian.AoiLib.LtDebug;
+using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
 
 
 namespace LaserAlignDX.AoiModel.V3
@@ -40,7 +40,8 @@ namespace LaserAlignDX.AoiModel.V3
         #endregion
 
         #region KERNEL_MEMBERS
-        ITransform _transToWorld;
+        //ITransform _worldTransform;
+        QMicroChipTransform _microTransform;
         #endregion
 
         #region RUNTIME_DATA
@@ -62,7 +63,6 @@ namespace LaserAlignDX.AoiModel.V3
         {
             this._cellGroups = cellGroups;
         }
-
         public override void Run()
         {
             bool go = _xInspect.optChipMeasurement || _xInspect.optChipDefectsInspect || QrUsed;
@@ -75,7 +75,10 @@ namespace LaserAlignDX.AoiModel.V3
                 markRunStart();
 
                 var activeCarrierID = getActiveCarrierID();
-                _transToWorld = _sysModel.TransformsModel.GetCameraPhysicTransform(activeCarrierID);
+                //>>> _worldTransform = _sysModel.TransformsModel.GetCameraPhysicTransform(activeCarrierID);
+                _microTransform = _sysModel.GetMicroTransform(activeCarrierID);
+                if (_microTransform == null)
+                    throw new Exception($"無法取得 Micro Transform ({activeCarrierID})");
 
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
                 RunChipsMeasurement(bmpFullfov);
@@ -90,11 +93,11 @@ namespace LaserAlignDX.AoiModel.V3
                 // 在此無需釋放 巨圖
                 markRunEnd(false);
                 fire_AoiEnd();
-                var errCode = Mvc.Model.ErrCodes.EXCEPTION_AT_AOI_RUN;
+                var errCode = ErrCodes.EXCEPTION_AT_AOI_RUN;
                 string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
-                fire_AoiError(errCode, errMsg);
                 GaUtil.LOG(errMsg, Color.Red);
                 _LOG_ERROR(ex, $"異常 @ {GetType().Name}.Run");
+                fire_AoiError(errCode, errMsg);
             }
         }
 
@@ -182,7 +185,6 @@ namespace LaserAlignDX.AoiModel.V3
 
             #region 邊線處理
             EdgeBorder eBorder = EdgeBorder.Left;
-
             try
             {
                 RectangleF[] rcpBorderRects = new RectangleF[]
@@ -243,23 +245,34 @@ namespace LaserAlignDX.AoiModel.V3
             #region 尺寸長寬量測
             try
             {
-                // 將 CMvdLine 轉換成 EzLSD.LineSegment
+                //(1) 將 CMvdLine 轉換成 EzLSD.LineSegment
                 var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
                 for (int i = 0, len = lines.Length; i < len; i++)
                 {
-                    // 記入 加回 ROI Offset
+                    //(1.1) 加回 ROI Offset
                     lines[i]?.Offset(cellRoi.X, cellRoi.Y);
-                    // 記入 cell.ChipData
+                    //(1.2) 記入 cell.ChipData
                     cell.ChipData.LineSegments[i] = lines[i];
                 }
-                CalcChipDimension(lines, out SizeF dimension, out var camMeasurePts, true);
+
+                //(2) 使用 Micro Transform 計算
+                //>>> CalcChipDimension(lines, out SizeF dimension, out var camMeasurePts, true);
+                var err = _microTransform.CalcChipDimension(out SizeF dimension, lines, cell.ChipData);
+                _microTransform.GetDimMeasurePoints(lines, out var camMeasurePts);
+
+                //(3) 記入結果
                 cell.RunWidth = dimension.Width;
                 cell.RunHeight = dimension.Height;
                 cell.ChipData.DimMeasurePoints = camMeasurePts;
+
+                //(4) 異常
+                if (err != ErrCodes.OK)
+                    throw new Exception(GaUtil.GetEnumDescription(err));
             }
             catch (Exception ex)
             {
                 _LOG_ERROR(ex, "晶粒 長寬量測 異常");
+                return;
             }
             #endregion
 
@@ -268,51 +281,58 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 try
                 {
-                    //晶格角點: 0左上, 1右上, 2右下, 3左下
-                    var corners = Array.ConvertAll(chipBox2D.Corners, c => new QVector(c.X, c.Y));
-                    //晶格左 點平均: (左上 + 左下) / 2
-                    var left = (corners[0] + corners[3]) / 2;
-                    //晶格右點 平均: (右上 + 右下) / 2
-                    var right = (corners[1] + corners[2]) / 2;
-                    //晶格上點 平均: (左上 + 右上) / 2
-                    var top = (corners[0] + corners[1]) / 2;
-                    //晶格下點 平均: (左下 + 右下) / 2
-                    var bottom = (corners[2] + corners[3]) / 2;
-                    //轉換到 world
-                    left = ToWorld(left);
-                    top = ToWorld(top);
-                    right = ToWorld(right);
-                    bottom = ToWorld(bottom);
+                    ////晶格角點: 0左上, 1右上, 2右下, 3左下
+                    //var corners = Array.ConvertAll(chipBox2D.Corners, c => new QVector(c.X, c.Y));
+                    ////晶格左 點平均: (左上 + 左下) / 2
+                    //var left = (corners[0] + corners[3]) / 2;
+                    ////晶格右點 平均: (右上 + 右下) / 2
+                    //var right = (corners[1] + corners[2]) / 2;
+                    ////晶格上點 平均: (左上 + 右上) / 2
+                    //var top = (corners[0] + corners[1]) / 2;
+                    ////晶格下點 平均: (左下 + 右下) / 2
+                    //var bottom = (corners[2] + corners[3]) / 2;
+
+                    ////轉換到 world
+                    //left = ToWorld(left);
+                    //top = ToWorld(top);
+                    //right = ToWorld(right);
+                    //bottom = ToWorld(bottom);
+
+                    //var lines = cell.ChipData.LineSegments;
+                    //var lineL = lines[0];   // 左邊線
+                    //var lineT = lines[1];   // 上邊線
+                    //var lineR = lines[2];   // 右邊線
+                    //var lineB = lines[3];   // 下邊線
+
+                    //if (lineL != null && lineR != null)
+                    //{
+                    //    //晶格 左邊緣 厚度 = 晶格左點 至 左邊線(line0) 距離
+                    //    var edge_left = lineL.CalcDistance(left);
+                    //    //晶格 右邊緣 厚度 = 晶格右點 至 右邊線(line2) 距離
+                    //    var edge_right = lineR.CalcDistance(right);
+                    //    //記入 結果
+                    //    cell.PadEdgeSizes[(int)EdgeBorder.Left] = (float)Math.Round(edge_left, 3);
+                    //    cell.PadEdgeSizes[(int)EdgeBorder.Right] = (float)Math.Round(edge_left, 3);
+                    //}
+
+                    //if (lineT != null && lineB != null)
+                    //{
+                    //    //晶格 上邊緣 厚度 = 晶格上點 至 上邊線(line1) 距離
+                    //    var edge_top = lineT.CalcDistance(top);
+                    //    //晶格 下邊緣 厚度 = 晶格下點 至 下邊線(line3) 距離
+                    //    var edge_bottom = lineB.CalcDistance(bottom);
+                    //    //記入 結果
+                    //    cell.PadEdgeSizes[(int)EdgeBorder.Top] = (float)Math.Round(edge_top, 3);
+                    //    cell.PadEdgeSizes[(int)EdgeBorder.Bottom] = (float)Math.Round(edge_bottom, 3);
+                    //}
 
                     var lines = cell.ChipData.LineSegments;
-                    var lineL = lines[0];   // 左邊線
-                    var lineT = lines[1];   // 上邊線
-                    var lineR = lines[2];   // 右邊線
-                    var lineB = lines[3];   // 下邊線
-
-                    if (lineL != null && lineR != null)
-                    {
-                        //晶格 左邊緣 厚度 = 晶格左點 至 左邊線(line0) 距離
-                        var edge_left = lineL.CalcDistance(left);
-                        //晶格 右邊緣 厚度 = 晶格右點 至 右邊線(line2) 距離
-                        var edge_right = lineR.CalcDistance(right);
-                        //記入 結果
-                        cell.PadEdgeSizes[(int)EdgeBorder.Left] = (float)Math.Round(edge_left, 3);
-                        cell.PadEdgeSizes[(int)EdgeBorder.Right] = (float)Math.Round(edge_left, 3);
-                    }
-
-                    if (lineT != null && lineB != null)
-                    {
-                        //晶格 上邊緣 厚度 = 晶格上點 至 上邊線(line1) 距離
-                        var edge_top = lineT.CalcDistance(top);
-                        //晶格 下邊緣 厚度 = 晶格下點 至 下邊線(line3) 距離
-                        var edge_bottom = lineB.CalcDistance(bottom);
-                        //記入 結果
-                        cell.PadEdgeSizes[(int)EdgeBorder.Top] = (float)Math.Round(edge_top, 3);
-                        cell.PadEdgeSizes[(int)EdgeBorder.Bottom] = (float)Math.Round(edge_bottom, 3);
-                    }
+                    var err = _microTransform.CalcPadEdgeSizes(out var padEdgeSizes, lines, cell.ChipData);
+                    if (err != ErrCodes.OK)
+                        throw new Exception(GaUtil.GetEnumDescription(err));
+                    Array.Copy(padEdgeSizes, cell.PadEdgeSizes, padEdgeSizes.Length);
                 }
-                catch (MvdException ex)
+                catch (Exception ex)
                 {
                     _LOG_ERROR(ex, "計算格點型晶粒的邊緣寬度 異常");
                 }
@@ -422,6 +442,7 @@ namespace LaserAlignDX.AoiModel.V3
         }
         #endregion
 
+#if (OPT_OLD_RESERVED)
         public bool CalcChipDimension(EzLSD.LineSegment[] lines, out SizeF chipSize, out QVector[] camMeasurePts, bool usePostScale)
         {
             chipSize = SizeF.Empty;
@@ -509,6 +530,83 @@ namespace LaserAlignDX.AoiModel.V3
 
             return okLR && okTB;
         }
+        public bool GetMeasurePoints(EzLSD.LineSegment[] lines, out QVector[] camMeasurePts, bool toWorld)
+        {
+            camMeasurePts = new QVector[4];
+
+            #region 寬方向
+            bool okW = false;
+            try
+            {
+                var line0 = lines[0];     //左邊線
+                var line2 = lines[2];     //右邊線
+                if (line0 != null && line2 != null)
+                {
+                    //(1) 轉換到 Physic Coordinates 重組 line segment, 再行計算距離.
+                    if (toWorld)
+                    {
+                        var P1 = ToWorld(line0.P1);
+                        var P2 = ToWorld(line0.P2);
+                        var Q1 = ToWorld(line2.P1);
+                        var Q2 = ToWorld(line2.P2);
+                        line0 = new EzLSD.LineSegment(P1, P2);
+                        line2 = new EzLSD.LineSegment(Q1, Q2);
+                    }
+
+                    //(2) 計算點線距離
+                    var P = line0.GetMidPoint();
+                    var Q = line2.CalcTheNearestPoint(P);
+
+                    //(3) Result
+                    camMeasurePts[0] = P;
+                    camMeasurePts[2] = Q;
+                    okW = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _LOG_ERROR(ex, "GetMeasurePoints (W) 異常");
+            }
+            #endregion
+
+            #region 高方向
+            bool okH = false;
+            try
+            {
+                var line1 = lines[1];     //上邊線
+                var line3 = lines[3];     //下邊線
+                if (line1 != null && line3 != null)
+                {
+                    //(1) 轉換到 Physic Coordinates 重組 line segment, 再行計算距離.
+                    if (toWorld)
+                    {
+                        var P1 = ToWorld(line1.P1);
+                        var P2 = ToWorld(line1.P2);
+                        var Q1 = ToWorld(line3.P1);
+                        var Q2 = ToWorld(line3.P2);
+                        P1 = ToWorld(line1.P1);
+                        line1 = new EzLSD.LineSegment(P1, P2);
+                        line3 = new EzLSD.LineSegment(Q1, Q2);
+                    }
+
+                    //(2) 計算點線距離
+                    var P = line1.GetMidPoint();
+                    var Q = line3.CalcTheNearestPoint(P);
+
+                    //(3) Result
+                    camMeasurePts[1] = P;
+                    camMeasurePts[3] = Q;
+                    okH = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _LOG_ERROR(ex, "GetMeasurePoints (H) 異常");
+            }
+            #endregion
+
+            return okW && okH;
+        }
 
         #region PRIVATE_TRANSFER_FUNCTIONS
         QVector ToWorld(QVector p)
@@ -516,8 +614,8 @@ namespace LaserAlignDX.AoiModel.V3
             if (p == null)
                 return p;
             
-            if (_transToWorld != null && false)
-                return _transToWorld.Trans(p);
+            if (_worldTransform != null && false)
+                return _worldTransform.Trans(p);
 
             var q = new QVector(p);
             q.X = p.X * Traveller106.INI.Instance.ImageResolutionX;
@@ -529,8 +627,8 @@ namespace LaserAlignDX.AoiModel.V3
             if (p == null)
                 return p;
 
-            if (_transToWorld != null && false)
-                return _transToWorld.InvTrans(p);
+            if (_worldTransform != null && false)
+                return _worldTransform.InvTrans(p);
 
             var q = new QVector(p);
             q.X = p.X / Traveller106.INI.Instance.ImageResolutionX;
@@ -538,5 +636,7 @@ namespace LaserAlignDX.AoiModel.V3
             return q;
         }
         #endregion
+#endif
+
     }
 }

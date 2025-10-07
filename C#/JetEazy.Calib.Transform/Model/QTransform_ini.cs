@@ -146,11 +146,13 @@ namespace JetEazy.Transform
 
             return nDim >= 2;
         }
-        public static void SaveIni(this QVector v, string iniFileName, string sectName, string keyName)
+        public static void SaveIni(this QVector v, string iniFileName, string sectName, string keyName, bool fixDigit = false)
         {
             if (v != null)
             {
-                string str = $"QVector, {v.Length}, {v.X:0.000000}, {v.Y:0.000000}";
+                string str = fixDigit ? 
+                            $"QVector, {v.Length}, {v.X:0.000000}, {v.Y:0.000000}" :
+                            $"QVector, {v.Length}, {v.X}, {v.Y}";
                 JetEazy.Win32.Win32Ini.Save(str, iniFileName, sectName, keyName);
             }
             else

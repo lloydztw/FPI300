@@ -45,5 +45,17 @@ namespace LaserAlignDX.Mvc.Model
 
         [Description("線掃AOI 運行異常 (可能沒有加密狗)")]
         EXCEPTION_AT_AOI_RUN,
+
+        [Description("無法定位, 請建立晶粒匹配模板!")]
+        ERR_NO_CHIP_LOCATION,
+
+        [Description("無法抓到 PADS, 請建立晶粒匹配模板!")]
+        ERR_NO_CHIP_PADS,
+
+        [Description("邊線框 條件不佳, 請再調整 邊線框!")]
+        ERR_WEAK_LINE_CONDITION,
+
+        [Description("晶粒格點 條件不佳, 請再抓取圖像!")]
+        ERR_WEAK_PADS_CONDITION,
     }
 }

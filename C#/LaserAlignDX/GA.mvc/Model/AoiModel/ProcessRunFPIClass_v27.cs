@@ -37,6 +37,7 @@ using System.Threading.Tasks;
 using Traveller106;
 using VisionDesigner;
 using _TM = LeTian.AoiLib.LtDebug;
+using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 
 
@@ -1139,6 +1140,11 @@ namespace LaserAlignDX.AoiModel.V27
             }
 
             return ok1 && ok2;
+        }
+
+        public ErrCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap bmp, RectangleF roi)
+        {
+            return ErrCodes.ERR_NO_CHIP_LOCATION;
         }
 
         #region INSPECT_003_EMPTY_TRAY

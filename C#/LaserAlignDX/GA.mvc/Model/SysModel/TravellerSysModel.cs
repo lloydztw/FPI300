@@ -18,6 +18,7 @@ using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
+using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
@@ -54,6 +55,11 @@ namespace LaserAlignDX.Mvc.Model
         IProcessRunFPI _aoiModel;
         ICalibAoiModel _calibModel;
         TravellerTransforms _transformsModel = TravellerTransforms.Instance;
+        QMicroChipTransform[] _microTransforms = new[]
+        {
+            new QMicroChipTransform("C1_Micro"),
+            new QMicroChipTransform("C2_Micro"),
+        };
         #endregion
 
         internal static TravellerSysModel Instance(IProcessRunFPI aoiModel)
@@ -116,6 +122,11 @@ namespace LaserAlignDX.Mvc.Model
         {
             get => _transformsModel;
         }
+        public QMicroChipTransform GetMicroTransform(CarrierEnum C)
+        {
+            int index = (int)C - (int)CarrierEnum.C1;
+            return _microTransforms[index];
+        }
         public GaBigImageHolder LineScanImageHolder
         {
             get => TravellerBigImagesHolder.Instance.LineScanImageHolder;
@@ -138,6 +149,8 @@ namespace LaserAlignDX.Mvc.Model
             var transformsModel = this.TransformsModel;
             transformsModel.Load(GaMvcPaths.CALIB_TRANSFORMS_FILE);
             transformsModel.BuildAll();
+            GetMicroTransform(ActiveCarrierID)?.Load(null);
+            GetMicroTransform(ActiveCarrierID)?.Build();
 
             //(1) 重新載入 _xRecipe
             _xRecipe.ChangeActiveCarrier(ActiveCarrierID, forceToReload: true);

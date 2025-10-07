@@ -456,7 +456,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             refreshDispUI(DS1);
 
             updateLineBorderBoxes(true);
-            updateLineSegmentBoxes(true);
+            updateLineSegmentBoxes(true, calcGoldenDim: true);
             _isLineBorderModified = true;
         }
         void TrainGoldenChipTemplate()
@@ -686,7 +686,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
             }
         }
-        void updateLineSegmentBoxes(bool show)
+        void updateLineSegmentBoxes(bool show, bool calcGoldenDim = false)
         {
             if (!show)
             {
@@ -714,7 +714,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                         edgeLines.Add(null);
                 }
 
-                aoiCalcGoldenChipDimension(edgeLines);
+                if (calcGoldenDim)
+                    aoiCalcGoldenChipDimension(edgeLines);
             }
         }
         void persistLineBorderIndentExt(bool save)
@@ -987,22 +988,31 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void aoiCalcGoldenChipDimension(List<EzLSD.LineSegment> lines)
         {
-            var regionRoi = _xRecipe.xRectRegionPrint;
-            foreach(var line in lines)
-                line?.Offset(regionRoi.X, regionRoi.Y);
-
             var aoiModel = _sysModel?.AoiModel;
             if (aoiModel != null)
             {
-                bool ok = aoiModel.CalcChipDimension(lines.ToArray(), out SizeF chipDim, false);
-                if (ok)
+                var regionRoi = _xRecipe.xRectRegionPrint;
+                foreach (var line in lines)
+                    line?.Offset(regionRoi.X, regionRoi.Y);
+
+                //bool ok = aoiModel.CalcChipDimension(lines.ToArray(), out SizeF chipDim, false);
+                //if (ok)
+                //{
+                //    System.Diagnostics.Trace.WriteLine($"Chip Dim = {chipDim.Width:0.000} x {chipDim.Height:0.000}");
+                //    if (chipDim.Width > 0)
+                //        _xInspectX3.xChipDimScaleW = (double)_xInspectX3.xTemplateChipWidth / chipDim.Width;
+                //    if (chipDim.Height > 0)
+                //        _xInspectX3.xChipDimScaleH = (double)_xInspectX3.xTemplateChipHeight / chipDim.Height;
+                //    _isPropertyModified = true;
+                //}
+
+                var targetSize = new SizeF(_xInspectX3.xTemplateChipWidth, _xInspectX3.xTemplateChipHeight);
+                var err = aoiModel.BuildMicroChipTransform(targetSize, lines.ToArray(), _xBmpGoldenRegionTemplate, regionRoi);
+
+                if (err != ErrCodes.OK)
                 {
-                    System.Diagnostics.Trace.WriteLine($"Chip Dim = {chipDim.Width:0.000} x {chipDim.Height:0.000}");
-                    if (chipDim.Width > 0)
-                        _xInspectX3.xChipDimScaleW = (double)_xInspectX3.xTemplateChipWidth / chipDim.Width;
-                    if (chipDim.Height > 0)
-                        _xInspectX3.xChipDimScaleH = (double)_xInspectX3.xTemplateChipHeight / chipDim.Height;
-                    _isPropertyModified = true;
+                    string errMsg = "無法建立 Micro Transform:\n\r\n\r" + GaUtil.GetEnumDescription(err);
+                    VsMessageBox.Warning(errMsg);
                 }
             }
         }

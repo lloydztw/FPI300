@@ -20,6 +20,7 @@ using JetEazy.QxCollections2;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 
 
 namespace JetEazy.Match
@@ -35,16 +36,71 @@ namespace JetEazy.Match
         #endregion
 
         /// <summary>
-        /// 使用 QvBox2D 可以免除 OpenCV RotatedRect 長短邊造成角度定義不同的效應
+        /// 使用 QvBox2D 可以免除 OpenCV RotatedRect 長短邊造成角度定義不同的效應.
+        /// (2025-10-07 改版)
         /// </summary>
         public static void CalcRotatedBox2D(IxGridMap<EzBloc> grid, out QvBox2D box2d, bool useBoundaryPoints = false)
         {
-            // 注意: Cv2.MinAreaRect 無法反映 透視投影 效果 !!!
-            var rotRect = useBoundaryPoints ? 
-                Cv2.MinAreaRect(IterBoundaryPoints(grid)):
-                Cv2.MinAreaRect(IterCentroids(grid));
-            box2d = new QvBox2D();
-            box2d.SetBox(rotRect);
+            if (grid == null)
+            {
+                box2d = null;
+                return;
+            }
+
+            int r = grid.Rows - 1;
+            int c = grid.Cols - 1;
+            var cornerBlocs = new[]
+            {
+                grid.Get(0,0),
+                grid.Get(0,c),
+                grid.Get(r,c),
+                grid.Get(r,0),
+            };
+
+            if (cornerBlocs[0] != null && cornerBlocs[1] != null && cornerBlocs[2] != null && cornerBlocs[3] != null)
+            {
+                var corners = Array.ConvertAll(cornerBlocs, b => b.Center);
+                var cLeft = (corners[0] + corners[2]) / 2.0;
+                var cRight = (corners[1] + corners[3]) / 2.0;
+                var center = (cLeft + cRight) / 2.0;
+                var vect = cRight - cLeft;
+                var theta = Math.Atan2(vect.Y, vect.X);
+
+                if (useBoundaryPoints)
+                {
+                    var cTop = (corners[0] + corners[1]) / 2.0;
+                    var cBottom = (corners[2] + corners[3]) / 2.0;
+                    var V = cBottom - cTop;
+                    V = V / V.NormLength;
+                    var U = vect / vect.NormLength;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        QVector d = new QVector(0, 0);
+                        var w = cornerBlocs[i].Rect.Width;
+                        var h = cornerBlocs[i].Rect.Height;
+                        switch (i)
+                        {
+                            case 0: d = U * (-w) + V * (-h); break;
+                            case 1: d = U * (w) + V * (-h); break;
+                            case 2: d = U * (w) + V * (h); break;
+                            case 3: d = U * (-w) + V * (h); break;
+                        }
+                        corners[i] = corners[i] + d;
+                    }
+                }
+
+                box2d = new QvBox2D();
+                box2d.Corners = Array.ConvertAll(corners, cc => new PointF((float)cc.X, (float)cc.Y));
+            }
+            else
+            {
+                // 注意: Cv2.MinAreaRect 無法反映 透視投影 效果 !!!
+                var rotRect = useBoundaryPoints ?
+                    Cv2.MinAreaRect(IterBoundaryPoints(grid)) :
+                    Cv2.MinAreaRect(IterCentroids(grid));
+                box2d = new QvBox2D();
+                box2d.SetBox(rotRect);
+            }
         }
 
         /// <summary>
@@ -146,25 +202,24 @@ namespace JetEazy.Match
             if (grid == null)
                 yield break;
 
-            var r = grid.Rows - 1;
-            var c = grid.Cols - 1;
-            var corners = new[]
-            {
-                grid.Get(0,0),
-                grid.Get(0,c),
-                grid.Get(r,c),
-                grid.Get(r,0),
-            };
-            
-            int count = 0;
-            foreach (var bloc in corners)
-            {
-                if (bloc == null) continue;
-                yield return new Point2f((float)bloc.Center.X, (float)bloc.Center.Y);
-                count++;
-            }
-            if (count >= 4)
-                yield break;
+            //var r = grid.Rows - 1;
+            //var c = grid.Cols - 1;
+            //var corners = new[]
+            //{
+            //    grid.Get(0,0),
+            //    grid.Get(0,c),
+            //    grid.Get(r,c),
+            //    grid.Get(r,0),
+            //};
+            //int count = 0;
+            //foreach (var bloc in corners)
+            //{
+            //    if (bloc == null) continue;
+            //    yield return new Point2f((float)bloc.Center.X, (float)bloc.Center.Y);
+            //    count++;
+            //}
+            //if (count >= 4)
+            //    yield break;
 
             for (int row = grid.RowMin; row < grid.RowMax; row++)
             {

@@ -621,7 +621,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (!_xRecipe.InspectParams.optChipMeasurement)
                 return;
 
-            if (_chipDimMeasurePoints.TryGetValue(activeCell, out var measurePts))
+            if (activeCell != null && _chipDimMeasurePoints.TryGetValue(activeCell, out var measurePts))
             {
                 if (measurePts != null)
                 {
@@ -1028,6 +1028,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     sb.AppendLine();
                     sb.AppendLine($"RunX = {cell.RunX:0.000} mm");
                     sb.AppendLine($"RunY = {cell.RunY:0.000} mm");
+                    sb.AppendLine($"Angle = {cell.RunAngle:0.00}°");
                     #endregion
 
                     if (_xRecipe.InspectParams.optChipMeasurement)
@@ -1066,7 +1067,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                             {
                                 var pW = (p0 - p1).NormLength;
                                 var pH = (p0 - p2).NormLength;
-                                sb.AppendLine();
                                 sb.AppendLine().Append($"PAD.寬 = {pW:0.0} pix");
                                 sb.AppendLine().Append($"PAD.高 = {pH:0.0} pix");
                             }

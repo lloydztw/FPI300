@@ -24,6 +24,8 @@ namespace JetEazy.Transform
     /// </summary>
     public interface ITransform : IDisposable
     {
+        string Name { get; }
+
         QVector Trans(QVector pt);
         QVector InvTrans(QVector pt);
 

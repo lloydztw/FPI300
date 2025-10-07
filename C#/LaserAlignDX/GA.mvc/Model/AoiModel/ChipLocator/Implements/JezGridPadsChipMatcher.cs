@@ -146,8 +146,8 @@ namespace LaserAlignDX.AoiModel
             //angle -= angleG;
 
             // SCALE
-            double scaleW = box2d.MinAreaRectSize.Width / (goldenBox2d.MinAreaRectSize.Width + 0.001);
-            double scaleH = box2d.MinAreaRectSize.Height / (goldenBox2d.MinAreaRectSize.Height + 0.001);
+            double scaleW = box2d.MinAreaRectSize.Width / (goldenBox2d.MinAreaRectSize.Width + 0.0001);
+            double scaleH = box2d.MinAreaRectSize.Height / (goldenBox2d.MinAreaRectSize.Height + 0.0001);
             double scale = (scaleW + scaleH) / 2;
 
             // Gaara Result

@@ -17,9 +17,11 @@
 using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
+using OpenCvSharp;
 using System;
 using System.Drawing;
 using System.Threading;
+using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 
 
@@ -245,9 +247,31 @@ namespace LaserAlignDX.AoiModel.V3
         }
         #endregion
 
-        public bool CalcChipDimension(EzLSD.LineSegment[] lines, out SizeF chipSize, bool usePostScale)
+        public ErrCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi)    
         {
-            return _aoiChipMeasure.CalcChipDimension(lines, out chipSize, out var _, usePostScale);
+            //(1) 晶粒定位
+            //      chipData.Roi = cellRoi;
+            //      chipData.ChipBox2D = chipBox2D;
+            //      chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
+            //      chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
+            bool ok = _aoiChipLoc.LocateOneChip(regionBmp, regionRoi, out var chipData);
+            if (!ok || chipData == null)
+                return ErrCodes.ERR_NO_CHIP_LOCATION;
+
+            //(2) 檢查 PadsGrid
+            if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch && chipData.PadsGrid == null)
+            {
+                return ErrCodes.ERR_NO_CHIP_PADS;
+            }
+            
+            //(3) 建立 Micro Transform
+            var carrierID = getActiveCarrierID();
+            var microTrf = _sysModel.GetMicroTransform(carrierID);
+            var err = microTrf.BuildMicroTransform(targetSize, lines, chipData);
+            if (err == ErrCodes.OK)
+                microTrf.Save(null);
+
+            return err;
         }
 
         public override void Run()
@@ -325,7 +349,6 @@ namespace LaserAlignDX.AoiModel.V3
                 GC.Collect();
             }
         }
-
         private void _RunEmptyTray()
         {
             try
@@ -348,7 +371,6 @@ namespace LaserAlignDX.AoiModel.V3
                 _LOG_ERROR(ex, "_RunEmptyTray");
             }
         }
-
         private bool _CheckChipsTotalPass()
         {
             foreach (var cell in _xRecipe.xRegionCells)
