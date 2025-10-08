@@ -240,6 +240,19 @@ namespace JetEazy.Utils
             return Cursors.Default;
         }
 
+        public static void SetNum(NumericUpDown num, decimal value)
+        {
+            if (num != null)
+            {
+                if (value > num.Maximum)
+                    value = num.Maximum;
+                else if (value < num.Minimum)
+                    value = num.Minimum;
+                else { }
+                num.Value = value;
+            }
+        }
+
         /// <summary>
         /// 通用的 LOG function
         /// </summary>

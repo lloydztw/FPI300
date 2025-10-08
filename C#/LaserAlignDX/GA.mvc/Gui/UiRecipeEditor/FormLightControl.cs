@@ -14,7 +14,6 @@
 #endregion
 
 using JetEazy.Utils;
-using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Windows.Forms;
 using Traveller106;

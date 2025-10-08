@@ -27,7 +27,10 @@ namespace LaserAlignDX.Mvc.Gui
     {
         public event EventHandler OnCursorsChanged;
 
+        #region CONFIG
+        public static int TOOL_TIP_DURATION = 1000 * 30;
         public bool BY_PASS => !Traveller106.INI.Instance.IsResultShowChar;
+        #endregion
 
         #region GUI_MEMBERS
         protected ToolTip _toolTip = new ToolTip();
@@ -462,7 +465,12 @@ namespace LaserAlignDX.Mvc.Gui
 
                 string txt = composeTooltipText(_cursorBloc, _cursorBloc2);
                 if (!string.IsNullOrEmpty(txt))
-                    _toolTip.Show(txt, wnd, vx + 10, vy + 10);
+                {
+                    if (TOOL_TIP_DURATION > 0)
+                        _toolTip.Show(txt, wnd, vx + 10, vy + 10, TOOL_TIP_DURATION);
+                    else
+                        _toolTip.Show(txt, wnd, vx + 10, vy + 10);
+                }
 
                 _hitPt = new Point(vx, vy);
 

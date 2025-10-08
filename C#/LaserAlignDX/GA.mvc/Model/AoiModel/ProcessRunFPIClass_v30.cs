@@ -268,6 +268,8 @@ namespace LaserAlignDX.AoiModel.V3
             var carrierID = getActiveCarrierID();
             var microTrf = _sysModel.GetMicroTransform(carrierID);
             var err = microTrf.BuildMicroTransform(targetSize, lines, chipData);
+
+            //(4) 保存參數
             if (err == ErrCodes.OK)
                 microTrf.Save(null);
 
@@ -373,20 +375,34 @@ namespace LaserAlignDX.AoiModel.V3
         }
         private bool _CheckChipsTotalPass()
         {
+            bool optUsePercentage = _xRecipe.InspectParams.optUseTotalNgPercentage && _xRecipe.InspectParams.optChipMeasurement;
+
+            int passCount = 0;
+            int ngCount = 0;
             foreach (var cell in _xRecipe.xRegionCells)
             {
-                if (cell == null) continue;
-
-                bool isPass = true;
+                if (cell == null)
+                    continue;
                 if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-                    isPass = true;
+                    passCount++;
                 else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
-                    isPass = false;
-
-                if (!isPass)
-                    return false;
+                    ngCount++;
             }
-            return true;
+
+            bool isPass;
+            if (optUsePercentage)
+            {
+                var total = passCount + ngCount;
+                if (total > 0)
+                    isPass = 100.0 * ngCount / total < _xRecipe.InspectParams.xTotalNgPercentage;
+                else
+                    isPass = true;
+            }
+            else
+            {
+                isPass = ngCount == 0;
+            }
+            return isPass;
         }
     }
 }

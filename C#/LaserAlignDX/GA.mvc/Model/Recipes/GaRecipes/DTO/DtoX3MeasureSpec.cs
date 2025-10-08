@@ -49,11 +49,11 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         // 啟用 瑕疵 與 QRCode 檢測
         public bool optChipDefectsInspect = false;
         // 尺寸與瑕疵檢測進階選項量: 使用整盤 NG 百分比 
-        public bool optUseTrayNgPercentage = false;
+        public bool optUseTotalNgPercentage = false;
         // 尺寸與瑕疵檢測進階選項量: 顯示個別 NG
         public bool optShowIndividualNG = false;
         // 尺寸與瑕疵檢測進階選項量: 整盤 NG 百分比
-        public float TrayNgPercentage = 5.0f;
+        public float TotalNgPercentage = 5.0f;
 
         // 尺寸宽度 spec (mm)
         public readonly DtoSpecValue StandardWidth = new DtoSpecValue(9.0f, 0.050f, 0.050f);
@@ -73,10 +73,10 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             Read(iniFileName, sectName, "optChipMeasurement", false, out optChipMeasurement);
             Read(iniFileName, sectName, "optChipEdgesCompare", false, out optChipEdgesCompare);
             Read(iniFileName, sectName, "optChipDefectsInspect", false, out optChipDefectsInspect);
-            Read(iniFileName, sectName, "optUseTrayNgPercentage", false, out optUseTrayNgPercentage);
+            Read(iniFileName, sectName, "optUseTotalNgPercentage", false, out optUseTotalNgPercentage);
             Read(iniFileName, sectName, "optShowIndividualNG", true, out optShowIndividualNG);
 
-            Read(iniFileName, sectName, "TrayNgPercentage", 5.0f, out TrayNgPercentage);
+            Read(iniFileName, sectName, "TotalNgPercentage", 5.0f, out TotalNgPercentage);
 
             StandardWidth.Load(iniFileName, sectName, "StandardWidth");
             StandardHeight.Load(iniFileName, sectName, "StandardHeight");
@@ -92,10 +92,10 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             Write(iniFileName, sectName, "optChipMeasurement", optChipMeasurement);
             Write(iniFileName, sectName, "optChipEdgesCompare", optChipEdgesCompare);
             Write(iniFileName, sectName, "optChipDefectsInspect", optChipDefectsInspect);
-            Write(iniFileName, sectName, "optUseTrayNgPercentage", optUseTrayNgPercentage);
+            Write(iniFileName, sectName, "optUseTotalNgPercentage", optUseTotalNgPercentage);
             Write(iniFileName, sectName, "optShowIndividualNG", optShowIndividualNG);
 
-            Write(iniFileName, sectName, "TrayNgPercentage", TrayNgPercentage);
+            Write(iniFileName, sectName, "TotalNgPercentage", TotalNgPercentage);
 
             StandardWidth.Save(iniFileName, sectName, "StandardWidth");
             StandardHeight.Save(iniFileName, sectName, "StandardHeight");

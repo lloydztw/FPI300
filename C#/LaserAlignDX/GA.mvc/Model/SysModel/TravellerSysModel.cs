@@ -254,20 +254,10 @@ namespace LaserAlignDX.Mvc.Model
 
                 aoiModel.SetRecipe(jx);
 
-                //aoiModel.RunAll(fullfovBmp, wait: true);
-                //var matchResult = aoiModel.GetMatchResult(SideID.A);
-                //if (matchResult != null)
-                //{
-                //    using (var bridge = new QxImageBridge(fullfovBmp))
-                //    {
-                //        aoiModel.RefineCentroidLocations(matchResult, bridge.Image, false);
-                //    }
-                //}
-                //return matchResult;
-
                 using (var bridge = new QxImageBridge(fullfovBmp))
                 {
-                    var matchResult = aoiModel.FetchGridNodes(bridge.Image);
+                    bool refine = _xRecipe.InspectParams.xCarrierBackground == EdgeBackGroundType.White;
+                    var matchResult = aoiModel.FetchGridNodes(bridge.Image, refine);
                     return matchResult;
                 }
             }

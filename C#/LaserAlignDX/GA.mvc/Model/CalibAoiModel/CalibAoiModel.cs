@@ -195,7 +195,7 @@ namespace LaserAlignDX.AoiModel
             _jxRecipe = recipe;
         }
 
-        public MatchResult FetchGridNodes(Mat fullfovImg)
+        public MatchResult FetchGridNodes(Mat fullfovImg, bool refine)
         {
             //(1) Peek the ezImage
             using (var ezImage = new EzQuickImage(fullfovImg, deepCopy: false))
@@ -207,7 +207,8 @@ namespace LaserAlignDX.AoiModel
                 var matchResult = _externImp.GetMatchResult(SideID.A);
 
                 //(4) Refine each detail locations
-                this.RefineCentroidLocations(matchResult, ezImage);
+                if (refine)
+                    this.RefineCentroidLocations(matchResult, ezImage);
 
                 return matchResult;
             }

@@ -38,6 +38,8 @@
             this.DS2 = new JzDisplay.UISpace.DispUI();
             this.DS3 = new JzDisplay.UISpace.DispUI();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.numSpanRatio = new System.Windows.Forms.NumericUpDown();
             this.labelA = new System.Windows.Forms.Label();
             this.numBorderIndent = new System.Windows.Forms.NumericUpDown();
             this.labelB = new System.Windows.Forms.Label();
@@ -60,11 +62,11 @@
             this.btnDefectAdd = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnTrain = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
-            this.numSpanRatio = new System.Windows.Forms.NumericUpDown();
+            this.btnBuildMircoTrf = new System.Windows.Forms.Button();
             this.tbLayoutSubM.SuspendLayout();
             this.tbLayoutA.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numSpanRatio)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numBorderIndent)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numBorderSize)).BeginInit();
             this.tbLayoutSubL.SuspendLayout();
@@ -72,7 +74,6 @@
             this.groupBox1.SuspendLayout();
             this.tbLayoutB.SuspendLayout();
             this.tbLayoutSubR.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numSpanRatio)).BeginInit();
             this.SuspendLayout();
             // 
             // tbLayoutSubM
@@ -125,7 +126,7 @@
             this.rtbCodeContent.Location = new System.Drawing.Point(22, 33);
             this.rtbCodeContent.Name = "rtbCodeContent";
             this.rtbCodeContent.ReadOnly = true;
-            this.rtbCodeContent.Size = new System.Drawing.Size(286, 92);
+            this.rtbCodeContent.Size = new System.Drawing.Size(286, 83);
             this.rtbCodeContent.TabIndex = 52;
             this.rtbCodeContent.Text = "";
             // 
@@ -182,6 +183,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.btnBuildMircoTrf);
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.numSpanRatio);
             this.groupBox2.Controls.Add(this.labelA);
@@ -191,13 +193,41 @@
             this.groupBox2.Controls.Add(this.btnAutoLineBorders);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(8, 187);
+            this.groupBox2.Location = new System.Drawing.Point(8, 183);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(8);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(478, 127);
+            this.groupBox2.Size = new System.Drawing.Size(478, 140);
             this.groupBox2.TabIndex = 75;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "自動框選 邊線";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(50, 97);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(96, 20);
+            this.label2.TabIndex = 73;
+            this.label2.Text = "跨度比例 (%)";
+            // 
+            // numSpanRatio
+            // 
+            this.numSpanRatio.DecimalPlaces = 1;
+            this.numSpanRatio.Location = new System.Drawing.Point(168, 94);
+            this.numSpanRatio.Minimum = new decimal(new int[] {
+            50,
+            0,
+            0,
+            0});
+            this.numSpanRatio.Name = "numSpanRatio";
+            this.numSpanRatio.Size = new System.Drawing.Size(123, 27);
+            this.numSpanRatio.TabIndex = 72;
+            this.numSpanRatio.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.numSpanRatio.Value = new decimal(new int[] {
+            90,
+            0,
+            0,
+            0});
             // 
             // labelA
             // 
@@ -268,7 +298,7 @@
             this.btnAutoLineBorders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnAutoLineBorders.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnAutoLineBorders.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnAutoLineBorders.Location = new System.Drawing.Point(327, 48);
+            this.btnAutoLineBorders.Location = new System.Drawing.Point(327, 25);
             this.btnAutoLineBorders.Margin = new System.Windows.Forms.Padding(4);
             this.btnAutoLineBorders.Name = "btnAutoLineBorders";
             this.btnAutoLineBorders.Size = new System.Drawing.Size(116, 46);
@@ -291,9 +321,9 @@
             this.tbLayoutSubL.Name = "tbLayoutSubL";
             this.tbLayoutSubL.RowCount = 4;
             this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 36F));
-            this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33F));
-            this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 33F));
-            this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 34F));
+            this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 32F));
+            this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 36F));
+            this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 32F));
             this.tbLayoutSubL.Size = new System.Drawing.Size(494, 471);
             this.tbLayoutSubL.TabIndex = 76;
             // 
@@ -318,11 +348,11 @@
             this.groupBox3.Controls.Add(this.rtbCodeContent);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox3.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox3.Location = new System.Drawing.Point(8, 330);
+            this.groupBox3.Location = new System.Drawing.Point(8, 339);
             this.groupBox3.Margin = new System.Windows.Forms.Padding(8);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Padding = new System.Windows.Forms.Padding(12, 3, 3, 18);
-            this.groupBox3.Size = new System.Drawing.Size(478, 133);
+            this.groupBox3.Size = new System.Drawing.Size(478, 124);
             this.groupBox3.TabIndex = 76;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "測試掃碼";
@@ -351,7 +381,7 @@
             this.groupBox1.Location = new System.Drawing.Point(8, 44);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(8);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(478, 127);
+            this.groupBox1.Size = new System.Drawing.Size(478, 123);
             this.groupBox1.TabIndex = 74;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "框選區塊";
@@ -518,36 +548,22 @@
             this.btnTrain.Name = "btnTrain";
             this.btnTrain.Size = new System.Drawing.Size(172, 52);
             this.btnTrain.TabIndex = 68;
-            this.btnTrain.Text = "檢查 模板";
+            this.btnTrain.Text = "訓練 模板";
             this.btnTrain.UseVisualStyleBackColor = false;
+            this.btnTrain.Visible = false;
             // 
-            // label2
+            // btnBuildMircoTrf
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(50, 97);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(96, 20);
-            this.label2.TabIndex = 73;
-            this.label2.Text = "跨度比例 (%)";
-            // 
-            // numSpanRatio
-            // 
-            this.numSpanRatio.DecimalPlaces = 1;
-            this.numSpanRatio.Location = new System.Drawing.Point(168, 94);
-            this.numSpanRatio.Minimum = new decimal(new int[] {
-            50,
-            0,
-            0,
-            0});
-            this.numSpanRatio.Name = "numSpanRatio";
-            this.numSpanRatio.Size = new System.Drawing.Size(123, 27);
-            this.numSpanRatio.TabIndex = 72;
-            this.numSpanRatio.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.numSpanRatio.Value = new decimal(new int[] {
-            90,
-            0,
-            0,
-            0});
+            this.btnBuildMircoTrf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBuildMircoTrf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.btnBuildMircoTrf.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnBuildMircoTrf.Location = new System.Drawing.Point(327, 77);
+            this.btnBuildMircoTrf.Margin = new System.Windows.Forms.Padding(4);
+            this.btnBuildMircoTrf.Name = "btnBuildMircoTrf";
+            this.btnBuildMircoTrf.Size = new System.Drawing.Size(116, 46);
+            this.btnBuildMircoTrf.TabIndex = 74;
+            this.btnBuildMircoTrf.Text = "精算尺寸";
+            this.btnBuildMircoTrf.UseVisualStyleBackColor = false;
             // 
             // FormTemplateEditor
             // 
@@ -566,6 +582,7 @@
             this.tbLayoutA.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numSpanRatio)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numBorderIndent)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numBorderSize)).EndInit();
             this.tbLayoutSubL.ResumeLayout(false);
@@ -574,7 +591,6 @@
             this.groupBox1.PerformLayout();
             this.tbLayoutB.ResumeLayout(false);
             this.tbLayoutSubR.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numSpanRatio)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -613,5 +629,6 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.NumericUpDown numSpanRatio;
+        private System.Windows.Forms.Button btnBuildMircoTrf;
     }
 }

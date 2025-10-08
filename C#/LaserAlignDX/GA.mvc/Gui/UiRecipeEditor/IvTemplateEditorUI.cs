@@ -28,6 +28,7 @@ namespace LaserAlignDX.Mvc.Gui
 
         Button btnPickGolden {  get; }
         Button btnAutoLineBorders { get; }
+        Button btnBuildMircoTransform { get; }
         NumericUpDown numBorderIndent { get; }
         NumericUpDown numBorderExtend { get; }
         NumericUpDown numLineSpanPercentage { get; }

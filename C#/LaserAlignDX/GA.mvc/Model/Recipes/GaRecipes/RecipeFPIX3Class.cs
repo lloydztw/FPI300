@@ -1509,27 +1509,27 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         [CategoryAttribute(_Cat02), DescriptionAttribute("")]
         [DisplayName("01 啟用 整盤 NG百分比 判定")]
-        [Browsable(false)]
-        public bool optUseTrayNgPercentage
+        [Browsable(true)]
+        public bool optUseTotalNgPercentage
         {
-            get => _spec.optUseTrayNgPercentage;
-            set => _spec.optUseTrayNgPercentage = value;
+            get => _spec.optUseTotalNgPercentage;
+            set => _spec.optUseTotalNgPercentage = value;
         }
 
         [CategoryAttribute(_Cat02), DescriptionAttribute("單位 %")]
         [DisplayName("02 整盤 NG百分比 上限 (%)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 0.5f, 1)]
-        [Browsable(false)]
-        public float TryNgPercentage
+        [Browsable(true)]
+        public float xTotalNgPercentage
         {
-            get => _spec.TrayNgPercentage;
-            set => _spec.TrayNgPercentage = value;
+            get => _spec.TotalNgPercentage;
+            set => _spec.TotalNgPercentage = value;
         }
 
         [CategoryAttribute(_Cat02), DescriptionAttribute("")]
         [DisplayName("03 顯示 個別 NG 檢測結果")]
-        [Browsable(false)]
+        [Browsable(true)]
         public bool optShowIndividualNG
         {
             get => _spec.optShowIndividualNG;

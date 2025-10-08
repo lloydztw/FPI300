@@ -13,7 +13,6 @@
  */
 #endregion
 
-using AForge.Imaging;
 using JetEazy.FormSpace;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
@@ -33,8 +32,9 @@ using System.Text;
 using System.Windows.Forms;
 using VisionDesigner;
 
-using CELL = LaserAlignDX.OPSpace.RegionCellX3Class;
-using RECIPE = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
+using Point = System.Drawing.Point;
+using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
+using XRecipe = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
 
 
 namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
@@ -44,11 +44,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #region INNER_CLASS
         class CellBloc : EzBloc
         {
-            public CellBloc(CELL cell, RectangleF rect) : base(Rectangle.Round(rect), 1)
+            public CellBloc(XCell cell, RectangleF rect) : base(Rectangle.Round(rect), 1)
             {
                 Cell = cell;
             }
-            public CellBloc(CELL cell) : base(Rectangle.Empty, 1)
+            public CellBloc(XCell cell) : base(Rectangle.Empty, 1)
             {
                 Cell = cell;
 
@@ -70,7 +70,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     Center = new QVector(cc.X, cc.Y);
                 }
             }
-            public CELL Cell
+            public XCell Cell
             {
                 get; private set;
             }
@@ -83,10 +83,15 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #endregion
 
         #region GLOBAL_MESS
-        RECIPE _xRecipe
+        XRecipe _xRecipe
         {
-            get => RECIPE.Instance;
+            get => XRecipe.Instance;
         }
+        #endregion
+
+        #region RUNTIME_DATA
+        bool _optBypassIndividualNG;
+        bool _isCtrlPressed;
         #endregion
 
         #region PRIVATE_DATA
@@ -122,7 +127,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             _drawItemsEx.Clear();
             _chipDimMeasurePoints.Clear();
         }
-        public void UpdateResult(IEnumerable<CELL> cells, int mode)
+        public void UpdateResult(IEnumerable<XCell> cells, int mode)
         {
             _mode = (ScanInspectMode)mode;
 
@@ -130,6 +135,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             {
                 Reset();
 
+                updateDisplayOptions();
                 updateCellsToGrid(cells, out _grid);
 
                 if (_mode == ScanInspectMode.NOTRAY)
@@ -148,7 +154,25 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
 
         #region UPDATE_FUNCTIONS
-        void updateCellsToGrid(IEnumerable<CELL> cells, out EzBlocsGrid grid)
+        void updateDisplayOptions()
+        {
+            _optBypassIndividualNG = false;
+            if (_mode != ScanInspectMode.NOTRAY)
+            {
+                if (_xRecipe.InspectParams.optChipMeasurement)
+                {
+                    bool optUseTotalNgPercentage = _xRecipe.InspectParams.optUseTotalNgPercentage;
+                    bool optShowIndividualNG = _xRecipe.InspectParams.optShowIndividualNG;
+                    if (optUseTotalNgPercentage && !optShowIndividualNG)
+                    {
+                        var aoiModel = GaMvcConfig.SysModel?.AoiModel;
+                        if (aoiModel != null && aoiModel.IsPass)
+                            _optBypassIndividualNG = true;
+                    }
+                }
+            }
+        }
+        void updateCellsToGrid(IEnumerable<XCell> cells, out EzBlocsGrid grid)
         {
             int rows = 0;
             int cols = 0;
@@ -218,7 +242,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 outGridBlocs.Add(new EzBloc(rect, 0));
             }
         }
-        void updatePassNgEmptyCount(IEnumerable<CELL> cells)
+        void updatePassNgEmptyCount(IEnumerable<XCell> cells)
         {
             int ng = 0;
             int pass = 0;
@@ -277,11 +301,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (!Visible)
                 return;
 
+            _isCtrlPressed = e.Control;
+
             switch (e.KeyCode)
             {
                 case Keys.Escape:
                     DebugMatchingOff();
                     break;
+
                 case Keys.F4:
                     if (!BY_PASS)
                     {
@@ -289,6 +316,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                             DebugMatching(cellBloc);
                     }
                     break;
+
                 case Keys.F2:
                     if (!BY_PASS)
                     {
@@ -301,7 +329,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             if (e.Control && e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9)
             {
-                DumpChipDims((int)e.KeyCode - (int)Keys.D0);
+                DumpChipDimsInCol((int)e.KeyCode - (int)Keys.D0);
             }
 
             base.OnKeyDown(viewer, e);
@@ -338,6 +366,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
 
             base.OnDraw(viewer, gxView);
+        }
+        public override bool OnMouseDown(CvImageViewer viewer, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right && _isCtrlPressed)
+            {
+                popupMenuStrip(viewer, e.Location);
+                _isCtrlPressed = false;
+                return false;
+            }
+            return base.OnMouseDown(viewer, e);
         }
         public override bool OnMouseMove(CvImageViewer viewer, MouseEventArgs e)
         {
@@ -389,7 +427,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     yield return bloc;
             }
         }
-        bool checkResult(CELL cell, out bool isPass, out bool isEmpty)
+        bool checkResult(XCell cell, out bool isPass, out bool isEmpty)
         {
             isPass = false;
             isEmpty = false;
@@ -475,7 +513,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 else if (cell.inspectReason != InspectReason.INS_ALIGNERR && chipBox2D != null)
                 {
                     // NG
-                    var item = new CviRotRectBox(chipBox2D, Color.Red, 0.25f) { Text = "NG", Tag = cell };
+                    var item = _optBypassIndividualNG ?
+                        new CviRotRectBox(chipBox2D, Color.Green, 0f) { Tag = cell }:
+                        new CviRotRectBox(chipBox2D, Color.Red, 0.20f) { Text = "NG", Tag = cell };
                     _drawItems.Add(item);
                 }
                 else
@@ -572,7 +612,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 var padsGrid = cell.ChipData.PadsGrid;
                 if (padsGrid != null)
                 {
-                    Color itemColor = cell.inspectReason == InspectReason.PASS ? Color.Lime : Color.Red;
+                    bool isPass = cell.inspectReason == InspectReason.PASS;
+                    Color itemColor = isPass ? Color.Lime : _optBypassIndividualNG ? Color.Green : Color.Red;
                     EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var padsBox2D, false);
                     var item = new CviRotRectBox(padsBox2D, itemColor, 0.20f) { Tag = cell };
                     _drawItemsEx.Add(item);
@@ -681,7 +722,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 draw_QrCode_One(viewer, gxView, bloc?.Cell);
             }
         }
-        void draw_QrCode_One(CvImageViewer viewer, Graphics gxView, CELL cell)
+        void draw_QrCode_One(CvImageViewer viewer, Graphics gxView, XCell cell)
         {
             if (cell != null && cell.DrawBarcodePosition != null)
             {
@@ -1036,8 +1077,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         #region 尺寸量測結果
                         var cW = _xRecipe.InspectParams.mWidthStand;
                         var cH = _xRecipe.InspectParams.mHeightStand;
-                        var dx = Math.Round(cW - cell.RunWidth, 3);
-                        var dy = Math.Round(cH - cell.RunHeight, 3);
+                        var dx = Math.Round(cell.RunWidth - cW, 3);
+                        var dy = Math.Round(cell.RunHeight - cH, 3);
                         sb.AppendLine().Append($"晶粒.寬 = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
                         sb.AppendLine().Append($"晶粒.高 = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
                         #endregion
@@ -1135,6 +1176,49 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (cx > 0 && cy > 0)
                 return new QVector(cx, cy);
             return bloc.Center;
+        }
+        #endregion
+
+        #region MENU_STRIP_FUNCTIONS
+        Form _frmOwner;
+        ContextMenuStrip _menuStrip;
+        void initMenuStrip(Control wnd)
+        {
+            if (_menuStrip == null)
+            {
+                _frmOwner = wnd.FindForm();
+                wnd.HandleDestroyed += (s, e) => disposeMenuStrip();
+                var menu0 = new ToolStripMenuItem("設定 晶粒 標準尺寸");
+                var menu1 = new ToolStripMenuItem("Dump 尺寸量測結果 (in row)");
+                var menu2 = new ToolStripMenuItem("Dump 尺寸量測結果 (in col)");
+                var menu3 = new ToolStripMenuItem("Dump 所有區域圖像 (All)");
+                //var menu4 = new ToolStripMenuItem("Debug 調試 晶粒定位 圖像");
+                menu0.Click += (s, e) => OpenGoldenDimensionEditorDlg();
+                menu1.Click += (s, e) => DumpChipDimsInRow(-1);
+                menu2.Click += (s, e) => DumpChipDimsInCol(-1);
+                menu3.Click += (s, e) => DumpCellRegions();
+
+                _menuStrip = new ContextMenuStrip();
+                _menuStrip.Items.Add(menu0);
+                _menuStrip.Items.Add(new ToolStripSeparator());
+                _menuStrip.Items.Add(menu1);
+                _menuStrip.Items.Add(menu2);
+                _menuStrip.Items.Add(menu3);
+            }
+        }
+        void disposeMenuStrip()
+        {
+            _menuStrip?.Dispose();
+            _menuStrip = null;
+        }
+        void popupMenuStrip(Control wnd, Point pt)
+        {
+            var activeCellBloc = _cursorBloc as CellBloc;
+            if (activeCellBloc == null) return;
+            _cursorBloc2 = null;
+            _toolTip.Hide(wnd);
+            initMenuStrip(wnd);
+            _menuStrip.Show(wnd, pt);
         }
         #endregion
 
@@ -1253,30 +1337,79 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             MessageBox.Show($"已存入 Region Cell Images 至\n\r{dstPath}", "DEBUG", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        void DumpChipDims(int col)
+        void DumpChipDimsInCol(int col)
         {
+            if (col < 0 && _cursorBloc is CellBloc cb && cb.Cell != null)
+                col = cb.Cell.CellCol;
+
             if (_grid == null || col < 0 || col >= _grid.Cols)
                 return;
 
             var sb = new StringBuilder();
             for (int r = 0; r < _grid.Rows; r++)
             {
-                var cb = _grid.Get(r, col) as CellBloc;
+                cb = _grid.Get(r, col) as CellBloc;
                 var cell = cb?.Cell;
                 if (cell == null) continue;
                 var w = cell.RunWidth;
                 var h = cell.RunHeight;
                 if (w > 0 && h > 0)
-                    sb.AppendValues(w, h).AppendLine();
+                    sb.Append(r).Append(",").AppendValues(w, h).AppendLine();
             }
 
             if (!System.IO.Directory.Exists(PATH_DUMP))
                 System.IO.Directory.CreateDirectory(PATH_DUMP);
 
-            string fileName = System.IO.Path.Combine(PATH_DUMP, $"measurement_{col}.csv");
+            string fileName = System.IO.Path.Combine(PATH_DUMP, $"measure_dims_in_col_{col:00}.csv");
+            GaUtil.SaveData(sb.ToString(), fileName);
+            VsMessageBox.Info($"已保存 尺寸數據 至 {fileName}");
+        }
+        void DumpChipDimsInRow(int row)
+        {
+            if (row < 0 && _cursorBloc is CellBloc cb && cb.Cell != null)
+                row = cb.Cell.CellRow;
+
+            if (_grid == null || row < 0 || row >= _grid.Cols)
+                return;
+
+            var sb = new StringBuilder();
+            for (int c = 0; c < _grid.Cols; c++)
+            {
+                cb = _grid.Get(row, c) as CellBloc;
+                var cell = cb?.Cell;
+                if (cell == null) continue;
+                var w = cell.RunWidth;
+                var h = cell.RunHeight;
+                if (w > 0 && h > 0)
+                    sb.Append(c).Append(",").AppendValues(w, h).AppendLine();
+            }
+
+            if (!System.IO.Directory.Exists(PATH_DUMP))
+                System.IO.Directory.CreateDirectory(PATH_DUMP);
+
+            string fileName = System.IO.Path.Combine(PATH_DUMP, $"measure_dims_in_row_{row:00}.csv");
             GaUtil.SaveData(sb.ToString(), fileName);
             VsMessageBox.Info($"已保存 尺寸數據 至 {fileName}");
         }
         #endregion
+
+        void OpenGoldenDimensionEditorDlg()
+        {
+            var cell = (_cursorBloc as CellBloc)?.Cell;
+            if (cell == null) return;
+
+            var account = Traveller106.Universal.ACCDB.AccNow;
+            if(account==null || !account.IsAllowSetupRecipe)
+            {
+                VsMessageBox.Warning("請先登入 有修改參數權限 的 帳號!");
+                return;
+            }
+
+            using (var dlg = new FormChipTemplateDim())
+            {
+                dlg.ActiveCell = cell;
+                dlg.ShowDialog(_frmOwner);
+            }
+        }
     }
 }

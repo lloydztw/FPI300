@@ -29,7 +29,6 @@ using System.Windows.Forms;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
 using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
-using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 using PlcFlyResultCode = LaserAlignDX.PlcResultCode;
 
 

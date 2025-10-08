@@ -392,6 +392,12 @@
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.Designer.cs">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormChipTemplateDim.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormChipTemplateDim.Designer.cs">
+      <DependentUpon>FormChipTemplateDim.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -826,6 +832,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.resx">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormChipTemplateDim.resx">
+      <DependentUpon>FormChipTemplateDim.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.resx">
       <DependentUpon>FormRecipeEditor.cs</DependentUpon>

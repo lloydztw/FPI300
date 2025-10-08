@@ -48,6 +48,8 @@ namespace LaserAlignDX.Mvc.Gui
 
         Button IvTemplateEditorUI.btnPickGolden => btnPickGolden;
         Button IvTemplateEditorUI.btnAutoLineBorders => btnAutoLineBorders;
+        Button IvTemplateEditorUI.btnBuildMircoTransform => btnBuildMircoTrf;
+
         NumericUpDown IvTemplateEditorUI.numBorderIndent => numBorderIndent;
         NumericUpDown IvTemplateEditorUI.numBorderExtend => numBorderSize;
         NumericUpDown IvTemplateEditorUI.numLineSpanPercentage => numSpanRatio;
@@ -59,6 +61,7 @@ namespace LaserAlignDX.Mvc.Gui
         Button IvTemplateEditorUI.btnDefectRegionAdd => btnDefectAdd;
         Button IvTemplateEditorUI.btnDefectRegionDelete => btnDefectDelete;
         Button IvTemplateEditorUI.btnDefectRegionClearAll => btnDefectClear;
+
         Button IvTemplateEditorUI.btnTrainTemplate => btnTrain;
         Button IvTemplateEditorUI.btnSaveAllParams => btnSave;
         Button IvTemplateEditorUI.btnCancel => btnCancel;

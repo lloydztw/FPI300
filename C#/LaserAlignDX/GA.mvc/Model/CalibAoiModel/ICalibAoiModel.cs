@@ -21,7 +21,6 @@ namespace LaserAlignDX.AoiModel
 {
     public interface ICalibAoiModel : IxEmptyTrayInspector
     {
-        MatchResult FetchGridNodes(Mat fullfovImg);
-        //Mat RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg, bool optOutputBindaryImage = false);
+        MatchResult FetchGridNodes(Mat fullfovImg, bool refine);
     }
 }

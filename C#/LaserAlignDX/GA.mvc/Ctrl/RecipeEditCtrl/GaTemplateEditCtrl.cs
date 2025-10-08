@@ -177,6 +177,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         Button btnPickGolden => _editorUI.btnPickGolden;
         Button btnTryScanQrCode => _editorUI.btnTryScanQrCode;
         Button btnAutoLayoutLineBorders => _editorUI.btnAutoLineBorders;
+        Button btnBuildMictroTransform => _editorUI.btnBuildMircoTransform;
         Button btnDefectRegionAdd => _editorUI.btnDefectRegionAdd;
         Button btnDefectRegionDelete => _editorUI.btnDefectRegionDelete;
         Button btnDefectRegionClearAll => _editorUI.btnDefectRegionClearAll;
@@ -220,6 +221,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             btnPickGolden.Click += (s, e) => BuildGoldenChipTemplate();
             btnTryScanQrCode.Click += (s, e) => BuildQRCodeTemplate();
             btnAutoLayoutLineBorders.Click += (s, e) => AutoLayoutLineBorders();
+            btnBuildMictroTransform.Click += (s, e) => BuildMicroTransform();
 
             btnDefectRegionAdd.Click += (s, e) => DfRegion_Add();
             btnDefectRegionDelete.Click += (s, e) => DfRegion_Delete();
@@ -456,21 +458,32 @@ namespace LaserAlignDX.Mvc.Ctrl
             refreshDispUI(DS1);
 
             updateLineBorderBoxes(true);
-            updateLineSegmentBoxes(true, calcGoldenDim: true);
+            updateLineSegmentBoxes(true);
             _isLineBorderModified = true;
         }
-        void TrainGoldenChipTemplate()
+        void BuildMicroTransform()
+        {
+            _isPropertyModified = true;
+            updateLineSegmentBoxes(true, calcGoldenDim: true);
+        }
+        void TrainGoldenChipTemplate(bool silentSuccess = false)
         {
             int err = _xRecipe.PrintTempTrain();
-            if (err == 0)
-                VsMessageBox.Info("匹配模板 創建成功.");
-            else
+            if (err != 0)
+            {
                 VsMessageBox.Warning("匹配模板 創建失敗!");
+            }
+            else if (!silentSuccess)
+            {
+                VsMessageBox.Info("匹配模板 創建成功!");
+            }
         }
         void SaveAllParams(bool force)
         {
             bool isAnySaved = false;
             string target = "";
+
+            TrainGoldenChipTemplate(silentSuccess: true);
 
             if (_isGoldenModified || force)
             {
@@ -732,9 +745,9 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
                 else
                 {
-                    safeSet(_editorUI.numBorderIndent, settings.lineBorderIndent);
-                    safeSet(_editorUI.numBorderExtend, settings.lineBorderExt);
-                    safeSet(_editorUI.numLineSpanPercentage, (decimal)settings.lineSpanPercentage);
+                    GaUtil.SetNum(_editorUI.numBorderIndent, settings.lineBorderIndent);
+                    GaUtil.SetNum(_editorUI.numBorderExtend, settings.lineBorderExt);
+                    GaUtil.SetNum(_editorUI.numLineSpanPercentage, (decimal)settings.lineSpanPercentage);
                 }
             }
             catch
@@ -831,15 +844,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             showInteractors(_opSelector);
             _editorUI.btnPickGolden.Enabled = _opSelector == OpSelector.Golden;
             _editorUI.btnAutoLineBorders.Enabled = _opSelector == OpSelector.LineBorders;
+            _editorUI.btnBuildMircoTransform.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.numBorderIndent.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.numBorderExtend.Enabled = _opSelector == OpSelector.LineBorders;
+            _editorUI.numLineSpanPercentage.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.btnTryScanQrCode.Enabled = _opSelector == OpSelector.QrCode;
-        }
-        void safeSet(NumericUpDown num, decimal value)
-        {
-            value = Math.Min(num.Maximum, value);
-            value = Math.Max(num.Minimum, value);
-            num.Value = value;
         }
         #endregion
 
@@ -989,30 +998,28 @@ namespace LaserAlignDX.Mvc.Ctrl
         void aoiCalcGoldenChipDimension(List<EzLSD.LineSegment> lines)
         {
             var aoiModel = _sysModel?.AoiModel;
-            if (aoiModel != null)
+            if (aoiModel != null && lines != null)
             {
+                var regionBmp = _xBmpGoldenRegionTemplate;
+                if (regionBmp == null)
+                    return;
+
                 var regionRoi = _xRecipe.xRectRegionPrint;
                 foreach (var line in lines)
                     line?.Offset(regionRoi.X, regionRoi.Y);
 
-                //bool ok = aoiModel.CalcChipDimension(lines.ToArray(), out SizeF chipDim, false);
-                //if (ok)
-                //{
-                //    System.Diagnostics.Trace.WriteLine($"Chip Dim = {chipDim.Width:0.000} x {chipDim.Height:0.000}");
-                //    if (chipDim.Width > 0)
-                //        _xInspectX3.xChipDimScaleW = (double)_xInspectX3.xTemplateChipWidth / chipDim.Width;
-                //    if (chipDim.Height > 0)
-                //        _xInspectX3.xChipDimScaleH = (double)_xInspectX3.xTemplateChipHeight / chipDim.Height;
-                //    _isPropertyModified = true;
-                //}
-
                 var targetSize = new SizeF(_xInspectX3.xTemplateChipWidth, _xInspectX3.xTemplateChipHeight);
-                var err = aoiModel.BuildMicroChipTransform(targetSize, lines.ToArray(), _xBmpGoldenRegionTemplate, regionRoi);
+                var err = aoiModel.BuildMicroChipTransform(targetSize, lines.ToArray(), regionBmp, regionRoi);
 
                 if (err != ErrCodes.OK)
                 {
                     string errMsg = "無法建立 Micro Transform:\n\r\n\r" + GaUtil.GetEnumDescription(err);
                     VsMessageBox.Warning(errMsg);
+                }
+                else
+                {
+                    string msg = "成功 設定樣本尺寸 並 建立 Micro Transform!";
+                    VsMessageBox.Info(msg);
                 }
             }
         }

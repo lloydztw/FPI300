@@ -22,6 +22,12 @@ namespace LaserAlignDX.Mvc.Model
         [Description("OK")]
         OK = 0,
 
+        [Description("沒有 Aoi Model")]
+        NO_AOI_MODEL,
+
+        [Description("沒有線掃圖檔")]
+        NO_LINE_SCAN_IMAGE,
+
         [Description("Machine.PLCIO 還沒配置")]
         NO_PLC_IO,
 

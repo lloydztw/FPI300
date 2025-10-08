@@ -63,9 +63,12 @@ namespace Traveller106
                         // 這樣 原代碼 C# 專案, 
                         //      才能放在任意資料夾
                         //      不需要 依附於 最後佈署的資料夾 
-                        //return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
-                        //return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
-                        //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
+                        if (IsNoUseCCD)
+                        {
+                            //return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
+                            //return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
+                            return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
+                        }
                         return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
                 }
             }

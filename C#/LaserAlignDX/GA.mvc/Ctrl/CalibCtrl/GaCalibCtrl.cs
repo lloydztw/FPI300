@@ -620,7 +620,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             #endregion
 
             //(1) Run AOI
-            var matchResult = _aoiModel.FetchGridNodes(fullfovImg);
+            var matchResult = _aoiModel.FetchGridNodes(fullfovImg, refine: true);
             var camGrid = matchResult?.Grid;
 
             //(2) Update Grid Result

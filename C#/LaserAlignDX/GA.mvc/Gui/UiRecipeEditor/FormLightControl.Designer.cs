@@ -82,9 +82,9 @@
             this.label3.Location = new System.Drawing.Point(65, 187);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(381, 27);
+            this.label3.Size = new System.Drawing.Size(387, 27);
             this.label3.TabIndex = 8;
-            this.label3.Text = "注:关闭灯光设置0 打开灯光设置数值 即可";
+            this.label3.Text = "註: 关闭灯光设置0 打开灯光设置数值 即可";
             // 
             // cboLightChannels
             // 
