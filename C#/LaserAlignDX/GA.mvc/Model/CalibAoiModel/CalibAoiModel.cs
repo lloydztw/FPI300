@@ -13,30 +13,32 @@
  */
 #endregion
 
+using AForge.Imaging;
 using EzAoiEmptyTrayInspector;
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.Utils;
+using LaserAlignDX.Mvc.Model;
+using LeTian.AoiLib;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using static JetEazy.Match.QuadLinkNode;
+using ErrCodes = EzAoiEmptyTrayInspector.Model.ErrCodes;
 
 
 namespace LaserAlignDX.AoiModel
 {
-    //public interface ICalibAoiModel : IxEmptyTrayInspector
-    //{
-    //    void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg);
-    //}
-
     public class CalibAoiModel : ICalibAoiModel
     {
         public static bool OPT_DUMP = false;
 
         #region PRIVATE_DATA
+        ITravelerModel _sysModel => GaMvcConfig.SysModel;
         IxEmptyTrayInspector _externImp;
         JxAoiRecipe _jxRecipe;
         #endregion
@@ -187,6 +189,10 @@ namespace LaserAlignDX.AoiModel
         {
             // Caller 負責調用 _externImp.Dispose()
         }
+
+        /// <summary>
+        /// 設定參數
+        /// </summary>
         public void SetRecipe(JxAoiRecipe recipe)
         {
             // recipe 會被 _externImp 持有,
@@ -195,23 +201,100 @@ namespace LaserAlignDX.AoiModel
             _jxRecipe = recipe;
         }
 
-        public MatchResult FetchGridNodes(Mat fullfovImg, bool refine)
+        /// <summary>
+        /// 抓取 空載台格位點
+        /// </summary>
+        /// <param name="fullfovImg"></param>
+        /// <param name="refine"></param>
+        public MatchResult FetchGridNodes(CarrierEnum carrierID, Mat fullfovImg, bool refine)
         {
             //(1) Peek the ezImage
             using (var ezImage = new EzQuickImage(fullfovImg, deepCopy: false))
             {
                 //(2) Run Aoi
                 _externImp.RunMatch(SideID.A, ezImage);
+                //_externImp.RunAll((IEzImage)ezImage, wait: true);
 
                 //(3) Result
                 var matchResult = _externImp.GetMatchResult(SideID.A);
+                //var result = _externImp.GetResult();
 
                 //(4) Refine each detail locations
                 if (refine)
-                    this.RefineCentroidLocations(matchResult, ezImage);
+                {
+                    RefineCentroidLocations(matchResult, ezImage);
+                }
 
                 return matchResult;
             }
+        }
+
+        public bool RemoveBadNodes(CarrierEnum carrierID, EzBlocsGrid grid)
+        {
+            bool isChanged = false;
+
+            //double maxErr = 0;
+            //int maxErrRow = -1;
+            //int maxErrCol = -1;
+
+            var transformsModel = _sysModel?.TransformsModel;
+            if (transformsModel == null || grid == null)
+                return isChanged;
+
+            int rows = grid.Rows;
+            int cols = grid.Cols;
+
+            int count = 0;
+            double sumW = 0;
+            double sumH = 0;
+            bool hasNull = false;
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    var bloc = grid[r, c];
+                    if (bloc == null)
+                    {
+                        hasNull = true;
+                        isChanged = true;
+                        continue;
+                    }
+
+                    (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(carrierID, bloc.Center, r, c);
+                    double err = Math.Max(Math.Abs(worldDelta.X), Math.Abs(worldDelta.Y));
+                    if (err > 0.08)
+                    {
+                        grid[r, c] = null;
+                        hasNull = true;
+                        isChanged = true;
+                        continue;
+                    }
+
+                    sumW += bloc.Rect.Width;
+                    sumH += bloc.Rect.Height;
+                    count++;
+                }
+            }
+
+            if (hasNull && count > rows * cols / 2)
+            {
+                //var aveSize = new SizeF((float)(sumW / count), (float)(sumH / count));
+                //var interpo = new EzBlocsGridInterpo(grid.GetPitch(), aveSize);
+                //interpo.RunInterpolation(grid, null, null);
+                //interpo.RunExpolation(grid, null, null, 2);
+                //grid.RebuildRowColTags();
+                //foreach (var bloc in grid)
+                //{
+                //    if (bloc != null)
+                //    {
+                //        ((IxBlob)bloc).Bin = 9999;
+                //    }
+                //}
+                isChanged = true;
+            }
+
+            return isChanged;
         }
 
 #if (OPT_RESERVED)
@@ -369,11 +452,12 @@ namespace LaserAlignDX.AoiModel
             return imgOutput;
         }
 #endif
-        Mat RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg, bool optOutputBinaryImage = false)
+
+        void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg)
         {
             var grid = matchResult?.Grid;
             if (grid == null || _jxRecipe == null)
-                return null;
+                return;
 
             int thresh = _jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
             var bound = new Rect(0, 0, fullfovImg.Width, fullfovImg.Height);
@@ -382,12 +466,8 @@ namespace LaserAlignDX.AoiModel
 
             bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
             var findLocalCenter = isBlackCarrier ?
-                (Func<Mat, Mat, int, QVector>)this.FindLocalCenter_black_carrier_cc :
-                (Func<Mat, Mat, int, QVector>)this.FindLocalCenter_white_carrier;
-
-            Mat imgOutput = null;
-            if (optOutputBinaryImage)
-                imgOutput = Mat.Zeros(fullfovImg.Size(), MatType.CV_8UC1);
+                (Func<Mat, Mat, int, string, QVector>)this.FindLocalCenter_black_carrier_cc :
+                (Func<Mat, Mat, int, string, QVector>)this.FindLocalCenter_white_carrier;
 
             for (int r = 0; r < rows; r++)
             {
@@ -397,19 +477,15 @@ namespace LaserAlignDX.AoiModel
                     if (bloc == null)
                         continue;
 
+
                     var roi = JetEazy.Qcvt.CV(bloc.Rect);
                     JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
 
                     using (var img = fullfovImg[roi].Clone())
                     using (var binary = new Mat())
                     {
-                        var center = findLocalCenter(img, binary, thresh);
-
-                        _DUMP(img, "img", r, c);
-                        _DUMP(binary, "binary", r, c);
-
-                        if (imgOutput != null)
-                            imgOutput[roi] = binary;
+                        string dumpTag = OPT_DUMP ? $"@{r}_{c}" : null;
+                        var center = findLocalCenter(img, binary, thresh, dumpTag);
 
                         if (center == null)
                             continue;
@@ -422,30 +498,29 @@ namespace LaserAlignDX.AoiModel
                     }
                 }
             }
-
-            return imgOutput;
         }
-        QVector FindLocalCenter_white_carrier(Mat img, Mat binary, int thresh)
+        QVector FindLocalCenter_white_carrier(Mat img, Mat binary, int thresh, string dumpTag)
         {
-            // 將 白色載台影像 反向, 形成 淺色晶粒 深色背景
+            //(1) 將 白色載台影像 反向, 形成 淺色晶粒 深色背景
             Cv2.BitwiseNot(img, img);
             if (thresh <= 0)
                 Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
             else
                 Cv2.Threshold(img, binary, thresh, 255, ThresholdTypes.Binary);
 
-            //_DUMP(img, "img", r, c);
-            //_DUMP(binary, "binary", r, c);
-            //if (imgOutput != null)
-            //    imgOutput[roi] = binary;
+            //(2) DUMP
+            _DUMP(img, "img", dumpTag);
+            _DUMP(binary, "binary", dumpTag);
 
+            //(3) Blobs
             findWhiteBlobs(binary, out var whiteBlobs);
             if (whiteBlobs.Count == 0)
                 return null;
 
             whiteBlobs.Sort((b1, b2) => b2.Pixels - b1.Pixels);
 
-            // 使用質心 (for 白色載台)
+
+            //(4) 使用質心 (for 白色載台)
             var center = whiteBlobs[0].Center;
             //center.X += roi.X;
             //center.Y += roi.Y;
@@ -454,7 +529,7 @@ namespace LaserAlignDX.AoiModel
             //bloc.Rect = Rectangle.Round(rc);
             return center;
         }
-        QVector FindLocalCenter_black_carrier_00(Mat img, Mat binary, int thresh)
+        QVector FindLocalCenter_black_carrier_00(Mat img, Mat binary, int thresh, string dumpTag)
         {
             if (thresh <= 0)
                 Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
@@ -478,19 +553,24 @@ namespace LaserAlignDX.AoiModel
             var center = new QVector(cc.X, cc.Y);
             return center;
         }
-        QVector FindLocalCenter_black_carrier_cc(Mat img, Mat binary, int thresh)
+        QVector FindLocalCenter_black_carrier_cc(Mat img, Mat binary, int thresh, string dumpTag)
         {
+            //(1) 二值化
             if (thresh <= 0)
                 Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
             else
                 Cv2.Threshold(img, binary, thresh, 255, ThresholdTypes.Binary);
 
+            //(2) Morph
             Cv2.Erode(binary, binary, null, iterations: 1);
             Cv2.Dilate(binary, binary, null, iterations: 1);
             //Cv2.Rectangle(binary, new Rect(0, 0, binary.Width, binary.Height), Scalar.White, 2);
             //Cv2.FloodFill(binary, new OpenCvSharp.Point(0, 0), Scalar.Black);
 
-            // 執行 FindContours
+            //(3) Dump
+            _DUMP(binary, "binary", dumpTag);
+
+            //(4) 執行 FindContours
             Cv2.FindContours(
                 binary,
                 out var contours,
@@ -499,14 +579,13 @@ namespace LaserAlignDX.AoiModel
                 method: ContourApproximationModes.ApproxSimple  // 對應 cv2.CHAIN_APPROX_SIMPLE
             );
 
-            // 3. 找到最大輪廓的索引和面積
+            //(4.1) 找到最大輪廓的索引和面積
             double maxArea = 0;
             int maxContourIndex = -1;
             for (int i = 0; i < contours.Length; i++)
             {
                 // 獲取當前輪廓 (Point[] 型別)
                 var contour = contours[i];
-
                 // 計算輪廓面積
                 double area = Cv2.ContourArea(contour);
                 if (area > maxArea)
@@ -515,14 +594,19 @@ namespace LaserAlignDX.AoiModel
                     maxContourIndex = i;
                 }
             }
+            if (maxContourIndex < 0)
+            {
+                LtDebug.LOG.Error($"{GetType().Name} 無法找到 格位的 Contour!");
+                return null;
+            }
 
-            // 4. 計算幾何矩 (Moments)
+            //(5) 計算幾何矩 (Moments)
             var bestContour = contours[maxContourIndex];
             Moments M = Cv2.Moments(bestContour);
-            // 4.1 初始化質心座標
+            //(5.1) 初始化質心座標
             double cX = 0;
             double cY = 0;
-            // 4.2 確保 M00 (面積) 不為零，避免除以零錯誤
+            //(5.2) 確保 M00 (面積) 不為零，避免除以零錯誤
             // 零階矩 M.M00 代表輪廓的面積
             if (M.M00 != 0)
             {
@@ -548,6 +632,18 @@ namespace LaserAlignDX.AoiModel
             cX = Math.Round(cX, 3);
             cY = Math.Round(cY, 3);
             var center = new QVector(cX, cY);
+
+            //(6) DUMP contour
+            if (OPT_DUMP) 
+            {
+                using (var canvas = new Mat())
+                {
+                    Cv2.CvtColor(img, canvas, ColorConversionCodes.GRAY2BGR);
+                    Cv2.DrawContours(canvas, contours, maxContourIndex, Scalar.Red, 3);
+                    _DUMP(canvas, "Contour", dumpTag);
+                }
+            }
+
             return center;
         }
 
@@ -666,6 +762,16 @@ namespace LaserAlignDX.AoiModel
                 string path = $"d:\\paso.log\\Calib\\{tag}";
                 JetEazy.IO.QxPathUtility.InitDirectory(path);
                 string file = System.IO.Path.Combine(path, $"{tag}_{row}_{col}.png");
+                img.SaveImage(file);
+            }
+        }
+        void _DUMP(Mat img, string subFolder, string tag)
+        {
+            if (OPT_DUMP && img != null)
+            {
+                string path = $"d:\\paso.log\\Calib\\{subFolder}";
+                JetEazy.IO.QxPathUtility.InitDirectory(path);
+                string file = System.IO.Path.Combine(path, $"{subFolder}{tag}.png");
                 img.SaveImage(file);
             }
         }

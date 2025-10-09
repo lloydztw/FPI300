@@ -565,6 +565,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 更新 GUI
             _cviCamGridBox.TransCameraToWorld = _sysModel.TransformsModel.GetCameraPhysicTransform(carrierID);
             _cviCamGridBox.IsEmptyTrayMode = true;
+            //_cviCamGridBox.IsEmptyTrayMode = false;
             _cviCamGridBox.UpdateResult(result);
             _cviCamGridBox.Visible = true;
             _imgViewer.MatViewer.Invalidate();

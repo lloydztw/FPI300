@@ -104,6 +104,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region RUNTIME_DATA
         CarrierEnum _activeCarrierID = CarrierEnum.C1;
         SuckerRowEnum _activeSuckerRowID = SuckerRowEnum.S1;
+        MatchResult _lastResult;
         bool _isCoordModified = false;
         bool _isGoldenPicking = false;
         bool _isRunning = false;        // 因為目前是單執行緒, 所以此變量用處不大.
@@ -186,6 +187,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _btnBuildCalib.Click += (s, e) => BuildAllTransforms();
 
             _cviGoldenBox.OnBoxSelected += (s, e) => BuildGolden();
+            _cviResultBox.OnRequestDumpBindaryImage += (s, e) => RunAutoFetch(dump: true);
+            
             _imgViewer.MatViewer.MouseMove += MatViewer_MouseMove;
 
             // 自動釋放資源
@@ -422,9 +425,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             var pitchY = (double)traySettings.PitchY.Value;
             var rows = (int)traySettings.FullRows.Value;
             var cols = (int)traySettings.FullCols.Value;
-            bool areRowsColsMatched = (rows == camGrid.Rows && cols == camGrid.Cols);
 
-            if (!areRowsColsMatched)
+            bool areAllRowsColsMatched = (rows == camGrid.Rows && cols == camGrid.Cols);
+            if (!areAllRowsColsMatched)
             {
                 string msg = $"像測的 Rows={camGrid.Rows} Cols={camGrid.Cols} 與\n\r"
                            + $"參數的 Rows={rows} Cols={cols} 不一致 !";
@@ -432,7 +435,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
 
             //(2) 將 校正點位群 更新到 座標轉換 系統 (Model)
-            if (areRowsColsMatched)
+            if (areAllRowsColsMatched)
             {
                 _transforms.ConfigGlobalCalibPlcGrid(rows, cols, pitchX, pitchY);
                 _transforms.UpdateCalibPoints(_activeCarrierID, _activeSuckerRowID, camGrid);
@@ -582,66 +585,90 @@ namespace LaserAlignDX.Mvc.Ctrl
             return err == ErrCodes.OK;
         }
 
-        void RunAutoFetch()
+        void RunAutoFetch(bool dump = false)
         {
-            enableGoldenPicking(false);
-            ShowCviResult(false, clear: true);
-
-            bool ok = BuildGoldenGrid();
-            if (!ok)
-                return;
-
-            var fullfovImg = _imgViewer.MatViewer.Image;
-            if (fullfovImg == null)
-                return;
-
-            //(0) Cursor
-            var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
-
-            #region OLD_CODE
-            ////(A1) Peek the ezImage
-            //var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
-
-            ////(A2) Run Aoi
-            //_aoiModel.RunMatch(SideID.A, ezImage);
-
-            ////(A3) Update Result
-            //var matchResult = _aoiModel.GetMatchResult(SideID.A);
-            //var camGrid = matchResult?.Grid;
-
-            //if (camGrid != null)
-            //{
-            //    //(A4) Refine each detail locations
-            //    _aoiModel.RefineCentroidLocations(matchResult, ezImage);
-
-            //    //(A5) Update Grid 4 Corners To Model
-            //    updateCalibKeyPoints(camGrid);
-            //}
-            #endregion
-
-            //(1) Run AOI
-            var matchResult = _aoiModel.FetchGridNodes(fullfovImg, refine: true);
-            var camGrid = matchResult?.Grid;
-
-            //(2) Update Grid Result
-            _cviResultBox.IsEmptyTrayMode = false;
-            _cviResultBox.TransCameraToMotor = null;
-            _cviResultBox.TransCameraToWorld = null;
-            _cviResultBox.UpdateResult(matchResult);
-            ShowCviResult(true);
-
-            //(3) Cvi Corners Boxes
-            foreach(var cviCornerBox in _cviCalibPointBoxes)
-                cviCornerBox.Visible = camGrid != null;
-
-            //(4) Cursor
-            GaUtil.SetCursor(_wndOwner, oldCursor);
-
-            //(5) Warnings
-            if (camGrid == null)
+            try
             {
-                string msg = "無法自動抓到 四角定位點!\n\r請確認以下 參數 是否設定為 true?\n\r\n\r 空盤像測參數 \\ 吸嘴比對設定 \\ 建立網格";
-                MessageBox.Show(msg, "Calib", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                CalibAoiModel.OPT_DUMP = dump;
+
+                enableGoldenPicking(false);
+                ShowCviResult(false, clear: true);
+
+                bool ok = BuildGoldenGrid();
+                if (!ok)
+                    return;
+
+                var fullfovImg = _imgViewer.MatViewer.Image;
+                if (fullfovImg == null)
+                    return;
+
+                //(0) Cursor
+                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
+                //(0.1) clear 4 corners
+                foreach (var cviCornerBox in _cviCalibPointBoxes)
+                    cviCornerBox.Box2D.SetCenter(PointF.Empty);
+
+                #region OLD_CODE
+                ////(A1) Peek the ezImage
+                //var ezImage = new EzQuickImage(fullfovImg, deepCopy: false);
+
+                ////(A2) Run Aoi
+                //_aoiModel.RunMatch(SideID.A, ezImage);
+
+                ////(A3) Update Result
+                //var matchResult = _aoiModel.GetMatchResult(SideID.A);
+                //var camGrid = matchResult?.Grid;
+
+                //if (camGrid != null)
+                //{
+                //    //(A4) Refine each detail locations
+                //    _aoiModel.RefineCentroidLocations(matchResult, ezImage);
+
+                //    //(A5) Update Grid 4 Corners To Model
+                //    updateCalibKeyPoints(camGrid);
+                //}
+                #endregion
+
+                //(1) Run AOI
+                var matchResult = _aoiModel.FetchGridNodes(_activeCarrierID, fullfovImg, refine: true);
+                var camGrid = matchResult?.Grid;
+                _lastResult = matchResult;
+
+                //(2) Cvi 4 Corners Boxes
+                if (camGrid != null)
+                    updateCalibKeyPoints(camGrid);
+
+
+                //(3) Update Grid Result
+                _cviResultBox.IsEmptyTrayMode = false;
+                _cviResultBox.TransCameraToMotor = null;
+                _cviResultBox.TransCameraToWorld = null;
+                _cviResultBox.UpdateResult(matchResult);
+                ShowCviResult(true);
+
+                //(4) Cursor
+                GaUtil.SetCursor(_wndOwner, oldCursor);
+
+                //(5) MessageBoxe
+                #region MESSAGE_BOX
+                if (camGrid == null)
+                {
+                    string msg = "無法自動抓到 四角定位點!\n\r請確認以下 參數 是否設定為 true?\n\r\n\r 空盤像測參數 \\ 吸嘴比對設定 \\ 建立網格";
+                    MessageBox.Show(msg, "Calib", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+                else if (dump)
+                {
+                    VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib");
+                }
+                #endregion
+            }
+            catch (Exception ex)
+            {
+            }
+            finally
+            {
+                CalibAoiModel.OPT_DUMP = false;
             }
         }
         void BuildAllTransforms()
@@ -652,6 +679,19 @@ namespace LaserAlignDX.Mvc.Ctrl
             updateAllData(true);
 
             _transforms.BuildAll();
+
+            // 去除異常 格位 再重建一次
+            var lastCamGrid = _lastResult?.Grid;
+            if (lastCamGrid != null)
+            {
+                //if (_aoiModel.RemoveBadNodes(_activeCarrierID, lastCamGrid))
+                //{
+                //    updateCalibKeyPoints(lastCamGrid);
+                //    _cviResultBox.UpdateResult(_lastResult);
+                //    _transforms.BuildAll();
+                //}
+            }
+
             _cviResultBox.TransCameraToMotor = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
             _cviResultBox.TransCameraToWorld = _transforms.GetCameraPhysicTransform(_activeCarrierID);
 

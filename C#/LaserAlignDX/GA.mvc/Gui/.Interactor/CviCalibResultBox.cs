@@ -14,8 +14,11 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy;
+using JetEazy.FormSpace;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
+using JetEazy.OpenCV;
 using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
@@ -29,6 +32,8 @@ namespace LaserAlignDX.Mvc.Gui
 {
     public class CviCalibResultBox : CviAbsTooltipBox
     {
+        public event EventHandler OnRequestDumpBindaryImage;
+
         #region PRIVATE_DATA
         MatchResult _matchResult;
         EzBlocsGrid _grid => _matchResult?.Grid;
@@ -36,13 +41,8 @@ namespace LaserAlignDX.Mvc.Gui
         IList<EzBloc> _outGridBlocs => _matchResult?.OutGridBlocs;
         #endregion
 
-        #region GUI_MEMBERS
-        //ToolTip _toolTip = new ToolTip();
-        //EzBloc _cursorBloc = null;
-        //EzBloc _cursorBloc2 = null;
-        #endregion
-
         #region RUNTIME_DATA
+        bool _isCtrlPressed = false;
         int _debugOption = -1;
         #endregion
 
@@ -84,26 +84,20 @@ namespace LaserAlignDX.Mvc.Gui
             if (!Visible)
                 return;
 
-            bool needsToRefresh = false;
+            _wndHost = viewer;
+            _isCtrlPressed = e.Control;
 
             if (true || !IsEmptyTrayMode)
             {
                 switch (e.KeyCode)
                 {
-                    case Keys.X: scanSelfErrors(_debugOption = 0); needsToRefresh = true; break;
-                    case Keys.Y: scanSelfErrors(_debugOption = 1); needsToRefresh = true; break;
-                    case Keys.B: scanSelfErrors(_debugOption = 2); needsToRefresh = true; break;
-                    case Keys.D: CalibAoiModel.OPT_DUMP = true; break;
-                    case Keys.Escape: 
-                        scanSelfErrors(_debugOption = -1);
-                        CalibAoiModel.OPT_DUMP = false;
-                        needsToRefresh = true; 
-                        break;
+                    case Keys.Escape: scanSelfErrors(-1); break;
+                    case Keys.X: scanSelfErrors(0); break;
+                    case Keys.Y: scanSelfErrors(1); break;
+                    case Keys.B: scanSelfErrors(2); break;
+                    case Keys.D: dumpBinary(); break;
                 }
             }
-
-            if (needsToRefresh)
-                viewer.Invalidate();
 
             base.OnKeyDown(viewer, e);
         }
@@ -120,60 +114,43 @@ namespace LaserAlignDX.Mvc.Gui
                 else
                     drawCalibResult(viewer, gxView);
 
-                //// Cursors
-                //draw_cursor(viewer, gxView, _cursorBloc2, Color.White);
-                //draw_cursor(viewer, gxView, _cursorBloc, Color.Gold);
-                //draw_line(viewer, gxView, _cursorBloc, _cursorBloc2, Color.Cyan);
-
                 if (!isWorld)
                     viewer.SwitchToViewportCoordinate(gxView);
             }
             base.OnDraw(viewer, gxView);
         }
+        public override bool OnMouseDown(CvImageViewer viewer, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Right && _isCtrlPressed)
+            {
+                popupMenuStrip(viewer, e.Location);
+                _toolTip?.Hide(viewer);
+                _isCtrlPressed = false;
+                return false;
+            }
+
+            return base.OnMouseDown(viewer, e);
+        }
         public override bool OnMouseMove(CvImageViewer viewer, MouseEventArgs e)
         {
-            //return handleMouseMove(viewer, e);
             return base.OnMouseMove(viewer, e);
         }
         #endregion
 
+        #region PRIVATE_DRAW_FUNCTIONS
         void drawEmptyTrayResult(CvImageViewer viewer, Graphics gxView)
         {
             // 畫出 grid 節點線
             draw_grid_lines(viewer, gxView, _matchResult?.Grid);
             // 畫出 正常 Blocs (有吸嘴)
             draw_bloc_rects(viewer, gxView, _suckerBlocs, Color.Lime, Color.DarkGreen, 0.05f);
-            // 畫記 異常 Blocs (沒有吸嘴)
+            // 畫記 異常 Blocs (疑似有料)
             draw_bloc_rects(viewer, gxView, iter_ng_blocs(), Color.Red, Color.DarkRed, 0.25f);
         }
         void drawCalibResult(CvImageViewer viewer, Graphics gxView)
         {
-            // 畫出 正常 Blocs (有吸嘴)
-            draw_bloc_rects(viewer, gxView, _suckerBlocs, Color.Blue, Color.DarkBlue, 0.25f);
-        }
-
-        #region PRIVATE_FUNCTIONS
-        /// <summary>
-        /// 枚舉 Empty Blocs (沒有吸嘴)
-        /// </summary>
-        IEnumerable<EzBloc> iter_ng_blocs()
-        {
-            if (_grid != null)
-            {
-                foreach (var bloc in _grid.IterPredictedBlocs())
-                {
-                    if (bloc != null)
-                        yield return bloc;
-                }
-            }
-            if (_outGridBlocs != null)
-            {
-                foreach (var bloc in _outGridBlocs)
-                {
-                    if (bloc != null)
-                        yield return bloc;
-                }
-            }
+            // 畫出 有效的 校正格位 Blocs (有吸嘴)
+            draw_bloc_rects(viewer, gxView, iter_calib_grid_node_blocs(), Color.Blue, Color.DarkBlue, 0.25f);
         }
         void draw_grid_lines(CvImageViewer viewer, Graphics gxView, EzBlocsGrid grid)
         {
@@ -420,201 +397,49 @@ namespace LaserAlignDX.Mvc.Gui
         //}
         #endregion
 
-        #region PRIVATE_TOOL_TIP_FUNCTIONS
-        //Point _hitPt = new Point();
-        //Size _fetchSize = new Size(100, 100);
-        //bool handleMouseMove(CvImageViewer viewer, MouseEventArgs e)
-        //{
-        //    if ((_grid != null || _suckerBlocs != null) && Visible && Enabled)
-        //    {
-        //        int xx = e.X;
-        //        int yy = e.Y;
-
-        //        viewer.TransViewportToWorld(ref xx, ref yy);
-
-        //        //var boundary = viewer.GetWorldRect();
-        //        //_fetchSize.Width = (int)Math.Max(100, boundary.Width / 50);
-        //        //_fetchSize.Height = (int)Math.Max(100, boundary.Height / 50);
-
-        //        var bloc = fetchOne(xx, yy);
-        //        bool isChanged = updateTooltip(bloc, e.X, e.Y, viewer);
-        //        return isChanged;
-        //    }
-        //    return false;
-        //}
-        //void adjustFetchSize()
-        //{
-        //    if (_grid != null)
-        //    {
-        //        foreach (var bloc in _grid.IterBlocs())
-        //        {
-        //            if (bloc != null)
-        //            {
-        //                //_fetchSize = bloc.Rect.Size;
-        //                adjustFetchSize(bloc.Rect.Size);
-        //                return;
-        //            }
-        //        }
-        //    }
-        //}
-
-        //EzBloc fetchOne(int x, int y)
-        //{
-        //    if (_grid != null)
-        //    {
-        //        var blobs = fetchKNN(x, y, 1, _fetchSize, _grid.IterBlocs());
-        //        if (blobs != null && blobs.Length > 0)
-        //            return blobs[0];
-        //    }
-
-        //    if (_suckerBlocs != null)
-        //    {
-        //        var blobs = fetchKNN(x, y, 1, _fetchSize, _suckerBlocs);
-        //        if (blobs != null && blobs.Length > 0)
-        //            return blobs[0];
-        //    }
-
-        //    if (_outGridBlocs != null)
-        //    {
-        //        var blobs = fetchKNN(x, y, 1, _fetchSize, _outGridBlocs);
-        //        if (blobs != null && blobs.Length > 0)
-        //            return blobs[0];
-        //    }
-
-        //    return null;
-        //}
-        //EzBloc[] fetchKNN(int x, int y, int kNumber, Size range, IEnumerable<EzBloc> srcBlobs)
-        //{
-        //    bool needsToSort = (kNumber >= 0);
-
-        //    if (kNumber <= 0)
-        //    {
-        //        // Get All
-        //        kNumber = int.MaxValue;
-        //    }
-
-        //    //if (range == Size.Empty)
-        //    //{
-        //    //    range = m_sizeCell;
-        //    //}
-
-        //    Rectangle rectRange = new Rectangle(
-        //            x - range.Width / 2,
-        //            y - range.Height / 2,
-        //            range.Width,
-        //            range.Height
-        //        );
-
-
-        //    var knn = new List<KeyValuePair<EzBloc, int>>();
-
-        //    foreach (var spot in srcBlobs)
-        //    {
-        //        if (spot == null)
-        //            continue;
-
-        //        //////if (chkList.IndexOf(spot) >= 0)
-        //        //////{
-        //        //////    System.Diagnostics.Trace.Assert(false);
-        //        //////    continue;
-        //        //////}
-
-        //        if (rectRange.Contains(spot.CenterX, spot.CenterY))
-        //        {
-        //            var dx = x - spot.CenterX;
-        //            var dy = y - spot.CenterY;
-        //            var dSQ = dx * dx + dy * dy;
-        //            knn.Add(new KeyValuePair<EzBloc, int>(spot, dSQ));
-        //            //////chkList.Add(spot);
-        //        }
-        //    }
-
-        //    if (knn.Count == 0)
-        //        return null;
-
-        //    if (needsToSort && knn.Count > 1)
-        //    {
-        //        int _compareSpots(KeyValuePair<EzBloc, int> kp1, KeyValuePair<EzBloc, int> kp2)
-        //        {
-        //            if (kp1.Value > kp2.Value)
-        //                return 1;
-        //            else if (kp1.Value < kp2.Value)
-        //                return -1;
-        //            return 0;
-        //        }
-        //        knn.Sort(_compareSpots);
-        //    }
-
-        //    kNumber = Math.Min(kNumber, knn.Count);
-        //    var result = new EzBloc[kNumber];
-
-        //    for (int k = 0; k < kNumber; k++)
-        //        result[k] = (EzBloc)knn[k].Key;
-
-        //    return result;
-        //}
-        //bool updateTooltip(EzBloc bloc, int vx, int vy, Control wnd)
-        //{
-        //    if (bloc == null)
-        //    {
-        //        _toolTip.Hide(wnd);
-
-        //        if (_cursorBloc != null)
-        //        {
-        //            _cursorBloc = null;
-        //            return true;
-        //        }
-
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        if (_hitPt.X == vx && _hitPt.Y == vy)
-        //            return false;
-
-        //        _cursorBloc = bloc;
-
-        //        bool showScore = true;
-
-        //        var sb = new StringBuilder();
-
-        //        var rowCol = (bloc.Tag as QuadLinkNode)?.rowCol;
-        //        if (rowCol != null)
-        //            sb.Append("格點: [").AppendValues(rowCol.Row, rowCol.Col).AppendLine("]");
-
-        //        appendCameraCoords(sb, _cursorBloc, _cursorBloc2);
-
-        //        if (TransCameraToMotor != null)
-        //        {
-        //            appendMotorCoords(sb, _cursorBloc, _cursorBloc2);
-        //            showScore = false;
-        //        }
-        //        if (TransCameraToWorld != null)
-        //        {
-        //            appendWorldCoords(sb, _cursorBloc, _cursorBloc2);
-        //            showScore = false;
-        //        }
-        //        if (TransCameraToMotor != null && TransCameraToMotor != null && _cursorBloc2 == null && rowCol != null)
-        //        {
-        //            appendPlcCompensation(sb, _cursorBloc, rowCol.Row, rowCol.Col);
-        //            showScore = false;
-        //        }
-
-        //        if (showScore || IsEmptyTrayMode)
-        //        {
-        //            sb.AppendLine();
-        //            sb.AppendLine($"Score= {bloc.Score:0.00}");
-        //            sb.AppendLine($"Size= {bloc.Rect.Width}x{bloc.Rect.Height}");
-        //        }
-
-        //        _toolTip.ForeColor = Color.Black;
-        //        _toolTip.BackColor = Color.LightBlue;
-
-        //        _toolTip.Show(sb.ToString(), wnd, vx + 10, vy + 10);
-        //        _hitPt = new Point(vx, vy);
-        //        return true;
-        //    }
-        //}
+        #region PRIVATE_HELPER_FUNCTIONS
+        /// <summary>
+        /// 枚舉 疑似有料 區塊 Blocs
+        /// </summary>
+        IEnumerable<EzBloc> iter_ng_blocs()
+        {
+            if (_grid != null)
+            {
+                foreach (var bloc in _grid.IterPredictedBlocs())
+                {
+                    if (bloc != null)
+                        yield return bloc;
+                }
+            }
+            if (_outGridBlocs != null)
+            {
+                foreach (var bloc in _outGridBlocs)
+                {
+                    if (bloc != null)
+                        yield return bloc;
+                }
+            }
+        }
+        /// <summary>
+        /// 枚舉 校正 之 格位點
+        /// </summary>
+        IEnumerable<EzBloc> iter_calib_grid_node_blocs()
+        {
+            if (_grid != null)
+            {
+                int rows = _grid.Rows;
+                int cols = _grid.Cols;
+                for (int r = 0; r < rows; r++)
+                {
+                    for (int c = 0; c < cols; c++)
+                    {
+                        var bloc = _grid.Get(r, c);
+                        if (bloc != null && (bloc.IsMajorNode() || ((IxBlob)bloc).Bin == 9999))
+                            yield return bloc;
+                    }
+                }
+            }
+        }
         #endregion
 
         void adjustFetchSize()
@@ -634,23 +459,30 @@ namespace LaserAlignDX.Mvc.Gui
         }
         protected override IEnumerable<EzBloc> iterFetchableBlocs(int camX, int camY)
         {
-            if (_grid != null)
+            if (IsEmptyTrayMode)
             {
-                foreach (var bloc in _grid.IterBlocs())
-                    if (bloc != null)
-                        yield return bloc;
+                if (_grid != null)
+                {
+                    foreach (var bloc in _grid.IterBlocs())
+                        if (bloc != null)
+                            yield return bloc;
+                }
+                if (_suckerBlocs != null)
+                {
+                    foreach (var bloc in _suckerBlocs)
+                        if (bloc != null)
+                            yield return bloc;
+                }
+                if (_outGridBlocs != null)
+                {
+                    foreach (var bloc in _outGridBlocs)
+                        if (bloc != null)
+                            yield return bloc;
+                }
             }
-
-            if (_suckerBlocs != null)
+            else
             {
-                foreach (var bloc in _suckerBlocs)
-                    if (bloc != null)
-                        yield return bloc;
-            }
-
-            if (_outGridBlocs != null)
-            {
-                foreach (var bloc in _outGridBlocs)
+                foreach (var bloc in iter_calib_grid_node_blocs())
                     if (bloc != null)
                         yield return bloc;
             }
@@ -774,9 +606,59 @@ namespace LaserAlignDX.Mvc.Gui
             sb.AppendLine($"PLC 格點 補償量 dY = {motorDelta.Y:0.000} mm");
         }
 
-        #region DEBUG_TRACE
+        #region MENU_STRIP_FUNCTIONS
+        //Form _frmOwner;
+        Control _wndHost;
+        ContextMenuStrip _menuStrip;
+        void initMenuStrip(Control wnd)
+        {
+            if (_menuStrip == null)
+            {
+                //_frmOwner = wnd.FindForm();
+                _wndHost = wnd;
+
+                wnd.HandleDestroyed += (s, e) => disposeMenuStrip();
+                var menu0 = new ToolStripMenuItem("檢視 格位 自我誤差 &X");
+                var menu1 = new ToolStripMenuItem("檢視 格位 自我誤差 &Y");
+                var menu2 = new ToolStripMenuItem("檢視 格位 自我誤差 &Both XY");
+                var menu3 = new ToolStripMenuItem("&Dump 保存 二值化 圖檔");
+                menu0.Click += (s, e) => scanSelfErrors(0);
+                menu1.Click += (s, e) => scanSelfErrors(1);
+                menu2.Click += (s, e) => scanSelfErrors(2);
+                menu3.Click += (s, e) => dumpBinary();
+                _menuStrip = new ContextMenuStrip();
+                _menuStrip.Items.Add(menu0);
+                _menuStrip.Items.Add(menu1);
+                _menuStrip.Items.Add(menu2);
+                _menuStrip.Items.Add(menu3);
+            }
+        }
+        void disposeMenuStrip()
+        {
+            _menuStrip?.Dispose();
+            _menuStrip = null;
+        }
+        void popupMenuStrip(Control wnd, Point pt)
+        {
+            //var activeCellBloc = _cursorBloc as CellBloc;
+            //if (activeCellBloc == null) return;
+            _cursorBloc2 = null;
+            _toolTip.Hide(wnd);
+            initMenuStrip(wnd);
+            _menuStrip.Show(wnd, pt);
+        }
+        #endregion
+
+        #region DEBUG_TRACE_FUNCTIONS
+        void dumpBinary()
+        {
+            OnRequestDumpBindaryImage?.Invoke(this, null);
+            _wndHost?.Invalidate();
+        }
         void scanSelfErrors(int option)
         {
+            _debugOption = option;
+
             //if (IsEmptyTrayMode) return;
             if (_grid == null) return;
 
@@ -793,6 +675,7 @@ namespace LaserAlignDX.Mvc.Gui
                 for (int c = 0; c < cols; c++)
                 {
                     var bloc = _grid[r, c];
+                    if (bloc == null) continue;
 
                     (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, r, c);
 
@@ -818,17 +701,21 @@ namespace LaserAlignDX.Mvc.Gui
 
             string msg = $"格位座標 最大誤差 在 [{maxErrRow},{maxErrCol}] = {maxErr:0.000}";
             GaUtil.LOG(msg, Color.Purple);
+
+            _wndHost?.Invalidate();
         }
         Brush getDebugBrush(EzBloc bloc)
         {
             var err = Math.Abs(bloc.SQRatio);
             if (err < 0.010)
-                return new SolidBrush(Color.FromArgb(64, Color.Blue));
+                return new SolidBrush(Color.FromArgb(16, Color.Blue));
             else if(err < 0.020)
-                return new SolidBrush(Color.FromArgb(64, Color.Yellow));
+                return new SolidBrush(Color.FromArgb(64, Color.Blue));
             else if (err < 0.030)
+                return new SolidBrush(Color.FromArgb(64, Color.Yellow));
+            else if (err < 0.050)
                 return new SolidBrush(Color.FromArgb(64, Color.Orange));
-            else if(err < 0.050)
+            else if(err < 0.080)
                 return new SolidBrush(Color.FromArgb(64, Color.Red));
             else
                 return new SolidBrush(Color.FromArgb(128, Color.Red));

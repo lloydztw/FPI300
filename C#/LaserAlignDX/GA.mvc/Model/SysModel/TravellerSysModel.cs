@@ -257,7 +257,7 @@ namespace LaserAlignDX.Mvc.Model
                 using (var bridge = new QxImageBridge(fullfovBmp))
                 {
                     bool refine = _xRecipe.InspectParams.xCarrierBackground == EdgeBackGroundType.White;
-                    var matchResult = aoiModel.FetchGridNodes(bridge.Image, refine);
+                    var matchResult = aoiModel.FetchGridNodes(ActiveCarrierID, bridge.Image, refine);
                     return matchResult;
                 }
             }

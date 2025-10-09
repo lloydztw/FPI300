@@ -42,7 +42,7 @@ namespace JetEazy.Match
     /// <summary>
     /// 格點內插與外插 (Interpolation and Expolation)
     /// </summary>
-    internal class EzBlocsGridInterpo
+    public class EzBlocsGridInterpo
     {
         public delegate float FUNC_IMG_MATCH_DIFF(IxGridMap map, QxRowColArg cur, QxRowColArg adj, IplImage imgOrg);
         public event DoWorkEventHandler OnInterpolating;

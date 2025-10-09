@@ -1187,6 +1187,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (_menuStrip == null)
             {
                 _frmOwner = wnd.FindForm();
+
                 wnd.HandleDestroyed += (s, e) => disposeMenuStrip();
                 var menu0 = new ToolStripMenuItem("設定 晶粒 標準尺寸");
                 var menu1 = new ToolStripMenuItem("Dump 尺寸量測結果 (in row)");

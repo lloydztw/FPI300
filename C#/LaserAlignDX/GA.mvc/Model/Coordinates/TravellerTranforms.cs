@@ -550,7 +550,7 @@ namespace LaserAlignDX.Model.Coords
             var motorDelta = s1_current - s1_target;
 
             // WorldDetla
-            var worldDelta = world_target - world_current;
+            var worldDelta = world_current - world_target;
 
             return (motorDelta, worldDelta);
         }
