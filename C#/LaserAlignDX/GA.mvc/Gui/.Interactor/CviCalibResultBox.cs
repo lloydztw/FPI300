@@ -434,7 +434,7 @@ namespace LaserAlignDX.Mvc.Gui
                     for (int c = 0; c < cols; c++)
                     {
                         var bloc = _grid.Get(r, c);
-                        if (bloc != null && (bloc.IsMajorNode() || ((IxBlob)bloc).Bin == 9999))
+                        if (bloc != null && bloc.IsMajorNode())
                             yield return bloc;
                     }
                 }
@@ -713,6 +713,8 @@ namespace LaserAlignDX.Mvc.Gui
                 return new SolidBrush(Color.FromArgb(64, Color.Blue));
             else if (err < 0.030)
                 return new SolidBrush(Color.FromArgb(64, Color.Yellow));
+            else if (err < 0.040)
+                return new SolidBrush(Color.FromArgb(32, Color.Orange));
             else if (err < 0.050)
                 return new SolidBrush(Color.FromArgb(64, Color.Orange));
             else if(err < 0.080)

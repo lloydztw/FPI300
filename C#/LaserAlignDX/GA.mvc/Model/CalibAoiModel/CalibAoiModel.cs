@@ -13,10 +13,8 @@
  */
 #endregion
 
-using AForge.Imaging;
 using EzAoiEmptyTrayInspector;
 using EzAoiEmptyTrayInspector.Model;
-using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.Match;
 using JetEazy.QMath;
@@ -27,7 +25,6 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using static JetEazy.Match.QuadLinkNode;
 using ErrCodes = EzAoiEmptyTrayInspector.Model.ErrCodes;
 
 
@@ -229,17 +226,14 @@ namespace LaserAlignDX.AoiModel
             }
         }
 
-        public bool RemoveBadNodes(CarrierEnum carrierID, EzBlocsGrid grid)
+        public bool AdjustBadNodes(CarrierEnum carrierID, EzBlocsGrid grid)
         {
             bool isChanged = false;
 
-            //double maxErr = 0;
-            //int maxErrRow = -1;
-            //int maxErrCol = -1;
-
             var transformsModel = _sysModel?.TransformsModel;
+            var transCP = transformsModel?.GetCameraPhysicTransform(carrierID);
             if (transformsModel == null || grid == null)
-                return isChanged;
+                return false;
 
             int rows = grid.Rows;
             int cols = grid.Cols;
@@ -247,26 +241,36 @@ namespace LaserAlignDX.AoiModel
             int count = 0;
             double sumW = 0;
             double sumH = 0;
-            bool hasNull = false;
 
             for (int r = 0; r < rows; r++)
             {
-                for (int c = 0; c < cols; c++)
+                var c_min = (r == 0 || r == rows - 1) ? 1 : 0;
+                var c_max = (r == 0 || r == rows - 1) ? cols - 1 : cols;
+                for (int c = c_min; c < c_max; c++)
                 {
                     var bloc = grid[r, c];
                     if (bloc == null)
                     {
-                        hasNull = true;
                         isChanged = true;
                         continue;
                     }
 
                     (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(carrierID, bloc.Center, r, c);
                     double err = Math.Max(Math.Abs(worldDelta.X), Math.Abs(worldDelta.Y));
-                    if (err > 0.08)
+                    if (err >= 0.08)
                     {
-                        grid[r, c] = null;
-                        hasNull = true;
+                        if (transCP != null)
+                        {
+                            var adjustPt = transCP.Trans(bloc.Center);
+                            adjustPt = adjustPt - worldDelta;
+                            adjustPt = transCP.InvTrans(adjustPt);
+                            bloc.Rect = JetEazy.Qcvt.CreateCenterRect((int)adjustPt.X, (int)adjustPt.Y, bloc.Rect.Width, bloc.Rect.Height);
+                            bloc.Center = adjustPt;
+                        }
+                        else
+                        {
+                            grid[r, c] = null;
+                        }
                         isChanged = true;
                         continue;
                     }
@@ -277,21 +281,20 @@ namespace LaserAlignDX.AoiModel
                 }
             }
 
-            if (hasNull && count > rows * cols / 2)
+            if (isChanged && count > rows * cols / 2)
             {
-                //var aveSize = new SizeF((float)(sumW / count), (float)(sumH / count));
-                //var interpo = new EzBlocsGridInterpo(grid.GetPitch(), aveSize);
-                //interpo.RunInterpolation(grid, null, null);
-                //interpo.RunExpolation(grid, null, null, 2);
-                //grid.RebuildRowColTags();
-                //foreach (var bloc in grid)
-                //{
-                //    if (bloc != null)
-                //    {
-                //        ((IxBlob)bloc).Bin = 9999;
-                //    }
-                //}
-                isChanged = true;
+                var aveSize = new SizeF((float)(sumW / count), (float)(sumH / count));
+                var interpo = new EzBlocsGridInterpo(grid.GetPitch(), aveSize);
+                interpo.RunInterpolation(grid, null, null);
+                interpo.RunExpolation(grid, null, null, 2);
+
+                ////暫時: 直接使用 QuadLinkNode() 設定成 MajorBloc.
+                foreach (var bloc in grid.IterPredictedBlocs())
+                {
+                    bloc.Tag = new QuadLinkNode();
+                }
+
+                grid.RebuildRowColTags();
             }
 
             return isChanged;

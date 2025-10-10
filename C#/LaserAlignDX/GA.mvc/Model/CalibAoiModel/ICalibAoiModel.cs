@@ -23,7 +23,7 @@ namespace LaserAlignDX.AoiModel
     public interface ICalibAoiModel : IxEmptyTrayInspector
     {
         MatchResult FetchGridNodes(CarrierEnum carrierID, Mat fullfovImg, bool refine = true);
-        bool RemoveBadNodes(CarrierEnum carrierID, EzBlocsGrid grid);
+        bool AdjustBadNodes(CarrierEnum carrierID, EzBlocsGrid grid);
         
         ///// <summary>
         ///// 計算 空載台 格位 本身誤差

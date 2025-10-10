@@ -684,12 +684,12 @@ namespace LaserAlignDX.Mvc.Ctrl
             var lastCamGrid = _lastResult?.Grid;
             if (lastCamGrid != null)
             {
-                //if (_aoiModel.RemoveBadNodes(_activeCarrierID, lastCamGrid))
-                //{
-                //    updateCalibKeyPoints(lastCamGrid);
-                //    _cviResultBox.UpdateResult(_lastResult);
-                //    _transforms.BuildAll();
-                //}
+                if (_aoiModel.AdjustBadNodes(_activeCarrierID, lastCamGrid))
+                {
+                    updateCalibKeyPoints(lastCamGrid);
+                    _cviResultBox.UpdateResult(_lastResult);
+                    _transforms.BuildAll();
+                }
             }
 
             _cviResultBox.TransCameraToMotor = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
