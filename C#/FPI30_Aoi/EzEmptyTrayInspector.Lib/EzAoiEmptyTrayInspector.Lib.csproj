@@ -232,6 +232,7 @@
     <Compile Include="Model\Match\EzAoiBase.cs" />
     <Compile Include="Model\Match\EzAoiBaseUtil.cs" />
     <Compile Include="Model\Match\EzOnGridNgBlocsPredictor.cs" />
+    <Compile Include="Model\Match\EzBlobFinder.cs" />
     <Compile Include="Model\Match\EzRotAngleFinder.cs" />
     <Compile Include="Model\Match\EzOutGridNgBlocsDetector.cs" />
     <Compile Include="Model\Match\EzTemplateMatcher.cs" />

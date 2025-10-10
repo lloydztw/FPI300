@@ -17,6 +17,7 @@ using JetEazy.EzImage;
 using JetEazy.OpenCV;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading.Tasks;
@@ -199,7 +200,37 @@ namespace EzAoiEmptyTrayInspector
             if (img != null)
                 Cv2.BitwiseNot(img[0, 1, 0, 1], img[0, 1, 0, 1]);
         }
-
+        
+        public static Mat ToU8(Mat src, bool autoDisposeSrc = false)
+        {
+            if (src == null || src.Channels() == 1)
+            {
+                return src;
+            }
+            else
+            {
+                var dst = new Mat();
+                {
+                    switch (src.Channels())
+                    {
+                        case 4:
+                            Cv2.CvtColor(src, dst, ColorConversionCodes.BGRA2GRAY);
+                            break;
+                        case 3:
+                            Cv2.CvtColor(src, dst, ColorConversionCodes.BGR2GRAY);
+                            break;
+                        case 2:
+                            Cv2.CvtColor(src, dst, ColorConversionCodes.BGR5652GRAY);
+                            break;
+                        default:
+                            throw new Exception("[ToU8] 錯誤的 channels number!");
+                    }
+                }
+                if (autoDisposeSrc)
+                    src.Dispose();
+                return dst;
+            }
+        }
 
         #region PRIVATE_FUNCTIONS
         static void apply_flip(Bitmap bmp, MirrorMode mode)

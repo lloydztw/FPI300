@@ -215,7 +215,12 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         private void viewer_KeyDown(object sender, KeyEventArgs e)
         {
             if (_isRcpEdittingMode && e.KeyCode == Keys.F3)
+            {
                 move_golden_box_to_default_location();
+                var rect = _imgViewer.GetWorldRect();
+                _cviBoundBox.Box = Rectangle.Round(rect);
+                _imgViewerWindow.Invalidate();
+            }
         }
         private void side_RotAngle_OnModified(object sender, EventArgs e)
         {
