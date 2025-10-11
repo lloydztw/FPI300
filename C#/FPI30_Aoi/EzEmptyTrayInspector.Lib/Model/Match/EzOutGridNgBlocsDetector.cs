@@ -15,6 +15,7 @@
 
 using JetEazy.Match;
 using JetEazy.OpenCV;
+using JetEazy.QvMath;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -57,18 +58,10 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
         #region RECIPE_PARAMS
         JxAoiRecipe _recipe;
-        Bitmap _suckerGoldenBmp => _recipe.VisionSettings.Match.GoldenBmp;
-        //JxTempMatchSettings _recipeM;
-        //bool _usingBlur = true;
-        //bool _usingLocMax = true;
-        //int _iterations => _recipeM != null ? Math.Max(_recipeM.Iterations.Value, 1) : 1;
-        //double _threshold => _recipeM!=null ? (double)_recipeM.ScoreThres.Value : 0.75;
-        //double _thresholdLow => _recipeM != null ? (double)_recipeM.ScoreThresLow.Value : 0.75;
-        //bool _removeOverlap => _recipeM != null ? _recipeM.RemoveOverlap.Value : false;
+        Bitmap _suckerGoldenBmp => _recipe?.VisionSettings.Match.GoldenBmp;
+        bool _isDarkBkGnd;
         int _fovWidth;
         int _fovHeight;
-        //int _goldenWidth;
-        //int _goldenHeight;
         #endregion
 
         /// <summary>
@@ -78,9 +71,12 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
         {
             _shrinkFactor = Math.Max(1, shrinkFactor);
         }
-        public void SetRecipe(JxAoiRecipe recipe)
+
+        public void SetRecipe(JxAoiRecipe recipe, bool isDarkBkGnd)
         {
             _recipe = recipe;
+            _isDarkBkGnd = isDarkBkGnd;
+
         }
         public int ShrinkFactor
         {
@@ -104,9 +100,9 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 using (var bridgeSG = new QxImageBridge(_suckerGoldenBmp))
                 {
                     var suckerGoldenImg = bridgeSG.Image;
-                    var meanColor = suckerGoldenImg.Mean();
+                    //bool isDarkBkGnd = EzBlobFinder.CheckIfDarkBackGround(suckerGoldenImg);
 
-                    // 0 To Shrink Domaon
+                    // 0 To Shrink Domain
                     normalizeGolden(suckerGoldenImg, srcImg, out suckerGoldenImg, garbagesCan);
                     apply_shrink(suckerGoldenImg, srcImg, out suckerGoldenImg, out srcImg, garbagesCan);
 
@@ -118,7 +114,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
                     // 2 gridMask: get minAreaRect
                     find_major_minAreaRect(gridMask, out RotatedRect minAreaRect);
-                    _DUMP(gridMask, "gridMask_2.png");
+                    //>>> _DUMP(gridMask, "gridMask_2.png");
 
                     // 3 gridMask: fill minAreaRect
                     gridMask.SetTo(Scalar.Black);
@@ -129,37 +125,48 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                     Cv2.BitwiseOr(srcImg, gridMask, imgWork);
                     _DUMP(imgWork, "imgWork.png");
 
-                    // 5. fill mean color into gridMask before otsu
-                    imgWork.SetTo(meanColor, gridMask);
-                    _DUMP(imgWork, "imgWork_m.png");
-
-                    // 6. otsu
+                    // 5. threshold
                     double otsu;
                     if (ogThreshold <= 0)
                     {
+                        // 5.O1 fill mean color before otsu
+                        var bkColor = suckerGoldenImg.Mean();
+                        imgWork.SetTo(bkColor, gridMask);
+                        _DUMP(imgWork, "imgWork_5_bk.png");
+
+                        // 5.O2 Otsu
                         otsu = Cv2.Threshold(imgWork, imgWork, 0, 255, ThresholdTypes.Otsu);
                         _LOG.Info("OutGrid Blocs Otsu = {0}", otsu);
+                        _DUMP(imgWork, "imgWork_5_o.png");
                     }
                     else
                     {
+                        // 5.T1 fill ogThreshold color into gridMask before thresh
+                        var bkColor = _isDarkBkGnd ? new Scalar(ogThreshold - 1) : new Scalar(ogThreshold + 1);
+                        imgWork.SetTo(bkColor, gridMask);
+                        _DUMP(imgWork, "imgWork_5_bk.png");
+
+                        // 5.T2 Threshold
                         Cv2.Threshold(imgWork, imgWork, ogThreshold, 255, ThresholdTypes.Binary);
+                        _DUMP(imgWork, "imgWork_5_t.png");
                     }
-                    _DUMP(imgWork, "imgWork_o.png");
 
-                    // 7. mask again
-                    Cv2.BitwiseOr(imgWork, gridMask, imgWork);
-                    _DUMP(imgWork, "imgWork_om.png");
+                    // 6. 反向, 讓 blob 變白色
+                    if (!_isDarkBkGnd)
+                    {
+                        Cv2.BitwiseNot(imgWork, imgWork);
+                        _DUMP(imgWork, "imgWork_6_inv.png");
+                    }
 
-                    // 8. 反白, blob 變白色
-                    Cv2.BitwiseNot(imgWork, imgWork);
-                    _DUMP(imgWork, "imgWork_omw.png");
+                    // 7. 除邊
+                    if (false)
+                    {
+                        Cv2.Rectangle(imgWork, new Rect(0, 0, imgWork.Width, imgWork.Height), Scalar.White, 1);
+                        Cv2.FloodFill(imgWork, new CvPoint(0, 0), Scalar.Black);
+                        _DUMP(imgWork, "imgWork_8_fborder.png");
+                    }
 
-                    // 9. 除邊
-                    Cv2.Rectangle(imgWork, new Rect(0, 0, imgWork.Width, imgWork.Height), Scalar.White, 1);
-                    Cv2.FloodFill(imgWork, new CvPoint(0, 0), Scalar.Black);
-                    _DUMP(imgWork, "imgWork_omwb.png");
-
-                    // 10. 除去 與 gridMask 相接觸的區塊
+                    // 8. 除去 與 gridMask 相接觸的區塊
                     if (false)
                     {
                         var firstBloc = grid[0, 0];
@@ -173,20 +180,36 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                                 Cv2.FloodFill(imgWork, seedPt, Scalar.Black);
                             }
                         }
-                        _DUMP(imgWork, "imgWork_omwbb.png");
+                        _DUMP(imgWork, "imgWork_5.png");
                     }
 
-                    // 11. 除圓孔 (變異太大, 保留)
-                    //exclude_circles(imgWork, Scalar.Black, 80, 100);
-                    //_DUMP(imgWork, "imgWork_omwbc.png");
+                    // 9. 除圓孔 (變異太大, 保留)
+                    if (false)
+                    {
+                        exclude_circles(imgWork, Scalar.Black, 80, 100);
+                        _DUMP(imgWork, "imgWork_omwbc.png");
+                    }
 
-                    // 12. CC blocs
+                    // 10. CC blocs
                     int goldenSize = Math.Min(_suckerGoldenBmp.Width, _suckerGoldenBmp.Height);
                     int minSizeW = Math.Max(_recipe.VisionSettings.OutGridBlocMinSize.Value, goldenSize / 8);
-                    var ngBlocs = find_black_ng_blocs(imgWork, minSizeW);
+                    var ngBlocs = find_ng_blocs(imgWork, minSizeW);
 
-                    // 13. 除去 與 gridMask 相接觸 的 小區塊
-                    remove_slim_out_grid_blocs(ngBlocs, grid);
+                    // 11. 還原 gridBox2D
+                    QvBox2D gridBox2D = new QvBox2D();
+                    gridBox2D.SetBox(minAreaRect);
+                    var sz = gridBox2D.MinAreaRectSize;
+                    sz.Width += 2;
+                    sz.Height += 2;
+                    gridBox2D.MinAreaRectSize = sz;
+                    if (_shrinkFactor > 1)
+                    {
+                        var corners = Array.ConvertAll(gridBox2D.Corners, c => new PointF(c.X * _shrinkFactor, c.Y * _shrinkFactor));
+                        gridBox2D.Corners = corners;
+                    }
+
+                    // 12. 除去 與 gridBox2D 相接觸 的 小區塊
+                    remove_slim_out_grid_blocs(ngBlocs, gridBox2D);
                     return ngBlocs;
                 }
             }
@@ -206,7 +229,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
         #region POST_PROCESS_FOR_OUT_GRID_BLOCS
         void remove_slim_out_grid_blocs(List<EzBloc> outGridNgBlocs, EzBlocsGrid grid)
         {
-            if (grid == null || outGridNgBlocs == null)
+            if (outGridNgBlocs == null || grid == null)
                 return;
 
             int dilate = 8 * _shrinkFactor;
@@ -263,6 +286,46 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                         }
                     }
                 }
+                return false;
+            });
+        }
+        void remove_slim_out_grid_blocs(List<EzBloc> outGridNgBlocs, QvBox2D gridBox2D)
+        {
+            if (outGridNgBlocs == null || gridBox2D == null)
+                return;
+
+            var gridCorrners = Array.ConvertAll(gridBox2D.Corners, c => new Point2f(c.X, c.Y));
+            var minSize = _recipe.VisionSettings.OutGridBlocMinSize.Value;
+
+            // 剔除 小的 off-grid ng blocs 且與 on-grid ng blocs 邊緣 相交
+            outGridNgBlocs.RemoveAll((ng) =>
+            {
+                if (ng == null)
+                    return true;
+
+                //(0) 太細長
+                if (ng.Rect.Width < minSize || ng.Rect.Height < minSize)
+                    return true;
+
+                //(1) 中心在 gridBox2D 內
+                if (Cv2.PointPolygonTest(gridCorrners, new Point2f((float)ng.Center.X, (float)ng.Center.Y), false) >= 0)
+                    return true;
+
+                ////(2) 獲取 ng bloc 的四個頂點
+                //Point2f[] corners = new Point2f[]
+                //{
+                //    new Point2f(ng.Rect.X, ng.Rect.Y),
+                //    new Point2f(ng.Rect.Right, ng.Rect.Y),
+                //    new Point2f(ng.Rect.Right, ng.Rect.Bottom),
+                //    new Point2f(ng.Rect.X, ng.Rect.Bottom)
+                //};
+
+                ////(2) Cv2.IntersectConvexConvex(多邊形1, 多邊形2, 交集結果)
+                //var area = Cv2.IntersectConvexConvex(gridCorrners, corners, out var _);
+                //if (area > 0)
+                //{
+                //}
+
                 return false;
             });
         }
@@ -374,7 +437,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             CvPoint[] rectPointsInt = Array.ConvertAll(rectPointsFloat, Point2f => (CvPoint)Point2f);
             Cv2.FillConvexPoly(dst, rectPointsInt, color);
         }
-        List<EzBloc> find_black_ng_blocs(Mat binary, int minLenInWorld = 8, int minAreaInShrink = 16)
+        List<EzBloc> find_ng_blocs(Mat binary, int minLenInWorld = 8, int minAreaInShrink = 16)
         {
             var blocs = new List<EzBloc>();
 

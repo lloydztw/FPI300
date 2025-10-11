@@ -1280,7 +1280,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
                 var predictor = new EzOnGridNgBlocsPredictor();
                 predictor.DumpPath = dumpPath;
-                predictor.SetRecipeParams(_recipe, _largeGoldenGridImage);
+                predictor.SetRecipeParams(_recipe, _largeGoldenGridImage, _isDarkBkGnd);
                 var newGrid = predictor.Predict(srcImg, matchResult, force);
 
                 matchResult.Grid = newGrid;
@@ -1329,7 +1329,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
                 var detector = new EzOutGridNgBlocsDetector(EzAoiBaseUtil.GetShrinkFactor(srcImg));
 
-                detector.SetRecipe(_recipe);
+                detector.SetRecipe(_recipe, _isDarkBkGnd);
 
                 ngBlocs = detector.FindNgBlocs(srcImg, matchedGrid);
             }
@@ -1470,9 +1470,11 @@ namespace EzAoiEmptyTrayInspector.Model
                 Mat imgA = imgFullFov;
                 if (usingRoi)
                 {
-                    var mean = imgFullFov.Mean();
+                    //var mean = imgFullFov.Mean();
+                    var ogThresh = _recipe.VisionSettings.OutGridBlocThreshold.Value;
+                    var bkColor = ogThresh <= 0 ? imgFullFov.Mean() : (_isDarkBkGnd ? new Scalar(ogThresh - 1) : new Scalar(ogThresh + 1));
                     Mat temp = new Mat(imgFullFov.Size(), imgFullFov.Type());
-                    temp.SetTo(mean);
+                    temp.SetTo(bkColor);
                     imgFullFov[roi].CopyTo(temp[roi]);
                     imgA = temp;
                 }
