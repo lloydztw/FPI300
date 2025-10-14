@@ -177,6 +177,9 @@ namespace PhotoMachine.UISpace
             
             if (bReady)                             
             {
+                plcIO.bScanStart = false;
+                plcIO.bScanReady = false;
+                plcIO.bScanDone = false;
                 plcIO.iRecipeNum = 0;
                 OnTrigger(RunStatusEnum.CHANGERECIPE);
             }

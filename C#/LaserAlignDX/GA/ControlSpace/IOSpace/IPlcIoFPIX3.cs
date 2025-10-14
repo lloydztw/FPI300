@@ -24,7 +24,7 @@ namespace VsCommon.ControlSpace.IOSpace
         /// <summary>
         /// PLC->PC 马达移动到开始位通知pc信号
         /// </summary>
-        bool bScanStart { get; }
+        bool bScanStart { get; set; }
         /// <summary>
         /// PC->PLC 线扫准备就绪
         /// </summary>
@@ -70,7 +70,7 @@ namespace VsCommon.ControlSpace.IOSpace
         string sStripID { get; }
         string sLotID { get; }
 
-        int iFlyStart { get; }
+        int iFlyStart { get; set; }
         bool bFlyDone { get; set; }
         bool bFlyReady { get; set; }
 

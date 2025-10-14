@@ -339,11 +339,11 @@ namespace VsCommon.ControlSpace.IOSpace
                 int.TryParse(str, out iret);
                 return iret;
             }
-            //set
-            //{
-            //    AddressClass address = ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanResult];
-            //    PLC[address.SiteNo].WriteVari(address.Address0, value.ToString());
-            //}
+            set
+            {
+                AddressClass address = getCipAdress("iFlyStart");
+                PLC[address.SiteNo].WriteVari(address.Address0, value.ToString());
+            }
         }
         public bool bFlyReady
         {
