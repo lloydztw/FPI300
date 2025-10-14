@@ -11,6 +11,8 @@ namespace VsCommon.ControlSpace.IOSpace
         void LoadData();
         void SaveData();
 
+        void ResetPlc(bool resetRecipeNum = false);
+
         /// <summary>
         /// 启动软件的ready
         /// </summary>
@@ -24,7 +26,7 @@ namespace VsCommon.ControlSpace.IOSpace
         /// <summary>
         /// PLC->PC 马达移动到开始位通知pc信号
         /// </summary>
-        bool bScanStart { get; set; }
+        bool bScanStart { get; }
         /// <summary>
         /// PC->PLC 线扫准备就绪
         /// </summary>
@@ -70,7 +72,7 @@ namespace VsCommon.ControlSpace.IOSpace
         string sStripID { get; }
         string sLotID { get; }
 
-        int iFlyStart { get; set; }
+        int iFlyStart { get; }
         bool bFlyDone { get; set; }
         bool bFlyReady { get; set; }
 

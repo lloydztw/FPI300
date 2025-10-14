@@ -88,6 +88,7 @@ namespace VsCommon.ControlSpace.IOSpace
             //PLC = plc;
             //INIFILE = path + "\\IO.INI";
             //LoadData();
+            ResetPlc();
         }
         public override void LoadData()
         {
@@ -106,6 +107,19 @@ namespace VsCommon.ControlSpace.IOSpace
         }
         public override void SaveData()
         {
+        }
+
+        public void ResetPlc(bool resetRecipeNum = false)
+        {
+            var plcIO = this;
+            plcIO.bScanStart = false;
+            plcIO.bScanReady = false;
+            plcIO.bScanDone = false;
+            plcIO.bFlyDone = false;
+            if (plcIO.bSoftwareReady)
+                plcIO.bFlyReady = true;
+            if (resetRecipeNum)
+                plcIO.iRecipeNum = 0;
         }
 
         /// <summary>

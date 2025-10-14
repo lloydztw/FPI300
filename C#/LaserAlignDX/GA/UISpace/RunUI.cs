@@ -173,14 +173,15 @@ namespace PhotoMachine.UISpace
 
             //>>> plcIO.bScanStart = false;
             plcIO.bSoftwareReady = bReady;
-            plcIO.bFlyReady = bReady;
+            //plcIO.bFlyReady = bReady;
             
             if (bReady)                             
             {
-                plcIO.bScanStart = false;
-                plcIO.bScanReady = false;
-                plcIO.bScanDone = false;
-                plcIO.iRecipeNum = 0;
+                //plcIO.bScanStart = false;
+                //plcIO.bScanReady = false;
+                //plcIO.bScanDone = false;
+                //plcIO.iRecipeNum = 0;
+                plcIO.ResetPlc(resetRecipeNum: true);
                 OnTrigger(RunStatusEnum.CHANGERECIPE);
             }
         }

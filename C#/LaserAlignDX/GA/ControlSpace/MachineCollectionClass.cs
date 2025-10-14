@@ -45,18 +45,6 @@ namespace VsCommon.ControlSpace
             //WriteConfigToPLC();
             //WriteToPlcModulePosition();
 
-            switch(VERSION)
-            {
-                case VersionEnum.LASER:
-                    switch(OPTION)
-                    {
-                        case OptionEnum.MAIN_FPIX3:
-                            ResetPlc();
-                            break;
-                    }
-                    break;
-            }
-
             MACHINE.TriggerAction += MACHINE_TriggerAction;
         }
 
@@ -76,16 +64,7 @@ namespace VsCommon.ControlSpace
             //    MOTION.SetSpeed(SpeedTypeEnum.GO);
             //}
         }
-        public void ResetPlc()
-        {
-            var plcIO = ((MainFPIX3MachineClass)MACHINE).PLCIO;
-            plcIO.bScanStart = false;
-            plcIO.bScanReady = false;
-            plcIO.bScanDone = false;
-            plcIO.bFlyDone = false;
-            if (plcIO.bSoftwareReady)
-                plcIO.bFlyReady = true;
-        }
+
         public void WriteConfigToPLC()
         {
 
@@ -165,17 +144,6 @@ namespace VsCommon.ControlSpace
 
         public void Close()
         {
-            switch (VERSION)
-            {
-                case VersionEnum.LASER:
-                    switch (OPTION)
-                    {
-                        case OptionEnum.MAIN_FPIX3:
-                            ResetPlc();
-                            break;
-                    }
-                    break;
-            }
             MACHINE.Close();
         }
         public string PLCFps()
