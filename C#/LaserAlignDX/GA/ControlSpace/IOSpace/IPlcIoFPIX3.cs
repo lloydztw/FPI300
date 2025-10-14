@@ -11,6 +11,8 @@ namespace VsCommon.ControlSpace.IOSpace
         void LoadData();
         void SaveData();
 
+        void ResetPlc(bool resetRecipeNum = false);
+
         /// <summary>
         /// 启动软件的ready
         /// </summary>

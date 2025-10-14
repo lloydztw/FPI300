@@ -66,6 +66,7 @@ namespace VsCommon.ControlSpace.IOSpace
 
             LoadData();
 
+            ResetPlc();
         }
         public override void LoadData()
         {
@@ -87,7 +88,24 @@ namespace VsCommon.ControlSpace.IOSpace
         }
         public override void SaveData()
         {
+        }
 
+        public void ResetPlc(bool resetRecipeNum = false)
+        {
+            var plcIO = this;
+
+            plcIO.bScanStart = false;
+            plcIO.bScanReady = false;
+            plcIO.bScanDone = false;
+            plcIO.bFlyDone = false;
+
+            if (plcIO.bSoftwareReady)
+            {
+                plcIO.bFlyReady = true;
+
+                if (resetRecipeNum)
+                    plcIO.iRecipeNum = 0;
+            }
         }
 
         /// <summary>
@@ -339,11 +357,11 @@ namespace VsCommon.ControlSpace.IOSpace
                 int.TryParse(str, out iret);
                 return iret;
             }
-            //set
-            //{
-            //    AddressClass address = ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanResult];
-            //    PLC[address.SiteNo].WriteVari(address.Address0, value.ToString());
-            //}
+            set
+            {
+                AddressClass address = getCipAdress("iFlyStart");
+                PLC[address.SiteNo].WriteVari(address.Address0, value.ToString());
+            }
         }
         public bool bFlyReady
         {
