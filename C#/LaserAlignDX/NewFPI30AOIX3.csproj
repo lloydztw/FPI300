@@ -360,6 +360,7 @@
   <ItemGroup>
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
+    <Compile Include="GA.mvc\Ctrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v35.cs" />
@@ -426,7 +427,6 @@
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_ChipLoc.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_EmptyTray.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v30.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v27.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaBigImageHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaCellsGroup.cs" />

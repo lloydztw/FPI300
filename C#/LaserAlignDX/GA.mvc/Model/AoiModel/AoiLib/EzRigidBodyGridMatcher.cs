@@ -126,9 +126,14 @@ namespace LeTian.AoiLib
                 var scenePitch = sceneGrid.GetPitch();
                 var pitchRatioX = Math.Abs(scenePitch.X / goldenPitch.X);
                 var pitchRatioY = Math.Abs(scenePitch.Y / goldenPitch.Y);
-                _LOG.Debug("Golden Pitch = {0}", goldenPitch);
-                _LOG.Debug("Scene Pitch = {0}", scenePitch);
-                _LOG.Debug("Scene Pitch Ratio = {0:0.000}, {1:0.000}", pitchRatioX, pitchRatioY);
+
+                if (false)
+                {
+                    _LOG.Debug("Golden Pitch = {0}", goldenPitch);
+                    _LOG.Debug("Scene Pitch = {0}", scenePitch);
+                    _LOG.Debug("Scene Pitch Ratio = {0:0.000}, {1:0.000}", pitchRatioX, pitchRatioY);
+                }
+
                 if (pitchRatioX >= 1.4 || pitchRatioY >= 1.4)
                 {
                     needsRebuild = true;

@@ -112,8 +112,9 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
             if (fullfovImage is GaBigImageHolder imgHolder)
             {
                 Bitmap bmp = imgHolder.PeekBitmap();
-                lblTitle.Text = srcName;
-                update_LineScanImage(bmp);
+                //lblTitle.Text = srcName;
+                //update_LineScanImage(bmp);
+                jezTransImageViewPanel1.UpdateImage(bmp, srcName, disposeSrc: false);
             }
             else if (fullfovImage is CMvdImage mvdImage)
             {

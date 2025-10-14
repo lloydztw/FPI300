@@ -153,8 +153,8 @@ namespace LaserAlignDX.BasicSpace.LineFinder.V1
                 int rayNum = (int)Math.Max(roi.Width, roi.Height) / 3;  // 自動決定
                 int edgeStrength = iEdgeStrength;
 
-                LtDebug.LOG.Debug("MvdLineFinder[{0}] : Orient= {1} : Roi= {2:0.0} x {3:0.0} : A= {4:0.0}",
-                                   borderId, orient, roi.Width, roi.Height, roi.Angle);
+                //LtDebug.LOG.Debug("MvdLineFinder[{0}] : Orient= {1} : Roi= {2:0.0} x {3:0.0} : A= {4:0.0}",
+                //                   borderId, orient, roi.Width, roi.Height, roi.Angle);
 
                 // 卡尺数量
                 _mvdLineFindTool.SetRunParam("RayNum", rayNum.ToString());     
@@ -173,7 +173,7 @@ namespace LaserAlignDX.BasicSpace.LineFinder.V1
                 // KernelSize
                 //_mvdLineFindTool.SetRunParam("KernelSize", "5");
 
-                LtDebug.LOG.Debug("MvdLineFinder[{0}] : SetRunParam [OK]", borderId);
+                //LtDebug.LOG.Debug("MvdLineFinder[{0}] : SetRunParam [OK]", borderId);
 
                 // Running
                 _mvdLineFindTool.Run();

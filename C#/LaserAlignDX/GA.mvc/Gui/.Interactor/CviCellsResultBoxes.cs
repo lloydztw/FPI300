@@ -352,9 +352,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 try
                 {
-                    draw_ChipsLoc(viewer, gxView);
-                    draw_ChipDetails(viewer, gxView);
-                    draw_QrCodes(viewer, gxView);
+                    if(_mode == ScanInspectMode.NOTRAY)
+                    {
+                        draw_EmptyTray(viewer, gxView);
+                    }
+                    else
+                    {
+                        draw_ChipsLoc(viewer, gxView);
+                        draw_ChipDetails(viewer, gxView);
+                        draw_QrCodes(viewer, gxView);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -627,6 +634,13 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #endregion
 
         #region DRAW_FUNCTIONS
+        void draw_EmptyTray(CvImageViewer viewer, Graphics gxView)
+        {
+            foreach (var item in _drawItems)
+            {
+                item?.OnDraw(viewer, gxView);
+            }
+        }
         void draw_ChipsLoc(CvImageViewer viewer, Graphics gxView)
         {
             var activeCell = _cviRegionBox?.Tag;
