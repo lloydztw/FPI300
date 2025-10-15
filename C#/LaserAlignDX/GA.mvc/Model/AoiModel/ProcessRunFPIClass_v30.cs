@@ -299,6 +299,12 @@ namespace LaserAlignDX.AoiModel.V3
 
             GaUtil.LOG($"{GetType().Name} [V3.0] Run", Color.Purple);
 
+            #region 把 LotID 與 StripID 設定給 SubAoiModel
+            _aoiChipLoc.LotData = this.LotData;
+            _aoiChipMeasure.LotData = this.LotData;
+            _aoiEmptyTray.LotData= this.LotData;
+            #endregion
+
             ThreadStart runFunc;
             if (xScanInspectMode == ScanInspectMode.NOTRAY)
                 runFunc = _RunEmptyTray;

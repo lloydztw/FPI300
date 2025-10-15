@@ -128,6 +128,8 @@ namespace TravellerMINIX6.ProcessSpace
                 case 10:
                     if (process.IsTimeup)
                     {
+                        pRun.StripId = StripID;
+                        pRun.LotId = LotID;
                         pRun.FileBarcodeStr = JzTimes.DateTimeSerialString;
 
                         pRun.xScanInspectMode = _modeArg.Value;

@@ -173,8 +173,8 @@ namespace PhotoMachine.UISpace
 
             //>>> plcIO.bScanStart = false;
             plcIO.bSoftwareReady = bReady;
-            //plcIO.bFlyReady = bReady;
-            
+            plcIO.bFlyReady = bReady;
+
             if (bReady)                             
             {
                 //plcIO.bScanStart = false;
