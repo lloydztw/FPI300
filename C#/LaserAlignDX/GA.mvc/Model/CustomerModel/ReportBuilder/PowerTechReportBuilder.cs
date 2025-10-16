@@ -77,18 +77,27 @@ namespace LaserAlignDX.Model
             sb.Append("是否检测").Append(",");
             sb.Append("尺寸宽度X").Append(",");
             sb.Append("尺寸高度Y").Append(",");
-            sb.Append("位置偏移X").Append(",");
-            sb.Append("位置偏移Y").Append(",");
+            //sb.Append("位置偏移X").Append(",");
+            //sb.Append("位置偏移Y").Append(",");
             sb.Append("原始X").Append(",");
             sb.Append("原始Y").Append(",");
             sb.Append("引导偏移X").Append(",");
             sb.Append("引导偏移Y").Append(",");
             sb.Append("引导偏移角度").Append(",");
 
-            sb.Append("左边距").Append(",");
-            sb.Append("右边距").Append(",");
-            sb.Append("上边距").Append(",");
-            sb.Append("下边距").Append(",");
+            //sb.Append("左边距").Append(",");
+            //sb.Append("右边距").Append(",");
+            //sb.Append("上边距").Append(",");
+            //sb.Append("下边距").Append(",");
+
+            sb.Append("LUX").Append(",");
+            sb.Append("LUY").Append(",");
+            sb.Append("RUX").Append(",");
+            sb.Append("RUY").Append(",");
+            sb.Append("RDX").Append(",");
+            sb.Append("RDY").Append(",");
+            sb.Append("LDX").Append(",");
+            sb.Append("LDY").Append(",");
 
             sb.Append("马达1-X").Append(",");
             sb.Append("马达1-Y").Append(",");
@@ -124,12 +133,13 @@ namespace LaserAlignDX.Model
             //sb.Append(cell.DisRight.ToString(_digitFormat)).Append(",");
             //sb.Append(cell.DisTop.ToString(_digitFormat)).Append(",");
             //sb.Append(cell.DisBottom.ToString(_digitFormat)).Append(",");
+            var gaps = cell?.ChipData?.PadEdgeGaps;
 
             sb.AppendValues(
                 cell.RunWidth,
                 cell.RunHeight,
-                cell.PadEdgeDiffX,
-                cell.PadEdgeDiffY,
+                //cell.PadEdgeDiffX,
+                //cell.PadEdgeDiffY,
 
                 cell.OrgX,
                 cell.OrgY,
@@ -137,10 +147,20 @@ namespace LaserAlignDX.Model
                 cell.RunY,
                 cell.RunAngle,
 
-                cell.PadEdgeSizes[(int)EdgeBorder.Left],        // 左 (報表順序)
-                cell.PadEdgeSizes[(int)EdgeBorder.Right],       // 右 (報表順序)
-                cell.PadEdgeSizes[(int)EdgeBorder.Top],         // 上 (報表順序)
-                cell.PadEdgeSizes[(int)EdgeBorder.Bottom]       // 下 (報表順序)
+                //cell.PadEdgeSizes[(int)EdgeBorder.Left],        // 左 (報表順序)
+                //cell.PadEdgeSizes[(int)EdgeBorder.Right],       // 右 (報表順序)
+                //cell.PadEdgeSizes[(int)EdgeBorder.Top],         // 上 (報表順序)
+                //cell.PadEdgeSizes[(int)EdgeBorder.Bottom]       // 下 (報表順序)
+
+                gaps != null ? gaps.LU.X : 0f,
+                gaps != null ? gaps.LU.Y : 0f,
+                gaps != null ? gaps.RU.X : 0f,
+                gaps != null ? gaps.RU.Y : 0f,
+                gaps != null ? gaps.RD.X : 0f,
+                gaps != null ? gaps.RD.Y : 0f,
+                gaps != null ? gaps.LD.X : 0f,
+                gaps != null ? gaps.LD.Y : 0f
+
             ).Append(",");
 
             sb.AppendPointF(cell.Sur1).Append(",");

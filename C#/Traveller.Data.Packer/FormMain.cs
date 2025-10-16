@@ -11,6 +11,8 @@ namespace Traveller.Data.Packer
             public const string S_FILE_7Z_EXE = @"C:\Program Files\7-Zip\7z.exe";
             public const string S_PATH_APP = "D:\\Automation\\Eazy FPI30\\";
             public static string S_PATH_RECIPE_ROOT => System.IO.Path.Combine(S_PATH_APP, "_V03_", "LASER-MAIN_FPIX3");
+            //public static string S_PATH_RECIPE_ROOT => System.IO.Path.Combine(S_PATH_APP, "_M05_", "LASER-MAIN_FPIX3");
+
             public static string GetDairyPath(string path)
             {
                 if (!System.IO.Directory.Exists(path))
@@ -112,6 +114,7 @@ namespace Traveller.Data.Packer
                 _doCopyFile(System.IO.Path.Combine(workPath, "MAIN_FPIX3", "LightCONTROL0.INI"), dstPath);
                 _doCopyFile(System.IO.Path.Combine(workPath, "MAIN_FPIX3", "LightCONTROL1.INI"), dstPath);
                 _doCopyFile(System.IO.Path.Combine(workPath, "MAIN_FPIX3", "PLCCONTROL0.INI"), dstPath);
+                _doCopyFolder(System.IO.Path.Combine(workPath, "Calibration"), dstPath);
                 _doCopyFolder(System.IO.Path.Combine(Global.S_PATH_RECIPE_ROOT, "EmptyTrayAoi", "Ini"), dstPath);
                 _doCopyFolder(System.IO.Path.Combine(Global.S_PATH_RECIPE_ROOT, "EmptyTrayAoi", "Recipes"), dstPath);
 

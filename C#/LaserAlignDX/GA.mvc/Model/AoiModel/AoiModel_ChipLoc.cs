@@ -37,6 +37,9 @@ using _TM = LeTian.AoiLib.LtDebug;
 
 namespace LaserAlignDX.AoiModel.V3
 {
+    /// <summary>
+    /// 晶粒定位
+    /// </summary>
     public class AoiModel_ChipLoc : AoiModelBase
     {
         #region GLOBAL_MESS

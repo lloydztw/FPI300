@@ -21,6 +21,7 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
+using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
@@ -87,6 +88,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             get => XRecipe.Instance;
         }
+        bool _withPadGaps = false;
         #endregion
 
         #region RUNTIME_DATA
@@ -130,6 +132,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         public void UpdateResult(IEnumerable<XCell> cells, int mode)
         {
             _mode = (ScanInspectMode)mode;
+
+            _withPadGaps = _xRecipe.InspectParams.optPadEdgeGapsMeasurement &&
+                           _xRecipe.InspectParams.optChipMeasurement &&
+                           _xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch;
 
             try
             {
@@ -310,7 +316,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     break;
 
                 case Keys.F4:
-                    if (!BY_PASS)
+                    if (!BY_PASS && e.Control)
                     {
                         if (_cursorBloc is CellBloc cellBloc)
                             DebugMatching(cellBloc);
@@ -318,7 +324,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     break;
 
                 case Keys.F2:
-                    if (!BY_PASS)
+                    if (!BY_PASS && e.Control)
                     {
                         var oldCursor = GaUtil.SetCursor(viewer.FindForm(), Cursors.AppStarting);
                         DumpCellRegions();
@@ -552,8 +558,12 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (!_xRecipe.InspectParams.optChipMeasurement)
                 return;
 
+            var xInspect = _xRecipe.InspectParams;
+            bool withPads = xInspect.optPadEdgeGapsMeasurement && xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch;
+
             var drawItemsOfBorderBoxes = new List<IvDrawItem>();
             var drawItemsOfLineSegments = new List<IvDrawItem>();
+            var drawItemsOfNgPads = new List<IvDrawItem>();
 
             foreach (CellBloc bloc in _grid)
             {
@@ -610,12 +620,12 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 #endregion
 
                 #region DIM_MEASURE_POINTS
-                var dimMeasurePoints = cell.ChipData.DimMeasurePoints;
+                var dimMeasurePoints = cell?.ChipData.ChipDimension.DimMeasurePoints;
                 if (dimMeasurePoints != null)
                     _chipDimMeasurePoints.Add(cell, dimMeasurePoints);
                 #endregion
 
-                #region PADS_BOX2D
+                #region CHIP_PAD_BOX2D
                 var padsGrid = cell.ChipData.PadsGrid;
                 if (padsGrid != null)
                 {
@@ -626,10 +636,39 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     _drawItemsEx.Add(item);
                 }
                 #endregion
+
+                #region NG_PAD_GAPS
+                if (withPads)
+                {
+                    var gaps = cell.ChipData?.PadEdgeGaps;
+                    var grid = cell.ChipData?.PadsGrid;
+                    if (gaps != null && grid !=null)
+                    {
+                        int i = 0;
+                        foreach (var gap in gaps.IterItems())
+                        {
+                            if (gap.X < xInspect.PadEdgeGapX_Min ||
+                                gap.X > xInspect.PadEdgeGapX_Max ||
+                                gap.Y < xInspect.PadEdgeGapY_Min ||
+                                gap.Y > xInspect.PadEdgeGapY_Max)
+                            {
+                                // [0,0], [0,c], [r,c], [r,0]
+                                int r = i == 2 || i == 3 ? grid.Rows - 1 : 0;
+                                int c = i == 1 || i == 2 ? grid.Cols - 1 : 0;
+                                var pad = grid.Get(r, c);
+                                if (pad != null)
+                                    drawItemsOfNgPads.Add(new CviRotRectBox((RectangleF)pad.Rect, Color.Yellow, 0.5f));
+                            }
+                            i++;
+                        }
+                    }
+                }
+                #endregion
             }
 
             _drawItemsEx.AddRange(drawItemsOfLineSegments);
             _drawItemsEx.AddRange(drawItemsOfBorderBoxes);
+            _drawItems.AddRange(drawItemsOfNgPads);
         }
         #endregion
 
@@ -835,7 +874,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         bool isFetched = false;
 
                         //(2) iterate MEASURE Points
-                        var measurePts = cell?.ChipData.DimMeasurePoints;
+                        var measurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
                         if (measurePts != null)
                         {
                             foreach (var pt in measurePts)
@@ -851,20 +890,45 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         var padsGrid = cell?.ChipData.PadsGrid;
                         if (padsGrid != null)
                         {
-                            var r = padsGrid.Rows - 1;
-                            var c = padsGrid.Cols - 1;
-                            var pads = new[] {
-                                padsGrid.Get(0, 0)?.Center,
-                                padsGrid.Get(0, c)?.Center,
-                                padsGrid.Get(r, c)?.Center,
-                                padsGrid.Get(r, 0)?.Center,
-                            };
-                            foreach (var pad in pads)
+                            //var r = padsGrid.Rows - 1;
+                            //var c = padsGrid.Cols - 1;
+                            //var pads = new[] {
+                            //    padsGrid.Get(0, 0)?.Center,
+                            //    padsGrid.Get(0, c)?.Center,
+                            //    padsGrid.Get(r, c)?.Center,
+                            //    padsGrid.Get(r, 0)?.Center,
+                            //};
+                            //foreach (var pad in pads)
+                            //{
+                            //    if (pad == null) continue;
+                            //    var pseudoBloc = createPseudoBloc(pad, bloc);
+                            //    yield return pseudoBloc;
+                            //    isFetched = true;
+                            //}
+
+                            var padBlocs = padsGrid.GetCornerBlocs();
+                            foreach (var pb in padBlocs)
                             {
+                                var pad = pb?.Center;
                                 if (pad == null) continue;
                                 var pseudoBloc = createPseudoBloc(pad, bloc);
                                 yield return pseudoBloc;
                                 isFetched = true;
+                            }
+
+                            if (_withPadGaps)
+                            {
+                                var gapMeasurePts = cell?.ChipData.PadEdgeGaps.GapMeasurePoints;
+                                if (gapMeasurePts != null)
+                                {
+                                    foreach (var gp in gapMeasurePts)
+                                    {
+                                        if (gp == null) continue;
+                                        var pseudoBloc = createPseudoBloc(gp, bloc);
+                                        yield return pseudoBloc;
+                                        isFetched = true;
+                                    }
+                                }
                             }
                         }
 
@@ -962,7 +1026,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         if (cursorCellBloc != null)
                             appendDetailCoordsInfo(sb, row, col, cursorBloc, cursorBloc2);
                         else
-                            appendMeasurePointInfo(sb, cursorBloc, cursorBloc2);
+                            appendMeasureDistInfo(sb, cursorBloc, cursorBloc2);
                         isShowScore = false;
                     }
                 }
@@ -1027,13 +1091,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
 
             #region S1_S2_馬達座標
-            sb.AppendLine().Append("S1 馬達目標(X,Y) = (").AppendValues((float)s1_target.X, (float)s1_target.Y).Append(") mm");
-            if(camPt!=null)
-                sb.AppendLine().Append("S1 馬達座標(X,Y) = (").AppendValues((float)s1_current.X, (float)s1_current.Y).Append(") mm");
+            if (!_withPadGaps)
+            {
+                sb.AppendLine().Append("S1 馬達目標(X,Y) = (").AppendValues((float)s1_target.X, (float)s1_target.Y).Append(") mm");
+                if (camPt != null)
+                    sb.AppendLine().Append("S1 馬達座標(X,Y) = (").AppendValues((float)s1_current.X, (float)s1_current.Y).Append(") mm");
 
-            sb.AppendLine().Append("S2 馬達目標(X,Y) = (").AppendValues((float)s2_target.X, (float)s2_target.Y).Append(") mm");
-            if (camPt != null)
-                sb.AppendLine().Append("S2 馬達座標(X,Y) = (").AppendValues((float)s2_current.X, (float)s2_current.Y).Append(") mm");
+                sb.AppendLine().Append("S2 馬達目標(X,Y) = (").AppendValues((float)s2_target.X, (float)s2_target.Y).Append(") mm");
+                if (camPt != null)
+                    sb.AppendLine().Append("S2 馬達座標(X,Y) = (").AppendValues((float)s2_current.X, (float)s2_current.Y).Append(") mm");
+            }
             #endregion
 
             #region PHYSIC_目標座標
@@ -1051,9 +1118,12 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 sb.AppendLine();
                 sb.AppendLine($"Physic 變動值 ΔX = {world_delta.X:0.000} mm");
                 sb.AppendLine($"Physic 變動值 ΔY = {world_delta.Y:0.000} mm");
-                sb.AppendLine();
-                sb.AppendLine($"PLC 格點 補償量 ΔX = {motor_delta.X:0.000} mm");
-                sb.AppendLine($"PLC 格點 補償量 ΔY = {motor_delta.Y:0.000} mm");
+                if (!_withPadGaps)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine($"PLC 格點 補償量 ΔX = {motor_delta.X:0.000} mm");
+                    sb.AppendLine($"PLC 格點 補償量 ΔY = {motor_delta.Y:0.000} mm");
+                }
             }
             #endregion
 
@@ -1098,7 +1168,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         #endregion
 
                         #region 尺寸量測詳細點位
-                        var meansurePts = cell?.ChipData?.DimMeasurePoints;
+                        var meansurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
                         if (meansurePts != null && meansurePts.Length >= 4 &&
                             meansurePts[0] != null && meansurePts[1] != null &&
                             meansurePts[2] != null && meansurePts[3] != null)
@@ -1111,7 +1181,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         }
                         #endregion
 
-                        #region 晶粒_PADS
+                        #region 晶粒_PAD_GRID
                         var padsGrid = cell?.ChipData?.PadsGrid;
                         if (padsGrid != null)
                         {
@@ -1122,8 +1192,26 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                             {
                                 var pW = (p0 - p1).NormLength;
                                 var pH = (p0 - p2).NormLength;
-                                sb.AppendLine().Append($"PAD.寬 = {pW:0.0} pix");
-                                sb.AppendLine().Append($"PAD.高 = {pH:0.0} pix");
+                                sb.AppendLine();
+                                sb.AppendLine().Append($"PAD.總寬 = {pW:0.0} pix");
+                                sb.AppendLine().Append($"PAD.總高 = {pH:0.0} pix");
+                            }
+                        }
+                        if (_withPadGaps)
+                        {
+                            var gaps = cell?.ChipData?.PadEdgeGaps;
+                            if (gaps != null)
+                            {
+                                sb.AppendLine();
+                                sb.AppendLine().Append($"LUX = {gaps.LU.X:0.000} mm");
+                                sb.AppendLine().Append($"RUX = {gaps.RU.X:0.000} mm");
+                                sb.AppendLine().Append($"RDX = {gaps.RD.X:0.000} mm");
+                                sb.AppendLine().Append($"LDX = {gaps.LD.X:0.000} mm");
+                                sb.AppendLine();
+                                sb.AppendLine().Append($"LUY = {gaps.LU.Y:0.000} mm");
+                                sb.AppendLine().Append($"RUY = {gaps.RU.Y:0.000} mm");
+                                sb.AppendLine().Append($"RDY = {gaps.RD.Y:0.000} mm");
+                                sb.AppendLine().Append($"LDY = {gaps.LD.Y:0.000} mm");
                             }
                         }
                         #endregion
@@ -1131,7 +1219,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 }
             }
         }
-        void appendMeasurePointInfo(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        void appendMeasureDistInfo(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
             if (TransformsModel == null)
                 return;

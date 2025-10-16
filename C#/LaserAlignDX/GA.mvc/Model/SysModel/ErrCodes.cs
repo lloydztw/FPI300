@@ -58,6 +58,9 @@ namespace LaserAlignDX.Mvc.Model
         [Description("無法抓到 PADS, 請建立晶粒匹配模板!")]
         ERR_NO_CHIP_PADS,
 
+        [Description("晶粒 PAD 格點缺角!")]
+        ERR_LACK_CHIP_PAD_CORNER,
+
         [Description("邊線框 條件不佳, 請再調整 邊線框!")]
         ERR_WEAK_LINE_CONDITION,
 

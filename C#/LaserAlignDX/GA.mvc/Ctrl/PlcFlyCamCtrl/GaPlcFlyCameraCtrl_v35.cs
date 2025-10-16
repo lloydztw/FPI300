@@ -221,6 +221,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                     // 重置 m_onTheFlyFrameCount
                     resetOnTheFlyFrameCount();
+
                     // 暫停 OnTheFlyFrameBuf
                     m_isOnTheFlyFrameEnabled = false;
 

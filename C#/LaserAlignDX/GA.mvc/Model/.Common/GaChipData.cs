@@ -18,6 +18,8 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
 using LeTian.AoiLib;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 
@@ -52,12 +54,6 @@ namespace LaserAlignDX.Model
         public QvBox2D[] LineBorderBoxes { get; set; } = new QvBox2D[4];
 
         /// <summary>
-        /// 尺寸量測點 (左上右下) (單位 pixels) (FullFov Cammera Coordinates)
-        /// (除錯用)
-        /// </summary>
-        public QVector[] DimMeasurePoints { get; set; } = new QVector[4];
-
-        /// <summary>
         /// 定位後之世界座標
         /// </summary>
         public readonly GaChipCoordindates ChipCoords = new GaChipCoordindates();
@@ -66,6 +62,11 @@ namespace LaserAlignDX.Model
         /// 量測後之物理尺寸
         /// </summary>
         public readonly GaChipDimension ChipDimension = new GaChipDimension();
+
+        /// <summary>
+        /// PAD 邊隙 (單位 mm)
+        /// </summary>
+        public readonly GaPadEdgeGaps PadEdgeGaps = new GaPadEdgeGaps();
     }
 
 
@@ -85,30 +86,74 @@ namespace LaserAlignDX.Model
     public class GaChipDimension
     {
         /// <summary>
-        /// 量測结果: 晶粒宽度
+        /// 量測结果: 晶粒宽度 (單位 mm)
         /// </summary>
         public float ChipWidth { get; set; } = 0;
         /// <summary>
-        /// 量測结果: 晶粒高度
+        /// 量測结果: 晶粒高度 (單位 mm)
         /// </summary>
         public float ChipHeight { get; set; } = 0;
         /// <summary>
-        /// 量測结果: 格點型晶粒 邊緣厚度 (順序: 左上右下)
+        /// 尺寸量測點 (左上右下) (單位 pixels) 
+        /// (FullFov Cammera Coordinates)
+        /// (顯示繪圖用)
         /// </summary>
-        public float[] PadEdgeSizes { get; set; } = new float[4];
+        public QVector[] DimMeasurePoints { get; set; } = new QVector[4];
+    }
+
+
+    public class GaPadEdgeGaps
+    {
         /// <summary>
-        /// 量測结果: 格點型晶粒 邊緣厚度 左右差 (X方向)
+        /// 左上 邊隙 (單位 mm)
         /// </summary>
-        public float PadEdgeDiffX
-        {
-            get => PadEdgeSizes[(int)EdgeBorder.Left] - PadEdgeSizes[(int)EdgeBorder.Right];
-        }
+        public PointF LU = new PointF(0, 0);
         /// <summary>
-        /// 量測结果: 格點型晶粒 邊緣厚度 上下差 (Y方向)
+        /// 右上 邊隙 (單位 mm)
         /// </summary>
-        public float PadEdgeDiffY
+        public PointF RU = new PointF(0, 0);
+        /// <summary>
+        /// 右下 邊隙 (單位 mm)
+        /// </summary>
+        public PointF RD = new PointF(0, 0);
+        /// <summary>
+        /// 左下 邊隙 (單位 mm)
+        /// </summary>
+        public PointF LD = new PointF(0, 0);
+
+        public float GetGapSize(EdgeBorder e)
         {
-            get => PadEdgeSizes[(int)EdgeBorder.Top] - PadEdgeSizes[(int)EdgeBorder.Bottom];
+            double value = 0f;
+            switch (e)
+            {
+                case EdgeBorder.Left:
+                    value = (LU.X + LD.X) / 2f; 
+                    break;
+                case EdgeBorder.Right:
+                    value = (RU.X + RD.X) / 2f;
+                    break;
+                case EdgeBorder.Top:
+                    value = (LU.Y + RU.Y) / 2f;
+                    break;
+                case EdgeBorder.Bottom:
+                    value = (LD.Y + RD.Y) / 2f;
+                    break;
+            }
+            return (float)Math.Round(value, 3);
         }
+        public IEnumerable<PointF> IterItems()
+        {
+            yield return LU;
+            yield return RU;
+            yield return RD;
+            yield return LD;
+        }
+
+        /// <summary>
+        /// 尺寸量測點 (左上右下) (單位 pixels) 
+        /// (FullFov Cammera Coordinates)
+        /// (顯示繪圖用)
+        /// </summary>
+        public QVector[] GapMeasurePoints { get; set; }
     }
 }

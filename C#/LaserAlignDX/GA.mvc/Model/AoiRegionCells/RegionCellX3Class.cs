@@ -126,6 +126,9 @@ namespace LaserAlignDX.OPSpace
             get => ChipData.ChipDimension.ChipHeight;
             set => ChipData.ChipDimension.ChipHeight = value;
         }
+
+        #region OLD_CODE
+#if (false)
         /// <summary>
         /// 测量结果: 格點型晶粒 邊緣厚度 左右差 (X方向) (單位 mm)
         /// </summary>
@@ -149,6 +152,8 @@ namespace LaserAlignDX.OPSpace
         {
             get => ChipData.ChipDimension.PadEdgeSizes;
         }
+#endif
+        #endregion
 
         #region FILE_PATH
         public bool IsSaveDebugPicture = false;
@@ -640,10 +645,20 @@ namespace LaserAlignDX.OPSpace
                 {
                     bOK = false;
                 }
-                if (bOK && xInspect.optChipEdgesDiffCompare && xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
+                if (bOK && xInspect.optPadEdgeGapsMeasurement && xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
                 {
-                    if (Math.Abs(PadEdgeDiffX) > xInspect.PadEdgeDiffMaxX || Math.Abs(PadEdgeDiffY) > xInspect.PadEdgeDiffMaxY)
-                        bOK = false;
+                    var gaps = ChipData?.PadEdgeGaps;
+                    foreach(var gap in gaps.IterItems())
+                    {
+                        if( gap.X < xInspect.PadEdgeGapX_Min || 
+                            gap.X > xInspect.PadEdgeGapX_Max ||
+                            gap.Y < xInspect.PadEdgeGapY_Min || 
+                            gap.Y > xInspect.PadEdgeGapY_Max)
+                        {
+                            bOK = false;
+                            break;
+                        }
+                    }
                 }
 
                 if (!bOK)
@@ -809,7 +824,7 @@ namespace LaserAlignDX.OPSpace
             return PTF.X.ToString("0.000") + "," + PTF.Y.ToString("0.000");
         }
 #endif
-        #endregion
+#endregion
 
         /// <summary>
         /// 清除上一次的檢測結果

@@ -1485,12 +1485,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         [CategoryAttribute(_Cat01), DescriptionAttribute("僅適用於 格點晶粒!")]
-        [DisplayName("02 啟用 尺寸偏移檢測")]
+        [DisplayName("02 啟用 PAD邊隙 檢測")]
         [Browsable(true)]
-        public bool optChipEdgesDiffCompare
+        public bool optPadEdgeGapsMeasurement
         {
-            get => _spec.optChipEdgesCompare;
-            set => _spec.optChipEdgesCompare = value;
+            get => _spec.optPadEdgeGapsMeasurement;
+            set => _spec.optPadEdgeGapsMeasurement = value;
         }
 
         [CategoryAttribute(_Cat01), DescriptionAttribute("")]
@@ -1842,28 +1842,94 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
 
         #region 6_尺寸偏移_SPEC_(兩載台共用)
-        const string _Cat6 = "6. 尺寸偏移规格设置";
+        const string _Cat6 = "6. PAD邊隙規格設定";
 
         [CategoryAttribute(_Cat6), DescriptionAttribute("僅適用於 格點晶粒! (單位 mm)")]
-        [DisplayName("01 邊緣差異X 上限")]
+        [DisplayName("01 PAD邊隙 X 標準值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
-        public float PadEdgeDiffMaxX
+        public float PadEdgeX
         {
-            get => _spec.PadEdgeDiffMaxX;
-            set => _spec.PadEdgeDiffMaxX = value;
+            get => _spec.PadEdgeGapX.Standard;
+            set => _spec.PadEdgeGapX.Standard = value;
+        }
+
+        [CategoryAttribute(_Cat6), DescriptionAttribute("單位 mm")]
+        [DisplayName("01a PAD邊隙 X 上公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float PadEdgeX_DeltaUpper
+        {
+            get => _spec.PadEdgeGapX.DeltaUpper;
+            set => _spec.PadEdgeGapX.DeltaUpper = value;
+        }
+
+        [CategoryAttribute(_Cat6), DescriptionAttribute("單位 mm")]
+        [DisplayName("01b PAD邊隙 X 下公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float PadEdgeX_DeltaLower
+        {
+            get => _spec.PadEdgeGapX.DeltaLower;
+            set => _spec.PadEdgeGapX.DeltaLower = value;
         }
 
         [CategoryAttribute(_Cat6), DescriptionAttribute("僅適用於 格點晶粒! (單位 mm)")]
-        [DisplayName("02 邊緣差異Y 上限")]
+        [DisplayName("02 PAD邊隙 Y 標準值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
-        public float PadEdgeDiffMaxY
+        public float PadEdgeY
         {
-            get => _spec.PadEdgeDiffMaxY;
-            set => _spec.PadEdgeDiffMaxY = value;
+            get => _spec.PadEdgeGapY.Standard;
+            set => _spec.PadEdgeGapY.Standard = value;
+        }
+
+        [CategoryAttribute(_Cat6), DescriptionAttribute("單位 mm")]
+        [DisplayName("02a PAD邊隙 Y 上公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float PadEdgeY_DeltaUpper
+        {
+            get => _spec.PadEdgeGapY.DeltaUpper;
+            set => _spec.PadEdgeGapY.DeltaUpper = value;
+        }
+
+        [CategoryAttribute(_Cat6), DescriptionAttribute("單位 mm")]
+        [DisplayName("02b PAD邊隙 Y 下公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float PadEdgeY_DeltaLower
+        {
+            get => _spec.PadEdgeGapY.DeltaLower;
+            set => _spec.PadEdgeGapY.DeltaLower = value;
+        }
+
+
+        [Browsable(false)]
+        public float PadEdgeGapX_Max
+        {
+            get => _spec.PadEdgeGapX.Max;
+        }
+        [Browsable(false)]
+        public float PadEdgeGapX_Min
+        {
+            get => _spec.PadEdgeGapX.Min;
+        }
+        [Browsable(false)]
+        public float PadEdgeGapY_Max
+        {
+            get => _spec.PadEdgeGapY.Max;
+        }
+        [Browsable(false)]
+        public float PadEdgeGapY_Min
+        {
+            get => _spec.PadEdgeGapY.Min;
         }
         #endregion
 

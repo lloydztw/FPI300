@@ -83,7 +83,7 @@ namespace LaserAlignDX.Mvc.Gui
             sb.Append("格點: [").Append(row).Append(",").Append(col).Append("]");
 
             #region 尺寸量測詳細點位
-            var meansurePts = cell?.ChipData?.DimMeasurePoints;
+            var meansurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
             if (meansurePts != null && meansurePts.Length >= 4 &&
                 meansurePts[0] != null && meansurePts[1] != null &&
                 meansurePts[2] != null && meansurePts[3] != null)

@@ -44,8 +44,8 @@ namespace LaserAlignDX.Mvc.Model.Recipe
 
         // 啟用尺寸量測
         public bool optChipMeasurement = false;
-        // 啟用 邊緣寬度 比對 (限有格點Pad的晶粒)
-        public bool optChipEdgesCompare = false;
+        // 啟用 PAD邊隙 量測 (限有格點Pad的晶粒)
+        public bool optPadEdgeGapsMeasurement = false;
         // 啟用 瑕疵 與 QRCode 檢測
         public bool optChipDefectsInspect = false;
         // 尺寸與瑕疵檢測進階選項量: 使用整盤 NG 百分比 
@@ -59,9 +59,9 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         public readonly DtoSpecValue StandardWidth = new DtoSpecValue(9.0f, 0.050f, 0.050f);
         public readonly DtoSpecValue StandardHeight = new DtoSpecValue(9.9f, 0.050f, 0.050f);
 
-        // 尺寸偏移 spec (mm)
-        public float PadEdgeDiffMaxX = 0.050f;
-        public float PadEdgeDiffMaxY = 0.050f;
+        // Pad邊隙 spec (mm)
+        public readonly DtoSpecValue PadEdgeGapX = new DtoSpecValue(0.375f, 0.127f, 0.127f);
+        public readonly DtoSpecValue PadEdgeGapY = new DtoSpecValue(0.300f, 0.127f, 0.127f);
 
 
         public override void Load(string iniFileName)
@@ -71,7 +71,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             string sectName = "Basic";
 
             Read(iniFileName, sectName, "optChipMeasurement", false, out optChipMeasurement);
-            Read(iniFileName, sectName, "optChipEdgesCompare", false, out optChipEdgesCompare);
+            Read(iniFileName, sectName, "optPadEdgeGapsMeasurement", false, out optPadEdgeGapsMeasurement);
             Read(iniFileName, sectName, "optChipDefectsInspect", false, out optChipDefectsInspect);
             Read(iniFileName, sectName, "optUseTotalNgPercentage", false, out optUseTotalNgPercentage);
             Read(iniFileName, sectName, "optShowIndividualNG", true, out optShowIndividualNG);
@@ -80,8 +80,8 @@ namespace LaserAlignDX.Mvc.Model.Recipe
 
             StandardWidth.Load(iniFileName, sectName, "StandardWidth");
             StandardHeight.Load(iniFileName, sectName, "StandardHeight");
-            Read(iniFileName, sectName, "PadEdgeDiffMaxX", 0.050f, out PadEdgeDiffMaxX);
-            Read(iniFileName, sectName, "PadEdgeDiffMaxY", 0.050f, out PadEdgeDiffMaxY);
+            PadEdgeGapX.Load(iniFileName, sectName, "PadEdgeGapX");
+            PadEdgeGapY.Load(iniFileName, sectName, "PadEdgeGapY");
         }
         public override void Save(string iniFileName)
         {
@@ -90,7 +90,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             string sectName = "Basic";
 
             Write(iniFileName, sectName, "optChipMeasurement", optChipMeasurement);
-            Write(iniFileName, sectName, "optChipEdgesCompare", optChipEdgesCompare);
+            Write(iniFileName, sectName, "optPadEdgeGapsMeasurement", optPadEdgeGapsMeasurement);
             Write(iniFileName, sectName, "optChipDefectsInspect", optChipDefectsInspect);
             Write(iniFileName, sectName, "optUseTotalNgPercentage", optUseTotalNgPercentage);
             Write(iniFileName, sectName, "optShowIndividualNG", optShowIndividualNG);
@@ -99,8 +99,8 @@ namespace LaserAlignDX.Mvc.Model.Recipe
 
             StandardWidth.Save(iniFileName, sectName, "StandardWidth");
             StandardHeight.Save(iniFileName, sectName, "StandardHeight");
-            Write(iniFileName, sectName, "PadEdgeDiffMaxX", PadEdgeDiffMaxX);
-            Write(iniFileName, sectName, "PadEdgeDiffMaxY", PadEdgeDiffMaxY);
+            PadEdgeGapX.Save(iniFileName, sectName, "PadEdgeGapX");
+            PadEdgeGapY.Save(iniFileName, sectName, "PadEdgeGapY");
         }
 
         void normalizeFileName(ref string iniFileName)

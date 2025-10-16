@@ -120,13 +120,20 @@ namespace LaserAlignDX.Model
                 sb.Append("宽度[").AppendValues(cell.RunWidth).Append("],");
                 sb.Append("高度[").AppendValues(cell.RunHeight).Append("],");
             }
-            if (cell.xInspect.optChipEdgesDiffCompare)
+            if (cell.xInspect.optPadEdgeGapsMeasurement)
             {
-                //str += $"X方向偏移[{cell.RunXOffset.ToString(_digitFormat)}]" + ",";
-                //str += $"Y方向偏移[{cell.RunYOffset.ToString(_digitFormat)}]" + ",";
-                sb.Append("X方向偏移[").AppendValues(cell.PadEdgeDiffX).Append("],");
-                sb.Append("Y方向偏移[").AppendValues(cell.PadEdgeDiffY).Append("],");
+                var gaps = cell?.ChipData.PadEdgeGaps;
+                if (gaps != null)
+                {
+                    var gapL = gaps.GetGapSize(BasicSpace.EdgeBorder.Left);
+                    var gapR = gaps.GetGapSize(BasicSpace.EdgeBorder.Right);
+                }
+                ////str += $"X方向偏移[{cell.RunXOffset.ToString(_digitFormat)}]" + ",";
+                ////str += $"Y方向偏移[{cell.RunYOffset.ToString(_digitFormat)}]" + ",";
+                //sb.Append("X方向偏移[").AppendValues(cell.PadEdgeDiffX).Append("],");
+                //sb.Append("Y方向偏移[").AppendValues(cell.PadEdgeDiffY).Append("],");
             }
+
             //str += $"{cell.SetBarcodeStr}" + ",";
             //if (cell.RunCodeInfo != null)
             //    str += $"{cell.RunCodeInfo.Content}" + ";";

@@ -190,5 +190,23 @@ namespace JetEazy.Match
             }
             _boundary.Offset((int)Math.Round(dx), (int)Math.Round(dy));
         }
+
+        /// <summary>
+        /// 順序: 左上, 右上, 右下, 左下
+        /// (2025-10-15 新增)
+        /// </summary>
+        public EzBloc[] GetCornerBlocs()
+        {
+            int r = this.Rows - 1;
+            int c = this.Cols - 1;
+            var corners = new[]
+            {
+                this.Get(0,0),     //左上
+                this.Get(0,c),     //右上
+                this.Get(r,c),     //右下
+                this.Get(r,0),     //左下
+            };
+            return corners;
+        }
     }
 }

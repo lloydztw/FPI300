@@ -23,6 +23,7 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 using CvSize = OpenCvSharp.Size;
 using EzAoiBase = EzAoiEmptyTrayInspector.Model.Aoi.EzAoiBase;
 
@@ -201,6 +202,11 @@ namespace LeTian.AoiLib
                     rigitBody = null;
             }
 
+            if (rigitBody != null)
+            {
+                findGridCornersBox2D(imgScene, rigitBody.Grid);
+            }
+
             return rigitBody;
         }
 
@@ -340,6 +346,78 @@ namespace LeTian.AoiLib
             }
 
             return bestBody;
+        }
+        void findGridCornersBox2D(Mat imgScene, EzBlocsGrid sceneGrid)
+        {
+            if (sceneGrid == null)
+                return;
+
+            var cornerPads = sceneGrid.GetCornerBlocs();
+            var bound = new Rect(0, 0, imgScene.Width, imgScene.Height);
+            var thres = PadThreshold;
+
+            for (int idx = 0, len = cornerPads.Length; idx < len; idx++)
+            {
+                var padBloc = cornerPads[idx];
+                if (padBloc == null)
+                    continue;
+
+                var roi = JetEazy.Qcvt.CV(cornerPads[idx].Rect);
+                roi.Inflate(2, 2);
+                JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+
+                QvBox2D box2D = null;
+                using (var binary = new Mat())
+                {
+                    if (thres > 0)
+                        Cv2.Threshold(imgScene[roi], binary, thres, 255, ThresholdTypes.Binary);
+                    else
+                        Cv2.Threshold(imgScene[roi], binary, 0, 255, ThresholdTypes.Otsu);
+
+                    Cv2.Erode(binary, binary, null, iterations: 1);
+                    Cv2.Dilate(binary, binary, null, iterations: 1);
+
+                    // 1. 提取輪廓
+                    Cv2.FindContours(binary, out var contours, out var hierarchy, RetrievalModes.External, ContourApproximationModes.ApproxSimple);
+                    if (contours.Length == 0)
+                        continue;
+
+                    // 2. 遍歷每一個輪廓並計算其 MinAreaRect
+                    double maxArea = 0;
+                    for (int k = 0; k < contours.Length; k++)
+                    {
+                        // MinAreaRect 要求輪廓的點數至少為 5。
+                        // 如果點數太少，MinAreaRect 可能無法準確計算或拋出錯誤。
+                        try
+                        {
+                            var contour = contours[k];
+                            if (contour.Length >= 4)
+                            {
+                                RotatedRect rotatedRect = Cv2.MinAreaRect(contour);
+                                var size = rotatedRect.Size;
+                                var area = size.Width * size.Height;
+                                if (area > maxArea)
+                                {
+                                    maxArea = area;
+                                    box2D = new QvBox2D();
+                                    rotatedRect.Center.X += roi.X;
+                                    rotatedRect.Center.Y += roi.Y;
+                                    box2D.SetBox(rotatedRect);
+                                }
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+
+                }
+                
+                // 直接存回到 EzBloc.ExtraBox2D
+                padBloc.ExtraBox2D = box2D;
+            }
+
         }
         #endregion
 

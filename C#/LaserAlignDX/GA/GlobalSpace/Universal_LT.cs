@@ -25,16 +25,16 @@ namespace Traveller106
 {
     public class Universal : JetEazy.Universal
     {
-        public static readonly bool N_THREADS_ENABLED = true;
+        public static readonly bool N_THREADS_ENABLED = false;
         public static readonly int N_THREADS = 16;
 
-        public static bool IsNoUseCCD = false;
+        public static bool IsNoUseCCD = true;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/10/16";
+        public const string VersionDate = "2025/10/15";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
@@ -52,25 +52,22 @@ namespace Traveller106
         /// </summary>
         public static bool IsOpenFlyForm = false;
 
-        public static string APP_ROOT_PATH
+        public static string APP_ROOT_PATH 
         {
             get
             {
-                switch (OPTION)
+                // 直接指定成 最後佈署的資料夾
+                // 這樣 原代碼 C# 專案, 
+                //      才能放在任意資料夾
+                //      不需要 依附於 最後佈署的資料夾 
+                if (IsNoUseCCD)
                 {
-                    default:
-                        // 直接指定成 最後佈署的資料夾
-                        // 這樣 原代碼 C# 專案, 
-                        //      才能放在任意資料夾
-                        //      不需要 依附於 最後佈署的資料夾 
-                        if (IsNoUseCCD)
-                        {
-                            //return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
-                            //return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
-                            return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
-                        }
-                        return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
+                    //return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
+                    //return "D:\\AUTOMATION\\Eazy FPI30\\_M01_";
+                    //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
+                    return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
                 }
+                return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
             }
         }
 
