@@ -45,6 +45,8 @@ namespace LaserAlignDX.FormSpace
         bool bSelectRegion = false;
         bool bOpenFly = false;
         bool bFlyComplete = false;
+        bool _isPropertyModified = false;
+
         IxLineScanCam IxFlyAreaCam
         {
             get { return Universal.IxFlyAreaCam; }
@@ -61,13 +63,21 @@ namespace LaserAlignDX.FormSpace
 
         Timer xTimer = null;
 
-        Button btnGetLocalImage;
-        Button btnOK;
-        Button btnCancel;
-        Button btnSelectRegion;
-        Button btnOpenFly;
-        Button btnLightTrigger;
-        Button btnSpecialCal;
+        //btnGetLocalImage = button7;
+        //btnOK = button1;
+        //btnCancel = button2;
+        //btnSelectRegion = button3;
+        //btnOpenFly = button4;
+        //btnLightTrigger = button5;
+        //btnSpecialCal = button6;
+
+        Button btnGetLocalImage => button7;
+        Button btnOK => button1;
+        Button btnCancel => button2;
+        Button btnSelectRegion => button3;
+        Button btnOpenFly => button4;
+        Button btnLightTrigger => button5;
+        Button btnSpecialCal => button6;
 
         FlyOffsetUI flyOffsetUI => flyOffsetUI1;
         FlyOffsetUI flyOffset2UI => flyOffsetUI2;
@@ -94,7 +104,6 @@ namespace LaserAlignDX.FormSpace
 
         public frmFlySetup()
         {
-
             Traveller106.Universal.IsOpenFlyForm = true;
             InitializeComponent();
 
@@ -121,13 +130,13 @@ namespace LaserAlignDX.FormSpace
             init_Display();
             update_Display();
 
-            btnGetLocalImage = button7;
-            btnOK = button1;
-            btnCancel = button2;
-            btnSelectRegion = button3;
-            btnOpenFly = button4;
-            btnLightTrigger = button5;
-            btnSpecialCal = button6;
+            //btnGetLocalImage = button7;
+            //btnOK = button1;
+            //btnCancel = button2;
+            //btnSelectRegion = button3;
+            //btnOpenFly = button4;
+            //btnLightTrigger = button5;
+            //btnSpecialCal = button6;
 
             btnGetLocalImage.Click += BtnGetLocalImage_Click;
             btnOK.Click += BtnOK_Click;
@@ -140,7 +149,8 @@ namespace LaserAlignDX.FormSpace
             DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
 
             IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
-            propertyGrid1.SelectedObject = FlyParaClass.Instance;
+            propertyGrid1.SelectedObject = xRecipe.FlyAoiParams;
+            propertyGrid1.PropertyValueChanged += (s, e2) => _isPropertyModified = true;
 
             this.Text = "飞拍参数设定窗口";
             this.FormBorderStyle = FormBorderStyle.None;
@@ -346,13 +356,16 @@ namespace LaserAlignDX.FormSpace
         private void BtnOK_Click(object sender, EventArgs e)
         {
             //if (m_FlyRunning)
-            //{
             //    JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
             if (!makeSureNotLiveMode())
                 return;
 
             flyOffsetUI.GetPoints();
             flyOffset2UI.GetPoints();
+
+            if (_isPropertyModified)
+                xRecipe.FlyAoiParams.Save();
+
             this.DialogResult = DialogResult.OK;
         }
 
