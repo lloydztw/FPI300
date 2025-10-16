@@ -64,8 +64,8 @@ namespace Traveller106
                 {
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M01_";
-                    //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
-                    return "D:\\AUTOMATION\\Eazy FPI30\\_M03_";
+                    return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
+                    //return "D:\\AUTOMATION\\Eazy FPI30\\_M03_";
                 }
                 return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
             }

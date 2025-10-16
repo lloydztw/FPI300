@@ -13,7 +13,7 @@
  */
 #endregion
 
-using JetEazy.BasicSpace;
+using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
@@ -22,7 +22,8 @@ using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
-using OpenCvSharp.Flann;
+using OpenCvSharp;
+using OpenCvSharp.Extensions;
 using System;
 using System.Drawing;
 using System.IO;
@@ -30,11 +31,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using Traveller106;
+using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace.MachineSpace;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
 using PlcFlyResultCode = LaserAlignDX.PlcResultCode;
-
 
 
 namespace LaserAlignDX.Mvc.Ctrl.V3
@@ -70,6 +70,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         FlyParaClass xFlyPara
         {
             get { return FlyParaClass.Instance; }
+        }
+        bool IsBusy()
+        {
+            var aoiModel = _sysModel.AoiModel;
+            return LineScanSingleProcess.Instance.IsOn || LineScanProcess.Instance.IsOn || (aoiModel != null && aoiModel.Running);
         }
         #endregion
 
@@ -138,18 +143,22 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             m_onTheFlyFrameCount = 0;
 
-            if (Universal.IsNoUseCCD)
-            {
-                string _flyfilenamepath = JzToolsClass.OpenFilePicker("JPG Files (*.jpg)|*.JPG|" + "All files (*.*)|*.*", "");
-                if (!string.IsNullOrEmpty(_flyfilenamepath))
-                {
-                    using (var bmpFly = new Bitmap(_flyfilenamepath))
-                    {
-                        var flyID = new FlyID(1, 0);
-                        flyRunAoiOne(flyID, bmpFly);
-                    }
-                }
-            }
+            // 以下改由 Ctrl + 鼠標右擊 進行 飛拍離線測試
+
+            #region OLD_CODE
+            //if (Universal.IsNoUseCCD)
+            //{
+            //    string _flyfilenamepath = JzToolsClass.OpenFilePicker("JPG Files (*.jpg)|*.JPG|" + "All files (*.*)|*.*", "");
+            //    if (!string.IsNullOrEmpty(_flyfilenamepath))
+            //    {
+            //        using (var bmpFly = new Bitmap(_flyfilenamepath))
+            //        {
+            //            var flyID = new FlyID(1, 0);
+            //            flyRunAoiOne(flyID, bmpFly);
+            //        }
+            //    }
+            //}
+            #endregion
         }
         void updateFlyCameraSerialNumber(int serialNumber)
         {
@@ -366,6 +375,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             _wndOwner = dispUIs[0].Parent;
             _DispUIs = Array.ConvertAll(dispUIs, ui => buildFlyCamViewer(ui));
+            connectPopupMenuEvents(_DispUIs);
         }
         IvFlyCamViewUI buildFlyCamViewer(Control panel)
         {
@@ -397,6 +407,55 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 return null;
             }
         }
+        void connectPopupMenuEvents(IvFlyCamViewUI[] dispUIs)
+        {
+            if (dispUIs == null)
+                return;
+
+            int idx = 0;
+            foreach (var ui in dispUIs)
+            {
+                if (ui is JezFlyViewPanel flyPanel)
+                {
+                    flyPanel.menuTestFlyCamAoi.Click += MenuTestFlyCamAoi_Click;
+                    flyPanel.menuTestFlyCamAoi.Tag = idx;
+                }
+                idx++;
+            }
+        }
+
+        #region EVENT_HANDLERS
+        /// <summary>
+        /// 離線測試飛拍AOI
+        /// </summary>
+        private void MenuTestFlyCamAoi_Click(object sender, EventArgs e)
+        {
+            var plcIO = MACHINE?.PLCIO;
+            if (plcIO != null && plcIO.bSoftwareReady)
+            {
+                VsMessageBox.Warning("【軟件準備】 已經啟動連線, 無法進行 飛拍 離線測試!");
+                return;
+            }
+
+            if (sender is ToolStripMenuItem menuItem)
+            {
+                if (menuItem.Tag is int idx && idx >= 0 && idx < _DispUIs.Length)
+                {
+                    string fileName = GaUtil.BrowseImageFile();
+                    if (!string.IsNullOrEmpty(fileName))
+                    {
+                        var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+                        using (Bitmap bmpFly = GaImageUtil.LoadBigImage(fileName))
+                        {
+                            var flyID = new FlyID(idx + 1, idx);
+                            flyRunAoiOne(flyID, bmpFly);
+                        }
+                        GaUtil.SetCursor(_wndOwner, oldCursor);
+                    }
+                }
+            }
+        }
+        #endregion
 
         void RunAoiAll(int flyStart, byte[][] framesBufBytes, int frameWidth, int frameHeight)
         {

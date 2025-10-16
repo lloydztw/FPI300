@@ -29,16 +29,30 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.menuLoadImage = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuTestChipInspect = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuTestQRCode = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuTestEmptyTrayInspect = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuTestFlyCamAoi = new System.Windows.Forms.ToolStripMenuItem();
             this.timBlinker = new System.Windows.Forms.Timer(this.components);
+            this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuTestFlyCamAoi});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(211, 56);
+            // 
+            // menuTestFlyCamAoi
+            // 
+            this.menuTestFlyCamAoi.Name = "menuTestFlyCamAoi";
+            this.menuTestFlyCamAoi.Size = new System.Drawing.Size(210, 24);
+            this.menuTestFlyCamAoi.Text = "離線測試 飛拍";
+            // 
+            // timBlinker
+            // 
+            this.timBlinker.Interval = 1000;
             // 
             // jezTransImageViewPanel1
             // 
@@ -48,51 +62,6 @@
             this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
             this.jezTransImageViewPanel1.Size = new System.Drawing.Size(310, 294);
             this.jezTransImageViewPanel1.TabIndex = 0;
-            // 
-            // contextMenuStrip1
-            // 
-            this.contextMenuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
-            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.menuLoadImage,
-            this.toolStripSeparator1,
-            this.menuTestChipInspect,
-            this.menuTestQRCode,
-            this.menuTestEmptyTrayInspect});
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(203, 106);
-            // 
-            // menuLoadImage
-            // 
-            this.menuLoadImage.Name = "menuLoadImage";
-            this.menuLoadImage.Size = new System.Drawing.Size(202, 24);
-            this.menuLoadImage.Text = "加載圖檔";
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(199, 6);
-            // 
-            // menuTestChipInspect
-            // 
-            this.menuTestChipInspect.Name = "menuTestChipInspect";
-            this.menuTestChipInspect.Size = new System.Drawing.Size(202, 24);
-            this.menuTestChipInspect.Text = "離線測試 晶粒檢測";
-            // 
-            // menuTestQRCode
-            // 
-            this.menuTestQRCode.Name = "menuTestQRCode";
-            this.menuTestQRCode.Size = new System.Drawing.Size(202, 24);
-            this.menuTestQRCode.Text = "離線測試 QRCode";
-            // 
-            // menuTestEmptyTrayInspect
-            // 
-            this.menuTestEmptyTrayInspect.Name = "menuTestEmptyTrayInspect";
-            this.menuTestEmptyTrayInspect.Size = new System.Drawing.Size(202, 24);
-            this.menuTestEmptyTrayInspect.Text = "離線測試 空盤檢測";
-            // 
-            // timBlinker
-            // 
-            this.timBlinker.Interval = 1000;
             // 
             // JezFlyViewPanel
             // 
@@ -110,11 +79,7 @@
         #endregion
 
         private global::LaserAlignDX.Mvc.Gui.JezTransImageViewPanel jezTransImageViewPanel1;
-        public System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        public System.Windows.Forms.ToolStripMenuItem menuLoadImage;
-        public System.Windows.Forms.ToolStripMenuItem menuTestChipInspect;
-        public System.Windows.Forms.ToolStripMenuItem menuTestQRCode;
-        public System.Windows.Forms.ToolStripMenuItem menuTestEmptyTrayInspect;
+        public System.Windows.Forms.ToolStripMenuItem menuTestFlyCamAoi;
         public System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.Timer timBlinker;
     }

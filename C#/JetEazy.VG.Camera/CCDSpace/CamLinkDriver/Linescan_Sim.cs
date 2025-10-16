@@ -83,7 +83,35 @@ namespace JetEazy.CCDSpace.CamLinkDriver
         }
         #endregion
 
-        #region PRIVATE VAR
+        public void LoadSimImageFile(string imgFile)
+        {
+            //使用 OpenCvSharp 載入圖檔, 以保證是 8bbp
+            //注意: fileName 可能不支援簡體有中文 !
+
+            if (!string.IsNullOrEmpty(imgFile) && System.IO.File.Exists(imgFile))
+            {
+                bool isFly = _camCfg.IsFly;
+
+                if (isFly)
+                {
+                    _camCfg.IsFly = false;
+                    // Sleep 足夠時間, 讓 Thread 完全停止 !!!
+                    System.Threading.Thread.Sleep(1000);
+                }
+                
+                var newImg = new Mat(imgFile, ImreadModes.Grayscale);
+                if (newImg != null)
+                {
+                    var old = _simImg;
+                    _simImg = newImg;
+                    old?.Dispose();
+                }
+
+                _camCfg.IsFly = isFly;
+            }
+        }
+
+        #region PRIVATE MEMBERS
         //private string _configFilename = "dvp2Config.ini";
         //private uint m_handle = 0;
         //private IntPtr m_ptr_wnd = new IntPtr();
@@ -110,6 +138,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
         {
             Close();
         }
+
         public void Init(bool debug, string inipara)
         {
             //m_IsDebug = true;
@@ -970,7 +999,6 @@ namespace JetEazy.CCDSpace.CamLinkDriver
 
             System.Diagnostics.Debug.WriteLine("Thread[{0}] terminated !", Thread.CurrentThread.Name);
         }
-
         void getRotatedImage(Mat srcImg, Mat dstImg, double angle)
         {
             // 1. 計算影像中心點 (Center of Rotation)

@@ -1,4 +1,4 @@
-; -- Inno Step Script File for EzCounter --
+Ôªø; -- Inno Step Script File for EzCounter --
 ;
 ; LETIAN: creation 20120204
 ;
@@ -27,7 +27,7 @@ Source: "..\bin\Debug\NLog.config";                                             
 Source: "..\C#\FPI30_Aoi\bin\Debug\EzAoiEmptyTrayInspector.App.exe";              DestDir: "{app}\_BIN_";   Flags: ignoreversion
 
 [Icons]
-Name: "{group}\Travller106 •Dµ{¶°";       Filename: "{app}\_BIN_\FPI30AOIX3.exe";                         WorkingDir: "{app}\_BIN_"
-Name: "{group}\Travller106 ∞—º∆•¥•]µ{¶°"; Filename: "{app}\_BIN_\Traveller.Data.Packer.exe";              WorkingDir: "{app}\_BIN_"
+Name: "{group}\Travller106 ‰∏ªÁ®ãÂºè";       Filename: "{app}\_BIN_\FPI30AOIX3.exe";                         WorkingDir: "{app}\_BIN_"
+Name: "{group}\Travller106 ÂèÉÊï∏ÊâìÂåÖÁ®ãÂºè"; Filename: "{app}\_BIN_\Traveller.Data.Packer.exe";              WorkingDir: "{app}\_BIN_"
 
 [Code]

@@ -24,12 +24,14 @@ namespace LaserAlignDX.Mvc.Gui
     {
         #region PRIVATE_DATA
         CviFlyAoiResultBox _cviResultBox = new CviFlyAoiResultBox();
+        bool _isCtrlPressed = false;
         #endregion
 
         public JezFlyViewPanel()
         {
             InitializeComponent();
             initGui();
+
             if (!DesignMode)
             {
                 _cviResultBox.Visible = false;
@@ -43,7 +45,31 @@ namespace LaserAlignDX.Mvc.Gui
             jezTransImageViewPanel1.picIcon.Visible = false;
             jezTransImageViewPanel1.TitleBar.BackColor = MatViewer.BackColor;
             jezTransImageViewPanel1.lblTitle.Padding = new System.Windows.Forms.Padding(2, 0, 0, 0);
+
+            //if (Universal.IsNoUseCCD)
+            {
+                MatViewer.KeyDown += MatViewer_KeyDown;
+                MatViewer.MouseDown += MatViewer_MouseDown;
+            }
         }
+
+        #region EVENT_HANDLERS
+        private void MatViewer_KeyDown(object sender, KeyEventArgs e)
+        {
+            _isCtrlPressed = e.Control;
+            if (!_isCtrlPressed)
+                contextMenuStrip1.Hide();
+        }
+        private void MatViewer_MouseDown(object sender, MouseEventArgs e)
+        {
+            //throw new System.NotImplementedException();
+            if (e.Button == MouseButtons.Right && _isCtrlPressed)
+            {
+                contextMenuStrip1.Show(this, e.Location);
+                _isCtrlPressed = false;
+            }
+        }
+        #endregion
 
         public IvImageViewer ImgViewer
         {
@@ -54,7 +80,6 @@ namespace LaserAlignDX.Mvc.Gui
             get => jezTransImageViewPanel1.MatViewer;
         }
         Control IvFlyCamViewUI.Window => this;
-
         public void Update(FlyAoiResult flyAoiResult)
         {
             _cviResultBox.Update(flyAoiResult);
