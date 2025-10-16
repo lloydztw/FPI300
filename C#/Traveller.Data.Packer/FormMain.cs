@@ -8,11 +8,11 @@ namespace Traveller.Data.Packer
     {
         class Global
         {
-            public const string S_FILE_7Z_EXE = @"C:\Program Files\7-Zip\7z.exe";
-            public const string S_PATH_APP = "D:\\Automation\\Eazy FPI30\\";
-            public static string S_PATH_RECIPE_ROOT => System.IO.Path.Combine(S_PATH_APP, "_V03_", "LASER-MAIN_FPIX3");
-            //public static string S_PATH_RECIPE_ROOT => System.IO.Path.Combine(S_PATH_APP, "_M05_", "LASER-MAIN_FPIX3");
-
+            public const string FILE_7Z_EXE = @"C:\Program Files\7-Zip\7z.exe";
+            public const string PATH_APP = "D:\\Automation\\Eazy FPI30\\";
+            public const string PATH_LOG_ROOT = "D:\\log\\";
+            public static string PATH_RECIPE_ROOT = System.IO.Path.Combine(PATH_APP, "_V03_");
+            public static string PATH_RECIPE_FPIX3 => System.IO.Path.Combine(PATH_RECIPE_ROOT, "LASER-MAIN_FPIX3");
             public static string GetDairyPath(string path)
             {
                 if (!System.IO.Directory.Exists(path))
@@ -46,6 +46,13 @@ namespace Traveller.Data.Packer
             _updateData(false);
             _check7z();
         }
+
+        private void btnBrowse_Click(object sender, EventArgs e)
+        {
+            bool ok = JetEazy.IO.QxPathUtility.BrowsePath(txtRootPath);
+            if (ok)
+                Global.PATH_RECIPE_ROOT = txtRootPath.Text;
+        }
         private void btnPack_Click(object sender, EventArgs e)
         {
             btnPack.Enabled = false;
@@ -67,6 +74,7 @@ namespace Traveller.Data.Packer
             }
             else
             {
+                txtRootPath.Text = Global.PATH_RECIPE_ROOT;
                 tmPickerBegin.Value = m_tmStartTime;
                 tmPickerEnd.Value = m_tmEndTime;
                 chkCopyLogs.Checked = m_optCopyLogs;
@@ -100,23 +108,31 @@ namespace Traveller.Data.Packer
                 _clearPath(dstPath);
                 _checkPath(dstPath);
 
-                string dbFile = System.IO.Path.Combine(Global.S_PATH_RECIPE_ROOT, "DB", "ESSDB.jdb");
+                string dbFile = System.IO.Path.Combine(Global.PATH_RECIPE_FPIX3, "DB", "ESSDB.jdb");
                 JetEazy.Utils.WinIni.Read(dbFile, "ESSDB", "LastRecipeIndex", 5, out int rcpIndex);
                 string rcpFolder = $"{rcpIndex:00000}";
 
-                _doCopyFile(System.IO.Path.Combine(Global.S_PATH_RECIPE_ROOT, "CONFIG.ini"), dstPath);
-                _doCopyFolder(System.IO.Path.Combine(Global.S_PATH_RECIPE_ROOT, "DB"), dstPath);
-                _doCopyFolder(System.IO.Path.Combine(Global.S_PATH_RECIPE_ROOT, "PIC", rcpFolder), dstPath);
+                _doCopyFile(System.IO.Path.Combine(Global.PATH_RECIPE_FPIX3, "CONFIG.ini"), dstPath);
+                _doCopyFolder(System.IO.Path.Combine(Global.PATH_RECIPE_FPIX3, "DB"), dstPath);
+                _doCopyFolder(System.IO.Path.Combine(Global.PATH_RECIPE_FPIX3, "PIC", rcpFolder), dstPath);
 
-                string workPath = System.IO.Path.Combine(Global.S_PATH_RECIPE_ROOT, "WORK");
+                string workPath = System.IO.Path.Combine(Global.PATH_RECIPE_FPIX3, "WORK");
                 _doCopyFile(System.IO.Path.Combine(workPath, "CAMERA.ini"), dstPath);
                 _doCopyFile(System.IO.Path.Combine(workPath, "MAIN_FPIX3", "IO.INI"), dstPath);
                 _doCopyFile(System.IO.Path.Combine(workPath, "MAIN_FPIX3", "LightCONTROL0.INI"), dstPath);
                 _doCopyFile(System.IO.Path.Combine(workPath, "MAIN_FPIX3", "LightCONTROL1.INI"), dstPath);
                 _doCopyFile(System.IO.Path.Combine(workPath, "MAIN_FPIX3", "PLCCONTROL0.INI"), dstPath);
                 _doCopyFolder(System.IO.Path.Combine(workPath, "Calibration"), dstPath);
-                _doCopyFolder(System.IO.Path.Combine(Global.S_PATH_RECIPE_ROOT, "EmptyTrayAoi", "Ini"), dstPath);
-                _doCopyFolder(System.IO.Path.Combine(Global.S_PATH_RECIPE_ROOT, "EmptyTrayAoi", "Recipes"), dstPath);
+                _doCopyFolder(System.IO.Path.Combine(Global.PATH_RECIPE_FPIX3, "EmptyTrayAoi", "Ini"), dstPath);
+                _doCopyFolder(System.IO.Path.Combine(Global.PATH_RECIPE_FPIX3, "EmptyTrayAoi", "Recipes"), dstPath);
+
+                if (m_optCopyLogs)
+                {
+                    var beginTag = new DateTime(m_tmStartTime.Year, m_tmStartTime.Month, m_tmStartTime.Day).ToString("yyyyMMdd");
+                    var endTag = new DateTime(m_tmEndTime.Year, m_tmEndTime.Month, m_tmEndTime.Day).ToString("yyyyMMdd");
+                    _doCopyFolderRecursiveTm(System.IO.Path.Combine(Global.PATH_LOG_ROOT, "MAIN_FPIX3", "Logs"), dstPath, beginTag, endTag);
+                    _doCopyFolderRecursiveTm(System.IO.Path.Combine(Global.PATH_LOG_ROOT, "NLogs"), dstPath, beginTag, endTag);
+                }
 
                 _doZip(dstPath);
                 BeginInvoke(funcEnd, new object[] { "" });
@@ -138,7 +154,7 @@ namespace Traveller.Data.Packer
             {
                 _trace("copy: " + System.IO.Path.GetFileName(srcFile));
                 var srcPath = System.IO.Path.GetDirectoryName(srcFile);
-                var dstPath = System.IO.Path.Combine(dstPathRoot, srcPath.Replace(Global.S_PATH_APP, ""));
+                var dstPath = System.IO.Path.Combine(dstPathRoot, srcPath.Replace(Global.PATH_APP, ""));
 
                 _checkPath(dstPath);
                 var dstFile = System.IO.Path.Combine(dstPath, System.IO.Path.GetFileName(srcFile));
@@ -154,7 +170,7 @@ namespace Traveller.Data.Packer
         {
             try
             {
-                var dstPath = System.IO.Path.Combine(dstPathRoot, srcPath.Replace(Global.S_PATH_APP, ""));
+                var dstPath = System.IO.Path.Combine(dstPathRoot, srcPath.Replace(Global.PATH_APP, ""));
                 _checkPath(dstPath);
 
                 var files = System.IO.Directory.GetFiles(srcPath, "*.*");
@@ -170,13 +186,55 @@ namespace Traveller.Data.Packer
                 throw ex;
             }
         }
+        private void _doCopyFolderRecursiveTm(string srcPath, string dstPathRoot, string beginTag, string endTag)
+        {
+            try
+            {
+                var root = System.IO.Path.GetPathRoot(srcPath);
+                var dstPath = System.IO.Path.Combine(dstPathRoot, srcPath.Replace(root, ""));
+                _checkPath(dstPath);
+
+                if (true)
+                {
+                    var files = System.IO.Directory.GetFiles(srcPath, "*.*");
+                    foreach (var srcFile in files)
+                    {
+                        string fname = System.IO.Path.GetFileName(srcFile);
+                        string dateTag = fname.Split('_')[0].Trim();
+                        if (string.Compare(dateTag, beginTag, true) < 0 || string.Compare(dateTag, endTag) > 0)
+                            continue;
+                        _trace("copy: " + System.IO.Path.GetFileName(srcFile));
+                        var dstFile = System.IO.Path.Combine(dstPath, System.IO.Path.GetFileName(srcFile));
+                        System.IO.File.Copy(srcFile, dstFile, true);
+                    }
+                }
+
+                var subSrcPaths = System.IO.Directory.GetDirectories(srcPath);
+                foreach (var subPath in subSrcPaths)
+                {
+                    string folder = System.IO.Path.GetFileName(subPath);
+                    if (int.TryParse(folder, out _))
+                    {
+                        if (string.Compare(folder, beginTag, true) < 0 || string.Compare(folder, endTag) > 0)
+                            continue;
+                    }
+                    _doCopyFolderRecursiveTm(subPath, dstPathRoot, beginTag, endTag);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+#if(OPT_RESERVED)
         private void _doCopyFolderTm(string srcPath, string dstPathRoot, bool optReplacingAppPath = true, string pattern = null)
         {
             if (!System.IO.Directory.Exists(srcPath))
                 return;
 
             var dstPath = optReplacingAppPath ?
-                System.IO.Path.Combine(dstPathRoot, srcPath.Replace(Global.S_PATH_APP, "")) :
+                System.IO.Path.Combine(dstPathRoot, srcPath.Replace(Global.PATH_APP, "")) :
                 dstPathRoot;
 
             if (pattern == null)
@@ -300,11 +358,13 @@ namespace Traveller.Data.Packer
                 throw ex;
             }
         }
+#endif
+
         private void _doZip(string srcPath)
         {
             try
             {
-                if (!System.IO.File.Exists(Global.S_FILE_7Z_EXE))
+                if (!System.IO.File.Exists(Global.FILE_7Z_EXE))
                     return;
 
                 string zipFileName = srcPath + ".zip";
@@ -315,7 +375,7 @@ namespace Traveller.Data.Packer
                 if (System.IO.File.Exists(zipFileName))
                     System.IO.File.Delete(zipFileName);
 
-                string cmdStr = string.Format("\"{0}\"", Global.S_FILE_7Z_EXE);
+                string cmdStr = string.Format("\"{0}\"", Global.FILE_7Z_EXE);
                 // 注意: 舊版 7z.exe 不支援 -sdel 參數.
                 // string argStr = string.Format("a {0} -r -sdel {1}", zipFileName, srcPath);
                 string argStr = string.Format("a {0} -r {1}", zipFileName, srcPath);
@@ -337,7 +397,7 @@ namespace Traveller.Data.Packer
         }
         private void _check7z()
         {
-            if (System.IO.File.Exists(Global.S_FILE_7Z_EXE))
+            if (System.IO.File.Exists(Global.FILE_7Z_EXE))
             {
                 _trace("7z 已支援.");
                 lblStatus.ForeColor = System.Drawing.Color.Lime;
