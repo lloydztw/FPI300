@@ -81,6 +81,8 @@ namespace LaserAlignDX.FormSpace
 
         FlyOffsetUI flyOffsetUI => flyOffsetUI1;
         FlyOffsetUI flyOffset2UI => flyOffsetUI2;
+        Label lblExpo => label2;
+        Label lblGain => label3;
 
         /// <summary>
         /// 飞拍模式 0-取像 1-测试
@@ -149,8 +151,8 @@ namespace LaserAlignDX.FormSpace
             DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
 
             IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
-            propertyGrid1.SelectedObject = xRecipe.FlyAoiParams;
-            propertyGrid1.PropertyValueChanged += (s, e2) => _isPropertyModified = true;
+            propertyGrid1.SelectedObject = FlyParaClass.Instance;
+            propertyGrid1.PropertyValueChanged += PropertyGrid1_PropertyValueChanged;
 
             this.Text = "飞拍参数设定窗口";
             this.FormBorderStyle = FormBorderStyle.None;
@@ -159,6 +161,8 @@ namespace LaserAlignDX.FormSpace
 
             flyOffsetUI.Init(StageNumber.N0);
             flyOffset2UI.Init(StageNumber.N1);
+
+            getCamDevParaAndUpdateUI();
 
             xTimer = new Timer();
             xTimer.Interval = 50;
@@ -173,6 +177,22 @@ namespace LaserAlignDX.FormSpace
             this.WindowState = FormWindowState.Maximized;
 #endif
 
+        }
+
+        private void PropertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
+        {
+            switch (e.ChangedItem.PropertyDescriptor.Name)
+            {
+                case "xCamExpo":
+                case "xCamGain":
+                    applyCameraExposureAndGain(true);
+                    break;
+            }
+        }
+
+        private void BtnGetCamPara_Click(object sender, EventArgs e)
+        {
+            //getCamDevParaAndUpdateUI();
         }
 
         private void BtnSpecialCal_Click(object sender, EventArgs e)
@@ -348,8 +368,8 @@ namespace LaserAlignDX.FormSpace
             //    JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
             if (!makeSureNotLiveMode())
                 return;
-
             xRecipe.Load();
+            applyCameraExposureAndGain();
             this.DialogResult = DialogResult.Cancel;
         }
 
@@ -359,13 +379,10 @@ namespace LaserAlignDX.FormSpace
             //    JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
             if (!makeSureNotLiveMode())
                 return;
-
             flyOffsetUI.GetPoints();
             flyOffset2UI.GetPoints();
-
-            if (_isPropertyModified)
-                xRecipe.FlyAoiParams.Save();
-
+            xRecipe.FlyAoiParams.Save();
+            applyCameraExposureAndGain();
             this.DialogResult = DialogResult.OK;
         }
 
@@ -541,7 +558,29 @@ namespace LaserAlignDX.FormSpace
         }
 
         #region TOOLS
-
+        void getCamDevParaAndUpdateUI()
+        {
+            lblExpo.Text = $"{IxFlyAreaCam.GetExposure()} us";
+            lblGain.Text = $"{IxFlyAreaCam.GetGain()} dB";
+        }
+        void applyCameraExposureAndGain(bool bUpdateUI = false)
+        {
+            try
+            {
+                if (FlyParaClass.Instance.GetCameraExpoAndGain(out float expo, out float gain))
+                {
+                    CommonLogClass.Instance.LogMessage($"設定 曝光時間= {expo} (us), 增益= {gain:0.0} (db)");
+                    IxFlyAreaCam.SetExposure(expo);
+                    IxFlyAreaCam.SetGain(gain);
+                    if (bUpdateUI)
+                        getCamDevParaAndUpdateUI();
+                }
+            }
+            catch (Exception ex)
+            {
+                CommonLogClass.Instance.LogError($"無法設定 曝光時間與增益!");
+            }
+        }
         void BoundRect(ref Rectangle InnerRect, Size BoundSize)
         {
             InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));

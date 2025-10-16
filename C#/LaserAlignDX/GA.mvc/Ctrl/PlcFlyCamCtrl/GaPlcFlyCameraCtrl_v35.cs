@@ -13,13 +13,16 @@
  */
 #endregion
 
+using JetEazy.BasicSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
+using LaserAlignDX.GA.BasicSpace;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
+using OpenCvSharp.Flann;
 using System;
 using System.Drawing;
 using System.IO;
@@ -28,6 +31,7 @@ using System.Text;
 using System.Windows.Forms;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
 using PlcFlyResultCode = LaserAlignDX.PlcResultCode;
 
@@ -133,6 +137,19 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         void resetOnTheFlyFrameCount()
         {
             m_onTheFlyFrameCount = 0;
+
+            if (Universal.IsNoUseCCD)
+            {
+                string _flyfilenamepath = JzToolsClass.OpenFilePicker("JPG Files (*.jpg)|*.JPG|" + "All files (*.*)|*.*", "");
+                if (!string.IsNullOrEmpty(_flyfilenamepath))
+                {
+                    using (var bmpFly = new Bitmap(_flyfilenamepath))
+                    {
+                        var flyID = new FlyID(1, 0);
+                        flyRunAoiOne(flyID, bmpFly);
+                    }
+                }
+            }
         }
         void updateFlyCameraSerialNumber(int serialNumber)
         {
@@ -221,7 +238,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                     // 重置 m_onTheFlyFrameCount
                     resetOnTheFlyFrameCount();
-
                     // 暫停 OnTheFlyFrameBuf
                     m_isOnTheFlyFrameEnabled = false;
 
@@ -470,11 +486,18 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 // 注意: mvdRects.Count 有可能為 0 !!!
                 var mvdRects = xRecipe.mvdprintFlytemp_Find.xMvdResultRects;
                 if (mvdRects.Count > 0)
+                {
                     aoiMetaData.xResultBox2D = mvdRects[0]?.ToBox2D();
+                    //定位的角度 直接给plc
+                    aoiResult.OffsetAngle = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
+                }
                 else
+                {
                     aoiMetaData.xResultBox2D = null;
+                    aoiResult.OffsetAngle = 0;
+                }
                 FlyMetaData.Offset(aoiMetaData.xResultBox2D, roiRect.X, roiRect.Y);
-
+                
                 aoiMetaData.xTemplateRect = xRecipe.xRectRegionPrintFly;
                 aoiMetaData.xBlobs = null;
                 aoiMetaData.roiRect = roiRect;
@@ -589,9 +612,44 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     float flyCamResolution = INI.Instance.FlyImageResolution;
                     int flyShowID1 = flyID.ShowID;
 
-                    aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
-                    aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
-                    aoiResult.OffsetAngle = (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
+                    //aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
+                    //aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
+                    //aoiResult.OffsetAngle = (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
+
+                    float _angle = aoiResult.OffsetAngle;// (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
+
+                    // 根据应用场景选择顺序
+                    var template = new TemplatePositioningCalculator2D.TemplateData(
+                        new TemplatePositioningCalculator2D.Vector2(centerOrg.X, centerOrg.Y), 0);
+
+                    var current = new TemplatePositioningCalculator2D.TemplateData(
+                        new TemplatePositioningCalculator2D.Vector2(centerRun.X, centerRun.Y), -_angle);
+
+                    // 场景1：机械臂控制 - 通常先旋转后平移
+                    //Console.WriteLine($"机械臂控制（推荐先旋转后平移）:");
+                    var comp1 = TemplatePositioningCalculator2D.CalculateCompensation(
+                        template, current, TemplatePositioningCalculator2D.ApplyOrder.RotateThenTranslate);
+                    //comp1.PrintResult();
+
+                    aoiResult.OffsetX = comp1.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
+                    aoiResult.OffsetY = comp1.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
+                    //aoiResult.OffsetAngle = comp1.AngleCompensation;
+
+                    //_LOG($"FlyID[{flyID.ShowID}] {comp1.ResultString(flyCamResolution)}", Color.Blue);
+
+                    //原先的计算结果 以下代码
+                    ////// 场景2：UI元素定位 - 通常先平移后旋转
+                    ////Console.WriteLine($"UI元素定位（推荐先平移后旋转）:");
+                    //var comp2 = TemplatePositioningCalculator2D.CalculateCompensation(
+                    //    template, current, TemplatePositioningCalculator2D.ApplyOrder.TranslateThenRotate);
+                    ////comp2.PrintResult();
+
+                    //aoiResult.OffsetX = comp2.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
+                    //aoiResult.OffsetY = comp2.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
+                    ////aoiResult.OffsetAngle = comp1.AngleCompensation;
+
+                    //_LOG($"FlyID[{flyID.ShowID}] {comp2.ResultString(flyCamResolution)}", Color.Blue);
+
                 }
                 updateOneResult(flyID, aoiResult);
             }

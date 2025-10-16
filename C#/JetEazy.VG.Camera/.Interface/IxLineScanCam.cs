@@ -11,6 +11,11 @@ namespace JetEazy.Interface
         bool Open(string configFile);
         bool Close();
 
+        void SetExposure(float val);
+        float GetExposure();
+        void SetGain(float val);
+        float GetGain();
+
         /// <summary>
         /// 正确取得图像标志
         /// </summary>

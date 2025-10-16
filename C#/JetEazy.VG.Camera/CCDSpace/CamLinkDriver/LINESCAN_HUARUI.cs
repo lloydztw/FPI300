@@ -1,9 +1,11 @@
 ﻿
+using DVPCameraType;
 using Euresys.MultiCam;
 using FreeImageAPI;
 using JetEazy.Interface;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -568,7 +570,24 @@ namespace JetEazy.CCDSpace.CamLinkDriver
             //base.Equals(null);
             Close();
         }
-
+        public void SetExposure(float val)
+        {
+            
+        }
+        public float GetExposure()
+        {
+            double val = -1;
+            return (float)val;
+        }
+        public void SetGain(float val)
+        {
+            
+        }
+        public float GetGain()
+        {
+            float val = -1;
+            return val;
+        }
 
         #region PRIVATE FUNTION
 

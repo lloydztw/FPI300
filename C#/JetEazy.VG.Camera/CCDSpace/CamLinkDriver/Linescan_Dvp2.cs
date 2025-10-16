@@ -279,7 +279,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                             status = DVPCamera.dvpRegisterStreamCallback(m_handle, _proc, dvpStreamEvent.STREAM_EVENT_FRAME_THREAD, m_ptr);
                             Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
                         }
-
+                        
                         //dvpTriggerSource triSource = (dvpTriggerSource)InputIOCombo.SelectedIndex;
                         //dvpStatus status = dvpStatus.DVP_STATUS_DESCR_FAULT;
                         //status = DVPCamera.dvpSetTriggerSource(m_handle, 
@@ -302,7 +302,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
             //TriggerMode(false);
             //关闭相机
             status = DVPCamera.dvpClose(m_handle);
-            Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+            //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
             m_handle = 0;
             //pictureBox.Refresh();
         }
@@ -324,7 +324,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
 
                 if (state == dvpStreamState.STATE_STOPED)
                     status = DVPCamera.dvpStart(m_handle);
-                Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+                //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
             }
         }
         public void StopGrab()
@@ -335,7 +335,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
             //检查相机视频流的状态
             dvpStreamState StreamState = new dvpStreamState();
             status = DVPCamera.dvpGetStreamState(m_handle, ref StreamState);
-            Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+            //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
             if (StreamState == dvpStreamState.STATE_STARTED)
             {
                 ////初始化显示数量为0
@@ -343,11 +343,64 @@ namespace JetEazy.CCDSpace.CamLinkDriver
 
                 //停止视频流
                 status = DVPCamera.dvpStop(m_handle);
-                Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+                //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
 
             }
         }
-
+        public void SetExposure(float val)
+        {
+            if (IsValidHandle(m_handle))
+            {
+                dvpStatus status = new dvpStatus();
+                dvpDoubleDescr expoDescr = new dvpDoubleDescr();
+                status = DVPCamera.dvpGetExposureDescr(m_handle, ref expoDescr);
+                if (status == dvpStatus.DVP_STATUS_OK)
+                {
+                    if (val >= expoDescr.fMax || val <= expoDescr.fMin)
+                        return;
+                    status = DVPCamera.dvpSetExposure(m_handle, val);
+                    //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+                }
+            }
+        }
+        public float GetExposure()
+        {
+            double val = -1;
+            if (IsValidHandle(m_handle))
+            {
+                dvpStatus status = new dvpStatus();
+                status = DVPCamera.dvpGetExposure(m_handle, ref val);
+                //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+            }
+            return (float)val;
+        }
+        public void SetGain(float val)
+        {
+            if (IsValidHandle(m_handle))
+            {
+                dvpStatus status = new dvpStatus();
+                dvpFloatDescr expoDescr = new dvpFloatDescr();
+                status = DVPCamera.dvpGetAnalogGainDescr(m_handle, ref expoDescr);
+                if (status == dvpStatus.DVP_STATUS_OK)
+                {
+                    if (val >= expoDescr.fMax || val <= expoDescr.fMin)
+                        return;
+                    status = DVPCamera.dvpSetAnalogGain(m_handle, val);
+                    //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+                }
+            }
+        }
+        public float GetGain()
+        {
+            float val = -1;
+            if (IsValidHandle(m_handle))
+            {
+                dvpStatus status = new dvpStatus();
+                status = DVPCamera.dvpGetAnalogGain(m_handle, ref val);
+                //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+            }
+            return val;
+        }
 
 
         private static Mutex imageMutex = new Mutex();
@@ -625,7 +678,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
 
             //获取连接到计算机上的相机数量
             status = DVPCamera.dvpRefresh(ref n);
-            Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+            //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
             //m_n_dev_count = (int)n;
             if (status == dvpStatus.DVP_STATUS_OK)
             {
@@ -635,7 +688,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                 {
                     //逐个获取每个相机的信息
                     status = DVPCamera.dvpEnum(i, ref dev_info);
-                    Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+                    //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
                     if (status == dvpStatus.DVP_STATUS_OK)
                     {
                         //m_info[m_CamCount] = dev_info;
@@ -668,7 +721,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
 
             //获取连接到计算机上的相机数量
             status = DVPCamera.dvpRefresh(ref n);
-            Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+            //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
             //m_n_dev_count = (int)n;
             if (status == dvpStatus.DVP_STATUS_OK)
             {
@@ -678,7 +731,7 @@ namespace JetEazy.CCDSpace.CamLinkDriver
                 {
                     //逐个获取每个相机的信息
                     status = DVPCamera.dvpEnum(i, ref dev_info);
-                    Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
+                    //Debug.Assert(status == dvpStatus.DVP_STATUS_OK);
                     if (status == dvpStatus.DVP_STATUS_OK)
                     {
                         //m_info[m_CamCount] = dev_info;

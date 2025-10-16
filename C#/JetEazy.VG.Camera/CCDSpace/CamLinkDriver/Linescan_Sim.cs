@@ -102,6 +102,8 @@ namespace JetEazy.CCDSpace.CamLinkDriver
         //string m_TrigCtl = "ISO";
         string m_OperateMessage = string.Empty;
         CameraPara _camCfg = new CameraPara();
+        float m_Expo = 0;
+        float m_Gain = 0;
         #endregion
 
         public void Dispose()
@@ -438,7 +440,22 @@ namespace JetEazy.CCDSpace.CamLinkDriver
             _evGrabStart.Reset();
             m_dfDisplayCount = 0;
         }
-
+        public void SetExposure(float val)
+        {
+            m_Expo = val;
+        }
+        public float GetExposure()
+        {
+            return m_Expo;
+        }
+        public void SetGain(float val)
+        {
+            m_Gain = val;
+        }
+        public float GetGain()
+        {
+            return m_Gain;
+        }
 
 #if (OPT_REAL_DVP2)
         private static Mutex imageMutex = new Mutex();

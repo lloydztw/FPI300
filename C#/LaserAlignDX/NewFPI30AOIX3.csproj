@@ -508,6 +508,7 @@
     <Compile Include="GA\BasicSpace\MvdLineFinders\MvdFindLineClass.cs" />
     <Compile Include="GA\BasicSpace\MvdLineFinders\V1\MvdFindLineClass_v1.cs" />
     <Compile Include="GA\BasicSpace\MvdLineFinders\V1\MvdPairLineClass_v1.cs" />
+    <Compile Include="GA\BasicSpace\NozzleCompensationCalculator.cs" />
     <Compile Include="GA\BasicSpace\ParaSpace\MvdFindCircleClass.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\BarcodeAll_MVD.cs" />
     <Compile Include="GA\BasicSpace\ReadBarcode\ZXingClass.cs" />

@@ -113,6 +113,7 @@ namespace TravellerMINIX6.ProcessSpace
                                 _LOG($"{ToChangeLanguage("打开线扫采集")}", Color.Black);
                                 //CommonLogClass.Instance.LogMessage("打开线扫采集... ", Color.Black);
                                 IScanCam.IsGrapImageComplete = false;
+                                IScanCam.IsGrapImageOK = false;
                                 if (!Traveller106.Universal.IsNoUseCCD)
                                 {
                                     IScanCam.StartGrab();

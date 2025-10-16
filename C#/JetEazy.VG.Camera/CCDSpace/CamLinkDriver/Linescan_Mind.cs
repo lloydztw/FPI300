@@ -172,6 +172,24 @@ namespace JetEazy.CCDSpace.CamLinkDriver
         {
             Close();
         }
+        public void SetExposure(float val)
+        {
+
+        }
+        public float GetExposure()
+        {
+            double val = -1;
+            return (float)val;
+        }
+        public void SetGain(float val)
+        {
+
+        }
+        public float GetGain()
+        {
+            float val = -1;
+            return val;
+        }
 
         public event LineTriggerHandler LineTriggerAction;
         public void FireTrigger(CameraFrame cameraFrame, IntPtr pBuffer)

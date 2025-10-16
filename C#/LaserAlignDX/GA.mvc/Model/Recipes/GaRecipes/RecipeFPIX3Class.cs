@@ -1316,6 +1316,24 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
 
+        #region A00
+        const string _Cat0 = "A00.相机参数";
+
+        [CategoryAttribute(_Cat0), DescriptionAttribute("即相机抓图时的曝光值 单位 us")]
+        [DisplayName("A01.曝光")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 300, 1f, 2)]
+        [Browsable(true)]
+        public float xCamExpo { get; set; } = 100f;
+
+        [CategoryAttribute(_Cat0), DescriptionAttribute("即相机抓图时的增益值 单位 dB")]
+        [DisplayName("A02.增益")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 20, 1f, 2)]
+        [Browsable(true)]
+        public float xCamGain { get; set; } = 8f;
+        #endregion
+
         #region A01
         const string _Cat1 = "A01.基础设置";
 
@@ -1408,6 +1426,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xExtendx = int.Parse(ReadINIValue("Fly", "xExtendx", "20", INIFILE));
             xExtendy = int.Parse(ReadINIValue("Fly", "xExtendy", "20", INIFILE));
 
+            xCamExpo = float.Parse(ReadINIValue("Fly", "xCamExpo", "100", INIFILE));
+            xCamGain = float.Parse(ReadINIValue("Fly", "xCamGain", "8", INIFILE));
+
             xIsOpenMuit = ReadINIValue("Basic", "xIsOpenMuit", "0", INIFILE) == "1";
             xThresholdValue = int.Parse(ReadINIValue("Basic", "xThresholdValue", "128", INIFILE));
             xBlobMode = (BlobMode)int.Parse(ReadINIValue("Basic", "xBlobMode", "1", INIFILE));
@@ -1431,6 +1452,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Fly", "xExtendx", xExtendx.ToString(), INIFILE);
             WriteINIValue("Fly", "xExtendy", xExtendy.ToString(), INIFILE);
 
+            WriteINIValue("Fly", "xCamExpo", xCamExpo.ToString(), INIFILE);
+            WriteINIValue("Fly", "xCamGain", xCamGain.ToString(), INIFILE);
+
             WriteINIValue("Basic", "xIsOpenMuit", (xIsOpenMuit ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
             WriteINIValue("Basic", "xBlobMode", ((int)xBlobMode).ToString(), INIFILE);
@@ -1446,6 +1470,13 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
                 i++;
             }
+        }
+
+        public bool GetCameraExpoAndGain(out float expo, out float gain)
+        {
+            expo = xCamExpo;
+            gain = xCamGain;
+            return true;
         }
     }
 
