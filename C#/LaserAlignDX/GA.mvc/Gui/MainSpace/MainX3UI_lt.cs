@@ -29,9 +29,8 @@ namespace LaserAlignDX.UISpace.MainSpace
 
             _mainCtrl.Attach( new[] { mvsui1, mvsui2 },
                               new[] { DSFly0, DSFly1, DSFly2, DSFly3 },
-                              label1 );
-
-            //_mainCtrl.OnStateChanged += (s, e) => OnStateChanged?.Invoke(s, e);
+                              lblFlySerialNumber, 
+                              lblMemoryUsage );
 
             _mainCtrl.OnStateChanged += (s, e) =>
             {

@@ -34,17 +34,18 @@ namespace LaserAlignDX.UISpace.MainSpace
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
-            this.mvsui2 = new JezChipCellsViewPanel();
-            this.mvsui1 = new JezChipCellsViewPanel();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblFlySerialNumber = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.DSFly0 = new JezFlyViewPanel();
-            this.DSFly1 = new JezFlyViewPanel();
-            this.DSFly2 = new JezFlyViewPanel();
-            this.DSFly3 = new JezFlyViewPanel();
+            this.lblMemoryUsage = new System.Windows.Forms.Label();
+            this.mvsui2 = new LaserAlignDX.UISpace.ChipCellsViewer.JezChipCellsViewPanel();
+            this.mvsui1 = new LaserAlignDX.UISpace.ChipCellsViewer.JezChipCellsViewPanel();
+            this.DSFly0 = new LaserAlignDX.Mvc.Gui.JezFlyViewPanel();
+            this.DSFly1 = new LaserAlignDX.Mvc.Gui.JezFlyViewPanel();
+            this.DSFly2 = new LaserAlignDX.Mvc.Gui.JezFlyViewPanel();
+            this.DSFly3 = new LaserAlignDX.Mvc.Gui.JezFlyViewPanel();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
@@ -93,25 +94,6 @@ namespace LaserAlignDX.UISpace.MainSpace
             this.tableLayoutPanel2.Size = new System.Drawing.Size(682, 970);
             this.tableLayoutPanel2.TabIndex = 21;
             // 
-            // mvsui2
-            // 
-            this.mvsui2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mvsui2.Location = new System.Drawing.Point(342, 1);
-            this.mvsui2.Margin = new System.Windows.Forms.Padding(1);
-            this.mvsui2.Name = "mvsui2";
-            this.mvsui2.Size = new System.Drawing.Size(339, 968);
-            this.mvsui2.TabIndex = 3;
-            // 
-            // mvsui1
-            // 
-            this.mvsui1.BackColor = System.Drawing.Color.Black;
-            this.mvsui1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.mvsui1.Location = new System.Drawing.Point(1, 1);
-            this.mvsui1.Margin = new System.Windows.Forms.Padding(1);
-            this.mvsui1.Name = "mvsui1";
-            this.mvsui1.Size = new System.Drawing.Size(339, 968);
-            this.mvsui1.TabIndex = 2;
-            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.groupBox1);
@@ -146,26 +128,27 @@ namespace LaserAlignDX.UISpace.MainSpace
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
             // 
-            // label1
+            // lblFlySerialNumber
             // 
-            this.label1.AutoSize = true;
-            this.label1.BackColor = System.Drawing.Color.Transparent;
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.label1.Location = new System.Drawing.Point(3, 1);
-            this.label1.Margin = new System.Windows.Forms.Padding(3, 1, 3, 0);
-            this.label1.Name = "label1";
-            this.label1.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
-            this.label1.Size = new System.Drawing.Size(330, 21);
-            this.label1.TabIndex = 20;
-            this.label1.Text = "飛拍序號:";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblFlySerialNumber.AutoSize = true;
+            this.lblFlySerialNumber.BackColor = System.Drawing.Color.Transparent;
+            this.lblFlySerialNumber.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblFlySerialNumber.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.lblFlySerialNumber.Location = new System.Drawing.Point(3, 1);
+            this.lblFlySerialNumber.Margin = new System.Windows.Forms.Padding(3, 1, 3, 0);
+            this.lblFlySerialNumber.Name = "lblFlySerialNumber";
+            this.lblFlySerialNumber.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
+            this.lblFlySerialNumber.Size = new System.Drawing.Size(330, 21);
+            this.lblFlySerialNumber.TabIndex = 20;
+            this.lblFlySerialNumber.Text = "飛拍序號:";
+            this.lblFlySerialNumber.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 1;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.lblMemoryUsage, 0, 5);
+            this.tableLayoutPanel1.Controls.Add(this.lblFlySerialNumber, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.DSFly0, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.DSFly1, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.DSFly2, 0, 3);
@@ -174,14 +157,54 @@ namespace LaserAlignDX.UISpace.MainSpace
             this.tableLayoutPanel1.Location = new System.Drawing.Point(690, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(1);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 5;
+            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(0, 0, 0, 1);
+            this.tableLayoutPanel1.RowCount = 6;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 22F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.Size = new System.Drawing.Size(336, 999);
             this.tableLayoutPanel1.TabIndex = 3;
+            // 
+            // lblMemoryUsage
+            // 
+            this.lblMemoryUsage.BackColor = System.Drawing.Color.Black;
+            this.lblMemoryUsage.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblMemoryUsage.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.lblMemoryUsage.ForeColor = System.Drawing.Color.Lime;
+            this.lblMemoryUsage.Location = new System.Drawing.Point(3, 954);
+            this.lblMemoryUsage.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
+            this.lblMemoryUsage.Name = "lblMemoryUsage";
+            this.lblMemoryUsage.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
+            this.lblMemoryUsage.Size = new System.Drawing.Size(330, 38);
+            this.lblMemoryUsage.TabIndex = 22;
+            this.lblMemoryUsage.Text = "資源使用: 0%";
+            this.lblMemoryUsage.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // mvsui2
+            // 
+            this.mvsui2.CarrierID = LaserAlignDX.CarrierEnum.C1;
+            this.mvsui2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mvsui2.IsActive = false;
+            this.mvsui2.Location = new System.Drawing.Point(342, 1);
+            this.mvsui2.Margin = new System.Windows.Forms.Padding(1);
+            this.mvsui2.Name = "mvsui2";
+            this.mvsui2.Size = new System.Drawing.Size(339, 968);
+            this.mvsui2.TabIndex = 3;
+            // 
+            // mvsui1
+            // 
+            this.mvsui1.BackColor = System.Drawing.Color.Black;
+            this.mvsui1.CarrierID = LaserAlignDX.CarrierEnum.C1;
+            this.mvsui1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mvsui1.IsActive = false;
+            this.mvsui1.Location = new System.Drawing.Point(1, 1);
+            this.mvsui1.Margin = new System.Windows.Forms.Padding(1);
+            this.mvsui1.Name = "mvsui1";
+            this.mvsui1.Size = new System.Drawing.Size(339, 968);
+            this.mvsui1.TabIndex = 2;
             // 
             // DSFly0
             // 
@@ -189,34 +212,34 @@ namespace LaserAlignDX.UISpace.MainSpace
             this.DSFly0.Location = new System.Drawing.Point(5, 24);
             this.DSFly0.Margin = new System.Windows.Forms.Padding(5, 2, 2, 2);
             this.DSFly0.Name = "DSFly0";
-            this.DSFly0.Size = new System.Drawing.Size(329, 240);
+            this.DSFly0.Size = new System.Drawing.Size(329, 229);
             this.DSFly0.TabIndex = 1;
             // 
             // DSFly1
             // 
             this.DSFly1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DSFly1.Location = new System.Drawing.Point(2, 268);
+            this.DSFly1.Location = new System.Drawing.Point(2, 257);
             this.DSFly1.Margin = new System.Windows.Forms.Padding(2);
             this.DSFly1.Name = "DSFly1";
-            this.DSFly1.Size = new System.Drawing.Size(332, 240);
+            this.DSFly1.Size = new System.Drawing.Size(332, 229);
             this.DSFly1.TabIndex = 2;
             // 
             // DSFly2
             // 
             this.DSFly2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DSFly2.Location = new System.Drawing.Point(2, 512);
+            this.DSFly2.Location = new System.Drawing.Point(2, 490);
             this.DSFly2.Margin = new System.Windows.Forms.Padding(2);
             this.DSFly2.Name = "DSFly2";
-            this.DSFly2.Size = new System.Drawing.Size(332, 240);
+            this.DSFly2.Size = new System.Drawing.Size(332, 229);
             this.DSFly2.TabIndex = 3;
             // 
             // DSFly3
             // 
             this.DSFly3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DSFly3.Location = new System.Drawing.Point(2, 756);
-            this.DSFly3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 5);
+            this.DSFly3.Location = new System.Drawing.Point(2, 723);
+            this.DSFly3.Margin = new System.Windows.Forms.Padding(2, 2, 2, 0);
             this.DSFly3.Name = "DSFly3";
-            this.DSFly3.Size = new System.Drawing.Size(332, 238);
+            this.DSFly3.Size = new System.Drawing.Size(332, 231);
             this.DSFly3.TabIndex = 4;
             // 
             // MainX3UI
@@ -253,9 +276,10 @@ namespace LaserAlignDX.UISpace.MainSpace
         private JezFlyViewPanel DSFly2;
         private JezFlyViewPanel DSFly3;
         //private System.Windows.Forms.Button button6;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblFlySerialNumber;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel2;
         private JezChipCellsViewPanel mvsui2;
         private JezChipCellsViewPanel mvsui1;
+        private System.Windows.Forms.Label lblMemoryUsage;
     }
 }

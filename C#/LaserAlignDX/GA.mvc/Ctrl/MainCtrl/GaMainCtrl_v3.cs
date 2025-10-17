@@ -37,6 +37,7 @@ using BaseProcess = NeedleX.ProcessSpace.BaseProcess;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
 using LineScanSingleProcess = TravellerMINIX6.ProcessSpace.LineScanSingleProcess;
+using System.Diagnostics;
 
 
 namespace LaserAlignDX.Mvc.Ctrl.V3
@@ -108,6 +109,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
         #region GUI_MEMBERS
         Control _wndOwner;
+        Control _lblMemoryUsage;
+        Timer _timerMemoryUsage;
         IvChipCellsViewer[] _DSMains;
         IvChipCellsViewer ActiveViewer
         {
@@ -120,7 +123,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         GaPlcFlyCameraCtrl _flyCtrl = new GaPlcFlyCameraCtrl();
         #endregion
 
-        public override void Attach(Control[] DsMains, Control[] DsFlys, Control lblFlyCameraSerialNo)
+        public override void Attach(Control[] DsMains, Control[] DsFlys, Control lblFlyCameraSerialNo, Control lblMemoryUsage)
         {
             // CHIP_CELLS_VIEWERS
             _DSMains = new[]
@@ -132,6 +135,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             // Owner Window
             _wndOwner = _DSMains[0].Window.Parent;
             System.Diagnostics.Debug.Assert(_wndOwner != null, "_wndOwner 不能為 null !");
+
+            // GUI 
+            _lblMemoryUsage = lblMemoryUsage;
+            _timerMemoryUsage = new Timer();
+            _timerMemoryUsage.Interval = 1000 * 60;     //每分鐘一次
 
             // FLY CAMERA Display UI
             _flyCtrl.Attach(DsFlys, lblFlyCameraSerialNo);
@@ -150,6 +158,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     _LOG("GaMailCtrl [V3]", Color.Blue);
                     _LOG($"參數資料夾 = {Traveller106.Universal.MAINPATH}", Color.Blue);
                     _sysModel.ApplyRecipe();
+                    updateMemoryUsage();
                 }));
             };
         }
@@ -203,7 +212,15 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             _aoiModel.OnAoiEnd += AoiEngine_OnAoiEnd;
             _aoiModel.OnError += SysModel_OnError;
             _sysModel.OnError += SysModel_OnError;
-            _wndOwner.HandleDestroyed += (s, e) => _flyCtrl = null;
+            _timerMemoryUsage.Tick += (s, e) => updateMemoryUsage();
+            _flyCtrl.OnFlyDone += (s, e) => updateMemoryUsage();
+
+            _wndOwner.HandleDestroyed += (s, e) =>
+            {
+                _flyCtrl = null;
+                _timerMemoryUsage?.Dispose();
+                _timerMemoryUsage = null;
+            };
 
             // SIMULATION
             var plcIO = MACHINE?.PLCIO;
@@ -235,12 +252,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             FireChangeState(MainS1State.LS_START);
             ActiveViewer.Reset();
+            updateMemoryUsage();
         }
         private void OnAoiProcess_Completed(object sender, ProcessEventArgs e)
         {
             FireChangeState(MainS1State.LS_STOP);
             update_AoiResult(e);
             CGOperate();
+            updateMemoryUsage();
         }
         private void LineScanImageHolder_OnImageChanged(object sender, EventArgs e)
         {
@@ -251,6 +270,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             else
             {
                 update_LineScanImage();
+                updateMemoryUsage();
             }
         }
         private void Sim_OnRequestSimLineScan(object sender, DoWorkEventArgs e)
@@ -531,6 +551,32 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 _sysModel.ActiveCarrierID = carrierID;
                 _sysModel.ApplyRecipe();
                 GaUtil.SetCursor(_wndOwner, oldCursor);
+            }
+        }
+        void updateMemoryUsage()
+        {
+            if (_lblMemoryUsage == null || _wndOwner == null)
+                return;
+
+            if(_wndOwner.InvokeRequired)
+            {
+                _wndOwner.BeginInvoke((Action)updateMemoryUsage);
+            }
+            else
+            {
+                // 取得整個系統的記憶體使用量百分比
+                using (var systemMemoryCounter = new PerformanceCounter("Memory", "% Committed Bytes In Use"))
+                {
+                    // 讀取數值
+                    float memoryUsagePercentage = systemMemoryCounter.NextValue();
+
+                    // 輸出結果 (例如)
+                    _lblMemoryUsage.Text = $"內存使用率: {memoryUsagePercentage:F2}%";
+
+                    _lblMemoryUsage.ForeColor = memoryUsagePercentage < 95f ? Color.Lime : Color.Red;
+                }
+                _timerMemoryUsage.Enabled = false;
+                _timerMemoryUsage.Enabled = true;
             }
         }
         #endregion
