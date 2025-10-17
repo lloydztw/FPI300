@@ -682,7 +682,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                         new TemplatePositioningCalculator2D.Vector2(centerOrg.X, centerOrg.Y), 0);
 
                     var current = new TemplatePositioningCalculator2D.TemplateData(
-                        new TemplatePositioningCalculator2D.Vector2(centerRun.X, centerRun.Y), -_angle);
+                        new TemplatePositioningCalculator2D.Vector2(centerRun.X, centerRun.Y), _angle);
 
                     // 场景1：机械臂控制 - 通常先旋转后平移
                     //Console.WriteLine($"机械臂控制（推荐先旋转后平移）:");
