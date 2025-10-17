@@ -31,7 +31,6 @@ namespace LaserAlignDX
 
             //frm.Load += (s, e) => GaMvcConfig.OpenCalibrationTool();
             //frm.Load += (s, e) => GaMvcConfig.OpenTamplateEditor(Model.Coords.CarrierEnum.C2);
-            //frm.Load += (s, e) => new LaserAlignDX.Mvc.Ctrl.GaContinousSelfTestCtrl().Init();
 
             Application.Run(frm);
         }

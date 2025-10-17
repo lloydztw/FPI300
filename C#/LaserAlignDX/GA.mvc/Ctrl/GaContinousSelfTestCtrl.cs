@@ -31,8 +31,28 @@ namespace LaserAlignDX.Mvc.Ctrl
     /// </summary>
     public partial class GaContinousSelfTestCtrl
     {
-        const string IMG_PATH = @"D:\Lloydz\JetEazy\Projects\FPI300\Images\2025_0930_#4";
-        
+        string IMG_PATH = "";
+
+        #region SINGLETON
+        static GaContinousSelfTestCtrl _instance = null;
+        GaContinousSelfTestCtrl()
+        {
+        }
+        #endregion
+
+        public static GaContinousSelfTestCtrl Instance
+        {
+            get
+            {
+                if(_instance == null )
+                {
+                    _instance = new GaContinousSelfTestCtrl();
+                    _instance.init();
+                }
+                return _instance;
+            }
+        }
+
         #region MACHINE
         MainFPIX3MachineClass MACHINE
         {
@@ -50,15 +70,37 @@ namespace LaserAlignDX.Mvc.Ctrl
         int _runCount = 0;
         #endregion
 
-        public void Init()
+        public bool IsEmpty()
         {
-            //_lsProcess.OnCompleted += (s, e) => ((Action)restartTest).BeginInvoke(null, null);
-            _aoiModel.OnAoiEnd += (s, e) => ((Action)restartTest).BeginInvoke(null, null);
+            return string.IsNullOrEmpty(IMG_PATH);
+        }
+        public string BrowseImageFile()
+        {
+            string imgFile = GaUtil.BrowseImageFile();
+            if (!string.IsNullOrEmpty(imgFile))
+            {
+                IMG_PATH = System.IO.Path.GetDirectoryName(imgFile);
+            }
+            return imgFile;
         }
 
+        private void init()
+        {
+            if (!Traveller106.Universal.IsNoUseCCD)
+                return;
+
+            _aoiModel.OnAoiEnd += (s, e) =>
+            {
+                var plcIO = MACHINE?.PLCIO;
+                if (plcIO == null || !plcIO.bSoftwareReady)
+                    return;
+                ((Action)restartTest).BeginInvoke(null, null);
+            };
+        }
         private void restartTest()
         {
-            if(getLocatedChipsCount() > 0 &&_aoiModel.xScanInspectMode != ScanInspectMode.NOTRAY)
+            if (IsEmpty()) return;
+            if (getLocatedChipsCount() > 0 &&_aoiModel.xScanInspectMode != ScanInspectMode.NOTRAY)
                 return;
 
             string[] files = System.IO.Directory.GetFiles(IMG_PATH, "*.jpg");
@@ -80,7 +122,6 @@ namespace LaserAlignDX.Mvc.Ctrl
                 plcIO.bFlyReady = true;
             }
         }
-
         private int getLocatedChipsCount()
         {
             int count = 0;

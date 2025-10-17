@@ -284,11 +284,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 //-----------------------------------------------------------------------
                 // 【模擬】
                 //-----------------------------------------------------------------------
-                bool isEmpty = !ActiveViewer.HasImage();
+                var selfTestCtrl = GaContinousSelfTestCtrl.Instance;
+                bool isEmpty = !ActiveViewer.HasImage() || selfTestCtrl.IsEmpty();
                 if (isEmpty)
                 {
                     checkPlcStageID(_activeCarrierID);
-                    string fileName = GaUtil.BrowseImageFile();
+                    string fileName = selfTestCtrl.BrowseImageFile();
                     if (fileName != null)
                         loadLineScanImage(fileName);
                 }

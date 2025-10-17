@@ -4,7 +4,6 @@ using JetEazy.DBSpace;
 using JetEazy.EzImage;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
-using JetEazy.Machine;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
 using System;
