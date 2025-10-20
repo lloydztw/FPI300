@@ -83,6 +83,11 @@ namespace LeTian.AoiLib
             analyzeGoldenTemplate(imgGolden);
         }
 
+        public bool LargeAngleEnabled
+        {
+            get;
+            set;
+        }
         public int PadThreshold
         {
             get => _padsFinder.PadThreshold;
@@ -93,6 +98,7 @@ namespace LeTian.AoiLib
             get => _padsFinder.DistTransThreshold;
             set => _padsFinder.DistTransThreshold = value;
         }
+
 
         public RigidBody FindBestMatch(Bitmap bmpScene, string debugDumpFile = null)
         {
@@ -167,14 +173,34 @@ namespace LeTian.AoiLib
             {
                 // 旋轉 -45度, +45度 重新抓
                 EzBlocsGrid grid2 = null;
-                foreach (var angle in new double[] { -45.0, 45.0, - 22.5, 22.5 })
+
+                var angle90s = LargeAngleEnabled ?
+                    new double[] { 0, -90, 90 } :
+                    new double[] { 0 };
+
+                bool isFound = false;
+
+                foreach (var angle90 in angle90s)
                 {
-                    grid2?.Dispose();
+                    foreach (var angleD in new double[] { 0, -45, 45, -22.5, 22.5 })
+                    {
+                        double angle = angle90 + angleD;
+                        if (Math.Abs(angle) < 1)
+                            continue;
 
-                    _padsFinder.RebuildPadsGrid(imgScene, angle, out grid2, out kr, out kc, out kSQ);
+                        grid2?.Dispose();
 
-                    _LOG.Warn("Rebuild @ {0:0.00}°", angle);
-                    if (kr == _goldenRigidBody.KeyRow && kc == _goldenRigidBody.KeyCol)
+                        _padsFinder.RebuildPadsGrid(imgScene, angle, out grid2, out kr, out kc, out kSQ);
+
+                        _LOG.Warn("Rebuild @ {0:0.00}°", angle);
+                        if (kr == _goldenRigidBody.KeyRow && kc == _goldenRigidBody.KeyCol)
+                        {
+                            isFound = true;
+                            break;
+                        }
+                    }
+
+                    if (isFound)
                         break;
                 }
 

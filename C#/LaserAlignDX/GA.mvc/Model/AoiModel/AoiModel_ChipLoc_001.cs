@@ -108,7 +108,7 @@ namespace LaserAlignDX.AoiModel.V3
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
 
                 //(5) 晶粒定位
-                RunChipsLocate(bmpFullfov, imgLogPath, out string debugCellCenterStr);
+                _RunChipsLocate(bmpFullfov, imgLogPath, out string debugCellCenterStr);
                 _TM.Trace("_Inspect001 : 晶粒定位 & 量測 完成!");
 
                 //(6) 異步輸出 Debug 數據
@@ -146,39 +146,48 @@ namespace LaserAlignDX.AoiModel.V3
         /// </summary>
         internal bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
         {
-            chipData = null;
-            prepareChipMatcher(0, out IMvdTemplateMatcher chipMatcher);
-            bool ok = chipMatcher.RunMatch(cellBmp);
-            if (ok)
-            {
-                //(4.0) 使用 xResults[0] 當 Chip Center
-                var xFindResult = chipMatcher.xResults[0];
-                //var debug_org_center_x = cell.xFindResult.fCenterX;
-                //var debug_org_center_y = cell.xFindResult.fCenterY;
-                xFindResult.fCenterX += cellRoi.X;
-                xFindResult.fCenterY += cellRoi.Y;
+            //chipData = null;
 
-                //(4.1) 晶粒定位中心點(camera coorindates)
-                var chipSize = _xRecipe.xRegionTrain.Size;
-                var chipBox2D = toBox2D(ref xFindResult, chipSize);
-                var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
+            //prepareChipMatcher(0, out var chipMatcher);
 
-                //(4.2) 將定位結果記入 cell.ChipData
-                chipData = new GaChipData();
-                chipData.Roi = cellRoi;
-                chipData.ChipBox2D = chipBox2D;
-                chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
-                chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
-            }
+            //bool ok = chipMatcher.RunMatch(cellBmp);
+
+            //ok &= chipMatcher.xResults.Count > 0;
+            //if (ok)
+            //{
+            //    //(4.0) 使用 xResults[0] 當 Chip Center
+            //    var xFindResult = chipMatcher.xResults[0];
+            //    //var debug_org_center_x = cell.xFindResult.fCenterX;
+            //    //var debug_org_center_y = cell.xFindResult.fCenterY;
+            //    xFindResult.fCenterX += cellRoi.X;
+            //    xFindResult.fCenterY += cellRoi.Y;
+
+            //    //(4.1) 晶粒定位中心點(camera coorindates)
+            //    var chipSize = _xRecipe.xRegionTrain.Size;
+            //    var chipBox2D = toBox2D(ref xFindResult, chipSize);
+            //    var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
+
+            //    //(4.2) 將定位結果記入 cell.ChipData
+            //    chipData = new GaChipData();
+            //    chipData.Roi = cellRoi;
+            //    chipData.ChipBox2D = chipBox2D;
+            //    chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
+            //    chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
+            //}
+            //return ok;
+
+            prepareChipMatcher(0, out var chipMatcher);
+            bool ok = _LocateOneChip(cellBmp, ref cellRoi, out chipData, chipMatcher);
             return ok;
         }
+
 
         #region PRIVATE_FUNCTIONS
 
         /// <summary>
         /// LETIAN: 晶粒定位
         /// </summary>
-        void RunChipsLocate(Bitmap bmpFullfov, string imgPath, out string debugCellCenterStr)
+        void _RunChipsLocate(Bitmap bmpFullfov, string imgPath, out string debugCellCenterStr)
         {
             _TM.RESET_ACCUM();
 
@@ -198,7 +207,7 @@ namespace LaserAlignDX.AoiModel.V3
                 // 單線程 (驗證用)
                 for (int gid = 0; gid < groups.Length; gid++)
                 {
-                    debugStrs[gid] = RunChipLocateOneT(gid, groups[gid], imgPath);
+                    debugStrs[gid] = _RunChipLocateOneT(gid, groups[gid], imgPath);
                 }
             }
             else
@@ -206,7 +215,7 @@ namespace LaserAlignDX.AoiModel.V3
                 Parallel.For(0, N_GROUPS, gid =>
                 {
                     if (gid < groups.Length)
-                        debugStrs[gid] = RunChipLocateOneT(gid, groups[gid], imgPath);
+                        debugStrs[gid] = _RunChipLocateOneT(gid, groups[gid], imgPath);
                 });
             }
 
@@ -218,7 +227,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// LETIAN: 晶粒定位 與 尺寸量測 (區域) (限用於同一線程內)
         /// </summary>
-        string RunChipLocateOneT(int threadIdx, GaCellsGroup cellsGroup, string imgPath)
+        string _RunChipLocateOneT(int threadIdx, GaCellsGroup cellsGroup, string imgPath)
         {
             prepareChipMatcher(threadIdx, out IMvdTemplateMatcher chipMatcher);
             var fullFovSize = cellsGroup.FullFovRect.Size;
@@ -237,9 +246,7 @@ namespace LaserAlignDX.AoiModel.V3
                 cell.Reset();
 
                 //(2) 像測 (使用 chipMatcher)
-                // _TM.BEGIN("_RunChipTemplateMatch");
-                bool ok = chipMatcher.RunMatch(cellBmp);
-                // _TM.END("_RunChipTemplateMatch");
+                bool ok = _LocateOneChip(cellBmp, ref cellRoi, out var chipData, chipMatcher);
 
                 //(3) 異步保存 Cell 圖像檔案
                 if (INI.Instance.IsSaveTestImage)
@@ -249,30 +256,30 @@ namespace LaserAlignDX.AoiModel.V3
                     saveCellBmpAsync(cellBmp, cell);
                 }
 
-                //(4) 防止因為 xResults.Count == 0 的意外狀況
-                ok &= (chipMatcher.xResults.Count > 0);
-
+                //(4) 整理 chipData
                 if (ok)
                 {
-                    //(4.0) 使用 xResults[0] 當 Chip Center
-                    cell.xFindResult = chipMatcher.xResults[0];
-                    var debug_org_center_x = cell.xFindResult.fCenterX;
-                    var debug_org_center_y = cell.xFindResult.fCenterY;
-                    cell.xFindResult.fCenterX += cellRoi.X;
-                    cell.xFindResult.fCenterY += cellRoi.Y;
+                    ////(4.0) 使用 xResults[0] 當 Chip Center
+                    //cell.xFindResult = chipMatcher.xResults[0];
+                    //var debug_org_center_x = cell.xFindResult.fCenterX;
+                    //var debug_org_center_y = cell.xFindResult.fCenterY;
+                    //cell.xFindResult.fCenterX += cellRoi.X;
+                    //cell.xFindResult.fCenterY += cellRoi.Y;
 
-                    //(4.1) 晶粒定位中心點(camera coorindates)
-                    var chipSize = _xRecipe.xRegionTrain.Size;
-                    var chipBox2D = toBox2D(ref cell.xFindResult, chipSize);
+                    ////(4.1) 晶粒定位中心點(camera coorindates)
+                    //var chipSize = _xRecipe.xRegionTrain.Size;
+                    //var chipBox2D = toBox2D(ref cell.xFindResult, chipSize);
+                    //var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
+
+                    ////(4.2) 將定位結果記入 cell.ChipData
+                    //cell.ChipData.Roi = cellRoi;
+                    //cell.ChipData.ChipBox2D = chipBox2D;
+                    //cell.ChipData.PadsGrid = chipMatcher.GetResultPadsGrid();
+                    //cell.ChipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
+
+                    //(4.*) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
+                    var chipBox2D = chipData.ChipBox2D;
                     var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
-
-                    //(4.2) 將定位結果記入 cell.ChipData
-                    cell.ChipData.Roi = cellRoi;
-                    cell.ChipData.ChipBox2D = chipBox2D;
-                    cell.ChipData.PadsGrid = chipMatcher.GetResultPadsGrid();
-                    cell.ChipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
-
-                    //(4.3) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
                     cell.SetMvdRunPositionFix(GaMvdExt.ToCMvdRectangleF(chipBox2D));
 
                     #region 加入_DEBUG_STRING
@@ -280,6 +287,8 @@ namespace LaserAlignDX.AoiModel.V3
                     //debugCellCenterStr += $"VIEW:{cellRoi.X};{cellRoi.Y}#";
                     //debugCellCenterStr += $"ORG:{cell.xFindResult.fCenterX};{cell.xFindResult.fCenterY}#";
                     //debugCellCenterStr += $"DES:{cell.xFindResult.fCenterX};{cell.xFindResult.fCenterY}{Environment.NewLine}";
+                    var debug_org_center_x = cell.xFindResult.fCenterX - cellRoi.X;
+                    var debug_org_center_y = cell.xFindResult.fCenterY - cellRoi.Y;
                     debugSB.Append("INDEX:").Append(cell.Index).Append("#");
                     debugSB.Append("VIEW:").Append(cellRoi.X).Append(";").Append(cellRoi.Y).Append("#");
                     debugSB.Append("ORG:").Append(debug_org_center_x).Append(";").Append(debug_org_center_y).Append("#");
@@ -342,6 +351,39 @@ namespace LaserAlignDX.AoiModel.V3
             }
 
             return debugSB.ToString();
+        }
+
+        bool _LocateOneChip(Bitmap cellBmp, ref RectangleF cellRoi, out GaChipData chipData, IMvdTemplateMatcher chipMatcher)
+        {
+            chipData = null;
+
+            bool ok = chipMatcher.RunMatch(cellBmp);
+
+            ok &= chipMatcher.xResults.Count > 0;
+
+            if (ok)
+            {
+                //(4.0) 使用 xResults[0] 當 Chip Center
+                var xFindResult = chipMatcher.xResults[0];
+                //var debug_org_center_x = cell.xFindResult.fCenterX;
+                //var debug_org_center_y = cell.xFindResult.fCenterY;
+                xFindResult.fCenterX += cellRoi.X;
+                xFindResult.fCenterY += cellRoi.Y;
+
+                //(4.1) 晶粒定位中心點(camera coorindates)
+                var chipSize = _xRecipe.xRegionTrain.Size;
+                var chipBox2D = toBox2D(ref xFindResult, chipSize);
+                var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
+
+                //(4.2) 將定位結果記入 cell.ChipData
+                chipData = new GaChipData();
+                chipData.Roi = cellRoi;
+                chipData.ChipBox2D = chipBox2D;
+                chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
+                chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
+            }
+
+            return ok;
         }
 
         /// <summary>
@@ -512,6 +554,7 @@ namespace LaserAlignDX.AoiModel.V3
         }
 
         #endregion
+
 
         #region HELPERS
         QvBox2D toBox2D(ref AUVision.xFindResult xResult, SizeF size, float offsetX = 0f, float offsetY = 0f)

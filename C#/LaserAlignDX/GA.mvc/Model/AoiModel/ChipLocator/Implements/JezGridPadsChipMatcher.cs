@@ -102,6 +102,7 @@ namespace LaserAlignDX.AoiModel
 
             _ezChipMatcher.PadThreshold = _recipeParams.xGridPadThreshold;
             _ezChipMatcher.DistTransThreshold = _recipeParams.xDistTransThreshold;
+            _ezChipMatcher.LargeAngleEnabled = _recipeParams.xUseLargePadGridAngle;
 
             var rigidBody = _ezChipMatcher.FindBestMatch(bmpScene);
 

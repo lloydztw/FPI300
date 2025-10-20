@@ -1,4 +1,5 @@
-﻿using LaserAlignDX.Mvc.Model;
+﻿using LaserAlignDX.Model;
+using LaserAlignDX.Mvc.Model;
 using LeTian.AoiLib;
 using System;
 using System.Drawing;
@@ -39,6 +40,14 @@ namespace LaserAlignDX.AoiModel
 
         void Run();
 
+        /// <summary>
+        /// 為 參數編輯 所用
+        /// </summary>
         ErrCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi);
+
+        ///// <summary>
+        ///// 為 參數編輯 所用
+        ///// </summary>
+        //bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData);
     }
 }

@@ -1600,6 +1600,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public int xDistTransThreshold { get; set; } = 0;
 
+        [CategoryAttribute(_Cat03), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '啟用大角度定位'")]
+        [DisplayName("A3 格點型晶粒 啟用大角度定位")]
+        [Browsable(true)]
+        public bool xUseLargePadGridAngle { get; set; } = false;
+
         //>>> const string _Cat1B = "A01.B '一般型' 晶粒定位";
         [CategoryAttribute(_Cat03), DescriptionAttribute("'一般型晶粒' 模板匹配的相似程度")]
         [DisplayName("B1 一般型晶粒 相似度")]
@@ -1981,8 +1986,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //xExtendy = int.Parse(ReadINIValue("Basic", "xExtendy", "20", INIFILE));
             xMaxOverlap = int.Parse(ReadINIValue("Basic", "xMaxOverlap", "80", INIFILE));
             xChipOverlap = float.Parse(ReadINIValue("Basic", "xChipOverlap", "0.5", INIFILE));
+
             xGridPadThreshold = int.Parse(ReadINIValue("Basic", "xGridPadThreshold", "0", INIFILE));
             xDistTransThreshold = int.Parse(ReadINIValue("Basic", "xDistTransThreshold", "0", INIFILE));
+            xUseLargePadGridAngle = int.Parse(ReadINIValue("Basic", "xUseLargePadGridAngle", "0", INIFILE)) == 1;
 
             xThresholdValue = int.Parse(ReadINIValue("Inspect", "xThresholdValue", "128", INIFILE));
             xCharWidth = float.Parse(ReadINIValue("Inspect", "xCharWidth", "15.1", INIFILE));
@@ -2058,8 +2065,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //WriteINIValue("Basic", "xExtendy", xExtendy.ToString(), INIFILE);
             WriteINIValue("Basic", "xMaxOverlap", xMaxOverlap.ToString(), INIFILE);
             WriteINIValue("Basic", "xChipOverlap", xChipOverlap.ToString(), INIFILE);
+
             WriteINIValue("Basic", "xGridPadThreshold", xGridPadThreshold.ToString(), INIFILE);
             WriteINIValue("Basic", "xDistTransThreshold", xDistTransThreshold.ToString(), INIFILE);
+            WriteINIValue("Basic", "xUseLargePadGridAngle", xUseLargePadGridAngle ? "1" : "0", INIFILE);
 
             WriteINIValue("Inspect", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
             WriteINIValue("Inspect", "xCharWidth", xCharWidth.ToString(), INIFILE);

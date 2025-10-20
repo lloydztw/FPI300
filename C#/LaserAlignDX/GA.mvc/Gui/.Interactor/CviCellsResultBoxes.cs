@@ -683,7 +683,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         void draw_ChipsLoc(CvImageViewer viewer, Graphics gxView)
         {
             var activeCell = _cviRegionBox?.Tag;
-            var forceDraw = !_xRecipe.InspectParams.optChipMeasurement;
+            
+            //var forceDraw = !_xRecipe.InspectParams.optChipMeasurement;
+            var forceDraw = !_xRecipe.InspectParams.optPadEdgeGapsMeasurement;
+
             foreach (var item in _drawItems)
             {
                 if (item == null) continue;
@@ -1369,7 +1372,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             // (1) ImageHolder
             var lineScanImageHolder = GaMvcConfig.SysModel.LineScanImageHolder;
-            string srcName = lineScanImageHolder.SrcName;
+            //string srcName = lineScanImageHolder.SrcName;
 
             // (2) Directory
             string dstPath = System.IO.Path.Combine(PATH_DUMP, "dumpOne");
@@ -1379,13 +1382,12 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             // (3) Thresh and Golden
             var goldenBmp = _xRecipe.bmpprinttemplate;
-            var extendX = _xRecipe.xExtendx;
-            var extendY = _xRecipe.xExtendy;
 
             // (4) Matcher
             var matcher = new EzRigidBodyGridMatcher(shrink: 1);
-            matcher.PadThreshold = _xRecipe.InspectParams.xGridPadThreshold; ;          //<<< PadThresh 要先設定, 才能取 Golden
-            matcher.DistTransThreshold = _xRecipe.InspectParams.xDistTransThreshold; ;
+            matcher.PadThreshold = _xRecipe.InspectParams.xGridPadThreshold;                //<<< PadThresh 要先設定, 才能取 Golden
+            matcher.DistTransThreshold = _xRecipe.InspectParams.xDistTransThreshold;
+            matcher.LargeAngleEnabled = _xRecipe.InspectParams.xUseLargePadGridAngle;
             matcher.SetGoldenTemplate(goldenBmp);
 
             // (5) 測試資料

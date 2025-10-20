@@ -28,7 +28,7 @@ namespace Traveller106
         public static readonly bool N_THREADS_ENABLED = false;
         public static readonly int N_THREADS = 16;
 
-        public static bool IsNoUseCCD = false;
+        public static bool IsNoUseCCD = true;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
@@ -65,7 +65,7 @@ namespace Traveller106
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_BIN_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M01_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M03_";
-                    return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
+                    //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
                     return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
                 }
                 return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";

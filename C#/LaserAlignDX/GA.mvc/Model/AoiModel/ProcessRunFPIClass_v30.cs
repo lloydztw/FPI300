@@ -15,6 +15,7 @@
 
 
 using JetEazy.Utils;
+using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
 using OpenCvSharp;
@@ -276,6 +277,11 @@ namespace LaserAlignDX.AoiModel.V3
             return err;
         }
 
+        //public bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
+        //{
+        //    return _aoiChipLoc.LocateOneChip(cellBmp, cellRoi, out chipData);
+        //}
+
         public override void Run()
         {
             #region DIRECTORIES_可以搬到後面處理_才不會有遲滯感覺
@@ -317,6 +323,7 @@ namespace LaserAlignDX.AoiModel.V3
             thread.Start();
         }
 
+        #region PRIVATE_IMPLEMENT_FUNCTIONS
         private void _RunChipLocAndMeasurement()
         {
             try
@@ -410,5 +417,6 @@ namespace LaserAlignDX.AoiModel.V3
             }
             return isPass;
         }
+        #endregion
     }
 }
