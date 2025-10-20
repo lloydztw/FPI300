@@ -142,7 +142,7 @@ namespace LaserAlignDX.AoiModel.V3
         }
 
         /// <summary>
-        /// 參數校正使用
+        /// 提供 給 參數編輯 使用
         /// </summary>
         internal bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
         {
@@ -172,7 +172,6 @@ namespace LaserAlignDX.AoiModel.V3
             }
             return ok;
         }
-
 
         #region PRIVATE_FUNCTIONS
 

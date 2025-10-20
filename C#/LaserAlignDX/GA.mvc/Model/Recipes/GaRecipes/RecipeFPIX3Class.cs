@@ -1585,15 +1585,22 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public float xChipOverlap { get; set; } = 0.5f;
 
-        //const string _Cat1A = "A01.A '格點型' 晶粒定位";
+        //>>> const string _Cat1A = "A01.A '格點型' 晶粒定位";
         [CategoryAttribute(_Cat03), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '格點門限值'")]
-        [DisplayName("A0 格點型晶粒 門限")]
+        [DisplayName("A1 格點型晶粒 門限")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
         [Browsable(true)]
         public int xGridPadThreshold { get; set; } = 0;
 
-        //const string _Cat1B = "A01.B '一般型' 晶粒定位";
+        [CategoryAttribute(_Cat03), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '去刮痕閥值'")]
+        [DisplayName("A2 格點型晶粒 去刮痕閥值")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
+        [Browsable(true)]
+        public int xDistTransThreshold { get; set; } = 0;
+
+        //>>> const string _Cat1B = "A01.B '一般型' 晶粒定位";
         [CategoryAttribute(_Cat03), DescriptionAttribute("'一般型晶粒' 模板匹配的相似程度")]
         [DisplayName("B1 一般型晶粒 相似度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -1975,6 +1982,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xMaxOverlap = int.Parse(ReadINIValue("Basic", "xMaxOverlap", "80", INIFILE));
             xChipOverlap = float.Parse(ReadINIValue("Basic", "xChipOverlap", "0.5", INIFILE));
             xGridPadThreshold = int.Parse(ReadINIValue("Basic", "xGridPadThreshold", "0", INIFILE));
+            xDistTransThreshold = int.Parse(ReadINIValue("Basic", "xDistTransThreshold", "0", INIFILE));
 
             xThresholdValue = int.Parse(ReadINIValue("Inspect", "xThresholdValue", "128", INIFILE));
             xCharWidth = float.Parse(ReadINIValue("Inspect", "xCharWidth", "15.1", INIFILE));
@@ -2051,6 +2059,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "xMaxOverlap", xMaxOverlap.ToString(), INIFILE);
             WriteINIValue("Basic", "xChipOverlap", xChipOverlap.ToString(), INIFILE);
             WriteINIValue("Basic", "xGridPadThreshold", xGridPadThreshold.ToString(), INIFILE);
+            WriteINIValue("Basic", "xDistTransThreshold", xDistTransThreshold.ToString(), INIFILE);
 
             WriteINIValue("Inspect", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
             WriteINIValue("Inspect", "xCharWidth", xCharWidth.ToString(), INIFILE);

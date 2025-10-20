@@ -38,6 +38,7 @@
             this.DS2 = new JzDisplay.UISpace.DispUI();
             this.DS3 = new JzDisplay.UISpace.DispUI();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.btnBuildMircoTrf = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.numSpanRatio = new System.Windows.Forms.NumericUpDown();
             this.labelA = new System.Windows.Forms.Label();
@@ -62,7 +63,6 @@
             this.btnDefectAdd = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnTrain = new System.Windows.Forms.Button();
-            this.btnBuildMircoTrf = new System.Windows.Forms.Button();
             this.tbLayoutSubM.SuspendLayout();
             this.tbLayoutA.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -200,6 +200,19 @@
             this.groupBox2.TabIndex = 75;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "自動框選 邊線";
+            // 
+            // btnBuildMircoTrf
+            // 
+            this.btnBuildMircoTrf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnBuildMircoTrf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.btnBuildMircoTrf.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnBuildMircoTrf.Location = new System.Drawing.Point(327, 77);
+            this.btnBuildMircoTrf.Margin = new System.Windows.Forms.Padding(4);
+            this.btnBuildMircoTrf.Name = "btnBuildMircoTrf";
+            this.btnBuildMircoTrf.Size = new System.Drawing.Size(116, 46);
+            this.btnBuildMircoTrf.TabIndex = 74;
+            this.btnBuildMircoTrf.Text = "精算尺寸";
+            this.btnBuildMircoTrf.UseVisualStyleBackColor = false;
             // 
             // label2
             // 
@@ -551,19 +564,6 @@
             this.btnTrain.Text = "訓練 模板";
             this.btnTrain.UseVisualStyleBackColor = false;
             this.btnTrain.Visible = false;
-            // 
-            // btnBuildMircoTrf
-            // 
-            this.btnBuildMircoTrf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnBuildMircoTrf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.btnBuildMircoTrf.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnBuildMircoTrf.Location = new System.Drawing.Point(327, 77);
-            this.btnBuildMircoTrf.Margin = new System.Windows.Forms.Padding(4);
-            this.btnBuildMircoTrf.Name = "btnBuildMircoTrf";
-            this.btnBuildMircoTrf.Size = new System.Drawing.Size(116, 46);
-            this.btnBuildMircoTrf.TabIndex = 74;
-            this.btnBuildMircoTrf.Text = "精算尺寸";
-            this.btnBuildMircoTrf.UseVisualStyleBackColor = false;
             // 
             // FormTemplateEditor
             // 

@@ -27,40 +27,52 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
         public Size? MinSize = null;
         public Size? MaxSize = null;
 
-        public int FindWhiteBlobs(Mat img, out List<EzBloc> keyBlocs)
+        /// <summary>
+        /// binaryImg 內容可能會被改變
+        /// </summary>
+        public int FindWhiteBlobs(Mat binaryImg, out List<EzBloc> keyBlocs)
         {
             keyBlocs = new List<EzBloc>();
-            Mat whiteBlobsBinary = img;
 
             if (MorphIterations > 0)
             {
-                Cv2.Dilate(whiteBlobsBinary, whiteBlobsBinary, null, iterations: MorphIterations);
-                Cv2.Erode(whiteBlobsBinary, whiteBlobsBinary, null, iterations: MorphIterations);
+                Cv2.Dilate(binaryImg, binaryImg, null, iterations: MorphIterations);
+                Cv2.Erode(binaryImg, binaryImg, null, iterations: MorphIterations);
             }
 
             if (OptFillBorder)
             {
-                var rect = new Rect(0, 0, whiteBlobsBinary.Width, whiteBlobsBinary.Height);
-                whiteBlobsBinary.Rectangle(rect, Scalar.White);
-                Cv2.FloodFill(whiteBlobsBinary, new OpenCvSharp.Point(0, 0), Scalar.Black);
+                var rect = new Rect(0, 0, binaryImg.Width, binaryImg.Height);
+                binaryImg.Rectangle(rect, Scalar.White);
+                Cv2.FloodFill(binaryImg, new OpenCvSharp.Point(0, 0), Scalar.Black);
             }
 
-            int min_w = img.Width / 3;
-            int min_h = img.Height / 3;
-            int max_w = img.Width;
-            int max_h = img.Height;
+            int min_w;  // = img.Width / 3;
+            int min_h;  // = img.Height / 3;
+            int max_w;  // = img.Width;
+            int max_h;  // = img.Height;
             if(MinSize.HasValue)
             {
                 min_w = MinSize.Value.Width;
                 min_h = MinSize.Value.Height;
+            }
+            else
+            {
+                min_w = binaryImg.Width / 3;
+                min_h = binaryImg.Height / 3;
             }
             if (MaxSize.HasValue)
             {
                 max_w = MaxSize.Value.Width;
                 max_h = MaxSize.Value.Height;
             }
+            else
+            {
+                max_w = binaryImg.Width;
+                max_h = binaryImg.Height;
+            }
 
-            var cc = Cv2.ConnectedComponentsEx(whiteBlobsBinary);
+            var cc = Cv2.ConnectedComponentsEx(binaryImg);
             for (int i = 1; i < cc.Blobs.Count; i++)
             {
                 var ccBlob = cc.Blobs[i];

@@ -13,6 +13,7 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model.Aoi;
 using JetEazy.Match;
 using JetEazy.QxCollections;
 using OpenCvSharp;
@@ -33,8 +34,7 @@ namespace LeTian.AoiLib
         #endregion
 
         #region BLOB_FILTER_PARAMETERS
-        bool _optFillOffBorder = true;
-        bool _optUseInnerFilter = true;
+        EzBlobFinder _blobFinder = new EzBlobFinder();
         #endregion
 
         public EzPadsGridFinder(int shrink = 1)
@@ -61,6 +61,13 @@ namespace LeTian.AoiLib
         {
             get; set;
         }
+        /// <summary>
+        /// Runtime Parameter
+        /// </summary>
+        public int DistTransThreshold
+        {
+            get; set;
+        }
 
         /// <summary>
         /// 用於 DEBUG 
@@ -69,17 +76,8 @@ namespace LeTian.AoiLib
         {
             using (Mat binary = new Mat())
             {
-                if (_optUseInnerFilter)
-                {
-                    findWhiteKeyPoints(img, out blocs, useInnerFilter: true, imgDebugOutput: binary);
-                    _DUMP_VISUAL(binary, null, false, Scalar.Black, "Binary");
-                }
-                else
-                {
-                    applyPadsFilter(img, binary);
-                    findWhiteKeyPoints(img, out blocs, useInnerFilter: false);
-                    _DUMP_VISUAL(binary, null, false, Scalar.Black, "Binary");
-                }
+                findWhiteKeyPoints(img, out blocs, useInnerFilter: true, imgDebugOutput: binary);
+                _DUMP_VISUAL(binary, null, false, Scalar.Black, "Binary");
             }
             _blocs = blocs;
         }
@@ -89,20 +87,8 @@ namespace LeTian.AoiLib
             keyRow = -1;
             keyCol = -1;
 
-            if (_optUseInnerFilter)
-            {
-                findWhiteRigidGrid(img, out grid, useInnerFilter: true);
-                FindSpecialKeyPad(img, grid, out keyRow, out keyCol, out keySQRatio);
-            }
-            else
-            {
-                using (Mat binary = new Mat())
-                {
-                    applyPadsFilter(img, binary);
-                    findWhiteRigidGrid(binary, out grid, useInnerFilter: false);
-                    FindSpecialKeyPad(img, grid, out keyRow, out keyCol, out keySQRatio);
-                }
-            }
+            findWhiteRigidGrid(img, out grid, useInnerFilter: true);
+            FindSpecialKeyPad(img, grid, out keyRow, out keyCol, out keySQRatio);
         }
         public void RebuildPadsGrid(Mat img, double angle, out EzBlocsGrid grid, out int keyRow, out int keyCol, out double keySQRatio)
         {
@@ -122,6 +108,11 @@ namespace LeTian.AoiLib
         public List<EzBloc> GetBlocsPool()
         {
             return _blocs;
+        }
+
+        public void TryApplyFilters(Mat img, Mat imgOut)
+        {
+            applyAllFilters(img, imgOut);
         }
 
         #region PRIVATE_BLOB_FUNCTIONS
@@ -156,7 +147,7 @@ namespace LeTian.AoiLib
                 min_h = Math.Max(min_h, 3);
             }
         }
-        void findWhiteRigidGrid(Mat img, out EzBlocsGrid gridPoints, bool useInnerFilter = false)
+        void findWhiteRigidGrid(Mat img, out EzBlocsGrid gridPoints, bool useInnerFilter = true)
         {
             findWhiteKeyPoints(img, out _blocs, useInnerFilter: useInnerFilter);
 
@@ -208,92 +199,160 @@ namespace LeTian.AoiLib
                 gridPoints.ColMin = 0;
             }
         }
-        void findWhiteKeyPoints(Mat img, out List<EzBloc> keyBlocs, bool useInnerFilter = false, Mat imgDebugOutput = null)
+        void findWhiteKeyPoints(Mat image, out List<EzBloc> keyBlocs, bool useInnerFilter = true, Mat imgDebugOutput = null)
         {
             var gc = new List<IDisposable>();
 
-            int min_w, min_h;
-            int max_w, max_h;
-            getBlobFilterMinMaxSize(img, out min_w, out min_h, out max_w, out max_h);
-
             // SHRINK
-            apply_shrink(img, out img, gc);
+            apply_shrink(image, out image, gc);
 
-            keyBlocs = new List<EzBloc>();
-            
-            Mat whiteBlobsBinary = img;
+            // BINARY
+            Mat binaryImg;
+
             if (useInnerFilter)
             {
-                whiteBlobsBinary = new Mat();
-                applyPadsFilter(img, whiteBlobsBinary);
-                gc.Add(whiteBlobsBinary);
-            }
+                binaryImg = new Mat();
+                gc.Add(binaryImg);
 
-            if (true)
+                //applyPadsFilter(image, binaryImg);      //@<<< findWhiteKeyPoints
+                //if (_shrinkFactor < 8)
+                //{
+                //    Cv2.Dilate(binaryImg, binaryImg, null);
+                //    Cv2.Erode(binaryImg, binaryImg, null);
+                //    if (_optFillOffBorder)
+                //    {
+                //        var rect = new Rect(0, 0, binaryImg.Width, binaryImg.Height);
+                //        binaryImg.Rectangle(rect, Scalar.White);
+                //        Cv2.FloodFill(binaryImg, new Point(0, 0), Scalar.Black);
+                //    }
+                //}
+                //if (imgDebugOutput != null)
+                //{
+                //    binaryImg.CopyTo(imgDebugOutput);
+                //}
+
+                applyAllFilters(image, binaryImg);      //@<<< findWhiteKeyPoints
+            }
+            else
             {
-                if (_shrinkFactor < 8)
+                binaryImg = image;
+            }
+
+            getBlobFilterMinMaxSize(image, out int min_w, out int min_h, out int max_w, out int max_h);
+            _blobFinder.MinSize = new CvSize(min_w, min_h);
+            _blobFinder.MaxSize = new CvSize(max_w, max_h);
+            _blobFinder.OptFillBorder = _shrinkFactor < 8;
+            _blobFinder.MorphIterations = _shrinkFactor < 8 && DistTransThreshold <= 0 ? 1 : 0;
+            _blobFinder.FindWhiteBlobs(binaryImg, out keyBlocs);
+
+            // DEBUG
+            if (imgDebugOutput != null)
+            {
+                binaryImg.CopyTo(imgDebugOutput);
+            }
+
+            // UNSHRINK
+            if (_shrinkFactor > 1)
+            {
+                foreach (var bloc in keyBlocs)
                 {
-                    Cv2.Dilate(whiteBlobsBinary, whiteBlobsBinary, null);
-                    Cv2.Erode(whiteBlobsBinary, whiteBlobsBinary, null);
-
-                    if (_optFillOffBorder)
-                    {
-                        var rect = new Rect(0, 0, whiteBlobsBinary.Width, whiteBlobsBinary.Height);
-                        whiteBlobsBinary.Rectangle(rect, Scalar.White);
-                        Cv2.FloodFill(whiteBlobsBinary, new Point(0, 0), Scalar.Black);
-                    }
-                }
-
-                if (imgDebugOutput != null)
-                {
-                    //whiteBlobsBinary.SaveImage(dumpFile);
-                    whiteBlobsBinary.CopyTo(imgDebugOutput);
-                }
-
-                var cc = Cv2.ConnectedComponentsEx(whiteBlobsBinary);
-                for (int i = 1; i < cc.Blobs.Count; i++)
-                {
-                    var ccBlob = cc.Blobs[i];
-
-                    if (ccBlob.Width < min_w || ccBlob.Height < min_h ||
-                        ccBlob.Width > max_w || ccBlob.Height > max_h)
-                        continue;
-
-                    //var kp = new KeyPoint((float)ccBlob.Centroid.X, (float)ccBlob.Centroid.Y, orb_keypoint_size);
-                    //pts.Add(kp);
-
-                    var rect = JetEazy.Qcvt.CC(ccBlob.Rect);
-
-                    // UNSHRINK
-                    if (_shrinkFactor > 1)
-                    {
-                        rect.X *= _shrinkFactor;
-                        rect.Y *= _shrinkFactor;
-                        rect.Width *= _shrinkFactor;
-                        rect.Height *= _shrinkFactor;
-                    }
-
-                    var bloc = new EzBloc(rect, 0);
-                    bloc.Pixels = ccBlob.Area;
-                    bloc.Center = new JetEazy.QMath.QVector(ccBlob.Centroid.X, ccBlob.Centroid.Y); // 保留精度 !
-                    keyBlocs.Add(bloc);
+                    if (bloc == null) continue;
+                    bloc.Rect.X *= _shrinkFactor;
+                    bloc.Rect.Y *= _shrinkFactor;
+                    bloc.Rect.Width *= _shrinkFactor;
+                    bloc.Rect.Height *= _shrinkFactor;
+                    bloc.Center = bloc.Center * _shrinkFactor;
                 }
             }
+
+#if(false)
+            var cc = Cv2.ConnectedComponentsEx(binaryImg);
+            for (int i = 1; i < cc.Blobs.Count; i++)
+            {
+                var ccBlob = cc.Blobs[i];
+
+                if (ccBlob.Width < min_w || ccBlob.Height < min_h ||
+                    ccBlob.Width > max_w || ccBlob.Height > max_h)
+                    continue;
+
+                //var kp = new KeyPoint((float)ccBlob.Centroid.X, (float)ccBlob.Centroid.Y, orb_keypoint_size);
+                //pts.Add(kp);
+
+                var rect = JetEazy.Qcvt.CC(ccBlob.Rect);
+
+                // UNSHRINK
+                if (_shrinkFactor > 1)
+                {
+                    rect.X *= _shrinkFactor;
+                    rect.Y *= _shrinkFactor;
+                    rect.Width *= _shrinkFactor;
+                    rect.Height *= _shrinkFactor;
+                }
+
+                var bloc = new EzBloc(rect, 0);
+                bloc.Pixels = ccBlob.Area;
+                bloc.Center = new JetEazy.QMath.QVector(ccBlob.Centroid.X, ccBlob.Centroid.Y); // 保留精度 !
+                keyBlocs.Add(bloc);
+            }
+#endif
 
             #region CLEAN_UP
             foreach (var obj in gc)
                 obj?.Dispose();
             #endregion
         }
+        #endregion
+
+        #region PRIVATE_FILTER_FUNCTIONS
+        void applyAllFilters(Mat img, Mat imgOut)
+        {
+            applyPadsFilter(img, imgOut);
+
+            var distThres = DistTransThreshold;
+            if (distThres > 0)
+            {
+                using (Mat src = imgOut.Clone())
+                {
+                    applyDistTransFilter(src, imgOut, distThres);
+                    Cv2.Dilate(imgOut, imgOut, null, iterations: Math.Min(distThres, 10));
+                }
+            }
+        }
         void applyPadsFilter(Mat img, Mat imgOut)
         {
             // 簡單使用 OTSU (容易受 極端點 干擾)
-            //Cv2.AdaptiveThreshold(img, whiteBlobsBinary, 255, AdaptiveThresholdTypes.MeanC, ThresholdTypes.Binary, 51, 0);
-            //Cv2.Threshold(img, whiteBlobsBinary, 0, 255, ThresholdTypes.Otsu);
             if (PadThreshold <= 0)
                 Cv2.Threshold(img, imgOut, 0, 255, ThresholdTypes.Otsu);
             else
                 Cv2.Threshold(img, imgOut, 200, 255, ThresholdTypes.Binary);
+        }
+        void applyDistTransFilter(Mat binaryImg, Mat imgOut, double thres)
+        {
+            // 1. 執行距離變換 (Distance Transform)
+            using (Mat distanceMap = new Mat())
+            {
+                Cv2.DistanceTransform(
+                    src: binaryImg,
+                    dst: distanceMap,
+                    distanceType: DistanceTypes.L2,             // 歐幾里得距離 (L2) 通常效果最好
+                    maskSize: DistanceTransformMasks.Mask3
+                );
+
+                // 距離變換的結果是 CV_32F 類型 (浮點數)，需要歸一化或直接閾值處理
+
+                // 2. 距離圖閾值處理
+                Cv2.Threshold(
+                    src: distanceMap,
+                    dst: distanceMap,
+                    thresh: thres, // 距離閾值 (這個值需要仔細調整)
+                    maxval: 255,
+                    type: ThresholdTypes.Binary
+                );
+
+                // 將結果從 CV_32F 轉為 CV_8U，以供後續輪廓尋找 (如果需要)
+                // 由於閾值後的結果已經是 0 或 255，可以直接轉型
+                distanceMap.ConvertTo(imgOut, MatType.CV_8U);
+            }
         }
         #endregion
 
@@ -425,14 +484,14 @@ namespace LeTian.AoiLib
         /// </summary>
         double calcSQRatio(Mat image, ref Rect roi, bool useFilter = true)
         {
-            using (Mat binary = new Mat())
+            using (Mat binaryImg = new Mat())
             {
                 if (useFilter)
-                    applyPadsFilter(image, binary);
+                    applyPadsFilter(image, binaryImg);     //@<<< calcSQRatio
                 else
-                    image.CopyTo(binary);
+                    image.CopyTo(binaryImg);
 
-                var padImage = binary[roi];
+                var padImage = binaryImg[roi];
 
                 int whitePixels = padImage.CountNonZero();
 

@@ -88,6 +88,12 @@ namespace LeTian.AoiLib
             get => _padsFinder.PadThreshold;
             set => _padsFinder.PadThreshold = value;
         }
+        public int DistTransThreshold
+        {
+            get => _padsFinder.DistTransThreshold;
+            set => _padsFinder.DistTransThreshold = value;
+        }
+
         public RigidBody FindBestMatch(Bitmap bmpScene, string debugDumpFile = null)
         {
             Bitmap bmpU8 = GaImageUtil.ToU8(bmpScene);

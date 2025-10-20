@@ -360,7 +360,7 @@
   <ItemGroup>
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
-    <Compile Include="GA.mvc\Ctrl\GaContinousSelfTestCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v35.cs" />
@@ -392,6 +392,12 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.Designer.cs">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormPadThresholdsEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormPadThresholdsEditor.Designer.cs">
+      <DependentUpon>FormPadThresholdsEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormChipTemplateDim.cs">
       <SubType>Form</SubType>
@@ -833,6 +839,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.resx">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormPadThresholdsEditor.resx">
+      <DependentUpon>FormPadThresholdsEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormChipTemplateDim.resx">
       <DependentUpon>FormChipTemplateDim.cs</DependentUpon>

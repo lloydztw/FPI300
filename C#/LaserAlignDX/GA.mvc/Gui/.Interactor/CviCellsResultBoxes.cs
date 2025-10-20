@@ -21,7 +21,6 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
@@ -326,16 +325,17 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 case Keys.F2:
                     if (!BY_PASS && e.Control)
                     {
-                        var oldCursor = GaUtil.SetCursor(viewer.FindForm(), Cursors.AppStarting);
-                        DumpCellRegions();
-                        GaUtil.SetCursor(viewer.FindForm(), oldCursor);
+                        DumpCellRegions(viewer);
                     }
                     break;
-            }
 
-            if (e.Control && e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9)
-            {
-                DumpChipDimsInCol((int)e.KeyCode - (int)Keys.D0);
+                case Keys.C:
+                    if (!BY_PASS && e.Control)
+                    {
+                        CopyOneChipDimsToClipboard();
+                        _isCtrlPressed = false;
+                    }
+                    break;
             }
 
             base.OnKeyDown(viewer, e);
@@ -1289,24 +1289,36 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (_menuStrip == null)
             {
                 _frmOwner = wnd.FindForm();
-
                 wnd.HandleDestroyed += (s, e) => disposeMenuStrip();
-                var menu0 = new ToolStripMenuItem("設定 晶粒 標準尺寸");
-                var menu1 = new ToolStripMenuItem("Dump 尺寸量測結果 (in row)");
-                var menu2 = new ToolStripMenuItem("Dump 尺寸量測結果 (in col)");
-                var menu3 = new ToolStripMenuItem("Dump 所有區域圖像 (All)");
-                //var menu4 = new ToolStripMenuItem("Debug 調試 晶粒定位 圖像");
-                menu0.Click += (s, e) => OpenGoldenDimensionEditorDlg();
-                menu1.Click += (s, e) => DumpChipDimsInRow(-1);
-                menu2.Click += (s, e) => DumpChipDimsInCol(-1);
-                menu3.Click += (s, e) => DumpCellRegions();
+
+                var menuRcps = new[]
+                {
+                    new ToolStripMenuItem("設定 晶粒 標準尺寸"),
+                    new ToolStripMenuItem("設定 晶粒 PAD 門限值"),
+                };
+                var menuDumps = new[]
+                {
+                    //new ToolStripMenuItem("Dump 尺寸量測結果 (in row)"),
+                    new ToolStripMenuItem("Copy One 複製 尺寸量測結果"),
+                    new ToolStripMenuItem("Dump One 保存 單一區域圖像"),
+                    new ToolStripMenuItem("Dump All 保存 所有區域圖像"),
+                    new ToolStripMenuItem("Debug One 調試 晶粒定位 圖像"),
+                };
+
+                int i = 0;
+                menuRcps[i++].Click += (s, e) => OpenGoldenDimensionEditorDlg();
+                menuRcps[i++].Click += (s, e) => OpenPadsFiltersEditorDlg();
+
+                int k = 0;
+                menuDumps[k++].Click += (s, e) => CopyOneChipDimsToClipboard();
+                menuDumps[k++].Click += (s, e) => DumpOneCellRegion(wnd);
+                menuDumps[k++].Click += (s, e) => DumpCellRegions(wnd);
+                menuDumps[k++].Click += (s, e) => DebugMatching(null);
 
                 _menuStrip = new ContextMenuStrip();
-                _menuStrip.Items.Add(menu0);
+                _menuStrip.Items.AddRange(menuRcps);
                 _menuStrip.Items.Add(new ToolStripSeparator());
-                _menuStrip.Items.Add(menu1);
-                _menuStrip.Items.Add(menu2);
-                _menuStrip.Items.Add(menu3);
+                _menuStrip.Items.AddRange(menuDumps);
             }
         }
         void disposeMenuStrip()
@@ -1325,14 +1337,31 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         #endregion
 
-        #region DEBUG_FUNCTIONS
+        #region DUMP_FUNCTIONS
         static string PATH_DUMP => "d:\\paso.log\\chipLoc";
-        void DebugMatching(CellBloc cellBloc)
+        bool checkPrivilege()
+        {
+            var account = Traveller106.Universal.ACCDB.AccNow;
+            if (account == null || !account.IsAllowSetupRecipe)
+            {
+                VsMessageBox.Warning("請先登入 擁有修改參數權限 的 帳號!");
+                return false;
+            }
+            return true;
+        }
+        void DebugMatching(CellBloc cellBloc = null)
         {
             if (IsEmptyTrayMode)
                 return;
+
+            if (cellBloc == null)
+                cellBloc = _cursorBloc as CellBloc;
+            
             var cell = cellBloc?.Cell;
             if (cell == null) return;
+
+            if (!checkPrivilege())
+                return;
 
             // (0) DEBUG OPIONS
             EzPadsGridFinder.VISUAL_DEBUG = true;
@@ -1349,14 +1378,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             string dumpFile = System.IO.Path.Combine(dstPath, fname);
 
             // (3) Thresh and Golden
-            var thresh = _xRecipe.InspectParams.xGridPadThreshold;
             var goldenBmp = _xRecipe.bmpprinttemplate;
             var extendX = _xRecipe.xExtendx;
             var extendY = _xRecipe.xExtendy;
 
             // (4) Matcher
             var matcher = new EzRigidBodyGridMatcher(shrink: 1);
-            matcher.PadThreshold = thresh;          //<<< PadThresh 要先設定, 才能取 Golden
+            matcher.PadThreshold = _xRecipe.InspectParams.xGridPadThreshold; ;          //<<< PadThresh 要先設定, 才能取 Golden
+            matcher.DistTransThreshold = _xRecipe.InspectParams.xDistTransThreshold; ;
             matcher.SetGoldenTemplate(goldenBmp);
 
             // (5) 測試資料
@@ -1395,8 +1424,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             VxDebugDrawer.DestroyAllWindows();
             EzPadsGridFinder.VISUAL_DEBUG = false;
         }
-        void DumpCellRegions()
+        void DumpCellRegions(Control viewer, XCell targetCell = null)
         {
+            var oldCursor = GaUtil.SetCursor(viewer, Cursors.AppStarting);
+
             EzPadsGridFinder.VISUAL_DEBUG = false;
 
             // (0) ImageHolder
@@ -1414,7 +1445,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             goldenBmp?.Save(System.IO.Path.Combine(dstPath, "0_golden.png"));
 
             // (3) LOOP region cells
-            var xRegionCells = _xRecipe.xRegionCells;
+            var xRegionCells = targetCell == null ? _xRecipe.xRegionCells : new List<XCell> { targetCell };
             var extendX = _xRecipe.xExtendx;
             var extendY = _xRecipe.xExtendy;
             var fullfovBmp = lineScanImageHolder.PeekBitmap();
@@ -1439,7 +1470,50 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
 
             MessageBox.Show($"已存入 Region Cell Images 至\n\r{dstPath}", "DEBUG", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+            GaUtil.SetCursor(viewer, oldCursor);
         }
+        void DumpOneCellRegion(Control viewer)
+        {
+            var cellBloc = _cursorBloc as CellBloc;
+            var targetCell = cellBloc?.Cell;
+            if (targetCell == null) return;
+            DumpCellRegions(viewer, targetCell);
+        }
+        void CopyOneChipDimsToClipboard()
+        {
+            try
+            {
+                var cellBloc = _cursorBloc as CellBloc;
+                var cell = cellBloc?.Cell;
+                var chipData = cell?.ChipData;
+                string textToCopy;
+                if (chipData != null)
+                {
+                    var sb = new StringBuilder();
+                    sb.AppendValues(cell.CellRow, cell.CellCol).Append(",").AppendValues(cell.RunWidth, cell.RunHeight);
+                    textToCopy = sb.ToString();
+                }
+                else
+                {
+                    textToCopy = "";
+                }
+                //System.Windows.Forms.Clipboard.SetText(text);
+                System.Windows.Forms.Clipboard.SetDataObject(textToCopy, true, 10, 200);
+            }
+            catch (System.Exception ex)
+            {
+                // 處理可能發生的錯誤
+                // Console.WriteLine("複製到剪貼簿時發生錯誤: " + ex.Message);
+                // 可以在WPF中使用MessageBox或其他方式提示用戶
+                //VsMessageBox.Warning("複製到剪貼簿失敗: " + ex.Message);
+                MessageBox.Show("複製到剪貼簿失敗: " + ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+        }
+        #endregion
+
+        #region RESERVED_CODE
+#if (OPT_RESERVED)
         void DumpChipDimsInCol(int col)
         {
             if (col < 0 && _cursorBloc is CellBloc cb && cb.Cell != null)
@@ -1494,19 +1568,17 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             GaUtil.SaveData(sb.ToString(), fileName);
             VsMessageBox.Info($"已保存 尺寸數據 至 {fileName}");
         }
+#endif
         #endregion
 
+        #region RECIPE_DIALOG_FUNCTIONS
         void OpenGoldenDimensionEditorDlg()
         {
             var cell = (_cursorBloc as CellBloc)?.Cell;
             if (cell == null) return;
 
-            var account = Traveller106.Universal.ACCDB.AccNow;
-            if(account==null || !account.IsAllowSetupRecipe)
-            {
-                VsMessageBox.Warning("請先登入 有修改參數權限 的 帳號!");
+            if (!checkPrivilege())
                 return;
-            }
 
             using (var dlg = new FormChipTemplateDim())
             {
@@ -1514,5 +1586,31 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 dlg.ShowDialog(_frmOwner);
             }
         }
+        void OpenPadsFiltersEditorDlg()
+        {
+            var cell = (_cursorBloc as CellBloc)?.Cell;
+            if (cell == null) return;
+
+            if (!checkPrivilege())
+                return;
+
+            // (0) ImageHolder
+            var lineScanImageHolder = GaMvcConfig.SysModel.LineScanImageHolder;
+            Bitmap fullfovBmp = lineScanImageHolder.PeekBitmap();
+
+            // (1) ROI
+            var roi = Rectangle.Round(cell.viewRectF);
+            roi.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
+            GaUtil.Clip(ref roi, fullfovBmp.Size);
+
+            // (2) DialogBox and Bmp
+            using (var dlg = new FormPadThresholdsEditor())
+            {
+                Bitmap bmp = fullfovBmp.Clone(roi, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+                dlg.SetSrcImage(bmp, true);
+                dlg.ShowDialog(_frmOwner);
+            }
+        }
+        #endregion
     }
 }

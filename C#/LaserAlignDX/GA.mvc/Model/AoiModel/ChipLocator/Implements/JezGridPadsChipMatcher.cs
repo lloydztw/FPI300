@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using RecipeParams = LaserAlignDX.OPSpace.RecipeSpace.InspectX3ParaClass;
 
+
 namespace LaserAlignDX.AoiModel
 {
     /// <summary>
@@ -100,6 +101,8 @@ namespace LaserAlignDX.AoiModel
             xResults.Clear();
 
             _ezChipMatcher.PadThreshold = _recipeParams.xGridPadThreshold;
+            _ezChipMatcher.DistTransThreshold = _recipeParams.xDistTransThreshold;
+
             var rigidBody = _ezChipMatcher.FindBestMatch(bmpScene);
 
             if (rigidBody != null)
