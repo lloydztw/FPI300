@@ -28,13 +28,13 @@ namespace Traveller106
         public static readonly bool N_THREADS_ENABLED = false;
         public static readonly int N_THREADS = 16;
 
-        public static bool IsNoUseCCD = true;
+        public static bool IsNoUseCCD = false;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/10/17";
+        public const string VersionDate = "2025/10/20";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;

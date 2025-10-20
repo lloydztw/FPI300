@@ -190,8 +190,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
             if (plcIO.bFlyReady && plcIO.iFlyStart > 0)
             {
+                // 離線模擬版本才使用 m_isOnTheFlyFrameEnabled 這個限制變量.
+                if (Traveller106.Universal.IsNoUseCCD)
+                    if (!m_isOnTheFlyFrameEnabled)
+                        return;
+
                 // 防止重複進入
-                if (m_isOnTheFlyFrameBusy || !m_isOnTheFlyFrameEnabled)
+                if (m_isOnTheFlyFrameBusy)
                     return;
 
                 // 設定 線程保護 旗標
