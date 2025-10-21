@@ -1288,16 +1288,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 var menuRcps = new[]
                 {
-                    new ToolStripMenuItem("設定 晶粒 標準尺寸"),
-                    new ToolStripMenuItem("設定 晶粒 PAD 門限值"),
+                    new ToolStripMenuItem("參數: 設定 晶粒 標準尺寸"),
+                    new ToolStripMenuItem("參數: 設定 晶粒 PAD 門限值"),
                 };
                 var menuDumps = new[]
                 {
                     //new ToolStripMenuItem("Dump 尺寸量測結果 (in row)"),
-                    new ToolStripMenuItem("Copy One 複製 尺寸量測結果"),
-                    new ToolStripMenuItem("Dump One 保存 單一區域圖像"),
-                    new ToolStripMenuItem("Dump All 保存 所有區域圖像"),
-                    new ToolStripMenuItem("Debug One 調試 晶粒定位 圖像"),
+                    new ToolStripMenuItem("調試: 複製 單一晶粒 尺寸量測結果"),
+                    new ToolStripMenuItem("調試: 輸出 單一區域 圖像檔案"),
+                    new ToolStripMenuItem("調試: 輸出 所有區域 圖像檔案"),
+                    new ToolStripMenuItem("調試: 顯示 晶粒定位 演算圖像"),
                 };
 
                 int i = 0;

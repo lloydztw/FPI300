@@ -14,6 +14,7 @@
 #endregion
 
 
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
@@ -57,6 +58,7 @@ namespace LaserAlignDX.AoiModel.V3
 
         #region RUNTIME_DATA
         GaCellsGroup[] _cellGroups;
+        EzEmptyTrayResult _preEmptyTrayResult;
         #endregion
 
 
@@ -106,15 +108,18 @@ namespace LaserAlignDX.AoiModel.V3
                 //(4) 取得線掃巨圖: 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
 
-                //(5) 晶粒定位
+                //(5) PreEmptyTray
+                _PreCheckEmptyTray(bmpFullfov);
+
+                //(6) 晶粒定位
                 _RunChipsLocate(bmpFullfov, imgLogPath, out string debugCellCenterStr);
                 _TM.Trace("_Inspect001 : 晶粒定位 & 量測 完成!");
 
-                //(6) 異步輸出 Debug 數據
+                //(7) 異步輸出 Debug 數據
                 markFileTimeTag();
                 saveDebugDataAsync(bmpFullfov, debugCellCenterStr, imgLogPath);
 
-                //(7) 標記終止計時
+                //(8) 標記終止計時
                 markRunEnd(true);
                 fire_AoiEnd();
             }
@@ -152,6 +157,21 @@ namespace LaserAlignDX.AoiModel.V3
 
         #region PRIVATE_FUNCTIONS
 
+        void _PreCheckEmptyTray(Bitmap bmpFullfov)
+        {
+            _preEmptyTrayResult = null;
+            try
+            {
+                var aoi = _sysModel.EmptyTrayAoiModel;
+                aoi.RunAll(bmpFullfov, wait: true);
+                _preEmptyTrayResult = aoi.GetResult();
+            }
+            catch(Exception ex)
+            {
+                _LOG_ERROR(ex, "_PreCheckEmptyTray");
+            }
+        }
+
         /// <summary>
         /// LETIAN: 晶粒定位
         /// </summary>
@@ -163,7 +183,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             DisposeCellGroups();
             int N_GROUPS = MvdCompositeChipMatcher.N_CHANNLS;
-            var groups = GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
+            var groups = GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov, _preEmptyTrayResult);
             _cellGroups = groups;
 
             string[] debugStrs = new string[groups.Length];
@@ -224,7 +244,6 @@ namespace LaserAlignDX.AoiModel.V3
                 //(3) 像測 (使用 chipMatcher)
                 bool ok = _LocateOneChip(cellBmp, ref cellRoi, out var chipData, chipMatcher);
 
-                //(4) 整理 chipData
                 if (ok)
                 {
                     //(4.1) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
@@ -262,14 +281,16 @@ namespace LaserAlignDX.AoiModel.V3
                         //(6) 根據不同載台, 計算補償量
                         var activeCarrierID = getActiveCarrierID();
                         (var motorDelta, var worldDelta) = _transformModel.CalcPlcCompensation(activeCarrierID, chipCentroid, cell.CellRow, cell.CellCol);
-                        double angle = chipQuad2D.Theta * 180 / Math.PI;
 
-                        //(6.1) 記入 Runtime (Gaara) 所需要的數據
-                        cell.RunAngle = (float)Math.Round((angle + INI.Instance.Cal_Bca),3);
+                        //(6.1) Angle
+                        double angle = _CalcAngle(chipData);
+
+                        //(6.2) 記入 Runtime (Gaara) 所需要的數據
+                        cell.RunAngle = (float)Math.Round((angle + INI.Instance.Cal_Bca), 3);
                         cell.RunX = (float)Math.Round((motorDelta.X + INI.Instance.Cal_Bcx), 3);
                         cell.RunY = (float)Math.Round((motorDelta.Y + INI.Instance.Cal_Bcy), 3);
 
-                        //(6.2) 記入 Gaara Sur1 與 Sur2
+                        //(6.3) 記入 Gaara Sur1 與 Sur2
                         if (_transCS1 != null)
                         {
                             var mp = _transCS1.Trans(chipCentroid);
@@ -281,7 +302,7 @@ namespace LaserAlignDX.AoiModel.V3
                             cell.Sur2 = new PointF((float)mp.X, (float)mp.Y);
                         }
 
-                        //(6.3) 記入 ChipData
+                        //(6.4) 記入 ChipData
                         cell.ChipData = chipData;
                         cell.ChipData.ChipCoords.Angle = cell.RunAngle;
                         cell.ChipData.ChipCoords.Centroid = _transCP?.Trans(chipCentroid);
@@ -367,6 +388,31 @@ namespace LaserAlignDX.AoiModel.V3
             }
 
             return ok;
+        }
+
+        double _CalcAngle(GaChipData chipData)
+        {
+            var padsGrid = chipData.PadsGrid;
+            if (padsGrid != null)
+            {
+                //-----------------------------------------
+                // 0 1
+                // 3 2
+                //-----------------------------------------
+                var corners = Array.ConvertAll(padsGrid.GetCornerBlocs(), b => b?.Center);
+                if (corners[0] != null && corners[1] != null && corners[2] != null && corners[3] != null)
+                {
+                    var L = (corners[0] + corners[3]) / 2.0;
+                    var R = (corners[1] + corners[2]) / 2.0;
+                    var vect = R - L;
+                    var theta = Math.Atan2(vect.Y, vect.X);
+                    return theta * 180.0 / Math.PI;
+                }
+            }
+            var chipQuad = chipData.ChipQuad2D;
+            if (chipQuad != null)
+                return chipQuad.Angle;
+            return 0;
         }
 
         /// <summary>

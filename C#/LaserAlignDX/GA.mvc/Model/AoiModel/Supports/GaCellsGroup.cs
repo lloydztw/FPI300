@@ -13,6 +13,7 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -85,9 +86,12 @@ namespace LaserAlignDX.AoiModel
         /// <summary>
         /// caller 負責 fullFovBmp 生命週期
         /// </summary>
-        public static GaCellsGroup[] CollectGroups(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
+        public static GaCellsGroup[] CollectGroups(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult = null)
         {
-            return CollectGroups_000_spanY(N, xRecipe, fullFovBmp);
+            if (preEmptyResult == null)
+                return CollectGroups_000_spanY(N, xRecipe, fullFovBmp);
+            else
+                return CollectGroups_002_fast(N, xRecipe, fullFovBmp, preEmptyResult);
         }
         static GaCellsGroup[] CollectGroups_000_spanY(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
         {
@@ -172,6 +176,56 @@ namespace LaserAlignDX.AoiModel
 
             verify(groups, alert: false);
 
+            return groups;
+        }
+        static GaCellsGroup[] CollectGroups_002_fast(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult)
+        {
+            var allSrcCells = new List<RegionCellX3Class>(xRecipe.xRegionCells);
+            var emptyCells = new List<RegionCellX3Class>();
+            if (preEmptyResult != null)
+            {
+                allSrcCells.RemoveAll(c =>
+                {
+                    if (c == null) return true;
+                    preEmptyResult.GetBlocByRowCol(c.CellRow, c.CellCol, out var _, out bool isSucker);
+                    if (isSucker)
+                        emptyCells.Add(c);
+                    return isSucker;
+                }); 
+            }
+
+            foreach (var cell in emptyCells)
+            {
+                if (cell == null) continue;
+                cell.inspectReason = InspectReason.INS_ALIGNERR;
+                cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
+            }
+
+            int totalCount = allSrcCells.Count;
+            if (totalCount == 0)
+                return new GaCellsGroup[0];
+
+            int span = totalCount >= N ? totalCount / N : 1;
+            while (N * span < totalCount)
+                span++;
+
+            var groups = new GaCellsGroup[N];
+            for (int gid = 0; gid < N; gid++)
+            {
+                var collection = new List<RegionCellX3Class>();
+                int idx = gid * span;
+                int idx2 = Math.Min(idx + span, totalCount);
+                for (int i = idx; i < idx2; i++)
+                {
+                    collection.Add(allSrcCells[i]);
+                }
+                //>>> collection.Sort((c1, c2) => (int)(c1.viewRectF.Y - c2.viewRectF.Y));
+                var inflate = new Size(xRecipe.xExtendx, xRecipe.xExtendy);
+                var grp = groups[gid] = new GaCellsGroup();
+                grp.buildGaCells(fullFovBmp, inflate, collection);
+            }
+
+            verify(groups, alert: false);
             return groups;
         }
         /// <summary>
