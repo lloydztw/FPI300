@@ -108,7 +108,7 @@ namespace LaserAlignDX.AoiModel.V3
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
 
                 //(5) 晶粒定位
-                RunChipsLocate(bmpFullfov, imgLogPath, out string debugCellCenterStr);
+                _RunChipsLocate(bmpFullfov, imgLogPath, out string debugCellCenterStr);
                 _TM.Trace("_Inspect001 : 晶粒定位 & 量測 完成!");
 
                 //(6) 異步輸出 Debug 數據
@@ -146,39 +146,17 @@ namespace LaserAlignDX.AoiModel.V3
         /// </summary>
         internal bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
         {
-            chipData = null;
-            prepareChipMatcher(0, out IMvdTemplateMatcher chipMatcher);
-            bool ok = chipMatcher.RunMatch(cellBmp);
-            if (ok)
-            {
-                //(4.0) 使用 xResults[0] 當 Chip Center
-                var xFindResult = chipMatcher.xResults[0];
-                //var debug_org_center_x = cell.xFindResult.fCenterX;
-                //var debug_org_center_y = cell.xFindResult.fCenterY;
-                xFindResult.fCenterX += cellRoi.X;
-                xFindResult.fCenterY += cellRoi.Y;
-
-                //(4.1) 晶粒定位中心點(camera coorindates)
-                var chipSize = _xRecipe.xRegionTrain.Size;
-                var chipBox2D = toBox2D(ref xFindResult, chipSize);
-                var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
-
-                //(4.2) 將定位結果記入 cell.ChipData
-                chipData = new GaChipData();
-                chipData.Roi = cellRoi;
-                chipData.ChipBox2D = chipBox2D;
-                chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
-                chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
-            }
-            return ok;
+            prepareChipMatcher(0, out var chipMatcher);
+            return _LocateOneChip(cellBmp, ref cellRoi, out chipData, chipMatcher);
         }
+
 
         #region PRIVATE_FUNCTIONS
 
         /// <summary>
         /// LETIAN: 晶粒定位
         /// </summary>
-        void RunChipsLocate(Bitmap bmpFullfov, string imgPath, out string debugCellCenterStr)
+        void _RunChipsLocate(Bitmap bmpFullfov, string imgPath, out string debugCellCenterStr)
         {
             _TM.RESET_ACCUM();
 
@@ -198,7 +176,7 @@ namespace LaserAlignDX.AoiModel.V3
                 // 單線程 (驗證用)
                 for (int gid = 0; gid < groups.Length; gid++)
                 {
-                    debugStrs[gid] = RunChipLocateOneT(gid, groups[gid], imgPath);
+                    debugStrs[gid] = _RunChipLocateOneT(gid, groups[gid], imgPath);
                 }
             }
             else
@@ -206,7 +184,7 @@ namespace LaserAlignDX.AoiModel.V3
                 Parallel.For(0, N_GROUPS, gid =>
                 {
                     if (gid < groups.Length)
-                        debugStrs[gid] = RunChipLocateOneT(gid, groups[gid], imgPath);
+                        debugStrs[gid] = _RunChipLocateOneT(gid, groups[gid], imgPath);
                 });
             }
 
@@ -218,7 +196,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// LETIAN: 晶粒定位 與 尺寸量測 (區域) (限用於同一線程內)
         /// </summary>
-        string RunChipLocateOneT(int threadIdx, GaCellsGroup cellsGroup, string imgPath)
+        string _RunChipLocateOneT(int threadIdx, GaCellsGroup cellsGroup, string imgPath)
         {
             prepareChipMatcher(threadIdx, out IMvdTemplateMatcher chipMatcher);
             var fullFovSize = cellsGroup.FullFovRect.Size;
@@ -236,12 +214,7 @@ namespace LaserAlignDX.AoiModel.V3
                 //(1) 清除上一次結果
                 cell.Reset();
 
-                //(2) 像測 (使用 chipMatcher)
-                // _TM.BEGIN("_RunChipTemplateMatch");
-                bool ok = chipMatcher.RunMatch(cellBmp);
-                // _TM.END("_RunChipTemplateMatch");
-
-                //(3) 異步保存 Cell 圖像檔案
+                //(2) 異步保存 Cell 圖像檔案
                 if (INI.Instance.IsSaveTestImage)
                 {
                     cell.IsSaveDebugPicture = true;
@@ -249,41 +222,30 @@ namespace LaserAlignDX.AoiModel.V3
                     saveCellBmpAsync(cellBmp, cell);
                 }
 
-                //(4) 防止因為 xResults.Count == 0 的意外狀況
-                ok &= (chipMatcher.xResults.Count > 0);
+                //(3) 像測 (使用 chipMatcher)
+                bool ok = _LocateOneChip(cellBmp, ref cellRoi, out var chipData, chipMatcher);
 
+                //(4) 整理 chipData
                 if (ok)
                 {
-                    //(4.0) 使用 xResults[0] 當 Chip Center
-                    cell.xFindResult = chipMatcher.xResults[0];
-                    var debug_org_center_x = cell.xFindResult.fCenterX;
-                    var debug_org_center_y = cell.xFindResult.fCenterY;
-                    cell.xFindResult.fCenterX += cellRoi.X;
-                    cell.xFindResult.fCenterY += cellRoi.Y;
+                    //(4.1) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
+                    var chipQuad2D = chipData.ChipQuad2D;
+                    var chipCentroid = chipQuad2D.Center;
+                    cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
 
-                    //(4.1) 晶粒定位中心點(camera coorindates)
-                    var chipSize = _xRecipe.xRegionTrain.Size;
-                    var chipBox2D = toBox2D(ref cell.xFindResult, chipSize);
-                    var chipCentroid = new QVector(chipBox2D.Center.X, chipBox2D.Center.Y);
-
-                    //(4.2) 將定位結果記入 cell.ChipData
-                    cell.ChipData.Roi = cellRoi;
-                    cell.ChipData.ChipBox2D = chipBox2D;
-                    cell.ChipData.PadsGrid = chipMatcher.GetResultPadsGrid();
-                    cell.ChipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
-
-                    //(4.3) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
-                    cell.SetMvdRunPositionFix(GaMvdExt.ToCMvdRectangleF(chipBox2D));
-
+                    //(4.2) DEBUG_STRING
                     #region 加入_DEBUG_STRING
-                    //debugCellCenterStr += $"INDEX:{cell.Index}#";
-                    //debugCellCenterStr += $"VIEW:{cellRoi.X};{cellRoi.Y}#";
-                    //debugCellCenterStr += $"ORG:{cell.xFindResult.fCenterX};{cell.xFindResult.fCenterY}#";
-                    //debugCellCenterStr += $"DES:{cell.xFindResult.fCenterX};{cell.xFindResult.fCenterY}{Environment.NewLine}";
-                    debugSB.Append("INDEX:").Append(cell.Index).Append("#");
-                    debugSB.Append("VIEW:").Append(cellRoi.X).Append(";").Append(cellRoi.Y).Append("#");
-                    debugSB.Append("ORG:").Append(debug_org_center_x).Append(";").Append(debug_org_center_y).Append("#");
-                    debugSB.Append("DES:").Append(cell.xFindResult.fCenterX).Append(";").Append(cell.xFindResult.fCenterY).AppendLine();
+                    if (true)
+                    {
+                        var debug_org_center_x = Math.Round(chipCentroid.X - cellRoi.X, 3);
+                        var debug_org_center_y = Math.Round(chipCentroid.Y - cellRoi.Y, 3);
+                        var debug_center_x = Math.Round(chipCentroid.X, 3);
+                        var debug_center_y = Math.Round(chipCentroid.Y, 3);
+                        debugSB.Append("INDEX:").Append(cell.Index).Append("#");
+                        debugSB.Append("VIEW:").Append(cellRoi.X).Append(";").Append(cellRoi.Y).Append("#");
+                        debugSB.Append("ORG:").Append(debug_org_center_x).Append(";").Append(debug_org_center_y).Append("#");
+                        debugSB.Append("DES:").Append(debug_center_x).Append(";").Append(debug_center_y).AppendLine();
+                    }
                     #endregion
 
                     //(5) 判定重疊區域比例
@@ -291,7 +253,7 @@ namespace LaserAlignDX.AoiModel.V3
                     if (xInspect.xChipOverlap > 0)
                     {
                         //(5.1) 直接使用 QvBox2D 計算 重疊率
-                        double overlapRatio = calcOverlap(gaCell, chipBox2D, isLocalCoordinate: false);
+                        double overlapRatio = calcOverlap(gaCell, chipQuad2D, isLocalCoordinate: false);
                         //(5.2) 重疊率 判定結果
                         ok = overlapRatio >= xInspect.xChipOverlap;
                     }
@@ -301,7 +263,7 @@ namespace LaserAlignDX.AoiModel.V3
                         //(6) 根據不同載台, 計算補償量
                         var activeCarrierID = getActiveCarrierID();
                         (var motorDelta, var worldDelta) = _transformModel.CalcPlcCompensation(activeCarrierID, chipCentroid, cell.CellRow, cell.CellCol);
-                        double angle = chipBox2D.Theta * 180 / Math.PI;
+                        double angle = chipQuad2D.Theta * 180 / Math.PI;
 
                         //(6.1) 記入 Runtime (Gaara) 所需要的數據
                         cell.RunAngle = (float)Math.Round((angle + INI.Instance.Cal_Bca),3);
@@ -320,7 +282,8 @@ namespace LaserAlignDX.AoiModel.V3
                             cell.Sur2 = new PointF((float)mp.X, (float)mp.Y);
                         }
 
-                        //(6.3) 記入 ChipData.Coords
+                        //(6.3) 記入 ChipData
+                        cell.ChipData = chipData;
                         cell.ChipData.ChipCoords.Angle = cell.RunAngle;
                         cell.ChipData.ChipCoords.Centroid = _transCP?.Trans(chipCentroid);
                     }
@@ -342,6 +305,68 @@ namespace LaserAlignDX.AoiModel.V3
             }
 
             return debugSB.ToString();
+        }
+
+        bool _LocateOneChip_000(Bitmap cellBmp, ref RectangleF cellRoi, out GaChipData chipData, IMvdTemplateMatcher chipMatcher)
+        {
+            chipData = null;
+
+            //(1) Match
+            bool ok = chipMatcher.RunMatch(cellBmp);
+
+            if (ok)
+            {
+                //(2) 使用 xResults[0] 當 Chip Center
+                var xFindResult = chipMatcher.xResults[0];
+                xFindResult.fCenterX += cellRoi.X;
+                xFindResult.fCenterY += cellRoi.Y;
+
+                //(3.1) 晶粒定位中心點(camera coorindates)
+                var chipSize = _xRecipe.xRegionTrain.Size;
+                var chipBox2D = toBox2D(ref xFindResult, chipSize);
+                var chipQuad = QvQuad2D.From(chipBox2D);
+
+                //(3.2) 將定位結果記入 cell.ChipData
+                chipData = new GaChipData();
+                chipData.Roi = cellRoi;
+                chipData.ChipQuad2D = chipQuad;
+                chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
+                chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
+
+                //(3.3) DEBUG data
+                chipData.DebugRigidBodyData = chipMatcher.GetResultDetails();
+            }
+
+            return ok;
+        }
+        
+        bool _LocateOneChip(Bitmap cellBmp, ref RectangleF cellRoi, out GaChipData chipData, IMvdTemplateMatcher chipMatcher)
+        {
+            chipData = null;
+
+            //(1) Match
+            bool ok = chipMatcher.RunMatch(cellBmp);
+
+            if (ok)
+            {
+                //(2) offset
+                var padsGrid = chipMatcher.GetResultPadsGrid();
+                padsGrid?.Offset(cellRoi.X, cellRoi.Y);
+                var chipQuad = chipMatcher.GetResultQuad2D();
+                //>>> chipQuad 不需要再次 Offset
+                //>>> chipQuad?.Offset(cellRoi.X, cellRoi.Y);
+
+                //(3) 將定位結果記入 cell.ChipData
+                chipData = new GaChipData();
+                chipData.Roi = cellRoi;
+                chipData.PadsGrid = padsGrid;
+                chipData.ChipQuad2D = chipQuad;
+
+                //(4) DEBUG data
+                chipData.DebugRigidBodyData = chipMatcher.GetResultDetails();
+            }
+
+            return ok;
         }
 
         /// <summary>
@@ -458,7 +483,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 計算覆蓋率
         /// </summary>
-        double calcOverlap(GaCell gaCell, QvBox2D chipBox2D, bool isLocalCoordinate = false, bool debug = false)
+        double calcOverlap(GaCell gaCell, QvQuad2D chipQuad, bool isLocalCoordinate = false, bool debug = false)
         {
             var cell = gaCell?.Cell;
             if (cell == null)
@@ -475,7 +500,7 @@ namespace LaserAlignDX.AoiModel.V3
             // polygonPts (local coordinates)
             int offsetX = isLocalCoordinate ? 0 : -cellRoi.X;
             var offsetY = isLocalCoordinate ? 0 : -cellRoi.Y;
-            var polygonPts = Array.ConvertAll(chipBox2D.Corners, c => new OpenCvSharp.Point((int)c.X + offsetX, (int)c.Y + offsetY));
+            var polygonPts = Array.ConvertAll(chipQuad.Corners, c => new OpenCvSharp.Point((int)c.X + offsetX, (int)c.Y + offsetY));
             for (int i = 0, len = polygonPts.Length; i < len; i++)
                 JetEazy.Qcvt.ClipBoundary(ref polygonPts[i], ref gridRect);
 
@@ -486,14 +511,14 @@ namespace LaserAlignDX.AoiModel.V3
             if (debug)
             {
                 // 轉至 local coordinate
-                var box2D = chipBox2D;
+                var quad = chipQuad;
                 if (!isLocalCoordinate)
                 {
-                    box2D = chipBox2D.Clone();
-                    var cc = box2D.Center;
+                    quad = chipQuad.Clone();
+                    var cc = quad.Center;
                     cc.X += offsetX;
                     cc.Y += offsetY;
-                    box2D.SetCenter(cc);
+                    quad.SetCenter(cc);
                 }
 
                 // Draw
@@ -502,7 +527,7 @@ namespace LaserAlignDX.AoiModel.V3
                 {
                     canvas.Rectangle(gridRect, Scalar.Blue, 3);
                     canvas.Polylines(new[] { polygonPts }, true, Scalar.Red, 3);
-                    VxDebugDrawer.Draw(canvas, box2D, Scalar.Lime);
+                    VxDebugDrawer.Draw(canvas, quad, Scalar.Lime);
                     canvas.SaveImage($"d:\\paso.log\\overlap_{cell.Index:000}.png");
                 }
             }
@@ -510,8 +535,17 @@ namespace LaserAlignDX.AoiModel.V3
 
             return overlapRatio;
         }
+        /// <summary>
+        /// 計算覆蓋率
+        /// </summary>
+        double calcOverlap(GaCell gaCell, QvBox2D chipBox2D, bool isLocalCoordinate = false, bool debug = false)
+        {
+            var quad = QvQuad2D.From(chipBox2D);
+            return calcOverlap(gaCell, quad, isLocalCoordinate, debug);
+        }
 
         #endregion
+
 
         #region HELPERS
         QvBox2D toBox2D(ref AUVision.xFindResult xResult, SizeF size, float offsetX = 0f, float offsetY = 0f)

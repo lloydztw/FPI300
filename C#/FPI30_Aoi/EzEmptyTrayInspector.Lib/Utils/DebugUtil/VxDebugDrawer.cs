@@ -124,6 +124,88 @@ namespace LeTian.AoiLib
 
             flush(img, canvas, displayWindowName);
         }
+        public static void Draw(Mat img, QvQuad2D quad2D, IxGridMap<EzBloc> grid, int keyRow, int keyCol, Scalar color, string displayWindowName = null)
+        {
+            if (_bypass)
+                return;
+
+            Mat canvas = prepare_canvas(img, _canvasShrink, displayWindowName);
+            Draw(canvas, iter_major_blocs(grid), false, color);
+
+            if (keyRow >= 0 && keyCol >= 0)
+            {
+                var keyPad = grid.Get(keyRow, keyCol);
+                if (keyPad != null)
+                {
+                    Draw(canvas, new EzBloc[] { keyPad }, false, Scalar.Red);
+                }
+            }
+
+            var lineColor = Scalar.DarkBlue;
+            void draw_line(EzBloc from, EzBloc to)
+            {
+                if (from != null && to != null)
+                {
+                    var lx = (float)from.Center.X / _canvasShrink;
+                    var ly = (float)from.Center.Y / _canvasShrink;
+                    var cx = (float)to.Center.X / _canvasShrink;
+                    var cy = (float)to.Center.Y / _canvasShrink;
+                    canvas.Line((int)lx, (int)ly, (int)cx, (int)cy, lineColor, 1);
+                }
+            }
+            int rows = grid.Rows;
+            int cols = grid.Cols;
+            for (int r = 0; r < rows; r++)
+            {
+                EzBloc last = null;
+                for (int c = 0; c < cols; c++)
+                {
+                    var bloc = grid.Get(r, c);
+                    if (bloc == null)
+                        continue;
+
+                    draw_line(last, bloc);
+                    last = bloc;
+                }
+            }
+            for (int c = 0; c < cols; c++)
+            {
+                EzBloc last = null;
+                for (int r = 0; r < rows; r++)
+                {
+                    var bloc = grid.Get(r, c);
+                    if (bloc == null)
+                        continue;
+
+                    draw_line(last, bloc);
+                    last = bloc;
+                }
+            }
+
+            if (quad2D != null)
+            {
+                //var pts = box2D.Corners;
+                //for (int i = 0; i < pts.Length; i++)
+                //{
+                //    int j = (i+1) % pts.Length;
+                //    var pt1 = new CvPoint(pts[i].X / _canvasShrink, pts[i].Y / _canvasShrink);
+                //    var pt2 = new CvPoint(pts[j].X / _canvasShrink, pts[j].Y / _canvasShrink);
+                //    Cv2.Line(canvas, pt1, pt2, Scalar.Green, 1);
+                //}
+
+                Draw(canvas, quad2D, Scalar.Yellow, thickness: 2, shrink: _canvasShrink);
+            }
+
+            //if (displayWindowName != null)
+            //{
+            //    //Cv2.ImShow(displayWindowName, canvas);
+            //    ShowWindow(displayWindowName, canvas);
+            //}
+            //if (canvas != img)
+            //    canvas?.Dispose();
+
+            flush(img, canvas, displayWindowName);
+        }
         public static void Draw(Mat img, IEnumerable<EzBloc> blocs, bool withRect, Scalar color, string displayWindowName = null)
         {
             if (_bypass)
@@ -246,6 +328,31 @@ namespace LeTian.AoiLib
                     var x2 = pts[j].X / shrink;
                     var y2 = pts[j].Y / shrink;
                     Cv2.Line(canvas, (int)x1, (int)y1, (int)x2, (int)y2, color, 1);
+                }
+            }
+
+            flush(img, canvas, displayWindowName);
+        }
+        public static void Draw(Mat img, QvQuad2D quad2D, Scalar? colorA = null, int thickness = 1, int shrink = 1, string displayWindowName = null)
+        {
+            if (_bypass)
+                return;
+
+            if (shrink <= 0) shrink = _canvasShrink;
+            Mat canvas = prepare_canvas(img, shrink, displayWindowName);
+
+            if (quad2D != null)
+            {
+                var color = colorA != null ? colorA.Value : Scalar.Cyan;
+                var pts = quad2D.Corners;
+                for (int i = 0; i < pts.Length; i++)
+                {
+                    int j = (i + 1) % pts.Length;
+                    var x1 = pts[i].X / shrink;
+                    var y1 = pts[i].Y / shrink;
+                    var x2 = pts[j].X / shrink;
+                    var y2 = pts[j].Y / shrink;
+                    Cv2.Line(canvas, (int)x1, (int)y1, (int)x2, (int)y2, color, thickness);
                 }
             }
 

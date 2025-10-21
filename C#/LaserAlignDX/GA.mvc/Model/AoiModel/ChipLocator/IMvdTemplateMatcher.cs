@@ -48,11 +48,6 @@ namespace LaserAlignDX.AoiModel
         bool RunMatch(Bitmap bmpScene);
 
         /// <summary>
-        /// 結果 (必須於調用 Train 之後, 才有有效值!)
-        /// </summary>
-        List<xFindResult> xResults { get; }
-
-        /// <summary>
         /// 取得定位後 Chip 上面 PAD 的資訊
         /// </summary>
         EzBlocsGrid GetResultPadsGrid();
@@ -60,6 +55,16 @@ namespace LaserAlignDX.AoiModel
         /// <summary>
         /// 外廓結果
         /// </summary>
-        QvBox2D GetResultBox2D();
+        QvQuad2D GetResultQuad2D();
+
+        /// <summary>
+        /// 調試用
+        /// </summary>
+        object GetResultDetails();
+
+        /// <summary>
+        /// 結果 (即將廢除)
+        /// </summary>
+        List<xFindResult> xResults { get; }
     }
 }

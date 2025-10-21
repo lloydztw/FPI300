@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.EzImage;
+using JetEazy.QvMath;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using System;
@@ -87,13 +88,13 @@ namespace UnitTest_FP130
                     if (bestResult != null)
                     {
                         var bestGrid = bestResult.Grid;
-                        var box2d = bestResult.CalcBox2D();
+                        //var box2d = bestResult.CalcBox2D();
                         //EzPadsGridFinder.FindSpecialKeyPad(bestGrid, out int kr, out int kc, out int px);
                         //EzPadsGridFinder.FindSpecialKeyPad(imgScene, bestGrid, out int kr, out int kc, out double kSQ);
                         int kr = bestResult.KeyRow;
                         int kc = bestResult.KeyCol;
                         var kSQ = bestResult.KeySQRatio;
-                        VxDebugDrawer.Draw(imgScene, box2d, bestGrid, kr, kc, Scalar.Lime, $"Best Grid [{bestGrid.Rows}x{bestGrid.Cols}] = {bestGrid.GetMajorCount()} @ {fname}");
+                        VxDebugDrawer.Draw(imgScene, (QvBox2D)null, bestGrid, kr, kc, Scalar.Lime, $"Best Grid [{bestGrid.Rows}x{bestGrid.Cols}] = {bestGrid.GetMajorCount()} @ {fname}");
                     }
 
                     Cv2.WaitKey();

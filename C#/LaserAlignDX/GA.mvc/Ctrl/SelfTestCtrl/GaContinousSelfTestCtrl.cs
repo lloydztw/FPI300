@@ -127,7 +127,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             int count = 0;
             foreach (var cell in _xRecipe.xRegionCells)
             {
-                if (cell?.ChipData?.ChipBox2D!=null)
+                if (cell?.ChipData?.ChipQuad2D!=null)
                     count++;
                 //if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                 //    passCount++;

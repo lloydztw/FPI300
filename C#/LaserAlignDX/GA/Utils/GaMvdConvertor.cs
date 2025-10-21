@@ -46,6 +46,15 @@ namespace LaserAlignDX
             box2D.SetTheta(angle * Math.PI / 180);
             return box2D;
         }
+        public static QvQuad2D ToQuad2D(this CMvdRectangleF mvdRectF)
+        {
+            if (mvdRectF == null)
+                return null;
+            var box2d = mvdRectF.ToBox2D();
+            var quad2d = QvQuad2D.From(box2d);
+            return quad2d;
+        }
+
         public static RectangleF ToRectangleF(this CMvdRectangleF cMvdRectangleF)
         {
             if (cMvdRectangleF != null)
@@ -60,6 +69,16 @@ namespace LaserAlignDX
                             viewRectF.Width,
                             viewRectF.Height
                         );
+        }
+        public static CMvdRectangleF ToCMvdRectangleF(this QvQuad2D quad2d)
+        {
+            if (quad2d == null)
+                return null;
+            quad2d.GetMidSize(out var size);
+            return new CMvdRectangleF((float)quad2d.Center.X, (float)quad2d.Center.Y, size.Width, size.Height)
+            {
+                Angle = (float)quad2d.Angle
+            };
         }
         public static CMvdRectangleF ToCMvdRectangleF(QvBox2D box2D)
         {

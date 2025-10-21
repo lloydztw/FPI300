@@ -35,7 +35,7 @@ namespace LaserAlignDX.Model
         /// <summary>
         /// 晶粒定位結果 (單位 pixels) (FullFov Cammera Coordinates)
         /// </summary>
-        public QvBox2D ChipBox2D { get; set; } = null;
+        public QvQuad2D ChipQuad2D { get; set; } = null;
 
         /// <summary>
         /// 格點型晶粒的 PAD 格點 (單位 pixels) (FullFov Cammera Coordinates)
@@ -67,6 +67,11 @@ namespace LaserAlignDX.Model
         /// PAD 邊隙 (單位 mm)
         /// </summary>
         public readonly GaPadEdgeGaps PadEdgeGaps = new GaPadEdgeGaps();
+
+        /// <summary>
+        /// 調試用 之 額外資料
+        /// </summary>
+        public object DebugRigidBodyData { get; set; } = null;
     }
 
 

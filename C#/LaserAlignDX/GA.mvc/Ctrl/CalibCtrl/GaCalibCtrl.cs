@@ -266,7 +266,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             for (int i = 0; i < N_CALIB_POINTS; i++)
             {
-                var rect = _cviCalibPointBoxes[i].Box2D.BoundaryRect;
+                var rect = _cviCalibPointBoxes[i].Quad2D.BoundaryRect;
                 if (rect.Contains(x, y))
                 {
                     _dgvCalibPointsListView.SelectedIndex = i;
@@ -408,9 +408,11 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return;
             }
 
-            var loc = box.Box2D;
-            loc.SetCenter((float)camCoord.X, (float)camCoord.Y);
-            box.SetBox(loc);
+            //var loc = box.Box2D;
+            //loc.SetCenter((float)camCoord.X, (float)camCoord.Y);
+            //box.SetBox(loc);
+
+            box.Quad2D?.SetCenter(camCoord.X, camCoord.Y);
             box.Visible = show;
         }
         void updateCalibKeyPoints(EzBlocsGrid camGrid)
@@ -607,7 +609,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
                 //(0.1) clear 4 corners
                 foreach (var cviCornerBox in _cviCalibPointBoxes)
-                    cviCornerBox.Box2D.SetCenter(PointF.Empty);
+                    cviCornerBox.Quad2D.SetCenter(0, 0);
 
                 #region OLD_CODE
                 ////(A1) Peek the ezImage

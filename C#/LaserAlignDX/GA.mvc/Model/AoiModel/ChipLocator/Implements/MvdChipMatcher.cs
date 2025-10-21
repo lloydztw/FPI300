@@ -169,7 +169,13 @@ namespace LaserAlignDX.AoiModel
             return null;
         }
 
-        public QvBox2D GetResultBox2D()
+        public QvQuad2D GetResultQuad2D()
+        {
+            throw new NotImplementedException();
+            return null;
+        }
+
+        public object GetResultDetails()
         {
             throw new NotImplementedException();
             return null;

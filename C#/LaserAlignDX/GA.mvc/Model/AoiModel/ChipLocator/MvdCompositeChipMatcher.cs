@@ -181,9 +181,13 @@ namespace LaserAlignDX.AoiModel
         {
             return _matchers[0]?.GetResultPadsGrid();
         }
-        public QvBox2D GetResultBox2D()
+        public QvQuad2D GetResultQuad2D()
         {
-            return _matchers[0]?.GetResultBox2D();
+            return _matchers[0]?.GetResultQuad2D();
+        }
+        public object GetResultDetails()
+        {
+            return _matchers[0]?.GetResultDetails();
         }
     }
 }

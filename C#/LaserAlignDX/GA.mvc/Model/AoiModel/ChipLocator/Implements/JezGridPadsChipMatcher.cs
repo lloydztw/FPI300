@@ -37,7 +37,7 @@ namespace LaserAlignDX.AoiModel
         #endregion
 
         #region PRIVATE_RUNTIME_DATA
-        bool _isMvdParamsChanged = false;
+        //bool _isMvdParamsChanged = false;
         EzRigidBodyGridMatcher.RigidBody _resultChipInfo;
         #endregion
 
@@ -55,11 +55,7 @@ namespace LaserAlignDX.AoiModel
             get;
             private set;
         } = new Size(1, 1);
-        public List<xFindResult> xResults
-        {
-            get;
-            private set;
-        } = new List<xFindResult>();
+
 
         ~JezGridPadsChipMatcher()
         {
@@ -111,7 +107,7 @@ namespace LaserAlignDX.AoiModel
             
             _resultChipInfo = rigidBody;
 
-            bool bOK = xResults.Count > 0;
+            bool bOK = rigidBody?.Grid != null;
             return bOK;
         }
 
@@ -123,10 +119,32 @@ namespace LaserAlignDX.AoiModel
             return _resultChipInfo?.Grid;
         }
 
-        public QvBox2D GetResultBox2D()
+        /// <summary>
+        /// 取得 廣義的四角多邊形
+        /// </summary>
+        public QvQuad2D GetResultQuad2D()
         {
-            return _resultChipInfo?.CalcBox2D(true);
+            var grid = _resultChipInfo?.Grid;
+            EzBlocsGridAnalyzer.CalcQuad2D(grid, out var quad2d, useBoundaryPoints: true);
+            return quad2d;
         }
+
+        /// <summary>
+        /// 調試用
+        /// </summary>
+        public object GetResultDetails()
+        {
+            return _resultChipInfo;
+        }
+
+        /// <summary>
+        /// 即將廢除
+        /// </summary>
+        public List<xFindResult> xResults
+        {
+            get;
+            private set;
+        } = new List<xFindResult>();
 
         #region PRIVATE_HELPER_FUNCTIONS
         void convert_to_gaara_result(EzRigidBodyGridMatcher.RigidBody rigidBody, List<xFindResult> results)
@@ -140,25 +158,31 @@ namespace LaserAlignDX.AoiModel
             if (goldenGrid == null || rigidBodyGrid == null)
                 return;
 
-            EzBlocsGridAnalyzer.CalcRotatedBox2D(rigidBodyGrid, out var box2d, useBoundaryPoints: false);
-            var center = box2d.Center;
-            var angle = box2d.Theta * 180.0 / Math.PI;
+            //EzBlocsGridAnalyzer.CalcRotatedBox2D(rigidBodyGrid, out var box2d, useBoundaryPoints: false);
+            EzBlocsGridAnalyzer.CalcQuad2D(rigidBodyGrid, out var chipQuad, useBoundaryPoints: false);
+            var center = chipQuad.Center;
+            var angle = chipQuad.Theta * 180.0 / Math.PI;
             var score = rigidBody.Score;
 
-            EzBlocsGridAnalyzer.CalcRotatedBox2D(goldenGrid, out var goldenBox2d, useBoundaryPoints: false);
+            //EzBlocsGridAnalyzer.CalcRotatedBox2D(goldenGrid, out var goldenBox2d, useBoundaryPoints: false);
+            EzBlocsGridAnalyzer.CalcQuad2D(goldenGrid, out var goldenQuad, useBoundaryPoints: false);
             //var angleG = goldenBox2d.Theta * 180.0 / Math.PI;
             //angle -= angleG;
 
             // SCALE
-            double scaleW = box2d.MinAreaRectSize.Width / (goldenBox2d.MinAreaRectSize.Width + 0.0001);
-            double scaleH = box2d.MinAreaRectSize.Height / (goldenBox2d.MinAreaRectSize.Height + 0.0001);
+            //double scaleW = box2d.MinAreaRectSize.Width / (goldenBox2d.MinAreaRectSize.Width + 0.0001);
+            //double scaleH = box2d.MinAreaRectSize.Height / (goldenBox2d.MinAreaRectSize.Height + 0.0001);
+            chipQuad.GetMidSize(out var sizeB);
+            goldenQuad.GetMidSize(out var sizeG);
+            double scaleW = sizeB.Width / (sizeG.Width + 0.00001);
+            double scaleH = sizeB.Height / (sizeG.Height + 0.00001);
             double scale = (scaleW + scaleH) / 2;
 
             // Gaara Result
             xFindResult result = new xFindResult
             {
-                fCenterX = center.X,
-                fCenterY = center.Y,
+                fCenterX = (float)center.X,
+                fCenterY = (float)center.Y,
                 fAngle = (float)angle,
                 fScale = (float)scale,
                 fScore = (float)score

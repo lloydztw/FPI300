@@ -104,6 +104,59 @@ namespace JetEazy.Match
         }
 
         /// <summary>
+        /// 使用 QvQuad2D 來處理大翹傾 晶粒定位
+        /// (2025-10-21 改版)
+        /// </summary>
+        public static void CalcQuad2D(IxGridMap<EzBloc> grid, out QvQuad2D quad2d, bool useBoundaryPoints = false)
+        {
+            if (grid == null)
+            {
+                quad2d = null;
+                return;
+            }
+
+            int r = grid.Rows - 1;
+            int c = grid.Cols - 1;
+            var cornerBlocs = new[]
+            {
+                grid.Get(0,0),
+                grid.Get(0,c),
+                grid.Get(r,c),
+                grid.Get(r,0),
+            };
+
+            if (cornerBlocs[0] != null && cornerBlocs[1] != null && cornerBlocs[2] != null && cornerBlocs[3] != null)
+            {
+                var corners = Array.ConvertAll(cornerBlocs, b => b.Center);
+                if (useBoundaryPoints)
+                {
+                    var center = (corners[0] + corners[1] + corners[2] + corners[3]) / 4.0;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        var w = cornerBlocs[i].Rect.Width;
+                        var h = cornerBlocs[i].Rect.Height;
+                        var d = Math.Sqrt(w * w + h * h) / 2;
+                        var V = corners[i] - center;
+                        V = V / V.NormLength;
+                        corners[i] = corners[i] + V * d;
+                    }
+                }
+                quad2d = new QvQuad2D();
+                quad2d.Corners = corners;
+            }
+            else
+            {
+                // 注意: Cv2.MinAreaRect 無法反映 透視投影 效果 !!!
+                var rotRect = useBoundaryPoints ?
+                    Cv2.MinAreaRect(IterBoundaryPoints(grid)) :
+                    Cv2.MinAreaRect(IterCentroids(grid));
+
+                quad2d = new QvQuad2D();
+                quad2d.Corners = Array.ConvertAll(rotRect.Points(), p => new QVector(p.X, p.Y));
+            }
+        }
+
+        /// <summary>
         /// 格位內容物不同之計數
         /// </summary>
         public int CalcLogicDiff(IxGridMap<EzBloc> grid, IxGridMap<EzBloc> goldenGrid)

@@ -145,7 +145,7 @@ namespace LaserAlignDX.Model.Coords
                 return err;
 
             //(1) ROI offset
-            var cc = chipData.ChipBox2D.Center;
+            var cc = chipData.ChipQuad2D.Center;
             _roiCenterPt = new QVector(cc.X, cc.Y);
 
             //(2) MeasurePoints (local scope) : 左0 上1 右2 下3 
@@ -246,7 +246,7 @@ namespace LaserAlignDX.Model.Coords
                 return err;
 
             //(1) ROI offset
-            var cc = chipData.ChipBox2D.Center;
+            var cc = chipData.ChipQuad2D.Center;
             var runtimeChipCenter = new QVector(cc.X, cc.Y);
 
             //(2) 取得 measurePts (local scope) 順序: 左0 上1 右2 下3
@@ -301,7 +301,7 @@ namespace LaserAlignDX.Model.Coords
                 return err;
 
             //(1) ROI offset
-            var cc = chipData.ChipBox2D.Center;
+            var cc = chipData.ChipQuad2D.Center;
             var runtimeChipCenter = new QVector(cc.X, cc.Y);
 
             //(2) 取得 measurePts (local scope) 順序: 左0 上1 右2 下3
@@ -390,7 +390,7 @@ namespace LaserAlignDX.Model.Coords
 
             //(3) 轉換到 world (單位 mm)
             //(3.1) ROI offset
-            var cc = chipData.ChipBox2D.Center;
+            var cc = chipData.ChipQuad2D.Center;
             var runtimeChipCenter = new QVector(cc.X, cc.Y);
             gapMeaturePts = Array.ConvertAll(gapMeaturePts, p => p != null ? p - runtimeChipCenter : null);
             //(3.2 Transform to world (local)
@@ -514,7 +514,7 @@ namespace LaserAlignDX.Model.Coords
         #region HELPER_FUNCTIONS
         ErrCodes check(EzLSD.LineSegment[] lines, GaChipData chipData)
         {
-            if (chipData == null || chipData.ChipBox2D == null)
+            if (chipData == null || chipData.ChipQuad2D == null)
                 return ErrCodes.ERR_NO_CHIP_LOCATION;
             return checkLines(lines);
         }

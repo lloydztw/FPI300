@@ -277,10 +277,10 @@ namespace LaserAlignDX.AoiModel.V3
             return err;
         }
 
-        //public bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
-        //{
-        //    return _aoiChipLoc.LocateOneChip(cellBmp, cellRoi, out chipData);
-        //}
+        public bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
+        {
+            return _aoiChipLoc.LocateOneChip(cellBmp, cellRoi, out chipData);
+        }
 
         public override void Run()
         {

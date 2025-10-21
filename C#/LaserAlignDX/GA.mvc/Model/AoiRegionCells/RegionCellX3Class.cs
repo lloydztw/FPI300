@@ -160,7 +160,10 @@ namespace LaserAlignDX.OPSpace
         public string SaveDebugPath = $"D:\\log\\DebugImage";
         #endregion
 
-        public AUVision.xFindResult xFindResult = new AUVision.xFindResult();
+        #region OLD_CODE
+        //>>> private AUVision.xFindResult xFindResult = new AUVision.xFindResult();
+        #endregion
+
         public InspectReason inspectReason = InspectReason.PASS;
         public List<InspectReason> inspectReasons = new List<InspectReason>();
 
@@ -832,7 +835,8 @@ namespace LaserAlignDX.OPSpace
         public void Reset()
         {
             ChipData = new GaChipData();
-            xFindResult = new AUVision.xFindResult();
+            
+            ////<<< 廢除 >>> xFindResult = new AUVision.xFindResult();
 
             inspectReason = InspectReason.PASS;
             inspectReasons.Clear();

@@ -15,6 +15,7 @@
 
 using JetEazy.ImageViewerEx;
 using JetEazy.QvMath;
+using System;
 using System.Drawing;
 
 namespace LaserAlignDX.Mvc.Gui
@@ -22,7 +23,7 @@ namespace LaserAlignDX.Mvc.Gui
     public class CviRotRectBox : CvImageViewerInteractor, IvDrawItem
     {
         #region PRIVATE_DATA
-        QvBox2D _box2D;
+        QvQuad2D _quad2D;
         Color _crossColor;
         Color _color;
         float _blend;
@@ -45,11 +46,15 @@ namespace LaserAlignDX.Mvc.Gui
         }
         public CviRotRectBox(QvBox2D box2D, Color color, float blend = 0) : this(color, blend)
         {
-            _box2D = box2D;
+            _quad2D = QvQuad2D.From(box2D);
+        }
+        public CviRotRectBox(QvQuad2D quad2D, Color color, float blend = 0) : this(color, blend)
+        {
+            _quad2D = quad2D?.Clone();
         }
         public CviRotRectBox(RectangleF rectF, Color color, float blend = 0) : this(color, blend)
         {
-            SetBox(rectF);
+            SetBox(ref rectF);
         }
         public CviRotRectBox(ref RectangleF rectF, Color color, float blend = 0) : this(color, blend)
         {
@@ -61,23 +66,25 @@ namespace LaserAlignDX.Mvc.Gui
             set;
         }
 
-        public QvBox2D Box2D
+        public QvQuad2D Quad2D
         {
-            get => _box2D;
+            get => _quad2D;
         }
         public void SetBox(QvBox2D box2d)
         {
-            _box2D = box2d;
+            _quad2D = QvQuad2D.From(box2d);
+        }
+        public void SetBox(QvQuad2D quad2d)
+        {
+            _quad2D = quad2d;
         }
         public void SetBox(RectangleF rect)
         {
-            _box2D = new QvBox2D();
-            _box2D.SetBox(rect.Location, rect.Size);
+            _quad2D = QvQuad2D.From(rect);
         }
         public void SetBox(ref RectangleF rect)
         {
-            _box2D = new QvBox2D();
-            _box2D.SetBox(rect.Location, rect.Size);
+            _quad2D = QvQuad2D.From(rect);
         }
         
         public string Text
@@ -97,7 +104,7 @@ namespace LaserAlignDX.Mvc.Gui
         #region OVERRIDES
         public override void OnDraw(CvImageViewer viewer, Graphics gxView)
         {
-            if (_box2D == null)
+            if (_quad2D == null)
                 return;
 
             if (_font == null)
@@ -117,6 +124,7 @@ namespace LaserAlignDX.Mvc.Gui
         #region DRAW_FUNCTIONS
         void Draw_Contents(CvImageViewer viewer, Graphics gxView)
         {
+            var polyPts = Array.ConvertAll(_quad2D.Corners, c => new PointF((float)c.X, (float)c.Y));
 
             #region FILL_BACKGROUND
             // Blending Alpha
@@ -125,7 +133,7 @@ namespace LaserAlignDX.Mvc.Gui
             {
                 using (var brBkGnd = new SolidBrush(Color.FromArgb(alpha, _color)))
                 {
-                    gxView.FillPolygon(brBkGnd, _box2D.Corners);
+                    gxView.FillPolygon(brBkGnd, polyPts);
                 }
             }
             #endregion
@@ -134,15 +142,18 @@ namespace LaserAlignDX.Mvc.Gui
             if (CrossLength > 0)
             {
                 var penC = viewer.GetOnePixelPen(_crossColor);
-                float cx = _box2D.Center.X;
-                float cy = _box2D.Center.Y;
+                float cx = (float)_quad2D.Center.X;
+                float cy = (float)_quad2D.Center.Y;
                 gxView.DrawLine(penC, cx - CrossLength, cy, cx + CrossLength, cy);
                 gxView.DrawLine(penC, cx, cy - CrossLength, cx, cy + CrossLength);
             }
             #endregion
 
-            var pen = viewer.GetOnePixelPen(_color);
-            gxView.DrawPolygon(pen, _box2D.Corners);
+            if (true)
+            {
+                var pen = viewer.GetOnePixelPen(_color);
+                gxView.DrawPolygon(pen, polyPts);
+            }
 
             #region DRAW_TEXT
             var text = Text;
@@ -150,7 +161,7 @@ namespace LaserAlignDX.Mvc.Gui
             {
                 using (var br = new SolidBrush(_color))
                 {
-                    gxView.DrawString(text, _font, br, _box2D.BoundaryRect, _strFormat);
+                    gxView.DrawString(text, _font, br, _quad2D.BoundaryRect, _strFormat);
                 }
             }
             #endregion

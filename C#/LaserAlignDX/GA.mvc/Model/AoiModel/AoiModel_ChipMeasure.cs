@@ -167,7 +167,7 @@ namespace LaserAlignDX.AoiModel.V3
                 //(1) 進度條事件
                 fire_AoiProgressing(cell);
 
-                bool go = cell.ChipData.ChipBox2D != null && cell.inspectReason == InspectReason.PASS;
+                bool go = cell.ChipData.ChipQuad2D != null && cell.inspectReason == InspectReason.PASS;
                 if (go)
                 {
                     //(2) 量測單一晶粒
@@ -184,7 +184,8 @@ namespace LaserAlignDX.AoiModel.V3
         {
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
-            if (chipData == null)
+            var chipQuad = chipData?.ChipQuad2D;
+            if (chipQuad == null)
                 return;
 
             #region 邊線處理
@@ -199,9 +200,13 @@ namespace LaserAlignDX.AoiModel.V3
                     _xRecipe.xLineBottom,
                 };
 
-                var xLocalResult = cell.xFindResult;
-                xLocalResult.fCenterX -= cellRoi.X;
-                xLocalResult.fCenterY -= cellRoi.Y;
+                //var xLocalResult = cell.xFindResult;
+                //xLocalResult.fCenterX -= cellRoi.X;
+                //xLocalResult.fCenterY -= cellRoi.Y;
+                var xLocalResult = new AUVision.xFindResult();
+                xLocalResult.fCenterX = (float)(chipQuad.Center.X - cellRoi.X);
+                xLocalResult.fCenterY = (float)(chipQuad.Center.Y - cellRoi.Y);
+                xLocalResult.fAngle = (float)chipQuad.Angle;
 
                 for (int borderIdx = 0, N = rcpBorderRects.Length; borderIdx < N; borderIdx++)
                 {

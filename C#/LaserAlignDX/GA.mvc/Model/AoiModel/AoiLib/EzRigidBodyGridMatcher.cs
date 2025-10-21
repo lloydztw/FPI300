@@ -218,7 +218,7 @@ namespace LeTian.AoiLib
             #region DEBUG_TRACE
             if (debugDumpFile != null)
             {
-                VxDebugDrawer.Draw(imgScene, null, sceneGrid, kr, kc, Scalar.Blue, $"Grid [{sceneGrid.Rows}x{sceneGrid.Cols}] = {sceneGrid.GetMajorCount()} @ {debugTitle}");
+                VxDebugDrawer.Draw(imgScene, (QvBox2D)null, sceneGrid, kr, kc, Scalar.Blue, $"Grid [{sceneGrid.Rows}x{sceneGrid.Cols}] = {sceneGrid.GetMajorCount()} @ {debugTitle}");
             }
             #endregion
 
@@ -372,13 +372,14 @@ namespace LeTian.AoiLib
                     {
                         //string title = $"DEBUG_{rowOffset}_{colOffset} [{sceneSubGrid.Rows},{sceneSubGrid.Cols}] penalty={penalty:0.000}, defects={defects:0.000}, keyPD={pixDiff:0.000}";
                         string title = $"DEBUG_{rowOffset}_{colOffset} [{sceneSubGrid.Rows},{sceneSubGrid.Cols}] penalty={penalty:0.000}, defects={defects:0.000}, kSQ={keySQ:0.000}";
-                        VxDebugDrawer.Draw(imgScene, null, sceneSubGrid, keyRow, keyCol, Scalar.Magenta, title);
+                        VxDebugDrawer.Draw(imgScene, (QvBox2D)null, sceneSubGrid, keyRow, keyCol, Scalar.Magenta, title);
                     }
                 }
             }
 
             return bestBody;
         }
+
         void findGridCornersBox2D(Mat imgScene, EzBlocsGrid sceneGrid)
         {
             if (sceneGrid == null)
@@ -553,15 +554,15 @@ namespace LeTian.AoiLib
                 Grid = null;
             }
 
-            /// <summary>
-            /// 如果 晶粒表面 與 載台 不平行, 則 Box2D 不會完美 切齊 pads 
-            /// </summary>
-            /// <param name="useBoundaryPoints"></param>
-            public QvBox2D CalcBox2D(bool useBoundaryPoints = false)
-            {
-                EzBlocsGridAnalyzer.CalcRotatedBox2D(this.Grid, out var box2D, useBoundaryPoints);
-                return box2D;
-            }
+            ///// <summary>
+            ///// 如果 晶粒表面 與 載台 不平行, 則 Box2D 不會完美 切齊 pads 
+            ///// </summary>
+            ///// <param name="useBoundaryPoints"></param>
+            //public QvBox2D CalcBox2D(bool useBoundaryPoints = false)
+            //{
+            //    EzBlocsGridAnalyzer.CalcRotatedBox2D(this.Grid, out var box2D, useBoundaryPoints);
+            //    return box2D;
+            //}
 
             /// <summary>
             /// 取的 最小 pad, 與最大 pad 的 size

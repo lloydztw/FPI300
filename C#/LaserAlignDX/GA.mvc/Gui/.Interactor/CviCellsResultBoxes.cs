@@ -56,12 +56,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRectF));
                 //Center = new JetEazy.QMath.QVector(mvdRectF.CenterX, mvdRectF.CenterY);
 
-                var chipBox2D = cell?.ChipData?.ChipBox2D;
-                if (chipBox2D != null)
+                var chipQuad2D = cell?.ChipData?.ChipQuad2D;
+                if (chipQuad2D != null)
                 {
-                    var cc = chipBox2D.Center;
                     Rect = Rectangle.Round(cell.viewRectF);
-                    Center = new QVector(cc.X, cc.Y);
+                    Center = new QVector(chipQuad2D.Center);
                 }
                 else
                 {
@@ -132,9 +131,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             _mode = (ScanInspectMode)mode;
 
-            _withPadGaps = _xRecipe.InspectParams.optPadEdgeGapsMeasurement &&
-                           _xRecipe.InspectParams.optChipMeasurement &&
-                           _xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch;
+            _withPadGaps = _xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch &&
+                           _xRecipe.InspectParams.optPadEdgeGapsMeasurement &&
+                           _xRecipe.InspectParams.optChipMeasurement;
 
             try
             {
@@ -150,6 +149,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 updatePassNgEmptyCount(cells);
                 updateDrawItems();
+
                 autoAdjustFetchSize();
             }
             catch (Exception ex)
@@ -397,10 +397,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         private void CviCellsResultBoxes_OnCursorsChanged(object sender, EventArgs e)
         {
             var cursorBloc = GetCursorBloc(0);
-            var cellBloc = cursorBloc is CellBloc cb ? cb : cursorBloc?.Tag as CellBloc;
-            var activeCell = cellBloc?.Cell;
-            _cviRegionBox.Tag = activeCell;
-            _cviRegionBox.Visible = cursorBloc != null; // == cellBloc;
+            //var cellBloc = cursorBloc is CellBloc cb ? cb : cursorBloc?.Tag as CellBloc;
+            //var activeCell = cellBloc?.Cell;
+            //_cviRegionBox.Tag = activeCell;
+            //_cviRegionBox.Visible = cursorBloc != null; // == cellBloc;
+            syncRegionBox(cursorBloc);
         }
         #endregion
 
@@ -513,22 +514,25 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 var cell = bloc?.Cell;
                 if (cell == null) continue;
 
-                var chipBox2D = cell.ChipData.ChipBox2D;
-                if (chipBox2D == null)
-                    chipBox2D = cell.DrawResultRectF()?.ToBox2D();
+                var chipQuad2D = cell.ChipData.ChipQuad2D;
+                if (chipQuad2D == null)
+                {
+                    //>>> chipBox2D = cell.DrawResultRectF()?.ToBox2D();
+                    chipQuad2D = cell.DrawResultRectF()?.ToQuad2D();
+                }
 
-                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0 && chipBox2D != null)
+                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0 && chipQuad2D != null)
                 {
                     // PASS
-                    var item = new CviRotRectBox(chipBox2D, Color.Lime, 0f) { Tag = cell };
+                    var item = new CviRotRectBox(chipQuad2D, Color.Lime, 0f) { Tag = cell };
                     _drawItems.Add(item);
                 }
-                else if (cell.inspectReason != InspectReason.INS_ALIGNERR && chipBox2D != null)
+                else if (cell.inspectReason != InspectReason.INS_ALIGNERR && chipQuad2D != null)
                 {
                     // NG
                     var item = _optBypassIndividualNG ?
-                        new CviRotRectBox(chipBox2D, Color.Green, 0f) { Tag = cell }:
-                        new CviRotRectBox(chipBox2D, Color.Red, 0.20f) { Text = "NG", Tag = cell };
+                        new CviRotRectBox(chipQuad2D, Color.Green, 0f) { Tag = cell }:
+                        new CviRotRectBox(chipQuad2D, Color.Red, 0.20f) { Text = "NG", Tag = cell };
                     _drawItems.Add(item);
                 }
                 else
@@ -536,9 +540,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     // 格點 (吸盤) 空位
                     var center = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
                     var rect = JetEazy.Qcvt.CreateCenterRect(center.X, center.Y, 200f, 200f);
-                    var box2D = new QvBox2D();
-                    box2D.SetBox(rect.Location, rect.Size);
-                    var item = new CviRotRectBox(box2D, Color.Purple, 0.10f) { Tag = cell };
+                    var quad2D = new QvQuad2D();
+                    quad2D.SetBox(rect.Location, rect.Size);
+                    var item = new CviRotRectBox(quad2D, Color.Purple, 0.10f) { Tag = cell };
                     _drawItems.Add(item);
                 }
 
@@ -631,8 +635,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     bool isPass = cell.inspectReason == InspectReason.PASS;
                     Color itemColor = isPass ? Color.Lime : _optBypassIndividualNG ? Color.Green : Color.Red;
-                    EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var padsBox2D, false);
-                    var item = new CviRotRectBox(padsBox2D, itemColor, 0.20f) { Tag = cell };
+                    EzBlocsGridAnalyzer.CalcQuad2D(padsGrid, out var quad2D, false);
+                    var item = new CviRotRectBox(quad2D, itemColor, 0.20f) { Tag = cell };
                     _drawItemsEx.Add(item);
                 }
                 #endregion
@@ -682,16 +686,15 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void draw_ChipsLoc(CvImageViewer viewer, Graphics gxView)
         {
-            var activeCell = _cviRegionBox?.Tag;
-            
-            //var forceDraw = !_xRecipe.InspectParams.optChipMeasurement;
-            var forceDraw = !_xRecipe.InspectParams.optPadEdgeGapsMeasurement;
+            //var activeCell = _cviRegionBox?.Tag;
+            //var forceDraw = !_xRecipe.InspectParams.optChipMeasurement ||
+            //                !_xRecipe.InspectParams.optPadEdgeGapsMeasurement;
 
             foreach (var item in _drawItems)
             {
                 if (item == null) continue;
-                if (forceDraw || item.Tag != activeCell)
-                    item.OnDraw(viewer, gxView);
+                //if (forceDraw || item.Tag != activeCell)
+                item.OnDraw(viewer, gxView);
             }
         }
         void draw_ChipDetails(CvImageViewer viewer, Graphics gxView)
@@ -871,8 +874,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     yield return bloc;
 
                     var cell = (bloc as CellBloc)?.Cell;
-                    var chipBox2D = cell.ChipData?.ChipBox2D;
-                    if (chipBox2D != null && chipBox2D.BoundaryRect.Contains(camX, camY))
+                    var chipQuad2D = cell.ChipData?.ChipQuad2D;
+                    if (chipQuad2D != null && chipQuad2D.BoundaryRect.Contains(camX, camY))
                     {
                         bool isFetched = false;
 
@@ -943,47 +946,31 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         protected override string composeTooltipText(EzBloc cursor, EzBloc cursor2)
         {
-            if (cursor is CellBloc cellBloc)
-            {
-                _cviRegionBox.Box2D.SetCenter((float)cellBloc.Center.X, (float)cellBloc.Center.Y);
-                _cviRegionBox.Visible = true;
-            }
-            else if(cursor is EzBloc bloc &&  bloc.Tag is CellBloc cb)
-            {
-                _cviRegionBox.Box2D.SetCenter((float)cb.Center.X, (float)cb.Center.Y);
-                _cviRegionBox.Visible = true;
-            }
+            //if (cursor is CellBloc cellBloc)
+            //{
+            //    _cviRegionBox.Quad2D.SetCenter(cellBloc.Center.X, cellBloc.Center.Y);
+            //    _cviRegionBox.Visible = true;
+            //}
+            //else if(cursor is EzBloc bloc &&  bloc.Tag is CellBloc cb)
+            //{
+            //    _cviRegionBox.Quad2D.SetCenter(cb.Center.X, cb.Center.Y);
+            //    _cviRegionBox.Visible = true;
+            //}
 
-            // string txt = formatDisplayText(cellBloc);
+            syncRegionBox(cursor);
+
             string txt = composeTooltipTextTrf(cursor, cursor2);
             return txt;
         }
-        string formatDisplayText(CellBloc bloc)
+        void syncRegionBox(EzBloc cursorBloc)
         {
-            ////if (cell != null)
-            ////{
-            ////    bool isEmpty;
-            ////    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-            ////        isEmpty = false;
-            ////    else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
-            ////        isEmpty = false;
-            ////    else
-            ////        isEmpty = true;
-            ////    if (isEmpty)
-            ////        return $"[{cell.Index}]\n空位";
-            ////    string msg = _formatter.Format(cell);
-            ////    return msg;
-            ////}
-
-            //var cell = bloc?.Cell;
-            //if (checkResult(cell, out bool pass, out bool empty))
-            //{
-            //    if (empty)
-            //        return $"[{cell.Index}]\n缺";
-            //    return _formatter.Format(cell);
-            //}
-
-            return null;
+            //>>> var cursorBloc = GetCursorBloc(0);
+            var cellBloc = cursorBloc is CellBloc cb ? cb : cursorBloc?.Tag as CellBloc;
+            var activeCell = cellBloc?.Cell;
+            _cviRegionBox.Tag = activeCell;
+            _cviRegionBox.Visible = cursorBloc != null; // == cellBloc;
+            if (cellBloc != null)
+                _cviRegionBox.Quad2D.SetCenter(cellBloc.Center.X, cellBloc.Center.Y);
         }
         #endregion
 
@@ -1274,13 +1261,19 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         static QVector getCentroid(EzBloc bloc)
         {
             var cell = (bloc as CellBloc)?.Cell;
-            if (cell == null)
-                return bloc?.Center;
-            var cx = cell.xFindResult.fCenterX;
-            var cy = cell.xFindResult.fCenterY;
-            if (cx > 0 && cy > 0)
-                return new QVector(cx, cy);
-            return bloc.Center;
+
+            //if (cell == null)
+            //    return bloc?.Center;
+            //var cx = cell.xFindResult.fCenterX;
+            //var cy = cell.xFindResult.fCenterY;
+            //if (cx > 0 && cy > 0)
+            //    return new QVector(cx, cy);
+            //return bloc.Center;
+
+            var chipQuad = cell?.ChipData?.ChipQuad2D;
+            if (chipQuad != null)
+                return chipQuad.Center;
+            return bloc?.Center;
         }
         #endregion
 
@@ -1352,7 +1345,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             return true;
         }
-        void DebugMatching(CellBloc cellBloc = null)
+        void DebugMatching_000(CellBloc cellBloc = null)
         {
             if (IsEmptyTrayMode)
                 return;
@@ -1408,13 +1401,71 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 if (bestResult != null)
                 {
                     var bestGrid = bestResult.Grid;
-                    var box2d = bestResult.CalcBox2D();
-                    //EzPadsGridFinder.FindSpecialKeyPad(bestGrid, out int kr, out int kc, out int px);
-                    //EzPadsGridFinder.FindSpecialKeyPad(imgScene, bestGrid, out int kr, out int kc, out double kSQ);
+                    //var box2d = bestResult.CalcBox2D();
+                    //>>> EzPadsGridFinder.FindSpecialKeyPad(bestGrid, out int kr, out int kc, out int px);
+                    //>>> EzPadsGridFinder.FindSpecialKeyPad(imgScene, bestGrid, out int kr, out int kc, out double kSQ);
                     int kr = bestResult.KeyRow;
                     int kc = bestResult.KeyCol;
                     var kSQ = bestResult.KeySQRatio;
-                    VxDebugDrawer.Draw(imgRegion, box2d, bestGrid, kr, kc, Scalar.Lime, $"Best Grid [{bestGrid.Rows}x{bestGrid.Cols}] = {bestGrid.GetMajorCount()} @ {fname}");
+                    VxDebugDrawer.Draw(imgRegion, (QvBox2D)null, bestGrid, kr, kc, Scalar.Lime, $"Best Grid [{bestGrid.Rows}x{bestGrid.Cols}] = {bestGrid.GetMajorCount()} @ {fname}");
+                }
+            }
+
+            // (6) Turn Off VISUAL_DEBUG
+            EzPadsGridFinder.VISUAL_DEBUG = false;
+        }
+        void DebugMatching(CellBloc cellBloc = null)
+        {
+            if (IsEmptyTrayMode)
+                return;
+
+            if (cellBloc == null)
+                cellBloc = _cursorBloc as CellBloc;
+
+            var cell = cellBloc?.Cell;
+            if (cell == null) return;
+
+            if (!checkPrivilege())
+                return;
+
+            // (0) DEBUG OPIONS
+            EzPadsGridFinder.VISUAL_DEBUG = true;
+            VxDebugDrawer.OPT_USE_OPENCV_WINDOW = false;
+
+            // (1) ImageHolder
+            var lineScanImageHolder = GaMvcConfig.SysModel.LineScanImageHolder;
+
+            // (2) Bitmap
+            var fullfovBmp = lineScanImageHolder.PeekBitmap();
+
+            // (3) ROI
+            var roi = Rectangle.Round(cell.viewRectF);
+            roi.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
+            GaUtil.Clip(ref roi, fullfovBmp.Size);
+
+            using (var bmpCrop = fullfovBmp.Clone(roi, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
+            {
+                //(4) AOI
+                var aoiModel = GaMvcConfig.SysModel.AoiModel;
+                var cropRect = new RectangleF(0, 0, bmpCrop.Width, bmpCrop.Height);
+                aoiModel.LocateOneChip(bmpCrop, cropRect, out var chipData);
+
+                //(5) Draw
+                if (chipData != null && chipData.DebugRigidBodyData is EzRigidBodyGridMatcher.RigidBody rig)
+                {
+                    using (var bridge = new QxImageBridge(bmpCrop))
+                    {
+                        string fname = $"{cell.Index}@{cell.CellRow}_{cell.CellCol}.png";
+                        var padsGrid = chipData.PadsGrid;
+                        var chipQuad = chipData.ChipQuad2D;
+                        //>>> EzPadsGridFinder.FindSpecialKeyPad(bestGrid, out int kr, out int kc, out int px);
+                        //>>> EzPadsGridFinder.FindSpecialKeyPad(imgScene, bestGrid, out int kr, out int kc, out double kSQ);
+                        int kr = rig.KeyRow;
+                        int kc = rig.KeyCol;
+                        var kSQ = rig.KeySQRatio;
+                        var imgRegion = bridge.Image;
+                        VxDebugDrawer.Draw(imgRegion, chipQuad, padsGrid, kr, kc, Scalar.Lime, $"Best Grid [{padsGrid.Rows}x{padsGrid.Cols}] = {padsGrid.GetMajorCount()} @ {fname}");
+                    }
                 }
             }
 
@@ -1514,7 +1565,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         #endregion
 
-        #region RESERVED_CODE
+        #region DEBUG_RESERVED_CODE
 #if (OPT_RESERVED)
         void DumpChipDimsInCol(int col)
         {
