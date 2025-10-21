@@ -89,7 +89,6 @@ namespace LaserAlignDX.AoiModel.V3
 
                 //(2) 準備資料夾
                 string imgLogPath = GetLogPath(this.FileBarcodeStr);
-
                 #region PREPARE_PATH
                 if (INI.Instance.IsSaveTestImage)
                 {
@@ -361,6 +360,7 @@ namespace LaserAlignDX.AoiModel.V3
                 chipData.Roi = cellRoi;
                 chipData.PadsGrid = padsGrid;
                 chipData.ChipQuad2D = chipQuad;
+                chipData.GoldenQuad2D = chipMatcher.GoldenQuad2D?.Clone();
 
                 //(4) DEBUG data
                 chipData.DebugRigidBodyData = chipMatcher.GetResultDetails();

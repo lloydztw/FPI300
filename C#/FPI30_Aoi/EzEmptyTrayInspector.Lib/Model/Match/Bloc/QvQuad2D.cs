@@ -266,6 +266,35 @@ namespace JetEazy.QvMath
 
             return pt;
         }
+        /// <summary>
+        /// 將 pt 以 center 為圓心, 旋轉 theta
+        /// </summary>
+        public static QvQuad2D Rotate(QvQuad2D quad, QVector center, double theta, bool inplace)
+        {
+            if (quad == null || center == null)
+                return null;
+
+            if (inplace)
+            {
+                foreach (var c in quad.Corners)
+                {
+                    Rotate(c, center, theta, true);
+                }
+                return quad;
+            }
+            else
+            {
+                var corners = quad.Corners;
+                for (int i = 0; i < NP; i++)
+                {
+                    corners[i] = Rotate(corners[i], center, theta, false);
+                }
+                var newQuad = new QvQuad2D();
+                newQuad.Corners = corners;
+                return newQuad;
+            }
+        }
+
         public static QvQuad2D From(QvBox2D box2d)
         {
             if(box2d == null) return null;

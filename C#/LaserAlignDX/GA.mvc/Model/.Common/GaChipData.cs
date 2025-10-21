@@ -33,6 +33,11 @@ namespace LaserAlignDX.Model
         public RectangleF Roi { get; set; }
 
         /// <summary>
+        /// 樣板 Quad2D (單位 pixels) (GoldenFov Cammera Coordinates)
+        /// </summary>
+        public QvQuad2D GoldenQuad2D { get; set; } = null;
+
+        /// <summary>
         /// 晶粒定位結果 (單位 pixels) (FullFov Cammera Coordinates)
         /// </summary>
         public QvQuad2D ChipQuad2D { get; set; } = null;

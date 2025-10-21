@@ -686,15 +686,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void draw_ChipsLoc(CvImageViewer viewer, Graphics gxView)
         {
-            //var activeCell = _cviRegionBox?.Tag;
-            //var forceDraw = !_xRecipe.InspectParams.optChipMeasurement ||
-            //                !_xRecipe.InspectParams.optPadEdgeGapsMeasurement;
+            var activeCell = _cviRegionBox?.Tag;
+            var forceDraw = !_xRecipe.InspectParams.optChipMeasurement;
 
             foreach (var item in _drawItems)
             {
                 if (item == null) continue;
-                //if (forceDraw || item.Tag != activeCell)
-                item.OnDraw(viewer, gxView);
+                if (forceDraw || item.Tag != activeCell)
+                    item.OnDraw(viewer, gxView);
             }
         }
         void draw_ChipDetails(CvImageViewer viewer, Graphics gxView)

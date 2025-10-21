@@ -50,11 +50,6 @@ namespace LaserAlignDX.AoiModel
         //public int xMaxOverlap { get; set; } = 80;
         #endregion
 
-        public Size TemplateSize
-        {
-            get;
-            private set;
-        } = new Size(1, 1);
 
 
         ~JezGridPadsChipMatcher()
@@ -83,7 +78,30 @@ namespace LaserAlignDX.AoiModel
         {
             this.TemplateSize = bmpTemplate.Size;
             _ezChipMatcher.SetGoldenTemplate(bmpTemplate);
+
+            var rig = _ezChipMatcher.GetGoldenBody();
+            var grid = rig?.Grid;
+            if (grid != null)
+                this.GoldenQuad2D = _GetContourQuad2D(grid);
+            else
+                this.GoldenQuad2D = QvQuad2D.From(new Rectangle(Point.Empty, TemplateSize));
+
             return true;
+        }
+
+        public Size TemplateSize
+        {
+            get;
+            private set;
+        } = new Size(1, 1);
+
+        /// <summary>
+        /// 樣板特徵外廓 (必須於調用 Train 之後, 才有有效值!)
+        /// </summary>
+        public QvQuad2D GoldenQuad2D
+        {
+            get;
+            private set;
         }
 
         /// <summary>
@@ -124,9 +142,7 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         public QvQuad2D GetResultQuad2D()
         {
-            var grid = _resultChipInfo?.Grid;
-            EzBlocsGridAnalyzer.CalcQuad2D(grid, out var quad2d, useBoundaryPoints: true);
-            return quad2d;
+            return _GetContourQuad2D(_resultChipInfo?.Grid);
         }
 
         /// <summary>
@@ -147,6 +163,12 @@ namespace LaserAlignDX.AoiModel
         } = new List<xFindResult>();
 
         #region PRIVATE_HELPER_FUNCTIONS
+        QvQuad2D _GetContourQuad2D(EzBlocsGrid grid)
+        {
+            if(grid == null) return null;
+            EzBlocsGridAnalyzer.CalcQuad2D(grid, out var quad2D, useBoundaryPoints: true);
+            return quad2D;
+        }
         void convert_to_gaara_result(EzRigidBodyGridMatcher.RigidBody rigidBody, List<xFindResult> results)
         {
             results?.Clear();

@@ -14,6 +14,8 @@
 #endregion
 
 
+using JetEazy.QMath;
+using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model.Coords;
@@ -180,7 +182,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 量測單一晶粒 (直线寻找)
         /// </summary>
-        private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
+        private void RunOneChipMeasurement_000(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
         {
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
@@ -192,7 +194,7 @@ namespace LaserAlignDX.AoiModel.V3
             EdgeBorder eBorder = EdgeBorder.Left;
             try
             {
-                RectangleF[] rcpBorderRects = new RectangleF[]
+                var lineBorderRects = new RectangleF[]
                 {
                     _xRecipe.xLineLeft,
                     _xRecipe.xLineTop,
@@ -208,11 +210,11 @@ namespace LaserAlignDX.AoiModel.V3
                 xLocalResult.fCenterY = (float)(chipQuad.Center.Y - cellRoi.Y);
                 xLocalResult.fAngle = (float)chipQuad.Angle;
 
-                for (int borderIdx = 0, N = rcpBorderRects.Length; borderIdx < N; borderIdx++)
+                for (int borderIdx = 0, N = lineBorderRects.Length; borderIdx < N; borderIdx++)
                 {
                     eBorder = (EdgeBorder)borderIdx;
 
-                    CMvdRectangleF mvdBorderRect = GaImageUtil.ToCMvdRectangleF(ref rcpBorderRects[borderIdx]);
+                    CMvdRectangleF mvdBorderRect = GaImageUtil.ToCMvdRectangleF(ref lineBorderRects[borderIdx]);
 
                     CMvdRectangleF mvdBorderRotatedRect = cell.PositionFixRun(
                                                             mvdBorderRect,
@@ -285,6 +287,158 @@ namespace LaserAlignDX.AoiModel.V3
             }
             #endregion
         }
+        /// <summary>
+        /// 量測單一晶粒 (直线寻找)
+        /// </summary>
+        private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
+        {
+            // 取得 上一輪 晶粒定位 的結果 (chipData)
+            var chipData = cell?.ChipData;
+            if (chipData == null)
+                return;
+
+            #region 邊線處理
+            EdgeBorder eBorder = EdgeBorder.Left;
+            try
+            {
+                var lineBorderQuads = CalcRuntimeLocalLineBorderQuads(cell, cellRoi);
+                if (lineBorderQuads == null)
+                    return;
+
+                for (int borderIdx = 0, N = lineBorderQuads.Length; borderIdx < N; borderIdx++)
+                {
+                    //(0) enum
+                    eBorder = (EdgeBorder)borderIdx;
+
+                    //(1) borderQuad
+                    var borderQuad = lineBorderQuads[borderIdx];
+                    var mvdRoi = borderQuad.ToCMvdRectangleF();
+
+                    //(2) 海康線檢 (輸出為 cell.cMvdLineSegmentFsOut)
+                    cell.LineSegmentRun(borderIdx, cellBmp, mvdRoi);
+
+                    //(3) 將 CMvdLine 轉換成 EzLSD.LineSegment
+                    var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
+                    for (int i = 0, len = lines.Length; i < len; i++)
+                    {
+                        //(3.1) 加回 ROI Offset
+                        lines[i]?.Offset(cellRoi.X, cellRoi.Y);
+                        //(3.2) 記入 cell.ChipData
+                        cell.ChipData.LineSegments[i] = lines[i];
+                    }
+
+                    //(4) 更新 LineBorderBoxes
+                    //(4.1) 加回 ROI Offset
+                    borderQuad.Offset(cellRoi.X, cellRoi.Y);
+                    //(4.2) 更新 LineBorderBoxes;
+                    chipData.LineBorderBoxes[borderIdx] = borderQuad.ToBox2D();
+                    //(4.3) 更新到 cell 舊的 Gaara Data
+                    cell.cMvdShapesForFindLineRegion[borderIdx] = borderQuad.ToCMvdRectangleF();
+                }
+            }
+            catch (Exception ex)
+            {
+                string borderName = JetEazy.QxNums.GetEnumDescription(eBorder);
+                _LOG_ERROR(ex, $"{borderName} 定位異常");
+                throw ex;
+            }
+            #endregion
+
+            #region 尺寸長寬量測
+            try
+            {
+                //(1) 將 CMvdLine 轉換成 EzLSD.LineSegment
+                var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
+                for (int i = 0, len = lines.Length; i < len; i++)
+                {
+                    //(1.1) 加回 ROI Offset
+                    lines[i]?.Offset(cellRoi.X, cellRoi.Y);
+                    //(1.2) 記入 cell.ChipData
+                    chipData.LineSegments[i] = lines[i];
+                }
+
+                //(2) 使用 Micro Transform 計算 尺寸 與 邊隙
+                //    (結果會直接存入 cell.ChipData 內)
+                bool toMeasureGaps = _xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch;
+                var err = _microTransform.CalcChipDimension(out SizeF dimension, lines, chipData, toMeasureGaps);
+
+                //(3) 記入結果
+                cell.RunWidth = dimension.Width;
+                cell.RunHeight = dimension.Height;
+
+                //(4) 異常
+                if (err != ErrCodes.OK)
+                    throw new Exception(GaUtil.GetEnumDescription(err));
+            }
+            catch (Exception ex)
+            {
+                _LOG_ERROR(ex, "晶粒 尺寸量測 異常");
+                return;
+            }
+            #endregion
+        }
+        private QvQuad2D[] CalcRuntimeLocalLineBorderQuads(RegionCellX3Class cell, RectangleF cellRoi)
+        {
+            // 取得 上一輪 晶粒定位 的結果 (chipData)
+            var chipData = cell?.ChipData;
+            var chipQuad = chipData?.ChipQuad2D?.Clone();
+            var goldenQuad = chipData?.GoldenQuad2D?.Clone();
+            if (chipQuad == null || goldenQuad == null)
+                return null;
+
+            EdgeBorder eBorder = EdgeBorder.Left;
+            try
+            {
+                var goldenChipRect = _xRecipe.xRegionTrain;
+                var goldenChipCenter = JetEazy.Qcvt.CenterF(ref goldenChipRect);
+                var runtimeLocalCenter = chipQuad.Center - new QVector(cellRoi.X, cellRoi.Y);
+                var borderToLocalOffset = runtimeLocalCenter - new QVector(goldenChipCenter.X, goldenChipCenter.Y);
+
+                var gcc = goldenQuad.Center;
+                goldenQuad.Offset(-gcc.X, -gcc.Y);
+                var cc = chipQuad.Center;
+                chipQuad.Offset(-cc.X, -cc.Y);
+
+                var lineBorderQuads = new QvQuad2D[]
+                {
+                    QvQuad2D.From(ref _xRecipe.xLineLeft),
+                    QvQuad2D.From(ref _xRecipe.xLineTop),
+                    QvQuad2D.From(ref _xRecipe.xLineRight),
+                    QvQuad2D.From(ref _xRecipe.xLineBottom),
+                };
+
+                var runtimeQuad = chipQuad.Clone();
+
+                for (int i = 0, N = lineBorderQuads.Length; i < N; i++)
+                {
+                    int k = i == 0 ? (N - 1) : (i - 1);
+
+                    var goldenMidPt = (goldenQuad.Corners[i] + goldenQuad.Corners[k]) / 2.0;
+                    var runtimeMitPt = (runtimeQuad.Corners[i] + runtimeQuad.Corners[k]) / 2.0;
+                    var shiftV = runtimeMitPt - goldenMidPt;
+
+                    var goldenVect = goldenQuad.Corners[i] - goldenQuad.Corners[k];
+                    var runtimeVect = runtimeQuad.Corners[i] - runtimeQuad.Corners[k];
+                    var thetaG = Math.Atan2(goldenVect.Y, goldenVect.X);
+                    var thetaT = Math.Atan2(runtimeVect.Y, runtimeVect.X);
+                    var theta = thetaT - thetaG;
+
+                    var borderQuad = lineBorderQuads[i];
+                    var borderCenter = borderQuad.Center + borderToLocalOffset + shiftV;
+                    borderQuad.SetCenter(borderCenter);
+                    QvQuad2D.Rotate(borderQuad, borderCenter, theta, inplace: true);
+                }
+
+                return lineBorderQuads;
+            }
+            catch (Exception ex)
+            {
+                string borderName = JetEazy.QxNums.GetEnumDescription(eBorder);
+                _LOG_ERROR(ex, $"{borderName} 無法計算 LineBorderQuads!");
+                throw ex;
+            }
+        }
+
         /// <summary>
         /// LETIAN: 读码测试 搬移至此.
         /// caller 負責 bmpInputImage 生命

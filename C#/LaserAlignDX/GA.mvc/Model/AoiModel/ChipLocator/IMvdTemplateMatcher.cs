@@ -38,6 +38,11 @@ namespace LaserAlignDX.AoiModel
         Size TemplateSize { get; }
 
         /// <summary>
+        /// 樣板特徵外廓 (必須於調用 Train 之後, 才有有效值!)
+        /// </summary>
+        QvQuad2D GoldenQuad2D { get; }
+
+        /// <summary>
         /// 訓練
         /// </summary>
         bool Train(Bitmap bmpTemplate);

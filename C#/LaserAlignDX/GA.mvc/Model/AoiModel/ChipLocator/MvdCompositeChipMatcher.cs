@@ -150,10 +150,6 @@ namespace LaserAlignDX.AoiModel
         }
 #endif
 
-        public Size TemplateSize
-        {
-            get => _matchers[0].TemplateSize;
-        }
         public void SetRecipeParams(RecipeParams recipeParams)
         {
             ChangeAlgorithm(_recipeParams.xAlgorithm);
@@ -167,6 +163,15 @@ namespace LaserAlignDX.AoiModel
                 ok &= matcher.Train(bmpTemplate);
             return ok;
         }
+        public Size TemplateSize
+        {
+            get => _matchers[0].TemplateSize;
+        }
+        public QvQuad2D GoldenQuad2D
+        {
+            get => _matchers[0].GoldenQuad2D;
+        }
+
         public bool RunMatch(Bitmap bmpScene)
         {
             throw new System.Exception("請用個別的 _matchers[i] !");

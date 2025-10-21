@@ -123,6 +123,11 @@ namespace LaserAlignDX.AoiModel
             return bOK;
         }
 
+        public QvQuad2D GoldenQuad2D
+        {
+            get => throw new NotImplementedException();
+        }
+
         /// <summary>
         /// MVD 執行比對 (對外統一接口 !)
         /// (1) 不要跟別的專案混雜在一起, 不要暴露一大堆 HikTrain2, HikTrain3 這些雜亂的函式!
