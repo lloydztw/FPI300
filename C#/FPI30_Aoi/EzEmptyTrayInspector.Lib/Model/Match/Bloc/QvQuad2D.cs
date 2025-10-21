@@ -52,7 +52,7 @@ namespace JetEazy.QvMath
                 if (value != null && value.Length >= NP)
                 {
                     _corners = Array.ConvertAll(value, p => p != null ? p : new QVector(0, 0));
-                    SortByRelativeTheta();
+                    //SortByRelativeTheta();
                 }
             }
         }
@@ -202,10 +202,14 @@ namespace JetEazy.QvMath
             foreach (var c in _corners)
                 Rotate(c, center, thetaDiff, inplace: true);
 
-            SortByRelativeTheta();
+            //SortByRelativeTheta();
         }
 
         #region SORT_FUNCTIONS
+        public void Sort()
+        {
+            SortByRelativeTheta();
+        }
         /// <summary>
         /// 按照相對偏移角度排序
         /// </summary>
