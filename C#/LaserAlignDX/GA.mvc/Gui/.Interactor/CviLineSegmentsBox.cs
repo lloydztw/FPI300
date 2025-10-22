@@ -70,10 +70,10 @@ namespace LaserAlignDX.Mvc.Gui
         void Draw_Contents(CvImageViewer viewer, Graphics gxView)
         {
             var pen = viewer.GetOnePixelPen(_color);
-            foreach (var line in _lines)
+            foreach (var pts in _lines)
             {
-                if (line.Length >= 2)
-                    gxView.DrawLine(pen, line[0], line[1]);
+                if (pts.Length >= 2)
+                    gxView.DrawLine(pen, pts[0], pts[1]);
             }
         }
         #endregion

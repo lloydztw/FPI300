@@ -110,7 +110,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         CviRotRectBox _cviRegionBox;
         List<IvDrawItem> _drawItems = new List<IvDrawItem>();
         List<IvDrawItem> _drawItemsEx = new List<IvDrawItem>();
-        Dictionary<object, QVector[]> _chipDimMeasurePoints = new Dictionary<object, QVector[]>();
+        Dictionary<object, QVector[]> _chipDimMeasurePointsDict = new Dictionary<object, QVector[]>();
         Font _font = null;
         #endregion
 
@@ -125,7 +125,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             _outGridBlocs = null;
             _drawItems.Clear();
             _drawItemsEx.Clear();
-            _chipDimMeasurePoints.Clear();
+            _chipDimMeasurePointsDict.Clear();
         }
         public void UpdateResult(IEnumerable<XCell> cells, int mode)
         {
@@ -596,20 +596,25 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 #region 邊線拉框
                 // 繪件: 邊線手拉框
+                int borderIdx = 0;
                 foreach (var borderBox in cell.ChipData.LineBorderBoxes)
                 {
                     if (borderBox != null)
-                        drawItemsOfBorderBoxes.Add(new CviRotRectBox(borderBox, Color.DarkBlue) { Tag = cell });
-                }
-                // 繪件: 邊線手拉框 (舊版)
-                if (drawItemsOfBorderBoxes.Count == 0)
-                {
-                    foreach (var mvdShape in cell.cMvdShapesForFindLineRegion)
                     {
-                        if (mvdShape is CMvdRectangleF mvdRect)
-                            drawItemsOfBorderBoxes.Add(new CviRotRectBox(mvdRect.ToBox2D(), Color.DarkBlue) { Tag = cell });
+                        //drawItemsOfBorderBoxes.Add(new CviRotRectBox(borderBox, Color.DarkBlue) { Tag = cell, Text = $"{borderIdx}" });
+                        drawItemsOfBorderBoxes.Add(new CviRotRectBox(borderBox, Color.DarkBlue) { Tag = cell });
                     }
+                    borderIdx++;
                 }
+                //// 繪件: 邊線手拉框 (舊版)
+                //if (drawItemsOfBorderBoxes.Count == 0)
+                //{
+                //    foreach (var mvdShape in cell.cMvdShapesForFindLineRegion)
+                //    {
+                //        if (mvdShape is CMvdRectangleF mvdRect)
+                //            drawItemsOfBorderBoxes.Add(new CviRotRectBox(mvdRect.ToBox2D(), Color.DarkBlue) { Tag = cell });
+                //    }
+                //}
                 #endregion
 
                 #region 廢除_LINES_INSIDE
@@ -626,10 +631,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 #region DIM_MEASURE_POINTS
                 var dimMeasurePoints = cell?.ChipData.ChipDimension.DimMeasurePoints;
                 if (dimMeasurePoints != null)
-                    _chipDimMeasurePoints.Add(cell, dimMeasurePoints);
+                    _chipDimMeasurePointsDict.Add(cell, dimMeasurePoints);
                 #endregion
 
-                #region CHIP_PAD_BOX2D
+                #region CHIP_PAD_QUAD2D
                 var padsGrid = cell.ChipData.PadsGrid;
                 if (padsGrid != null)
                 {
@@ -720,12 +725,32 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (!_xRecipe.InspectParams.optChipMeasurement)
                 return;
 
-            if (activeCell != null && _chipDimMeasurePoints.TryGetValue(activeCell, out var measurePts))
+            if (activeCell != null && _chipDimMeasurePointsDict.TryGetValue(activeCell, out var measurePts))
             {
                 if (measurePts != null)
                 {
                     foreach (var p in measurePts)
+                    {
                         draw_MeasurePoint(viewer, gxView, p, Color.Yellow);
+                    }
+
+                    #region DRAW_TEXT
+                    if (viewer.GetZoomScale() > 0.35)
+                    {
+                        int idx = 0;
+                        var offset = new QVector(25, -25);
+                        foreach (var p in measurePts)
+                        {
+                            if (p != null)
+                            {
+                                var pt = p + offset;
+                                gxView.DrawString($"{idx}", _font, Brushes.Orange, (float)pt.X, (float)pt.Y);
+                            }
+                            idx++;
+                        }
+                    }
+                    #endregion
+
                     draw_MeasureLine(viewer, gxView, measurePts[0], measurePts[2], Color.Yellow);
                     draw_MeasureLine(viewer, gxView, measurePts[1], measurePts[3], Color.Yellow);
                 }

@@ -66,5 +66,11 @@ namespace LaserAlignDX.Mvc.Model
 
         [Description("晶粒格點 條件不佳, 請再抓取圖像!")]
         ERR_WEAK_PADS_CONDITION,
+
+        [Description("晶粒格點 尺寸 計算異常!")]
+        ERR_EDGE_DIM_CALCULATION,
+
+        [Description("晶粒格點 邊隙 計算異常!")]
+        ERR_EDGE_GAP_CALCULATION,
     }
 }

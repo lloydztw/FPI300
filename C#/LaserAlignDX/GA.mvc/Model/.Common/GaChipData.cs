@@ -108,7 +108,7 @@ namespace LaserAlignDX.Model
         /// (FullFov Cammera Coordinates)
         /// (顯示繪圖用)
         /// </summary>
-        public QVector[] DimMeasurePoints { get; set; } = new QVector[4];
+        public QVector[] DimMeasurePoints { get; set; } = null;
     }
 
 
