@@ -35,6 +35,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.numDistTransThreshold = new System.Windows.Forms.NumericUpDown();
+            this.label0 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.numBinaryThreshold)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numDistTransThreshold)).BeginInit();
             this.SuspendLayout();
@@ -43,12 +44,12 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(488, 47);
+            this.label1.Location = new System.Drawing.Point(488, 70);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(52, 27);
+            this.label1.Size = new System.Drawing.Size(114, 27);
             this.label1.TabIndex = 0;
-            this.label1.Text = "門限";
+            this.label1.Text = "Pad 門限值";
             // 
             // btnOK
             // 
@@ -66,7 +67,7 @@
             // numBinaryThreshold
             // 
             this.numBinaryThreshold.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numBinaryThreshold.Location = new System.Drawing.Point(632, 45);
+            this.numBinaryThreshold.Location = new System.Drawing.Point(632, 68);
             this.numBinaryThreshold.Margin = new System.Windows.Forms.Padding(4);
             this.numBinaryThreshold.Maximum = new decimal(new int[] {
             255,
@@ -108,12 +109,24 @@
             this.numDistTransThreshold.TabIndex = 41;
             this.numDistTransThreshold.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
+            // label0
+            // 
+            this.label0.AutoSize = true;
+            this.label0.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label0.Location = new System.Drawing.Point(488, 14);
+            this.label0.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label0.Name = "label0";
+            this.label0.Size = new System.Drawing.Size(112, 27);
+            this.label0.TabIndex = 42;
+            this.label0.Text = "格點型晶粒";
+            // 
             // FormPadThresholdsEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.LightSteelBlue;
             this.ClientSize = new System.Drawing.Size(811, 432);
+            this.Controls.Add(this.label0);
             this.Controls.Add(this.numDistTransThreshold);
             this.Controls.Add(this.jezTransImageViewPanel1);
             this.Controls.Add(this.numBinaryThreshold);
@@ -143,5 +156,6 @@
         private System.Windows.Forms.Label label2;
         private JezTransImageViewPanel jezTransImageViewPanel1;
         private System.Windows.Forms.NumericUpDown numDistTransThreshold;
+        private System.Windows.Forms.Label label0;
     }
 }

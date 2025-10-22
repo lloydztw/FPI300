@@ -93,6 +93,13 @@ namespace LaserAlignDX.Mvc.Gui
                 sb.AppendLine().Append($"晶粒.寬 = {dpX:0.0} pix");
                 sb.AppendLine().Append($"晶粒.高 = {dpY:0.0} pix");
             }
+            else
+            {
+                sb.AppendLine().AppendLine("沒有 完整邊線, 無法建構 有效量測點位!");
+                numChipWidth.Enabled = false;
+                numChipHeight.Enabled = false;
+                btnOK.Enabled = false;
+            }
             #endregion
 
             #region 晶粒_PADS

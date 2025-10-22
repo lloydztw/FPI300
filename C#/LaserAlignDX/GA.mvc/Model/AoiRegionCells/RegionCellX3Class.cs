@@ -75,7 +75,6 @@ namespace LaserAlignDX.OPSpace
         /// ROI (FullFov Camera Coordinates) (單位 pixel)
         /// </summary>
         public RectangleF viewRectF = new RectangleF();
-
         /// <summary>
         /// 優化後, 晶粒位置 數據 放置於此 
         /// </summary>
@@ -610,7 +609,7 @@ namespace LaserAlignDX.OPSpace
         #endregion
 
         /// <summary>
-        /// 整理打包 尺寸计算 的 最後结果
+        /// 整理打包 尺寸计算 的 最後判定结果
         /// </summary>
         /// <returns>true:OK false:NG</returns>
         public bool PackMeasureResult()

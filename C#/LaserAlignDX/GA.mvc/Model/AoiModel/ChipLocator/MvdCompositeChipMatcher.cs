@@ -178,10 +178,13 @@ namespace LaserAlignDX.AoiModel
             return _matchers[0].RunMatch(bmpScene);
         }
 
-        public List<xFindResult> xResults
-        {
-            get => _matchers[0].xResults;
-        }
+        #region OLD_CODE
+        //public List<xFindResult> xResults
+        //{
+        //    get => _matchers[0].xResults;
+        //}
+        #endregion
+
         public EzBlocsGrid GetResultPadsGrid()
         {
             return _matchers[0]?.GetResultPadsGrid();

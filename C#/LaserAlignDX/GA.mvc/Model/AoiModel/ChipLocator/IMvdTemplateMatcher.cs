@@ -67,9 +67,9 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         object GetResultDetails();
 
-        /// <summary>
-        /// 結果 (即將廢除)
-        /// </summary>
-        List<xFindResult> xResults { get; }
+        ///// <summary>
+        ///// 結果 (即將廢除)
+        ///// </summary>
+        //List<xFindResult> xResults { get; }
     }
 }

@@ -25,8 +25,11 @@ using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
+using NLog.LayoutRenderers;
 using OpenCvSharp;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Text;
@@ -148,10 +151,22 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 提供 給 參數編輯 使用
         /// </summary>
-        internal bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
+        internal bool LocateOneChip(Bitmap cellBmp, ref RectangleF cellRoi, out GaChipData chipData)
         {
             prepareChipMatcher(0, out var chipMatcher);
             return _LocateOneChip(cellBmp, ref cellRoi, out chipData, chipMatcher);
+        }
+
+        /// <summary>
+        /// 調試用
+        /// </summary>
+        internal bool TryLocateOneChip(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
+        {
+            if (cell == null) return false;
+            var gaCell = new GaCell(cell, cellBmp, Rectangle.Round(cellRoi));
+            _RunChipLocateOneT(0, new[] { gaCell }, null);
+            bool ok = cell.ChipData?.ChipQuad2D != null;
+            return ok;
         }
 
 
@@ -215,10 +230,10 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// LETIAN: 晶粒定位 與 尺寸量測 (區域) (限用於同一線程內)
         /// </summary>
-        string _RunChipLocateOneT(int threadIdx, GaCellsGroup cellsGroup, string imgPath)
+        string _RunChipLocateOneT(int threadIdx, IEnumerable<GaCell> cellsGroup, string imgPath)
         {
             prepareChipMatcher(threadIdx, out IMvdTemplateMatcher chipMatcher);
-            var fullFovSize = cellsGroup.FullFovRect.Size;
+            //var fullFovSize = cellsGroup.FullFovRect.Size;
             var debugSB = new StringBuilder();
 
             foreach (var gaCell in cellsGroup)
@@ -234,7 +249,7 @@ namespace LaserAlignDX.AoiModel.V3
                 cell.Reset();
 
                 //(2) 異步保存 Cell 圖像檔案
-                if (INI.Instance.IsSaveTestImage)
+                if (INI.Instance.IsSaveTestImage && imgPath != null)
                 {
                     cell.IsSaveDebugPicture = true;
                     cell.SaveDebugPath = imgPath;
@@ -327,39 +342,6 @@ namespace LaserAlignDX.AoiModel.V3
             return debugSB.ToString();
         }
 
-        bool _LocateOneChip_000(Bitmap cellBmp, ref RectangleF cellRoi, out GaChipData chipData, IMvdTemplateMatcher chipMatcher)
-        {
-            chipData = null;
-
-            //(1) Match
-            bool ok = chipMatcher.RunMatch(cellBmp);
-
-            if (ok)
-            {
-                //(2) 使用 xResults[0] 當 Chip Center
-                var xFindResult = chipMatcher.xResults[0];
-                xFindResult.fCenterX += cellRoi.X;
-                xFindResult.fCenterY += cellRoi.Y;
-
-                //(3.1) 晶粒定位中心點(camera coorindates)
-                var chipSize = _xRecipe.xRegionTrain.Size;
-                var chipBox2D = toBox2D(ref xFindResult, chipSize);
-                var chipQuad = QvQuad2D.From(chipBox2D);
-
-                //(3.2) 將定位結果記入 cell.ChipData
-                chipData = new GaChipData();
-                chipData.Roi = cellRoi;
-                chipData.ChipQuad2D = chipQuad;
-                chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
-                chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
-
-                //(3.3) DEBUG data
-                chipData.DebugRigidBodyData = chipMatcher.GetResultDetails();
-            }
-
-            return ok;
-        }
-        
         bool _LocateOneChip(Bitmap cellBmp, ref RectangleF cellRoi, out GaChipData chipData, IMvdTemplateMatcher chipMatcher)
         {
             chipData = null;

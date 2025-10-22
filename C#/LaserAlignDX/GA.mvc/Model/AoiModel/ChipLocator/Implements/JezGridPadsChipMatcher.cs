@@ -14,12 +14,9 @@
 #endregion
 
 
-using AUVision;
 using JetEazy.Match;
 using JetEazy.QvMath;
 using LeTian.AoiLib;
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 using RecipeParams = LaserAlignDX.OPSpace.RecipeSpace.InspectX3ParaClass;
 
@@ -49,7 +46,6 @@ namespace LaserAlignDX.AoiModel
         //public PointF xMvdFixed { get; set; } = new PointF(-1, -1);
         //public int xMaxOverlap { get; set; } = 80;
         #endregion
-
 
 
         ~JezGridPadsChipMatcher()
@@ -112,7 +108,7 @@ namespace LaserAlignDX.AoiModel
         /// <param name="bmpScene">由 caller 維護其生命週期</param>
         public bool RunMatch(Bitmap bmpScene)
         {
-            xResults.Clear();
+            //xResults.Clear();
 
             _ezChipMatcher.PadThreshold = _recipeParams.xGridPadThreshold;
             _ezChipMatcher.DistTransThreshold = _recipeParams.xDistTransThreshold;
@@ -120,9 +116,9 @@ namespace LaserAlignDX.AoiModel
 
             var rigidBody = _ezChipMatcher.FindBestMatch(bmpScene);
 
-            if (rigidBody != null)
-                convert_to_gaara_result(rigidBody, xResults);
-            
+            //if (rigidBody != null)
+            //    convert_to_gaara_result(rigidBody, xResults);
+
             _resultChipInfo = rigidBody;
 
             bool bOK = rigidBody?.Grid != null;
@@ -153,6 +149,19 @@ namespace LaserAlignDX.AoiModel
             return _resultChipInfo;
         }
 
+
+        #region PRIVATE_HELPER_FUNCTIONS
+        QvQuad2D _GetContourQuad2D(EzBlocsGrid grid)
+        {
+            if (grid == null) return null;
+            EzBlocsGridAnalyzer.CalcQuad2D(grid, out var quad2D, useBoundaryPoints: true);
+            return quad2D;
+        }
+        #endregion
+
+
+        #region OLD_CODE
+#if (OPT_OLD_CODE)
         /// <summary>
         /// 即將廢除
         /// </summary>
@@ -162,13 +171,6 @@ namespace LaserAlignDX.AoiModel
             private set;
         } = new List<xFindResult>();
 
-        #region PRIVATE_HELPER_FUNCTIONS
-        QvQuad2D _GetContourQuad2D(EzBlocsGrid grid)
-        {
-            if(grid == null) return null;
-            EzBlocsGridAnalyzer.CalcQuad2D(grid, out var quad2D, useBoundaryPoints: true);
-            return quad2D;
-        }
         void convert_to_gaara_result(EzRigidBodyGridMatcher.RigidBody rigidBody, List<xFindResult> results)
         {
             results?.Clear();
@@ -210,8 +212,9 @@ namespace LaserAlignDX.AoiModel
                 fScore = (float)score
             };
 
-            xResults.Add(result);
+            results.Add(result);
         }
+#endif
         #endregion
     }
 }

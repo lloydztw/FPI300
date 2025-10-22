@@ -18,6 +18,7 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -67,6 +68,7 @@ namespace LaserAlignDX.AoiModel.V3
         {
             this._cellGroups = cellGroups;
         }
+
         public override void Run()
         {
             bool go = _xInspect.optChipMeasurement || _xInspect.optChipDefectsInspect || QrUsed;
@@ -103,6 +105,19 @@ namespace LaserAlignDX.AoiModel.V3
                 _LOG_ERROR(ex, $"異常 @ {GetType().Name}.Run");
                 fire_AoiError(errCode, errMsg);
             }
+        }
+
+        /// <summary>
+        /// 調試 使用
+        /// </summary>
+        internal void TryMeasureOneChip(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
+        {
+            if (_microTransform == null)
+                _microTransform = _sysModel.GetMicroTransform(getActiveCarrierID());
+            if (_microTransform == null)
+                return;
+
+            RunOneChipMeasurement(cell, cellBmp, ref cellRoi);
         }
 
         #region PRIVATE_FUNCTIONS
@@ -173,7 +188,7 @@ namespace LaserAlignDX.AoiModel.V3
                 if (go)
                 {
                     //(2) 量測單一晶粒
-                    RunOneChipMeasurement(cell, cellBmp, cellRoi);
+                    RunOneChipMeasurement(cell, cellBmp, ref cellRoi);
                     cell.PackMeasureResult();
                     //_TM.END("OneChipMeasurement");
                 }
@@ -184,6 +199,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// </summary>
         private void RunOneChipMeasurement_000(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
         {
+#if(OPT_OLD_CODE)
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
             var chipQuad = chipData?.ChipQuad2D;
@@ -286,11 +302,12 @@ namespace LaserAlignDX.AoiModel.V3
                 return;
             }
             #endregion
+#endif
         }
         /// <summary>
         /// 量測單一晶粒 (直线寻找)
         /// </summary>
-        private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
+        private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
         {
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
@@ -377,6 +394,9 @@ namespace LaserAlignDX.AoiModel.V3
             }
             #endregion
         }
+        /// <summary>
+        /// 計算 選轉&平移 後的 邊線框 (左, 上, 右, 下)
+        /// </summary>
         private QvQuad2D[] CalcRuntimeLocalLineBorderQuads(RegionCellX3Class cell, RectangleF cellRoi)
         {
             // 取得 上一輪 晶粒定位 的結果 (chipData)

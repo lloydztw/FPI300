@@ -187,6 +187,7 @@ namespace LaserAlignDX.AoiModel
         }
 
         #region PRIVATE_HIK_FUNCTIONS
+
 #if NO_USED_CODE
         bool HikTrainBmp()
         {
@@ -331,6 +332,7 @@ namespace LaserAlignDX.AoiModel
 
         }
 #endif
+
         bool HikRun2(CMvdImage xMvdRun_Image)
         {
             var W = xMvdRun_Image.Width;

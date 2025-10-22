@@ -1297,7 +1297,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     new ToolStripMenuItem("調試: 複製 單一晶粒 尺寸量測結果"),
                     new ToolStripMenuItem("調試: 輸出 單一區域 圖像檔案"),
                     new ToolStripMenuItem("調試: 輸出 所有區域 圖像檔案"),
-                    new ToolStripMenuItem("調試: 顯示 晶粒定位 演算圖像"),
+                    new ToolStripMenuItem("調試: 顯示 晶粒定位 所有演算圖像"),
                 };
 
                 int i = 0;
@@ -1346,6 +1346,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void DebugMatching_000(CellBloc cellBloc = null)
         {
+#if(OPT_OLD_CODE)
             if (IsEmptyTrayMode)
                 return;
 
@@ -1412,9 +1413,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             // (6) Turn Off VISUAL_DEBUG
             EzPadsGridFinder.VISUAL_DEBUG = false;
+#endif
         }
-        void DebugMatching(CellBloc cellBloc = null)
+        void DebugMatching_001(CellBloc cellBloc = null)
         {
+#if(OPT_OLD_CODE)
             if (IsEmptyTrayMode)
                 return;
 
@@ -1464,6 +1467,68 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         var kSQ = rig.KeySQRatio;
                         var imgRegion = bridge.Image;
                         VxDebugDrawer.Draw(imgRegion, chipQuad, padsGrid, kr, kc, Scalar.Lime, $"Best Grid [{padsGrid.Rows}x{padsGrid.Cols}] = {padsGrid.GetMajorCount()} @ {fname}");
+                    }
+                }
+            }
+
+            // (6) Turn Off VISUAL_DEBUG
+            EzPadsGridFinder.VISUAL_DEBUG = false;
+#endif
+        }
+        void DebugMatching(CellBloc cellBloc = null)
+        {
+            if (IsEmptyTrayMode)
+                return;
+
+            if (cellBloc == null)
+                cellBloc = _cursorBloc as CellBloc;
+
+            var cell = cellBloc?.Cell;
+            if (cell == null) return;
+
+            if (!checkPrivilege())
+                return;
+
+            // (0) DEBUG OPIONS
+            EzPadsGridFinder.VISUAL_DEBUG = true;
+            VxDebugDrawer.OPT_USE_OPENCV_WINDOW = false;
+
+            // (1) ImageHolder
+            var lineScanImageHolder = GaMvcConfig.SysModel.LineScanImageHolder;
+
+            // (2) Bitmap
+            var fullfovBmp = lineScanImageHolder.PeekBitmap();
+
+            // (3) ROI
+            var cellRoi = Rectangle.Round(cell.viewRectF);
+            cellRoi.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
+            GaUtil.Clip(ref cellRoi, fullfovBmp.Size);
+
+            using (var cellBmp = fullfovBmp.Clone(cellRoi, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
+            {
+                //(4) AOI
+                var aoiModel = GaMvcConfig.SysModel.AoiModel;
+                bool ok = aoiModel.TryRunOneChip(cell, cellBmp, cellRoi);
+
+                //(5) Draw
+                var chipData = cell.ChipData;
+                if (ok && chipData != null && chipData.DebugRigidBodyData is EzRigidBodyGridMatcher.RigidBody rig)
+                {
+                    using (var bridge = new QxImageBridge(cellBmp))
+                    {
+                        var chipQuad = chipData.ChipQuad2D?.Clone();
+                        var padsGrid = chipData.PadsGrid;
+                        if (padsGrid != null)
+                        {
+                            int kr = rig.KeyRow;
+                            int kc = rig.KeyCol;
+                            var kSQ = rig.KeySQRatio;
+                            var imgRegion = bridge.Image;
+                            string fname = $"{cell.Index}@{cell.CellRow}_{cell.CellCol}.png";
+                            padsGrid.Offset(-cellRoi.X, -cellRoi.Y);
+                            VxDebugDrawer.Draw(imgRegion, chipQuad, padsGrid, kr, kc, Scalar.Lime, $"Best Grid [{padsGrid.Rows}x{padsGrid.Cols}] = {padsGrid.GetMajorCount()} @ {fname}");
+                            padsGrid.Offset(cellRoi.X, cellRoi.Y);
+                        }
                     }
                 }
             }
@@ -1543,7 +1608,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 if (chipData != null)
                 {
                     var sb = new StringBuilder();
-                    sb.AppendValues(cell.CellRow, cell.CellCol).Append(",").AppendValues(cell.RunWidth, cell.RunHeight);
+                    sb.AppendValues(cell.CellRow, cell.CellCol).Append(", ").AppendValues(cell.RunWidth, cell.RunHeight);
                     textToCopy = sb.ToString();
                 }
                 else

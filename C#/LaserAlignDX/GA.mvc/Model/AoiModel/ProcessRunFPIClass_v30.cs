@@ -255,7 +255,7 @@ namespace LaserAlignDX.AoiModel.V3
             //      chipData.ChipBox2D = chipBox2D;
             //      chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
             //      chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
-            bool ok = _aoiChipLoc.LocateOneChip(regionBmp, regionRoi, out var chipData);
+            bool ok = _aoiChipLoc.LocateOneChip(regionBmp, ref regionRoi, out var chipData);
             if (!ok || chipData == null)
                 return ErrCodes.ERR_NO_CHIP_LOCATION;
 
@@ -277,9 +277,14 @@ namespace LaserAlignDX.AoiModel.V3
             return err;
         }
 
-        public bool LocateOneChip(Bitmap cellBmp, RectangleF cellRoi, out GaChipData chipData)
+        public bool TryRunOneChip(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
         {
-            return _aoiChipLoc.LocateOneChip(cellBmp, cellRoi, out chipData);
+            if (cell == null) return false;
+            cell.Reset();
+            bool ok = _aoiChipLoc.TryLocateOneChip(cell, cellBmp, ref cellRoi);
+            if (ok && _xRecipe.InspectParams.optChipMeasurement)
+                _aoiChipMeasure.TryMeasureOneChip(cell, cellBmp, ref cellRoi);
+            return ok;
         }
 
         public override void Run()
