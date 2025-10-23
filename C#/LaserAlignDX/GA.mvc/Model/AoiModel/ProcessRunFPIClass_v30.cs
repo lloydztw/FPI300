@@ -15,11 +15,10 @@
 
 
 using JetEazy.Utils;
-using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
-using OpenCvSharp;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
@@ -158,13 +157,11 @@ namespace LaserAlignDX.AoiModel.V3
         /// <returns>ARRAY[0..299] OF INT PC->PLC 单颗结果, 1:OK 2:外观NG, 3:空, 4:读码NG, 9:切割NG </returns>
         public int[] GetSingleResult()
         {
-            //PC->PLC 单颗结果,1-Ok,2-外观Ng,3-空,4-读码NG,9-切割NG
+            //PC->PLC 单颗结果, 1-Ok, 2-外观Ng, 3-空, 4-读码NG, 9-切割NG
 
-            var xRecipe = _xRecipe;
-
-            int[] states = new int[xRecipe.xRegionCells.Count];
+            int[] states = new int[_xRecipe.xRegionCells.Count];
             int i = 0;
-            foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
+            foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
             {
                 if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                     states[i] = 1;
@@ -188,10 +185,9 @@ namespace LaserAlignDX.AoiModel.V3
         {
             //PC->PLC 读码结果,1-Ok,2-比对Ng,3-空,4-有码未读到
 
-            var xRecipe = _xRecipe;
-            int[] states = new int[xRecipe.xRegionCells.Count];
+            int[] states = new int[_xRecipe.xRegionCells.Count];
             int i = 0;
-            foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
+            foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
             {
                 if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                     states[i] = 1;
@@ -216,11 +212,9 @@ namespace LaserAlignDX.AoiModel.V3
             //PC->PLC 线扫偏移值XYR
             //单颗产品的偏移值([0]-X,[1]-Y,[2]-R，[3]-X,[4]-Y,[5]-R…依次共300个)
 
-            var xRecipe = _xRecipe;
-
-            float[] states = new float[xRecipe.xRegionCells.Count * 3];
+            float[] states = new float[_xRecipe.xRegionCells.Count * 3];
             int i = 0;
-            foreach (RegionCellX3Class cell in xRecipe.xRegionCells)
+            foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
             {
                 if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                 {
@@ -276,7 +270,6 @@ namespace LaserAlignDX.AoiModel.V3
 
             return err;
         }
-
         public bool TryRunOneChip(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
         {
             if (cell == null) return false;
@@ -423,5 +416,19 @@ namespace LaserAlignDX.AoiModel.V3
             return isPass;
         }
         #endregion
+
+        internal IEnumerable<RegionCellX3Class> IterResultCells(IEnumerable<RegionCellX3Class> cells = null)
+        {
+            if (cells == null)
+                cells = _xRecipe.xRegionCells;
+            foreach (var cell in cells)
+            {
+                var outGridCell = cell?.OutGridLink;
+                if (outGridCell != null)
+                    yield return outGridCell;
+                else
+                    yield return cell;
+            }
+        }
     }
 }

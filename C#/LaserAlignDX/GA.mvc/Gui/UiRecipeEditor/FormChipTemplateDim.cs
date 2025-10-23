@@ -165,7 +165,7 @@ namespace LaserAlignDX.Mvc.Gui
             var goldenDim = new SizeF(goldenW, goldenH);
 
             // Region Bitmap
-            var regionRoi = Rectangle.Round(chipData.Roi);
+            var regionRoi = Rectangle.Round(chipData.CellRoi);
             GaUtil.Clip(ref regionRoi, fullfovBmp.Size);
             if (regionRoi.Width < 2 || regionRoi.Height < 2)
                 return ErrCodes.ERR_NO_CHIP_LOCATION;

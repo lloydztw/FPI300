@@ -27,10 +27,20 @@ namespace LaserAlignDX.Model
 {
     public class GaChipData
     {
+        public bool IsEmpty()
+        {
+            return ChipQuad2D == null;
+        }
+
+        /// <summary>
+        /// 是否位於 格位範圍之外
+        /// </summary>
+        public bool IsOutGrid { get; set; } = false;
+
         /// <summary>
         /// 運算截圖時的 Roi (單位 pixels) (FullFov Cammera Coordinates)
         /// </summary>
-        public RectangleF Roi { get; set; }
+        public RectangleF CellRoi { get; set; }
 
         /// <summary>
         /// 樣板 Quad2D (單位 pixels) (GoldenFov Cammera Coordinates)
@@ -109,6 +119,26 @@ namespace LaserAlignDX.Model
         /// (顯示繪圖用)
         /// </summary>
         public QVector[] DimMeasurePoints { get; set; } = null;
+        /// <summary>
+        /// 取得晶粒 像素 長寬 (單位 pixels)
+        /// </summary>
+        public bool GetPixelSize(out double pixWidth, out double pixHeight)
+        {
+            pixWidth = 0;
+            pixHeight = 0;
+
+            // 0:左, 1:上, 2:右, 3:下
+            var pts = DimMeasurePoints;
+            if (pts == null)
+                return false;
+
+            if (pts[0] != null && pts[2] != null)
+                pixWidth = Math.Round((pts[0] - pts[2]).NormLength, 1);
+            if (pts[1] != null && pts[3] != null)
+                pixHeight = Math.Round((pts[1] - pts[3]).NormLength, 1);
+
+            return pixWidth > 0 && pixHeight > 0;
+        }
     }
 
 

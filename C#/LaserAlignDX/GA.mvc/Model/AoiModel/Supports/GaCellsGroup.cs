@@ -17,10 +17,13 @@ using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using OpenCvSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Windows.Controls;
+using Size = System.Drawing.Size;
 
 
 namespace LaserAlignDX.AoiModel
@@ -74,24 +77,30 @@ namespace LaserAlignDX.AoiModel
         }
         public IEnumerator<GaCell> GetEnumerator()
         {
-            foreach (var cell in _gaCells)
-                yield return cell;
+            if (_gaCells != null)
+            {
+                foreach (var cell in _gaCells)
+                    yield return cell;
+            }
         }
         public void Dispose()
         {
-            foreach (var cell in _gaCells)
-                cell?.Dispose();
+            if (_gaCells != null)
+            {
+                foreach (var cell in _gaCells)
+                    cell?.Dispose();
+            }
         }
 
         /// <summary>
         /// caller 負責 fullFovBmp 生命週期
         /// </summary>
-        public static GaCellsGroup[] CollectGroups(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult = null)
+        public static GaCellsGroup[] CollectGroups(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult = null, bool outGrid = false)
         {
-            if (preEmptyResult == null)
-                return CollectGroups_000_spanY(N, xRecipe, fullFovBmp);
+            if (!outGrid)
+                return CollectGroups_on_grid(N, xRecipe, fullFovBmp, preEmptyResult);
             else
-                return CollectGroups_002_fast(N, xRecipe, fullFovBmp, preEmptyResult);
+                return CollectGroups_out_grid(N, xRecipe, fullFovBmp, preEmptyResult);
         }
         static GaCellsGroup[] CollectGroups_000_spanY(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
         {
@@ -147,38 +156,7 @@ namespace LaserAlignDX.AoiModel
 
             return groups;
         }
-        static GaCellsGroup[] CollectGroups_001_simple(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
-        {
-            var allSrcCells = xRecipe.xRegionCells;
-            int totalCount = allSrcCells.Count;
-            if (totalCount == 0)
-                return new GaCellsGroup[0];
-
-            int span = totalCount >= N ? totalCount / N : 1;
-            while( N * span < totalCount)
-                span++; 
-
-            var groups = new GaCellsGroup[N];
-            for (int gid = 0; gid < N; gid++)
-            {
-                var collection = new List<RegionCellX3Class>();
-                int idx = gid * span;
-                int idx2 = Math.Min(idx + span, totalCount);
-                for (int i = idx; i < idx2; i++)
-                {
-                    collection.Add(allSrcCells[i]);
-                }
-                //>>> collection.Sort((c1, c2) => (int)(c1.viewRectF.Y - c2.viewRectF.Y));
-                var inflate = new Size(xRecipe.xExtendx, xRecipe.xExtendy);
-                var grp = groups[gid] = new GaCellsGroup();
-                grp.buildGaCells(fullFovBmp, inflate, collection);
-            }
-
-            verify(groups, alert: false);
-
-            return groups;
-        }
-        static GaCellsGroup[] CollectGroups_002_fast(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult)
+        static GaCellsGroup[] CollectGroups_on_grid(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult)
         {
             var allSrcCells = new List<RegionCellX3Class>(xRecipe.xRegionCells);
             var emptyCells = new List<RegionCellX3Class>();
@@ -201,7 +179,82 @@ namespace LaserAlignDX.AoiModel
                 cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
             }
 
-            int totalCount = allSrcCells.Count;
+            //int totalCount = allSrcCells.Count;
+            //if (totalCount == 0)
+            //    return new GaCellsGroup[0];
+
+            //int span = totalCount >= N ? totalCount / N : 1;
+            //while (N * span < totalCount)
+            //    span++;
+
+            //var groups = new GaCellsGroup[N];
+            //for (int gid = 0; gid < N; gid++)
+            //{
+            //    var collection = new List<RegionCellX3Class>();
+            //    int idx = gid * span;
+            //    int idx2 = Math.Min(idx + span, totalCount);
+            //    for (int i = idx; i < idx2; i++)
+            //    {
+            //        collection.Add(allSrcCells[i]);
+            //    }
+            //    //>>> collection.Sort((c1, c2) => (int)(c1.viewRectF.Y - c2.viewRectF.Y));
+            //    var inflate = new Size(xRecipe.xExtendx, xRecipe.xExtendy);
+            //    var grp = groups[gid] = new GaCellsGroup();
+            //    grp.buildGaCells(fullFovBmp, inflate, collection);
+            //}
+
+            //verify(groups, alert: false);
+            //return groups;
+
+            var groups = CollectGroups_simple(N, allSrcCells, fullFovBmp, new Size(xRecipe.xExtendx, xRecipe.xExtendy));
+            return groups;
+        }
+        static GaCellsGroup[] CollectGroups_out_grid(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult)
+        {
+            if (preEmptyResult == null)
+                return new GaCellsGroup[0];
+
+            SizeF cellViewSizeF = SizeF.Empty;
+
+            #region 取得_cellViewSizeF
+            foreach (var cell in xRecipe.xRegionCells)
+            {
+                if (cell != null)
+                {
+                    cellViewSizeF = cell.viewRectF.Size;
+                    break;
+                }
+            }
+            #endregion
+
+            if (cellViewSizeF == SizeF.Empty)
+                return new GaCellsGroup[0];
+
+            var outGridCells = new List<RegionCellX3Class>();
+            var boundaryPolygonPts = getCellsBoundRotRect(xRecipe).Points();
+            foreach (var bloc in preEmptyResult.IterOutGridAbnormalBlocs())
+            {
+                if (bloc == null) continue;
+                var centerPt = new Point2f((float)bloc.Center.X, (float)bloc.Center.Y);
+                bool isInside = Cv2.PointPolygonTest(boundaryPolygonPts, centerPt, false) >= 0;
+                if (isInside) continue;
+
+                var cell = new RegionCellX3Class();
+                int index = outGridCells.Count;
+                cell.Index = index;
+                cell.CellRow = -1;
+                cell.CellCol = -1;
+                cell.lblName = $"OUT-{index}";
+                cell.viewRectF = JetEazy.Qcvt.CreateCenterRect(centerPt.X, centerPt.Y, ref cellViewSizeF);
+                outGridCells.Add(cell);
+            }
+
+            var groups = CollectGroups_simple(N, outGridCells, fullFovBmp, new Size(xRecipe.xExtendx, xRecipe.xExtendy));
+            return groups;
+        }
+        static GaCellsGroup[] CollectGroups_simple(int N, List<RegionCellX3Class> srcCells, Bitmap fullFovBmp, Size inflate)
+        {
+            int totalCount = srcCells.Count;
             if (totalCount == 0)
                 return new GaCellsGroup[0];
 
@@ -217,10 +270,9 @@ namespace LaserAlignDX.AoiModel
                 int idx2 = Math.Min(idx + span, totalCount);
                 for (int i = idx; i < idx2; i++)
                 {
-                    collection.Add(allSrcCells[i]);
+                    collection.Add(srcCells[i]);
                 }
                 //>>> collection.Sort((c1, c2) => (int)(c1.viewRectF.Y - c2.viewRectF.Y));
-                var inflate = new Size(xRecipe.xExtendx, xRecipe.xExtendy);
                 var grp = groups[gid] = new GaCellsGroup();
                 grp.buildGaCells(fullFovBmp, inflate, collection);
             }
@@ -228,6 +280,57 @@ namespace LaserAlignDX.AoiModel
             verify(groups, alert: false);
             return groups;
         }
+
+        /// <summary>
+        /// 取得 所有 xRecipe.xRegionCells 形成的邊界範圍 
+        /// </summary>
+        static RotatedRect getCellsBoundRotRect(RecipeFPIX3Class xRecipe)
+        {
+            var points = new List<Point2f>();
+            int rowMax = -1;
+            int colMax = -1;
+            foreach (var cell in xRecipe.xRegionCells)
+            {
+                if(cell == null) continue;
+                int r = cell.CellRow;
+                int c = cell.CellCol;
+
+                bool needsToCollect = false;
+                if (r > rowMax || c > colMax)
+                {
+                    r = rowMax;
+                    c = colMax;
+                    needsToCollect = true;
+                }
+                else if (r == 0 && c == 0)
+                {
+                    needsToCollect = true;
+                }
+                else if (r == 0 && c == colMax)
+                {
+                    needsToCollect = true;
+                }
+                else if (r == rowMax && c == colMax)
+                {
+                    needsToCollect = true;
+                }
+                else if (r == rowMax && c == 0)
+                {
+                    needsToCollect = true;
+                }
+
+                if (needsToCollect)
+                {
+                    var rect = cell.viewRectF;
+                    points.Add(new Point2f(rect.X, rect.Y));
+                    points.Add(new Point2f(rect.Right, rect.Y));
+                    points.Add(new Point2f(rect.Right, rect.Bottom));
+                    points.Add(new Point2f(rect.X, rect.Bottom));
+                }
+            }
+            return Cv2.MinAreaRect(points);
+        }
+
         /// <summary>
         /// 釋放資源
         /// </summary>
@@ -267,6 +370,7 @@ namespace LaserAlignDX.AoiModel
         #region PRIVATE_DEBUG_FUNCTIONS
         static void verify(GaCellsGroup[] groups, bool alert = true)
         {
+#if DEBUG
             for (int ig = 0; ig < groups.Length; ig++)
             {
                 var grp = groups[ig];
@@ -284,6 +388,7 @@ namespace LaserAlignDX.AoiModel
                         System.Diagnostics.Debug.Assert(!rect0.IntersectsWith(rect2), "跳號的 2 個 Groups 不能相交!");
                 }
             }
+#endif
         }
         static int get_roi_boundary(GaCellsGroup grp, out Rectangle boundaryRect)
         {

@@ -61,11 +61,13 @@ namespace LaserAlignDX.OPSpace
             mvdFindLineClass = null;
             mvdPairLineClass?.Dispose();
             mvdPairLineClass = null;
+         
+            try { OutGridLink?.Dispose(); } catch { }
+            OutGridLink = null;
         }
 
         // INDEX
         public int Index = 0;
-        public string Name = "";
         public string lblName = "";
         public int CellRow = 0;
         public int CellCol = 0;
@@ -76,9 +78,14 @@ namespace LaserAlignDX.OPSpace
         /// </summary>
         public RectangleF viewRectF = new RectangleF();
         /// <summary>
-        /// 優化後, 晶粒位置 數據 放置於此 
+        /// 優化後, 晶粒 像測的詳細數據 皆放置於此 
         /// </summary>
         public GaChipData ChipData = new GaChipData();
+        /// <summary>
+        /// 用來連結 最接近此格位 的 散落在外圍 晶粒
+        /// (2025-10-22 新增)
+        /// </summary>
+        public RegionCellX3Class OutGridLink { get; set; } = null;
 
         /// <summary>
         /// 理想 格位中心座標 X (單位 mm)
@@ -834,6 +841,9 @@ namespace LaserAlignDX.OPSpace
         public void Reset()
         {
             ChipData = new GaChipData();
+
+            try { OutGridLink?.Dispose(); } catch { }
+            OutGridLink = null;
             
             ////<<< 廢除 >>> xFindResult = new AUVision.xFindResult();
 

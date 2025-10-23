@@ -25,10 +25,8 @@ using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
-using NLog.LayoutRenderers;
 using OpenCvSharp;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -112,17 +110,20 @@ namespace LaserAlignDX.AoiModel.V3
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
 
                 //(5) PreEmptyTray
-                _PreCheckEmptyTray(bmpFullfov);
+                _PreInspectEmptyTray(bmpFullfov);
 
                 //(6) 晶粒定位
                 _RunChipsLocate(bmpFullfov, imgLogPath, out string debugCellCenterStr);
                 _TM.Trace("_Inspect001 : 晶粒定位 & 量測 完成!");
 
-                //(7) 異步輸出 Debug 數據
+                //(7) 晶粒定位 (偏離格位外)
+                _RunChipsLocateOutGrid(bmpFullfov, imgLogPath);
+
+                //(8) 異步輸出 Debug 數據
                 markFileTimeTag();
                 saveDebugDataAsync(bmpFullfov, debugCellCenterStr, imgLogPath);
 
-                //(8) 標記終止計時
+                //(9) 標記終止計時
                 markRunEnd(true);
                 fire_AoiEnd();
             }
@@ -172,7 +173,7 @@ namespace LaserAlignDX.AoiModel.V3
 
         #region PRIVATE_FUNCTIONS
 
-        void _PreCheckEmptyTray(Bitmap bmpFullfov)
+        void _PreInspectEmptyTray(Bitmap bmpFullfov)
         {
             _preEmptyTrayResult = null;
             try
@@ -188,7 +189,7 @@ namespace LaserAlignDX.AoiModel.V3
         }
 
         /// <summary>
-        /// LETIAN: 晶粒定位
+        /// LETIAN: 晶粒定位 (格位內)
         /// </summary>
         void _RunChipsLocate(Bitmap bmpFullfov, string imgPath, out string debugCellCenterStr)
         {
@@ -225,6 +226,129 @@ namespace LaserAlignDX.AoiModel.V3
             debugCellCenterStr = string.Join("", debugStrs);
 
             _TM.DUMP_ACCUM();
+        }
+
+        /// <summary>
+        /// LETIAN: 晶粒定位 (格位外)
+        /// </summary>
+        void _RunChipsLocateOutGrid(Bitmap bmpFullfov, string imgPath)
+        {
+            if (_preEmptyTrayResult == null)
+                return;
+
+            _TM.RESET_ACCUM();
+
+            //(1) 蒐集 GaCellsGroups
+            bool usingMultiThread = Universal.N_THREADS_ENABLED;
+            var outGridGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, outGrid: true);
+
+            //(2) 定位
+            if (!usingMultiThread)
+            {
+                //(2.1) 定位: 單線程 (驗證用)
+                for (int gid = 0; gid < outGridGroups.Length; gid++)
+                {
+                    _RunChipLocateOneT(gid, outGridGroups[gid], imgPath);
+                }
+            }
+            else
+            {
+                //(2.2) 定位: 多線程 (跑線用)
+                Parallel.For(0, outGridGroups.Length, gid =>
+                {
+                    _RunChipLocateOneT(gid, outGridGroups[gid], imgPath);
+                });
+            }
+
+            //(3) 整合 outGridGroups
+            _MergeOutGridCellsGroups(outGridGroups);
+
+            _TM.DUMP_ACCUM();
+        }
+
+        /// <summary>
+        /// 整合 OutGrid Cells Groups
+        /// </summary>
+        void _MergeOutGridCellsGroups(GaCellsGroup[] outGridGroups)
+        {
+            if (outGridGroups != null && outGridGroups.Length > 0)
+            {
+                var outGridGroupsList = new List<GaCellsGroup>(outGridGroups);
+                var outGridCells = new List<RegionCellX3Class>();
+                outGridGroupsList.RemoveAll(grp =>
+                {
+                    bool hasData = false;
+                    foreach (var gcell in grp)
+                    {
+                        var cell = gcell?.Cell;
+                        var chipData = cell?.ChipData;
+                        if (chipData != null && !chipData.IsEmpty())
+                        {
+                            hasData = true;
+                            chipData.IsOutGrid = true;
+                            outGridCells.Add(cell);
+                        }
+                        else
+                        {
+                            gcell?.Dispose();
+                        }
+                    }
+                    return !hasData;
+                });
+
+                // 找到最接近的 row, col
+                if (outGridCells.Count > 0)
+                {
+                    var onGridCells = _xRecipe.xRegionCells;
+                    foreach(var ogCell in outGridCells)
+                    {
+                        if (ogCell == null) continue;
+
+                        RegionCellX3Class bestPlaceHold = null;
+                        var ogCenter = JetEazy.Qcvt.CenterF(ref ogCell.viewRectF);
+                        var minDistSQ = float.MaxValue;
+                        foreach (var cell in onGridCells)
+                        {
+                            if (cell == null) continue;
+                            if (cell.OutGridLink != null) continue;  // 已經被佔位
+                            if (cell.ChipData != null && !cell.ChipData.IsEmpty()) continue;    // 已經被佔位
+                            if (_preEmptyTrayResult != null)
+                            {
+                                _preEmptyTrayResult.GetBlocByRowCol(cell.CellRow, cell.CellCol, out var _, out bool isSucker);
+                                if (!isSucker) continue;    // 已經被佔位
+                            }
+
+                            var center = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
+                            var dx = center.X - ogCenter.X;
+                            var dy = center.Y - ogCenter.Y;
+                            var distSQ = dx * dx + dy * dy;
+                            if (minDistSQ > distSQ)
+                            {
+                                minDistSQ = distSQ;
+                                bestPlaceHold = cell;
+                            }
+                        }
+
+                        if (bestPlaceHold != null && bestPlaceHold != ogCell)
+                        {
+                            bestPlaceHold.OutGridLink = ogCell;
+                            ogCell.Index = bestPlaceHold.Index;
+                            ogCell.CellRow = bestPlaceHold.CellRow;
+                            ogCell.CellCol = bestPlaceHold.CellCol;
+                            ogCell.lblName = bestPlaceHold.lblName;
+                            //ogCell.viewRectF = bestPlaceHold.viewRectF;
+                            //_xRecipe.xRegionCells[ogCell.Index] = ogCell;
+                        }
+                    }
+                }
+
+                if (outGridGroupsList.Count > 0)
+                {
+                    var allList = new List<GaCellsGroup>(_cellGroups);
+                    allList.AddRange(outGridGroupsList);
+                    _cellGroups = allList.ToArray();
+                }
+            }
         }
 
         /// <summary>
@@ -360,13 +484,20 @@ namespace LaserAlignDX.AoiModel.V3
 
                 //(3) 將定位結果記入 cell.ChipData
                 chipData = new GaChipData();
-                chipData.Roi = cellRoi;
+                chipData.CellRoi = cellRoi;
                 chipData.PadsGrid = padsGrid;
                 chipData.ChipQuad2D = chipQuad;
                 chipData.GoldenQuad2D = chipMatcher.GoldenQuad2D?.Clone();
 
                 //(4) DEBUG data
                 chipData.DebugRigidBodyData = chipMatcher.GetResultDetails();
+
+                //(5) 調整大角度 排序
+                var angle = _CalcAngle(chipData);
+                if (angle > 50)
+                    _Shift(chipData.ChipQuad2D.Corners, -1);
+                else if (angle < -50)
+                    _Shift(chipData.ChipQuad2D.Corners, +1);
             }
 
             return ok;
@@ -395,6 +526,29 @@ namespace LaserAlignDX.AoiModel.V3
             if (chipQuad != null)
                 return chipQuad.Angle;
             return 0;
+        }
+
+        void _Shift(QVector[] corners, int dir)
+        {
+            // RESERVED
+            return;
+
+            if (corners == null || dir == 0) return;
+            int NP = corners.Length;
+            if (dir < 0)
+            {
+                var tmp = corners[0];
+                for (int i = 1; i < NP; i++)
+                    corners[i - 1] = corners[i];
+                corners[NP - 1] = tmp;
+            }
+            else if (dir > 0)
+            {
+                var tmp = corners[NP - 1];
+                for (int i = NP - 1; i > 0; i--)
+                    corners[i] = corners[i - 1];
+                corners[0] = tmp;
+            }
         }
 
         /// <summary>
