@@ -152,14 +152,14 @@ namespace LaserAlignDX.Model
                 //cell.PadEdgeSizes[(int)EdgeBorder.Top],         // 上 (報表順序)
                 //cell.PadEdgeSizes[(int)EdgeBorder.Bottom]       // 下 (報表順序)
 
-                gaps != null ? gaps.LU.X : 0f,
-                gaps != null ? gaps.LU.Y : 0f,
-                gaps != null ? gaps.RU.X : 0f,
-                gaps != null ? gaps.RU.Y : 0f,
-                gaps != null ? gaps.RD.X : 0f,
-                gaps != null ? gaps.RD.Y : 0f,
-                gaps != null ? gaps.LD.X : 0f,
-                gaps != null ? gaps.LD.Y : 0f
+                gaps != null ? (float)gaps.LU.X : 0f,
+                gaps != null ? (float)gaps.LU.Y : 0f,
+                gaps != null ? (float)gaps.RU.X : 0f,
+                gaps != null ? (float)gaps.RU.Y : 0f,
+                gaps != null ? (float)gaps.RD.X : 0f,
+                gaps != null ? (float)gaps.RD.Y : 0f,
+                gaps != null ? (float)gaps.LD.X : 0f,
+                gaps != null ? (float)gaps.LD.Y : 0f
 
             ).Append(",");
 

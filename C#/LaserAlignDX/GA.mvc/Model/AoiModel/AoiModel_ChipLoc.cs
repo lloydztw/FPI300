@@ -17,7 +17,6 @@
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.OpenCV;
-using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
@@ -491,13 +490,6 @@ namespace LaserAlignDX.AoiModel.V3
 
                 //(4) DEBUG data
                 chipData.DebugRigidBodyData = chipMatcher.GetResultDetails();
-
-                //(5) 調整大角度 排序
-                var angle = _CalcAngle(chipData);
-                if (angle > 50)
-                    _Shift(chipData.ChipQuad2D.Corners, -1);
-                else if (angle < -50)
-                    _Shift(chipData.ChipQuad2D.Corners, +1);
             }
 
             return ok;
@@ -526,29 +518,6 @@ namespace LaserAlignDX.AoiModel.V3
             if (chipQuad != null)
                 return chipQuad.Angle;
             return 0;
-        }
-
-        void _Shift(QVector[] corners, int dir)
-        {
-            // RESERVED
-            return;
-
-            if (corners == null || dir == 0) return;
-            int NP = corners.Length;
-            if (dir < 0)
-            {
-                var tmp = corners[0];
-                for (int i = 1; i < NP; i++)
-                    corners[i - 1] = corners[i];
-                corners[NP - 1] = tmp;
-            }
-            else if (dir > 0)
-            {
-                var tmp = corners[NP - 1];
-                for (int i = NP - 1; i > 0; i--)
-                    corners[i] = corners[i - 1];
-                corners[0] = tmp;
-            }
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
 ﻿using AUVision;
+using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model;
@@ -190,35 +191,54 @@ namespace LaserAlignDX.OPSpace
         /// <summary>
         /// 寻找直线
         /// </summary>
-        /// <param name="iSideIndex">哪条边序号</param>
-        /// <param name="bmp">输入图片</param>
-        /// <param name="roi">寻找的ROI</param>
-        public void LineSegmentRun(int iSideIndex, Bitmap bmp, CMvdRectangleF roi)
+        public void LineSegmentRun(int borderIndex, Bitmap bmp, CMvdRectangleF roi, double angleRef = 0)
         {
+            int NP = 4;
+
             if (mvdFindLineClass == null)
                 mvdFindLineClass = new MvdFindLineClass();
 
-            cMvdLineSegmentFsOut[iSideIndex] = null;
+            //borderIndex %= NP;
+            cMvdLineSegmentFsOut[borderIndex] = null;
 
-            if (iSideIndex == 0)
+            //>>> 根據 angleRef 將 borderIndex 正規化
+            int sideIndex;
+            if (angleRef > 70.0)
+            {
+                sideIndex = (borderIndex + 1) % NP;
+            }
+            else if (angleRef < -70.0)
+            {
+                sideIndex = borderIndex == 0 ? NP - 1 : (borderIndex - 1) % NP;
+            }
+            else
+            {
+                sideIndex = borderIndex;
+            }
+
+            // 左
+            if (sideIndex == 0)
             {
                 mvdFindLineClass.bPositive = xInspect.bPositive0;
                 mvdFindLineClass.bFindOrient = true;
                 mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity0;
             }
-            else if (iSideIndex == 1)
+            // 上
+            else if (sideIndex == 1)
             {
                 mvdFindLineClass.bPositive = xInspect.bPositive1;
                 mvdFindLineClass.bFindOrient = false;
                 mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity1;
             }
-            else if (iSideIndex == 2)
+            // 右
+            else if (sideIndex == 2)
             {
                 mvdFindLineClass.bPositive = xInspect.bPositive2;
                 mvdFindLineClass.bFindOrient = true;
                 mvdFindLineClass.bEdgePolarity = xInspect.bEdgePolarity2;
             }
-            else if (iSideIndex == 3)
+            // 下
+            else if (sideIndex == 3)
             {
                 mvdFindLineClass.bPositive = xInspect.bPositive3;
                 mvdFindLineClass.bFindOrient = false;
@@ -226,7 +246,7 @@ namespace LaserAlignDX.OPSpace
             }
 
             mvdFindLineClass.Background = xInspect.xCarrierBackground;
-            cMvdLineSegmentFsOut[iSideIndex] = mvdFindLineClass.Run(bmp, roi, iSideIndex);
+            cMvdLineSegmentFsOut[borderIndex] = mvdFindLineClass.Run(bmp, roi, sideIndex);
         }
 
         /// <summary>
@@ -657,16 +677,26 @@ namespace LaserAlignDX.OPSpace
                 if (bOK && xInspect.optPadEdgeGapsMeasurement && xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
                 {
                     var gaps = ChipData?.PadEdgeGaps;
-                    foreach(var gap in gaps.IterItems())
+                    if (gaps == null)
                     {
-                        if( gap.X < xInspect.PadEdgeGapX_Min || 
-                            gap.X > xInspect.PadEdgeGapX_Max ||
-                            gap.Y < xInspect.PadEdgeGapY_Min || 
-                            gap.Y > xInspect.PadEdgeGapY_Max)
-                        {
-                            bOK = false;
-                            break;
-                        }
+                        bOK = false;
+                    }
+                    else
+                    {
+                        //foreach (var gap in gaps.IterItems())
+                        //{
+                        //    if (gap.X < xInspect.PadEdgeGapX_Min ||
+                        //        gap.X > xInspect.PadEdgeGapX_Max ||
+                        //        gap.Y < xInspect.PadEdgeGapY_Min ||
+                        //        gap.Y > xInspect.PadEdgeGapY_Max)
+                        //    {
+                        //        bOK = false;
+                        //        break;
+                        //    }
+                        //}
+                        var min = new QVector(xInspect.PadEdgeGapX_Min, xInspect.PadEdgeGapY_Min);
+                        var max = new QVector(xInspect.PadEdgeGapX_Max, xInspect.PadEdgeGapY_Max);
+                        gaps.Check(out bOK, min, max);
                     }
                 }
 

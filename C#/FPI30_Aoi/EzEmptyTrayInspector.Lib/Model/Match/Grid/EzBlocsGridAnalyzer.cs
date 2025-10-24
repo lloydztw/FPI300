@@ -41,66 +41,69 @@ namespace JetEazy.Match
         /// </summary>
         public static void CalcRotatedBox2D(IxGridMap<EzBloc> grid, out QvBox2D box2d, bool useBoundaryPoints = false)
         {
-            if (grid == null)
-            {
-                box2d = null;
-                return;
-            }
+            //if (grid == null)
+            //{
+            //    box2d = null;
+            //    return;
+            //}
 
-            int r = grid.Rows - 1;
-            int c = grid.Cols - 1;
-            var cornerBlocs = new[]
-            {
-                grid.Get(0,0),
-                grid.Get(0,c),
-                grid.Get(r,c),
-                grid.Get(r,0),
-            };
+            //int r = grid.Rows - 1;
+            //int c = grid.Cols - 1;
+            //var cornerBlocs = new[]
+            //{
+            //    grid.Get(0,0),
+            //    grid.Get(0,c),
+            //    grid.Get(r,c),
+            //    grid.Get(r,0),
+            //};
 
-            if (cornerBlocs[0] != null && cornerBlocs[1] != null && cornerBlocs[2] != null && cornerBlocs[3] != null)
-            {
-                var corners = Array.ConvertAll(cornerBlocs, b => b.Center);
-                var cLeft = (corners[0] + corners[2]) / 2.0;
-                var cRight = (corners[1] + corners[3]) / 2.0;
-                var center = (cLeft + cRight) / 2.0;
-                var vect = cRight - cLeft;
-                var theta = Math.Atan2(vect.Y, vect.X);
+            //if (cornerBlocs[0] != null && cornerBlocs[1] != null && cornerBlocs[2] != null && cornerBlocs[3] != null)
+            //{
+            //    var corners = Array.ConvertAll(cornerBlocs, b => b.Center);
+            //    var cLeft = (corners[0] + corners[2]) / 2.0;
+            //    var cRight = (corners[1] + corners[3]) / 2.0;
+            //    var center = (cLeft + cRight) / 2.0;
+            //    var vect = cRight - cLeft;
+            //    var theta = Math.Atan2(vect.Y, vect.X);
 
-                if (useBoundaryPoints)
-                {
-                    var cTop = (corners[0] + corners[1]) / 2.0;
-                    var cBottom = (corners[2] + corners[3]) / 2.0;
-                    var V = cBottom - cTop;
-                    V = V / V.NormLength;
-                    var U = vect / vect.NormLength;
-                    for (int i = 0; i < 4; i++)
-                    {
-                        QVector d = new QVector(0, 0);
-                        var w = cornerBlocs[i].Rect.Width;
-                        var h = cornerBlocs[i].Rect.Height;
-                        switch (i)
-                        {
-                            case 0: d = U * (-w) + V * (-h); break;
-                            case 1: d = U * (w) + V * (-h); break;
-                            case 2: d = U * (w) + V * (h); break;
-                            case 3: d = U * (-w) + V * (h); break;
-                        }
-                        corners[i] = corners[i] + d;
-                    }
-                }
+            //    if (useBoundaryPoints)
+            //    {
+            //        var cTop = (corners[0] + corners[1]) / 2.0;
+            //        var cBottom = (corners[2] + corners[3]) / 2.0;
+            //        var V = cBottom - cTop;
+            //        V = V / V.NormLength;
+            //        var U = vect / vect.NormLength;
+            //        for (int i = 0; i < 4; i++)
+            //        {
+            //            QVector d = new QVector(0, 0);
+            //            var w = cornerBlocs[i].Rect.Width;
+            //            var h = cornerBlocs[i].Rect.Height;
+            //            switch (i)
+            //            {
+            //                case 0: d = U * (-w) + V * (-h); break;
+            //                case 1: d = U * (w) + V * (-h); break;
+            //                case 2: d = U * (w) + V * (h); break;
+            //                case 3: d = U * (-w) + V * (h); break;
+            //            }
+            //            corners[i] = corners[i] + d;
+            //        }
+            //    }
 
-                box2d = new QvBox2D();
-                box2d.Corners = Array.ConvertAll(corners, cc => new PointF((float)cc.X, (float)cc.Y));
-            }
-            else
-            {
-                // 注意: Cv2.MinAreaRect 無法反映 透視投影 效果 !!!
-                var rotRect = useBoundaryPoints ?
-                    Cv2.MinAreaRect(IterBoundaryPoints(grid)) :
-                    Cv2.MinAreaRect(IterCentroids(grid));
-                box2d = new QvBox2D();
-                box2d.SetBox(rotRect);
-            }
+            //    box2d = new QvBox2D();
+            //    box2d.Corners = Array.ConvertAll(corners, cc => new PointF((float)cc.X, (float)cc.Y));
+            //}
+            //else
+            //{
+            //    // 注意: Cv2.MinAreaRect 無法反映 透視投影 效果 !!!
+            //    var rotRect = useBoundaryPoints ?
+            //        Cv2.MinAreaRect(IterBoundaryPoints(grid)) :
+            //        Cv2.MinAreaRect(IterCentroids(grid));
+            //    box2d = new QvBox2D();
+            //    box2d.SetBox(rotRect);
+            //}
+
+            CalcQuad2D(grid, out QvQuad2D quad2d, useBoundaryPoints);
+            box2d = quad2d?.ToBox2D();
         }
 
         /// <summary>
@@ -127,20 +130,51 @@ namespace JetEazy.Match
 
             if (cornerBlocs[0] != null && cornerBlocs[1] != null && cornerBlocs[2] != null && cornerBlocs[3] != null)
             {
-                var corners = Array.ConvertAll(cornerBlocs, b => b.Center);
+                QVector[] corners = corners = Array.ConvertAll(cornerBlocs, b => b.Center);
+
                 if (useBoundaryPoints)
                 {
-                    var center = (corners[0] + corners[1] + corners[2] + corners[3]) / 4.0;
+                    var quadCenter = (corners[0] + corners[1] + corners[2] + corners[3]) / 4.0;
+
                     for (int i = 0; i < 4; i++)
                     {
-                        var w = cornerBlocs[i].Rect.Width;
-                        var h = cornerBlocs[i].Rect.Height;
-                        var d = Math.Sqrt(w * w + h * h) / 2;
-                        var V = corners[i] - center;
-                        V = V / V.NormLength;
-                        corners[i] = corners[i] + V * d;
+                        var padBloc = cornerBlocs[i];
+                        var padBox = padBloc.ExtraBox2D;
+                        if (padBox != null)
+                        {
+                            var CV = padBloc.Center - quadCenter;
+                            var localPts = padBox.Corners;
+                            int bestIdx = 0;
+                            double max = 0;
+                            for (int k = 0, len = localPts.Length; k < len; k++)
+                            {
+                                var dx = localPts[k].X - quadCenter.X;
+                                var dy = localPts[k].Y - quadCenter.Y;
+                                var dotProduct = CV.X * dx + CV.Y * dy;
+                                if (max < dotProduct)
+                                {
+                                    max = dotProduct;
+                                    bestIdx = k;
+                                }
+                            }
+
+                            corners[i] = new QVector(localPts[bestIdx].X, localPts[bestIdx].Y);
+                        }
+                        else
+                        {
+                            var w = padBloc.Rect.Width;
+                            var h = padBloc.Rect.Height;
+                            var d = Math.Sqrt(w * w + h * h) / 2;
+                            var V = corners[i] - quadCenter;
+                            V = V / V.NormLength;
+
+                            corners[i] = padBloc.Center + V * d;
+                        }
                     }
+
+                    corners = findBoundaryCorners(cornerBlocs);
                 }
+
                 quad2d = new QvQuad2D();
                 quad2d.Corners = corners;
             }
@@ -155,6 +189,58 @@ namespace JetEazy.Match
                 quad2d.Corners = Array.ConvertAll(rotRect.Points(), p => new QVector(p.X, p.Y));
             }
         }
+
+        #region PRIVATE_FUNCTIONS
+        static QVector[] findBoundaryCorners(EzBloc[] cornerBlocs)
+        {
+            int NP = 4;
+
+            if (cornerBlocs == null || cornerBlocs.Length < NP)
+                return null;
+
+            var corners = Array.ConvertAll(cornerBlocs, b => b.Center);
+            var quadCenter = (corners[0] + corners[1] + corners[2] + corners[3]) / 4.0;
+
+            for (int i = 0; i < NP; i++)
+            {
+                var padBloc = cornerBlocs[i];
+                if (padBloc == null) 
+                    continue;
+
+                var padBox = padBloc.ExtraBox2D;
+                if (padBox != null)
+                {
+                    var CV = padBloc.Center - quadCenter;
+                    var localPts = padBox.Corners;
+                    int bestIdx = 0;
+                    double max = 0;
+                    for (int k = 0, len = localPts.Length; k < len; k++)
+                    {
+                        var dx = localPts[k].X - quadCenter.X;
+                        var dy = localPts[k].Y - quadCenter.Y;
+                        var dotProduct = CV.X * dx + CV.Y * dy;
+                        if (max < dotProduct)
+                        {
+                            max = dotProduct;
+                            bestIdx = k;
+                        }
+                    }
+                    corners[i] = new QVector(localPts[bestIdx].X, localPts[bestIdx].Y);
+                }
+                else
+                {
+                    var w = cornerBlocs[i].Rect.Width;
+                    var h = cornerBlocs[i].Rect.Height;
+                    var d = Math.Sqrt(w * w + h * h) / 2;
+                    var V = corners[i] - quadCenter;
+                    V = V / V.NormLength;
+                    corners[i] = corners[i] + V * d;
+                }
+            }
+
+            return corners;
+        }
+        #endregion
 
         /// <summary>
         /// 格位內容物不同之計數

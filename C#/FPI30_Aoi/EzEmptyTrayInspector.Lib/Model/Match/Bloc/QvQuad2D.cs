@@ -52,7 +52,7 @@ namespace JetEazy.QvMath
                 if (value != null && value.Length >= NP)
                 {
                     _corners = Array.ConvertAll(value, p => p != null ? p : new QVector(0, 0));
-                    SortByRelativeTheta();
+                    //SortByRelativeTheta();
                 }
             }
         }

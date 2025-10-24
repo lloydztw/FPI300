@@ -16,7 +16,6 @@
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
-using LaserAlignDX.BasicSpace;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
@@ -118,7 +117,7 @@ namespace LaserAlignDX.Model
         /// (FullFov Cammera Coordinates)
         /// (顯示繪圖用)
         /// </summary>
-        public QVector[] DimMeasurePoints { get; set; } = null;
+        public QVector[] DimMeasurePoints { get; set; }
         /// <summary>
         /// 取得晶粒 像素 長寬 (單位 pixels)
         /// </summary>
@@ -144,44 +143,34 @@ namespace LaserAlignDX.Model
 
     public class GaPadEdgeGaps
     {
+        #region PRIVATE_DATA
+        QVector[] _gaps = new QVector[]
+        {
+            new QVector(0, 0),
+            new QVector(0, 0),
+            new QVector(0, 0),
+            new QVector(0, 0),
+        };
+        #endregion
+
         /// <summary>
         /// 左上 邊隙 (單位 mm)
         /// </summary>
-        public PointF LU = new PointF(0, 0);
+        public QVector LU => _gaps[0];
         /// <summary>
         /// 右上 邊隙 (單位 mm)
         /// </summary>
-        public PointF RU = new PointF(0, 0);
+        public QVector RU => _gaps[1];
         /// <summary>
         /// 右下 邊隙 (單位 mm)
         /// </summary>
-        public PointF RD = new PointF(0, 0);
+        public QVector RD => _gaps[2];
         /// <summary>
         /// 左下 邊隙 (單位 mm)
         /// </summary>
-        public PointF LD = new PointF(0, 0);
+        public QVector LD => _gaps[3];
 
-        public float GetGapSize(EdgeBorder e)
-        {
-            double value = 0f;
-            switch (e)
-            {
-                case EdgeBorder.Left:
-                    value = (LU.X + LD.X) / 2f; 
-                    break;
-                case EdgeBorder.Right:
-                    value = (RU.X + RD.X) / 2f;
-                    break;
-                case EdgeBorder.Top:
-                    value = (LU.Y + RU.Y) / 2f;
-                    break;
-                case EdgeBorder.Bottom:
-                    value = (LD.Y + RD.Y) / 2f;
-                    break;
-            }
-            return (float)Math.Round(value, 3);
-        }
-        public IEnumerable<PointF> IterItems()
+        public IEnumerable<QVector> IterItems()
         {
             yield return LU;
             yield return RU;
@@ -189,9 +178,32 @@ namespace LaserAlignDX.Model
             yield return LD;
         }
 
+        public bool[] Check(out bool isPass, QVector min, QVector max)
+        {
+            isPass = true;
+
+            // 順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY
+            bool[] results = new bool[8];
+            int i = 0;
+
+            isPass &= results[i++] = min.X <= LD.X && LD.X <= max.X;
+            isPass &= results[i++] = min.X <= LU.X && LU.X <= max.X;
+
+            isPass &= results[i++] = min.Y <= LU.Y && LU.Y <= max.Y;
+            isPass &= results[i++] = min.Y <= RU.Y && RU.Y <= max.Y;
+
+            isPass &= results[i++] = min.X <= RU.X && RU.X <= max.X;
+            isPass &= results[i++] = min.X <= RD.X && RD.X <= max.X;
+
+            isPass &= results[i++] = min.Y <= RD.Y && RD.Y <= max.Y;
+            isPass &= results[i++] = min.Y <= LD.Y && LD.Y <= max.Y;
+
+            return results;
+        }
+
         /// <summary>
-        /// 尺寸量測點 (左上右下) (單位 pixels) 
-        /// (FullFov Cammera Coordinates)
+        /// 尺寸量測點: 順序: LDX(2), LUX(2), LUY(2), RUY(2), RUX(2), RDX(2), RDY(2), LDY(2)
+        /// (單位 pixels) (FullFov Cammera Coordinates)
         /// (顯示繪圖用)
         /// </summary>
         public QVector[] GapMeasurePoints { get; set; }

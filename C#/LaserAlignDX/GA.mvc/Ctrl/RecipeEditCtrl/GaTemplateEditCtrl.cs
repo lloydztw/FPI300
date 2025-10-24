@@ -15,6 +15,7 @@
 
 using JetEazy.FormSpace;
 using JetEazy.OpenCV;
+using JetEazy.QvMath;
 using JetEazy.Utils;
 using JzDisplay;
 using JzDisplay.UISpace;
@@ -196,11 +197,13 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region RUNTIME_DATA
+        bool _bypassWindowEvents = false;
         bool _isGoldenModified = false;
         bool _isQrCodeModified = false;
         bool _isLineBorderModified = false;
         bool _isDefectMaskModified = false;
         bool _isPropertyModified = false;
+        QvQuad2D _goldenQuad2D = null;
         #endregion
 
         public void Attach(IvTemplateEditorUI ui, CarrierEnum C)
@@ -222,6 +225,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             btnTryScanQrCode.Click += (s, e) => BuildQRCodeTemplate();
             btnAutoLayoutLineBorders.Click += (s, e) => AutoLayoutLineBorders();
             btnBuildMictroTransform.Click += (s, e) => BuildMicroTransform();
+
+            _editorUI.numBorderIndent.ValueChanged += NumBorderExtend_ValueChanged;
+            _editorUI.numBorderExtend.ValueChanged += NumBorderExtend_ValueChanged;
+            _editorUI.numLineSpanPercentage.ValueChanged += NumBorderExtend_ValueChanged;
 
             btnDefectRegionAdd.Click += (s, e) => DfRegion_Add();
             btnDefectRegionDelete.Click += (s, e) => DfRegion_Delete();
@@ -248,6 +255,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             if(_editorUI.wndVisionSettingsPanel is PropertyGrid pg)
                 pg.PropertyValueChanged += Pg_PropertyValueChanged;
         }
+
+
 
         #region EVENT_HANDLERS
         private void Window_HandleCreated(object sender, EventArgs e)
@@ -294,6 +303,13 @@ namespace LaserAlignDX.Mvc.Ctrl
                     refreshDispUI(DS1);
                 }
             }
+        }
+        private void NumBorderExtend_ValueChanged(object sender, EventArgs e)
+        {
+            if (_bypassWindowEvents)
+                return;
+
+            _editorUI?.Window?.BeginInvoke((Action)AutoLayoutLineBorders);
         }
         private void CviDefectMaskBox_OnChanged(object sender, EventArgs e)
         {
@@ -391,6 +407,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             // 標記 已改變
             _isGoldenModified = true;
+            _goldenQuad2D = null;
 
             // 更新 GUI
             updateDispUI(DS2, bmpGoldenChip, autoZoom: true);
@@ -422,7 +439,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _editorUI.wndQrCodeResult.Text = text;
             }
         }
-        void AutoLayoutLineBorders()
+        void AutoLayoutLineBorders_000()
         {
             if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
             {
@@ -457,6 +474,89 @@ namespace LaserAlignDX.Mvc.Ctrl
             _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, rect.Bottom - ind, ww, ind + ext);
             refreshDispUI(DS1);
 
+            updateLineBorderBoxes(true);
+            updateLineSegmentBoxes(true);
+            _isLineBorderModified = true;
+        }
+        void AutoLayoutLineBorders()
+        {
+            if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
+            {
+                VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
+                return;
+            }
+
+            if (_cviGoldenChipBox.Box != Rectangle.Round(_xGoldenChipRect))
+            {
+                // 重新 擷取 Golden Chip
+                BuildGoldenChipTemplate();
+            }
+
+
+            var ind = (int)_editorUI.numBorderIndent.Value;
+            var ext = (int)_editorUI.numBorderExtend.Value;
+            var ratio = (double)_editorUI.numLineSpanPercentage.Value * 0.01;
+
+            var baseRect = Rectangle.Round(_xGoldenChipRect);
+            var W = baseRect.Width;
+            var H = baseRect.Height;
+            var ww = (int)(baseRect.Width * ratio);
+            var hh = (int)(baseRect.Height * ratio);
+            var dw = W - ww;
+            var dh = H - hh;
+
+            if (_goldenQuad2D == null)
+            {
+                #region 重新抓取 goldenQuad2D
+                var matchers = _xRecipe.mvdprinttemp_Find;
+                var matcher = matchers.GetMatcher(0);
+                matcher.SetRecipeParams(_xRecipe.InspectParams);
+                matcher.Train(_xBmpGoldenChipTemplate);
+                _goldenQuad2D = matcher.GoldenQuad2D?.Clone();
+                _goldenQuad2D?.Offset(_xGoldenChipRect.X, _xGoldenChipRect.Y);
+                #endregion
+            }
+            if (_goldenQuad2D != null)
+            {
+                // ind 固定在 baseRect 與 quadRect 中間處
+                var quadRect = Rectangle.Round(_goldenQuad2D.BoundaryRect);
+                var inX = (quadRect.X + baseRect.X) / 2;
+                var inY = (quadRect.Y + baseRect.Y) / 2;
+                var inX2 = (quadRect.Right + baseRect.Right) / 2;
+                var inY2 = (quadRect.Bottom + baseRect.Bottom) / 2;
+                var xL = baseRect.X;
+                var xR = baseRect.Right;
+                var indL = Math.Abs(inX - xL);
+                var indR = Math.Abs(inX2 - xR);
+                var yT = baseRect.Y;
+                var yB = baseRect.Bottom;
+                var indT = Math.Abs(inY - yT);
+                var indB = Math.Abs(inY2 - yB);
+                int i = 0;
+                _cviLineBorderBoxes[i++].Box = new Rectangle(xL - ext, yT + dh / 2, indL + ext, hh);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yT - ext, ww, indT + ext);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(xR - indR, yT + dh / 2, indR + ext, hh);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yB - indB, ww, indB + ext);
+
+                _bypassWindowEvents = true;
+                _editorUI.numBorderIndent.Enabled = false;
+                GaUtil.SetNum(_editorUI.numBorderIndent, (indL + indR + indT + indB) / 4m);
+                _bypassWindowEvents = false;
+            }
+            else
+            {
+                var x = baseRect.X;
+                var y = baseRect.Y;
+                int i = 0;
+                _cviLineBorderBoxes[i++].Box = new Rectangle(x - ext, y + dh / 2, ind + ext, hh);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, y - ext, ww, ind + ext);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(baseRect.Right - ind, y + dh / 2, ind + ext, hh);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, baseRect.Bottom - ind, ww, ind + ext);
+
+                _editorUI.numBorderIndent.Enabled = true;
+            }
+
+            refreshDispUI(DS1);
             updateLineBorderBoxes(true);
             updateLineSegmentBoxes(true);
             _isLineBorderModified = true;
@@ -745,9 +845,11 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
                 else
                 {
+                    _bypassWindowEvents = true;
                     GaUtil.SetNum(_editorUI.numBorderIndent, settings.lineBorderIndent);
                     GaUtil.SetNum(_editorUI.numBorderExtend, settings.lineBorderExt);
                     GaUtil.SetNum(_editorUI.numLineSpanPercentage, (decimal)settings.lineSpanPercentage);
+                    _bypassWindowEvents = false;
                 }
             }
             catch
@@ -845,7 +947,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             _editorUI.btnPickGolden.Enabled = _opSelector == OpSelector.Golden;
             _editorUI.btnAutoLineBorders.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.btnBuildMircoTransform.Enabled = _opSelector == OpSelector.LineBorders;
-            _editorUI.numBorderIndent.Enabled = _opSelector == OpSelector.LineBorders;
+            _editorUI.numBorderIndent.Enabled = false && _opSelector == OpSelector.LineBorders;
             _editorUI.numBorderExtend.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.numLineSpanPercentage.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.btnTryScanQrCode.Enabled = _opSelector == OpSelector.QrCode;
