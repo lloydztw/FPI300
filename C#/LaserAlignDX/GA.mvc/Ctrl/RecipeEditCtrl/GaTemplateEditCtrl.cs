@@ -563,6 +563,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void BuildMicroTransform()
         {
+            if (DialogResult.Yes != MessageBox.Show("是否要重新設定 樣本尺寸?", "參數設定", MessageBoxButtons.YesNo, MessageBoxIcon.Question))
+                return;
+
             _isPropertyModified = true;
             updateLineSegmentBoxes(true, calcGoldenDim: true);
         }

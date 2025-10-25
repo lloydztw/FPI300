@@ -532,10 +532,17 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             if (!string.IsNullOrEmpty(fileName) && System.IO.File.Exists(fileName))
             {
-                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+                var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.AppStarting);
 
-                var bmp = GaImageUtil.LoadBigImage(fileName);
-                _lineScanImageHolder?.TakeOver(bmp, System.IO.Path.GetFileName(fileName));
+                try
+                {
+                    var bmp = GaImageUtil.LoadBigImage(fileName);
+                    _lineScanImageHolder?.TakeOver(bmp, System.IO.Path.GetFileName(fileName));
+                }
+                catch (Exception ex)
+                {
+                    VsMessageBox.Warning(ex.Message);
+                }
 
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
