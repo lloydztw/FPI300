@@ -14,13 +14,11 @@
 #endregion
 
 using JetEazy.ImageViewerEx;
-using System.Drawing;
 
 namespace LaserAlignDX.Mvc.Gui
 {
-    public interface IvDrawItem
+    public interface IvDrawItem : IvImageViewerInteractor
     {
         object Tag { get; set; }
-        void OnDraw(CvImageViewer viewer, Graphics gxView);
     }
 }

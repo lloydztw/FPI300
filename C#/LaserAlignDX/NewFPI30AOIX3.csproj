@@ -370,6 +370,7 @@
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCalibResultBox.cs" />
+    <Compile Include="GA.mvc\Gui\.Interactor\CviChipResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCellsResultBoxes.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviGoldenPickingBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviLineSegmentsBox.cs" />
