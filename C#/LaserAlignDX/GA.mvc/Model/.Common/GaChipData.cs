@@ -112,6 +112,7 @@ namespace LaserAlignDX.Model
         /// 量測结果: 晶粒高度 (單位 mm)
         /// </summary>
         public float ChipHeight { get; set; } = 0;
+
         /// <summary>
         /// 尺寸量測點 (左上右下) (單位 pixels) 
         /// (FullFov Cammera Coordinates)
@@ -137,6 +138,15 @@ namespace LaserAlignDX.Model
                 pixHeight = Math.Round((pts[1] - pts[3]).NormLength, 1);
 
             return pixWidth > 0 && pixHeight > 0;
+        }
+
+        /// <summary>
+        /// Runtime Results
+        /// </summary>
+        public bool[] PassNgResults
+        {
+            get;
+            set;
         }
     }
 
@@ -178,6 +188,13 @@ namespace LaserAlignDX.Model
             yield return LD;
         }
 
+        /// <summary>
+        /// 尺寸量測點: 順序: LDX(2), LUX(2), LUY(2), RUY(2), RUX(2), RDX(2), RDY(2), LDY(2)
+        /// (單位 pixels) (FullFov Cammera Coordinates)
+        /// (顯示繪圖用)
+        /// </summary>
+        public QVector[] GapMeasurePoints { get; set; }
+
         public bool[] Check(out bool isPass, QVector min, QVector max)
         {
             isPass = true;
@@ -198,14 +215,17 @@ namespace LaserAlignDX.Model
             isPass &= results[i++] = min.Y <= RD.Y && RD.Y <= max.Y;
             isPass &= results[i++] = min.Y <= LD.Y && LD.Y <= max.Y;
 
+            this.PassNgResults = results;
             return results;
         }
 
         /// <summary>
-        /// 尺寸量測點: 順序: LDX(2), LUX(2), LUY(2), RUY(2), RUX(2), RDX(2), RDY(2), LDY(2)
-        /// (單位 pixels) (FullFov Cammera Coordinates)
-        /// (顯示繪圖用)
+        /// Runtime Results
         /// </summary>
-        public QVector[] GapMeasurePoints { get; set; }
+        public bool[] PassNgResults
+        {
+            get;
+            set;
+        }
     }
 }

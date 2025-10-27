@@ -315,16 +315,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 if (lineSeg != null)
                     drawItemsOfLineSegments.Add(new CviLineSegmentsBox(Color.Cyan, lineSeg.ToCSharpLine()) { Tag = cell });
             }
-            //// 繪件: 邊線 (左上右下) (舊版)
-            //if (drawItemsOfLineSegments.Count == 0)
-            //{
-            //    RectangleF cellRect = cell.viewRectF;
-            //    cellRect.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
-            //    var offset = cellRect.Location;
-            //    var linesOut = GaMvdExt.ToCSharpLines(offset, cell.cMvdLineSegmentFsOut);
-            //    if (linesOut != null && linesOut.Length > 0)
-            //        drawItemsOfLineSegments.Add(new CviLineSegmentsBox(Color.Cyan, linesOut) { Tag = cell });
-            //}
             #endregion
 
             #region 邊線拉框
@@ -339,15 +329,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 }
                 borderIdx++;
             }
-            //// 繪件: 邊線手拉框 (舊版)
-            //if (drawItemsOfBorderBoxes.Count == 0)
-            //{
-            //    foreach (var mvdShape in cell.cMvdShapesForFindLineRegion)
-            //    {
-            //        if (mvdShape is CMvdRectangleF mvdRect)
-            //            drawItemsOfBorderBoxes.Add(new CviRotRectBox(mvdRect.ToBox2D(), Color.DarkBlue) { Tag = cell });
-            //    }
-            //}
             #endregion
 
             #region 廢除_LINES_INSIDE
@@ -491,15 +472,19 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (gapMeasurePts == null)
                 return;
 
-            var xInspect = _xRecipe.InspectParams;
-            var min = new QVector(xInspect.PadEdgeGapX_Min, xInspect.PadEdgeGapY_Min);
-            var max = new QVector(xInspect.PadEdgeGapX_Max, xInspect.PadEdgeGapY_Max);
-            var results = gaps.Check(out bool isPass, min, max);
+            //var xInspect = _xRecipe.InspectParams;
+            //var min = new QVector(xInspect.PadEdgeGapX_Min, xInspect.PadEdgeGapY_Min);
+            //var max = new QVector(xInspect.PadEdgeGapX_Max, xInspect.PadEdgeGapY_Max);
+            //var gapResults = gaps.Check(out bool isPass, min, max);
+
+            var gapResults = gaps?.PassNgResults;
+            if (gapResults == null) 
+                return;
 
             bool toShowText = viewer.GetZoomScale() > 0.35;
-            for (int i = 0, N = results.Length; i < N; i++)
+            for (int i = 0, N = gapResults.Length; i < N; i++)
             {
-                isPass = results[i];
+                bool isPass = gapResults[i];
                 int k = i * 2;
                 int k1 = k + 1;
                 if (k1 >= gapMeasurePts.Length)
@@ -524,15 +509,20 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var measurePts = activeCell?.ChipData?.ChipDimension?.DimMeasurePoints;
             if (measurePts != null)
             {
+                var dimResults = activeCell.ChipData.ChipDimension?.PassNgResults;
+
+                int idx = 0;
                 foreach (var p in measurePts)
                 {
-                    draw_MeasurePoint(viewer, gxView, p, Color.Yellow);
+                    bool isPass = dimResults != null ? dimResults[idx % 2] : true;
+                    draw_MeasurePoint(viewer, gxView, p, isPass);
+                    idx++;
                 }
 
                 #region DRAW_TEXT
                 if (viewer.GetZoomScale() > 0.35)
                 {
-                    int idx = 0;
+                    idx = 0;
                     var offset = new QVector(25, -25);
                     foreach (var p in measurePts)
                     {
@@ -550,18 +540,29 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 draw_MeasureLine(viewer, gxView, measurePts[1], measurePts[3], Color.Yellow);
             }
         }
-        void draw_MeasurePoint(CvImageViewer viewer, Graphics gxView, QVector pt, Color color)
+        void draw_MeasurePoint(CvImageViewer viewer, Graphics gxView, QVector pt, bool isPass)
         {
             if (pt == null)
                 return;
+
             float sz = 15;
-            var pen = viewer.GetOnePixelPen(color);
             var cx = (float)pt.X;
             var cy = (float)pt.Y;
             //>>> gxView.DrawLine(pen, cx - sz, cy, cx + sz, cy);
             //>>> gxView.DrawLine(pen, cx, cy - sz, cx, cy + sz);
+
             var rect = new RectangleF(cx - sz, cy - sz, sz * 2, sz * 2);
-            gxView.DrawEllipse(pen, rect);
+
+            if (isPass)
+            {
+                var pen = viewer.GetOnePixelPen(Color.Yellow);
+                gxView.DrawEllipse(pen, rect);
+            }
+            else
+            {
+                var br = Brushes.Red;
+                gxView.FillEllipse(br, rect);
+            }
         }
         void draw_MeasureLine(CvImageViewer viewer, Graphics gxView, QVector pt, QVector pt2, Color color)
         {

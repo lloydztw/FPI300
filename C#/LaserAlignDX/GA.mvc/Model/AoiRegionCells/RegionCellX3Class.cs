@@ -7,10 +7,12 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using VisionDesigner;
 using VisionDesigner.Code2DReader;
 using VisionDesigner.ImageArithmetic;
 using VisionDesigner.PositionFix;
+using ZXing.OneD;
 using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
 
 
@@ -645,36 +647,16 @@ namespace LaserAlignDX.OPSpace
 
             if (xInspect.optChipMeasurement)
             {
-                //float tmpwidth = RunWidth;
-                //float tmpheight = RunHeight;
+                //(1) 判定 長寬 是否達標
+                var dimResults = new bool[2];
+                bOK &= (dimResults[0] = !(RunWidth < xInspect.mWidthStandMin || RunWidth > xInspect.mWidthStandMax));
+                bOK &= (dimResults[1] = !(RunHeight < xInspect.mHeightStandMin || RunHeight > xInspect.mHeightStandMax));
+                var chipDim = ChipData?.ChipDimension;
+                if (chipDim != null)
+                    chipDim.PassNgResults = dimResults;
 
-                //if (INI.Instance.IsCheat)
-                //{
-                //    if (RunWidth < xInspect.mWidthStand - xInspect.mWidthLower || RunWidth > xInspect.mWidthStand + xInspect.mWidthPercentage)
-                //    {
-                //        if (RunWidth >= xInspect.mWidthStand - xInspect.mWidthLower - 0.02 && RunWidth < xInspect.mWidthStand - xInspect.mWidthLower)
-                //            RunWidth = RunWidth + 0.027f;
-                //        if (RunWidth > xInspect.mWidthStand + xInspect.mWidthPercentage && RunWidth <= xInspect.mWidthStand + xInspect.mWidthPercentage + 0.02)
-                //            RunWidth = RunWidth - 0.027f;
-                //    }
-                //    if (RunHeight < xInspect.mHeightStand - xInspect.mHeightLower || RunHeight > xInspect.mHeightStand + xInspect.mHeightPercentage)
-                //    {
-                //        if (RunHeight >= xInspect.mHeightStand - xInspect.mHeightLower - 0.02 && RunHeight < xInspect.mHeightStand - xInspect.mHeightLower)
-                //            RunHeight = RunHeight + 0.027f;
-                //        if (RunHeight > xInspect.mHeightStand + xInspect.mHeightPercentage && RunHeight <= xInspect.mHeightStand + xInspect.mHeightPercentage + 0.02)
-                //            RunHeight = RunHeight - 0.027f;
-                //    }
-                //}
-
-                if (RunWidth < xInspect.mWidthStandMin || RunWidth > xInspect.mWidthStandMax)
-                {
-                    bOK = false;
-                }
-                else if (RunHeight < xInspect.mHeightStandMin || RunHeight > xInspect.mHeightStandMax)
-                {
-                    bOK = false;
-                }
-                if (bOK && xInspect.optPadEdgeGapsMeasurement && xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
+                //(2) 判定 邊隙 是否達標
+                if (xInspect.optPadEdgeGapsMeasurement && xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
                 {
                     var gaps = ChipData?.PadEdgeGaps;
                     if (gaps == null)
@@ -683,17 +665,6 @@ namespace LaserAlignDX.OPSpace
                     }
                     else
                     {
-                        //foreach (var gap in gaps.IterItems())
-                        //{
-                        //    if (gap.X < xInspect.PadEdgeGapX_Min ||
-                        //        gap.X > xInspect.PadEdgeGapX_Max ||
-                        //        gap.Y < xInspect.PadEdgeGapY_Min ||
-                        //        gap.Y > xInspect.PadEdgeGapY_Max)
-                        //    {
-                        //        bOK = false;
-                        //        break;
-                        //    }
-                        //}
                         var min = new QVector(xInspect.PadEdgeGapX_Min, xInspect.PadEdgeGapY_Min);
                         var max = new QVector(xInspect.PadEdgeGapX_Max, xInspect.PadEdgeGapY_Max);
                         gaps.Check(out bOK, min, max);

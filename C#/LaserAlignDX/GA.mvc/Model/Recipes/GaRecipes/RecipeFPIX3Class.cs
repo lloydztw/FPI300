@@ -1534,6 +1534,16 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             get => _spec.optChipDefectsInspect;
             set => _spec.optChipDefectsInspect = value;
         }
+
+        [CategoryAttribute(_Cat01), DescriptionAttribute("")]
+        [DisplayName("04 傳送 NG 判定結果 給 PLC")]
+        [Browsable(false)]
+        public bool optSendNgResultToPLC
+        {
+            // 準備中
+            get;    // => _spec.optChipDefectsInspect;
+            set;    // => _spec.optChipDefectsInspect = value;
+        }
         #endregion
 
 

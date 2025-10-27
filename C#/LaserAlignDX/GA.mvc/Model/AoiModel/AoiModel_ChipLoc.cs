@@ -86,8 +86,11 @@ namespace LaserAlignDX.AoiModel.V3
                 //_xRecipe.AnalyzeDatasData();
                 //_TM.Trace("_Inspect001 : xRecipe.AnalyzeDatasData()");
 
-                //(1) 標記起始計時
+                //(0.1) 標記起始計時
                 markRunStart();
+
+                //(1) 清除上一次所有結果
+                ResetCellsResultData();
 
                 //(2) 準備資料夾
                 string imgLogPath = GetLogPath(this.FileBarcodeStr);
@@ -368,8 +371,8 @@ namespace LaserAlignDX.AoiModel.V3
                 //(0) 進度條事件
                 fire_AoiProgressing(cell);
 
-                //(1) 清除上一次結果
-                cell.Reset();
+                //(1) 清除上一次結果 (由外部清除!)
+                //>>> cell.Reset();
 
                 //(2) 異步保存 Cell 圖像檔案
                 if (INI.Instance.IsSaveTestImage && imgPath != null)
