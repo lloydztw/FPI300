@@ -48,6 +48,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         public bool optPadEdgeGapsMeasurement = false;
         // 啟用 瑕疵 與 QRCode 檢測
         public bool optChipDefectsInspect = false;
+
         // 尺寸與瑕疵檢測進階選項量: 使用整盤 NG 百分比 
         public bool optUseTotalNgPercentage = false;
         // 尺寸與瑕疵檢測進階選項量: 顯示個別 NG
@@ -73,9 +74,9 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             Read(iniFileName, sectName, "optChipMeasurement", false, out optChipMeasurement);
             Read(iniFileName, sectName, "optPadEdgeGapsMeasurement", false, out optPadEdgeGapsMeasurement);
             Read(iniFileName, sectName, "optChipDefectsInspect", false, out optChipDefectsInspect);
+
             Read(iniFileName, sectName, "optUseTotalNgPercentage", false, out optUseTotalNgPercentage);
             Read(iniFileName, sectName, "optShowIndividualNG", true, out optShowIndividualNG);
-
             Read(iniFileName, sectName, "TotalNgPercentage", 5.0f, out TotalNgPercentage);
 
             StandardWidth.Load(iniFileName, sectName, "StandardWidth");

@@ -159,11 +159,14 @@ namespace LaserAlignDX.AoiModel.V3
         {
             //PC->PLC 单颗结果, 1-Ok, 2-外观Ng, 3-空, 4-读码NG, 9-切割NG
 
+            bool optUsePercentage = _xRecipe.InspectParams.optUseTotalNgPercentage && _xRecipe.InspectParams.optChipMeasurement;
+            bool forceAllPass = (optUsePercentage && xScanInspectMode != ScanInspectMode.NOTRAY && IsPass);
+
             int[] states = new int[_xRecipe.xRegionCells.Count];
             int i = 0;
             foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
             {
-                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                if (forceAllPass || cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                     states[i] = 1;
                 else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
                     states[i] = 3;
@@ -175,6 +178,7 @@ namespace LaserAlignDX.AoiModel.V3
                     states[i] = 2;
                 i++;
             }
+
             return states;
         }
         /// <summary>
