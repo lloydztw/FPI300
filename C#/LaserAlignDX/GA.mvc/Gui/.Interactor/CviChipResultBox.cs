@@ -31,6 +31,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 {
     public partial class CviChipResultBox : CvImageViewerInteractor, IvDrawItem
     {
+        #region CONFIG
+        static bool OPT_SHOW_TRAIN_CORNERS = false;
+        #endregion
+
         #region GLOBAL_MESS
         XRecipe _xRecipe
         {
@@ -414,8 +418,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void updateDrawItems_For_TrainCorners()
         {
-            // DEBUG
-            return;
+            if (!OPT_SHOW_TRAIN_CORNERS)
+                return;
 
             var chipQuad = _cell?.ChipData?.ChipQuad2D;
             if (chipQuad != null)
@@ -427,9 +431,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     _drawItemsEx.Add(item);
                 }
             }
-            if(_boundaryPolygon != null)
+
+            if (_boundaryPolygon != null)
             {
-                foreach(var pt in _boundaryPolygon)
+                foreach (var pt in _boundaryPolygon)
                 {
                     var rect = JetEazy.Qcvt.CreateCenterRect((float)pt.X, (float)pt.Y, 10, 10);
                     var item = new CviRotRectBox(rect, Color.WhiteSmoke) { CrossLength = 25 };

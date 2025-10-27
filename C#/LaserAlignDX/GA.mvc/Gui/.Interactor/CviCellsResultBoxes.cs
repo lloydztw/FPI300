@@ -904,7 +904,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                         #region 晶粒_PAD_跨距
                         var padsGrid = cell?.ChipData?.PadsGrid;
-                        if (getPadsSpanSize(padsGrid, out double padSpanW, out double padSpanH))
+                        if (getChapPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
                         {
                             sb.AppendLine();
                             sb.AppendLine().Append($"PAD.跨距.寬 = {padSpanW:0.0} pix");
@@ -1257,8 +1257,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             VxDebugDrawer.DestroyAllWindows();
             EzPadsGridFinder.VISUAL_DEBUG = false;
         }
-        void DumpCellRegions(Control viewer, XCell targetCell = null)
+        void DumpCellRegions(Control viewer, IEnumerable<XCell> xRegionCells = null)
         {
+            if (xRegionCells == null)
+                xRegionCells = _xRecipe.xRegionCells;
+
             var oldCursor = GaUtil.SetCursor(viewer, Cursors.AppStarting);
 
             EzPadsGridFinder.VISUAL_DEBUG = false;
@@ -1278,7 +1281,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             goldenBmp?.Save(System.IO.Path.Combine(dstPath, "0_golden.png"));
 
             // (3) LOOP region cells
-            var xRegionCells = targetCell == null ? _xRecipe.xRegionCells : new List<XCell> { targetCell };
+
             var extendX = _xRecipe.xExtendx;
             var extendY = _xRecipe.xExtendy;
             var fullfovBmp = lineScanImageHolder.PeekBitmap();
@@ -1311,7 +1314,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var cellBloc = _cursorBloc as CellBloc;
             var targetCell = cellBloc?.Cell;
             if (targetCell == null) return;
-            DumpCellRegions(viewer, targetCell);
+            DumpCellRegions(viewer, new[] { targetCell });
         }
         void CopyOneChipDimsToClipboard()
         {
@@ -1344,7 +1347,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                     // padSpanWidth, padSpanHeight
                     var padsGrid = cell?.ChipData?.PadsGrid;
-                    if (getPadsSpanSize(padsGrid, out double padSpanW, out double padSpanH))
+                    if (getChapPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
                     {
                         sb.Append(", ").Append($"{padSpanW:0.0}");
                         sb.Append(", ").Append($"{padSpanH:0.0}");
@@ -1370,7 +1373,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 MessageBox.Show("複製到剪貼簿失敗: " + ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
-        bool getPadsSpanSize(EzBlocsGrid padsGrid, out double spanWidth, out double spanHeight, int digits = 1)
+        bool getChapPadsSpan(EzBlocsGrid padsGrid, out double spanWidth, out double spanHeight, int digits = 1)
         {
             spanWidth = 0;
             spanHeight = 0;

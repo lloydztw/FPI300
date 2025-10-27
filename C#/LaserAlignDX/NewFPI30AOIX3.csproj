@@ -595,12 +595,6 @@
     <Compile Include="GA\FormSpace\frmFlySetup.Designer.cs">
       <DependentUpon>frmFlySetup.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA\FormSpace\frmFPIRecipe.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmFPIRecipe.Designer.cs">
-      <DependentUpon>frmFPIRecipe.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA\FormSpace\frmHandle.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -642,12 +636,6 @@
     </Compile>
     <Compile Include="GA\FormSpace\frmTemplateX2.Designer.cs">
       <DependentUpon>frmTemplateX2.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmTemplateX3.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmTemplateX3.Designer.cs">
-      <DependentUpon>frmTemplateX3.cs</DependentUpon>
     </Compile>
     <Compile Include="GA\FormSpace\frmWaring.cs">
       <SubType>Form</SubType>
@@ -886,9 +874,6 @@
     <EmbeddedResource Include="GA\FormSpace\frmFlySetup.resx">
       <DependentUpon>frmFlySetup.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmFPIRecipe.resx">
-      <DependentUpon>frmFPIRecipe.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\frmHandle.resx">
       <DependentUpon>frmHandle.cs</DependentUpon>
     </EmbeddedResource>
@@ -909,9 +894,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\frmTemplateX2.resx">
       <DependentUpon>frmTemplateX2.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmTemplateX3.resx">
-      <DependentUpon>frmTemplateX3.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\frmWaring.resx">
       <DependentUpon>frmWaring.cs</DependentUpon>
