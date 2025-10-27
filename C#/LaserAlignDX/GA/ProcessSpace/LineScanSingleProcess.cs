@@ -1,11 +1,8 @@
 ﻿using JetEazy.BasicSpace;
-using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.FormSpace;
 using NeedleX.ProcessSpace;
 using System.Drawing;
 using System.Text;
-using System.Windows.Forms;
 
 
 namespace TravellerMINIX6.ProcessSpace
@@ -64,6 +61,7 @@ namespace TravellerMINIX6.ProcessSpace
                     }
                     else
                     {
+#if(OPT_OLD_CODE)
                         #region 加載圖檔
                         process.Pause();
 
@@ -88,9 +86,11 @@ namespace TravellerMINIX6.ProcessSpace
                         #endregion
 
                         SetNextState(6, 0);
+#endif
                     }
                     break;
 
+#if(OPT_OLD_CODE)
                 case 6:
                     if (process.IsTimeup)
                     {
@@ -124,6 +124,7 @@ namespace TravellerMINIX6.ProcessSpace
                         #endregion
                     }
                     break;
+#endif
 
                 case 10:
                     if (process.IsTimeup)

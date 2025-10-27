@@ -48,6 +48,7 @@ namespace LaserAlignDX
 
         #region PRIVATE_DATA
         static TravellerSysModel _sysModel;
+        static GaMainCtrl _mainCtrl;
         #endregion
 
         // MODEL ----------------------------------------------------
@@ -76,12 +77,12 @@ namespace LaserAlignDX
         }
 
         // CTRL ----------------------------------------------------
-        public static GaMainCtrl CreateMainCtrl()
+        public static GaMainCtrl InstanceMainCtrl()
         {
-            //// GaMainCtrl 使用 V2
-            //return new global::LaserAlignDX.Mvc.Ctrl.V2.GaMainCtrl();
             // GaMainCtrl 使用 V3
-            return new global::LaserAlignDX.Mvc.Ctrl.V3.GaMainCtrl();
+            if (_mainCtrl == null)
+                _mainCtrl = new global::LaserAlignDX.Mvc.Ctrl.V3.GaMainCtrl();
+            return _mainCtrl;
         }
 
         // VIEW ----------------------------------------------------
@@ -159,6 +160,7 @@ namespace LaserAlignDX
         {
             _sysModel?.Dispose();
             _sysModel = null;
+            _mainCtrl = null;
         }
     }
 }

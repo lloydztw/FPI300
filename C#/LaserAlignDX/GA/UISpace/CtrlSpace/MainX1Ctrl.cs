@@ -17,7 +17,7 @@ using JetEazy.ControlSpace.PLCSpace;
 
 namespace LaserAlignDX.UISpace.CtrlSpace
 {
-    public partial class MainX1Ctrl : UserControl
+    public partial class MainX1Ctrl : UserControl, IoPanelUI
     {
         VersionEnum VERSION;
         OptionEnum OPTION;
@@ -75,6 +75,13 @@ namespace LaserAlignDX.UISpace.CtrlSpace
             btnOff = button1Ctr;
             numLightValue = numericUpDown1Ctr;
         }
+
+        Control IoPanelUI.Window => this;
+        void IoPanelUI.Initial(VersionEnum version, OptionEnum option, object machine)
+        {
+            Initial(version, option, (MainX1MachineClass)machine);
+        }
+
         public void Initial(VersionEnum version, OptionEnum option, MainX1MachineClass machine)
         {
             VERSION = version;

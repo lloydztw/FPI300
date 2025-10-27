@@ -25,7 +25,7 @@ namespace LaserAlignDX.UISpace.MainSpace
         {
             CommonLogClass.Instance.SetRichTextBox(richTextBox1);
 
-            _mainCtrl = GaMvcConfig.CreateMainCtrl();
+            _mainCtrl = GaMvcConfig.InstanceMainCtrl();
 
             _mainCtrl.Attach( new[] { mvsui1, mvsui2 },
                               new[] { DSFly0, DSFly1, DSFly2, DSFly3 },

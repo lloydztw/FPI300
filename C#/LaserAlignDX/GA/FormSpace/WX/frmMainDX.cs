@@ -7,7 +7,6 @@ using JetEazy.DBSpace;
 using JetEazy.FormSpace;
 using JetEazy.UISpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LaserAlignDX.RunSpace;
 using LaserAlignDX.UISpace;
 using NeedleX.ProcessSpace;
 using PhotoMachine.UISpace;
@@ -376,6 +375,7 @@ namespace Traveller106
         /// </summary>
         private void tcp_TriggerAct()
         {
+#if(OPT_X2)
             switch (VERSION)
             {
                 case VersionEnum.AOI:
@@ -539,9 +539,11 @@ namespace Traveller106
 
                     break;
             }
+#endif
         }
 
         bool m_tcpHandleAction = false;
+
         //string _recipename = string.Empty;
         //tcpCmd _cmd = opstr.Cmd;
         tcpItemData tcpHandledata = null;
@@ -552,6 +554,7 @@ namespace Traveller106
         /// </summary>
         private void tcp_HandleTriggerAct()
         {
+#if(OPT_X2)
             switch (VERSION)
             {
                 case VersionEnum.AOI:
@@ -762,6 +765,7 @@ namespace Traveller106
 
                     break;
             }
+#endif
         }
 
         #endregion

@@ -1,34 +1,36 @@
 ﻿using JetEazy;
-using LaserAlignDX.ControlSpace.MachineSpace;
-using NeedleX.UISpace.CtrlSpace;
+using LaserAlignDX.UISpace.CtrlSpace;
 using System.Drawing;
-using System.Security.Cryptography;
 using System.Windows.Forms;
-using Traveller106.ControlSpace.MachineSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
 namespace PhotoMachine.UISpace
 {
     public partial class CtrlUI : UserControl
     {
+#if (OPT_OLD_MESS)
         VersionEnum VERSION;
         OptionEnum OPTION;
-
         LaserAlignDX.UISpace.CtrlSpace.MainX1Ctrl mainX1;
         LaserAlignDX.UISpace.CtrlSpace.MainX2Ctrl mainX2;
         LaserAlignDX.UISpace.CtrlSpace.MainFPIX3Ctrl mainX3;
+#endif
+
+        IoPanelUI _ioPanel;
 
         public CtrlUI()
         {
             InitializeComponent();
-            InitialInternal();
+            
+            if(!DesignMode)
+            {
+                HandleDestroyed += (s, e) => _ioPanel = null;
+            }
         }
-        void InitialInternal()
-        {
 
-        }
         public void Initial(VersionEnum version, OptionEnum option, GeoMachineClass machine)
         {
+#if (OPT_OLD_MESS)
             VERSION = version;
             OPTION = option;
 
@@ -66,9 +68,20 @@ namespace PhotoMachine.UISpace
                     }
                     break;
             }
+#endif
+
+            _ioPanel = IoPanelFactory.CreateIoPanelUI(version, option, machine);
+            if (_ioPanel != null)
+            {
+                var window = _ioPanel.Window;
+                window.Location = new Point(0, 0);
+                this.Controls.Add(window);
+                window.Dock = DockStyle.Fill;
+            }
         }
         public void Tick()
         {
+#if (OPT_OLD_MESS)
             switch (VERSION)
             {
                 case VersionEnum.LASER:
@@ -91,9 +104,12 @@ namespace PhotoMachine.UISpace
                     }
                     break;
             }
+#endif
+            _ioPanel?.Tick();
         }
         public void SetEnable(bool isenable)
         {
+#if (OPT_OLD_MESS)
             switch (VERSION)
             {
                 case VersionEnum.LASER:
@@ -116,9 +132,12 @@ namespace PhotoMachine.UISpace
                     }
                     break;
             }
+#endif
+            _ioPanel?.SetEnable(isenable);
         }
         public void MyDispose()
         {
+#if (OPT_OLD_MESS)
             switch (VERSION)
             {
                 case VersionEnum.AOI:
@@ -133,8 +152,17 @@ namespace PhotoMachine.UISpace
                     }
                     break;
             }
+#endif
+
+            //------------------------------------------------------------------
+            // 註:
+            // mainX2.MyDispose()
+            // mainX3.MyDispose()
+            // 改在 自己在 HandleDestroyed 的 EventHandler 中, 自己釋放資源
+            //------------------------------------------------------------------
         }
 
+#if (OPT_NOT_USED)
         public delegate void TriggerHandler(ActionEnum action, string opstr);
         public event TriggerHandler TriggerAction;
         public void OnTrigger(ActionEnum action, string opstr)
@@ -144,6 +172,7 @@ namespace PhotoMachine.UISpace
                 TriggerAction(action, opstr);
             }
         }
+#endif
 
     }
 }

@@ -1,6 +1,5 @@
 ﻿using JetEazy;
 using JetEazy.BasicSpace;
-using LaserAlignDX.FormSpace;
 using System;
 using System.Drawing;
 using System.Threading;
@@ -10,7 +9,7 @@ using VsCommon.ControlSpace.MachineSpace;
 
 namespace LaserAlignDX.UISpace.CtrlSpace
 {
-    public partial class MainFPIX3Ctrl : UserControl
+    public partial class MainFPIX3Ctrl : UserControl, IoPanelUI
     {
         VersionEnum VERSION;
         OptionEnum OPTION;
@@ -64,6 +63,11 @@ namespace LaserAlignDX.UISpace.CtrlSpace
         {
             InitializeComponent();
             InitUI();
+
+            if (!DesignMode)
+            {
+                HandleDestroyed += (s, e) => MyDispose();
+            }
         }
         void InitUI()
         {
@@ -94,6 +98,13 @@ namespace LaserAlignDX.UISpace.CtrlSpace
             //btnOff = button1Ctr;
             //numLightValue = numericUpDown1Ctr;
         }
+
+        Control IoPanelUI.Window => this;
+        void IoPanelUI.Initial(VersionEnum version, OptionEnum option, object machine)
+        {
+            Initial(version, option, (MainFPIX3MachineClass)machine);
+        }
+
         public void Initial(VersionEnum version, OptionEnum option, MainFPIX3MachineClass machine)
         {
             VERSION = version;
@@ -518,12 +529,15 @@ namespace LaserAlignDX.UISpace.CtrlSpace
             int iret = X6_LASER_CLIENT.ReConnectServer();
             m_ReConnecting = false;
         }
+
+#if(OPT_OLD_CODE)
         frmMSR mFromMSR = null;
         private void LblCalibration_DoubleClick(object sender, EventArgs e)
         {
             mFromMSR = new frmMSR();
             mFromMSR.ShowDialog();
         }
+#endif
 
         private string ToChangeLanguage(string eText)
         {

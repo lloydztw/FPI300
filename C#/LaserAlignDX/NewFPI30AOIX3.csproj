@@ -439,6 +439,7 @@
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaCellsGroup.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaProgressEventArgs.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
+    <Compile Include="GA.mvc\.Enums\InspectReason.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellX3Class.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\QMicroChipTransform_v30.cs" />
@@ -571,89 +572,11 @@
     <Compile Include="GA\FormSpace\FPI30Form\FlyOffsetUI.Designer.cs">
       <DependentUpon>FlyOffsetUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA\FormSpace\FPI30Form\frmCalibration.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\FPI30Form\frmCalibration.Designer.cs">
-      <DependentUpon>frmCalibration.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmBaseX2.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmBaseX2.Designer.cs">
-      <DependentUpon>frmBaseX2.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmFindLine.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmFindLine.Designer.cs">
-      <DependentUpon>frmFindLine.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA\FormSpace\frmFlySetup.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GA\FormSpace\frmFlySetup.Designer.cs">
       <DependentUpon>frmFlySetup.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmHandle.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmHandle.Designer.cs">
-      <DependentUpon>frmHandle.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmIO.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmIO.Designer.cs">
-      <DependentUpon>frmIO.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmLightControl.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmLightControl.Designer.cs">
-      <DependentUpon>frmLightControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmMotor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmMotor.Designer.cs">
-      <DependentUpon>frmMotor.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmMSR.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmMSR.Designer.cs">
-      <DependentUpon>frmMSR.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmRecipe.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmRecipe.Designer.cs">
-      <DependentUpon>frmRecipe.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmTemplateX2.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmTemplateX2.Designer.cs">
-      <DependentUpon>frmTemplateX2.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmWaring.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmWaring.Designer.cs">
-      <DependentUpon>frmWaring.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmX2Recipe.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\frmX2Recipe.Designer.cs">
-      <DependentUpon>frmX2Recipe.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\WX\frmFourMark.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\WX\frmFourMark.Designer.cs">
-      <DependentUpon>frmFourMark.cs</DependentUpon>
     </Compile>
     <Compile Include="GA\FormSpace\WX\frmMainDX.cs">
       <SubType>Form</SubType>
@@ -664,7 +587,6 @@
     <Compile Include="GA\GlobalSpace\Enums.cs" />
     <Compile Include="GA\GlobalSpace\INI.cs" />
     <Compile Include="GA\GlobalSpace\Universal_lt.cs" />
-    <Compile Include="GA\OPSpace\AnalyzeClass.cs" />
     <Compile Include="GA\OPSpace\AUFindClass.cs" />
     <Compile Include="GA\OPSpace\CameraConfig.cs" />
     <Compile Include="GA\OPSpace\ChannelBarcodeClass.cs" />
@@ -672,11 +594,6 @@
     <Compile Include="GA\OPSpace\ModuleClass.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\WinIni.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeBaseClass.cs" />
-    <Compile Include="GA\OPSpace\RecipeSpace\RecipeMainX2Class.cs" />
-    <Compile Include="GA\OPSpace\RecipeSpace\RecipeMiniX6Class.cs" />
-    <Compile Include="GA\OPSpace\RecipeSpace\RecipeNeedleClass.cs" />
-    <Compile Include="GA\OPSpace\RecipeSpace\RecipeTrayClass.cs" />
-    <Compile Include="GA\OPSpace\RegionCellX2Class.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\GeoResultClass.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\JzBaseResultClass.cs" />
     <Compile Include="GA\ProcessSpace\AbsProcess.cs" />
@@ -687,39 +604,10 @@
     <Compile Include="GA\ProcessSpace\LineScanSingleProcess.cs" />
     <Compile Include="GA\ProcessSpace\MainProcess.cs" />
     <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
-    <Compile Include="GA\RunSpace\X2\ProcessRunClass.cs" />
+    <Compile Include="GA\UISpace\CtrlSpace\IoPanelUI.cs" />
+    <Compile Include="GA\UISpace\CtrlSpace\IoPanelFactory.cs" />
     <Compile Include="GA\UISpace\MainSpace\MainUiFactory.cs" />
     <Compile Include="GA\UISpace\MainSpace\IMainUI.cs" />
-    <Compile Include="GA\UISpace\MainSpace\MainX1UI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\MainSpace\MainX1UI.Designer.cs">
-      <DependentUpon>MainX1UI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\MainSpace\MainX2UI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\MainSpace\MainX2UI.Designer.cs">
-      <DependentUpon>MainX2UI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\MainSpace\MiniMainUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\MainSpace\MiniMainUI.Designer.cs">
-      <DependentUpon>MiniMainUI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\MainSpace\NeedleMainUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\MainSpace\NeedleMainUI.Designer.cs">
-      <DependentUpon>NeedleMainUI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\MainSpace\TrackItemUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\MainSpace\TrackItemUI.Designer.cs">
-      <DependentUpon>TrackItemUI.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA\Utils\GaMvdConvertor.cs" />
     <Compile Include="LT\LtAoiFactory.cs" />
     <Compile Include="GA\Utils\GaImageUtil.cs" />
@@ -732,30 +620,6 @@
     </Compile>
     <Compile Include="GA\UISpace\CtrlSpace\MainFPIX3Ctrl.Designer.cs">
       <DependentUpon>MainFPIX3Ctrl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\CtrlSpace\MainX1Ctrl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\CtrlSpace\MainX1Ctrl.Designer.cs">
-      <DependentUpon>MainX1Ctrl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\CtrlSpace\MainX2Ctrl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\CtrlSpace\MainX2Ctrl.Designer.cs">
-      <DependentUpon>MainX2Ctrl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\CtrlSpace\MiniCtrl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\CtrlSpace\MiniCtrl.Designer.cs">
-      <DependentUpon>MiniCtrl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\CtrlSpace\NeedleCtrl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\CtrlSpace\NeedleCtrl.Designer.cs">
-      <DependentUpon>NeedleCtrl.cs</DependentUpon>
     </Compile>
     <Compile Include="GA\UISpace\CtrlUI.cs">
       <SubType>UserControl</SubType>
@@ -862,65 +726,11 @@
     <EmbeddedResource Include="GA\FormSpace\FPI30Form\FlyOffsetUI.resx">
       <DependentUpon>FlyOffsetUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\FPI30Form\frmCalibration.resx">
-      <DependentUpon>frmCalibration.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmBaseX2.resx">
-      <DependentUpon>frmBaseX2.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmFindLine.resx">
-      <DependentUpon>frmFindLine.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\frmFlySetup.resx">
       <DependentUpon>frmFlySetup.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmHandle.resx">
-      <DependentUpon>frmHandle.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmIO.resx">
-      <DependentUpon>frmIO.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmLightControl.resx">
-      <DependentUpon>frmLightControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmMotor.resx">
-      <DependentUpon>frmMotor.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmMSR.resx">
-      <DependentUpon>frmMSR.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmRecipe.resx">
-      <DependentUpon>frmRecipe.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmTemplateX2.resx">
-      <DependentUpon>frmTemplateX2.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmWaring.resx">
-      <DependentUpon>frmWaring.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\frmX2Recipe.resx">
-      <DependentUpon>frmX2Recipe.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\WX\frmFourMark.resx">
-      <DependentUpon>frmFourMark.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\WX\frmMainDX.resx">
       <DependentUpon>frmMainDX.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\MainSpace\MainX1UI.resx">
-      <DependentUpon>MainX1UI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\MainSpace\MainX2UI.resx">
-      <DependentUpon>MainX2UI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\MainSpace\MiniMainUI.resx">
-      <DependentUpon>MiniMainUI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\MainSpace\NeedleMainUI.resx">
-      <DependentUpon>NeedleMainUI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\MainSpace\TrackItemUI.resx">
-      <DependentUpon>TrackItemUI.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -934,18 +744,6 @@
     </Compile>
     <EmbeddedResource Include="GA\UISpace\CtrlSpace\MainFPIX3Ctrl.resx">
       <DependentUpon>MainFPIX3Ctrl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\CtrlSpace\MainX1Ctrl.resx">
-      <DependentUpon>MainX1Ctrl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\CtrlSpace\MainX2Ctrl.resx">
-      <DependentUpon>MainX2Ctrl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\CtrlSpace\MiniCtrl.resx">
-      <DependentUpon>MiniCtrl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\CtrlSpace\NeedleCtrl.resx">
-      <DependentUpon>NeedleCtrl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\UISpace\CtrlUI.resx">
       <DependentUpon>CtrlUI.cs</DependentUpon>
@@ -980,7 +778,6 @@
     <None Include="GA.mvc\Model\Readme.md" />
     <None Include="GA.mvc\Model\Recipes\JxRecipes\Readme.md" />
     <None Include="GA.mvc\Readme.md" />
-    <None Include="GA\RunSpace\X2\Readme.md" />
     <None Include="LT\UnitTest\Readme.md" />
     <None Include="NLog.config" />
     <None Include="packages.config" />
@@ -1029,7 +826,9 @@
     <None Include="Resources\next.png" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="GA\RunSpace\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)

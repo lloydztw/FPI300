@@ -39,7 +39,7 @@ namespace LaserAlignDX.UISpace.CtrlSpace
         CIPMAPPING,
     }
 
-    public partial class MainX2Ctrl : UserControl
+    public partial class MainX2Ctrl : UserControl, IoPanelUI
     {
         VersionEnum VERSION;
         OptionEnum OPTION;
@@ -92,6 +92,11 @@ namespace LaserAlignDX.UISpace.CtrlSpace
         {
             InitializeComponent();
             InitUI();
+
+            if (!DesignMode)
+            {
+                HandleDestroyed += (s, e) => MyDispose();
+            }
         }
         void InitUI()
         {
@@ -140,6 +145,12 @@ namespace LaserAlignDX.UISpace.CtrlSpace
             //lblGetImageIndex.DoubleClick += lbl_DoubleClick;
             lblTcpComplete.DoubleClick += lbl_DoubleClick;
             lblTcpComplete.BackColor = Color.Black;
+        }
+
+        Control IoPanelUI.Window => this;
+        void IoPanelUI.Initial(VersionEnum version, OptionEnum option, object machine)
+        {
+            Initial(version, option, (MainX2MachineClass)machine);
         }
 
         private void lbl_DoubleClick(object sender, EventArgs e)

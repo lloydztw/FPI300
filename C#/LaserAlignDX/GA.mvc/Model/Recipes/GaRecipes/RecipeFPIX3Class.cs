@@ -1161,6 +1161,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// </summary>
         void CreateViews_Gaara()
         {
+#if (OPT_OLD_CODE)
             //-----------------------------------------------------------------------------
             // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
             // 不應該由 Recipe 自己調用 !
@@ -1256,6 +1257,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //        _index++;
             //    }
             //}
+#endif
         }
 
         #region MISC_UTIL_FUNCTIONS
