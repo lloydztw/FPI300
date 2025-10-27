@@ -35,5 +35,10 @@ namespace LaserAlignDX.OPSpace
         INS_2DREPEATERR = 6,
         [Description("不检测")]
         INS_NOOPEN = 7,
+        /// <summary>
+        /// 切割偏移NG
+        /// </summary>
+        [Description("切割偏移NG")]
+        INS_PADEDGEGAPERR = 8,
     }
 }

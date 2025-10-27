@@ -675,19 +675,26 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     // 算出的 pix 需加入解析度
                     float flyCamResolution = INI.Instance.FlyImageResolution;
                     int flyShowID1 = flyID.ShowID;
+                    float angle = aoiResult.OffsetAngle;
 
                     //aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
                     //aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
                     //aoiResult.OffsetAngle = (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
 
-                    float _angle = aoiResult.OffsetAngle;// (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
+                    double oldx = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
+                    double oldy = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
+                    Console.WriteLine($"Angle {angle}");
+                    Console.WriteLine($"Old x{oldx},y{oldy}");
+                    _LOG($"Angle {angle}", Color.Black);
+                    _LOG($"Old x{oldx},y{oldy}", Color.Black);
+                    //float _angle = aoiResult.OffsetAngle;// (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
 
                     // 根据应用场景选择顺序
                     var template = new TemplatePositioningCalculator2D.TemplateData(
                         new TemplatePositioningCalculator2D.Vector2(centerOrg.X, centerOrg.Y), 0);
 
                     var current = new TemplatePositioningCalculator2D.TemplateData(
-                        new TemplatePositioningCalculator2D.Vector2(centerRun.X, centerRun.Y), _angle);
+                        new TemplatePositioningCalculator2D.Vector2(centerRun.X, centerRun.Y), angle);
 
                     // 场景1：机械臂控制 - 通常先旋转后平移
                     //Console.WriteLine($"机械臂控制（推荐先旋转后平移）:");
@@ -695,24 +702,39 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                         template, current, TemplatePositioningCalculator2D.ApplyOrder.RotateThenTranslate);
                     //comp1.PrintResult();
 
-                    aoiResult.OffsetX = comp1.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
-                    aoiResult.OffsetY = comp1.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
+                    oldx = comp1.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
+                    oldy = comp1.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
                     //aoiResult.OffsetAngle = comp1.AngleCompensation;
-
+                    Console.WriteLine($"Comp1 x{oldx},y{oldy}");
+                    _LOG($"Comp1 x{oldx},y{oldy}", Color.Black);
                     //_LOG($"FlyID[{flyID.ShowID}] {comp1.ResultString(flyCamResolution)}", Color.Blue);
 
                     //原先的计算结果 以下代码
-                    ////// 场景2：UI元素定位 - 通常先平移后旋转
-                    ////Console.WriteLine($"UI元素定位（推荐先平移后旋转）:");
-                    //var comp2 = TemplatePositioningCalculator2D.CalculateCompensation(
-                    //    template, current, TemplatePositioningCalculator2D.ApplyOrder.TranslateThenRotate);
-                    ////comp2.PrintResult();
+                    //// 场景2：UI元素定位 - 通常先平移后旋转
+                    //Console.WriteLine($"UI元素定位（推荐先平移后旋转）:");
+                    var comp2 = TemplatePositioningCalculator2D.CalculateCompensation(
+                        template, current, TemplatePositioningCalculator2D.ApplyOrder.TranslateThenRotate);
+                    //comp2.PrintResult();
 
-                    //aoiResult.OffsetX = comp2.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
-                    //aoiResult.OffsetY = comp2.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
-                    ////aoiResult.OffsetAngle = comp1.AngleCompensation;
-
+                    //20251024 小于-90 或者 大于90 时 先补偿再反向<===需要验证
+                    //第二种先反向再补偿<===这个算出来比较接近先旋转再平移的结果 但是现场放不进去 不知为何
+                    if (angle < -90 || angle > 90)
+                    {
+                        oldx = -(comp2.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X);
+                        oldy = -(comp2.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y);
+                    }
+                    else
+                    {
+                        oldx = comp2.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
+                        oldy = comp2.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
+                    }
+                    //aoiResult.OffsetAngle = comp1.AngleCompensation;
+                    Console.WriteLine($"Comp2 x{oldx},y{oldy}");
+                    _LOG($"Comp2 x{oldx},y{oldy}", Color.Black);
                     //_LOG($"FlyID[{flyID.ShowID}] {comp2.ResultString(flyCamResolution)}", Color.Blue);
+
+                    aoiResult.OffsetX = (float)oldx;
+                    aoiResult.OffsetY = (float)oldy;
 
                 }
                 updateOneResult(flyID, aoiResult);

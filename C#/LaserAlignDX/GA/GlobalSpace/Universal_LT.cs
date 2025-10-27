@@ -63,8 +63,8 @@ namespace Traveller106
                 if (IsNoUseCCD)
                 {
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M01_";
-                    return "D:\\AUTOMATION\\Eazy FPI30\\_M02_";
-                    //return "D:\\AUTOMATION\\Eazy FPI30\\_M03_";
+                    //return "D:\\AUTOMATION\\Eazy FPI30\\_M02_";
+                    return "D:\\AUTOMATION\\Eazy FPI30\\_M03_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
                     return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
                 }

@@ -157,7 +157,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// <returns>ARRAY[0..299] OF INT PC->PLC 单颗结果, 1:OK 2:外观NG, 3:空, 4:读码NG, 9:切割NG </returns>
         public int[] GetSingleResult()
         {
-            //PC->PLC 单颗结果, 1-Ok, 2-外观Ng, 3-空, 4-读码NG, 9-切割NG
+            //PC->PLC 单颗结果, 1-Ok, 2-外观Ng, 3-空, 4-读码NG, 8-切割偏移NG, 9-切割NG
 
             bool optUsePercentage = _xRecipe.InspectParams.optUseTotalNgPercentage && _xRecipe.InspectParams.optChipMeasurement;
             bool forceAllPass = (optUsePercentage && xScanInspectMode != ScanInspectMode.NOTRAY && IsPass);
@@ -174,6 +174,8 @@ namespace LaserAlignDX.AoiModel.V3
                     states[i] = 4;
                 else if (cell.inspectReason == InspectReason.INS_CUTTINGERR)
                     states[i] = 9;
+                else if (cell.inspectReason == InspectReason.INS_PADEDGEGAPERR)
+                    states[i] = 8;
                 else
                     states[i] = 2;
                 i++;

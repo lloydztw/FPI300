@@ -655,6 +655,12 @@ namespace LaserAlignDX.OPSpace
                 if (chipDim != null)
                     chipDim.PassNgResults = dimResults;
 
+                if (!bOK)
+                {
+                    inspectReason = InspectReason.INS_CUTTINGERR;
+                    inspectReasons.Add(InspectReason.INS_CUTTINGERR);
+                }
+
                 //(2) 判定 邊隙 是否達標
                 if (xInspect.optPadEdgeGapsMeasurement && xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
                 {
@@ -669,13 +675,15 @@ namespace LaserAlignDX.OPSpace
                         var max = new QVector(xInspect.PadEdgeGapX_Max, xInspect.PadEdgeGapY_Max);
                         gaps.Check(out bOK, min, max);
                     }
+
+                    if (!bOK)
+                    {
+                        inspectReason = InspectReason.INS_PADEDGEGAPERR;
+                        inspectReasons.Add(InspectReason.INS_PADEDGEGAPERR);
+                    }
                 }
 
-                if (!bOK)
-                {
-                    inspectReason = InspectReason.INS_CUTTINGERR;
-                    inspectReasons.Add(InspectReason.INS_CUTTINGERR);
-                }
+                
             }
             return bOK;
         }
