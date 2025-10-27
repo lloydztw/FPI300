@@ -655,21 +655,21 @@ namespace Traveller106
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
         [DisplayName("01.图像解析度")]
-        [Browsable(true)]
+        [Browsable(false)]
         public float ImageResolution { get; set; } = 0.0134f;
 
         [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
         [DisplayName("01a.图像X方向精度")]
-        [Browsable(true)]
+        [Browsable(false)]
         public float ImageResolutionX { get; set; } = 0.0073f;
 
         [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
         [DisplayName("01b.图像Y方向精度")]
-        [Browsable(true)]
+        [Browsable(false)]
         public float ImageResolutionY { get; set; } = 0.00715f;
 
         [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
