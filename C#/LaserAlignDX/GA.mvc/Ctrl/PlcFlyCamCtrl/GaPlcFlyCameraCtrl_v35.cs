@@ -22,8 +22,6 @@ using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
-using OpenCvSharp;
-using OpenCvSharp.Extensions;
 using System;
 using System.Drawing;
 using System.IO;
@@ -683,8 +681,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                     double oldx = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
                     double oldy = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
-                    Console.WriteLine($"Angle {angle}");
-                    Console.WriteLine($"Old x{oldx},y{oldy}");
+
+                    System.Diagnostics.Debug.WriteLine($"Angle {angle}");
+                    System.Diagnostics.Debug.WriteLine($"Old x{oldx},y{oldy}");
                     _LOG($"Angle {angle}", Color.Black);
                     _LOG($"Old x{oldx},y{oldy}", Color.Black);
                     //float _angle = aoiResult.OffsetAngle;// (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
@@ -697,7 +696,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                         new TemplatePositioningCalculator2D.Vector2(centerRun.X, centerRun.Y), angle);
 
                     // 场景1：机械臂控制 - 通常先旋转后平移
-                    //Console.WriteLine($"机械臂控制（推荐先旋转后平移）:");
+                    //System.Diagnostics.Debug.WriteLine($"机械臂控制（推荐先旋转后平移）:");
                     var comp1 = TemplatePositioningCalculator2D.CalculateCompensation(
                         template, current, TemplatePositioningCalculator2D.ApplyOrder.RotateThenTranslate);
                     //comp1.PrintResult();
@@ -705,7 +704,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     oldx = comp1.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
                     oldy = comp1.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
                     //aoiResult.OffsetAngle = comp1.AngleCompensation;
-                    Console.WriteLine($"Comp1 x{oldx},y{oldy}");
+                    System.Diagnostics.Debug.WriteLine($"Comp1 x{oldx},y{oldy}");
                     _LOG($"Comp1 x{oldx},y{oldy}", Color.Black);
                     //_LOG($"FlyID[{flyID.ShowID}] {comp1.ResultString(flyCamResolution)}", Color.Blue);
 
@@ -729,7 +728,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                         oldy = comp2.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
                     }
                     //aoiResult.OffsetAngle = comp1.AngleCompensation;
-                    Console.WriteLine($"Comp2 x{oldx},y{oldy}");
+                    System.Diagnostics.Debug.WriteLine($"Comp2 x{oldx},y{oldy}");
                     _LOG($"Comp2 x{oldx},y{oldy}", Color.Black);
                     //_LOG($"FlyID[{flyID.ShowID}] {comp2.ResultString(flyCamResolution)}", Color.Blue);
 

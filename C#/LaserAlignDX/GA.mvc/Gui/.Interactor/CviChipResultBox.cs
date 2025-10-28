@@ -49,7 +49,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
         #region GUI_DRAW_ITEMS
         List<IvDrawItem> _drawItems = new List<IvDrawItem>();
-        List<IvDrawItem> _drawItemsEx = new List<IvDrawItem>();
+        List<IvDrawItem> _drawItemsDetails = new List<IvDrawItem>();
+        List<IvDrawItem> _drawItemsNgGapCorners = new List<IvDrawItem>();
         Font _font = null;
         #endregion
 
@@ -71,7 +72,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             _cell = null;
             _drawItems.Clear();
-            _drawItemsEx.Clear();
+            _drawItemsDetails.Clear();
+            _drawItemsNgGapCorners.Clear();
             _bypassNg = false;
         }
         public void UpdateResult(XCell cell, bool bypassNg)
@@ -282,9 +284,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     {
                         var text = $"P{i}";
                         if (pad.ExtraBox2D != null)
-                            _drawItemsEx.Add(new CviRotRectBox(pad.ExtraBox2D, Color.Blue) { Text = text });
+                            _drawItemsDetails.Add(new CviRotRectBox(pad.ExtraBox2D, Color.Blue) { Text = text });
                         else
-                            _drawItemsEx.Add(new CviRotRectBox((RectangleF)pad.Rect, Color.Blue) { Text = text });
+                            _drawItemsDetails.Add(new CviRotRectBox((RectangleF)pad.Rect, Color.Blue) { Text = text });
                         i++;
                     }
                 }
@@ -356,7 +358,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 Color itemColor = isPass ? Color.Lime : _bypassNg ? Color.Green : Color.Red;
                 EzBlocsGridAnalyzer.CalcQuad2D(padsGrid, out var quad2D, false);
                 var item = new CviRotRectBox(quad2D, itemColor, 0.20f) { Tag = cell };
-                _drawItemsEx.Add(item);
+                _drawItemsDetails.Add(item);
             }
             #endregion
 
@@ -393,9 +395,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             #endregion
 
-            _drawItemsEx.AddRange(drawItemsOfLineSegments);
-            _drawItemsEx.AddRange(drawItemsOfBorderBoxes);
-            _drawItems.AddRange(drawItemsOfNgGapPads);
+            _drawItemsDetails.AddRange(drawItemsOfLineSegments);
+            _drawItemsDetails.AddRange(drawItemsOfBorderBoxes);
+            _drawItemsNgGapCorners.AddRange(drawItemsOfNgGapPads);
         }
         void updateDrawItems_For_TrainCorners()
         {
@@ -409,7 +411,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     var rect = JetEazy.Qcvt.CreateCenterRect((float)pt.X, (float)pt.Y, 224 * 2, 224 * 2);
                     var item = new CviRotRectBox(rect, Color.WhiteSmoke);
-                    _drawItemsEx.Add(item);
+                    _drawItemsDetails.Add(item);
                 }
             }
 
@@ -419,7 +421,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     var rect = JetEazy.Qcvt.CreateCenterRect((float)pt.X, (float)pt.Y, 10, 10);
                     var item = new CviRotRectBox(rect, Color.WhiteSmoke) { CrossLength = 25 };
-                    _drawItemsEx.Add(item);
+                    _drawItemsDetails.Add(item);
                 }
             }
         }
@@ -433,6 +435,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             {
                 foreach (var item in _drawItems)
                     item?.OnDraw(viewer, gxView);
+
+                foreach(var item in _drawItemsNgGapCorners)
+                    item?.OnDraw(viewer, gxView);
             }
         }
         void draw_ChipDetails(CvImageViewer viewer, Graphics gxView)
@@ -441,10 +446,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (!toDraw)
                 return;
 
-            foreach (var item in _drawItemsEx)
-            {
+            foreach (var item in _drawItemsDetails)
                 item?.OnDraw(viewer, gxView);
-            }
+
+            foreach (var item in _drawItemsNgGapCorners)
+                item?.OnDraw(viewer, gxView);
 
             draw_DimMeasurePoints(viewer, gxView, _cell);
             draw_GapMeasurePoints(viewer, gxView, _cell);

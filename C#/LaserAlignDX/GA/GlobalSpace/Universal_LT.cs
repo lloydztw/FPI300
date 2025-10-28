@@ -12,6 +12,7 @@ using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.OPSpace;
 using JetEazy.PropertyGridSpace;
+using JetEazy.Utils;
 using LaserAlignDX.BasicSpace.ParaSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -28,7 +29,7 @@ namespace Traveller106
         public static readonly bool N_THREADS_ENABLED = true;
         public static readonly int N_THREADS = 16;
 
-        public static bool IsNoUseCCD = false;
+        public static bool IsNoUseCCD = true;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
@@ -52,6 +53,7 @@ namespace Traveller106
         /// </summary>
         public static bool IsOpenFlyForm = false;
 
+        static string _app_root_path = null;
         public static string APP_ROOT_PATH 
         {
             get
@@ -59,16 +61,25 @@ namespace Traveller106
                 // 直接指定成 最後佈署的資料夾
                 // 這樣 原代碼 C# 專案, 
                 //      才能放在任意資料夾
-                //      不需要 依附於 最後佈署的資料夾 
+                //      不需要 依附於 最後佈署的資料夾
+
+                string defaultPath = "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
+
                 if (IsNoUseCCD)
                 {
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M01_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M02_";
-                    return "D:\\AUTOMATION\\Eazy FPI30\\_M03_";
+                    //return "D:\\AUTOMATION\\Eazy FPI30\\_M03_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
-                    return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
+                    //return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
+                    if (string.IsNullOrEmpty(_app_root_path))
+                    {
+                        _app_root_path = GaUtil.BrowseFolder(defaultPath);
+                    }
+                    return _app_root_path;
                 }
-                return "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
+
+                return defaultPath;
             }
         }
 

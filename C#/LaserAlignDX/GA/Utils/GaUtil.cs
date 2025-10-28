@@ -223,6 +223,27 @@ namespace JetEazy.Utils
             return fileName;
         }
 
+        public static string BrowseFolder(string defaultPath = null)
+        {
+            using (FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog())
+            {
+                folderBrowserDialog.Description = "Choose a folder (選擇路徑)";
+                folderBrowserDialog.ShowNewFolderButton = true;
+
+                if (!string.IsNullOrEmpty(defaultPath))
+                    folderBrowserDialog.SelectedPath = defaultPath;
+
+                if (DialogResult.OK == folderBrowserDialog.ShowDialog())
+                {
+                    string folder = folderBrowserDialog.SelectedPath;
+                    if (!string.IsNullOrEmpty(folder))
+                        return folder;
+                }
+
+            }
+            return defaultPath;
+        }
+
         public static Cursor SetCursor(Control wnd, Cursor cursor)
         {
             var frmOwner = wnd?.FindForm();
