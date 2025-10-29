@@ -148,6 +148,22 @@ namespace LaserAlignDX.Model
             get;
             set;
         }
+        /// <summary>
+        /// Runtime Results
+        /// </summary>
+        public bool IsAllPass()
+        {
+            int passCount = 0;
+            if (PassNgResults != null)
+            {
+                foreach (var pass in PassNgResults)
+                {
+                    if (pass)
+                        passCount++;
+                }
+            }
+            return passCount >= 2;
+        }
     }
 
 
@@ -226,6 +242,22 @@ namespace LaserAlignDX.Model
         {
             get;
             set;
+        }
+        /// <summary>
+        /// Runtime Results
+        /// </summary>
+        public bool IsAllPass()
+        {
+            int passCount = 0;
+            if (PassNgResults != null)
+            {
+                foreach (var pass in PassNgResults)
+                {
+                    if (pass)
+                        passCount++;
+                }
+            }
+            return passCount >= 8;
         }
     }
 }

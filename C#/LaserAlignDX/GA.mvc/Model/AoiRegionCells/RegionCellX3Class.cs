@@ -76,6 +76,10 @@ namespace LaserAlignDX.OPSpace
         public int CellCol = 0;
         public bool ByPass = false;
 
+        public bool IsEmpty()
+        {
+            return ChipData == null || ChipData.IsEmpty();
+        }
         /// <summary>
         /// ROI (FullFov Camera Coordinates) (單位 pixel)
         /// </summary>
@@ -89,6 +93,7 @@ namespace LaserAlignDX.OPSpace
         /// (2025-10-22 新增)
         /// </summary>
         public RegionCellX3Class OutGridLink { get; set; } = null;
+
 
         /// <summary>
         /// 理想 格位中心座標 X (單位 mm)

@@ -166,18 +166,26 @@ namespace LaserAlignDX.AoiModel.V3
             int i = 0;
             foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
             {
-                if (forceAllPass || cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-                    states[i] = 1;
-                else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
-                    states[i] = 3;
-                else if (cell.inspectReason == InspectReason.INS_2DERR || cell.inspectReason == InspectReason.INS_2DMAPNG)
-                    states[i] = 4;
-                else if (cell.inspectReason == InspectReason.INS_CUTTINGERR)
-                    states[i] = 9;
-                else if (cell.inspectReason == InspectReason.INS_PADEDGEGAPERR)
-                    states[i] = 8;
+                if (forceAllPass)
+                {
+                    bool isEmpty = cell == null || cell.IsEmpty();
+                    states[i] = isEmpty ? 3 : 1;
+                }
                 else
-                    states[i] = 2;
+                {
+                    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                        states[i] = 1;
+                    else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
+                        states[i] = 3;
+                    else if (cell.inspectReason == InspectReason.INS_2DERR || cell.inspectReason == InspectReason.INS_2DMAPNG)
+                        states[i] = 4;
+                    else if (cell.inspectReason == InspectReason.INS_CUTTINGERR)
+                        states[i] = 9;
+                    else if (cell.inspectReason == InspectReason.INS_PADEDGEGAPERR)
+                        states[i] = 8;
+                    else
+                        states[i] = 2;
+                }
                 i++;
             }
 

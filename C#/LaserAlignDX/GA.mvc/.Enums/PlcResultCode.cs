@@ -13,6 +13,7 @@
  */
 #endregion
 
+using LaserAlignDX.OPSpace;
 using System.ComponentModel;
 
 namespace LaserAlignDX
@@ -22,8 +23,8 @@ namespace LaserAlignDX
     //  2: 外观NG
     //  3: 空
     //  4: 读码NG
+    //  8: 邊隙 NG (切割偏移)
     //  9: 切割NG
-
     public enum PlcResultCode : int
     {
         [Description("OK")]
@@ -36,6 +37,8 @@ namespace LaserAlignDX
         NG_EMPTY = 3,
         [Description("讀碼 NG")]
         NG_QRCODE = 4,
+        [Description("邊隙 NG (切割偏移)")]
+        NG_EDGE_GAP = 8,
         [Description("切割 NG")]
         NG_CUT = 9,
     };

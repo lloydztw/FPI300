@@ -32,7 +32,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
     public partial class CviChipResultBox : CvImageViewerInteractor, IvDrawItem
     {
         #region CONFIG
-        static bool OPT_SHOW_TRAIN_CORNERS = false;
+        static bool OPT_SHOW_AI_TRAIN_CORNERS = false;
         #endregion
 
         #region GLOBAL_MESS
@@ -232,7 +232,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             updateDrawItems_For_ChipLocate();
             updateDrawItems_For_ChipMeasure();
-            updateDrawItems_For_TrainCorners();
+            updateDrawItems_For_AiTrainCorners();
         }
         void updateDrawItems_For_ChipLocate()
         {
@@ -399,30 +399,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             _drawItemsDetails.AddRange(drawItemsOfBorderBoxes);
             _drawItemsNgGapCorners.AddRange(drawItemsOfNgGapPads);
         }
-        void updateDrawItems_For_TrainCorners()
+        void updateDrawItems_For_AiTrainCorners()
         {
-            if (!OPT_SHOW_TRAIN_CORNERS)
-                return;
-
-            var chipQuad = _cell?.ChipData?.ChipQuad2D;
-            if (chipQuad != null)
+            if (OPT_SHOW_AI_TRAIN_CORNERS && _cell != null)
             {
-                foreach (var pt in chipQuad.Corners)
-                {
-                    var rect = JetEazy.Qcvt.CreateCenterRect((float)pt.X, (float)pt.Y, 224 * 2, 224 * 2);
-                    var item = new CviRotRectBox(rect, Color.WhiteSmoke);
-                    _drawItemsDetails.Add(item);
-                }
-            }
-
-            if (_boundaryPolygon != null)
-            {
-                foreach (var pt in _boundaryPolygon)
-                {
-                    var rect = JetEazy.Qcvt.CreateCenterRect((float)pt.X, (float)pt.Y, 10, 10);
-                    var item = new CviRotRectBox(rect, Color.WhiteSmoke) { CrossLength = 25 };
-                    _drawItemsDetails.Add(item);
-                }
+#if (OPT_RESERVED)
+                var aiData = new AiDataCropper();
+                var drawItems = aiData.GetDrawItems(_cell);
+                if (drawItems != null && drawItems.Count > 0)
+                    _drawItemsDetails.AddRange(drawItems);
+#endif
             }
         }
         #endregion

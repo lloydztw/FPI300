@@ -29,13 +29,13 @@ namespace Traveller106
         public static readonly bool N_THREADS_ENABLED = true;
         public static readonly int N_THREADS = 16;
 
-        public static bool IsNoUseCCD = true;
+        public static bool IsNoUseCCD = false;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/10/27";
+        public const string VersionDate = "2025/10/29";
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
@@ -71,7 +71,7 @@ namespace Traveller106
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M02_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M03_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
-                    //return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
+                    return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
                     if (string.IsNullOrEmpty(_app_root_path))
                     {
                         _app_root_path = GaUtil.BrowseFolder(defaultPath);

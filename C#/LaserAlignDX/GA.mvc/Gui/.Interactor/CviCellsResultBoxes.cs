@@ -1008,6 +1008,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     new ToolStripMenuItem("調試: 輸出 單一區域 圖像檔案"),
                     new ToolStripMenuItem("調試: 輸出 所有區域 圖像檔案"),
                     new ToolStripMenuItem("調試: 顯示 晶粒定位 所有演算圖像"),
+                    new ToolStripMenuItem("AI: 生成 AI 訓練數據"),
                 };
 
                 int i = 0;
@@ -1019,6 +1020,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 menuDumps[k++].Click += (s, e) => DumpOneCellRegion(wnd);
                 menuDumps[k++].Click += (s, e) => DumpCellRegions(wnd);
                 menuDumps[k++].Click += (s, e) => DebugMatching(null);
+                menuDumps[k++].Click += (s, e) => GenAiData();
 
                 _menuStrip = new ContextMenuStrip();
                 _menuStrip.Items.AddRange(menuRcps);
@@ -1373,6 +1375,34 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 MessageBox.Show("複製到剪貼簿失敗: " + ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
         }
+        void GenAiData()
+        {
+            if (IsEmptyTrayMode)
+                return;
+
+            if (!checkPrivilege())
+                return;
+
+            var cellBloc = _cursorBloc as CellBloc;
+            var cell = cellBloc?.Cell;
+            var chipDim = cell?.ChipData?.ChipDimension;
+
+            // (0) 尺寸量測結果為 PASS 才納入 AI 訓練數據
+            if (chipDim == null || !chipDim.IsAllPass())
+                return;
+
+            // (1) ImageHolder
+            var lineScanImageHolder = GaMvcConfig.SysModel.LineScanImageHolder;
+
+            // (2) Bitmap
+            var fullfovBmp = lineScanImageHolder.PeekBitmap();
+
+            //// (3) 
+            //var aiDataCropper = new AiDataCropper();
+            //aiDataCropper.GenerateData(lineScanImageHolder.SrcName, fullfovBmp, _xRecipe.xRegionCells);
+            ////aiDataCropper.GenerateDataOneCell(lineScanImageHolder.SrcName, fullfovBmp, cell);
+            //MessageBox.Show("AI 訓練數據 生成於\n\r" + AiDataCropper.PATH_DATA_ROOT, "AI Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
         bool getChapPadsSpan(EzBlocsGrid padsGrid, out double spanWidth, out double spanHeight, int digits = 1)
         {
             spanWidth = 0;
@@ -1499,5 +1529,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
         }
         #endregion
+
+
     }
 }
