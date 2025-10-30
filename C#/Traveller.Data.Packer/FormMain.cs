@@ -118,6 +118,9 @@ namespace Traveller.Data.Packer
 
                 string workPath = System.IO.Path.Combine(Global.PATH_RECIPE_FPIX3, "WORK");
                 _doCopyFile(System.IO.Path.Combine(workPath, "CAMERA.ini"), dstPath);
+                _doCopyFolder(workPath, dstPath, "*@*.ini");
+                _doCopyFolder(workPath, dstPath, "DSXL*.ini");
+
                 _doCopyFile(System.IO.Path.Combine(workPath, "MAIN_FPIX3", "IO.INI"), dstPath);
                 _doCopyFile(System.IO.Path.Combine(workPath, "MAIN_FPIX3", "LightCONTROL0.INI"), dstPath);
                 _doCopyFile(System.IO.Path.Combine(workPath, "MAIN_FPIX3", "LightCONTROL1.INI"), dstPath);
@@ -166,14 +169,14 @@ namespace Traveller.Data.Packer
                 throw ex;
             }
         }
-        private void _doCopyFolder(string srcPath, string dstPathRoot)
+        private void _doCopyFolder(string srcPath, string dstPathRoot, string pattern = "*.*")
         {
             try
             {
                 var dstPath = System.IO.Path.Combine(dstPathRoot, srcPath.Replace(Global.PATH_APP, ""));
                 _checkPath(dstPath);
 
-                var files = System.IO.Directory.GetFiles(srcPath, "*.*");
+                var files = System.IO.Directory.GetFiles(srcPath, pattern);
                 foreach (var srcFile in files)
                 {
                     _trace("copy: " + System.IO.Path.GetFileName(srcFile));
