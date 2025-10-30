@@ -1008,7 +1008,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     new ToolStripMenuItem("調試: 輸出 單一區域 圖像檔案"),
                     new ToolStripMenuItem("調試: 輸出 所有區域 圖像檔案"),
                     new ToolStripMenuItem("調試: 顯示 晶粒定位 所有演算圖像"),
-                    new ToolStripMenuItem("AI: 生成 AI 訓練數據"),
                 };
 
                 int i = 0;
@@ -1020,12 +1019,18 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 menuDumps[k++].Click += (s, e) => DumpOneCellRegion(wnd);
                 menuDumps[k++].Click += (s, e) => DumpCellRegions(wnd);
                 menuDumps[k++].Click += (s, e) => DebugMatching(null);
-                menuDumps[k++].Click += (s, e) => GenAiData();
 
                 _menuStrip = new ContextMenuStrip();
                 _menuStrip.Items.AddRange(menuRcps);
                 _menuStrip.Items.Add(new ToolStripSeparator());
                 _menuStrip.Items.AddRange(menuDumps);
+
+#if (OPT_USE_AI)
+                var menuAI = new ToolStripMenuItem("AI: 生成 AI 訓練數據");
+                menuAI.Click += (s, e) => GenAiData();
+                _menuStrip.Items.Add(new ToolStripSeparator());
+                _menuStrip.Items.Add(menuAI);
+#endif
             }
         }
         void disposeMenuStrip()
@@ -1047,7 +1052,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             initMenuStrip(wnd);
             _menuStrip.Show(wnd, pt);
         }
-        #endregion
+#endregion
 
         #region DUMP_FUNCTIONS
         static string PATH_DUMP => "d:\\paso.log\\chipLoc";
@@ -1063,7 +1068,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void DebugMatching_000(CellBloc cellBloc = null)
         {
-#if(OPT_OLD_CODE)
+#if (OPT_OLD_CODE)
             if (IsEmptyTrayMode)
                 return;
 
@@ -1134,7 +1139,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void DebugMatching_001(CellBloc cellBloc = null)
         {
-#if(OPT_OLD_CODE)
+#if (OPT_OLD_CODE)
             if (IsEmptyTrayMode)
                 return;
 
@@ -1377,6 +1382,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void GenAiData()
         {
+#if (OPT_USE_AI)
             if (IsEmptyTrayMode)
                 return;
 
@@ -1402,6 +1408,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             //aiDataCropper.GenerateData(lineScanImageHolder.SrcName, fullfovBmp, _xRecipe.xRegionCells);
             ////aiDataCropper.GenerateDataOneCell(lineScanImageHolder.SrcName, fullfovBmp, cell);
             //MessageBox.Show("AI 訓練數據 生成於\n\r" + AiDataCropper.PATH_DATA_ROOT, "AI Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+#endif
         }
         bool getChapPadsSpan(EzBlocsGrid padsGrid, out double spanWidth, out double spanHeight, int digits = 1)
         {
@@ -1427,7 +1434,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             return false;
         }
-        #endregion
+#endregion
 
         #region DEBUG_RESERVED_CODE
 #if (OPT_RESERVED)
@@ -1486,7 +1493,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             VsMessageBox.Info($"已保存 尺寸數據 至 {fileName}");
         }
 #endif
-        #endregion
+#endregion
 
         #region RECIPE_DIALOG_FUNCTIONS
         void OpenGoldenDimensionEditorDlg()
@@ -1529,7 +1536,5 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
         }
         #endregion
-
-
     }
 }

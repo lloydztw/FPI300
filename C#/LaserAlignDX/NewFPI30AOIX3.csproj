@@ -23,7 +23,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;xFX3U | FATEK | OPT_LETIAN_AUTO_LAYOUT | xOPT_BYPASS_DONGLE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;xOPT_USE_AI | xFX3U | FATEK | OPT_LETIAN_AUTO_LAYOUT | xOPT_BYPASS_DONGLE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -427,6 +427,7 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
     <Compile Include="GA.mvc\Model\.Common\GaChipData.cs" />
+    <Compile Include="GA.mvc\Model\AI\AiDataCropper.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_Base.cs" />
     <Compile Include="GA.mvc\Model\.Common\LotData.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />

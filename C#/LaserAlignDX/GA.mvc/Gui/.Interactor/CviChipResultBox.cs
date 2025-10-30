@@ -17,6 +17,7 @@ using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
+using LaserAlignDX.AoiModel.AI;
 using LaserAlignDX.OPSpace;
 using OpenCvSharp;
 using System;
@@ -401,15 +402,15 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void updateDrawItems_For_AiTrainCorners()
         {
+#if (OPT_USE_AI)
             if (OPT_SHOW_AI_TRAIN_CORNERS && _cell != null)
             {
-#if (OPT_RESERVED)
                 var aiData = new AiDataCropper();
                 var drawItems = aiData.GetDrawItems(_cell);
                 if (drawItems != null && drawItems.Count > 0)
                     _drawItemsDetails.AddRange(drawItems);
-#endif
             }
+#endif
         }
         #endregion
 
