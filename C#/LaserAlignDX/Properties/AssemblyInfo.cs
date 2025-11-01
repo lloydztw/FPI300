@@ -33,7 +33,7 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("3.0.9.10")]
-[assembly: AssemblyFileVersion("3.0.9.10")]
+[assembly: AssemblyVersion("3.0.9.11")]
+[assembly: AssemblyFileVersion("3.0.9.11")]
 
 // 之前的紀錄 放置在 ReadMe_History.md
