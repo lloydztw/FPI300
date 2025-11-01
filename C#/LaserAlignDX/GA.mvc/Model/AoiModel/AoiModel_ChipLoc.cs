@@ -121,11 +121,14 @@ namespace LaserAlignDX.AoiModel.V3
                 //(7) 晶粒定位 (偏離格位外)
                 _RunChipsLocateOutGrid(bmpFullfov, imgLogPath);
 
-                //(8) 異步輸出 Debug 數據
+                //(8) 晶粒定位 (位於邊界模擬兩可之處)
+                _RunChipsLocateOnBoundary(bmpFullfov, imgLogPath);
+
+                //(9) 異步輸出 Debug 數據
                 markFileTimeTag();
                 saveDebugDataAsync(bmpFullfov, debugCellCenterStr, imgLogPath);
 
-                //(9) 標記終止計時
+                //(10) 標記終止計時
                 markRunEnd(true);
                 fire_AoiEnd();
             }
@@ -242,7 +245,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             //(1) 蒐集 GaCellsGroups
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            var outGridGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, outGrid: true);
+            var outGridGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "OUT_GRID");
 
             //(2) 定位
             if (!usingMultiThread)
@@ -268,7 +271,7 @@ namespace LaserAlignDX.AoiModel.V3
             //(4) 重新計算補償量
             if (!usingMultiThread)
             {
-                //(2.1) 定位: 單線程 (驗證用)
+                //(4.1) 定位: 單線程 (驗證用)
                 for (int gid = 0; gid < outGridGroups.Length; gid++)
                 {
                     _RunChipLocateOneT(gid, outGridGroups[gid], imgPath, optLocate: false);     //@ _RunChipsLocateOutGrid (不定位GUI, 只計算補償量!)
@@ -276,13 +279,136 @@ namespace LaserAlignDX.AoiModel.V3
             }
             else
             {
-                //(2.2) 定位: 多線程 (跑線用)
+                //(4.2) 定位: 多線程 (跑線用)
                 Parallel.For(0, outGridGroups.Length, gid =>
                 {
                     _RunChipLocateOneT(gid, outGridGroups[gid], imgPath, optLocate: false);     //@ _RunChipsLocateOutGrid (不定位GUI, 只計算補償量!)
                 });
             }
 
+            _TM.DUMP_ACCUM();
+        }
+
+        /// <summary>
+        /// LETIAN: 晶粒定位 (位於邊界模擬兩可之處)
+        /// </summary>
+        void _RunChipsLocateOnBoundary(Bitmap bmpFullfov, string imgPath)
+        {
+            if (_preEmptyTrayResult == null)
+                return;
+
+            _TM.RESET_ACCUM();
+
+#if(false)
+            //(0) 蒐集邊界可能有料的格位
+            var collects = new List<RegionCellX3Class>();
+            var emptyGrid = _preEmptyTrayResult.Grid;
+            int rows = emptyGrid.Rows;
+            int cols = emptyGrid.Cols;
+            foreach (var cell in _xRecipe.xRegionCells)
+            {
+                //(a) Empty
+                if (cell == null) continue;
+
+                //(b) 排除 非邊界格位
+                int r = cell.CellRow;
+                int c = cell.CellCol;
+                bool isBoundary = (r == 0 || r == rows - 1) || (c == 0 || c == cols - 1);
+                if (!isBoundary) continue;
+                //>>> System.Diagnostics.Debug.WriteLine("Boundary [{0},{1}]", r, c);
+
+                //(c) 排除已經定位之晶粒
+                if (cell.OutGridLink != null) continue;                             // 已經被佔位
+                if (cell.ChipData != null && !cell.ChipData.IsEmpty()) continue;    // 已經被佔位
+
+                //(e) 排除空格
+                _preEmptyTrayResult.GetBlocByRowCol(r, c, out var _, out bool isSukcer);
+                if (isSukcer) continue;
+
+                //(f) 蒐集剩下可能有料之 cell
+                System.Diagnostics.Debug.WriteLine("Boundary [{0},{1}]", r, c);
+                collects.Add(cell);
+            }
+            if (collects.Count == 0)
+                return;
+
+            using (var bmpFullfov2 = (Bitmap)bmpFullfov.Clone())
+            {
+                //(1) 把已經定位到的晶粒塗成平均色
+                using (var bridge = new QxImageBridge(bmpFullfov2))
+                {
+                    var imgFullfov = bridge.Image;
+
+                    var sz = Math.Min(imgFullfov.Width, imgFullfov.Height);
+                    var roi = new Rect(0, 0, sz / 4, sz / 4);
+                    JetEazy.Qcvt.SetCenter(ref roi, imgFullfov.Width / 2, imgFullfov.Height / 2);
+                    Scalar mean = imgFullfov[roi].Mean();
+
+                    foreach (var cell in _xRecipe.xRegionCells)
+                    {
+                        var chipQuad2D = cell?.ChipData?.ChipQuad2D;
+                        if (chipQuad2D == null) continue;
+                        var pts = Array.ConvertAll(chipQuad2D.Corners, c => new OpenCvSharp.Point((int)c.X, (int)c.Y));
+                        Cv2.FillConvexPoly(imgFullfov, pts, mean);
+                    }
+                }
+
+                //(2) 蒐集 GaCellsGroups (使用 x2 倍 Extendx, Extendy)
+                bool usingMultiThread = Universal.N_THREADS_ENABLED;
+                var inflate = new System.Drawing.Size(_xRecipe.xExtendx * 2, _xRecipe.xExtendy * 2);
+                var boundaryGrps = GaCellsGroup.CollectGroups_simple(MvdCompositeChipMatcher.N_CHANNLS, collects, bmpFullfov2, inflate);
+                if (boundaryGrps.Length == 0)
+                    return;
+
+                //(3) 定位
+                if (!usingMultiThread)
+                {
+                    //(3.1) 定位: 單線程 (驗證用)
+                    for (int gid = 0; gid < boundaryGrps.Length; gid++)
+                    {
+                        _RunChipLocateOneT(gid, boundaryGrps[gid], imgPath);     //@ _RunChipsLocateOnBoundary
+                    }
+                }
+                else
+                {
+                    //(3.2) 定位: 多線程 (跑線用)
+                    Parallel.For(0, boundaryGrps.Length, gid =>
+                    {
+                        _RunChipLocateOneT(gid, boundaryGrps[gid], imgPath);     //@ _RunChipsLocateOnBoundary
+                    });
+                }
+
+                //(4) 整合 Boudary Cells Groups (到 _cellGroups)
+                _MergeBoudaryCellsGroups(boundaryGrps);
+            }
+#endif
+
+            //(1) 蒐集 GaCellsGroups
+            bool usingMultiThread = Universal.N_THREADS_ENABLED;
+            var boundaryGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "BOUNDARY");
+            if (boundaryGroups == null || boundaryGroups.Length == 0)
+                return;
+
+            //(2) 定位
+            if (!usingMultiThread)
+            {
+                //(2.1) 定位: 單線程 (驗證用)
+                for (int gid = 0; gid < boundaryGroups.Length; gid++)
+                {
+                    _RunChipLocateOneT(gid, boundaryGroups[gid], imgPath);     //@ _RunChipsLocateOnBoundary
+                }
+            }
+            else
+            {
+                //(2.2) 定位: 多線程 (跑線用)
+                Parallel.For(0, boundaryGroups.Length, gid =>
+                {
+                    _RunChipLocateOneT(gid, boundaryGroups[gid], imgPath);     //@ _RunChipsLocateOnBoundary
+                });
+            }
+
+            //(3) 整合 boundaryGroups
+            _MergeBoudaryCellsGroups(boundaryGroups);
             _TM.DUMP_ACCUM();
         }
 
@@ -372,6 +498,62 @@ namespace LaserAlignDX.AoiModel.V3
         }
 
         /// <summary>
+        /// 整合 Boudary Cells Groups
+        /// </summary>
+        void _MergeBoudaryCellsGroups(GaCellsGroup[] boundaryGrps)
+        {
+            if (boundaryGrps == null || boundaryGrps.Length == 0)
+                return;
+
+            if (_cellGroups == null || _cellGroups.Length == 0)
+            {
+                _cellGroups = boundaryGrps;
+                return;
+            }
+
+            var existDict = new Dictionary<string, GaCell>();
+            foreach (var grp in _cellGroups)
+            {
+                foreach (var gaCell in grp)
+                {
+                    var cell = gaCell?.Cell;
+                    if (cell == null) continue;
+                    string key = $"{cell.CellRow},{cell.CellCol}";
+
+                    //if (existDict.TryGetValue(key, out var existing))
+                    //{
+                    //    //if (existing != gaCell)
+                    //    //    gaCell.Dispose();
+                    //    continue;
+                    //}
+
+                    if (!existDict.ContainsKey(key))
+                    {
+                        existDict.Add(key, gaCell);
+                    }
+                }
+            }
+
+            foreach(var newGrp in boundaryGrps)
+            {
+                if (newGrp == null) continue;
+                foreach (var newGaCell in newGrp)
+                {
+                    var cell = newGaCell?.Cell;
+                    if (cell == null) continue;
+                    string key = $"{cell.CellRow},{cell.CellCol}";
+                    if (existDict.TryGetValue(key, out var existing))
+                    {
+                        if (existing != newGaCell)
+                            existing.CopyFrom(newGaCell);   // Replacement
+                        continue;
+                    }
+                    newGaCell?.Dispose();
+                }
+            }
+        }
+
+        /// <summary>
         /// LETIAN: 晶粒定位 與 尺寸量測 (區域) (限用於同一線程內)
         /// </summary>
         string _RunChipLocateOneT(int threadIdx, IEnumerable<GaCell> cellsGroup, string imgPath, bool optLocate = true, bool optCompensate = true)
@@ -410,7 +592,7 @@ namespace LaserAlignDX.AoiModel.V3
                 else
                 {
                     chipData = cell?.ChipData;
-                    ok = chipData != null;
+                    ok = (chipData?.ChipQuad2D != null);
                 }
 
                 if (ok)
@@ -489,6 +671,8 @@ namespace LaserAlignDX.AoiModel.V3
                         cell.ChipData = chipData;
                         //cell.ChipData.ChipCoords.Angle = cell.RunAngle;
                         cell.ChipData.ChipCoords.Centroid = _transCP?.Trans(chipCentroid);
+                        cell.inspectReason = InspectReason.PASS;
+                        cell.inspectReasons.Clear();
                     }
                 }
 

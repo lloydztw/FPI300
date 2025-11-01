@@ -289,13 +289,17 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
             if (_imgViewer != null)
             {
+                _imgViewer.AddInteractor(_cviGoldenBox);
+                _cviGoldenBox.Enabled = false;
+                _cviGoldenBox.Visible = false;
+
                 _imgViewer.AddInteractor(_cviBoundBox);
                 _cviBoundBox.Enabled = false;
                 _cviBoundBox.Visible = false;
 
-                _imgViewer.AddInteractor(_cviGoldenBox);
-                _cviGoldenBox.Enabled = false;
-                _cviGoldenBox.Visible = false;
+                //_imgViewer.AddInteractor(_cviGoldenBox);
+                //_cviGoldenBox.Enabled = false;
+                //_cviGoldenBox.Visible = false;
 
                 _imgViewer.AddInteractor(_cviFiltersBox);
                 _cviFiltersBox.Enabled = false;

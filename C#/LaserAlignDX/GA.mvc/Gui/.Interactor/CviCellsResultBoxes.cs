@@ -1222,8 +1222,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var fullfovBmp = lineScanImageHolder.PeekBitmap();
 
             // (3) ROI
-            var cellRoi = Rectangle.Round(cell.viewRectF);
-            cellRoi.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
+            //>>> var cellRoi = Rectangle.Round(cell.viewRectF);
+            //>>> cellRoi.Inflate(_xRecipe.xExtendx, _xRecipe.xExtendy);
+            var cellRoi = Rectangle.Round(_cviRegionBox.Quad2D.BoundaryRect);
             GaUtil.Clip(ref cellRoi, fullfovBmp.Size);
 
             using (var cellBmp = fullfovBmp.Clone(cellRoi, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))

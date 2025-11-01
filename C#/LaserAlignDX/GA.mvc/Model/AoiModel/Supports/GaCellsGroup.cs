@@ -14,7 +14,9 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy.OpenCV;
 using JetEazy.Utils;
+using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using OpenCvSharp;
@@ -45,12 +47,27 @@ namespace LaserAlignDX.AoiModel
         {
             get; private set;
         }
+
         public GaCell(RegionCellX3Class cell, Bitmap cellBmp, Rectangle roi)
         {
             Cell = cell;
             CellBmp = cellBmp;
             CellRoi = roi;
         }
+
+        public void CopyFrom(GaCell src)
+        {
+            if (this != src && src != null)
+            {
+                var oldBmp = this.CellBmp;
+                this.Cell = src.Cell;
+                this.CellBmp = src.CellBmp;
+                this.CellRoi = src.CellRoi;
+                if (oldBmp != this.CellBmp)
+                    oldBmp?.Dispose();
+            }
+        }
+
         public void Dispose()
         {
             CellBmp?.Dispose();
@@ -95,12 +112,23 @@ namespace LaserAlignDX.AoiModel
         /// <summary>
         /// caller 負責 fullFovBmp 生命週期
         /// </summary>
-        public static GaCellsGroup[] CollectGroups(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult = null, bool outGrid = false)
+        public static GaCellsGroup[] CollectGroups(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult = null, string option = null)
         {
-            if (!outGrid)
-                return CollectGroups_on_grid(N, xRecipe, fullFovBmp, preEmptyResult);
-            else
-                return CollectGroups_out_grid(N, xRecipe, fullFovBmp, preEmptyResult);
+
+            //if (!outGrid)
+            //    return CollectGroups_on_grid(N, xRecipe, fullFovBmp, preEmptyResult);
+            //else
+            //    return CollectGroups_out_grid(N, xRecipe, fullFovBmp, preEmptyResult);
+
+            switch(option)
+            {
+                case "BOUNDARY":
+                    return CollectGroups_boundary_cells(N, xRecipe, fullFovBmp, preEmptyResult);
+                case "OUT_GRID":
+                    return CollectGroups_out_grid(N, xRecipe, fullFovBmp, preEmptyResult);
+                default:
+                    return CollectGroups_on_grid(N, xRecipe, fullFovBmp, preEmptyResult);
+            }
         }
         static GaCellsGroup[] CollectGroups_000_spanY(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
         {
@@ -251,6 +279,89 @@ namespace LaserAlignDX.AoiModel
 
             var groups = CollectGroups_simple(N, outGridCells, fullFovBmp, new Size(xRecipe.xExtendx, xRecipe.xExtendy));
             return groups;
+        }
+        static GaCellsGroup[] CollectGroups_boundary_cells(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult)
+        {
+            if (preEmptyResult == null || preEmptyResult.Grid == null)
+                return null;
+
+            //(0) 蒐集邊界可能有料的格位
+            var collects = new List<RegionCellX3Class>();
+            var emptyGrid = preEmptyResult.Grid;
+            int rows = emptyGrid.Rows;
+            int cols = emptyGrid.Cols;
+            foreach (var cell in xRecipe.xRegionCells)
+            {
+                //(a) Empty
+                if (cell == null) continue;
+
+                //(b) 排除 非邊界格位
+                int r = cell.CellRow;
+                int c = cell.CellCol;
+                bool isBoundary = (r == 0 || r == rows - 1) || (c == 0 || c == cols - 1);
+                if (!isBoundary) continue;
+                //>>> System.Diagnostics.Debug.WriteLine("Boundary [{0},{1}]", r, c);
+
+                //(c) 排除已經定位之晶粒
+                if (cell.OutGridLink != null) continue;                             // 已經被佔位
+                if (cell.ChipData != null && !cell.ChipData.IsEmpty()) continue;    // 已經被佔位
+
+                //(e) 排除空格
+                preEmptyResult.GetBlocByRowCol(r, c, out var _, out bool isSukcer);
+                if (isSukcer) continue;
+
+                //(f) 蒐集 剩下可能有料 cell 之 副本
+                System.Diagnostics.Debug.WriteLine("Boundary [{0},{1}]", r, c);
+                collects.Add(cell);
+            }
+            if (collects.Count == 0)
+                return null;
+
+            using (var fullFovBmp2 = (Bitmap)fullFovBmp.Clone())
+            {
+                //(1) 把已經定位到的晶粒塗成平均色
+                using (var bridge = new QxImageBridge(fullFovBmp2))
+                {
+                    var imgFullfov = bridge.Image;
+
+                    var sz = Math.Min(imgFullfov.Width, imgFullfov.Height);
+                    var roi = new Rect(0, 0, sz / 4, sz / 4);
+                    JetEazy.Qcvt.SetCenter(ref roi, imgFullfov.Width / 2, imgFullfov.Height / 2);
+                    Scalar mean = imgFullfov[roi].Mean();
+
+                    foreach (var xCell in xRecipe.xRegionCells)
+                    {
+                        var cell = xCell?.OutGridLink;
+                        if (cell == null) cell = xCell;
+
+                        var chipQuad2D = cell?.ChipData?.ChipQuad2D;
+                        if (chipQuad2D == null) continue;
+
+                        var pts = Array.ConvertAll(chipQuad2D.Corners, c => new OpenCvSharp.Point((int)c.X, (int)c.Y));
+                        Cv2.FillConvexPoly(imgFullfov, pts, mean);
+                    }
+                }
+
+                //(2) 重新設定 collects
+                for (int i = 0, count = collects.Count; i < count; i++)
+                {
+                    var cellOriginal = collects[i];
+                    var cellCopy = new RegionCellX3Class();
+                    cellCopy.Index = cellOriginal.Index;
+                    cellCopy.CellRow = cellOriginal.CellRow;
+                    cellCopy.CellCol = cellOriginal.CellCol;
+                    cellCopy.lblName = cellOriginal.lblName;
+                    cellCopy.viewRectF = cellOriginal.viewRectF;
+                    cellCopy.ChipData = cellOriginal.ChipData;
+                    cellOriginal.OutGridLink = cellCopy;
+                    collects[i] = cellCopy;
+                }
+
+                //(3) 蒐集 GaCellsGroups (使用 x2 倍 Extendx, Extendy)
+                var inflate = new System.Drawing.Size(xRecipe.xExtendx * 2, xRecipe.xExtendy * 2);
+                var boundaryGrps = CollectGroups_simple(N, collects, fullFovBmp2, inflate);
+                return boundaryGrps;
+            }
         }
         static GaCellsGroup[] CollectGroups_simple(int N, List<RegionCellX3Class> srcCells, Bitmap fullFovBmp, Size inflate)
         {
