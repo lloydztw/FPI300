@@ -118,6 +118,20 @@ namespace LeTian.AoiLib
                 return new[] { P1F, P2F }; 
             }
 
+            /// <summary>
+            /// [r,θ] 極座標參數化的直線參數
+            /// </summary>
+            public (double, double) GetRhoTheta(QVector org = null)
+            {
+                if (org == null) 
+                    org = new QVector(0, 0);
+                var linePt = CalcTheNearestPoint(org);
+                var vect = linePt - org;
+                var rho = vect.NormLength;
+                var theta = Math.Atan2(vect.Y, vect.X);
+                return (rho, theta);
+            }
+
             public LineSegment CreateNewScale(double xscale, double yscale)
             {
                 double x1 = _p1.X * xscale;
@@ -220,5 +234,6 @@ namespace LeTian.AoiLib
                     line.EndPoint.fX,
                     line.EndPoint.fY );
         }
+
     }
 }

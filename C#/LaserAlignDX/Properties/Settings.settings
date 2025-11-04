@@ -11,5 +11,8 @@
     <Setting Name="lineSpanPercentage" Type="System.Single" Scope="User">
       <Value Profile="(Default)">90</Value>
     </Setting>
+    <Setting Name="rootPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">D:\AUTOMATION\Eazy FPI30\_V03_</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

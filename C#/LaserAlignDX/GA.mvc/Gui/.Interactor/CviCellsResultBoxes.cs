@@ -722,7 +722,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     return null;
 
                 int row = cell.CellRow;
-                int col = cell.CellCol; 
+                int col = cell.CellCol;
 
                 bool isShowScore = true;
                 var sb = new StringBuilder();
@@ -1052,7 +1052,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             initMenuStrip(wnd);
             _menuStrip.Show(wnd, pt);
         }
-#endregion
+        #endregion
 
         #region DUMP_FUNCTIONS
         static string PATH_DUMP => "d:\\paso.log\\chipLoc";
@@ -1341,7 +1341,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                     // row, col
                     sb.AppendValues(cell.CellRow, cell.CellCol);
-                    
+
                     // runWidth, runHeight
                     sb.Append(", ").AppendValues(cell.RunWidth, cell.RunHeight);
 
@@ -1405,10 +1405,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var fullfovBmp = lineScanImageHolder.PeekBitmap();
 
             //// (3) 
-            //var aiDataCropper = new AiDataCropper();
-            //aiDataCropper.GenerateData(lineScanImageHolder.SrcName, fullfovBmp, _xRecipe.xRegionCells);
-            ////aiDataCropper.GenerateDataOneCell(lineScanImageHolder.SrcName, fullfovBmp, cell);
-            //MessageBox.Show("AI 訓練數據 生成於\n\r" + AiDataCropper.PATH_DATA_ROOT, "AI Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var aiDataCropper = new LaserAlignDX.AoiModel.AI.AiDataCropper();
+            aiDataCropper.GenerateData(lineScanImageHolder.SrcName, fullfovBmp, _xRecipe.xRegionCells);
+            MessageBox.Show("AI 訓練數據 生成於\n\r" + aiDataCropper.PATH_DATA_ROOT, "AI Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
 #endif
         }
         bool getChapPadsSpan(EzBlocsGrid padsGrid, out double spanWidth, out double spanHeight, int digits = 1)
@@ -1435,7 +1434,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             return false;
         }
-#endregion
+        #endregion
 
         #region DEBUG_RESERVED_CODE
 #if (OPT_RESERVED)
@@ -1494,7 +1493,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             VsMessageBox.Info($"已保存 尺寸數據 至 {fileName}");
         }
 #endif
-#endregion
+        #endregion
 
         #region RECIPE_DIALOG_FUNCTIONS
         void OpenGoldenDimensionEditorDlg()

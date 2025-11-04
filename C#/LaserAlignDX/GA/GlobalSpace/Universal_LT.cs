@@ -53,16 +53,11 @@ namespace Traveller106
         /// </summary>
         public static bool IsOpenFlyForm = false;
 
-        static string _app_root_path = null;
+        static string _sim_root_path = null;
         public static string APP_ROOT_PATH 
         {
             get
             {
-                // 直接指定成 最後佈署的資料夾
-                // 這樣 原代碼 C# 專案, 
-                //      才能放在任意資料夾
-                //      不需要 依附於 最後佈署的資料夾
-
                 string defaultPath = "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
 
                 if (IsNoUseCCD)
@@ -72,11 +67,19 @@ namespace Traveller106
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M03_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M04_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M05_";
-                    if (string.IsNullOrEmpty(_app_root_path))
+
+                    if (string.IsNullOrEmpty(_sim_root_path))
                     {
-                        _app_root_path = GaUtil.BrowseFolder(defaultPath);
+                        var settings = LaserAlignDX.Properties.Settings.Default;
+                        _sim_root_path = GaUtil.BrowseFolder(settings.rootPath);
+                        if (settings.rootPath != _sim_root_path)
+                        {
+                            settings.rootPath = _sim_root_path;
+                            settings.Save();
+                        }
+                        VsMessageBox.Info($"[離線版] [使用] {_sim_root_path}");
                     }
-                    return _app_root_path;
+                    return _sim_root_path;
                 }
 
                 return defaultPath;
