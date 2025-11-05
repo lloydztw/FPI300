@@ -22,6 +22,7 @@ using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using TravellerMINIX6.ProcessSpace;
+using VsCommon.ControlSpace.IOSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
 namespace LaserAlignDX.Mvc.Ctrl
@@ -31,6 +32,8 @@ namespace LaserAlignDX.Mvc.Ctrl
     /// </summary>
     public partial class GaContinousSelfTestCtrl
     {
+        public static bool OPT_SKIP_FLY_AOI = false;
+
         string IMG_PATH = "";
 
         #region SINGLETON
@@ -94,10 +97,18 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var plcIO = MACHINE?.PLCIO;
                 if (plcIO == null || !plcIO.bSoftwareReady)
                     return;
-                ((Action)restartTest).BeginInvoke(null, null);
+
+                if (!OPT_SKIP_FLY_AOI)
+                    ((Action)restartTest_full_processes).BeginInvoke(null, null);
+                else
+                    ((Action)restartTest_only_chip_loc).BeginInvoke(null, null);
             };
         }
-        private void restartTest()
+
+        /// <summary>
+        /// 再次 啟動 模擬所有流程
+        /// </summary>
+        private void restartTest_full_processes()
         {
             if (IsEmpty()) return;
             if (getLocatedChipsCount() > 0 &&_aoiModel.xScanInspectMode != ScanInspectMode.NOTRAY)
@@ -122,6 +133,47 @@ namespace LaserAlignDX.Mvc.Ctrl
                 plcIO.bFlyReady = true;
             }
         }
+
+        /// <summary>
+        /// 再次 啟動  模擬定位
+        /// </summary>
+        private void restartTest_only_chip_loc()
+        {
+            if (IsEmpty()) return;
+            System.Threading.Thread.Sleep(500);
+
+            var plcIO = MACHINE?.PLCIO as MainFPIX3IOSim;
+            plcIO.bScanStart = false;
+            plcIO.bFlyReady = false;
+
+            var process = LineScanProcess.Instance;
+            process.Stop();
+
+            string[] files = System.IO.Directory.GetFiles(IMG_PATH, "*.jpg");
+            Array.Sort(files);
+            if (++_runCount >= files.Length)
+            {
+                // 自動終止.
+                _runCount = 0;
+                return;
+            }
+
+            string file = files[_runCount];
+            var bmp = GaImageUtil.LoadBigImage(file);
+            var srcName = System.IO.Path.GetFileNameWithoutExtension(file);
+            _sysModel.LineScanImageHolder.TakeOver(bmp, srcName);
+
+            if (plcIO != null)
+            {
+                plcIO.iScanStatus = 0;
+                plcIO.bScanStart = false;
+                plcIO.bFlyReady = false;
+                plcIO.sStripID = srcName.Split('.')[0].Trim();
+            }
+
+            process.Start();
+        }
+        
         private int getLocatedChipsCount()
         {
             int count = 0;

@@ -291,8 +291,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     checkPlcStageID(_activeCarrierID);
                     string fileName = selfTestCtrl.BrowseImageFile();
                     if (fileName != null)
+                    {
                         loadLineScanImage(fileName);
+                        var ret = MessageBox.Show("循環自測: 是否也要包含 飛拍 模擬?", "離線模擬", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        GaContinousSelfTestCtrl.OPT_SKIP_FLY_AOI = ret == DialogResult.No;
+                    }
                 }
+
                 isEmpty = !ActiveViewer.HasImage();
                 e.Cancel = isEmpty;
             }
@@ -302,7 +307,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         void update_LineScanImage()
         {
             // 更新 GUI 畫面
-            ActiveViewer.UpdateImageSrc(_lineScanImageHolder);
+            string srcName = _lineScanImageHolder?.SrcName;
+            ActiveViewer.UpdateImageSrc(_lineScanImageHolder, srcName);
         }
         void update_AoiResult(ProcessEventArgs e)
         {
