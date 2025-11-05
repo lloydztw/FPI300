@@ -4,6 +4,7 @@ using JetEazy.DBSpace;
 using JetEazy.EzImage;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using LaserAlignDX;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
 using System;
@@ -156,6 +157,19 @@ namespace PhotoMachine.UISpace
 
             txtLotNo.ReadOnly = true;
             txtStripID.ReadOnly = true;
+
+            if (!DesignMode)
+            {
+                HandleCreated += (s, e) =>
+                {
+                    GaMvcConfig.SysModel.AoiModel.OnLotDataChanged += AoiModel_OnLotDataChanged;
+                };
+            }
+        }
+
+        private void AoiModel_OnLotDataChanged(object sender, EventArgs e)
+        {
+            UpdateLotData();
         }
 
         private void BtnAutoManual_Click(object sender, EventArgs e)
@@ -405,6 +419,7 @@ namespace PhotoMachine.UISpace
             //SetLotID(xRecipe.xLotNoStr);
             SetDuriation("0 s");
         }
+
         public string GetProductBarcode()
         {
             return txtProductBarcode.Text.Trim();
@@ -453,15 +468,32 @@ namespace PhotoMachine.UISpace
             txtProductBarcode.Focus();
         }
 
-        public void SetLotID(string eLot)
+        //public void SetLotID(string eLot)
+        //{
+        //    //txtLotNo.Text = eLot;
+        //}
+        //public void SetStripID(string eStrip)
+        //{
+        //    //txtStripID.Text = eStrip;
+        //}
+        void UpdateLotData()
         {
-            //txtLotNo.Text = eLot;
-        }
-        public void SetStripID(string eStrip)
-        {
-            //txtStripID.Text = eStrip;
+            if (InvokeRequired)
+            {
+                BeginInvoke((Action)UpdateLotData);
+            }
+            else
+            {
+                var plcIO = MACHINE?.PLCIO;
+                if (plcIO != null)
+                {
+                    txtStripID.Text = plcIO.sStripID;
+                    txtLotNo.Text = plcIO.sLotID;
+                }
+            }
         }
 
+        #region SHINING_MESS
         public bool IsShinning
         {
             get
@@ -532,7 +564,6 @@ namespace PhotoMachine.UISpace
                 }
             }
         }
-
         //void ShineGreen()
         //{
         //    USEIO.LEDGreen = true;
@@ -551,6 +582,8 @@ namespace PhotoMachine.UISpace
         //    USEIO.LEDRed = false;
         //    USEIO.LEDYellow = false;
         //}
+        #endregion
+
         public void Tick()
         {
             ShinningTick();
@@ -584,8 +617,9 @@ namespace PhotoMachine.UISpace
                     if (txtStripID.Tag == null)
                     {
                         txtStripID.Tag = "bScanStart";
-                        txtStripID.Text = plcIO.sStripID;
-                        txtLotNo.Text = plcIO.sLotID;
+                        //txtStripID.Text = plcIO.sStripID;
+                        //txtLotNo.Text = plcIO.sLotID;
+                        UpdateLotData();
                     }
                 }
                 else

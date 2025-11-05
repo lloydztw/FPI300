@@ -37,6 +37,7 @@ namespace LaserAlignDX.AoiModel
         public event EventHandler<GaProgressEventArgs> OnAoiBegin;
         public event EventHandler<GaProgressEventArgs> OnAoiEnd;
         public event EventHandler<ProcessEventArgs> OnError;
+        public event EventHandler OnLotDataChanged;
 
         #region NLOG
         NLog.Logger _NLOG => LtDebug.LOG;
@@ -119,7 +120,11 @@ namespace LaserAlignDX.AoiModel
             //get { return m_LotId; }
             //set { m_LotId = value; }
             get => _lotData.LotID;
-            set => _lotData.LotID = value;
+            set
+            {
+                _lotData.LotID = value;
+                OnLotDataChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
         public string StripId
         {

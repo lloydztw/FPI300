@@ -15,6 +15,7 @@ namespace LaserAlignDX.AoiModel
         event EventHandler<GaProgressEventArgs> OnAoiBegin;
         event EventHandler<GaProgressEventArgs> OnAoiEnd;
         event EventHandler<ProcessEventArgs> OnError;
+        event EventHandler OnLotDataChanged;
 
         ScanInspectMode xScanInspectMode { get; set; }
 

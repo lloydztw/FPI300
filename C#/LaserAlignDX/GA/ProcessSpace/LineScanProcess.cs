@@ -285,9 +285,9 @@ namespace TravellerMINIX6.ProcessSpace
                                 pRun.xScanInspectMode = ScanInspectMode.MEASUREAOI;
                             }
 
+                            pRun.FileBarcodeStr = JzTimes.DateTimeSerialString;
                             pRun.StripId = StripID;
                             pRun.LotId = LotID;
-                            pRun.FileBarcodeStr = JzTimes.DateTimeSerialString;
                             _LOG($"StripID:{pRun.StripId}", Color.Black);
                             _LOG($"LotID:{pRun.LotId}", Color.Black);
 

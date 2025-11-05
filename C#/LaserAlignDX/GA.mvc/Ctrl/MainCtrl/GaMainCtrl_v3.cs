@@ -282,19 +282,18 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             else
             {
                 //-----------------------------------------------------------------------
-                // 【模擬】
+                // 【模擬】 (循環自測)
                 //-----------------------------------------------------------------------
                 var selfTestCtrl = GaContinousSelfTestCtrl.Instance;
                 bool isEmpty = !ActiveViewer.HasImage() || selfTestCtrl.IsEmpty();
                 if (isEmpty)
                 {
                     checkPlcStageID(_activeCarrierID);
-                    string fileName = selfTestCtrl.BrowseImageFile();
-                    if (fileName != null)
+
+                    string fileName = selfTestCtrl.BrowseImageFileThenStart();
+                    if (!string.IsNullOrEmpty(fileName))
                     {
                         loadLineScanImage(fileName);
-                        var ret = MessageBox.Show("循環自測: 是否也要包含 飛拍 模擬?", "離線模擬", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                        GaContinousSelfTestCtrl.OPT_SKIP_FLY_AOI = ret == DialogResult.No;
                     }
                 }
 

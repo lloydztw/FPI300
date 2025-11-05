@@ -1179,8 +1179,13 @@ namespace Traveller106
 
             if (!Traveller106.Universal.IsNoUseIO)
             {
-                RUNUI.SetLotID(MACHINE.PLCIO.sLotID);
-                RUNUI.SetStripID(MACHINE.PLCIO.sStripID);
+                //// 每隔 20 ms 不斷的 向 PLC 通訊 !!!
+                //// 重複詢問 LotID 與 StripID
+                //// 不優 !!!
+                
+                //>>> 於 2025-11-06 廢除 !!!
+                //RUNUI.SetLotID(MACHINE.PLCIO.sLotID);
+                //RUNUI.SetStripID(MACHINE.PLCIO.sStripID);
             }
 
 #if OPT_STATION_S2
@@ -1190,9 +1195,9 @@ namespace Traveller106
                                  MACHINECollection.PLCFps());
 #else
             ESSUI.ShowPLC_RxTime(Universal.VersionDate + "_" +
-                                     Universal.OPTION.ToString() + " " +
-                                     JzScanTimeMS.ToString() + "ms " +
-                                     MACHINECollection.PLCFps());
+                                 Universal.OPTION.ToString() + " " +
+                                 JzScanTimeMS.ToString() + "ms " +
+                                 MACHINECollection.PLCFps());
 #endif
 
         }

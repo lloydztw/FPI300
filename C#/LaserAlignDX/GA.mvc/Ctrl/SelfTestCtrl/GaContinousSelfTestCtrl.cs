@@ -18,9 +18,9 @@
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Mvc.Model;
-using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
+using System.Windows.Forms;
 using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace.IOSpace;
 using VsCommon.ControlSpace.MachineSpace;
@@ -32,8 +32,7 @@ namespace LaserAlignDX.Mvc.Ctrl
     /// </summary>
     public partial class GaContinousSelfTestCtrl
     {
-        public static bool OPT_SKIP_FLY_AOI = false;
-
+        public static bool OPT_INCLUDE_FLY_AOI = false;
         string IMG_PATH = "";
 
         #region SINGLETON
@@ -77,15 +76,28 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             return string.IsNullOrEmpty(IMG_PATH);
         }
-        public string BrowseImageFile()
+
+        public string BrowseImageFileThenStart()
         {
+            if (!Traveller106.Universal.IsNoUseCCD)
+                return null;
+
+            var ret = MessageBox.Show("即將進行 循環自測\n\r\n\r是否也要包含 飛拍 模擬?", "離線循環自測", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (DialogResult.Cancel == ret)
+                return null;
+
             string imgFile = GaUtil.BrowseImageFile();
-            if (!string.IsNullOrEmpty(imgFile))
-            {
-                IMG_PATH = System.IO.Path.GetDirectoryName(imgFile);
-            }
+            if (string.IsNullOrEmpty(imgFile))
+                return null;
+
+            IMG_PATH = System.IO.Path.GetDirectoryName(imgFile);
+            OPT_INCLUDE_FLY_AOI = (DialogResult.Yes == ret);
+
+            turn_off_ini_image_savings();
             return imgFile;
         }
+
+        #region PRIVATE_FUNCTIONS
 
         private void init()
         {
@@ -96,13 +108,23 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 var plcIO = MACHINE?.PLCIO;
                 if (plcIO == null || !plcIO.bSoftwareReady)
+                {
+                    // 結束循環自測
+                    end();
                     return;
+                }
 
-                if (!OPT_SKIP_FLY_AOI)
+                if (OPT_INCLUDE_FLY_AOI)
                     ((Action)restartTest_full_processes).BeginInvoke(null, null);
                 else
                     ((Action)restartTest_only_chip_loc).BeginInvoke(null, null);
             };
+        }
+
+        private void end()
+        {
+            IMG_PATH = null;
+            reload_ini_settings();
         }
 
         /// <summary>
@@ -114,17 +136,14 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (getLocatedChipsCount() > 0 &&_aoiModel.xScanInspectMode != ScanInspectMode.NOTRAY)
                 return;
 
-            string[] files = System.IO.Directory.GetFiles(IMG_PATH, "*.jpg");
-            Array.Sort(files);
-            _runCount = (_runCount + 1) % files.Length;
-            string file = files[_runCount];
             System.Threading.Thread.Sleep(1500);
 
-            var bmp = GaImageUtil.LoadBigImage(file);
-            var srcName = System.IO.Path.GetFileNameWithoutExtension(file);
-            _sysModel.LineScanImageHolder.TakeOver(bmp, srcName);
+            // 無限循環
+            bool go = loadNextImageToModel(out int id, circulate: true);
+            if (!go)
+                return;
 
-            var plcIO = MACHINE.PLCIO;
+            var plcIO = MACHINE.PLCIO as MainFPIX3IOSim;
             if (plcIO != null)
             {
                 plcIO.bSoftwareReady = false;
@@ -143,35 +162,80 @@ namespace LaserAlignDX.Mvc.Ctrl
             System.Threading.Thread.Sleep(500);
 
             var plcIO = MACHINE?.PLCIO as MainFPIX3IOSim;
-            plcIO.bScanStart = false;
-            plcIO.bFlyReady = false;
+            if (plcIO != null)
+            {
+                plcIO.bScanStart = false;
+                plcIO.bFlyReady = false;
+            }
 
             var process = LineScanProcess.Instance;
             process.Stop();
 
-            string[] files = System.IO.Directory.GetFiles(IMG_PATH, "*.jpg");
-            Array.Sort(files);
-            if (++_runCount >= files.Length)
+            // 跑完最後檔案後, 會自動停止
+            bool go = loadNextImageToModel(out int id, circulate: false);
+            if (!go)
             {
-                // 自動終止.
-                _runCount = 0;
+                plcIO.bSoftwareReady = false;
+                end();
                 return;
             }
-
-            string file = files[_runCount];
-            var bmp = GaImageUtil.LoadBigImage(file);
-            var srcName = System.IO.Path.GetFileNameWithoutExtension(file);
-            _sysModel.LineScanImageHolder.TakeOver(bmp, srcName);
 
             if (plcIO != null)
             {
                 plcIO.iScanStatus = 0;
                 plcIO.bScanStart = false;
                 plcIO.bFlyReady = false;
-                plcIO.sStripID = srcName.Split('.')[0].Trim();
+                plcIO.sLotID = $"Lot_SIM_{id:000}";
+                plcIO.sStripID = $"Strip_SIM_{id:000}";
             }
 
             process.Start();
+        }
+
+        private bool loadNextImageToModel(out int index, bool circulate)
+        {
+            bool go = getNextImgFileName(out string fileName, out index, out int totalNumber, circulate);
+            if (go)
+            {
+                var bmp = GaImageUtil.LoadBigImage(fileName);
+                var srcName = System.IO.Path.GetFileNameWithoutExtension(fileName);
+                _sysModel.LineScanImageHolder.TakeOver(bmp, srcName + $" ({index}/{totalNumber})");
+            }
+            return go;
+        }
+
+        private bool getNextImgFileName(out string imgFileName, out int index, out int totalNumber, bool circulate)
+        {
+            string[] files = System.IO.Directory.GetFiles(IMG_PATH, "*.jpg");
+            Array.Sort(files);
+            totalNumber = files.Length;
+
+            if (totalNumber == 0)
+            {
+                imgFileName = null;
+                index = 0;
+                return false;
+            }
+
+            index = ++_runCount;
+
+            if (index >= totalNumber)
+            {
+                if (!circulate)
+                {
+                    // 自動終止.
+                    index = _runCount = 0;
+                    imgFileName = null;
+                    return false;
+                }
+                else
+                {
+                    index = _runCount = 0;
+                }
+            }
+
+            imgFileName = files[index];
+            return true;
         }
         
         private int getLocatedChipsCount()
@@ -188,5 +252,22 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             return count;
         }
+
+        private void turn_off_ini_image_savings()
+        {
+            var ini = Traveller106.INI.Instance;
+            ini.IsSaveDebugBMP = false;
+            ini.IsSaveDebugOrgBmp = false;
+            ini.IsSaveStripImage = false;
+            ini.IsSaveTestImage = false;
+        }
+
+        private void reload_ini_settings()
+        {
+            var ini = Traveller106.INI.Instance;
+            ini.Load();
+        }
+
+        #endregion
     }
 }
