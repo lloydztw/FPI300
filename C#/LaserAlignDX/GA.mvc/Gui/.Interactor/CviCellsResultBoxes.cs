@@ -871,6 +871,18 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     sb.AppendLine($"Angle = {cell.RunAngle:0.00}°");
                     #endregion
 
+                    if (_xRecipe.InspectParams.optTiltDetectEnabled)
+                    {
+                        #region 傾斜(踩腳)
+                        var chipCoords = cell?.ChipData?.ChipCoords;
+                        if (chipCoords != null)
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine($"傾斜(踩腳)程度 = {chipCoords.TiltRatio:0.000}");
+                        }
+                        #endregion
+                    }
+
                     if (_xRecipe.InspectParams.optChipMeasurement)
                     {
                         #region 尺寸量測結果

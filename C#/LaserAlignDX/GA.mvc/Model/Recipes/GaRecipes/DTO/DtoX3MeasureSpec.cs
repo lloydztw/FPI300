@@ -56,6 +56,11 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         // 尺寸與瑕疵檢測進階選項量: 整盤 NG 百分比
         public float TotalNgPercentage = 5.0f;
 
+        // 傾斜(踩腳) 偵測 啟用
+        public bool optTiltDetectEnabled = false;
+        // 傾斜(踩腳) 門限值
+        public float TiltRatioThres = 0.12f;
+
         // 尺寸宽度 spec (mm)
         public readonly DtoSpecValue StandardWidth = new DtoSpecValue(9.0f, 0.050f, 0.050f);
         public readonly DtoSpecValue StandardHeight = new DtoSpecValue(9.9f, 0.050f, 0.050f);
@@ -79,6 +84,9 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             Read(iniFileName, sectName, "optShowIndividualNG", true, out optShowIndividualNG);
             Read(iniFileName, sectName, "TotalNgPercentage", 5.0f, out TotalNgPercentage);
 
+            Read(iniFileName, sectName, "optTiltDetectEnabled", false, out optTiltDetectEnabled);
+            Read(iniFileName, sectName, "TiltRatioThres", 0.12f, out TiltRatioThres);
+
             StandardWidth.Load(iniFileName, sectName, "StandardWidth");
             StandardHeight.Load(iniFileName, sectName, "StandardHeight");
             PadEdgeGapX.Load(iniFileName, sectName, "PadEdgeGapX");
@@ -93,10 +101,13 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             Write(iniFileName, sectName, "optChipMeasurement", optChipMeasurement);
             Write(iniFileName, sectName, "optPadEdgeGapsMeasurement", optPadEdgeGapsMeasurement);
             Write(iniFileName, sectName, "optChipDefectsInspect", optChipDefectsInspect);
+
             Write(iniFileName, sectName, "optUseTotalNgPercentage", optUseTotalNgPercentage);
             Write(iniFileName, sectName, "optShowIndividualNG", optShowIndividualNG);
-
             Write(iniFileName, sectName, "TotalNgPercentage", TotalNgPercentage);
+
+            Write(iniFileName, sectName, "optTiltDetectEnabled", optTiltDetectEnabled);
+            Write(iniFileName, sectName, "TiltRatioThres", TiltRatioThres);
 
             StandardWidth.Save(iniFileName, sectName, "StandardWidth");
             StandardHeight.Save(iniFileName, sectName, "StandardHeight");

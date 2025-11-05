@@ -17,6 +17,7 @@
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.OpenCV;
+using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
@@ -676,6 +677,8 @@ namespace LaserAlignDX.AoiModel.V3
                     }
                 }
 
+                ok = ok && _CheckTiltRatio(chipData);
+
                 //(7) 設定 Inspect Result Code
                 if (!ok)
                 {
@@ -716,7 +719,7 @@ namespace LaserAlignDX.AoiModel.V3
                 chipData.PadsGrid = padsGrid;
                 chipData.ChipQuad2D = chipQuad;
                 chipData.GoldenQuad2D = chipMatcher.GoldenQuad2D?.Clone();
-
+                
                 //(4) DEBUG data
                 chipData.DebugRigidBodyData = chipMatcher.GetResultDetails();
             }
@@ -724,6 +727,93 @@ namespace LaserAlignDX.AoiModel.V3
             return ok;
         }
 
+        /// <summary>
+        /// 傾斜程度 (晶粒踩腳)
+        /// </summary>
+        bool _CheckTiltRatio(GaChipData chipData)
+        {
+            if (!_xRecipe.InspectParams.optTiltDetectEnabled)
+                return true;
+
+            if (chipData == null)
+                return false;
+
+            double tiltRatio = 0.0;
+
+            var chipQuad = chipData.ChipQuad2D;
+            var goldenQuad = chipData.GoldenQuad2D;
+            if (chipQuad != null && goldenQuad != null)
+            {
+                int NP = 4;
+                bool hasFullCorners = true;
+                for (int i = 0; i < NP; i++)
+                {
+                    if (chipQuad.Corners[i] == null || goldenQuad.Corners[i] == null)
+                    {
+                        hasFullCorners = false;
+                        break;
+                    }
+                }
+                if (hasFullCorners)
+                {
+                    chipQuad.GetMidSize(out var chipSize, 1);
+                    goldenQuad.GetMidSize(out var goldenSize, 1);
+                    if (goldenSize.Width > 2 && goldenSize.Height > 2)
+                    {
+                        var ratioU = chipSize.Width / goldenSize.Width;
+                        var ratioV = chipSize.Height / goldenSize.Height;
+                        var ratioMin = Math.Min(ratioU, ratioV);
+                        var ratioMax = Math.Max(ratioU, ratioV);
+
+                        var ratio = ratioMin / (ratioMax + 1e-6);
+                        ratio = Math.Min(ratio, 1f);
+                        tiltRatio = 1 - ratio;
+                    }
+                }
+                else
+                {
+                    double ratioMin = double.MaxValue;
+                    double ratioMax = 0.0;
+                    int count = 0;
+                    for (int i = 0; i < NP; i++)
+                    {
+                        int j = (i + 1) % NP;
+                        var C1 = chipQuad.Corners[i];
+                        var C2 = chipQuad.Corners[j];
+                        var G1 = goldenQuad.Corners[i];
+                        var G2 = goldenQuad.Corners[j];
+                        if (C1 == null || C2 == null || G1 == null || G2 == null)
+                            continue;
+
+                        var runLen = (C1 - C2).NormLength;
+                        var goldenLen = (G1 - G2).NormLength;
+                        if (goldenLen < 3) // 小於 3 pixels
+                            continue;
+
+                        var ratio = runLen / goldenLen;
+                        ratioMin = Math.Min(ratioMin, ratio);
+                        ratioMax = Math.Max(ratioMax, ratio);
+                        count++;
+                    }
+
+                    if (count > 0)
+                    {
+                        var ratio = ratioMin / (ratioMax + 1e-6);
+                        ratio = Math.Min(ratio, 1f);
+                        tiltRatio = 1 - ratio;
+                    }
+                }
+            }
+            
+            chipData.ChipCoords.TiltRatio = (float)tiltRatio;
+
+            bool ok = tiltRatio <= _xRecipe.InspectParams.xTiltRatioThres;
+            return ok;
+        }
+
+        /// <summary>
+        /// 計算平面旋轉角度
+        /// </summary>
         double _CalcAngle(GaChipData chipData)
         {
             var padsGrid = chipData.PadsGrid;

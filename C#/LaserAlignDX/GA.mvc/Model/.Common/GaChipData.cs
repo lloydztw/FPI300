@@ -99,6 +99,10 @@ namespace LaserAlignDX.Model
         /// 旋轉角度 (單位 degree) (world coordinates)
         /// </summary>
         public float Angle { get; set; } = 0;
+        /// <summary>
+        /// 傾斜程度 (晶粒踩腳嚴重程度 0.0 ~ 1.0)
+        /// </summary>
+        public float TiltRatio { get; set; } = 0;
     }
 
 

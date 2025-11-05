@@ -1568,6 +1568,26 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             get => _spec.optShowIndividualNG;
             set => _spec.optShowIndividualNG = value;
         }
+
+        [CategoryAttribute(_Cat02), DescriptionAttribute("")]
+        [DisplayName("04 傾斜(踩腳) 偵測 啟用")]
+        [Browsable(true)]
+        public bool optTiltDetectEnabled 
+        {
+            get => _spec.optTiltDetectEnabled;
+            set => _spec.optTiltDetectEnabled = value;
+        }
+
+        [CategoryAttribute(_Cat02), DescriptionAttribute("比重值 0.000 ~ 1.000")]
+        [DisplayName("05 傾斜(踩腳) 門限值")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 3)]
+        [Browsable(true)]
+        public float xTiltRatioThres
+        {
+            get => _spec.TiltRatioThres;
+            set => _spec.TiltRatioThres = value;
+        }
         #endregion
 
 
@@ -1628,6 +1648,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 1f, 0)]
         [Browsable(true)]
         public int xMaxOverlap { get; set; } = 80;
+
+
         #endregion
 
 
