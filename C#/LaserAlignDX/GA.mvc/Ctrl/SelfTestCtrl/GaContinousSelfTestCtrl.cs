@@ -199,7 +199,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 var bmp = GaImageUtil.LoadBigImage(fileName);
                 var srcName = System.IO.Path.GetFileNameWithoutExtension(fileName);
-                _sysModel.LineScanImageHolder.TakeOver(bmp, srcName + $" ({index}/{totalNumber})");
+                _sysModel.LineScanImageHolder.TakeOver(bmp, srcName + $" ({index+1}/{totalNumber})");
             }
             return go;
         }

@@ -324,7 +324,7 @@ namespace LeTian.AoiLib
             if (PadThreshold <= 0)
                 Cv2.Threshold(img, imgOut, 0, 255, ThresholdTypes.Otsu);
             else
-                Cv2.Threshold(img, imgOut, 200, 255, ThresholdTypes.Binary);
+                Cv2.Threshold(img, imgOut, PadThreshold, 255, ThresholdTypes.Binary);
         }
         void applyDistTransFilter(Mat binaryImg, Mat imgOut, double thres)
         {

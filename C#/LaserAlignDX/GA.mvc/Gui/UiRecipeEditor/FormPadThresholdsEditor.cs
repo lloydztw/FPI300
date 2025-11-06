@@ -57,11 +57,13 @@ namespace LaserAlignDX.Mvc.Gui
                 numBinaryThreshold.ValueChanged += NumBinaryThreshold_ValueChanged;
                 numDistTransThreshold.ValueChanged += NumBinaryThreshold_ValueChanged;
 
-                FormClosed += (s, e) => disposeImages();
+                FormClosed += FormPadThresholdsEditor_FormClosed;
                 Load += (s, e) => tryApplyFilters();
                 _isModified = false;
             }
         }
+
+
 
         public void SetSrcImage(Bitmap srcBmp, bool disposeSrc)
         {
@@ -85,11 +87,13 @@ namespace LaserAlignDX.Mvc.Gui
         }
         private void BtnOK_Click(object sender, EventArgs e)
         {
-            if (_isModified)
-                _xRecipe.Save();
-
             this.DialogResult = DialogResult.OK;
+            commit();
             Close();
+        }
+        private void FormPadThresholdsEditor_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            rollback();
         }
         #endregion
 
@@ -125,6 +129,22 @@ namespace LaserAlignDX.Mvc.Gui
             filter.TryApplyFilters(_imgOrg, _imgBinary);
 
             jezTransImageViewPanel1.MatViewer.Image = _imgBinary;
+        }
+        void commit()
+        {
+            if (_isModified)
+            {
+                _xRecipe.Save();
+                _isModified = false;
+            }
+        }
+        void rollback()
+        {
+            if (_isModified)
+            {
+                _xRecipe.Load();
+                _isModified = false;
+            }
         }
         void disposeImages()
         {
