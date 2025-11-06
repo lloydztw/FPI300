@@ -15,10 +15,10 @@
 
 
 using JetEazy.Utils;
+using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
@@ -102,7 +102,7 @@ namespace LaserAlignDX.AoiModel.V3
         void initSubModels()
         {
             var subModels = new AoiModelBase[] { _aoiChipLoc, _aoiChipMeasure, _aoiEmptyTray };
-            foreach(var subModel in subModels)
+            foreach (var subModel in subModels)
             {
                 //model.OnAoiBegin+=
                 subModel.OnAoiProgressing += SubModel_OnAoiProgressing;
@@ -157,39 +157,46 @@ namespace LaserAlignDX.AoiModel.V3
         /// <returns>ARRAY[0..299] OF INT PC->PLC 单颗结果, 1:OK 2:外观NG, 3:空, 4:读码NG, 9:切割NG </returns>
         public int[] GetSingleResult()
         {
-            //PC->PLC 单颗结果, 1-Ok, 2-外观Ng, 3-空, 4-读码NG, 8-切割偏移NG, 9-切割NG
+            #region OLD_CODE
+            ////PC->PLC 单颗结果, 1-Ok, 2-外观Ng, 3-空, 4-读码NG, 8-切割偏移NG, 9-切割NG
+
+            //bool optUsePercentage = _xRecipe.InspectParams.optUseTotalNgPercentage && _xRecipe.InspectParams.optChipMeasurement;
+            //bool forceAllPass = (optUsePercentage && xScanInspectMode != ScanInspectMode.NOTRAY && IsPass);
+
+            //int[] states = new int[_xRecipe.xRegionCells.Count];
+            //int i = 0;
+            //foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
+            //{
+            //    if (forceAllPass)
+            //    {
+            //        bool isEmpty = cell == null || !cell.IsLocated();
+            //        states[i] = isEmpty ? 3 : 1;
+            //    }
+            //    else
+            //    {
+            //        if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+            //            states[i] = 1;
+            //        else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
+            //            states[i] = 3;
+            //        else if (cell.inspectReason == InspectReason.INS_2DERR || cell.inspectReason == InspectReason.INS_2DMAPNG)
+            //            states[i] = 4;
+            //        else if (cell.inspectReason == InspectReason.INS_CUTTINGERR)
+            //            states[i] = 9;
+            //        else if (cell.inspectReason == InspectReason.INS_PADEDGEGAPERR)
+            //            states[i] = 8;
+            //        else
+            //            states[i] = 2;
+            //    }
+            //    i++;
+            //}
+
+            //return states;
+            #endregion
 
             bool optUsePercentage = _xRecipe.InspectParams.optUseTotalNgPercentage && _xRecipe.InspectParams.optChipMeasurement;
-            bool forceAllPass = (optUsePercentage && xScanInspectMode != ScanInspectMode.NOTRAY && IsPass);
+            bool forceAllPass = (optUsePercentage && xScanInspectMode != ScanInspectMode.NOTRAY && this.IsPass);
 
-            int[] states = new int[_xRecipe.xRegionCells.Count];
-            int i = 0;
-            foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
-            {
-                if (forceAllPass)
-                {
-                    bool isEmpty = cell == null || cell.IsEmpty();
-                    states[i] = isEmpty ? 3 : 1;
-                }
-                else
-                {
-                    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-                        states[i] = 1;
-                    else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
-                        states[i] = 3;
-                    else if (cell.inspectReason == InspectReason.INS_2DERR || cell.inspectReason == InspectReason.INS_2DMAPNG)
-                        states[i] = 4;
-                    else if (cell.inspectReason == InspectReason.INS_CUTTINGERR)
-                        states[i] = 9;
-                    else if (cell.inspectReason == InspectReason.INS_PADEDGEGAPERR)
-                        states[i] = 8;
-                    else
-                        states[i] = 2;
-                }
-                i++;
-            }
-
-            return states;
+            return GaPlcDataPacker.GetSingleResult(forceAllPass);
         }
         /// <summary>
         /// 单颗产品的读码比对结果(预留300个) 视觉软件需要将读码结果保存在本地或服务器
@@ -197,25 +204,29 @@ namespace LaserAlignDX.AoiModel.V3
         /// <returns>ARRAY[0..299] OF INT PC->PLC 读码结果, 1:OK, 2:比对NG, 3:空, 4:有码未读到</returns>
         public int[] GetQrResult()
         {
-            //PC->PLC 读码结果,1-Ok,2-比对Ng,3-空,4-有码未读到
+            #region OLD_CODE
+            ////PC->PLC 读码结果,1-Ok,2-比对Ng,3-空,4-有码未读到
 
-            int[] states = new int[_xRecipe.xRegionCells.Count];
-            int i = 0;
-            foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
-            {
-                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-                    states[i] = 1;
-                else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
-                    states[i] = 3;
-                else if (cell.inspectReason == InspectReason.INS_2DERR)
-                    states[i] = 4;
-                else if (cell.inspectReason == InspectReason.INS_2DMAPNG)
-                    states[i] = 2;
-                else
-                    states[i] = 1;
-                i++;
-            }
-            return states;
+            //int[] states = new int[_xRecipe.xRegionCells.Count];
+            //int i = 0;
+            //foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
+            //{
+            //    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+            //        states[i] = 1;
+            //    else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
+            //        states[i] = 3;
+            //    else if (cell.inspectReason == InspectReason.INS_2DERR)
+            //        states[i] = 4;
+            //    else if (cell.inspectReason == InspectReason.INS_2DMAPNG)
+            //        states[i] = 2;
+            //    else
+            //        states[i] = 1;
+            //    i++;
+            //}
+            //return states;
+            #endregion
+
+            return GaPlcDataPacker.GetQrResult();
         }
         /// <summary>
         /// 单颗产品的偏移值([0]-X,[1]-Y,[2]-R，[3]-X,[4]-Y,[5]-R…依次共300个) 线扫引导功能启用时PLC需要用到这些值
@@ -223,40 +234,44 @@ namespace LaserAlignDX.AoiModel.V3
         /// <returns>ARRAY[0..899] OF REAL PC->PLC 线扫偏移值XYR</returns>
         public float[] GetScanOffset()
         {
-            //PC->PLC 线扫偏移值XYR
-            //单颗产品的偏移值([0]-X,[1]-Y,[2]-R，[3]-X,[4]-Y,[5]-R…依次共300个)
+            #region OLD_CODE
+            ////PC->PLC 线扫偏移值XYR
+            ////单颗产品的偏移值([0]-X,[1]-Y,[2]-R，[3]-X,[4]-Y,[5]-R…依次共300个)
 
-            float[] states = new float[_xRecipe.xRegionCells.Count * 3];
-            int i = 0;
-            foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
-            {
-                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-                {
-                    states[i] = cell.RunX;
-                    states[i + 1] = cell.RunY;
-                    states[i + 2] = cell.RunAngle;
-                }
-                else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
-                {
-                    states[i] = 0;
-                    states[i + 1] = 0;
-                    states[i + 2] = 0;
+            //float[] states = new float[_xRecipe.xRegionCells.Count * 3];
+            //int i = 0;
+            //foreach (RegionCellX3Class cell in IterResultCells(_xRecipe.xRegionCells))
+            //{
+            //    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+            //    {
+            //        states[i] = cell.RunX;
+            //        states[i + 1] = cell.RunY;
+            //        states[i + 2] = cell.RunAngle;
+            //    }
+            //    else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
+            //    {
+            //        states[i] = 0;
+            //        states[i + 1] = 0;
+            //        states[i + 2] = 0;
 
-                }
-                else
-                {
-                    states[i] = cell.RunX;
-                    states[i + 1] = cell.RunY;
-                    states[i + 2] = cell.RunAngle;
+            //    }
+            //    else
+            //    {
+            //        states[i] = cell.RunX;
+            //        states[i + 1] = cell.RunY;
+            //        states[i + 2] = cell.RunAngle;
 
-                }
-                i += 3;
-            }
-            return states;
+            //    }
+            //    i += 3;
+            //}
+            //return states;
+            #endregion
+
+            return GaPlcDataPacker.GetScanOffset();
         }
         #endregion
 
-        public ErrCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi)    
+        public ErrCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi)
         {
             //(1) 晶粒定位
             //      chipData.Roi = cellRoi;
@@ -272,7 +287,7 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 return ErrCodes.ERR_NO_CHIP_PADS;
             }
-            
+
             //(3) 建立 Micro Transform
             var carrierID = getActiveCarrierID();
             var microTrf = _sysModel.GetMicroTransform(carrierID);
@@ -320,7 +335,7 @@ namespace LaserAlignDX.AoiModel.V3
             #region 把 LotID 與 StripID 設定給 SubAoiModel
             _aoiChipLoc.LotData = this.LotData;
             _aoiChipMeasure.LotData = this.LotData;
-            _aoiEmptyTray.LotData= this.LotData;
+            _aoiEmptyTray.LotData = this.LotData;
             #endregion
 
             ThreadStart runFunc;
@@ -431,10 +446,13 @@ namespace LaserAlignDX.AoiModel.V3
         }
         #endregion
 
+        #region OLD_CODE
+#if (OPT_REMOVED_TO_GaPlcDataPacker)
         internal IEnumerable<RegionCellX3Class> IterResultCells(IEnumerable<RegionCellX3Class> cells = null)
         {
             if (cells == null)
                 cells = _xRecipe.xRegionCells;
+
             foreach (var cell in cells)
             {
                 var outGridCell = cell?.OutGridLink;
@@ -444,5 +462,7 @@ namespace LaserAlignDX.AoiModel.V3
                     yield return cell;
             }
         }
+#endif
+        #endregion
     }
 }

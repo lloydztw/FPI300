@@ -74,12 +74,8 @@ namespace LaserAlignDX.OPSpace
         public string lblName = "";
         public int CellRow = 0;
         public int CellCol = 0;
-        public bool ByPass = false;
+        public bool ByPass { get; set; } = false;
 
-        public bool IsEmpty()
-        {
-            return ChipData == null || ChipData.IsEmpty();
-        }
         /// <summary>
         /// ROI (FullFov Camera Coordinates) (單位 pixel)
         /// </summary>
@@ -94,7 +90,19 @@ namespace LaserAlignDX.OPSpace
         /// </summary>
         public RegionCellX3Class OutGridLink { get; set; } = null;
 
+        /// <summary>
+        /// 是否已經定位
+        /// </summary>
+        public bool IsLocated()
+        {
+            return ChipData != null && ChipData.ChipQuad2D != null;
+        }
+        public bool IsEmpty()
+        {
+            return !IsLocated();
+        }
 
+        #region PUBLIC_CACHE_PROPERTIES
         /// <summary>
         /// 理想 格位中心座標 X (單位 mm)
         /// </summary>
@@ -123,7 +131,6 @@ namespace LaserAlignDX.OPSpace
         /// 推算馬達座標: 吸嘴排2 (單位 mm)
         /// </summary>
         public PointF Sur2 = new PointF();
-
         /// <summary>
         /// 测量结果: 晶粒宽度 (單位 mm)
         /// </summary>
@@ -140,6 +147,7 @@ namespace LaserAlignDX.OPSpace
             get => ChipData.ChipDimension.ChipHeight;
             set => ChipData.ChipDimension.ChipHeight = value;
         }
+        #endregion
 
         #region OLD_CODE
 #if (false)
@@ -178,7 +186,13 @@ namespace LaserAlignDX.OPSpace
         //>>> private AUVision.xFindResult xFindResult = new AUVision.xFindResult();
         #endregion
 
+        /// <summary>
+        /// 總和檢測結果
+        /// </summary>
         public InspectReason inspectReason = InspectReason.PASS;
+        /// <summary>
+        /// 檢測歷程
+        /// </summary>
         public List<InspectReason> inspectReasons = new List<InspectReason>();
 
         #region MVD_LINE_SEGMENTS

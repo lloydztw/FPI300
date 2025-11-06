@@ -16,7 +16,6 @@
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.OpenCV;
 using JetEazy.Utils;
-using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using OpenCvSharp;
@@ -24,7 +23,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Controls;
 using Size = System.Drawing.Size;
 
 
@@ -54,8 +52,7 @@ namespace LaserAlignDX.AoiModel
             CellBmp = cellBmp;
             CellRoi = roi;
         }
-
-        public void CopyFrom(GaCell src)
+        public void TakeOver(GaCell src)
         {
             if (this != src && src != null)
             {
@@ -67,7 +64,6 @@ namespace LaserAlignDX.AoiModel
                     oldBmp?.Dispose();
             }
         }
-
         public void Dispose()
         {
             CellBmp?.Dispose();
@@ -130,6 +126,8 @@ namespace LaserAlignDX.AoiModel
                     return CollectGroups_on_grid(N, xRecipe, fullFovBmp, preEmptyResult);
             }
         }
+
+        #region PRIVATE_COLLECT_FUNCTIONS
         static GaCellsGroup[] CollectGroups_000_spanY(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp)
         {
             float x_min = float.MaxValue;
@@ -240,7 +238,7 @@ namespace LaserAlignDX.AoiModel
         static GaCellsGroup[] CollectGroups_out_grid(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult)
         {
             if (preEmptyResult == null)
-                return new GaCellsGroup[0];
+                return null;
 
             SizeF cellViewSizeF = SizeF.Empty;
 
@@ -256,10 +254,11 @@ namespace LaserAlignDX.AoiModel
             #endregion
 
             if (cellViewSizeF == SizeF.Empty)
-                return new GaCellsGroup[0];
+                return null;
 
             var outGridCells = new List<RegionCellX3Class>();
             var boundaryPolygonPts = getCellsBoundRotRect(xRecipe).Points();
+
             foreach (var bloc in preEmptyResult.IterOutGridAbnormalBlocs())
             {
                 if (bloc == null) continue;
@@ -276,9 +275,17 @@ namespace LaserAlignDX.AoiModel
                 cell.viewRectF = JetEazy.Qcvt.CreateCenterRect(centerPt.X, centerPt.Y, ref cellViewSizeF);
                 outGridCells.Add(cell);
             }
+            if (outGridCells.Count == 0)
+                return null;
 
-            var groups = CollectGroups_simple(N, outGridCells, fullFovBmp, new Size(xRecipe.xExtendx, xRecipe.xExtendy));
-            return groups;
+            using (var fullFovBmp2 = (Bitmap)fullFovBmp.Clone())
+            {
+                //(1) 把已經定位到的晶粒塗成平均色
+                FillOutLocatedChips(fullFovBmp2, xRecipe);
+                //(2) 分配多線呈的群組
+                var groups = CollectGroups_simple(N, outGridCells, fullFovBmp2, new Size(xRecipe.xExtendx, xRecipe.xExtendy));
+                return groups;
+            }
         }
         static GaCellsGroup[] CollectGroups_boundary_cells(int N, RecipeFPIX3Class xRecipe, Bitmap fullFovBmp, EzEmptyTrayResult preEmptyResult)
         {
@@ -303,8 +310,8 @@ namespace LaserAlignDX.AoiModel
                 //>>> System.Diagnostics.Debug.WriteLine("Boundary [{0},{1}]", r, c);
 
                 //(c) 排除已經定位之晶粒
+                if (cell.IsLocated()) continue;                                     // 已經被佔位
                 if (cell.OutGridLink != null) continue;                             // 已經被佔位
-                if (cell.ChipData != null && !cell.ChipData.IsEmpty()) continue;    // 已經被佔位
 
                 //(e) 排除空格
                 preEmptyResult.GetBlocByRowCol(r, c, out var _, out bool isSukcer);
@@ -320,27 +327,7 @@ namespace LaserAlignDX.AoiModel
             using (var fullFovBmp2 = (Bitmap)fullFovBmp.Clone())
             {
                 //(1) 把已經定位到的晶粒塗成平均色
-                using (var bridge = new QxImageBridge(fullFovBmp2))
-                {
-                    var imgFullfov = bridge.Image;
-
-                    var sz = Math.Min(imgFullfov.Width, imgFullfov.Height);
-                    var roi = new Rect(0, 0, sz / 4, sz / 4);
-                    JetEazy.Qcvt.SetCenter(ref roi, imgFullfov.Width / 2, imgFullfov.Height / 2);
-                    Scalar mean = imgFullfov[roi].Mean();
-
-                    foreach (var xCell in xRecipe.xRegionCells)
-                    {
-                        var cell = xCell?.OutGridLink;
-                        if (cell == null) cell = xCell;
-
-                        var chipQuad2D = cell?.ChipData?.ChipQuad2D;
-                        if (chipQuad2D == null) continue;
-
-                        var pts = Array.ConvertAll(chipQuad2D.Corners, c => new OpenCvSharp.Point((int)c.X, (int)c.Y));
-                        Cv2.FillConvexPoly(imgFullfov, pts, mean);
-                    }
-                }
+                FillOutLocatedChips(fullFovBmp2, xRecipe);
 
                 //(2) 重新設定 collects
                 for (int i = 0, count = collects.Count; i < count; i++)
@@ -393,6 +380,35 @@ namespace LaserAlignDX.AoiModel
         }
 
         /// <summary>
+        /// 把已經 定位到的晶粒 塗成 平均色
+        /// </summary>
+        static void FillOutLocatedChips(Bitmap fullFovBmp2, RecipeFPIX3Class xRecipe)
+        {
+            using (var bridge = new QxImageBridge(fullFovBmp2))
+            {
+                var imgFullfov = bridge.Image;
+
+                // 計算 中央區塊 的平均色
+                var sz = Math.Min(imgFullfov.Width, imgFullfov.Height);
+                var roi = new Rect(0, 0, sz / 4, sz / 4);
+                JetEazy.Qcvt.SetCenter(ref roi, imgFullfov.Width / 2, imgFullfov.Height / 2);
+                Scalar mean = imgFullfov[roi].Mean();
+
+                // 枚舉 已經定位 的 晶粒
+                foreach (var cell in xRecipe.xRegionCells)
+                {
+                    var xCell = cell?.OutGridLink;
+                    if (xCell == null) xCell = cell;
+
+                    var chipQuad2D = xCell?.ChipData?.ChipQuad2D;
+                    if (chipQuad2D == null) continue;
+
+                    var pts = Array.ConvertAll(chipQuad2D.Corners, c => new OpenCvSharp.Point((int)c.X, (int)c.Y));
+                    Cv2.FillConvexPoly(imgFullfov, pts, mean);
+                }
+            }
+        }
+        /// <summary>
         /// 取得 所有 xRecipe.xRegionCells 形成的邊界範圍 
         /// </summary>
         static RotatedRect getCellsBoundRotRect(RecipeFPIX3Class xRecipe)
@@ -441,6 +457,7 @@ namespace LaserAlignDX.AoiModel
             }
             return Cv2.MinAreaRect(points);
         }
+        #endregion
 
         /// <summary>
         /// 釋放資源

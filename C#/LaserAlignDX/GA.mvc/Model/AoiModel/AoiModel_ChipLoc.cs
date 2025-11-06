@@ -30,6 +30,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -119,11 +120,11 @@ namespace LaserAlignDX.AoiModel.V3
                 _RunChipsLocate(bmpFullfov, imgLogPath, out string debugCellCenterStr);
                 _TM.Trace("_Inspect001 : 晶粒定位 & 量測 完成!");
 
-                //(7) 晶粒定位 (偏離格位外)
-                _RunChipsLocateOutGrid(bmpFullfov, imgLogPath);
-
-                //(8) 晶粒定位 (位於邊界模擬兩可之處)
+                //(7) 晶粒定位 (位於邊界模擬兩可之處)
                 _RunChipsLocateOnBoundary(bmpFullfov, imgLogPath);
+
+                //(8) 晶粒定位 (偏離格位外)
+                _RunChipsLocateOutGrid(bmpFullfov, imgLogPath);
 
                 //(9) 異步輸出 Debug 數據
                 markFileTimeTag();
@@ -247,6 +248,8 @@ namespace LaserAlignDX.AoiModel.V3
             //(1) 蒐集 GaCellsGroups
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
             var outGridGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "OUT_GRID");
+            if (outGridGroups == null || outGridGroups.Length == 0)
+                return;
 
             //(2) 定位
             if (!usingMultiThread)
@@ -420,50 +423,66 @@ namespace LaserAlignDX.AoiModel.V3
         {
             if (outGridGroups != null && outGridGroups.Length > 0)
             {
-                var outGridGroupsList = new List<GaCellsGroup>(outGridGroups);
-                var outGridCells = new List<RegionCellX3Class>();
-                outGridGroupsList.RemoveAll(grp =>
-                {
-                    bool hasData = false;
-                    foreach (var gcell in grp)
-                    {
-                        var cell = gcell?.Cell;
-                        var chipData = cell?.ChipData;
-                        if (chipData != null && !chipData.IsEmpty())
-                        {
-                            hasData = true;
-                            chipData.IsOutGrid = true;
-                            outGridCells.Add(cell);
-                        }
-                        else
-                        {
-                            gcell?.Dispose();
-                        }
-                    }
-                    return !hasData;
-                });
+                //var outGridGroupsList = new List<GaCellsGroup>(outGridGroups);
+                //var outGridCells = new List<RegionCellX3Class>();
+                //outGridGroupsList.RemoveAll(grp =>
+                //{
+                //    bool hasAnyData = false;
+                //    foreach (var gcell in grp)
+                //    {
+                //        var cell = gcell?.Cell;
+                //        if (cell != null && cell.IsLocated())
+                //        {
+                //            hasAnyData = true;
+                //            cell.ChipData.IsOutGrid = true;
+                //            outGridCells.Add(cell);
+                //        }
+                //        else
+                //        {
+                //            gcell?.Dispose();
+                //        }
+                //    }
+                //    return !hasAnyData;
+                //});
 
-                // 找到最接近的 row, col
-                if (outGridCells.Count > 0)
+                //(1) 只留存 定位成功 的 晶粒
+                _ScanLocatedCells(ref outGridGroups, out var outGridCells, markAsOutgrid: true);
+
+                //(2) 找到最接近的 [row, col] 空格位, 進行 LINK
+                if (outGridCells.Length > 0)
                 {
                     var onGridCells = _xRecipe.xRegionCells;
+
                     foreach(var ogCell in outGridCells)
                     {
                         if (ogCell == null) continue;
 
                         RegionCellX3Class bestPlaceHold = null;
-                        var ogCenter = JetEazy.Qcvt.CenterF(ref ogCell.viewRectF);
+                        var quadCenter = ogCell?.ChipData?.ChipQuad2D?.Center;
+                        var ogCenter = quadCenter != null ? 
+                                       new PointF((float)quadCenter.X, (float)quadCenter.Y) :
+                                       JetEazy.Qcvt.CenterF(ref ogCell.viewRectF);
+
                         var minDistSQ = float.MaxValue;
                         foreach (var cell in onGridCells)
                         {
                             if (cell == null) continue;
-                            if (cell.OutGridLink != null) continue;  // 已經被佔位
-                            if (cell.ChipData != null && !cell.ChipData.IsEmpty()) continue;    // 已經被佔位
-                            if (_preEmptyTrayResult != null)
+                            if (cell.IsLocated()) continue;             // 已經被佔位
+
+                            if (cell.OutGridLink != null)
                             {
-                                _preEmptyTrayResult.GetBlocByRowCol(cell.CellRow, cell.CellCol, out var _, out bool isSucker);
-                                if (!isSucker) continue;    // 已經被佔位
+                                if(cell.OutGridLink.IsLocated()) 
+                                    continue;
+
+                                cell.OutGridLink?.Dispose();
+                                cell.OutGridLink = null;
                             }
+
+                            //if (_preEmptyTrayResult != null)
+                            //{
+                            //    _preEmptyTrayResult.GetBlocByRowCol(cell.CellRow, cell.CellCol, out var _, out bool isSucker);
+                            //    if (!isSucker) continue;    // 已經被佔位
+                            //}
 
                             var center = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
                             var dx = center.X - ogCenter.X;
@@ -483,16 +502,17 @@ namespace LaserAlignDX.AoiModel.V3
                             ogCell.CellRow = bestPlaceHold.CellRow;
                             ogCell.CellCol = bestPlaceHold.CellCol;
                             ogCell.lblName = bestPlaceHold.lblName;
-                            //ogCell.viewRectF = bestPlaceHold.viewRectF;
-                            //_xRecipe.xRegionCells[ogCell.Index] = ogCell;
+                            //>>> ogCell.viewRectF = bestPlaceHold.viewRectF;
+                            //>>> _xRecipe.xRegionCells[ogCell.Index] = ogCell;
                         }
                     }
                 }
 
-                if (outGridGroupsList.Count > 0)
+                //(3) 將 outGridGroups 附加到 _cellGroups 內
+                if (outGridGroups.Length > 0)
                 {
                     var allList = new List<GaCellsGroup>(_cellGroups);
-                    allList.AddRange(outGridGroupsList);
+                    allList.AddRange(outGridGroups);
                     _cellGroups = allList.ToArray();
                 }
             }
@@ -501,17 +521,26 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 整合 Boudary Cells Groups
         /// </summary>
-        void _MergeBoudaryCellsGroups(GaCellsGroup[] boundaryGrps)
+        void _MergeBoudaryCellsGroups(GaCellsGroup[] boundaryGroups)
         {
-            if (boundaryGrps == null || boundaryGrps.Length == 0)
+            if (boundaryGroups == null || boundaryGroups.Length == 0)
                 return;
 
+            //(1) 只留存 定位成功 的 晶粒
+            _ScanLocatedCells(ref boundaryGroups, out var newLocatedCells, markAsOutgrid: true);
+
+            //(2) 如果原來的 _cellGroups 是空的, 直接用 boundaryGroups 替換之
             if (_cellGroups == null || _cellGroups.Length == 0)
             {
-                _cellGroups = boundaryGrps;
+                _cellGroups = boundaryGroups;
                 return;
             }
 
+            //(3) 沒有新找到的晶粒
+            if (newLocatedCells.Length == 0)
+                return;
+
+            //(4) 將原有的 _cellGroups 存入 Dictionary
             var existDict = new Dictionary<string, GaCell>();
             foreach (var grp in _cellGroups)
             {
@@ -520,14 +549,6 @@ namespace LaserAlignDX.AoiModel.V3
                     var cell = gaCell?.Cell;
                     if (cell == null) continue;
                     string key = $"{cell.CellRow},{cell.CellCol}";
-
-                    //if (existDict.TryGetValue(key, out var existing))
-                    //{
-                    //    //if (existing != gaCell)
-                    //    //    gaCell.Dispose();
-                    //    continue;
-                    //}
-
                     if (!existDict.ContainsKey(key))
                     {
                         existDict.Add(key, gaCell);
@@ -535,23 +556,82 @@ namespace LaserAlignDX.AoiModel.V3
                 }
             }
 
-            foreach(var newGrp in boundaryGrps)
+            //(5) boundaryGroups 併入 _cellGroups
+            foreach(var newGrp in boundaryGroups)
             {
                 if (newGrp == null) continue;
                 foreach (var newGaCell in newGrp)
                 {
                     var cell = newGaCell?.Cell;
-                    if (cell == null) continue;
-                    string key = $"{cell.CellRow},{cell.CellCol}";
-                    if (existDict.TryGetValue(key, out var existing))
+                    if (cell == null)
                     {
-                        if (existing != newGaCell)
-                            existing.CopyFrom(newGaCell);   // Replacement
+                        newGaCell?.Dispose();
                         continue;
                     }
-                    newGaCell?.Dispose();
+
+                    string key = $"{cell.CellRow},{cell.CellCol}";
+                    if (existDict.TryGetValue(key, out var existGaCell))
+                    {
+                        // 既有的 GaCell 接管 newGaCell 內容物
+                        existGaCell.TakeOver(newGaCell);
+                    }
+                    else
+                    {
+                        newGaCell?.Dispose();
+                    }
                 }
             }
+        }
+
+        void _ScanLocatedCells(ref GaCellsGroup[] groups, out RegionCellX3Class[] locatedCells, bool markAsOutgrid)
+        {
+            if (groups == null || groups.Length == 0)
+            {
+                locatedCells = new RegionCellX3Class[0];
+                return;
+            }
+
+            var groupsList = new List<GaCellsGroup>(groups);
+            var cellsList = new List<RegionCellX3Class>();
+
+            groupsList.RemoveAll(grp =>
+            {
+                bool hasAnyData = false;
+                foreach (var gcell in grp)
+                {
+                    var cell = gcell?.Cell;
+                    var link = cell?.OutGridLink;
+                    bool isLocated = cell != null && cell.IsLocated();
+                    bool isLinkLocated = link != null && link.IsLocated();
+                    if (isLocated || isLinkLocated)
+                    {
+                        if (cell.ChipData != null)
+                            cell.ChipData.IsOutGrid = markAsOutgrid;
+                        
+                        if (!isLinkLocated)
+                        {
+                            cell.OutGridLink?.Dispose();
+                            cell.OutGridLink = null;
+                        }
+
+                        cellsList.Add(cell);
+                        hasAnyData = true;
+                    }
+                    else
+                    {
+                        // 釋放資源
+                        gcell?.Dispose();
+                    }
+                }
+                return !hasAnyData;
+            });
+
+            if (groups.Length != groupsList.Count)
+            {
+                groups = groupsList.ToArray();
+            }
+
+            locatedCells = cellsList.ToArray();
         }
 
         /// <summary>
@@ -738,76 +818,36 @@ namespace LaserAlignDX.AoiModel.V3
             if (chipData == null)
                 return false;
 
+            bool ok;
             double tiltRatio = 0.0;
 
             var chipQuad = chipData.ChipQuad2D;
             var goldenQuad = chipData.GoldenQuad2D;
             if (chipQuad != null && goldenQuad != null)
             {
-                int NP = 4;
-                bool hasFullCorners = true;
-                for (int i = 0; i < NP; i++)
+                ok = getSafeMidSize(goldenQuad, out var gSize);
+                ok = ok & getSafeMidSize(chipQuad, out var cSize);
+                if (!ok)
                 {
-                    if (chipQuad.Corners[i] == null || goldenQuad.Corners[i] == null)
-                    {
-                        hasFullCorners = false;
-                        break;
-                    }
-                }
-                if (hasFullCorners)
-                {
-                    chipQuad.GetMidSize(out var chipSize, 1);
-                    goldenQuad.GetMidSize(out var goldenSize, 1);
-                    if (goldenSize.Width > 2 && goldenSize.Height > 2)
-                    {
-                        var ratioU = chipSize.Width / goldenSize.Width;
-                        var ratioV = chipSize.Height / goldenSize.Height;
-                        var ratioMin = Math.Min(ratioU, ratioV);
-                        var ratioMax = Math.Max(ratioU, ratioV);
-
-                        var ratio = ratioMin / (ratioMax + 1e-6);
-                        ratio = Math.Min(ratio, 1f);
-                        tiltRatio = 1 - ratio;
-                    }
+                    tiltRatio = 1.0;
                 }
                 else
                 {
-                    double ratioMin = double.MaxValue;
-                    double ratioMax = 0.0;
-                    int count = 0;
-                    for (int i = 0; i < NP; i++)
-                    {
-                        int j = (i + 1) % NP;
-                        var C1 = chipQuad.Corners[i];
-                        var C2 = chipQuad.Corners[j];
-                        var G1 = goldenQuad.Corners[i];
-                        var G2 = goldenQuad.Corners[j];
-                        if (C1 == null || C2 == null || G1 == null || G2 == null)
-                            continue;
-
-                        var runLen = (C1 - C2).NormLength;
-                        var goldenLen = (G1 - G2).NormLength;
-                        if (goldenLen < 3) // 小於 3 pixels
-                            continue;
-
-                        var ratio = runLen / goldenLen;
-                        ratioMin = Math.Min(ratioMin, ratio);
-                        ratioMax = Math.Max(ratioMax, ratio);
-                        count++;
-                    }
-
-                    if (count > 0)
-                    {
-                        var ratio = ratioMin / (ratioMax + 1e-6);
-                        ratio = Math.Min(ratio, 1f);
-                        tiltRatio = 1 - ratio;
-                    }
+                    var ratioU = cSize.Width / gSize.Width;
+                    var ratioV = cSize.Height / gSize.Height;
+                    var ratioMin = Math.Min(ratioU, ratioV);
+                    var ratioMax = Math.Max(ratioU, ratioV);
+                    var ratio = ratioMin / (ratioMax + 1e-6);
+                    ratio = Math.Min(ratio, 1f);
+                    tiltRatio = 1 - ratio;
+                    //var diff = Math.Abs(ratioU - ratioV);
+                    //tiltRatio = diff / Math.Max(ratioU, ratioV);
                 }
             }
             
             chipData.ChipCoords.TiltRatio = (float)tiltRatio;
+            ok = tiltRatio <= _xRecipe.InspectParams.xTiltRatioThres;
 
-            bool ok = tiltRatio <= _xRecipe.InspectParams.xTiltRatioThres;
             return ok;
         }
 
@@ -1018,6 +1058,19 @@ namespace LaserAlignDX.AoiModel.V3
 
 
         #region HELPERS
+        bool getSafeMidSize(QvQuad2D quad, out SizeF size)
+        {
+            try
+            {
+                quad.GetMidSize(out size);
+                return true;
+            }
+            catch
+            {
+                size = SizeF.Empty;
+                return false;
+            }
+        }
         QvBox2D toBox2D(ref AUVision.xFindResult xResult, SizeF size, float offsetX = 0f, float offsetY = 0f)
         {
             var box = new QvBox2D();

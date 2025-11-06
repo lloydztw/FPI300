@@ -264,12 +264,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             else
             {
-                // 格點 (吸盤) 空位
+                // 吸盤 格位
                 var center = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
                 var rect = JetEazy.Qcvt.CreateCenterRect(center.X, center.Y, 200f, 200f);
                 var quad2D = new QvQuad2D();
                 quad2D.SetBox(rect.Location, rect.Size);
-                var item = new CviRotRectBox(quad2D, Color.Purple, 0.10f) { Tag = cell };
+
+                var color = (cell.OutGridLink != null) ? Color.Blue : Color.Purple;
+                var item = new CviRotRectBox(quad2D, color, 0.10f) { Tag = cell };
                 _drawItems.Add(item);
             }
 
