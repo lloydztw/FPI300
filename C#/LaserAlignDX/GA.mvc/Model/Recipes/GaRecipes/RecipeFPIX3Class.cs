@@ -986,9 +986,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region 统计数据
+#if (OPT_NOT_USED)
         public float[] AnalyzeDatas = new float[9];
+#endif
         public void AnalyzeDatasData()
         {
+#if (OPT_NOT_USED)
             int count = Enum.GetValues(typeof(InspectReason)).Length;
             AnalyzeDatas = new float[count + 2];
             int i = 0;
@@ -997,6 +1000,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 AnalyzeDatas[i] = 0;
                 i++;
             }
+#endif
         }
         /// <summary>
         /// 分析数据 返回bool
@@ -1004,27 +1008,30 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// <returns>true:PASS false:FAIL</returns>
         public bool AnalyzeDatasRun()
         {
-            foreach (RegionCellX3Class cell in xRegionCells)
-            {
-                if (cell.inspectReasons.Count == 0)
-                {
-                    AnalyzeDatas[(int)InspectReason.PASS]++;
-                    continue;
-                }
-                foreach (InspectReason reason in cell.inspectReasons)
-                {
-                    AnalyzeDatas[(int)reason]++;
-                }
-            }
-            //芯片数
-            AnalyzeDatas[AnalyzeDatas.Length - 2] = xRow * xColumn;
-            //良率
-            AnalyzeDatas[AnalyzeDatas.Length - 1] = AnalyzeDatas[(int)InspectReason.PASS] * 1.0f / AnalyzeDatas[AnalyzeDatas.Length - 2] * 100;
-            float ins_count = AnalyzeDatas[(int)InspectReason.PASS] + AnalyzeDatas[(int)InspectReason.INS_NOOPEN];
-            bool bOK = ins_count == xRow * xColumn;
+#if (OPT_NOT_USED)
+            //foreach (RegionCellX3Class cell in xRegionCells)
+            //{
+            //    if (cell.inspectReasons.Count == 0)
+            //    {
+            //        AnalyzeDatas[(int)InspectReason.PASS]++;
+            //        continue;
+            //    }
+            //    foreach (InspectReason reason in cell.inspectReasons)
+            //    {
+            //        AnalyzeDatas[(int)reason]++;
+            //    }
+            //}
+            ////芯片数
+            //AnalyzeDatas[AnalyzeDatas.Length - 2] = xRow * xColumn;
+            ////良率
+            //AnalyzeDatas[AnalyzeDatas.Length - 1] = AnalyzeDatas[(int)InspectReason.PASS] * 1.0f / AnalyzeDatas[AnalyzeDatas.Length - 2] * 100;
+            //float ins_count = AnalyzeDatas[(int)InspectReason.PASS] + AnalyzeDatas[(int)InspectReason.INS_NOOPEN];
+            //bool bOK = ins_count == xRow * xColumn;
 
-            Add(bOK);
-            return bOK;
+            //Add(bOK);
+            //return bOK;
+#endif
+            return true;
         }
 
         //public int PassCount = 0;
@@ -1052,7 +1059,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "PassCount", PassCount.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "NGCount", NGCount.ToString(), INIFILE);
         }
-        #endregion
+#endregion
 
         #region 校正與座標轉換_GAARA_版本
         /// <summary>
@@ -1529,9 +1536,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [CategoryAttribute(_Cat01), DescriptionAttribute("")]
         [DisplayName("03 啟用 缺陷檢測")]
         [Browsable(true)]
+        [ReadOnly(true)]
         public bool optChipDefectsInspect
         {
-            get => _spec.optChipDefectsInspect;
+            get => _spec.optChipDefectsInspect = false;     // 暫時不開放
             set => _spec.optChipDefectsInspect = value;
         }
         #endregion

@@ -118,7 +118,6 @@ namespace LaserAlignDX.AoiModel.V3
 
                 //(6) 晶粒定位
                 _RunChipsLocate(bmpFullfov, imgLogPath, out string debugCellCenterStr);
-                _TM.Trace("_Inspect001 : 晶粒定位 & 量測 完成!");
 
                 //(7) 晶粒定位 (位於邊界模擬兩可之處)
                 _RunChipsLocateOnBoundary(bmpFullfov, imgLogPath);
@@ -247,7 +246,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             //(1) 蒐集 GaCellsGroups
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            var outGridGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "OUT_GRID");
+            var outGridGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "OUT_GRID_BOUND");
             if (outGridGroups == null || outGridGroups.Length == 0)
                 return;
 
@@ -389,7 +388,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             //(1) 蒐集 GaCellsGroups
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            var boundaryGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "BOUNDARY");
+            var boundaryGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "ON_GRID_BOUND");
             if (boundaryGroups == null || boundaryGroups.Length == 0)
                 return;
 
@@ -750,10 +749,11 @@ namespace LaserAlignDX.AoiModel.V3
                         var chipCentroid = chipQuad2D.Center;
                         cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
                         cell.ChipData = chipData;
-                        //cell.ChipData.ChipCoords.Angle = cell.RunAngle;
                         cell.ChipData.ChipCoords.Centroid = _transCP?.Trans(chipCentroid);
-                        cell.inspectReason = InspectReason.PASS;
-                        cell.inspectReasons.Clear();
+                        //cell.ChipData.ChipCoords.Angle = cell.RunAngle;
+                        //cell.inspectReason = InspectReason.PASS;
+                        //cell.inspectReasons.Clear();
+                        cell.MarkResult(InspectReason.PASS, reset: true);
                     }
                 }
 
@@ -762,12 +762,14 @@ namespace LaserAlignDX.AoiModel.V3
                 //(7) 設定 Inspect Result Code
                 if (!ok)
                 {
-                    cell.inspectReason = InspectReason.INS_ALIGNERR;
-                    cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
+                    //cell.inspectReason = InspectReason.INS_ALIGNERR;
+                    //cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
+                    cell.MarkResult(InspectReason.NG_EMPTY);
                 }
                 else
                 {
-                    cell.inspectReason = InspectReason.PASS;
+                    //cell.inspectReason = InspectReason.PASS;
+                    cell.MarkResult(InspectReason.PASS, reset: true);
                 }
 
                 //>>> 後面還要使用, 在此不要調用 cellBmp.Dispose() !!!

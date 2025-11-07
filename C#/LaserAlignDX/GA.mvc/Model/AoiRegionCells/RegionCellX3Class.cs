@@ -7,12 +7,10 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using VisionDesigner;
 using VisionDesigner.Code2DReader;
 using VisionDesigner.ImageArithmetic;
 using VisionDesigner.PositionFix;
-using ZXing.OneD;
 using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
 
 
@@ -70,11 +68,13 @@ namespace LaserAlignDX.OPSpace
         }
 
         // INDEX
+        #region INDEX_LABEL_AND_ROW_COLS
         public int Index = 0;
         public string lblName = "";
         public int CellRow = 0;
         public int CellCol = 0;
-        public bool ByPass { get; set; } = false;
+        public bool ByPass { get; set; } = false;   // 沒用到
+        #endregion
 
         /// <summary>
         /// ROI (FullFov Camera Coordinates) (單位 pixel)
@@ -91,15 +91,11 @@ namespace LaserAlignDX.OPSpace
         public RegionCellX3Class OutGridLink { get; set; } = null;
 
         /// <summary>
-        /// 是否已經定位
+        /// 是否已經定位成功
         /// </summary>
         public bool IsLocated()
         {
             return ChipData != null && ChipData.ChipQuad2D != null;
-        }
-        public bool IsEmpty()
-        {
-            return !IsLocated();
         }
 
         #region PUBLIC_CACHE_PROPERTIES
@@ -186,14 +182,55 @@ namespace LaserAlignDX.OPSpace
         //>>> private AUVision.xFindResult xFindResult = new AUVision.xFindResult();
         #endregion
 
+        #region PRIVATE_INSPECTION_RESULTS_DATA
+        List<InspectReason> _inspectNgList = new List<InspectReason>();
+        InspectReason _inspectResult = InspectReason.PASS;
+        #endregion
+
         /// <summary>
-        /// 總和檢測結果
+        /// 檢測總合結果
         /// </summary>
-        public InspectReason inspectReason = InspectReason.PASS;
+        public InspectReason FinalInspectResult
+        {
+            get => _inspectResult;
+        }
         /// <summary>
-        /// 檢測歷程
+        /// 檢測總合結果 為 PASS
         /// </summary>
-        public List<InspectReason> inspectReasons = new List<InspectReason>();
+        public bool IsResultPass()
+        {
+            return _inspectResult == InspectReason.PASS && _inspectNgList.Count == 0;
+        }
+        /// <summary>
+        /// 是否為 吸嘴空格
+        /// </summary>
+        public bool IsEmptyPlaceHold()
+        {
+            // 是否為 吸嘴空格
+            return _inspectResult == InspectReason.NG_EMPTY;
+        }
+        /// <summary>
+        /// 是否為 疑似有料 之 不明區塊 
+        /// (2025-11-17 新增, 用來標記 踩腳)
+        /// </summary>
+        public bool IsAmbiguousBloc()
+        {
+            //return _inspectResult == InspectReason.NG_AMBIGUOUS_BLOC;
+            return false;
+        }
+        /// <summary>
+        /// 標記 檢測結果
+        /// </summary>
+        public void MarkResult(InspectReason result, bool reset = false)
+        {
+            _inspectResult = result;
+
+            if (reset)
+                _inspectNgList.Clear();
+
+            if (result != InspectReason.PASS)
+                _inspectNgList.Add(result);
+        }
 
         #region MVD_LINE_SEGMENTS
         /// <summary>
@@ -509,27 +546,35 @@ namespace LaserAlignDX.OPSpace
                 MvdRunPositionFix.BorderColor = new MVD_COLOR(255, 0, 0);
             }
 
-            switch (inspectReason)
+            //switch (_inspectResult)
+            //{
+            //    case InspectReason.NG_EMPTY:
+            //        MvdRunPositionFix = GaImageUtil.ToCMvdRectangleF(ref viewRectF);
+            //        MvdRunPositionFix.BorderColor = new MVD_COLOR(255, 0, 0);
+            //        break;
+            //    case InspectReason.PASS:
+            //        if (_inspectNGs.Count > 0)
+            //            MvdRunPositionFix.BorderColor = new MVD_COLOR(255, 0, 0);
+            //        else
+            //            MvdRunPositionFix.BorderColor = new MVD_COLOR(0, 255, 0);
+            //        break;
+            //    default:
+            //        MvdRunPositionFix.BorderColor = new MVD_COLOR(255, 0, 0);
+            //        break;
+            //}
+
+            if (IsEmptyPlaceHold())
             {
-                case InspectReason.INS_ALIGNERR:
-                    //MvdRunPositionFix = new CMvdRectangleF(
-                    //                            viewRectF.X + viewRectF.Width / 2, 
-                    //                            viewRectF.Y + viewRectF.Height / 2, 
-                    //                            viewRectF.Width,
-                    //                            viewRectF.Height
-                    //                        );
-                    MvdRunPositionFix = GaImageUtil.ToCMvdRectangleF(ref viewRectF);
-                    MvdRunPositionFix.BorderColor = new MVD_COLOR(255, 0, 0);
-                    break;
-                case InspectReason.PASS:
-                    if (inspectReasons.Count > 0)
-                        MvdRunPositionFix.BorderColor = new MVD_COLOR(255, 0, 0);
-                    else
-                        MvdRunPositionFix.BorderColor = new MVD_COLOR(0, 255, 0);
-                    break;
-                default:
-                    MvdRunPositionFix.BorderColor = new MVD_COLOR(255, 0, 0);
-                    break;
+                MvdRunPositionFix = GaImageUtil.ToCMvdRectangleF(ref viewRectF);
+                MvdRunPositionFix.BorderColor = new MVD_COLOR(255, 0, 0);
+            }
+            else if (IsResultPass())
+            {
+                MvdRunPositionFix.BorderColor = new MVD_COLOR(0, 255, 0);
+            }
+            else
+            {
+                MvdRunPositionFix.BorderColor = new MVD_COLOR(255, 0, 0);
             }
 
             //if (ByPass && !INI.Instance.IsForceInspect)
@@ -588,21 +633,20 @@ namespace LaserAlignDX.OPSpace
         public string GetNoTrayDesc()
         {
             string str = string.Empty;
-            if (inspectReason == InspectReason.INS_DEFECTERR)
+            if (_inspectResult == InspectReason.NG_APPEARANCE)
             {
                 str = "疑似有料";
                 return str;
             }
-            foreach (var reason in inspectReasons)
+            foreach (var reason in _inspectNgList)
             {
-                if (reason == InspectReason.INS_DEFECTERR)
+                if (reason == InspectReason.NG_APPEARANCE)
                 {
                     str = "疑似有料";
                     //str = "Maybe.P";
                     break;
                 }
             }
-
             return str;
         }
         #endregion
@@ -676,8 +720,9 @@ namespace LaserAlignDX.OPSpace
 
                 if (!bOK)
                 {
-                    inspectReason = InspectReason.INS_CUTTINGERR;
-                    inspectReasons.Add(InspectReason.INS_CUTTINGERR);
+                    //inspectReason = InspectReason.INS_CUTTINGERR;
+                    //inspectReasons.Add(InspectReason.INS_CUTTINGERR);
+                    this.MarkResult(InspectReason.NG_CUT);
                 }
 
                 //(2) 判定 邊隙 是否達標
@@ -697,8 +742,9 @@ namespace LaserAlignDX.OPSpace
 
                     if (!bOK)
                     {
-                        inspectReason = InspectReason.INS_PADEDGEGAPERR;
-                        inspectReasons.Add(InspectReason.INS_PADEDGEGAPERR);
+                        //inspectReason = InspectReason.INS_PADEDGEGAPERR;
+                        //inspectReasons.Add(InspectReason.INS_PADEDGEGAPERR);
+                        MarkResult(InspectReason.NG_EDGE_GAP);
                     }
                 }
 
@@ -875,8 +921,10 @@ namespace LaserAlignDX.OPSpace
             
             ////<<< 廢除 >>> xFindResult = new AUVision.xFindResult();
 
-            inspectReason = InspectReason.PASS;
-            inspectReasons.Clear();
+            //inspectReason = InspectReason.PASS;
+            //inspectReasons.Clear();
+            MarkResult(InspectReason.PASS, reset: true);
+
             RunCodeInfo = null;
 
             if (mvd2DReader != null)
@@ -1087,7 +1135,8 @@ namespace LaserAlignDX.OPSpace
 
             if (_blobMvdRectFNGList.Count > 0)
             {
-                inspectReasons.Add(InspectReason.INS_DEFECTERR);
+                //inspectReasons.Add(InspectReason.INS_DEFECTERR);
+                MarkResult(InspectReason.NG_APPEARANCE);
 
                 if (IsSaveDebugPicture)
                 {
@@ -1147,13 +1196,15 @@ namespace LaserAlignDX.OPSpace
                         DrawBarcodePosition.BorderColor = new MVD_COLOR(255, 0, 0);
                         #endregion
 
-                        inspectReasons.Add(InspectReason.INS_2DMAPNG);
+                        //inspectReasons.Add(InspectReason.INS_2DMAPNG);
+                        MarkResult(InspectReason.NG_QRCODE_COMPARE);
                     }
                 }
             }
             else
             {
-                inspectReasons.Add(InspectReason.INS_2DERR);
+                //inspectReasons.Add(InspectReason.INS_2DERR);
+                MarkResult(InspectReason.NG_QRCODE_ERR);
 
                 #region GENERATE_MVD_GUI_COMPONENT_UGLY_CODE
                 DrawBarcodePosition = null;

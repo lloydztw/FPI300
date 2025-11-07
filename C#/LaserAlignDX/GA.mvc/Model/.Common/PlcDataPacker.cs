@@ -25,7 +25,7 @@ namespace LaserAlignDX.Model
     /// <summary>
     /// PLC 返回數據 打包器
     /// </summary>
-    public class GaPlcDataPacker
+    public class PlcDataPacker
     {
         #region GLOBAL_MESS
         static RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
@@ -44,9 +44,6 @@ namespace LaserAlignDX.Model
             //  1-Ok, 2-外观Ng, 3-空, 4-读码NG, 8-切割偏移NG, 9-切割NG
             //---------------------------------------------------------------------------------------------------------------------
 
-            //bool optUsePercentage = _xRecipe.InspectParams.optUseTotalNgPercentage && _xRecipe.InspectParams.optChipMeasurement;
-            //bool forceAllPass = (optUsePercentage && xScanInspectMode != ScanInspectMode.NOTRAY && IsPass);
-
             int i = 0;
             int[] states = new int[_xRecipe.xRegionCells.Count];
 
@@ -54,24 +51,65 @@ namespace LaserAlignDX.Model
             {
                 if (forceAllPass)
                 {
-                    bool isEmpty = cell == null || !cell.IsLocated();
-                    states[i] = isEmpty ? (int)PlcResultCode.NG_EMPTY : (int)PlcResultCode.OK;
+                    var go = (cell != null && 
+                              cell.IsLocated() && 
+                             !cell.IsEmptyPlaceHold() && 
+                             !cell.IsAmbiguousBloc());
+
+                    // 1 (當成 PASS 讓 PLC 吸走)
+                    // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
+                    states[i] = (int)(go ? PlcResultCode.OK : PlcResultCode.NG_EMPTY);
                 }
                 else
                 {
-                    if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-                        states[i] = (int)PlcResultCode.OK;              // 1
-                    else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
-                        states[i] = (int)PlcResultCode.NG_EMPTY;        // 3
-                    else if (cell.inspectReason == InspectReason.INS_2DERR || cell.inspectReason == InspectReason.INS_2DMAPNG)
-                        states[i] = (int)PlcResultCode.NG_QRCODE;       // 4;
-                    else if (cell.inspectReason == InspectReason.INS_CUTTINGERR)
-                        states[i] = (int)PlcResultCode.NG_CUT;          // 9;
-                    else if (cell.inspectReason == InspectReason.INS_PADEDGEGAPERR)
-                        states[i] = (int)PlcResultCode.NG_EDGE_GAP;     // 8;
+                    //(A) PASS
+                    if (cell.IsResultPass()) 
+                    {
+                        states[i] = (int)PlcResultCode.OK;                          // 1
+                    }
+                    //(B) 空格
+                    else if (cell.IsEmptyPlaceHold())
+                    {
+                        states[i] = (int)PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
+                    }
+                    //(C) 疑似有料之不明區塊
+                    else if (cell.IsAmbiguousBloc())
+                    {
+                        states[i] = (int)PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不吸" 該區塊)
+                    }
+                    //(D) 其他 結果
                     else
-                        states[i] = (int)PlcResultCode.NG_APPEARANCE;   // 2;
+                    {
+                        switch (cell.FinalInspectResult)
+                        {
+                            // 二維碼 NG
+                            //case InspectReason.INS_2DERR:
+                            //case InspectReason.INS_2DMAPNG:
+                            case InspectReason.NG_QRCODE_ERR:
+                            case InspectReason.NG_QRCODE_COMPARE:
+                                states[i] = (int)PlcResultCode.NG_QRCODE_ERR;       // 4
+                                break;
+
+                            // 尺寸量測 NG
+                            //case InspectReason.INS_CUTTINGERR:
+                            case InspectReason.NG_CUT:
+                                states[i] = (int)PlcResultCode.NG_CUT;              // 9
+                                break;
+
+                            // 邊隙 NG
+                            //case InspectReason.INS_PADEDGEGAPERR:
+                            case InspectReason.NG_EDGE_GAP:
+                                states[i] = (int)PlcResultCode.NG_EDGE_GAP;         // 8
+                                break;
+
+                            // 其他 NG
+                            default:
+                                states[i] = (int)PlcResultCode.NG_APPEARANCE;       // 2
+                                break;
+                        }
+                    }
                 }
+
                 i++;
             }
 
@@ -84,23 +122,62 @@ namespace LaserAlignDX.Model
         /// <returns>ARRAY[0..299] OF INT PC->PLC 读码结果, 1:OK, 2:比对NG, 3:空, 4:有码未读到</returns>
         public static int[] GetQrResult()
         {
-            //PC->PLC 读码结果,1-Ok,2-比对Ng,3-空,4-有码未读到
+            //PC->PLC 读码结果, 1-Ok, 2-比对Ng, 3-空, 4-有码未读到
 
             int i = 0;
             int[] states = new int[_xRecipe.xRegionCells.Count];
 
             foreach (RegionCellX3Class cell in IterFinalResultCells(_xRecipe.xRegionCells))
             {
-                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-                    states[i] = (int)PlcResultCode.OK;                          // 1;
-                else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
-                    states[i] = (int)PlcResultCode.NG_EMPTY;                    // 3;
-                else if (cell.inspectReason == InspectReason.INS_2DERR)
-                    states[i] = (int)PlcResultCode.NG_QRCODE;                   // 4;
-                else if (cell.inspectReason == InspectReason.INS_2DMAPNG)
-                    states[i] = (int)PlcResultCode.NG_QRCODE_COMPARE;           // 2;
+                //if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                //    states[i] = (int)PlcResultCode.OK;                                // 1;
+                //else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
+                //    states[i] = (int)PlcResultCode.NG_EMPTY;                          // 3;
+                //else if (cell.inspectReason == InspectReason.INS_2DERR)
+                //    states[i] = (int)PlcResultCode.NG_QRCODE_ERR;                     // 4;
+                //else if (cell.inspectReason == InspectReason.INS_2DMAPNG)
+                //    states[i] = (int)PlcResultCode.NG_APPEARANCE;                     // 2; (why ???)
+                //else
+                //    states[i] = (int)PlcResultCode.OK;                                // 1;
+
+                //(A) PASS
+                if (cell.IsResultPass())
+                {
+                    states[i] = (int)PlcResultCode.OK;                                  // 1
+                }
+                //(B) 空格
+                else if (cell.IsEmptyPlaceHold())
+                {
+                    states[i] = (int)PlcResultCode.NG_EMPTY;                            // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
+                }
+                //(C) 疑似有料之不明區塊
+                else if (cell.IsAmbiguousBloc())
+                {
+                    states[i] = (int)PlcResultCode.NG_EMPTY;                            // 3 (回報 NG_EMPTY 讓 PLC "不吸" 該區塊)
+                }
+                //(D) 其他 結果
                 else
-                    states[i] = (int)PlcResultCode.OK;                          // 1;
+                {
+                    switch (cell.FinalInspectResult)
+                    {
+                        // 二維碼 讀取錯誤
+                        // case InspectReason.INS_2DERR:
+                        case InspectReason.NG_QRCODE_ERR:
+                            states[i] = (int)PlcResultCode.NG_QRCODE_ERR;               // 4
+                            break;
+
+                        // 二維碼 比對錯誤
+                        // case InspectReason.INS_2DMAPNG:
+                        case InspectReason.NG_QRCODE_COMPARE:
+                            states[i] = (int)PlcResultCode.NG_APPEARANCE;               // 2
+                            break;
+
+                        default:
+                            states[i] = (int)PlcResultCode.OK;                          // 1
+                            break;
+                    }
+                }
+
                 i++;
             }
             return states;
@@ -120,13 +197,13 @@ namespace LaserAlignDX.Model
 
             foreach (RegionCellX3Class cell in IterFinalResultCells(_xRecipe.xRegionCells))
             {
-                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                if (cell.IsResultPass())                    //cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                 {
                     states[i] = cell.RunX;
                     states[i + 1] = cell.RunY;
                     states[i + 2] = cell.RunAngle;
                 }
-                else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
+                else if (cell.IsEmptyPlaceHold())     //cell.inspectReason == InspectReason.INS_ALIGNERR)
                 {
                     states[i] = 0;
                     states[i + 1] = 0;
@@ -149,7 +226,7 @@ namespace LaserAlignDX.Model
         /// </summary>
         public static bool VerifyFinalResultCells()
         {
-            // 實機跑線版本: 不執行此 調試驗證
+            // 實機跑線版本: 不執行 此調試驗證函式
             if (!Traveller106.Universal.IsNoUseCCD)
                 return true;
 
@@ -221,7 +298,8 @@ namespace LaserAlignDX.Model
         }
 
         /// <summary>
-        /// 枚舉 檢測後  實際 持有量測數據的 Cells 
+        /// 枚舉 檢測後  實際 持有量測數據的 Cell
+        /// (以 OutGridLink 優先)
         /// </summary>
         public static IEnumerable<RegionCellX3Class> IterFinalResultCells(IEnumerable<RegionCellX3Class> cells = null)
         {

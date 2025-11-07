@@ -426,7 +426,7 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
-    <Compile Include="GA.mvc\Model\.Common\GaPlcDataPacker.cs" />
+    <Compile Include="GA.mvc\Model\.Common\PlcDataPacker.cs" />
     <Compile Include="GA.mvc\Model\.Common\GaChipData.cs" />
     <Compile Include="GA.mvc\Model\AI\AiDataCropper.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_Base.cs" />

@@ -87,6 +87,7 @@ namespace LaserAlignDX.AoiModel.V3
 
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
                 RunChipsMeasurement(bmpFullfov);
+                RunChipsMeasurement2ndForNGs(bmpFullfov);
                 RunDefectsAndQrCode(bmpFullfov);
 
                 markRunEnd(true);
@@ -139,6 +140,9 @@ namespace LaserAlignDX.AoiModel.V3
             var groups = _cellGroups != null ? _cellGroups : GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
             #endregion
 
+            if (groups == null || groups.Length == 0)
+                return;
+
             if (!usingMultiThread)
             {
                 // 單線程 (驗證用)
@@ -150,10 +154,9 @@ namespace LaserAlignDX.AoiModel.V3
             else
             {
                 // 多線程
-                Parallel.For(0, N_GROUPS, gid =>
+                Parallel.For(0, groups.Length, gid =>
                 {
-                    if (gid < groups.Length)
-                        RunChipsMeasurementOneT(gid, groups[gid]);
+                    RunChipsMeasurementOneT(gid, groups[gid]);
                 });
             }
 
@@ -166,6 +169,56 @@ namespace LaserAlignDX.AoiModel.V3
 
             //_TM.DUMP_ACCUM();
         }
+
+        /// <summary>
+        /// LETIAN: 晶粒定位 與 尺寸量測 (針對 NG 進行二次量測)
+        /// </summary>
+        private void RunChipsMeasurement2ndForNGs(Bitmap bmpFullfov)
+        {
+            if (!_xInspect.optChipMeasurement)
+                return;
+
+            fire_AoiBegin("晶粒尺寸量測 (二次補測)");
+
+            //_TM.RESET_ACCUM();
+
+            bool usingMultiThread = Universal.N_THREADS_ENABLED;
+
+            #region 準備_CELL_GROUPS
+            int N = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;
+            var ngGroups = GaCellsGroup.CollectGroups(N, _xRecipe, bmpFullfov, option: "NG_DIM_ONLY");
+            #endregion
+
+            if (ngGroups == null || ngGroups.Length == 0)
+                return;
+
+            if (!usingMultiThread)
+            {
+                // 單線程 (驗證用)
+                for (int gid = 0; gid < ngGroups.Length; gid++)
+                {
+                    RunChipsMeasurementOneT(gid, ngGroups[gid]);
+                }
+            }
+            else
+            {
+                // 多線程
+                Parallel.For(0, ngGroups.Length, gid =>
+                {
+                    RunChipsMeasurementOneT(gid, ngGroups[gid]);
+                });
+            }
+
+            #region CLEAN_UP
+            if (ngGroups != null)
+            {
+                GaCellsGroup.DisposeAll(ngGroups);
+            }
+            #endregion
+
+            //_TM.DUMP_ACCUM();
+        }
+
         /// <summary>
         /// LETIAN: 晶粒定位 與 尺寸量測 (區域) (限用於同一線程內)
         /// </summary>
@@ -183,7 +236,8 @@ namespace LaserAlignDX.AoiModel.V3
                 //(1) 進度條事件
                 fire_AoiProgressing(cell);
 
-                bool go = cell.ChipData.ChipQuad2D != null && cell.inspectReason == InspectReason.PASS;
+                //>>> bool go = cell.ChipData.ChipQuad2D != null && cell.inspectReason == InspectReason.PASS;
+                bool go = cell.ChipData.ChipQuad2D != null && cell.IsResultPass();
                 if (go)
                 {
                     //(2) 量測單一晶粒
@@ -193,10 +247,11 @@ namespace LaserAlignDX.AoiModel.V3
                 }
             }
         }
+
         /// <summary>
         /// 量測單一晶粒 (直线寻找)
         /// </summary>
-        private void RunOneChipMeasurement_000(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
+        private void _RunOneChipMeasurement_000(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
         {
 #if(OPT_OLD_CODE)
             // 取得 上一輪 晶粒定位 的結果 (chipData)
@@ -303,6 +358,7 @@ namespace LaserAlignDX.AoiModel.V3
             #endregion
 #endif
         }
+
         /// <summary>
         /// 量測單一晶粒 (直线寻找)
         /// </summary>
@@ -393,10 +449,11 @@ namespace LaserAlignDX.AoiModel.V3
             }
             #endregion
         }
+
         /// <summary>
         /// 計算 選轉&平移 後的 邊線框 (左, 上, 右, 下)
         /// </summary>
-        private QvQuad2D[] CalcRuntimeLocalLineBorderQuads_001(RegionCellX3Class cell, RectangleF cellRoi)
+        private QvQuad2D[] _CalcRuntimeLocalLineBorderQuads_001(RegionCellX3Class cell, RectangleF cellRoi)
         {
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
@@ -472,6 +529,7 @@ namespace LaserAlignDX.AoiModel.V3
                 throw ex;
             }
         }
+
         /// <summary>
         /// 計算 選轉&平移 後的 邊線框 (左, 上, 右, 下)
         /// </summary>
@@ -568,6 +626,7 @@ namespace LaserAlignDX.AoiModel.V3
                 throw ex;
             }
         }
+
         /// <summary>
         /// LETIAN: 读码测试 搬移至此.
         /// caller 負責 bmpInputImage 生命
@@ -589,7 +648,8 @@ namespace LaserAlignDX.AoiModel.V3
                 if (cell.ByPass && !INI.Instance.IsForceInspect)
                     continue;
 
-                if (cell.inspectReason == InspectReason.INS_ALIGNERR)
+                //if (cell.inspectReason == InspectReason.INS_ALIGNERR)
+                if (cell.IsEmptyPlaceHold())
                     continue;
 
                 // Golden Region Size

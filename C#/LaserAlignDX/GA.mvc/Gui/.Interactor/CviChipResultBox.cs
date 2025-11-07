@@ -238,7 +238,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         void updateDrawItems_For_ChipLocate()
         {
             var cell = _cell;
-            if (cell == null) 
+            if (cell == null)
                 return;
 
             var chipQuad2D = cell.ChipData?.ChipQuad2D;
@@ -248,13 +248,15 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 chipQuad2D = cell.DrawResultRectF()?.ToQuad2D();
             }
 
-            if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0 && chipQuad2D != null)
+            //if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0 && chipQuad2D != null)
+            if (cell.IsResultPass() && chipQuad2D != null)
             {
                 // PASS
                 var item = new CviRotRectBox(chipQuad2D, Color.Lime, 0f) { Tag = cell };
                 _drawItems.Add(item);
             }
-            else if (cell.inspectReason != InspectReason.INS_ALIGNERR && chipQuad2D != null)
+            //else if (cell.inspectReason != InspectReason.INS_ALIGNERR && chipQuad2D != null)
+            else if (!cell.IsEmptyPlaceHold() && chipQuad2D != null)
             {
                 // NG
                 var item = _bypassNg ?
@@ -357,7 +359,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var padsGrid = cell.ChipData.PadsGrid;
             if (padsGrid != null)
             {
-                bool isPass = cell.inspectReason == InspectReason.PASS;
+                bool isPass = cell.IsResultPass();  //cell.inspectReason == InspectReason.PASS;
                 Color itemColor = isPass ? Color.Lime : _bypassNg ? Color.Green : Color.Red;
                 EzBlocsGridAnalyzer.CalcQuad2D(padsGrid, out var quad2D, false);
                 var item = new CviRotRectBox(quad2D, itemColor, 0.20f) { Tag = cell };

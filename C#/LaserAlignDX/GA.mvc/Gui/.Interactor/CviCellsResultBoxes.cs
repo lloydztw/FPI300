@@ -536,9 +536,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             else
             {
                 isEmpty = false;
-                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                if (cell.IsResultPass())
                     isPass = true;
-                else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
+                else if (!cell.IsEmptyPlaceHold())
                     isPass = false;
                 else
                     isEmpty = true;
@@ -895,20 +895,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         #endregion
 
                         #region 尺寸量測詳細點位
-                        //var meansurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
-                        //if (meansurePts != null && meansurePts.Length >= 4 &&
-                        //    meansurePts[0] != null && meansurePts[1] != null &&
-                        //    meansurePts[2] != null && meansurePts[3] != null)
-                        //{
-                        //    var dpX = (meansurePts[0] - meansurePts[2]).NormLength;
-                        //    var dpY = (meansurePts[1] - meansurePts[3]).NormLength;
-                        //    sb.AppendLine();
-                        //    sb.AppendLine().Append($"晶粒.寬 = {dpX:0.0} pix");
-                        //    sb.AppendLine().Append($"晶粒.高 = {dpY:0.0} pix");
-                        //}
                         var chipDim = cell?.ChipData?.ChipDimension;
                         if (chipDim != null && chipDim.GetPixelSize(out double dpX, out double dpY))
                         {
+                            sb.AppendLine();
                             sb.AppendLine().Append($"晶粒.寬 = {dpX:0.0} pix");
                             sb.AppendLine().Append($"晶粒.高 = {dpY:0.0} pix");
                         }

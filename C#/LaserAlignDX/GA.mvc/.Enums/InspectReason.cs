@@ -7,38 +7,37 @@ namespace LaserAlignDX.OPSpace
     {
         [Description("PASS")]
         PASS = 0,
-        /// <summary>
-        /// 空料
-        /// </summary>
+
         [Description("空料")]
-        //[Description("印字错误")]
-        INS_ALIGNERR = 1,
-        [Description("切割NG")]
-        INS_CUTTINGERR = 2,
-        /// <summary>
-        /// 疑似有料及外观NG
-        /// </summary>
-        [Description("疑似有料")]
-        //[Description("印字缺失")]
-        INS_DEFECTERR = 3,
-        /// <summary>
-        /// 2D读取错误
-        /// </summary>
-        [Description("2D读取错误")]
-        INS_2DERR = 4,
-        /// <summary>
-        /// 2D比对错误
-        /// </summary>
-        [Description("2D比对错误")]
-        INS_2DMAPNG = 5,
-        [Description("2D码重复")]
-        INS_2DREPEATERR = 6,
-        [Description("不检测")]
-        INS_NOOPEN = 7,
-        /// <summary>
-        /// 切割偏移NG
-        /// </summary>
-        [Description("切割偏移NG")]
-        INS_PADEDGEGAPERR = 8,
+        NG_EMPTY,
+        INS_ALIGNERR = NG_EMPTY,
+
+        [Description("切割 NG")]
+        NG_CUT,
+        INS_CUTTINGERR = NG_CUT,
+
+        [Description("外觀 NG)")]
+        NG_APPEARANCE,
+        INS_DEFECTERR = NG_APPEARANCE,
+
+        [Description("二維碼 讀取錯誤")]
+        NG_QRCODE_ERR,
+        INS_2DERR = NG_QRCODE_ERR,
+
+        [Description("二維碼 比對錯誤")]
+        NG_QRCODE_COMPARE,
+        INS_2DMAPNG = NG_QRCODE_ERR,
+
+        [Description("二維碼 重複")]             // 沒用到
+        NG_QRCODE_REPEATED,
+        INS_2DREPEATERR = NG_QRCODE_REPEATED,
+
+        [Description("不檢測")]                  // 沒用到
+        NG_BYPASS,
+        INS_NOOPEN = NG_BYPASS,
+
+        [Description("切割偏移 NG (邊隙 NG)")]
+        NG_EDGE_GAP,
+        INS_PADEDGEGAPERR = NG_EDGE_GAP,
     }
 }

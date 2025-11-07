@@ -196,7 +196,7 @@ namespace LaserAlignDX.AoiModel.V3
             bool optUsePercentage = _xRecipe.InspectParams.optUseTotalNgPercentage && _xRecipe.InspectParams.optChipMeasurement;
             bool forceAllPass = (optUsePercentage && xScanInspectMode != ScanInspectMode.NOTRAY && this.IsPass);
 
-            return GaPlcDataPacker.GetSingleResult(forceAllPass);
+            return PlcDataPacker.GetSingleResult(forceAllPass);
         }
         /// <summary>
         /// 单颗产品的读码比对结果(预留300个) 视觉软件需要将读码结果保存在本地或服务器
@@ -226,7 +226,7 @@ namespace LaserAlignDX.AoiModel.V3
             //return states;
             #endregion
 
-            return GaPlcDataPacker.GetQrResult();
+            return PlcDataPacker.GetQrResult();
         }
         /// <summary>
         /// 单颗产品的偏移值([0]-X,[1]-Y,[2]-R，[3]-X,[4]-Y,[5]-R…依次共300个) 线扫引导功能启用时PLC需要用到这些值
@@ -267,7 +267,7 @@ namespace LaserAlignDX.AoiModel.V3
             //return states;
             #endregion
 
-            return GaPlcDataPacker.GetScanOffset();
+            return PlcDataPacker.GetScanOffset();
         }
         #endregion
 
@@ -419,13 +419,29 @@ namespace LaserAlignDX.AoiModel.V3
 
             int passCount = 0;
             int ngCount = 0;
-            foreach (var cell in _xRecipe.xRegionCells)
+
+            //foreach (var cell in _xRecipe.xRegionCells)
+            //{
+            //    if (cell == null)
+            //        continue;
+            //    //if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+            //    if(cell.IsResultPass())
+            //        passCount++;
+            //    //else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
+            //    else if (!cell.IsResultEmptyPlaceHold())
+            //        ngCount++;
+            //}
+
+            foreach (var cell in PlcDataPacker.IterFinalResultCells())
             {
-                if (cell == null)
-                    continue;
-                if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                if (cell == null) continue;
+                if (cell.IsResultPass())
                     passCount++;
-                else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
+                else if (cell.IsEmptyPlaceHold())
+                    continue;
+                else if (cell.IsAmbiguousBloc())
+                    continue;
+                else
                     ngCount++;
             }
 

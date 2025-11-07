@@ -133,12 +133,14 @@ namespace LaserAlignDX.AoiModel.V3
                     var cell = xRegionCells[index];
                     result.GetBlocByRowCol(row, col, out EzBloc bloc, out bool isOK);
 
-                    InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
+                    //InspectReason reason = (isOK ? InspectReason.INS_ALIGNERR : InspectReason.INS_DEFECTERR);
                     //if (bloc == null)
                     //    reason = InspectReason.INS_DEFECTERR;
-                    cell.inspectReason = reason;
-                    cell.inspectReasons.Add(reason);
+                    //cell.inspectReason = reason;
+                    //cell.inspectReasons.Add(reason);
                     //System.Diagnostics.Trace.WriteLine($"[{row}, {col}] is " + (isOK ? "OK" : "NG"));
+
+                    cell.MarkResult(isOK ? InspectReason.NG_EMPTY : InspectReason.NG_APPEARANCE);
 
                     if (!isOK)
                         isAllPass = false;

@@ -39,11 +39,8 @@ namespace LaserAlignDX
         [Description("空缺")]
         NG_EMPTY = 3,
         
-        [Description("讀碼 NG (讀不到)")]
-        NG_QRCODE = 4,
-        
-        [Description("讀碼 比對錯誤")]
-        NG_QRCODE_COMPARE = 2,
+        [Description("讀碼 NG (比對錯誤)")]
+        NG_QRCODE_ERR = 4,
 
         [Description("邊隙 NG (切割偏移)")]
         NG_EDGE_GAP = 8,
