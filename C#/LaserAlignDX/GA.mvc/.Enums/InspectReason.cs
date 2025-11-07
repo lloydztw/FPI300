@@ -26,18 +26,21 @@ namespace LaserAlignDX.OPSpace
 
         [Description("二維碼 比對錯誤")]
         NG_QRCODE_COMPARE,
-        INS_2DMAPNG = NG_QRCODE_ERR,
+        INS_2DMAPNG = NG_QRCODE_COMPARE,
 
-        [Description("二維碼 重複")]             // 沒用到
-        NG_QRCODE_REPEATED,
-        INS_2DREPEATERR = NG_QRCODE_REPEATED,
+        //[Description("二維碼 重複")]             // 沒用到
+        //NG_QRCODE_REPEATED,
+        //INS_2DREPEATERR = NG_QRCODE_REPEATED,
 
-        [Description("不檢測")]                  // 沒用到
-        NG_BYPASS,
-        INS_NOOPEN = NG_BYPASS,
+        //[Description("不檢測")]                  // 沒用到
+        //NG_BYPASS,
+        //INS_NOOPEN = NG_BYPASS,
 
         [Description("切割偏移 NG (邊隙 NG)")]
         NG_EDGE_GAP,
         INS_PADEDGEGAPERR = NG_EDGE_GAP,
+
+        [Description("不明區塊")]
+        NG_AMBIGUOUS_BLOC,
     }
 }

@@ -201,7 +201,7 @@ namespace LaserAlignDX.AoiModel
             foreach (var cell in suckerEmptyCells)
             {
                 if (cell == null) continue;
-                cell.MarkResult(InspectReason.NG_EMPTY);
+                cell.MarkResult(InspectReason.NG_EMPTY, reset: true);
             }
 
             //(3) 分配多線呈的群組

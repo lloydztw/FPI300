@@ -223,13 +223,22 @@ namespace LaserAlignDX.OPSpace
         /// </summary>
         public void MarkResult(InspectReason result, bool reset = false)
         {
-            _inspectResult = result;
-
             if (reset)
+            {
+                _inspectResult = result;
                 _inspectNgList.Clear();
+            }
+            else
+            {
+                // 已經是空格: 不能被執行檢測 (再被指定其他結果碼)
+                if (IsEmptyPlaceHold())
+                    return;
 
-            if (result != InspectReason.PASS)
-                _inspectNgList.Add(result);
+                _inspectResult = result;
+                
+                if (result != InspectReason.PASS)
+                    _inspectNgList.Add(result);
+            }
         }
 
         #region MVD_LINE_SEGMENTS

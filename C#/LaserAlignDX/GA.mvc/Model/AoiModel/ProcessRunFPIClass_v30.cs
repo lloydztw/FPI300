@@ -369,6 +369,9 @@ namespace LaserAlignDX.AoiModel.V3
                 // 釋放 多執行續的 CellGroups
                 _aoiChipLoc.DisposeCellGroups();
 
+                // 後處理: 標記不明區塊
+                _aoiChipLoc.PostMarkAmbiguousBlocs();
+
                 bool pass = _CheckChipsTotalPass();
                 markRunEnd(pass);
                 fire_AoiEnd();

@@ -34,6 +34,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Documents;
 using Traveller106;
 using _TM = LeTian.AoiLib.LtDebug;
 
@@ -62,7 +63,6 @@ namespace LaserAlignDX.AoiModel.V3
         GaCellsGroup[] _cellGroups;
         EzEmptyTrayResult _preEmptyTrayResult;
         #endregion
-
 
         public GaCellsGroup[] CellGroups
         {
@@ -176,6 +176,32 @@ namespace LaserAlignDX.AoiModel.V3
             return ok;
         }
 
+        internal void PostMarkAmbiguousBlocs()
+        {
+            // RESERVED
+            return;
+
+            if (_preEmptyTrayResult == null)
+                return;
+
+            foreach (var cell in PlcDataPacker.IterFinalResultCells())
+            {
+                if (cell == null) continue;
+                //if (cell.IsResultPass()) continue;
+                //if (cell.IsAmbiguousBloc()) continue;
+                //if (!cell.IsEmptyPlaceHold()) continue;
+                if (cell.IsLocated()) continue;
+
+                var r = cell.CellRow;
+                var c = cell.CellCol;
+                _preEmptyTrayResult.GetBlocByRowCol(r, c, out var bloc, out bool isSucker);
+
+                if (!isSucker && bloc != null)
+                {
+                    cell.MarkResult(InspectReason.NG_AMBIGUOUS_BLOC, reset: true);
+                }
+            }
+        }
 
         #region PRIVATE_FUNCTIONS
 
@@ -750,25 +776,21 @@ namespace LaserAlignDX.AoiModel.V3
                         cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
                         cell.ChipData = chipData;
                         cell.ChipData.ChipCoords.Centroid = _transCP?.Trans(chipCentroid);
-                        //cell.ChipData.ChipCoords.Angle = cell.RunAngle;
-                        //cell.inspectReason = InspectReason.PASS;
-                        //cell.inspectReasons.Clear();
+                        //>>> cell.ChipData.ChipCoords.Angle = cell.RunAngle;
                         cell.MarkResult(InspectReason.PASS, reset: true);
                     }
                 }
 
+                //(*) 踩腳檢查
                 ok = ok && _CheckTiltRatio(chipData);
 
                 //(7) 設定 Inspect Result Code
                 if (!ok)
                 {
-                    //cell.inspectReason = InspectReason.INS_ALIGNERR;
-                    //cell.inspectReasons.Add(InspectReason.INS_ALIGNERR);
-                    cell.MarkResult(InspectReason.NG_EMPTY);
+                    cell.MarkResult(InspectReason.NG_EMPTY, reset: true);
                 }
                 else
                 {
-                    //cell.inspectReason = InspectReason.PASS;
                     cell.MarkResult(InspectReason.PASS, reset: true);
                 }
 
