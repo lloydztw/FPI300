@@ -178,8 +178,7 @@ namespace LaserAlignDX.AoiModel.V3
 
         internal void PostMarkAmbiguousBlocs()
         {
-            // RESERVED
-            return;
+            //return;
 
             if (_preEmptyTrayResult == null)
                 return;

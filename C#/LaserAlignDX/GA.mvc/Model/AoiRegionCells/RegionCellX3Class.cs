@@ -215,8 +215,7 @@ namespace LaserAlignDX.OPSpace
         /// </summary>
         public bool IsAmbiguousBloc()
         {
-            //return _inspectResult == InspectReason.NG_AMBIGUOUS_BLOC;
-            return false;
+            return _inspectResult == InspectReason.NG_AMBIGUOUS_BLOC;
         }
         /// <summary>
         /// 標記 檢測結果

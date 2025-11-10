@@ -820,6 +820,7 @@
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="GA.mvc\_reserved\" />
     <Folder Include="GA\RunSpace\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

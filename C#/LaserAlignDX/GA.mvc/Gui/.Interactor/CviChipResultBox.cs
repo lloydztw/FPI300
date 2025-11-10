@@ -242,38 +242,48 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 return;
 
             var chipQuad2D = cell.ChipData?.ChipQuad2D;
-            if (chipQuad2D == null)
-            {
-                //>>> chipBox2D = cell.DrawResultRectF()?.ToBox2D();
-                chipQuad2D = cell.DrawResultRectF()?.ToQuad2D();
-            }
 
-            //if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0 && chipQuad2D != null)
-            if (cell.IsResultPass() && chipQuad2D != null)
+            //(1) PASS
+            if (chipQuad2D != null && cell.IsResultPass())
             {
-                // PASS
                 var item = new CviRotRectBox(chipQuad2D, Color.Lime, 0f) { Tag = cell };
                 _drawItems.Add(item);
             }
-            //else if (cell.inspectReason != InspectReason.INS_ALIGNERR && chipQuad2D != null)
-            else if (!cell.IsEmptyPlaceHold() && chipQuad2D != null)
+            //(2) NG (real NG)
+            else if (chipQuad2D != null && !cell.IsAmbiguousBloc() && !cell.IsEmptyPlaceHold())
             {
-                // NG
                 var item = _bypassNg ?
                     new CviRotRectBox(chipQuad2D, Color.Green, 0f) { Tag = cell } :
                     new CviRotRectBox(chipQuad2D, Color.Red, 0.20f) { Text = "NG", Tag = cell };
                 _drawItems.Add(item);
             }
+            //(3) 其他異常
             else
             {
-                // 吸盤 格位
+                // 使用小 QUAD
                 var center = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
                 var rect = JetEazy.Qcvt.CreateCenterRect(center.X, center.Y, 200f, 200f);
                 var quad2D = new QvQuad2D();
                 quad2D.SetBox(rect.Location, rect.Size);
 
-                var color = (cell.OutGridLink != null) ? Color.Blue : Color.Purple;
-                var item = new CviRotRectBox(quad2D, color, 0.10f) { Tag = cell };
+                // 顏色
+                Color color;
+                float blend = 0.10f;
+                if (cell.IsAmbiguousBloc())
+                {
+                    color = Color.Red;
+                    blend = 0.25f;
+                }
+                else if (cell.OutGridLink != null)
+                {
+                    color = Color.Blue;
+                }
+                else
+                {
+                    color = Color.Purple;
+                }
+
+                var item = new CviRotRectBox(quad2D, color, blend) { Tag = cell };
                 _drawItems.Add(item);
             }
 

@@ -22,6 +22,7 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -50,6 +51,7 @@ namespace LaserAlignDX.AoiModel.V3
 
         #region RUNTIME_DATA
         GaCellsGroup[] _cellGroups;
+        bool _is2ndRun;
         #endregion
 
         public bool QrUsed
@@ -129,6 +131,8 @@ namespace LaserAlignDX.AoiModel.V3
             if (!_xInspect.optChipMeasurement)
                 return;
 
+            _is2ndRun = false;
+
             fire_AoiBegin("晶粒尺寸量測");
 
             //_TM.RESET_ACCUM();
@@ -177,6 +181,8 @@ namespace LaserAlignDX.AoiModel.V3
         {
             if (!_xInspect.optChipMeasurement)
                 return;
+
+            _is2ndRun = true;
 
             fire_AoiBegin("晶粒尺寸量測 (二次補測)");
 
@@ -386,8 +392,23 @@ namespace LaserAlignDX.AoiModel.V3
                     var borderQuad = lineBorderQuads[borderIdx];
                     var mvdRoi = borderQuad.ToCMvdRectangleF();
 
-                    //(2) 海康線檢 (輸出為 cell.cMvdLineSegmentFsOut)
-                    cell.LineSegmentRun(borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
+                    //(2.0) 海康線檢 I
+                    if (!_is2ndRun)
+                    {
+                        // 海康線檢(輸出為 cell.cMvdLineSegmentFsOut)
+                        cell.LineSegmentRun(borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
+                    }
+                    //(2.1) 海康線檢 II
+                    else
+                    {
+                        using (Bitmap cellBmp2 = (Bitmap)cellBmp.Clone())
+                        {
+                            // 塗掉中段 (1/3) 
+                            fill_border_mid_area(cellBmp2, borderQuad, eBorder, Scalar.Black);
+                            // 海康線檢(輸出為 cell.cMvdLineSegmentFsOut)
+                            cell.LineSegmentRun(borderIdx, cellBmp2, mvdRoi, chipData.ChipQuad2D.Angle);
+                        }
+                    }
 
                     //(3) 將 CMvdLine 轉換成 EzLSD.LineSegment
                     var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
@@ -727,6 +748,31 @@ namespace LaserAlignDX.AoiModel.V3
                         //xInspect.m_QrUsed = false;
                     }
                 }
+            }
+        }
+        #endregion
+
+        #region PRIVATE_HELPER_FUNCTIONS
+        void fill_border_mid_area(Bitmap cellBmp2, QvQuad2D borderQuad, EdgeBorder eBorder, Scalar color)
+        {
+            using (var bridge = new QxImageBridge(cellBmp2))
+            {
+                var cellImg = bridge.Image;
+
+                var midRoi = JetEazy.Qcvt.CV(Rectangle.Round(borderQuad.BoundaryRect));
+                if (eBorder == EdgeBorder.Left || eBorder == EdgeBorder.Right)
+                {
+                    var dh = midRoi.Height / 3;
+                    midRoi.Inflate(0, -dh);
+                }
+                else
+                {
+                    var dw = midRoi.Width / 3;
+                    midRoi.Inflate(-dw, 0);
+                }
+
+                GaUtil.Clip(ref midRoi, cellImg.Width, cellImg.Height);
+                cellImg[midRoi].SetTo(color);
             }
         }
         #endregion
