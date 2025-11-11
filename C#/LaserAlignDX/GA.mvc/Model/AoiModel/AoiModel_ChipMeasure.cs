@@ -476,6 +476,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// </summary>
         private QvQuad2D[] _CalcRuntimeLocalLineBorderQuads_001(RegionCellX3Class cell, RectangleF cellRoi)
         {
+#if (OPT_OLD_CODE)
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
 
@@ -549,6 +550,8 @@ namespace LaserAlignDX.AoiModel.V3
                 _LOG_ERROR(ex, $"{borderName} 無法計算 LineBorderQuads!");
                 throw ex;
             }
+#endif
+            return null;
         }
 
         /// <summary>

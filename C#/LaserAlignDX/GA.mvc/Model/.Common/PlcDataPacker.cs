@@ -197,19 +197,29 @@ namespace LaserAlignDX.Model
 
             foreach (RegionCellX3Class cell in IterFinalResultCells(_xRecipe.xRegionCells))
             {
+                //(A) PASS
                 if (cell.IsResultPass())                    //cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                 {
                     states[i] = cell.RunX;
                     states[i + 1] = cell.RunY;
                     states[i + 2] = cell.RunAngle;
                 }
-                else if (cell.IsEmptyPlaceHold())     //cell.inspectReason == InspectReason.INS_ALIGNERR)
+                //(B) 空格
+                else if (cell.IsEmptyPlaceHold())           //cell.inspectReason == InspectReason.INS_ALIGNERR)
                 {
                     states[i] = 0;
                     states[i + 1] = 0;
                     states[i + 2] = 0;
 
                 }
+                //(C) 疑似有料之不明區塊 (視同 空格 一樣,  讓 PLC 不吸)
+                else if (cell.IsAmbiguousBloc())
+                {
+                    states[i] = 0;
+                    states[i + 1] = 0;
+                    states[i + 2] = 0;
+                }
+                //(D) 其他 NG
                 else
                 {
                     states[i] = cell.RunX;
