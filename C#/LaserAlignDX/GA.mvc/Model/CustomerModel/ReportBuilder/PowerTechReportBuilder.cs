@@ -70,88 +70,29 @@ namespace LaserAlignDX.Model
         #region PRIVATE_FUNCTIONS
         void appendHeader(StringBuilder sb)
         {
-            // sb.Append(ToReport1HeadStr());
-            // return;
-
-            sb.Append("编号").Append(",");
-            sb.Append("名称").Append(",");
-            sb.Append("是否检测").Append(",");
-            sb.Append("尺寸宽度X").Append(",");
-            sb.Append("尺寸高度Y").Append(",");
-            //sb.Append("位置偏移X").Append(",");
-            //sb.Append("位置偏移Y").Append(",");
-            sb.Append("原始X").Append(",");
-            sb.Append("原始Y").Append(",");
-            sb.Append("引导偏移X").Append(",");
-            sb.Append("引导偏移Y").Append(",");
-            sb.Append("引导偏移角度").Append(",");
-
-            //sb.Append("左边距").Append(",");
-            //sb.Append("右边距").Append(",");
-            //sb.Append("上边距").Append(",");
-            //sb.Append("下边距").Append(",");
-
-            sb.Append("LUX").Append(",");
-            sb.Append("LUY").Append(",");
-            sb.Append("RUX").Append(",");
-            sb.Append("RUY").Append(",");
-            sb.Append("RDX").Append(",");
-            sb.Append("RDY").Append(",");
-            sb.Append("LDX").Append(",");
-            sb.Append("LDY").Append(",");
-
-            sb.Append("马达1-X").Append(",");
-            sb.Append("马达1-Y").Append(",");
-            sb.Append("马达2-X").Append(",");
-            sb.Append("马达2-Y").Append(",");
-            sb.Append("条码设定值").Append(",");
-            sb.Append("读取码").Append(",");
+            sb.Append("編號, Row, Col, 是否檢測, 尺寸(寬), 尺寸(高), 原始X, 原始Y, 補償X, 補償Y, 補償角度");
+            sb.Append(", LUX, LUY, RUX, RUY, RDX, RDY, LDX, LDY");
+            //sb.Append(", S1, S2, S3, S4, S5, S6, S7, S8");
+            sb.Append(", 馬達1.X, 馬達1.Y, 馬達2.X, 馬達2.Y");
+            sb.Append(", 條碼設定值, 讀取碼");
             sb.AppendLine();
         }
         void appendOneCellData(StringBuilder sb, CELL cell)
         {
-            //sb.Append(ToReport1Str(cell));
-            //return;
-
-            //str += $"{cell.Index}" + ",";
-            //str += $"{cell.lblName}" + ",";
-            sb.Append(cell.Index).Append(",");
-            sb.Append(cell.lblName).Append(",");
-            sb.Append((cell.ByPass ? (INI.Instance.IsForceInspect ? "1强制检测" : "0不检测") : "1检测")).Append(",");
-
-            //sb.Append(cell.RunWidth.ToString(_digitFormat)).Append(",");
-            //sb.Append(cell.RunHeight.ToString(_digitFormat)).Append(",");
-            //sb.Append(cell.RunXOffset.ToString(_digitFormat)).Append(",");
-            //sb.Append(cell.RunYOffset.ToString(_digitFormat)).Append(",");
-
-            //sb.Append(cell.OrgX.ToString(_digitFormat)).Append(",");
-            //sb.Append(cell.OrgY.ToString(_digitFormat)).Append(",");
-            //sb.Append(cell.RunX.ToString(_digitFormat)).Append(",");
-            //sb.Append(cell.RunY.ToString(_digitFormat)).Append(",");
-            //sb.Append(cell.RunAngle.ToString(_digitFormat)).Append(",");
-
-            //sb.Append(cell.DisLeft.ToString(_digitFormat)).Append(",");
-            //sb.Append(cell.DisRight.ToString(_digitFormat)).Append(",");
-            //sb.Append(cell.DisTop.ToString(_digitFormat)).Append(",");
-            //sb.Append(cell.DisBottom.ToString(_digitFormat)).Append(",");
             var gaps = cell?.ChipData?.PadEdgeGaps;
+
+            sb.AppendValues(cell.Index, cell.CellRow, cell.CellCol);
+            sb.Append((cell.ByPass ? (INI.Instance.IsForceInspect ? "1强制检测" : "0不检测") : "1检测")).Append(",");
 
             sb.AppendValues(
                 cell.RunWidth,
                 cell.RunHeight,
-                //cell.PadEdgeDiffX,
-                //cell.PadEdgeDiffY,
 
                 cell.OrgX,
                 cell.OrgY,
                 cell.RunX,
                 cell.RunY,
                 cell.RunAngle,
-
-                //cell.PadEdgeSizes[(int)EdgeBorder.Left],        // 左 (報表順序)
-                //cell.PadEdgeSizes[(int)EdgeBorder.Right],       // 右 (報表順序)
-                //cell.PadEdgeSizes[(int)EdgeBorder.Top],         // 上 (報表順序)
-                //cell.PadEdgeSizes[(int)EdgeBorder.Bottom]       // 下 (報表順序)
 
                 gaps != null ? (float)gaps.LU.X : 0f,
                 gaps != null ? (float)gaps.LU.Y : 0f,
@@ -162,27 +103,31 @@ namespace LaserAlignDX.Model
                 gaps != null ? (float)gaps.LD.X : 0f,
                 gaps != null ? (float)gaps.LD.Y : 0f
 
+                //gaps != null ? (float)gaps.S1 : 0f,
+                //gaps != null ? (float)gaps.S2 : 0f,
+                //gaps != null ? (float)gaps.S3 : 0f,
+                //gaps != null ? (float)gaps.S4 : 0f,
+                //gaps != null ? (float)gaps.S5 : 0f,
+                //gaps != null ? (float)gaps.S6 : 0f,
+                //gaps != null ? (float)gaps.S7 : 0f,
+                //gaps != null ? (float)gaps.S8 : 0f
+
             ).Append(",");
 
             sb.AppendPointF(cell.Sur1).Append(",");
             sb.AppendPointF(cell.Sur2).Append(",");
+
             sb.Append(cell.SetBarcodeStr).Append(",");
-
-            //if (cell.RunCodeInfo != null)
-            //    str += cell.RunCodeInfo.Content + ",";
-            //else
-            //    str += ",";
-            //str += Environment.NewLine;
-
             if (cell.RunCodeInfo != null)
-                sb.Append(cell.RunCodeInfo.Content).Append(",");
+                sb.Append(cell.RunCodeInfo.Content);
             else
-                sb.Append(",");
+                sb.Append("");
+
             sb.AppendLine();
         }
         void saveReportData(StringBuilder reportSB)
         {
-            //string path = $"{_resultImagePath}\\report\\{DateTime.Now.ToString("yyyyMMdd")}\\{_stripID}";
+            //>>> string path = $"{_resultImagePath}\\report\\{DateTime.Now.ToString("yyyyMMdd")}\\{_stripID}";
             string path = System.IO.Path.Combine(_resultImagePath, "report", DateTime.Now.ToString("yyyyMMdd"), _stripId);
             string fname = System.IO.Path.ChangeExtension(_fileName, ".csv");
 

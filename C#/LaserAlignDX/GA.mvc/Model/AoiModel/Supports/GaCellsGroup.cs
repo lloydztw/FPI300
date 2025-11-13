@@ -70,6 +70,11 @@ namespace LaserAlignDX.AoiModel
             CellBmp?.Dispose();
             CellBmp = null;
         }
+
+        public override string ToString()
+        {
+            return Cell?.ToString();
+        }
     }
     
     public class GaCellsGroup : IEnumerable<GaCell>, IDisposable

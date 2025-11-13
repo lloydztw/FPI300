@@ -37,18 +37,21 @@ namespace LaserAlignDX.Model
         /// <returns>ARRAY[0..299] OF INT PC->PLC 单颗结果, 1:OK 2:外观NG, 3:空, 4:读码NG, 9:切割NG </returns>
         public static int[] GetSingleResult(bool forceAllPass)
         {
-            VerifyFinalResultCells();
-
             //---------------------------------------------------------------------------------------------------------------------
             // PC->PLC 单颗结果:
             //  1-Ok, 2-外观Ng, 3-空, 4-读码NG, 8-切割偏移NG, 9-切割NG
             //---------------------------------------------------------------------------------------------------------------------
 
-            int i = 0;
+            VerifyFinalResultCells();
+            var sb = _TRACE_BEGIN("row, col, plcCode");
+
             int[] states = new int[_xRecipe.xRegionCells.Count];
+            PlcResultCode plcCode;
+            int i = 0;
 
             foreach (RegionCellX3Class cell in IterFinalResultCells())
             {
+                #region CONVERT_TO_PLC_CODE
                 if (forceAllPass)
                 {
                     var go = (cell != null && 
@@ -58,24 +61,24 @@ namespace LaserAlignDX.Model
 
                     // 1 (當成 PASS 讓 PLC 吸走)
                     // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
-                    states[i] = (int)(go ? PlcResultCode.OK : PlcResultCode.NG_EMPTY);
+                    plcCode = go ? PlcResultCode.OK : PlcResultCode.NG_EMPTY;
                 }
                 else
                 {
                     //(A) PASS
                     if (cell.IsResultPass()) 
                     {
-                        states[i] = (int)PlcResultCode.OK;                          // 1
+                        plcCode = PlcResultCode.OK;                          // 1
                     }
                     //(B) 空格
                     else if (cell.IsEmptyPlaceHold())
                     {
-                        states[i] = (int)PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
+                        plcCode = PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
                     }
                     //(C) 疑似有料之不明區塊
                     else if (cell.IsAmbiguousBloc())
                     {
-                        states[i] = (int)PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不吸" 該區塊)
+                        plcCode = PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不吸" 該區塊)
                     }
                     //(D) 其他 結果
                     else
@@ -87,32 +90,37 @@ namespace LaserAlignDX.Model
                             //case InspectReason.INS_2DMAPNG:
                             case InspectReason.NG_QRCODE_ERR:
                             case InspectReason.NG_QRCODE_COMPARE:
-                                states[i] = (int)PlcResultCode.NG_QRCODE_ERR;       // 4
+                                plcCode = PlcResultCode.NG_QRCODE_ERR;       // 4
                                 break;
 
                             // 尺寸量測 NG
                             //case InspectReason.INS_CUTTINGERR:
                             case InspectReason.NG_CUT:
-                                states[i] = (int)PlcResultCode.NG_CUT;              // 9
+                                plcCode = PlcResultCode.NG_CUT;              // 9
                                 break;
 
                             // 邊隙 NG
                             //case InspectReason.INS_PADEDGEGAPERR:
                             case InspectReason.NG_EDGE_GAP:
-                                states[i] = (int)PlcResultCode.NG_EDGE_GAP;         // 8
+                                plcCode = PlcResultCode.NG_EDGE_GAP;         // 8
                                 break;
 
                             // 其他 NG
                             default:
-                                states[i] = (int)PlcResultCode.NG_APPEARANCE;       // 2
+                                plcCode = PlcResultCode.NG_APPEARANCE;       // 2
                                 break;
                         }
                     }
                 }
+                #endregion
 
+                states[i] = (int)plcCode;
                 i++;
+
+                _TRACE_LINE(sb, cell, plcCode);
             }
 
+            _TRACE_END(sb, "SingleResult");
             return states;
         }
 
@@ -122,13 +130,19 @@ namespace LaserAlignDX.Model
         /// <returns>ARRAY[0..299] OF INT PC->PLC 读码结果, 1:OK, 2:比对NG, 3:空, 4:有码未读到</returns>
         public static int[] GetQrResult()
         {
-            //PC->PLC 读码结果, 1-Ok, 2-比对Ng, 3-空, 4-有码未读到
+            //---------------------------------------------------------------------------------------------------------------------
+            // PC->PLC 读码结果, 1-Ok, 2-比对Ng, 3-空, 4-有码未读到
+            //---------------------------------------------------------------------------------------------------------------------
 
-            int i = 0;
+            var sb = _TRACE_BEGIN("row, col, plcCode");
+
             int[] states = new int[_xRecipe.xRegionCells.Count];
+            PlcResultCode plcCode;
+            int i = 0;
 
             foreach (RegionCellX3Class cell in IterFinalResultCells(_xRecipe.xRegionCells))
             {
+                #region CONVERT_TO_PLC_CODE
                 //if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
                 //    states[i] = (int)PlcResultCode.OK;                                // 1;
                 //else if (cell.inspectReason == InspectReason.INS_ALIGNERR)
@@ -143,17 +157,17 @@ namespace LaserAlignDX.Model
                 //(A) PASS
                 if (cell.IsResultPass())
                 {
-                    states[i] = (int)PlcResultCode.OK;                                  // 1
+                    plcCode = PlcResultCode.OK;                                  // 1
                 }
                 //(B) 空格
                 else if (cell.IsEmptyPlaceHold())
                 {
-                    states[i] = (int)PlcResultCode.NG_EMPTY;                            // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
+                    plcCode = PlcResultCode.NG_EMPTY;                            // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
                 }
                 //(C) 疑似有料之不明區塊
                 else if (cell.IsAmbiguousBloc())
                 {
-                    states[i] = (int)PlcResultCode.NG_EMPTY;                            // 3 (回報 NG_EMPTY 讓 PLC "不吸" 該區塊)
+                    plcCode = PlcResultCode.NG_EMPTY;                            // 3 (回報 NG_EMPTY 讓 PLC "不吸" 該區塊)
                 }
                 //(D) 其他 結果
                 else
@@ -163,23 +177,29 @@ namespace LaserAlignDX.Model
                         // 二維碼 讀取錯誤
                         // case InspectReason.INS_2DERR:
                         case InspectReason.NG_QRCODE_ERR:
-                            states[i] = (int)PlcResultCode.NG_QRCODE_ERR;               // 4
+                            plcCode = PlcResultCode.NG_QRCODE_ERR;               // 4
                             break;
 
                         // 二維碼 比對錯誤
                         // case InspectReason.INS_2DMAPNG:
                         case InspectReason.NG_QRCODE_COMPARE:
-                            states[i] = (int)PlcResultCode.NG_APPEARANCE;               // 2
+                            plcCode = PlcResultCode.NG_APPEARANCE;               // 2
                             break;
 
                         default:
-                            states[i] = (int)PlcResultCode.OK;                          // 1
+                            plcCode = PlcResultCode.OK;                          // 1
                             break;
                     }
                 }
+                #endregion
 
+                states[i] = (int)plcCode;
                 i++;
+
+                _TRACE_LINE(sb, cell, plcCode);
             }
+
+            _TRACE_END(sb, "QrResult");
             return states;
         }
 
@@ -189,47 +209,63 @@ namespace LaserAlignDX.Model
         /// <returns>ARRAY[0..899] OF REAL PC->PLC 线扫偏移值XYR</returns>
         public static float[] GetScanOffset()
         {
-            //PC->PLC 线扫偏移值XYR
-            //单颗产品的偏移值([0]-X,[1]-Y,[2]-R，[3]-X,[4]-Y,[5]-R…依次共300个)
+            //---------------------------------------------------------------------------------------------------------------------
+            // PC->PLC 线扫偏移值XYR
+            // 单颗产品的偏移值([0]-X,[1]-Y,[2]-R，[3]-X,[4]-Y,[5]-R…依次共300个)
+            //---------------------------------------------------------------------------------------------------------------------
 
-            int i = 0;
+            var sb = _TRACE_BEGIN("row, col, X, Y, R");
+
             float[] states = new float[_xRecipe.xRegionCells.Count * 3];
+            float X, Y, R;
+            int i = 0;
 
             foreach (RegionCellX3Class cell in IterFinalResultCells(_xRecipe.xRegionCells))
             {
-                //(A) PASS
-                if (cell.IsResultPass())                    //cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
+                // 空格 或 疑似不明區塊
+                if (cell == null || cell.IsEmptyPlaceHold() || cell.IsAmbiguousBloc())
                 {
-                    states[i] = cell.RunX;
-                    states[i + 1] = cell.RunY;
-                    states[i + 2] = cell.RunAngle;
+                    X = 0f;
+                    Y = 0f;
+                    R = 0f;
                 }
-                //(B) 空格
-                else if (cell.IsEmptyPlaceHold())           //cell.inspectReason == InspectReason.INS_ALIGNERR)
-                {
-                    states[i] = 0;
-                    states[i + 1] = 0;
-                    states[i + 2] = 0;
-
-                }
-                //(C) 疑似有料之不明區塊 (視同 空格 一樣,  讓 PLC 不吸)
-                else if (cell.IsAmbiguousBloc())
-                {
-                    states[i] = 0;
-                    states[i + 1] = 0;
-                    states[i + 2] = 0;
-                }
-                //(D) 其他 NG
                 else
                 {
-                    states[i] = cell.RunX;
-                    states[i + 1] = cell.RunY;
-                    states[i + 2] = cell.RunAngle;
+                    X = cell.RunX;
+                    Y = cell.RunY;
+                    R = cell.RunAngle;
                 }
+                states[i] = X;
+                states[i + 1] = Y;
+                states[i + 2] = R;
                 i += 3;
+
+                _TRACE_LINE(sb, cell, X, Y, R);
             }
+
+            _TRACE_END(sb, "ScanOffset");
             return states;
         }
+
+        /// <summary>
+        /// 枚舉 檢測後  實際 持有量測數據的 Cell
+        /// (以 OutGridLink 優先)
+        /// </summary>
+        public static IEnumerable<RegionCellX3Class> IterFinalResultCells(IEnumerable<RegionCellX3Class> cells = null)
+        {
+            if (cells == null)
+                cells = _xRecipe.xRegionCells;
+
+            foreach (var cell in cells)
+            {
+                var outGridCell = cell?.OutGridLink;
+                if (outGridCell != null)
+                    yield return outGridCell;
+                else
+                    yield return cell;
+            }
+        }
+
 
         /// <summary>
         /// 調試用: 檢查最後 cell (row,col) 是否正確
@@ -289,7 +325,7 @@ namespace LaserAlignDX.Model
                     ok = false;
                     break;
                 }
-                if(cell.Index != index)
+                if (cell.Index != index)
                 {
                     errors.AppendLine($"[r={r}, c={c}] Zigzag 順序錯誤!");
                     ok = false;
@@ -303,27 +339,38 @@ namespace LaserAlignDX.Model
                 var errMsg = "PLC 返回數據異常 :\n\r" + errors.ToString();
                 throw new System.Exception(errMsg);
             }
-            
+
             return ok;
         }
-
-        /// <summary>
-        /// 枚舉 檢測後  實際 持有量測數據的 Cell
-        /// (以 OutGridLink 優先)
-        /// </summary>
-        public static IEnumerable<RegionCellX3Class> IterFinalResultCells(IEnumerable<RegionCellX3Class> cells = null)
+        private static StringBuilder _TRACE_BEGIN(string header)
         {
-            if (cells == null)
-                cells = _xRecipe.xRegionCells;
+            // 實機跑線版本: 不執行 _TRACE
+            if (!Traveller106.Universal.IsNoUseCCD)
+                return null;
 
-            foreach (var cell in cells)
-            {
-                var outGridCell = cell?.OutGridLink;
-                if (outGridCell != null)
-                    yield return outGridCell;
-                else
-                    yield return cell;
-            }
+            StringBuilder sb = new StringBuilder();
+            if (!string.IsNullOrEmpty(header))
+                sb.AppendLine(header);
+
+            return sb;
+        }
+        private static void _TRACE_LINE(StringBuilder sb, RegionCellX3Class cell, PlcResultCode code)
+        {
+            if (sb == null || cell == null) return;
+            sb.AppendValues(cell.CellRow, cell.CellCol, (int)code).AppendLine();
+        }
+        private static void _TRACE_LINE(StringBuilder sb, RegionCellX3Class cell, params float[] values)
+        {
+            if (sb == null || cell == null) return;
+            sb.AppendValues(cell.CellRow, cell.CellCol).AppendValues(values).AppendLine();
+        }
+        private static void _TRACE_END(StringBuilder sb, string fileTag)
+        {
+            if (sb == null) return;
+            string path = "d:\\paso.log\\PlcResultData";
+            JetEazy.IO.QxPathUtility.InitDirectory(path);
+            string fileName = System.IO.Path.Combine(path, fileTag + ".csv");
+            System.IO.File.WriteAllText(fileName, sb.ToString());
         }
     }
 }

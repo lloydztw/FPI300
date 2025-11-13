@@ -263,7 +263,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// </summary>
         public Bitmap bmpprintmask
         {
-            get => _dtoGoldenMaskTemplate.Bmp; 
+            get => _dtoGoldenMaskTemplate.Bmp;
             set => _dtoGoldenMaskTemplate.Bmp = value;
         }
         /// <summary>
@@ -1059,7 +1059,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "PassCount", PassCount.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "NGCount", NGCount.ToString(), INIFILE);
         }
-#endregion
+        #endregion
 
         #region 校正與座標轉換_GAARA_版本
         /// <summary>

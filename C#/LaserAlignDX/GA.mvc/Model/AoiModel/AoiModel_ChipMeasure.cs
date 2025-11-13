@@ -15,9 +15,11 @@
 
 
 using JetEazy.OpenCV;
+using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -30,6 +32,7 @@ using System.Drawing.Imaging;
 using System.Text;
 using System.Threading.Tasks;
 using Traveller106;
+using VisionDesigner;
 using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
 
 
@@ -393,12 +396,13 @@ namespace LaserAlignDX.AoiModel.V3
                     var mvdRoi = borderQuad.ToCMvdRectangleF();
 
                     //(2.0) 海康線檢 I
-                    if (!_is2ndRun)
+                    CMvdLineSegmentF mvdLine;
+                    if (true)   // if (!_is2ndRun)
                     {
                         // 海康線檢(輸出為 cell.cMvdLineSegmentFsOut)
-                        cell.LineSegmentRun(borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
+                        mvdLine = cell.LineSegmentRun(borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
                     }
-                    //(2.1) 海康線檢 II
+                    //(2.1) 海康線檢 II (暫時不使用)
                     else
                     {
                         using (Bitmap cellBmp2 = (Bitmap)cellBmp.Clone())
@@ -406,27 +410,40 @@ namespace LaserAlignDX.AoiModel.V3
                             // 塗掉中段 (1/3) 
                             fill_border_mid_area(cellBmp2, borderQuad, eBorder, Scalar.Black);
                             // 海康線檢(輸出為 cell.cMvdLineSegmentFsOut)
-                            cell.LineSegmentRun(borderIdx, cellBmp2, mvdRoi, chipData.ChipQuad2D.Angle);
+                            mvdLine = cell.LineSegmentRun(borderIdx, cellBmp2, mvdRoi, chipData.ChipQuad2D.Angle);
+                        }
+
+                        // 如果塗掉中段 (1/3) 仍然抓不到, 回過頭使用 原來的方法
+                        if (mvdLine == null)
+                        {
+                            mvdLine = cell.LineSegmentRun(borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
                         }
                     }
 
                     //(3) 將 CMvdLine 轉換成 EzLSD.LineSegment
-                    var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
-                    for (int i = 0, len = lines.Length; i < len; i++)
-                    {
-                        //(3.1) 加回 ROI Offset
-                        lines[i]?.Offset(cellRoi.X, cellRoi.Y);
-                        //(3.2) 記入 cell.ChipData
-                        cell.ChipData.LineSegments[i] = lines[i];
-                    }
+                    #region OLD_CODE
+                    //var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
+                    //for (int i = 0, len = lines.Length; i < len; i++)
+                    //{
+                    //    //(3.1) 加回 ROI Offset
+                    //    lines[i]?.Offset(cellRoi.X, cellRoi.Y);
+                    //    //(3.2) 記入 cell.ChipData
+                    //    cell.ChipData.LineSegments[i] = lines[i];
+                    //}
+                    #endregion
+                    var line = mvdLine?.ToLineSegment();
+                    //(3.1) 加回 ROI Offset
+                    line?.Offset(cellRoi.X, cellRoi.Y);
+                    //(3.2) 記入 cell.ChipData
+                    cell.ChipData.LineSegments[borderIdx] = line;
 
                     //(4) 更新 LineBorderBoxes
                     //(4.1) 加回 ROI Offset
                     borderQuad.Offset(cellRoi.X, cellRoi.Y);
                     //(4.2) 更新 LineBorderBoxes;
                     chipData.LineBorderBoxes[borderIdx] = borderQuad.ToBox2D();
-                    //(4.3) 更新到 cell 舊的 Gaara Data
-                    cell.cMvdShapesForFindLineRegion[borderIdx] = borderQuad.ToCMvdRectangleF();
+                    ////(4.3) 更新到 cell 舊的 Gaara Data
+                    //cell.cMvdShapesForFindLineRegion[borderIdx] = borderQuad.ToCMvdRectangleF();
                 }
             }
             catch (Exception ex)
@@ -440,15 +457,16 @@ namespace LaserAlignDX.AoiModel.V3
             #region 尺寸長寬量測
             try
             {
-                //(1) 將 CMvdLine 轉換成 EzLSD.LineSegment
-                var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
-                for (int i = 0, len = lines.Length; i < len; i++)
-                {
-                    //(1.1) 加回 ROI Offset
-                    lines[i]?.Offset(cellRoi.X, cellRoi.Y);
-                    //(1.2) 記入 cell.ChipData
-                    chipData.LineSegments[i] = lines[i];
-                }
+                ////(1) 將 CMvdLine 轉換成 EzLSD.LineSegment
+                //var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
+                //for (int i = 0, len = lines.Length; i < len; i++)
+                //{
+                //    //(1.1) 加回 ROI Offset
+                //    lines[i]?.Offset(cellRoi.X, cellRoi.Y);
+                //    //(1.2) 記入 cell.ChipData
+                //    chipData.LineSegments[i] = lines[i];
+                //}
+                var lines = chipData.LineSegments;
 
                 //(2) 使用 Micro Transform 計算 尺寸 與 邊隙
                 //    (結果會直接存入 cell.ChipData 內)
@@ -663,9 +681,9 @@ namespace LaserAlignDX.AoiModel.V3
 
             fire_AoiBegin("晶粒瑕疵 與 QR CODE");
 
-            var cells = _xRecipe.xRegionCells;
+            //>>> var cells = _xRecipe.xRegionCells;
 
-            foreach (var cell in cells)
+            foreach (var cell in PlcDataPacker.IterFinalResultCells())
             {
                 fire_AoiProgressing(cell);
 
@@ -673,7 +691,7 @@ namespace LaserAlignDX.AoiModel.V3
                     continue;
 
                 //if (cell.inspectReason == InspectReason.INS_ALIGNERR)
-                if (cell.IsEmptyPlaceHold())
+                if (cell.IsEmptyPlaceHold() || cell.IsAmbiguousBloc())
                     continue;
 
                 // Golden Region Size
@@ -777,6 +795,34 @@ namespace LaserAlignDX.AoiModel.V3
                 GaUtil.Clip(ref midRoi, cellImg.Width, cellImg.Height);
                 cellImg[midRoi].SetTo(color);
             }
+        }
+        QVector[] getChipDimCorners(GaChipData chipData)
+        {
+            if (chipData != null)
+            {
+                var points = new List<QVector>();
+                var lines = chipData.LineSegments;
+                if (lines != null && lines.Length >= 4)
+                {
+                    for (int i = 0, NP = lines.Length; i < NP; i++)
+                    {
+                        int j = (i + 1) % NP;
+                        var line1 = lines[i];
+                        var line2 = lines[j];
+                        if (line1 == null || line2 == null) continue;
+                        var pt = line1.CalcIntersectedPoint(line2);
+                        if (pt == null) continue;
+                        points.Add(pt);
+                    }
+                }
+
+                if (points.Count >= 4)
+                {
+                    return points.ToArray();
+                }
+            }
+
+            return null;
         }
         #endregion
     }

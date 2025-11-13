@@ -240,32 +240,36 @@ namespace LaserAlignDX.OPSpace
             }
         }
 
-        #region MVD_LINE_SEGMENTS
-        /// <summary>
-        /// 外围的直线
-        /// </summary>
-        public CMvdLineSegmentF[] cMvdLineSegmentFsOut = new CMvdLineSegmentF[4];
-        /// <summary>
-        /// 内围的直线
-        /// </summary>
-        public CMvdLineSegmentF[] cMvdLineSegmentFsInSide = new CMvdLineSegmentF[4];
-        /// <summary>
-        /// Runtime 跑線後的 LineSegment Border Box2D
-        /// </summary>
-        public CMvdShape[] cMvdShapesForFindLineRegion = new CMvdShape[4];
+        #region OLD_CODE
+        ///// <summary>
+        ///// 外围的直线
+        ///// </summary>
+        //public CMvdLineSegmentF[] cMvdLineSegmentFsOut = new CMvdLineSegmentF[4];
+        ///// <summary>
+        ///// 内围的直线
+        ///// </summary>
+        //public CMvdLineSegmentF[] cMvdLineSegmentFsInSide = new CMvdLineSegmentF[4];
+        ///// <summary>
+        ///// Runtime 跑線後的 LineSegment Border Box2D
+        ///// </summary>
+        //public CMvdShape[] cMvdShapesForFindLineRegion = new CMvdShape[4];
+        #endregion
 
+        #region MVD_LINE_SEGMENTS
         /// <summary>
         /// 寻找直线
         /// </summary>
-        public void LineSegmentRun(int borderIndex, Bitmap bmp, CMvdRectangleF roi, double angleRef = 0)
+        public CMvdLineSegmentF LineSegmentRun(int borderIndex, Bitmap bmp, CMvdRectangleF roi, double angleRef = 0)
         {
+            CMvdLineSegmentF resultLine = null;
+
             int NP = 4;
 
             if (mvdFindLineClass == null)
                 mvdFindLineClass = new MvdFindLineClass();
 
             //borderIndex %= NP;
-            cMvdLineSegmentFsOut[borderIndex] = null;
+            //cMvdLineSegmentFsOut[borderIndex] = null;
 
             //>>> 根據 angleRef 將 borderIndex 正規化
             int sideIndex;
@@ -312,9 +316,11 @@ namespace LaserAlignDX.OPSpace
             }
 
             mvdFindLineClass.Background = xInspect.xCarrierBackground;
-            cMvdLineSegmentFsOut[borderIndex] = mvdFindLineClass.Run(bmp, roi, sideIndex);
+            resultLine = mvdFindLineClass.Run(bmp, roi, sideIndex);
+            
+            //cMvdLineSegmentFsOut[borderIndex] = resultLine;
+            return resultLine;
         }
-
         /// <summary>
         /// 寻找平行线
         /// </summary>
@@ -945,19 +951,19 @@ namespace LaserAlignDX.OPSpace
             RunAngle = 0;
             IsSaveDebugPicture = false;
 
-            int i = 0;
-            while (i < 4)
-            {
-                //CMvdLineSegmentF mLine = cMvdLineSegmentFsOut[i];
-                if (cMvdLineSegmentFsOut[i] != null)
-                    cMvdLineSegmentFsOut[i] = null;
-                if (cMvdLineSegmentFsInSide[i] != null)
-                    cMvdLineSegmentFsInSide[i] = null;
-                //CMvdShape mvdShape = cMvdShapesForFindLineRegion[i];
-                if (cMvdShapesForFindLineRegion[i] != null)
-                    cMvdShapesForFindLineRegion[i] = null;
-                i++;
-            }
+            //int i = 0;
+            //while (i < 4)
+            //{
+            //    //CMvdLineSegmentF mLine = cMvdLineSegmentFsOut[i];
+            //    if (cMvdLineSegmentFsOut[i] != null)
+            //        cMvdLineSegmentFsOut[i] = null;
+            //    if (cMvdLineSegmentFsInSide[i] != null)
+            //        cMvdLineSegmentFsInSide[i] = null;
+            //    CMvdShape mvdShape = cMvdShapesForFindLineRegion[i];
+            //    if (cMvdShapesForFindLineRegion[i] != null)
+            //        cMvdShapesForFindLineRegion[i] = null;
+            //    i++;
+            //}
 
             RunWidth = 0;
             RunHeight = 0;
@@ -1231,5 +1237,10 @@ namespace LaserAlignDX.OPSpace
             }
         }
         #endregion
+
+        public override string ToString()
+        {
+            return $"Cell[{CellRow},{CellCol}] {_inspectResult}";
+        }
     }
 }

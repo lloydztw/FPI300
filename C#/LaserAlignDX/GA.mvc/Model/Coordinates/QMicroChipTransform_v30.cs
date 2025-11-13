@@ -424,6 +424,9 @@ namespace LaserAlignDX.Model.Coords
                 p1 = gapMeaturePts[idx++];
                 chipData.PadEdgeGaps.LD.Y = Math.Round((p0 - p1).NormLength, 3);
 
+                //(7) 加入 S1 ~ S8
+
+
                 return ErrCodes.OK;
             }
             catch(Exception ex)

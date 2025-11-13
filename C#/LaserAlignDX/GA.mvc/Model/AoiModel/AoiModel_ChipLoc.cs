@@ -233,25 +233,35 @@ namespace LaserAlignDX.AoiModel.V3
             var groups = GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov, _preEmptyTrayResult);
             _cellGroups = groups;
 
-            string[] debugStrs = new string[groups.Length];
+            N_GROUPS = groups.Length;
+            string[] debugStrs = new string[N_GROUPS];
 
             //_InstanceBoxOverlapTools(N_GROUPS);
 
             if (!usingMultiThread)
             {
                 // 單線程 (驗證用)
-                for (int gid = 0; gid < groups.Length; gid++)
+                for (int gid = 0; gid < N_GROUPS; gid++)
                 {
                     debugStrs[gid] = _RunChipLocateOneT(gid, groups[gid], imgPath);
                 }
+
+                //for (int gid = 0; gid < N_GROUPS; gid++)
+                //{
+                //    _ExcludeCentroidOverlapsT(gid, groups[gid]);
+                //}
             }
             else
             {
                 Parallel.For(0, N_GROUPS, gid =>
                 {
-                    if (gid < groups.Length)
-                        debugStrs[gid] = _RunChipLocateOneT(gid, groups[gid], imgPath);
+                    debugStrs[gid] = _RunChipLocateOneT(gid, groups[gid], imgPath);
                 });
+
+                //Parallel.For(0, N_GROUPS, gid =>
+                //{
+                //    _ExcludeCentroidOverlapsT(gid, groups[gid]);
+                //});
             }
 
             debugCellCenterStr = string.Join("", debugStrs);
@@ -828,6 +838,132 @@ namespace LaserAlignDX.AoiModel.V3
             }
 
             return ok;
+        }
+
+        /// <summary>
+        /// 排除重複交疊的 Cell
+        /// </summary>
+        void _ExcludeCentroidOverlapsT(int threadIdx, IEnumerable<GaCell> cellsGroup)
+        {
+            //var xRegionCells = _xRecipe.xRegionCells;
+            //var rows = 0;
+            //var cols = 0;
+
+
+            //foreach (var gaCell in cellsGroup)
+            //{
+            //    var cell = gaCell.Cell;
+            //    RectangleF cellRoi = gaCell.CellRoi;
+
+            //    //(0) 進度條事件
+            //    fire_AoiProgressing(cell);
+
+            //    //(3) 執行像測 或 使用原有的 cell.ChipData
+            //    bool ok;
+            //    GaChipData chipData;
+            //    if (optLocate)
+            //    {
+            //        ok = _LocateOneChip(cellBmp, ref cellRoi, out chipData, chipMatcher);
+            //    }
+            //    else
+            //    {
+            //        chipData = cell?.ChipData;
+            //        ok = (chipData?.ChipQuad2D != null);
+            //    }
+
+            //    if (ok)
+            //    {
+            //        //(4) 找出 PLC 補償量
+            //        if (optCompensate)
+            //        {
+            //            //(4.1) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
+            //            var chipQuad2D = chipData.ChipQuad2D;
+            //            var chipCentroid = chipQuad2D.Center;
+            //            cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
+
+            //            //(4.2) DEBUG_STRING
+            //            #region 加入_DEBUG_STRING
+            //            if (true)
+            //            {
+            //                var debug_org_center_x = Math.Round(chipCentroid.X - cellRoi.X, 3);
+            //                var debug_org_center_y = Math.Round(chipCentroid.Y - cellRoi.Y, 3);
+            //                var debug_center_x = Math.Round(chipCentroid.X, 3);
+            //                var debug_center_y = Math.Round(chipCentroid.Y, 3);
+            //                debugSB.Append("INDEX:").Append(cell.Index).Append("#");
+            //                debugSB.Append("VIEW:").Append(cellRoi.X).Append(";").Append(cellRoi.Y).Append("#");
+            //                debugSB.Append("ORG:").Append(debug_org_center_x).Append(";").Append(debug_org_center_y).Append("#");
+            //                debugSB.Append("DES:").Append(debug_center_x).Append(";").Append(debug_center_y).AppendLine();
+            //            }
+            //            #endregion
+
+            //            //(5) 判定重疊區域比例
+            //            var xInspect = _xRecipe.InspectParams;
+            //            if (xInspect.xChipOverlap > 0)
+            //            {
+            //                //(5.1) 直接使用 QvBox2D 計算 重疊率
+            //                double overlapRatio = calcOverlap(gaCell, chipQuad2D, isLocalCoordinate: false);
+            //                //(5.2) 重疊率 判定結果
+            //                ok = overlapRatio >= xInspect.xChipOverlap;
+            //            }
+
+            //            if (ok)
+            //            {
+            //                //(6) 根據不同載台, 計算補償量
+            //                var activeCarrierID = getActiveCarrierID();
+            //                (var motorDelta, var worldDelta) = _transformModel.CalcPlcCompensation(activeCarrierID, chipCentroid, cell.CellRow, cell.CellCol);
+
+            //                //(6.1) Angle
+            //                double angle = _CalcAngle(chipData);
+
+            //                //(6.2) 記入 Runtime (Gaara) 所需要的數據
+            //                cell.RunAngle = (float)Math.Round((angle + INI.Instance.Cal_Bca), 3);
+            //                cell.RunX = (float)Math.Round((motorDelta.X + INI.Instance.Cal_Bcx), 3);
+            //                cell.RunY = (float)Math.Round((motorDelta.Y + INI.Instance.Cal_Bcy), 3);
+
+            //                //(6.3) 記入 Gaara Sur1 與 Sur2
+            //                if (_transCS1 != null)
+            //                {
+            //                    var mp = _transCS1.Trans(chipCentroid);
+            //                    cell.Sur1 = new PointF((float)mp.X, (float)mp.Y);
+            //                }
+            //                if (_transCS2 != null)
+            //                {
+            //                    var mp = _transCS2.Trans(chipCentroid);
+            //                    cell.Sur2 = new PointF((float)mp.X, (float)mp.Y);
+            //                }
+
+            //                //(6.4) 記入 ChipData
+            //                cell.ChipData = chipData;
+            //                cell.ChipData.ChipCoords.Angle = cell.RunAngle;
+            //                cell.ChipData.ChipCoords.Centroid = _transCP?.Trans(chipCentroid);
+            //            }
+            //        }
+            //        else
+            //        {
+            //            //(6.5) 只簡單記入 ChipData
+            //            var chipQuad2D = chipData.ChipQuad2D;
+            //            var chipCentroid = chipQuad2D.Center;
+            //            cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
+            //            cell.ChipData = chipData;
+            //            cell.ChipData.ChipCoords.Centroid = _transCP?.Trans(chipCentroid);
+            //            //>>> cell.ChipData.ChipCoords.Angle = cell.RunAngle;
+            //            cell.MarkResult(InspectReason.PASS, reset: true);
+            //        }
+            //    }
+
+            //    //(*) 踩腳檢查
+            //    ok = ok && _CheckTiltRatio(chipData);
+
+            //    //(7) 設定 Inspect Result Code
+            //    if (!ok)
+            //    {
+            //        cell.MarkResult(InspectReason.NG_EMPTY, reset: true);
+            //    }
+            //    else
+            //    {
+            //        cell.MarkResult(InspectReason.PASS, reset: true);
+            //    }
+            //}
         }
 
         /// <summary>

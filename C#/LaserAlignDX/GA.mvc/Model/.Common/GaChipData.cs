@@ -181,6 +181,7 @@ namespace LaserAlignDX.Model
             new QVector(0, 0),
             new QVector(0, 0),
         };
+        double[] _S = new double[8];
         #endregion
 
         /// <summary>
@@ -199,6 +200,16 @@ namespace LaserAlignDX.Model
         /// 左下 邊隙 (單位 mm)
         /// </summary>
         public QVector LD => _gaps[3];
+
+        public double[] S => _S;
+        public double S1 { get => _S[0]; set => _S[0] = value; }
+        public double S2 { get => _S[1]; set => _S[1] = value; }
+        public double S3 { get => _S[2]; set => _S[2] = value; }
+        public double S4 { get => _S[3]; set => _S[3] = value; }
+        public double S5 { get => _S[4]; set => _S[4] = value; }
+        public double S6 { get => _S[5]; set => _S[5] = value; }
+        public double S7 { get => _S[6]; set => _S[6] = value; }
+        public double S8 { get => _S[7]; set => _S[7] = value; }
 
         public IEnumerable<QVector> IterItems()
         {
