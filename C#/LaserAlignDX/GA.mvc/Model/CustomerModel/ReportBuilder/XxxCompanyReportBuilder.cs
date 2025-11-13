@@ -48,7 +48,8 @@ namespace LaserAlignDX.Model
 
             appendHeader(reportSB);
 
-            foreach (CELL cell in _xRecipe.xRegionCells)
+            //>>> foreach (CELL cell in _xRecipe.xRegionCells)
+            foreach (var cell in PlcDataPacker.IterFinalResultCells())
             {
                 appendOneCellData(reportSB, cell);
             }
