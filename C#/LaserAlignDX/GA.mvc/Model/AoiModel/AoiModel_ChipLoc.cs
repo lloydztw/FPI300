@@ -536,6 +536,10 @@ namespace LaserAlignDX.AoiModel.V3
                             ogCell.CellRow = bestPlaceHold.CellRow;
                             ogCell.CellCol = bestPlaceHold.CellCol;
                             ogCell.lblName = bestPlaceHold.lblName;
+
+                            ogCell.OrgX = bestPlaceHold.OrgX;
+                            ogCell.OrgY = bestPlaceHold.OrgY;
+                            
                             //>>> ogCell.viewRectF = bestPlaceHold.viewRectF;
                             //>>> _xRecipe.xRegionCells[ogCell.Index] = ogCell;
                         }

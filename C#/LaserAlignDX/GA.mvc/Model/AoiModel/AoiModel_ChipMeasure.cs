@@ -457,7 +457,8 @@ namespace LaserAlignDX.AoiModel.V3
             #region 尺寸長寬量測
             try
             {
-                ////(1) 將 CMvdLine 轉換成 EzLSD.LineSegment
+                #region OLD_CODE
+                ////(0) 將 CMvdLine 轉換成 EzLSD.LineSegment
                 //var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
                 //for (int i = 0, len = lines.Length; i < len; i++)
                 //{
@@ -466,6 +467,9 @@ namespace LaserAlignDX.AoiModel.V3
                 //    //(1.2) 記入 cell.ChipData
                 //    chipData.LineSegments[i] = lines[i];
                 //}
+                #endregion
+
+                //(1) LineSegments (Camera Coordinates) (單位 pixels)
                 var lines = chipData.LineSegments;
 
                 //(2) 使用 Micro Transform 計算 尺寸 與 邊隙

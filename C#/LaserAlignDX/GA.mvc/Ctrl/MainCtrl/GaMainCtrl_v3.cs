@@ -542,6 +542,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 try
                 {
                     var bmp = GaImageUtil.LoadBigImage(fileName);
+                    simLotData(fileName);
                     _lineScanImageHolder?.TakeOver(bmp, System.IO.Path.GetFileName(fileName));
                 }
                 catch (Exception ex)
@@ -590,6 +591,24 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 }
                 _timerMemoryUsage.Enabled = false;
                 _timerMemoryUsage.Enabled = true;
+            }
+        }
+        void simLotData(string fileName)
+        {
+            // SIMULATION
+            if (Traveller106.Universal.IsNoUseCCD)
+            {
+                var plcIO = MACHINE?.PLCIO;
+                if (plcIO is IPlcIoFPIX3Sim sim)
+                {
+                    fileName = System.IO.Path.GetFileName(fileName);
+                    if (fileName.Contains("-"))
+                    {
+                        var lotID = fileName.Split('-')[0].Trim();
+                        sim.simLotID(lotID);
+                        sim.simStripID(null);
+                    }
+                }
             }
         }
         #endregion

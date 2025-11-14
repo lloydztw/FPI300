@@ -102,11 +102,11 @@ namespace LaserAlignDX.OPSpace
         /// <summary>
         /// 理想 格位中心座標 X (單位 mm)
         /// </summary>
-        public float OrgX = 0;
+        public float OrgX { get; set; } = 0;
         /// <summary>
         /// 理想 格位中心座標 Y (單位 mm)
         /// </summary>
-        public float OrgY = 0;
+        public float OrgY { get; set; } = 0;
         /// <summary>
         /// PLC 定位補償 X (單位 mm)
         /// </summary>

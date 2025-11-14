@@ -269,7 +269,9 @@ namespace LaserAlignDX.AoiModel
                         CellCol = cellOriginal.CellCol,
                         lblName = cellOriginal.lblName,
                         viewRectF = cellOriginal.viewRectF,
-                        ChipData = cellOriginal.ChipData
+                        ChipData = cellOriginal.ChipData,
+                        OrgX = cellOriginal.OrgX,
+                        OrgY = cellOriginal.OrgY,
                     };
                     collectedCells[i] = cellCopy;
                     cellOriginal.OutGridLink = cellCopy;

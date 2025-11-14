@@ -162,7 +162,7 @@ namespace LaserAlignDX.AoiModel
         protected string GetLotFileName(string tag, string ext)
         {
             //m_FileName = $"{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg";
-            return $"{tag}-{_timeTag:yyyyMMddHHmmss}{ext}";
+            return $"{tag}-{_timeTag:yyyyMMdd_HHmmss}{ext}";
         }
         protected string GetDebugBmpFileName()
         {
@@ -182,7 +182,7 @@ namespace LaserAlignDX.AoiModel
             {
                 System.IO.Directory.CreateDirectory(path);
             }
-            string file = $"{lotID}-{_timeTag:yyyyMMddHHmmss}.jpg";
+            string file = $"{lotID}-{_timeTag:yyyyMMdd_HHmmss}.jpg";
             return System.IO.Path.Combine(path, file);
         }
         protected string GetLogPath(string subFolder)

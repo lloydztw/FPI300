@@ -126,5 +126,7 @@ namespace VsCommon.ControlSpace.IOSpace
         /// 模擬目前 載台1 或 載台2
         /// </summary>
         void simActiveStage(int stageId1);
+        void simStripID(string stripID);
+        void simLotID(string lotID);
     }
 }

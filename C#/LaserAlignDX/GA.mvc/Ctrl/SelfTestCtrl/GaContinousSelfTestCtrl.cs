@@ -139,7 +139,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             System.Threading.Thread.Sleep(1500);
 
             // 無限循環
-            bool go = loadNextImageToModel(out int id, circulate: true);
+            bool go = loadNextImageToModel(out int id, out string lotID, circulate: true);
             if (!go)
                 return;
 
@@ -150,6 +150,9 @@ namespace LaserAlignDX.Mvc.Ctrl
                 System.Threading.Thread.Sleep(500);
                 plcIO.bSoftwareReady = true;
                 plcIO.bFlyReady = true;
+                //plcIO.simLotID($"Lot_SIM_{id:000}");
+                //plcIO.simStripID($"Strip_SIM_{id:000}");
+                plcIO.simLotID(lotID);
             }
         }
 
@@ -172,7 +175,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             process.Stop();
 
             // 跑完最後檔案後, 會自動停止
-            bool go = loadNextImageToModel(out int id, circulate: false);
+            bool go = loadNextImageToModel(out int id, out string lotID, circulate: false);
             if (!go)
             {
                 plcIO.bSoftwareReady = false;
@@ -185,20 +188,25 @@ namespace LaserAlignDX.Mvc.Ctrl
                 plcIO.iScanStatus = 0;
                 plcIO.bScanStart = false;
                 plcIO.bFlyReady = false;
-                plcIO.sLotID = $"Lot_SIM_{id:000}";
-                plcIO.sStripID = $"Strip_SIM_{id:000}";
+                //plcIO.simLotID($"Lot_SIM_{id:000}");
+                //plcIO.simStripID($"Strip_SIM_{id:000}");
+                plcIO.simLotID(lotID);
             }
 
             process.Start();
         }
 
-        private bool loadNextImageToModel(out int index, bool circulate)
+        private bool loadNextImageToModel(out int index, out string lotID, bool circulate)
         {
             bool go = getNextImgFileName(out string fileName, out index, out int totalNumber, circulate);
+            lotID = $"Lot_SIM_{index:000}";
+
             if (go)
             {
                 var bmp = GaImageUtil.LoadBigImage(fileName);
                 var srcName = System.IO.Path.GetFileNameWithoutExtension(fileName);
+                if (srcName.Contains("-"))
+                    lotID = srcName.Split('-')[0].Trim();
                 _sysModel.LineScanImageHolder.TakeOver(bmp, srcName + $" ({index+1}/{totalNumber})");
             }
             return go;

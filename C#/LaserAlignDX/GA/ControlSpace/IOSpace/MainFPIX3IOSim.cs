@@ -280,12 +280,12 @@ namespace VsCommon.ControlSpace.IOSpace
         public string sLotID
         {
             get;
-            set;
+            private set;
         } = "Lot_NONE";
         public string sStripID
         {
             get;
-            set;
+            private set;
         } = "Strip_NONE";
 
         public int iFlyStart
@@ -418,9 +418,27 @@ namespace VsCommon.ControlSpace.IOSpace
             private set;
         } = 1;
 
-        void IPlcIoFPIX3Sim.simActiveStage(int stageId1)
+        public void simActiveStage(int stageId1)
         {
             iScanStage = stageId1 == 2 ? 2 : 1;
+        }
+        public void simStripID(string stripID)
+        {
+            if (string.IsNullOrWhiteSpace(stripID))
+                sStripID = $"sim_SP{_simProductionRunCount:000}";
+            else if (!stripID.Contains("sim"))
+                sStripID = "sim_" + stripID;
+            else
+                sStripID = stripID;
+        }
+        public void simLotID(string lotID)
+        {
+            if (string.IsNullOrWhiteSpace(lotID))
+                sLotID = $"sim_LOT{_simProductionRunCount:000}";
+            else if (!lotID.Contains("sim"))
+                sLotID = "sim_" + lotID;
+            else
+                sLotID = lotID;
         }
 
         void sim_StartScan_ChipLoc()
@@ -437,8 +455,8 @@ namespace VsCommon.ControlSpace.IOSpace
             bScanDone = false;
 
             // 設定 LOT DATA
-            sStripID = $"Strip_SIM_{_simProductionRunCount:000}";
-            sLotID = $"Lot_SIM_{_simProductionRunCount:000}";
+            //simStripID($"Strip_SIM_{_simProductionRunCount:000}");
+            //simLotID($"Lot_SIM_{_simProductionRunCount:000}");
 
             //*** bFlyReady *** 完全由 PC 控制
             //bFlyReady = true;   // 根據 Gaara 描述, 一旦啟動 bSoftwareReady, bFlyReady 就馬上 ON,
