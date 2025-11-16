@@ -442,6 +442,7 @@
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaProgressEventArgs.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
     <Compile Include="GA.mvc\.Enums\InspectReason.cs" />
+    <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellsDataCollection.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellX3Class.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\QMicroChipTransform_v30.cs" />
@@ -820,7 +821,6 @@
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="GA.mvc\_reserved\" />
     <Folder Include="GA\RunSpace\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

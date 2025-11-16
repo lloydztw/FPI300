@@ -20,15 +20,14 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
-using XRecipe = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
 
 
 namespace LaserAlignDX.AoiModel
 {
-    public partial class RegionCellsDataHolder : IDisposable
+    public partial class RegionCellsDataCollection : IDisposable
     {
         #region GLOBAL_MESS
-        XRecipe _xRecipe => XRecipe.Instance;
+        //XRecipe _xRecipe => XRecipe.Instance;
         #endregion
 
         #region INNER_CLASS
@@ -77,44 +76,69 @@ namespace LaserAlignDX.AoiModel
         #endregion
 
         #region PRIVATE_SETTINGS_DATA
-        ScanInspectMode _mode;
+        //ScanInspectMode _mode = ScanInspectMode.MEASUREAOI;
         #endregion
 
-
-        public RegionCellsDataHolder()
+        public RegionCellsDataCollection(IEnumerable<XCell> cells = null)
         {
+            if (cells != null)
+                Update(cells);
         }
-        public void Dispose()
+        public void Update(IEnumerable<XCell> cells)
         {
-            _grid?.Dispose();
-            _grid = null;
-            _outGridBlocs = null;
-        }
-        public void Reset()
-        {
-            this.Dispose();
-        }
-
-        public void Update(IEnumerable<XCell> cells, int mode)
-        {
-            _mode = (ScanInspectMode)mode;
-
-            //_withPadGaps = _xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch &&
-            //               _xRecipe.InspectParams.optPadEdgeGapsMeasurement &&
-            //               _xRecipe.InspectParams.optChipMeasurement;
-
             try
             {
-                Reset();
-
-                //_xRegionCells = cells != null ? cells : _xRecipe.xRegionCells;
-                _grid = ConvertToGrid(cells);
-                _outGridBlocs = ConvertToOutGridBlocsList(cells);
+                cleanUp(_grid);
+                cleanUp(_outGridBlocs);
+                _grid = buildGrid(cells);
+                _outGridBlocs = new List<EzBloc>();
             }
             catch (Exception ex)
             {
                 GaUtil.LOG_ERROR(ex, $"{GetType().Name}.UpdateResult");
             }
+        }
+        public void Detach()
+        {
+            // 刻意避免 源頭的 cells 被 Dispose
+            _grid?.Dispose();
+            _grid = null;
+            _outGridBlocs = null;
+        }
+        public void Dispose()
+        {
+            cleanUp(_grid);
+            _grid = null;
+            cleanUp(_outGridBlocs);
+            _outGridBlocs = null;
+        }
+        public void Reset()
+        {
+            foreach (var cell in IterGridCells())
+                cell?.Reset();
+            _outGridBlocs = new List<EzBloc>();
+        }
+
+        public int Rows
+        {
+            get => _grid != null ? _grid.Rows : 0;
+        }
+        public int Cols
+        {
+            get => _grid != null ? _grid.Cols : 0;
+        }
+        public XCell GetGridCell(int row, int col)
+        {
+            var bloc = (CellBloc)_grid?.Get(row, col);
+            var cell = bloc?.Cell;
+            return cell;
+        }
+        public XCell GetFinalCell(int row, int col)
+        {
+            var bloc = (CellBloc)_grid?.Get(row, col);
+            var cell = bloc?.Cell;
+            var xCell = cell?.OutGridLink;
+            return xCell ?? cell;
         }
         public IEnumerable<XCell> IterFinalCells()
         {
@@ -124,22 +148,37 @@ namespace LaserAlignDX.AoiModel
                 int cols = _grid.Cols;
                 foreach ((var r, var c) in Zigzag.IterZigzag(rows, cols))
                 {
-                    var bloc = (CellBloc)_grid.Get(r, c);
-                    var cell = bloc.Cell;
-                    var xCell = cell?.OutGridLink;
-                    if (xCell != null)
-                        yield return xCell;
-                    else
+                    var cell = GetFinalCell(r, c);
+                    if (cell != null)
                         yield return cell;
                 }
             }
         }
-        public XCell GetCellByRowCol(int row, int col)
+        public IEnumerable<XCell> IterGridCells()
         {
-            var bloc = (CellBloc)_grid?.Get(row, col);
-            return bloc?.Cell;
+            if (_grid != null)
+            {
+                int rows = _grid.Rows;
+                int cols = _grid.Cols;
+                foreach ((var r, var c) in Zigzag.IterZigzag(rows, cols))
+                {
+                    var cell = GetGridCell(r, c);
+                    if (cell != null)
+                        yield return cell;
+                }
+            }
         }
 
+        /// <summary>
+        /// 【空盤檢測】加入格位外 疑似有料的區塊
+        /// </summary>
+        public void AppendOutGridBloc(EzBloc bloc)
+        {
+            if (bloc != null)
+                _outGridBlocs.Add(bloc);
+        }
+
+#if(OPT_RESERVED)
         public IEnumerable<EzBloc> iterNonEmptyBlocs(bool onGrid)
         {
             if (onGrid)
@@ -194,38 +233,10 @@ namespace LaserAlignDX.AoiModel
                 }
             }
         }
-        bool checkResult(XCell cell, out bool isPass, out bool isEmpty)
-        {
-            isPass = false;
-            isEmpty = false;
-
-            if (cell == null)
-                return false;
-
-            if (_mode == ScanInspectMode.NOTRAY)
-            {
-                string abnormalStr = cell.GetNoTrayDesc();
-                if (string.IsNullOrEmpty(abnormalStr))
-                    isEmpty = true;
-                else
-                    isEmpty = false;
-                isPass = isEmpty;
-            }
-            else
-            {
-                isEmpty = false;
-                if (cell.IsResultPass())
-                    isPass = true;
-                else if (!cell.IsEmptyPlaceHold())
-                    isPass = false;
-                else
-                    isEmpty = true;
-            }
-            return true;
-        }
+#endif
 
         #region PRIVATE_FUNCTIONS
-        EzBlocsGrid ConvertToGrid(IEnumerable<XCell> cells)
+        EzBlocsGrid buildGrid(IEnumerable<XCell> cells)
         {
             int rows = 0;
             int cols = 0;
@@ -234,12 +245,16 @@ namespace LaserAlignDX.AoiModel
             #region 蒐集_CELL_BLOCS
             foreach (var cell in cells)
             {
-                if (cell == null) continue;
-                CellBloc cbloc;
-                if (_mode == ScanInspectMode.NOTRAY)
-                    cbloc = new CellBloc(cell, cell.viewRectF);
-                else
-                    cbloc = new CellBloc(cell);
+                if (cell == null) 
+                    continue;
+
+                //CellBloc cbloc;
+                //if (_mode == ScanInspectMode.NOTRAY)
+                //    cbloc = new CellBloc(cell, cell.viewRectF);
+                //else
+                //    cbloc = new CellBloc(cell);
+
+                var cbloc = new CellBloc(cell, cell.viewRectF);
                 blocs.Add(cbloc);
                 rows = Math.Max(rows, cell.CellRow + 1);
                 cols = Math.Max(cols, cell.CellCol + 1);
@@ -258,48 +273,33 @@ namespace LaserAlignDX.AoiModel
             }
             #endregion
 
-            #region 將空缺格點_填入_PLACE_HOLDER
-            //var C = GaMvcConfig.SysModel.ActiveCarrierID;
-            //var camGrid = C == CarrierEnum.C1 ? _xRecipe.xCamGrid1 : _xRecipe.xCamGrid2;
-            //for (int r = 0; r < rows; r++)
-            //{
-            //    for (int c = 0; c < cols; c++)
-            //    {
-            //        var cb = (CellBloc)grid.Get(r, c);
-            //        if (cb == null || cb?.Cell?.chipLocInCamera == null)
-            //        {
-            //            var placeHolder = camGrid.Get(r, c);
-            //            var rect = placeHolder.Rect;
-            //            cb = new CellBloc(cb?.Cell, rect);
-            //            grid.Set(r, c, cb);
-            //        }
-            //    }
-            //}
-            #endregion
-
             return grid;
         }
-        List<EzBloc> ConvertToOutGridBlocsList(IEnumerable<XCell> cells)
+        void cleanUp(EzBlocsGrid grid)
         {
-            var outGridBlocs = new List<EzBloc>();
-            if (_mode == ScanInspectMode.NOTRAY)
+            if (grid != null)
             {
-                foreach (var rect in _xRecipe.xOutBlocs)
+                foreach (var item in grid)
                 {
-                    outGridBlocs.Add(new EzBloc(rect, 0));
+                    if (item is CellBloc cb)
+                    {
+                        cb.Cell?.Dispose();
+                    }
                 }
             }
-            else
+        }
+        void cleanUp(IList<EzBloc> list)
+        {
+            if (list != null)
             {
-                foreach (var cell in cells)
+                foreach (var item in list)
                 {
-                    var ogCell = cell?.OutGridLink;
-                    if (ogCell == null) continue;
-                    CellBloc cb = new CellBloc(ogCell);
-                    outGridBlocs.Add(cb);
+                    if (item is CellBloc cb)
+                    {
+                        cb.Cell?.Dispose();
+                    }
                 }
             }
-            return outGridBlocs;
         }
         #endregion
     }

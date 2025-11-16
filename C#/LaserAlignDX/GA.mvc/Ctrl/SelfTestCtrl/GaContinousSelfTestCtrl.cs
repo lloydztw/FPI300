@@ -17,6 +17,7 @@
 
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
+using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
@@ -249,14 +250,12 @@ namespace LaserAlignDX.Mvc.Ctrl
         private int getLocatedChipsCount()
         {
             int count = 0;
-            foreach (var cell in _xRecipe.xRegionCells)
+            foreach (var cell in PlcDataPacker.IterFinalResultCells())
             {
-                if (cell?.ChipData?.ChipQuad2D!=null)
+                //if (cell?.ChipData?.ChipQuad2D!=null)
+                //    count++;
+                if (cell != null && cell.IsLocated())
                     count++;
-                //if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-                //    passCount++;
-                //else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
-                //    ngCount++;
             }
             return count;
         }
