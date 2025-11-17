@@ -382,21 +382,21 @@ namespace LaserAlignDX.AoiModel
             if (totalCount == 0)
                 return new GaCellsGroup[0];
 
-            int span = totalCount >= N ? totalCount / N : 1;
-            while (N * span < totalCount)
-                span++;
+            //int span = totalCount >= N ? totalCount / N : 1;
+            //while (N * span < totalCount)
+            //    span++;
+            int span = Math.Max(1, (int)Math.Ceiling(1.0 * totalCount / N));
 
             var groups = new GaCellsGroup[N];
             for (int gid = 0; gid < N; gid++)
             {
                 var collection = new List<RegionCellX3Class>();
-                int idx = gid * span;
-                int idx2 = Math.Min(idx + span, totalCount);
-                for (int i = idx; i < idx2; i++)
-                {
+
+                int idxStart = gid * span;
+                int idxEnd = Math.Min(idxStart + span, totalCount);
+                for (int i = idxStart; i < idxEnd; i++)
                     collection.Add(srcCells[i]);
-                }
-                //>>> collection.Sort((c1, c2) => (int)(c1.viewRectF.Y - c2.viewRectF.Y));
+
                 var grp = groups[gid] = new GaCellsGroup();
                 grp.buildGaCells(fullFovBmp, inflate, collection);
             }

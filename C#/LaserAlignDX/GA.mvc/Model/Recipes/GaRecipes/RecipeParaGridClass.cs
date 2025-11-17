@@ -136,6 +136,7 @@ namespace LaserAlignDX.BasicSpace
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999f, 1f, 2)]
         [Browsable(true)]
+        [ReadOnly(true)]
         public int xExtendx
         {
             get { return xRecipe.xExtendx; }
@@ -147,6 +148,7 @@ namespace LaserAlignDX.BasicSpace
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999f, 1f, 2)]
         [Browsable(true)]
+        [ReadOnly(true)]
         public int xExtendy
         {
             get { return xRecipe.xExtendy; }

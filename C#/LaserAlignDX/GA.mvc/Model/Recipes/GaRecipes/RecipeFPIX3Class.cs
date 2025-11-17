@@ -89,12 +89,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// 個別 晶粒區域 (位於格點範圍)
         /// 這應該放在 AoiResult 而不是 Recipe 區
         /// </summary>
-        public List<RegionCellX3Class> xRegionCells = new List<RegionCellX3Class>();
+        public readonly List<RegionCellX3Class> xRegionCells = new List<RegionCellX3Class>();
         /// <summary>
         /// 個別 疑似異物區塊 (位於格點範圍外)
         /// 這應該放在 AoiResult 而不是 Recipe 區
         /// </summary>
-        public List<Rectangle> xOutBlocs = new List<Rectangle>();
+        public readonly List<Rectangle> xOutBlocs = new List<Rectangle>();
         /// <summary>
         /// 釋放資源
         /// </summary>

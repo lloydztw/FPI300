@@ -48,6 +48,7 @@ namespace LaserAlignDX.AoiModel
         {
             get => RecipeFPIX3Class.Instance;
         }
+        protected static RegionCellsDataCollection _regionCells;
         #endregion
 
         #region KENERL_MEMBERS
@@ -256,10 +257,29 @@ namespace LaserAlignDX.AoiModel
         protected void ResetCellsResultData()
         {
             _xRecipe.xOutBlocs?.Clear();
-            var cells = _xRecipe.xRegionCells;
-            if (cells != null)
-                foreach (var cell in cells)
-                    cell?.Reset();
+            foreach (var cell in _xRecipe.xRegionCells)
+                cell?.Reset();
+
+            // 使用 RegionCellsDataCollection 來管理 _xRecipe.xRegionCells
+            _regionCells?.Detach();
+            _regionCells?.Dispose();
+            _regionCells = new RegionCellsDataCollection(_xRecipe.xRegionCells);
+
+            // 自動設定 Extend
+            if (true)
+            {
+                var c00 = _regionCells.GetGridCell(0, 0);
+                var c11 = _regionCells.GetGridCell(1, 1);
+                if (c00 != null && c11 != null)
+                {
+                    var pitchX = Math.Abs(c00.viewRectF.X - c11.viewRectF.X);
+                    var pitchY = Math.Abs(c00.viewRectF.Y - c11.viewRectF.Y);
+                    var extendX = (2f * pitchX - c00.viewRectF.Width) / 2f * 1.025f;
+                    var extendY = (2f * pitchY - c00.viewRectF.Height) / 2f * 1.025f;
+                    if (extendX > 0) _xRecipe.xExtendx = (int)extendX;
+                    if (extendY > 0) _xRecipe.xExtendy = (int)extendY;
+                }
+            }
         }
     }
 }

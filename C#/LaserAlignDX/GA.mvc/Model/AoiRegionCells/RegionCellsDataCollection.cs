@@ -100,7 +100,7 @@ namespace LaserAlignDX.AoiModel
         }
         public void Detach()
         {
-            // 刻意避免 源頭的 cells 被 Dispose
+            // 調用此函式 避免 源頭的 cells 被 Dispose
             _grid?.Dispose();
             _grid = null;
             _outGridBlocs = null;

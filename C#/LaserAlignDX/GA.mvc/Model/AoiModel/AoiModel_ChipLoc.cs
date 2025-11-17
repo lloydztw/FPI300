@@ -848,33 +848,28 @@ namespace LaserAlignDX.AoiModel.V3
             _TM.RESET_ACCUM();
 
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
+            var N_GROUPS = _cellGroups.Length;
             var groups = _cellGroups;
-            var N_GROUPS = groups.Length;
 
-            using (var cellsCollection = new RegionCellsDataCollection(_xRecipe.xRegionCells))
+            if (!usingMultiThread)
             {
-                if (!usingMultiThread)
+                // 單線程 (驗證用)
+                for (int gid = 0; gid < N_GROUPS; gid++)
                 {
-                    // 單線程 (驗證用)
-                    for (int gid = 0; gid < N_GROUPS; gid++)
-                    {
-                        _ExcludeCentroidOverlapsT(gid, groups[gid], cellsCollection);
-                    }
+                    _ExcludeCentroidOverlapsT(gid, groups[gid], _regionCells);
                 }
-                else
+            }
+            else
+            {
+                Parallel.For(0, N_GROUPS, gid =>
                 {
-                    Parallel.For(0, N_GROUPS, gid =>
-                    {
-                        _ExcludeCentroidOverlapsT(gid, groups[gid], cellsCollection);
-                    });
-                }
-
-                // 避免 源頭的 cells 被 Dispose
-                cellsCollection.Detach();
+                    _ExcludeCentroidOverlapsT(gid, groups[gid], _regionCells);
+                });
             }
 
             _TM.DUMP_ACCUM();
         }
+        
         /// <summary>
         /// 排除重複交疊的 Cells (in one thread)
         /// </summary>
