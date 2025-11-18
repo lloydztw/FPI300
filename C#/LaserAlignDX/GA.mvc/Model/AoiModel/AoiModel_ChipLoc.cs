@@ -30,11 +30,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Documents;
+using System.Windows.Media.Animation;
 using Traveller106;
 using _TM = LeTian.AoiLib.LtDebug;
 
@@ -788,17 +786,23 @@ namespace LaserAlignDX.AoiModel.V3
                     }
                 }
 
-                //(*) 踩腳檢查
-                ok = ok && _CheckTiltRatio(chipData);
+                //(7) 踩腳檢查
+                bool isStampede = !_CheckTiltRatio(chipData); ;
+                if (isStampede)
+                    ok = false;
 
-                //(7) 設定 Inspect Result Code
-                if (!ok)
+                //(8) 設定 Inspect Result Code
+                if (ok)
                 {
-                    cell.MarkResult(InspectReason.NG_EMPTY, reset: true);
+                    cell.MarkResult(InspectReason.PASS, reset: true);
+                }
+                else if (isStampede)
+                {
+                    cell.MarkResult(InspectReason.NG_AMBIGUOUS_BLOC, reset: true);
                 }
                 else
                 {
-                    cell.MarkResult(InspectReason.PASS, reset: true);
+                    cell.MarkResult(InspectReason.NG_EMPTY, reset: true);
                 }
 
                 //>>> 後面還要使用, 在此不要調用 cellBmp.Dispose() !!!
@@ -929,7 +933,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 傾斜程度 (晶粒踩腳)
         /// </summary>
-        bool _CheckTiltRatio(GaChipData chipData)
+        bool _CheckTiltRatio_000(GaChipData chipData)
         {
             if (!_xRecipe.InspectParams.optTiltDetectEnabled)
                 return true;
@@ -966,6 +970,78 @@ namespace LaserAlignDX.AoiModel.V3
             
             chipData.ChipCoords.TiltRatio = (float)tiltRatio;
             ok = tiltRatio <= _xRecipe.InspectParams.xTiltRatioThres;
+
+            return ok;
+        }
+        
+        /// <summary>
+        /// 傾斜程度 (晶粒踩腳)
+        /// </summary>
+        bool _CheckTiltRatio(GaChipData chipData)
+        {
+            if (!_xRecipe.InspectParams.optTiltDetectEnabled)
+                return true;
+
+            bool ok = true;
+
+            if (chipData != null)
+            {
+                double tiltRatio = 0.0;
+
+                var padsGrid = chipData.PadsGrid;
+                if (padsGrid != null)
+                {
+                    int rows = padsGrid.Rows;
+                    int cols = padsGrid.Cols;
+                    if (rows > 3 && cols > 3)
+                    {
+                        double maxDistortionX = 0;
+                        double maxDistortionY = 0;
+
+                        var rr = new[] { 1, rows - 2 };
+                        foreach (var r in rr)
+                        {
+                            var padA = padsGrid.Get(r, 0);
+                            var padB = padsGrid.Get(r, 1);
+                            var padC = padsGrid.Get(r, cols - 2);
+                            var padD = padsGrid.Get(r, cols - 1);
+                            if (padA != null && padB != null && padC != null && padD != null)
+                            {
+                                var dist1 = (padA.Center - padB.Center).NormLength;
+                                var dist2 = (padC.Center - padD.Center).NormLength;
+                                //var dist1 = Math.Abs(padA.Pixels - padB.Pixels);
+                                //var dist2 = Math.Abs(padC.Pixels - padD.Pixels);
+                                var distortion = dist1 > dist2 ? dist1 / (dist2 + 0.001) : dist2 / (dist1 + 0.001);
+                                maxDistortionX = Math.Max(maxDistortionX, distortion);
+                            }
+                        }
+
+                        var cc = new[] { 1, cols - 2 };
+                        foreach (var c in cc)
+                        {
+                            var padA = padsGrid.Get(0, c);
+                            var padB = padsGrid.Get(1, c);
+                            var padC = padsGrid.Get(rows - 2, c);
+                            var padD = padsGrid.Get(rows - 1, c);
+                            if (padA != null && padB != null && padC != null && padD != null)
+                            {
+                                var dist1 = (padA.Center - padB.Center).NormLength;
+                                var dist2 = (padC.Center - padD.Center).NormLength;
+                                //var dist1 = Math.Abs(padA.Pixels - padB.Pixels);
+                                //var dist2 = Math.Abs(padC.Pixels - padD.Pixels);
+                                var distortion = dist1 > dist2 ? dist1 / (dist2 + 0.001) : dist2 / (dist1 + 0.001);
+                                maxDistortionY = Math.Max(maxDistortionY, distortion);
+                            }
+                        }
+
+                        tiltRatio = Math.Max(maxDistortionX, maxDistortionY) - 1.0;
+                    }
+                }
+
+                chipData.ChipCoords.TiltRatio = (float)tiltRatio;
+                chipData.ChipCoords.IsStampede = tiltRatio > _xRecipe.InspectParams.xTiltRatioThres;
+                ok = !chipData.ChipCoords.IsStampede;
+            }
 
             return ok;
         }

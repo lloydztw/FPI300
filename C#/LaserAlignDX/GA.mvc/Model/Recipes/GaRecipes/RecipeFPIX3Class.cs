@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
-using Traveller106;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
 using MVD_CHIP_MATCHER = LaserAlignDX.AoiModel.MvdCompositeChipMatcher;
@@ -1589,7 +1588,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [CategoryAttribute(_Cat02), DescriptionAttribute("比重值 0.000 ~ 1.000")]
         [DisplayName("05 傾斜(踩腳) 門限值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 3)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.001f, 4)]
         [Browsable(true)]
         public float xTiltRatioThres
         {

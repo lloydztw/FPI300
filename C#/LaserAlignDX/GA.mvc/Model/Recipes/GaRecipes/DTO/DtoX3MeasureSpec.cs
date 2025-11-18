@@ -59,7 +59,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         // 傾斜(踩腳) 偵測 啟用
         public bool optTiltDetectEnabled = false;
         // 傾斜(踩腳) 門限值
-        public float TiltRatioThres = 0.12f;
+        public float TiltRatioThres = 0.0125f;
 
         // 尺寸宽度 spec (mm)
         public readonly DtoSpecValue StandardWidth = new DtoSpecValue(9.0f, 0.050f, 0.050f);
@@ -85,7 +85,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             Read(iniFileName, sectName, "TotalNgPercentage", 5.0f, out TotalNgPercentage);
 
             Read(iniFileName, sectName, "optTiltDetectEnabled", false, out optTiltDetectEnabled);
-            Read(iniFileName, sectName, "TiltRatioThres", 0.12f, out TiltRatioThres);
+            Read(iniFileName, sectName, "TiltRatioThres", 0.125f, out TiltRatioThres);
 
             StandardWidth.Load(iniFileName, sectName, "StandardWidth");
             StandardHeight.Load(iniFileName, sectName, "StandardHeight");

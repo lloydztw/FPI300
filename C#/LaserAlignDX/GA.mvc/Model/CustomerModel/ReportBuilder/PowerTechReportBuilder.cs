@@ -76,6 +76,7 @@ namespace LaserAlignDX.Model
             sb.Append("編號, 行列標記, 晶粒狀態, 尺寸(寬), 尺寸(高), 原始X, 原始Y, 補償X, 補償Y, 補償角度");
             sb.Append(", LUX, LUY, RUX, RUY, RDX, RDY, LDX, LDY");
             sb.Append(", S1, S2, S3, S4, S5, S6, S7, S8");
+            sb.Append(", TiltRatio");
             sb.Append(", 馬達1.X, 馬達1.Y, 馬達2.X, 馬達2.Y");
             sb.Append(", 條碼設定值, 讀取碼");
             sb.AppendLine();
@@ -85,6 +86,9 @@ namespace LaserAlignDX.Model
             var gaps = cell?.ChipData?.PadEdgeGaps;
             var isSkip = cell == null || cell.IsEmptyPlaceHold() || cell.IsAmbiguousBloc();
             var isPass = cell != null && cell.IsResultPass();
+
+            var chipCoords = cell?.ChipData?.ChipCoords;
+            float tiltRatio = chipCoords != null ? (float)chipCoords.TiltRatio : 0f;
 
             //>>>sb.AppendValues(cell.Index, cell.CellRow, cell.CellCol);
             sb.Append(cell.Index).Append(", ").Append($"r{cell.CellRow:000} c{cell.CellCol:000}");
@@ -118,7 +122,9 @@ namespace LaserAlignDX.Model
                 gaps != null ? (float)gaps.S5 : 0f,
                 gaps != null ? (float)gaps.S6 : 0f,
                 gaps != null ? (float)gaps.S7 : 0f,
-                gaps != null ? (float)gaps.S8 : 0f
+                gaps != null ? (float)gaps.S8 : 0f,
+
+                tiltRatio
             );
 
             sb.Append(", ").AppendPointF(isSkip ? PointF.Empty : cell.Sur1);

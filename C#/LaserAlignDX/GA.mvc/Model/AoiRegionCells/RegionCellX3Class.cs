@@ -1,5 +1,4 @@
 ﻿using AUVision;
-using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model;
@@ -714,6 +713,8 @@ namespace LaserAlignDX.OPSpace
         }
         #endregion
 
+        #region OLD_CODE
+#if (OPT_MOVED_TO_AOI_MODEL)
         /// <summary>
         /// 整理打包 尺寸计算 的 最後判定结果
         /// </summary>
@@ -766,6 +767,8 @@ namespace LaserAlignDX.OPSpace
             }
             return bOK;
         }
+#endif
+        #endregion
 
         #region OLD_CODE_不要在此生成_客戶要求的_顯示與報表_字串格式_不然換不同廠家就要跟著一直變動_CELL
 #if (OPT_OLD_STRING_FORMATTER_CODE)

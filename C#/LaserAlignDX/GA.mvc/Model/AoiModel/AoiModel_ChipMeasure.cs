@@ -251,7 +251,7 @@ namespace LaserAlignDX.AoiModel.V3
                 {
                     //(2) 量測單一晶粒
                     RunOneChipMeasurement(cell, cellBmp, ref cellRoi);
-                    cell.PackMeasureResult();
+                    PackMeasureResult(cell);
                     //_TM.END("OneChipMeasurement");
                 }
             }
@@ -491,6 +491,65 @@ namespace LaserAlignDX.AoiModel.V3
                 return;
             }
             #endregion
+        }
+        
+        /// <summary>
+        /// 整理打包 尺寸计算 的 最後判定结果
+        /// </summary>
+        /// <returns>true:OK false:NG</returns>
+        private void PackMeasureResult(RegionCellX3Class cell)
+        {
+            if (cell == null)
+                return;
+
+            bool ok = true;
+
+            if (_xInspect.optChipMeasurement)
+            {
+                //(1) 判定 長寬 是否達標
+                var dimResults = new bool[2];
+                ok &= (dimResults[0] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
+                ok &= (dimResults[1] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
+
+                var chipDim = cell.ChipData?.ChipDimension;
+                if (chipDim != null)
+                    chipDim.PassNgResults = dimResults;
+
+                if (!ok)
+                {
+                    cell.MarkResult(InspectReason.NG_CUT);
+                }
+
+                //(2) 判定 邊隙 是否達標
+                if (_xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
+                {
+                    var gaps = cell.ChipData?.PadEdgeGaps;
+                    if (gaps == null)
+                    {
+                        ok = false;
+                    }
+                    else
+                    {
+                        var min = new QVector(_xInspect.PadEdgeGapX_Min, _xInspect.PadEdgeGapY_Min);
+                        var max = new QVector(_xInspect.PadEdgeGapX_Max, _xInspect.PadEdgeGapY_Max);
+                        gaps.Check(out ok, min, max);
+                    }
+
+                    if (!ok)
+                    {
+                        cell.MarkResult(InspectReason.NG_EDGE_GAP);
+                    }
+                }
+            }
+
+            // 強制設定 Stampede (踩腳)
+            if (_xInspect.optTiltDetectEnabled)
+            {
+                var chipData = cell.ChipData;
+                bool isStampede = (chipData != null && chipData.ChipCoords.IsStampede);
+                if (isStampede)
+                    cell.MarkResult(InspectReason.NG_AMBIGUOUS_BLOC);
+            }
         }
 
         /// <summary>

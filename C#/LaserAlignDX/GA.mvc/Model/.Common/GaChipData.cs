@@ -103,6 +103,10 @@ namespace LaserAlignDX.Model
         /// 傾斜程度 (晶粒踩腳嚴重程度 0.0 ~ 1.0)
         /// </summary>
         public float TiltRatio { get; set; } = 0;
+        /// <summary>
+        /// 是否為踩腳 (Runtime)
+        /// </summary>
+        public bool IsStampede { get; set; } = false;
     }
 
 
