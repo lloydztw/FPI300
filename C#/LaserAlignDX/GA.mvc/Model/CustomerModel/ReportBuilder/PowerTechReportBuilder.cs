@@ -14,12 +14,13 @@
 #endregion
 
 using JetEazy.Utils;
+using LaserAlignDX.AoiModel;
+using LaserAlignDX.OPSpace;
+using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Drawing;
 using System.Text;
 using Traveller106;
-
-using CELL = LaserAlignDX.OPSpace.RegionCellX3Class;
 
 
 namespace LaserAlignDX.Model
@@ -33,8 +34,11 @@ namespace LaserAlignDX.Model
         //static string _digitFormat => StringBuilderExt.DIGIT_FORMAT;
         #endregion
 
+        #region GLOBAL_MESS
+        RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
+        #endregion
+
         #region PRIVATE_DATA
-        //RECIPE _xRecipe => RECIPE.Instance;
         string _resultImagePath => INI.Instance.ResultImagePath;
         string _stripId;
         string _fileName;
@@ -42,6 +46,8 @@ namespace LaserAlignDX.Model
 
         public string GenerateReport(string stripId, string fileName, bool optOutputFinalText)
         {
+            bool byRowCol = false;
+
             try
             {
                 _stripId = stripId;
@@ -51,10 +57,29 @@ namespace LaserAlignDX.Model
 
                 appendHeader(reportSB);
 
-                //>>> foreach (CELL cell in _xRecipe.xRegionCells)
-                foreach (var cell in PlcDataPacker.IterFinalResultCells())
+                if (!byRowCol)
                 {
-                    appendOneCellData(reportSB, cell);
+                    foreach (var cell in PlcDataPacker.IterFinalResultCells())
+                    {
+                        appendOneCellData(reportSB, cell);
+                    }
+                }
+                else
+                {
+                    using (var cellsCollection = new RegionCellsDataCollection(_xRecipe.xRegionCells))
+                    {
+                        int rows = cellsCollection.Rows;
+                        int cols = cellsCollection.Cols;
+                        for (int r = 0; r < rows; r++)
+                        {
+                            for (int c = 0; c < cols; c++)
+                            {
+                                var cell = cellsCollection.GetFinalCell(r, c);
+                                appendOneCellData(reportSB, cell);
+                            }
+                        }
+                        cellsCollection.Detach();
+                    }
                 }
 
                 saveReportData(reportSB);
@@ -81,9 +106,12 @@ namespace LaserAlignDX.Model
             sb.Append(", 條碼設定值, 讀取碼");
             sb.AppendLine();
         }
-        void appendOneCellData(StringBuilder sb, CELL cell)
+        void appendOneCellData(StringBuilder sb, RegionCellX3Class cell)
         {
-            var gaps = cell?.ChipData?.PadEdgeGaps;
+            if (cell == null)
+                return;
+
+            var gaps = cell.ChipData?.PadEdgeGaps;
             var isSkip = cell == null || cell.IsEmptyPlaceHold() || cell.IsAmbiguousBloc();
             var isPass = cell != null && cell.IsResultPass();
 
