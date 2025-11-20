@@ -240,6 +240,21 @@ namespace JetEazy.QvMath
                 _corners = newCorners;
             }
         }
+        /// <summary>
+        /// 按照絕對角度排序
+        /// </summary>
+        public void SortByCornerTheta()
+        {
+            var center = GetCenter();
+            Array.Sort(_corners, (a, b) =>
+            {
+                var thetaA = a != null ? _getTheta(a - center) : double.MaxValue;
+                var thetaB = b != null ? _getTheta(b - center) : double.MaxValue;
+                if (thetaA < thetaB) return -1;
+                else if (thetaA > thetaB) return 1;
+                else return 0;
+            });
+        }
         #endregion
 
         /// <summary>

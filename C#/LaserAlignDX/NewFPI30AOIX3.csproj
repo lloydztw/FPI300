@@ -360,6 +360,7 @@
   <ItemGroup>
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
+    <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibInkMarkCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
@@ -453,6 +454,7 @@
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeParaGridClass.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\JxCalibInkMarkSettings.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\JxMetadataUtil.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyMetadataUtil.cs" />

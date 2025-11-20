@@ -232,5 +232,24 @@ namespace LaserAlignDX.Mvc.Gui
         {
             return wnd?.dataGridView1;
         }
+
+        public void SetReadOnly(int columnIndex, bool readOnly, Color? backColor = null)
+        {
+            var dgv = dataGridView1;
+            if (columnIndex >= 0 && columnIndex < dgv.Columns.Count)
+            {
+                DataGridViewColumn targetColumn = dgv.Columns[columnIndex];
+
+                // 设置只读
+                targetColumn.ReadOnly = readOnly;
+
+                // 设置背景颜色
+                if (backColor != null)
+                    targetColumn.DefaultCellStyle.BackColor = backColor.Value;
+
+                // 刷新 DataGridView 以确保立即应用视觉更改
+                dgv.Invalidate();
+            }
+        }
     }
 }

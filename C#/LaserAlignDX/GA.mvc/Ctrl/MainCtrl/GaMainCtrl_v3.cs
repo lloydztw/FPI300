@@ -159,6 +159,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     _LOG($"參數資料夾 = {Traveller106.Universal.MAINPATH}", Color.Blue);
                     _sysModel.ApplyRecipe();
                     updateMemoryUsage();
+                    GaUtil.SetCursor(_wndOwner, Cursors.Default);
                 }));
             };
         }

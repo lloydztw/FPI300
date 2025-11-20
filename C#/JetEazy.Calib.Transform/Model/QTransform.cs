@@ -211,8 +211,8 @@ namespace JetEazy.Transform
         public bool CheckBuildCondition(out double det, out double det2)
         {
             // 判定轉換矩陣的品質
-            det = _mat == null ? 0.0 : _mat.Determinant();
-            det2 = _matInv == null ? 0.0 : _matInv.Determinant();
+            det = _mat == null || _mat.Empty() ? 0.0 : _mat.Determinant();
+            det2 = _matInv == null || _matInv.Empty() ? 0.0 : _matInv.Determinant();
             bool ok = Math.Abs(det) > 1e-9 && Math.Abs(det2) > 1e-9;
             return ok;
         }

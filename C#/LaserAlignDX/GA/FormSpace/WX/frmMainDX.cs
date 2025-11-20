@@ -135,6 +135,8 @@ namespace Traveller106
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            this.Cursor = Cursors.AppStarting;
+
             //---------------------------------------------------------------------
             // 注意:
             //  使用 dispUI = new DispUI() 動態生成
@@ -184,6 +186,8 @@ namespace Traveller106
 #endif
 
             _show_simulation_info_to_log();
+
+            //this.Cursor = Cursors.Default;
         }
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {

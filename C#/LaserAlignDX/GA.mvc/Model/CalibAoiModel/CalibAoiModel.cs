@@ -599,7 +599,7 @@ namespace LaserAlignDX.AoiModel
             }
             if (maxContourIndex < 0)
             {
-                LtDebug.LOG.Error($"{GetType().Name} 無法找到 格位的 Contour!");
+                LtDebug.LOG.Warn($"{GetType().Name} 無法找到 格位的 Contour!");
                 return null;
             }
 

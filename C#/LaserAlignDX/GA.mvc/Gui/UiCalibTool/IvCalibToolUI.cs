@@ -13,6 +13,7 @@
  */
 #endregion
 
+using System;
 using System.Windows.Forms;
 
 
@@ -20,12 +21,16 @@ namespace LaserAlignDX.Mvc.Gui
 {
     public interface IvCalibToolUI
     {
+        event EventHandler OnActiveViewChanged;
+
         Control Window { get; }
         RadioButton[] rdoCarriers { get; }
         RadioButton[] rdoSuckerRows { get; }
 
+        int ActiveViewID { get; }
+        JezTransImageViewPanel[] ImgViewers { get; }
+
         GvCalibPointsDataGridView dgvCalibPointsListView { get; }
-        JezTransImageViewPanel ImgViewer { get; }
         Control wndVisionSettingsPanel { get; }
 
         Button btnGrabImage { get; }
@@ -33,6 +38,9 @@ namespace LaserAlignDX.Mvc.Gui
         Button btnPickupGolden { get; }
         Button btnRunAutoFetch { get; }
         Button btnBuildCalib { get; }
+
+        Button btnAutoFetchInkPts { get; }
+        Button btnBuildCalibInkAdj { get; }
 
         Button btnCancel { get; }
         Button btnOK { get; }

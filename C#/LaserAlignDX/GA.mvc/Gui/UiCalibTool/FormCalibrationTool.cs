@@ -14,6 +14,7 @@
 #endregion
 
 using LaserAlignDX.Mvc.Ctrl;
+using System;
 using System.Windows.Forms;
 
 
@@ -21,6 +22,8 @@ namespace LaserAlignDX.Mvc.Gui
 {
     public partial class FormCalibrationTool : Form, IvCalibToolUI
     {
+        public event EventHandler OnActiveViewChanged;
+
         public FormCalibrationTool()
         {
             InitializeComponent();
@@ -30,8 +33,12 @@ namespace LaserAlignDX.Mvc.Gui
 
             rdoCarriers = new RadioButton[] { rdoCarrier1, rdoCarrier2 };
             rdoSuckerRows = new RadioButton[] { rdoSucker1, rdoSucker2 };
+            ImgViewers = new[] { jezTransImageViewPanel1, jezTransImageViewPanel2 };
+            
             rdoCarrier1.CheckedChanged += RdoCarrier1_CheckedChanged;
             rdoSucker1.CheckedChanged += RdoSucker1_CheckedChanged;
+            tabControl1.SelectedIndexChanged += (s, e) => OnActiveViewChanged?.Invoke(s, e);
+
             SizeChanged += (s, e) => autoLayout();
             Load += Form_Load;
 
@@ -41,7 +48,18 @@ namespace LaserAlignDX.Mvc.Gui
                 ctrl.Attach(this);
             }
 
-            //this.Height = Screen.PrimaryScreen.Bounds.Height;
+            //>>> this.Height = Screen.PrimaryScreen.Bounds.Height;
+        }
+
+        public int ActiveViewID
+        {
+            get => tabControl1.SelectedIndex;
+
+            //set
+            //{
+            //    if (value < tabControl1.TabPages.Count && value >= 0)
+            //        tabControl1.SelectedIndex = value;
+            //}
         }
 
         #region GUI_LINKS
@@ -53,8 +71,13 @@ namespace LaserAlignDX.Mvc.Gui
         {
             get; private set;
         }
+        public JezTransImageViewPanel[] ImgViewers
+        {
+            get;
+            private set;
+        }
+
         Control IvCalibToolUI.Window => this;
-        JezTransImageViewPanel IvCalibToolUI.ImgViewer => jezTransImageViewPanel1;
         GvCalibPointsDataGridView IvCalibToolUI.dgvCalibPointsListView => gvCalibPointsDataGridView1;
         Control IvCalibToolUI.wndVisionSettingsPanel => gwPanePropsViewer1;
         Button IvCalibToolUI.btnGrabImage => btnGrabImage;
@@ -62,6 +85,8 @@ namespace LaserAlignDX.Mvc.Gui
         Button IvCalibToolUI.btnPickupGolden => btnPickGolden;
         Button IvCalibToolUI.btnRunAutoFetch => btnAutoFindCalibPoints;
         Button IvCalibToolUI.btnBuildCalib => btnBuildCalib;
+        Button IvCalibToolUI.btnAutoFetchInkPts => btnAutoFetchInkPts;
+        Button IvCalibToolUI.btnBuildCalibInkAdj => btnBuildCalibInkAdj;
         Button IvCalibToolUI.btnCancel => btnCancel;
         Button IvCalibToolUI.btnOK => btnOK;
         #endregion

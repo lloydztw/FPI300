@@ -51,8 +51,14 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnLoadImage = new System.Windows.Forms.Button();
             this.btnGrabImage = new System.Windows.Forms.Button();
             this.btnPickGolden = new System.Windows.Forms.Button();
+            this.btnAutoFetchInkPts = new System.Windows.Forms.Button();
+            this.btnBuildCalibInkAdj = new System.Windows.Forms.Button();
             this.panelDockLeft = new System.Windows.Forms.Panel();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
             this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.jezTransImageViewPanel2 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.tbLayoutDockRight.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.panelB.SuspendLayout();
@@ -61,6 +67,9 @@ namespace LaserAlignDX.Mvc.Gui
             this.panel2.SuspendLayout();
             this.panelBtns.SuspendLayout();
             this.panelDockLeft.SuspendLayout();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tbLayoutDockRight
@@ -291,11 +300,13 @@ namespace LaserAlignDX.Mvc.Gui
             // 
             this.panelBtns.BackColor = System.Drawing.Color.LightSteelBlue;
             this.panelBtns.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelBtns.Controls.Add(this.btnAutoFindCalibPoints);
             this.panelBtns.Controls.Add(this.btnBuildCalib);
             this.panelBtns.Controls.Add(this.btnLoadImage);
             this.panelBtns.Controls.Add(this.btnGrabImage);
+            this.panelBtns.Controls.Add(this.btnBuildCalibInkAdj);
+            this.panelBtns.Controls.Add(this.btnAutoFindCalibPoints);
             this.panelBtns.Controls.Add(this.btnPickGolden);
+            this.panelBtns.Controls.Add(this.btnAutoFetchInkPts);
             this.panelBtns.Location = new System.Drawing.Point(4, 260);
             this.panelBtns.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panelBtns.Name = "panelBtns";
@@ -369,25 +380,97 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnPickGolden.Text = "框取 Golden";
             this.btnPickGolden.UseVisualStyleBackColor = false;
             // 
+            // btnAutoFetchInkPts
+            // 
+            this.btnAutoFetchInkPts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.btnAutoFetchInkPts.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnAutoFetchInkPts.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAutoFetchInkPts.Location = new System.Drawing.Point(225, 11);
+            this.btnAutoFetchInkPts.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnAutoFetchInkPts.Name = "btnAutoFetchInkPts";
+            this.btnAutoFetchInkPts.Size = new System.Drawing.Size(150, 80);
+            this.btnAutoFetchInkPts.TabIndex = 28;
+            this.btnAutoFetchInkPts.Text = "自動 抓取 墨點";
+            this.btnAutoFetchInkPts.UseVisualStyleBackColor = false;
+            this.btnAutoFetchInkPts.Visible = false;
+            // 
+            // btnBuildCalibInkAdj
+            // 
+            this.btnBuildCalibInkAdj.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.btnBuildCalibInkAdj.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnBuildCalibInkAdj.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBuildCalibInkAdj.Location = new System.Drawing.Point(395, 11);
+            this.btnBuildCalibInkAdj.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnBuildCalibInkAdj.Name = "btnBuildCalibInkAdj";
+            this.btnBuildCalibInkAdj.Size = new System.Drawing.Size(150, 80);
+            this.btnBuildCalibInkAdj.TabIndex = 27;
+            this.btnBuildCalibInkAdj.Text = "執行 墨點 校正";
+            this.btnBuildCalibInkAdj.UseVisualStyleBackColor = false;
+            this.btnBuildCalibInkAdj.Visible = false;
+            // 
             // panelDockLeft
             // 
-            this.panelDockLeft.Controls.Add(this.jezTransImageViewPanel1);
+            this.panelDockLeft.Controls.Add(this.tabControl1);
             this.panelDockLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.panelDockLeft.Location = new System.Drawing.Point(2, 0);
             this.panelDockLeft.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.panelDockLeft.Name = "panelDockLeft";
-            this.panelDockLeft.Size = new System.Drawing.Size(665, 975);
+            this.panelDockLeft.Size = new System.Drawing.Size(654, 975);
             this.panelDockLeft.TabIndex = 1;
+            // 
+            // tabControl1
+            // 
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl1.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.tabControl1.Location = new System.Drawing.Point(0, 0);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(654, 975);
+            this.tabControl1.TabIndex = 32;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.jezTransImageViewPanel1);
+            this.tabPage1.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.tabPage1.Location = new System.Drawing.Point(4, 34);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(0);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Size = new System.Drawing.Size(646, 937);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "1. 主頁";
+            this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // jezTransImageViewPanel1
             // 
             this.jezTransImageViewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.jezTransImageViewPanel1.Location = new System.Drawing.Point(0, 0);
-            this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
-            this.jezTransImageViewPanel1.Padding = new System.Windows.Forms.Padding(0, 2, 0, 1);
-            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(665, 975);
+            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(646, 937);
             this.jezTransImageViewPanel1.TabIndex = 0;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.jezTransImageViewPanel2);
+            this.tabPage2.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.tabPage2.Location = new System.Drawing.Point(4, 34);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(0);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Size = new System.Drawing.Size(646, 937);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "2 點墨頁";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // jezTransImageViewPanel2
+            // 
+            this.jezTransImageViewPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jezTransImageViewPanel2.Location = new System.Drawing.Point(0, 0);
+            this.jezTransImageViewPanel2.Margin = new System.Windows.Forms.Padding(0);
+            this.jezTransImageViewPanel2.Name = "jezTransImageViewPanel2";
+            this.jezTransImageViewPanel2.Size = new System.Drawing.Size(646, 937);
+            this.jezTransImageViewPanel2.TabIndex = 1;
             // 
             // FormCalibrationTool
             // 
@@ -412,6 +495,9 @@ namespace LaserAlignDX.Mvc.Gui
             this.panel2.ResumeLayout(false);
             this.panelBtns.ResumeLayout(false);
             this.panelDockLeft.ResumeLayout(false);
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -440,5 +526,11 @@ namespace LaserAlignDX.Mvc.Gui
         private System.Windows.Forms.Button btnAutoFindCalibPoints;
         private System.Windows.Forms.RadioButton rdoCarrier2;
         private System.Windows.Forms.RadioButton rdoSucker2;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabPage tabPage2;
+        private JezTransImageViewPanel jezTransImageViewPanel2;
+        private System.Windows.Forms.Button btnBuildCalibInkAdj;
+        private System.Windows.Forms.Button btnAutoFetchInkPts;
     }
 }

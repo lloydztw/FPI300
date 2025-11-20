@@ -29,7 +29,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
 using JxCalibAoiRecipe = EzAoiEmptyTrayInspector.Model.JxAoiRecipe;
 using QCoord = JetEazy.QMath.QVector;
@@ -37,10 +36,11 @@ using QCoord = JetEazy.QMath.QVector;
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
-    public partial class GaCalibCtrl
+    public class GaCalibCtrl
     {
         static int N_CALIB_POINTS => TravellerTransforms.N_CALIB_POINTS;
 
+        #region ENUM
         enum CalibCornersEnum : int
         {
             [Description("載台左上")]
@@ -52,16 +52,22 @@ namespace LaserAlignDX.Mvc.Ctrl
             [Description("載台左下")]
             LeftBottom
         };
+        #endregion
 
         #region GLOBAL_PATH
-        static string CALIB_TRANSFORMS_FILE => GaMvcPaths.CALIB_TRANSFORMS_FILE;
-        static string CALIB_VISION_FILE(CarrierEnum C)
+        internal static string CALIB_TRANSFORMS_FILE => GaMvcPaths.CALIB_TRANSFORMS_FILE;
+        internal static string CALIB_VISION_FILE(CarrierEnum C, SuckerRowEnum S = SuckerRowEnum.S1, int viewID = 0)
         {
-            return GaMvcPaths.CALIB_VISION_FILE(C);
+            return GaMvcPaths.CALIB_VISION_FILE(C, S, viewID);
         }
-        static string CALIB_LAST_IMAGE_FILE(CarrierEnum C)
+        internal static string CALIB_INK_MARK_FILE(CarrierEnum C, SuckerRowEnum S = SuckerRowEnum.S1, int viewID = 0)
         {
-            string file = System.IO.Path.ChangeExtension(CALIB_VISION_FILE(C), ".jpg");
+            string fileName = GaMvcPaths.CALIB_VISION_FILE(C, S, viewID);
+            return fileName.Replace("_Vision_", "_InkMark_");
+        }
+        internal static string CALIB_LAST_IMAGE_FILE(CarrierEnum C, SuckerRowEnum S, int viewID)
+        {
+            string file = System.IO.Path.ChangeExtension(CALIB_VISION_FILE(C, S, viewID), ".jpg");
             return file;
         }
         #endregion
@@ -82,7 +88,6 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region GUI_LINKS
         IvCalibToolUI _calibToolUI;
         Control _wndOwner => _calibToolUI.Window;
-        JezTransImageViewPanel _imgViewer => _calibToolUI.ImgViewer;
         GvCalibPointsDataGridView _dgvCalibPointsListView => _calibToolUI.dgvCalibPointsListView;
         RadioButton[] _rdoCarriers => _calibToolUI.rdoCarriers;
         RadioButton[] _rdoSuckerRows => _calibToolUI.rdoSuckerRows;
@@ -91,8 +96,14 @@ namespace LaserAlignDX.Mvc.Ctrl
         Button _btnPickupGolden => _calibToolUI.btnPickupGolden;
         Button _btnRunAutoFetch => _calibToolUI.btnRunAutoFetch;
         Button _btnBuildCalib => _calibToolUI.btnBuildCalib;
+        Button _btnAutoFetchInkPts => _calibToolUI.btnAutoFetchInkPts;
+        Button _btnBuildCalibInkAdj => _calibToolUI.btnBuildCalibInkAdj;
         Button _btnCancel => _calibToolUI.btnCancel;
         Button _btnOK => _calibToolUI.btnOK;
+        #endregion
+
+        #region CHILD_CTRL
+        GaCalibInkMarkCtrl _calibInkMarkCtrl;
         #endregion
 
         #region INTERACTORS
@@ -104,6 +115,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region RUNTIME_DATA
         CarrierEnum _activeCarrierID = CarrierEnum.C1;
         SuckerRowEnum _activeSuckerRowID = SuckerRowEnum.S1;
+        int _activeViewID = 0;
         MatchResult _lastResult;
         bool _isCoordModified = false;
         bool _isGoldenPicking = false;
@@ -112,17 +124,25 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         public void Attach(IvCalibToolUI toolView)
         {
+            if (_calibInkMarkCtrl == null)
+            {
+                _calibInkMarkCtrl = new GaCalibInkMarkCtrl();
+                _calibInkMarkCtrl.OnRequestToLoadInkImage += _calibInkMarkCtrl_OnRequestToLoadInkImage;
+                _calibInkMarkCtrl.Attach(toolView);
+            }
+
             _calibToolUI = toolView;
             _btnPickupGolden.Tag = _btnPickupGolden.BackColor;
 
-            InitRecipeBodies();
+            InitRecipeBody();
             initImgViewer();
             LoadSettings();
 
-            //updateAllData(false);
             connectEventHandlers();
         }
-        void InitRecipeBodies()
+
+        #region PRIVATE_INIT_FUNCTIONS
+        void InitRecipeBody()
         {
             for (int i = 0, N = _jxCalibVisionRecipes.Length; i < N; i++)
             {
@@ -142,12 +162,14 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _jxCalibVisionRecipes[i] = null;
                 old?.Dispose();
             }
-        }
 
-        #region PRIVATE_INIT_FUNCTIONS
+            _calibInkMarkCtrl = null;
+        }
         void initImgViewer()
         {
-            var matViewer = _imgViewer.MatViewer;
+            int viewID = 0;
+            var imgViewer = _calibToolUI.ImgViewers[viewID];
+            var matViewer = imgViewer.MatViewer;
             for (int i = 0; i < N_CALIB_POINTS; i++)
             {
                 _cviCalibPointBoxes[i] = new CviCalibPointBox(new Rectangle(0, 0, 500, 500), Color.Lime, 0.25f)
@@ -162,6 +184,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void connectEventHandlers()
         {
+            _calibToolUI.OnActiveViewChanged += _calibToolUI_OnActiveViewChanged;
+
             if (_btnOK != null)
                 _btnOK.Click += (s, e) => CloseWindow(true);
 
@@ -186,10 +210,18 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (_btnBuildCalib != null)
                 _btnBuildCalib.Click += (s, e) => BuildAllTransforms();
 
+            if (_btnAutoFetchInkPts != null)
+                _btnAutoFetchInkPts.Click += (s, e) => RunAutoFetch_Ink_Pts();
+
+            if (_btnBuildCalibInkAdj != null)
+                _btnBuildCalibInkAdj.Click += (s, e) => BuildAllTransforms_Ink_Adj();
+
             _cviGoldenBox.OnBoxSelected += (s, e) => BuildGolden();
             _cviResultBox.OnRequestDumpBindaryImage += (s, e) => RunAutoFetch(dump: true);
-            
-            _imgViewer.MatViewer.MouseMove += MatViewer_MouseMove;
+
+            // ImgViewrs' EventHanlders
+            var imgViewer0 = _calibToolUI.ImgViewers[0];
+            imgViewer0.MatViewer.MouseMove += MatViewer_MouseMove;
 
             // 自動釋放資源
             _wndOwner.HandleDestroyed += (s, e) => CleanUp();
@@ -207,15 +239,21 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void connectPropEventHandlers(JxCalibAoiRecipe rcp)
         {
-
         }
         void disconnectPropEventHandlers(JxCalibAoiRecipe rcp)
         {
-
         }
         #endregion
 
         #region EVENT_HANDLERS
+        private void _calibToolUI_OnActiveViewChanged(object sender, EventArgs e)
+        {
+            // 2025-11-20 (搭配點墨)
+            _activeViewID = _calibToolUI.ActiveViewID;
+            _calibInkMarkCtrl.SetActiveView(_activeCarrierID, _activeSuckerRowID, _activeViewID);
+            updateVisionParams(_activeCarrierID, false, false);
+            updateGuiStatus();
+        }
         private void _rdoSelect_CheckedChanged(object sender, System.EventArgs e)
         {
             _activeCarrierID = _rdoCarriers[0].Checked ? CarrierEnum.C1 : CarrierEnum.C2;
@@ -223,14 +261,21 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             if (Array.IndexOf(_rdoCarriers, sender) >= 0)
             {
-                updateVisionParams(_activeCarrierID, false);
+                updateVisionParams(_activeCarrierID, false, toReloadRecipe: true);
             }
 
-            updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);            
-            clearCviResults();
+            updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);
+
+            if (_activeViewID == 0)
+            {
+                clearCviResults();
+            }
 
             _cviResultBox.ActiveCarrierID = _activeCarrierID;
             _cviResultBox.ActiveSuckerRowID = _activeSuckerRowID;
+
+            // 2025-11-20 (搭配點墨)
+            _calibInkMarkCtrl.SetActiveView(_activeCarrierID, _activeSuckerRowID, _activeViewID);
         }
         private void _lineScanImageHolder_OnImageChanged(object sender, EventArgs e)
         {
@@ -254,6 +299,14 @@ namespace LaserAlignDX.Mvc.Ctrl
             //    }
             //}
         }
+        private void _calibInkMarkCtrl_OnRequestToLoadInkImage(object sender, EventArgs e)
+        {
+            if (_activeViewID == 1)
+            {
+                var fileName = CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID, _activeViewID);
+                LoadImage(fileName, _activeViewID);
+            }
+        }
         private void MatViewer_MouseMove(object sender, MouseEventArgs e)
         {
             if (_dgvCalibPointsListView == null)
@@ -262,7 +315,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             int x = e.X;
             int y = e.Y;
 
-            _imgViewer.MatViewer.TransCoordToWorld(ref x, ref y);
+            var imgViewer0 = _calibToolUI.ImgViewers[0];
+            imgViewer0.MatViewer.TransCoordToWorld(ref x, ref y);
 
             for (int i = 0; i < N_CALIB_POINTS; i++)
             {
@@ -282,7 +336,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         void updateAllData(bool toModel)
         {
             updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, toModel);
-            updateVisionParams(_activeCarrierID, toModel);
+            updateVisionParams(_activeCarrierID, toModel, toReloadRecipe: true);
+            //updateInkMarkerParams(_activeCarrierID, toModel, toReloadRecipe: true);
         }
         void updateVisionParams(CarrierEnum carrierID, bool toModel, bool toReloadRecipe = true)
         {
@@ -301,16 +356,26 @@ namespace LaserAlignDX.Mvc.Ctrl
                 {
                     // 設定參數
                     _aoiModel.SetRecipe(jxRecipe);
+
                     // 載入圖片
-                    LoadImage(CALIB_LAST_IMAGE_FILE(_activeCarrierID));
+                    var viewID = 0;
+                    var imgViewer = _calibToolUI.ImgViewers[viewID];
+                    var fileName = CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID, viewID);
+                    LoadImage(fileName, viewID);
                 }
 
-                panel.BuildGuiCtrls(jxRecipe);
-                panel.ExpandAll();
+                if (_activeViewID == 0)
+                {
+                    panel.BuildGuiCtrls(jxRecipe);
+                    panel.ExpandAll();
+                }
             }
         }
         void updateCalibKeyPoints(CarrierEnum carrierID, SuckerRowEnum suckerRowID, bool toModel)
         {
+            if (_activeViewID != 0 && toModel)
+                return;
+
             var dgv = _dgvCalibPointsListView?.DataGridView;
             if (dgv == null) return;
 
@@ -358,6 +423,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         bool updateCalibKeyPoints(DataGridView dgv, int rowId, QCoord camCoord, QCoord motorCoord, bool toModel)
         {
+            if (_activeViewID != 0 && toModel)
+                return false;
+
             int col = 1;
             var dgvRow = dgv.Rows[rowId];
 
@@ -401,6 +469,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updateCalibKeyPointBox(CalibCornersEnum corner, QCoord camCoord, bool show = true)
         {
+            //if (_activeViewID != 0)
+            //    return;
+
             var box = _cviCalibPointBoxes[(int)corner];
             if (camCoord == null)
             {
@@ -417,6 +488,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updateCalibKeyPoints(EzBlocsGrid camGrid)
         {
+            if (_activeViewID != 0)
+                return;
+
             if (camGrid == null)
                 return;
 
@@ -451,6 +525,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updateAllCalibKeyPointBoxes()
         {
+            if (_activeViewID != 0)
+                return;
+
             var carrierID = _activeCarrierID;
             var suckerRowID = _activeSuckerRowID;
 
@@ -468,21 +545,68 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         #endregion
 
+        void UpdateImage(Bitmap bigBmp, string srcName, int viewID, bool disposeSrc = true)
+        {
+            if (viewID == 0)
+            {
+                var imgViewer = _calibToolUI.ImgViewers[0];
+                if (bigBmp != null)
+                {
+                    imgViewer.UpdateImage(bigBmp, srcName, disposeSrc);
+                }
+                else
+                {
+                    var old = imgViewer.MatViewer.Image;
+                    imgViewer.MatViewer.Image = null;
+                    old?.Dispose();
+                    imgViewer.UpdateImage(null, "", false);
+                }
+            }
+            else
+            {
+                _calibInkMarkCtrl.TakeOverImage(bigBmp, srcName, viewID);
+            }
+        }
+
         #region PRIVATE_GUI_FUNCTIONS
         void updateGuiStatus()
         {
-            bool isEmpty = _imgViewer.MatViewer.Image == null;
+            var viewID = _activeViewID;
+            var imgViewer = _calibToolUI.ImgViewers[viewID];
+            bool isEmpty = imgViewer.MatViewer.Image == null;
+
+            if (viewID == 0)
+            {
+                //_btnGrabImage.Enabled = !_isRunning;
+                //_btnLoadImage.Enabled = !_isRunning;
+
+                _btnPickupGolden.BackColor = _isGoldenPicking ? Color.HotPink : (Color)_btnPickupGolden.Tag;
+                _btnPickupGolden.Enabled = !_isRunning && !isEmpty;
+
+                if (_btnRunAutoFetch != null)
+                    _btnRunAutoFetch.Enabled = !_isRunning && !isEmpty;
+
+                if (_btnBuildCalib != null)
+                    _btnBuildCalib.Enabled = !_isRunning && !isEmpty;
+            }
+
             _btnGrabImage.Enabled = !_isRunning;
             _btnLoadImage.Enabled = !_isRunning;
 
-            _btnPickupGolden.BackColor = _isGoldenPicking ? Color.HotPink : (Color)_btnPickupGolden.Tag;
-            _btnPickupGolden.Enabled = !_isRunning && !isEmpty;
+            bool isInkViewingMode = viewID == 1;
 
-            if (_btnRunAutoFetch != null)
-                _btnRunAutoFetch.Enabled = !_isRunning && !isEmpty;
+            _btnRunAutoFetch.Visible = !isInkViewingMode;
+            _btnPickupGolden.Visible = !isInkViewingMode;
+            _btnBuildCalib.Visible = !isInkViewingMode;
 
-            if (_btnBuildCalib != null)
-                _btnBuildCalib.Enabled = !_isRunning && !isEmpty;
+            _btnAutoFetchInkPts.Visible = isInkViewingMode;
+            _btnBuildCalibInkAdj.Visible = isInkViewingMode;
+
+            var bkColor = isInkViewingMode ? Color.Gray : Color.Black;
+            foreach (int col in new[] { 3, 4 })
+            {
+                _dgvCalibPointsListView.SetReadOnly(col, isInkViewingMode, bkColor);
+            }
         }
         void toggleGoldenPicking()
         {
@@ -490,6 +614,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void enableGoldenPicking(bool enabled)
         {
+            if (_activeViewID != 0)
+                return;
+
             _isGoldenPicking = enabled;
             _cviGoldenBox.Visible = enabled;
             _cviGoldenBox.Enabled = enabled;
@@ -500,13 +627,24 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void clearCviResults()
         {
+            var viewID = _activeViewID;
+            if (viewID != 0)
+                return;
+
+            var imgViewer = _calibToolUI.ImgViewers[viewID];
             _cviResultBox.Reset();
-            _imgViewer.MatViewer.Invalidate();
+            imgViewer.MatViewer.Invalidate();
         }
         #endregion
 
+        #region PRIVATE_ACTION_FUNCTIONS
         void ShowCviResult(bool show, bool clear = false)
         {
+            var viewID = _activeViewID;
+            if (viewID != 0)
+                return;
+            var imgViewer = _calibToolUI.ImgViewers[viewID];
+
             if (clear)
             {
                 clearCviResults();
@@ -516,19 +654,21 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (_cviResultBox.Visible != show)
             {
                 _cviResultBox.Visible = show;
-                _imgViewer.MatViewer.Refresh();
+                imgViewer.MatViewer.Refresh();
             }
-        }
-        void EnableGoldenPicking(bool enabled)
-        {
-            enableGoldenPicking(enabled);
         }
 
         void BuildGolden()
         {
+            var viewID = _activeViewID;
+            if (viewID != 0) 
+                return;
+
+            var imgViewer = _calibToolUI.ImgViewers[viewID];
+
             clearCviResults();
 
-            var fullfovImg = _imgViewer.MatViewer.Image;
+            var fullfovImg = imgViewer.MatViewer.Image;
             if (fullfovImg == null)
                 return;
 
@@ -557,7 +697,13 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         bool BuildGoldenGrid()
         {
-            var fullfovImg = _imgViewer.MatViewer.Image;
+            var viewID = _activeViewID;
+            if (viewID != 0) 
+                return false;
+
+            var imgViewer = _calibToolUI.ImgViewers[viewID];
+
+            var fullfovImg = imgViewer.MatViewer.Image;
             if (fullfovImg == null)
                 return false;
 
@@ -587,8 +733,13 @@ namespace LaserAlignDX.Mvc.Ctrl
             return err == ErrCodes.OK;
         }
 
-        void RunAutoFetch(bool dump = false)
+        bool RunAutoFetch(bool dump = false, bool force = false)
         {
+            if (_activeViewID != 0 && !force)
+                return false;
+
+            var imgViewer = _calibToolUI.ImgViewers[0];
+
             try
             {
                 CalibAoiModel.OPT_DUMP = dump;
@@ -598,11 +749,11 @@ namespace LaserAlignDX.Mvc.Ctrl
 
                 bool ok = BuildGoldenGrid();
                 if (!ok)
-                    return;
+                    return false;
 
-                var fullfovImg = _imgViewer.MatViewer.Image;
+                var fullfovImg = imgViewer.MatViewer.Image;
                 if (fullfovImg == null)
-                    return;
+                    return false;
 
                 //(0) Cursor
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
@@ -664,17 +815,23 @@ namespace LaserAlignDX.Mvc.Ctrl
                     VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib");
                 }
                 #endregion
+
+                return camGrid != null;
             }
             catch (Exception ex)
             {
+                return false;
             }
             finally
             {
                 CalibAoiModel.OPT_DUMP = false;
             }
         }
-        void BuildAllTransforms()
+        void BuildAllTransforms(bool force = false)
         {
+            if (_activeViewID != 0 && !force)
+                return;
+
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 
             enableGoldenPicking(false);
@@ -703,11 +860,62 @@ namespace LaserAlignDX.Mvc.Ctrl
             VsMessageBox.Info($"{name}\n\r\n\r座標系統建置完成!");
         }
 
-        void LoadImage(string fileName = null)
+        void RunAutoFetch_Ink_Pts()
         {
-            enableGoldenPicking(false);
+            if (_activeViewID == 1)
+            {
+                _calibInkMarkCtrl.AutoFetchInkPoints();
+            }
+        }
+        void BuildAllTransforms_Ink_Adj()
+        {
+            if (_activeViewID == 1)
+            {
+                bool ok = _calibInkMarkCtrl.BuildCalibInkAdj();
 
-            if (string.IsNullOrEmpty(fileName))
+                if (ok)
+                {
+                    // 暫時將 activeViewID 設定為 0 (主頁)
+                    _activeViewID = 0;
+                    updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);
+
+                    if (_wndOwner != null)
+                    {
+                        _wndOwner.BeginInvoke(new Action(() =>
+                        {
+                            // 暫時將 activeViewID 設定為 0 (主頁)
+                            _activeViewID = 0;
+
+                            ok = RunAutoFetch();
+                            if (ok) BuildAllTransforms();
+
+                            // 恢復 activeViewID 設定為 1 (點墨頁)
+                            _activeViewID = 1;
+                            updateGuiStatus();
+                        }));
+                    }
+                    else
+                    {
+                        // 恢復 activeViewID 設定為 1 (點墨頁)
+                        _activeViewID = 1;
+                        updateGuiStatus();
+                    }
+                }
+            }
+        }
+
+        void LoadImage(string fileName = null, int viewID = -1)
+        {
+            if (viewID < 0)
+                viewID = _activeViewID;
+
+            var imgViewer = _calibToolUI.ImgViewers[viewID];
+
+            if (viewID == 0)
+                enableGoldenPicking(false);
+
+            bool isBrowsing = string.IsNullOrEmpty(fileName);
+            if (isBrowsing)
                 fileName = GaUtil.BrowseImageFile();
 
             if (!string.IsNullOrEmpty(fileName) && System.IO.File.Exists(fileName))
@@ -718,30 +926,51 @@ namespace LaserAlignDX.Mvc.Ctrl
                 // 2025-09-14 _imgViewer 會複製 bigBmp
                 var bigBmp = GaImageUtil.LoadBigImage(fileName);
                 var srcName = "[校正] " + System.IO.Path.GetFileName(fileName);
-                _imgViewer.UpdateImage(bigBmp, srcName, disposeSrc: true);
+
+                // 2025-11-20 (搭配點墨)
+                UpdateImage(bigBmp, srcName, viewID, disposeSrc: true);
 
                 // 2025-09-17 (自動存檔)
-                var dstFileName = CALIB_LAST_IMAGE_FILE(_activeCarrierID);
+                var dstFileName = CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID, viewID);
                 if (dstFileName != fileName)
                     SaveImage(dstFileName);
 
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
-            
-            updateAllCalibKeyPointBoxes();
+            else
+            {
+                if (!isBrowsing)
+                {
+                    // 2025-11-20 (搭配點墨)
+                    UpdateImage(null, "", viewID, disposeSrc: false);
+                }
+            }
+
+            if (viewID == 0)
+                updateAllCalibKeyPointBoxes();
+
             updateGuiStatus();
         }
         void SaveImage(string fileName)
         {
+            var viewID = _activeViewID;
+            var imgViewer = _calibToolUI.ImgViewers[viewID];
+
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
-            //_wndOwner?.Refresh();
-            var img = _imgViewer?.Image;
+            
+            var img = imgViewer?.Image;
             img?.SaveImage(fileName);
+
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
         void GrabImage()
         {
-            enableGoldenPicking(false);
+            var viewID = _activeViewID;
+            var imgViewer = _calibToolUI.ImgViewers[viewID];
+
+            if (viewID == 0)
+                enableGoldenPicking(false);
+
             updateGuiStatus();
 
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
@@ -751,10 +980,12 @@ namespace LaserAlignDX.Mvc.Ctrl
                 // 2025-09-14 _imgViewer 會複製 bigBmp
                 var bigBmp = freeBmp.ToBitmap();
                 var srcName = "[校正] 線掃相機 擷圖";
-                _imgViewer.UpdateImage(bigBmp, srcName, disposeSrc: true);
+
+                // 2025-11-20 (搭配點墨)
+                UpdateImage(bigBmp, srcName, viewID, disposeSrc: true);
 
                 // 2025-09-17 (自動存檔)
-                SaveImage(CALIB_LAST_IMAGE_FILE(_activeCarrierID));
+                SaveImage(CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID, viewID));
             }
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
@@ -777,6 +1008,9 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             // (3) 第一次建置座標轉換
             _transforms.BuildAll();
+
+            // (4) Load Ink Mark Settings
+            _calibInkMarkCtrl?.LoadSettings();
         }
         void SaveSettings(bool force = false)
         {
@@ -796,6 +1030,9 @@ namespace LaserAlignDX.Mvc.Ctrl
                     jx?.Save(CALIB_VISION_FILE((CarrierEnum)i));
                 i++;
             }
+
+            // (3) Save Ink Mark Settings
+            _calibInkMarkCtrl?.SaveSettings(force);
         }
         void CloseWindow(bool confirm)
         {
@@ -805,6 +1042,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 updateAllData(true);
                 SaveSettings();
                 GaUtil.SetCursor(_wndOwner, oldCursor);
+                return;
             }
             else
             {
@@ -822,5 +1060,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             //由上層負責調用 Dispose()
             //frm?.Dispose();
         }
+        #endregion
     }
 }

@@ -25,9 +25,21 @@ namespace LaserAlignDX
     public static class GaMvcPaths
     {
         public static string GA_WORK_PATH => Traveller106.Universal.WORKPATH;
-        public static string CALIB_VISION_FILE(CarrierEnum C)
+        public static string CALIB_VISION_FILE(CarrierEnum C, SuckerRowEnum S = SuckerRowEnum.S1, int viewID = 0)
         {
-            string ext = C != CarrierEnum.C1 ? $"@{C}.json" : ".json";
+            string tag = "";
+            if (viewID > 0)
+            {
+                tag = $"@{C}#{S}";
+            }
+            else
+            {
+                if (C != CarrierEnum.C1)
+                    tag = $"@{C}";
+            }
+
+            //string ext = C != CarrierEnum.C1 ? $"@{C}.json" : ".json";
+            string ext = tag + ".json";
             return System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Vision_Settings" + ext);
         }
         public static string CALIB_TRANSFORMS_FILE
