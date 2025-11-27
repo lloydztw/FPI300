@@ -752,8 +752,23 @@ namespace EzAoiEmptyTrayInspector.Model
                     {
                         //changeState("Gridding", sideId);
                         _LOG.Info("[{0}] Gridding", sideId);
+
                         var builder = new EzBlocsGridBuilder();
                         grid = builder.Build(blocs);
+
+                        // 2025-11-28 新增
+                        #region 如果抓不到理想的GRID_再重新抓一次
+                        if (true)
+                        {
+                            var targetRows = _recipe.TrayMiscSettings.FullRows;
+                            var targetCols = _recipe.TrayMiscSettings.FullCols;
+                            if (targetRows > 0 && targetCols > 0)
+                            {
+                                if (grid == null || grid.Rows != targetRows || grid.Cols != targetCols)
+                                    grid = builder.Build(blocs, targetRows: targetRows, targetCols: targetCols, resetOwner: true);
+                            }
+                        }
+                        #endregion
                     }
 
                     var ts = DateTime.Now - tm0;

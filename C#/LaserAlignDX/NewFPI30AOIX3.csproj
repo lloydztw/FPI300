@@ -445,6 +445,7 @@
     <Compile Include="GA.mvc\.Enums\InspectReason.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellsDataCollection.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellX3Class.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_dots.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\QMicroChipTransform_v30.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
@@ -494,7 +495,6 @@
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\Implements\JezGridPadsChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\IMvdTemplateMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\MvdCompositeChipMatcher.cs" />
-    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerBigImagesHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ScanInspectModeEnum.cs" />

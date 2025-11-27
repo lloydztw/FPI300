@@ -25,19 +25,36 @@ namespace JetEazy.Match
 {
     public class EzBlocsGridBuilder
     {
-        public EzBlocsGrid Build(IList<EzBloc> blocs, Comparison<EzBlocsGrid> comparer = null)
+        public EzBlocsGrid Build(IList<EzBloc> blocs, Comparison<EzBlocsGrid> comparer = null, int targetRows = 0, int targetCols = 0, bool resetOwner = false)
         {
             if (blocs == null)
                 return null;
 
             var bound = get_boundary(blocs);
             var aveSize = get_ave_size(blocs);
-            var pitch = search_best_pitches(blocs, aveSize);
+            var defaultPitch = aveSize;
+
+            if (targetRows > 0 && targetCols > 0)
+            {
+                defaultPitch.Width = bound.Width / targetCols;
+                defaultPitch.Height = bound.Height / targetRows;
+            }
+
+            var pitch = search_best_pitches(blocs, defaultPitch);
             if (pitch.X <= 0) pitch.X = bound.Width;
             if (pitch.Y <= 0) pitch.Y = bound.Height;
 
             var locaBuilder = new LocalGridBuilder();
             var localMaps = new List<EzBlocsGrid>();
+
+            if (resetOwner)
+            {
+                foreach (var bloc in blocs)
+                {
+                    if (bloc != null)
+                        bloc.Owner = null;
+                }
+            }
 
             foreach (var bloc in blocs)
             {
