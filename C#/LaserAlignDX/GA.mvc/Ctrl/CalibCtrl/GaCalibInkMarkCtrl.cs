@@ -22,6 +22,7 @@ using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
+using LaserAlignDX.Properties;
 using LeTian.JxProps.Gui;
 using OpenCvSharp;
 using System;
@@ -249,7 +250,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return;
 
             var rcpPanel = _calibToolUI.wndVisionSettingsPanel;
-            var jxRect = jxSettings.BoundRect;
+            var jxRect = jxSettings.Marks.BoundRect;
 
             if (toModel)
             {
@@ -427,20 +428,25 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
 
         #region PRIVATE_FUNCTIONS
-        void fetchInkPoints(Mat imgSrc, out List<EzBloc> blocs)
+        void fetchInkPoints(Mat imgSrc, out List<EzBloc> inkBlocs)
         {
-            blocs = null;
+            inkBlocs = null;
 
             if (_activeViewID != 1 || imgSrc == null)
                 return;
 
+            var jxSettings = _getActiveSettings();
+            var blockMinSize = jxSettings.Vision.BlockMinSize.Value;
+
+            int NP = 4;
             var roi = JetEazy.Qcvt.CV(_cviBigBoundBox.Box);
             GaUtil.Clip(ref roi, imgSrc.Width, imgSrc.Height);
 
-            var jxSettings = _getActiveSettings();
+            //(1) Find Calib Blocks 
+            var calibBlocks = new List<EzBloc>();
             using (var imgCrop = imgSrc[roi].Clone())
             {
-                var thres = jxSettings.Threshold.Value;
+                var thres = jxSettings.Vision.BlockThreshold.Value;
                 if (thres <= 0)
                 {
                     Cv2.Threshold(imgCrop, imgCrop, thres, 255, ThresholdTypes.Otsu);
@@ -449,22 +455,21 @@ namespace LaserAlignDX.Mvc.Ctrl
                 {
                     Cv2.Threshold(imgCrop, imgCrop, thres, 255, ThresholdTypes.Binary);
                 }
-                Cv2.BitwiseNot(imgCrop, imgCrop);
 
                 EzBlobFinder finder = new EzBlobFinder
                 {
                     MorphIterations = 0,
                     OptFillBorder = false,
-                    MinSize = new OpenCvSharp.Size(10, 10)
+                    MinSize = new OpenCvSharp.Size(blockMinSize, blockMinSize)
                 };
 
-                finder.FindWhiteBlobs(imgCrop, out blocs);
-                if (blocs == null)
+                finder.FindWhiteBlobs(imgCrop, out calibBlocks);
+                if (calibBlocks == null)
                     return;
 
-                if (blocs.Count > 1)
+                if (calibBlocks.Count > 1)
                 {
-                    blocs.Sort((a, b) =>
+                    calibBlocks.Sort((a, b) =>
                     {
                         var px1 = a != null ? a.Pixels : 0;
                         var px2 = b != null ? b.Pixels : 0;
@@ -472,11 +477,59 @@ namespace LaserAlignDX.Mvc.Ctrl
                     });
                 }
 
-                if (blocs.Count > 4)
-                    blocs.RemoveRange(4, blocs.Count - 4);
+                if (calibBlocks.Count > NP)
+                    calibBlocks.RemoveRange(NP, calibBlocks.Count - NP);
 
-                foreach (var b in blocs)
+                foreach (var b in calibBlocks)
                     b?.Offset(roi.X, roi.Y);
+            }
+
+            //(2) Find the ink marks
+            if (calibBlocks.Count > 0)
+            {
+                inkBlocs = new List<EzBloc>(calibBlocks);
+
+                int index = 0;
+                var inkMinSize = Math.Max(2, blockMinSize / 20);
+                foreach (var calibBloc in calibBlocks)
+                {
+                    roi = JetEazy.Qcvt.CV(calibBloc.Rect);
+                    roi.Inflate(-5, -5);
+                    GaUtil.Clip(ref roi, imgSrc.Width, imgSrc.Height);
+
+                    using (var imgCrop = imgSrc[roi].Clone())
+                    {
+                        Cv2.Threshold(imgCrop, imgCrop, 0, 255, ThresholdTypes.Otsu);
+                        Cv2.BitwiseNot(imgCrop, imgCrop);
+
+                        EzBlobFinder finder = new EzBlobFinder
+                        {
+                            MorphIterations = 0,
+                            OptFillBorder = false,
+                            MinSize = new OpenCvSharp.Size(inkMinSize, inkMinSize)
+                        };
+                        finder.FindWhiteBlobs(imgCrop, out var whiteBlobs);
+
+                        if (whiteBlobs != null && whiteBlobs.Count > 0)
+                        {
+                            if (whiteBlobs.Count > 1)
+                            {
+                                whiteBlobs.Sort((a, b) =>
+                                {
+                                    var px1 = a != null ? a.Pixels : 0;
+                                    var px2 = b != null ? b.Pixels : 0;
+                                    return px2 - px1;
+                                });
+                            }
+
+                            foreach (var b in whiteBlobs)
+                                b?.Offset(roi.X, roi.Y);
+
+                            inkBlocs[index] = whiteBlobs[0];
+                        }
+                    }
+                    index++;
+                }
             }
         }
         void updateInkPoints(IEnumerable<EzBloc> blocs)

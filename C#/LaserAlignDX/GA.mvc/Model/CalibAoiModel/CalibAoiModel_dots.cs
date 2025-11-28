@@ -223,7 +223,7 @@ namespace LaserAlignDX.AoiModel
                     RefineCentroidLocations(matchResult, ezImage);
                 }
 
-                _DUMP_DOTS_PLATE_IMAGE(ezImage.Image as Mat, matchResult, $"d:\\paso.log\\dots_plate_{carrierID}.jpg");
+                _CREATE_DOTS_PLATE_IMAGE(ezImage.Image as Mat, matchResult, $"d:\\paso.log\\calib_dots_plate_{carrierID}.jpg");
 
                 return matchResult;
             }
@@ -781,8 +781,10 @@ namespace LaserAlignDX.AoiModel
                 img.SaveImage(file);
             }
         }
-        void _DUMP_DOTS_PLATE_IMAGE(Mat srcFullfovImg, MatchResult matchResult, string fileName)
+        void _CREATE_DOTS_PLATE_IMAGE(Mat srcFullfovImg, MatchResult matchResult, string fileName)
         {
+            return;
+
             int radius = 250;
 
             var grid = matchResult?.Grid;

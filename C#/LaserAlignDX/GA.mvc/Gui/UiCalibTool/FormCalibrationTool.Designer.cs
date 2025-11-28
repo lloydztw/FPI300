@@ -46,13 +46,13 @@ namespace LaserAlignDX.Mvc.Gui
             this.rdoSucker2 = new System.Windows.Forms.RadioButton();
             this.rdoSucker1 = new System.Windows.Forms.RadioButton();
             this.panelBtns = new System.Windows.Forms.Panel();
-            this.btnAutoFindCalibPoints = new System.Windows.Forms.Button();
             this.btnBuildCalib = new System.Windows.Forms.Button();
             this.btnLoadImage = new System.Windows.Forms.Button();
             this.btnGrabImage = new System.Windows.Forms.Button();
+            this.btnBuildCalibInkAdj = new System.Windows.Forms.Button();
+            this.btnAutoFindCalibPoints = new System.Windows.Forms.Button();
             this.btnPickGolden = new System.Windows.Forms.Button();
             this.btnAutoFetchInkPts = new System.Windows.Forms.Button();
-            this.btnBuildCalibInkAdj = new System.Windows.Forms.Button();
             this.panelDockLeft = new System.Windows.Forms.Panel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -315,19 +315,6 @@ namespace LaserAlignDX.Mvc.Gui
             this.panelBtns.TabIndex = 28;
             this.panelBtns.Text = "像測操作";
             // 
-            // btnAutoFindCalibPoints
-            // 
-            this.btnAutoFindCalibPoints.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
-            this.btnAutoFindCalibPoints.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnAutoFindCalibPoints.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAutoFindCalibPoints.Location = new System.Drawing.Point(225, 53);
-            this.btnAutoFindCalibPoints.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnAutoFindCalibPoints.Name = "btnAutoFindCalibPoints";
-            this.btnAutoFindCalibPoints.Size = new System.Drawing.Size(150, 38);
-            this.btnAutoFindCalibPoints.TabIndex = 26;
-            this.btnAutoFindCalibPoints.Text = "自動抓取四角";
-            this.btnAutoFindCalibPoints.UseVisualStyleBackColor = false;
-            // 
             // btnBuildCalib
             // 
             this.btnBuildCalib.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
@@ -367,6 +354,33 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnGrabImage.Text = "取像";
             this.btnGrabImage.UseVisualStyleBackColor = false;
             // 
+            // btnBuildCalibInkAdj
+            // 
+            this.btnBuildCalibInkAdj.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.btnBuildCalibInkAdj.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnBuildCalibInkAdj.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnBuildCalibInkAdj.Location = new System.Drawing.Point(395, 11);
+            this.btnBuildCalibInkAdj.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnBuildCalibInkAdj.Name = "btnBuildCalibInkAdj";
+            this.btnBuildCalibInkAdj.Size = new System.Drawing.Size(150, 80);
+            this.btnBuildCalibInkAdj.TabIndex = 27;
+            this.btnBuildCalibInkAdj.Text = "執行 墨點 校正";
+            this.btnBuildCalibInkAdj.UseVisualStyleBackColor = false;
+            this.btnBuildCalibInkAdj.Visible = false;
+            // 
+            // btnAutoFindCalibPoints
+            // 
+            this.btnAutoFindCalibPoints.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.btnAutoFindCalibPoints.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnAutoFindCalibPoints.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAutoFindCalibPoints.Location = new System.Drawing.Point(225, 53);
+            this.btnAutoFindCalibPoints.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnAutoFindCalibPoints.Name = "btnAutoFindCalibPoints";
+            this.btnAutoFindCalibPoints.Size = new System.Drawing.Size(150, 38);
+            this.btnAutoFindCalibPoints.TabIndex = 26;
+            this.btnAutoFindCalibPoints.Text = "自動抓取四角";
+            this.btnAutoFindCalibPoints.UseVisualStyleBackColor = false;
+            // 
             // btnPickGolden
             // 
             this.btnPickGolden.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
@@ -393,20 +407,6 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnAutoFetchInkPts.Text = "自動 抓取 墨點";
             this.btnAutoFetchInkPts.UseVisualStyleBackColor = false;
             this.btnAutoFetchInkPts.Visible = false;
-            // 
-            // btnBuildCalibInkAdj
-            // 
-            this.btnBuildCalibInkAdj.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
-            this.btnBuildCalibInkAdj.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnBuildCalibInkAdj.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnBuildCalibInkAdj.Location = new System.Drawing.Point(395, 11);
-            this.btnBuildCalibInkAdj.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnBuildCalibInkAdj.Name = "btnBuildCalibInkAdj";
-            this.btnBuildCalibInkAdj.Size = new System.Drawing.Size(150, 80);
-            this.btnBuildCalibInkAdj.TabIndex = 27;
-            this.btnBuildCalibInkAdj.Text = "執行 墨點 校正";
-            this.btnBuildCalibInkAdj.UseVisualStyleBackColor = false;
-            this.btnBuildCalibInkAdj.Visible = false;
             // 
             // panelDockLeft
             // 
@@ -439,7 +439,7 @@ namespace LaserAlignDX.Mvc.Gui
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Size = new System.Drawing.Size(646, 937);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "1. 主頁";
+            this.tabPage1.Text = "1. 大校正板";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // jezTransImageViewPanel1
@@ -460,7 +460,7 @@ namespace LaserAlignDX.Mvc.Gui
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Size = new System.Drawing.Size(646, 937);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "2 點墨頁";
+            this.tabPage2.Text = "2 點墨校正塊";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
             // jezTransImageViewPanel2
