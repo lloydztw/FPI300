@@ -88,11 +88,11 @@ namespace LaserAlignDX.Mvc.Gui
         Control IvCalibToolUI.wndVisionSettingsPanel => gwPanePropsViewer1;
         Button IvCalibToolUI.btnGrabImage => btnGrabImage;
         Button IvCalibToolUI.btnLoadImage => btnLoadImage;
-        Button IvCalibToolUI.btnPickupGolden => btnPickGolden;
-        Button IvCalibToolUI.btnRunAutoFetch => btnAutoFindCalibPoints;
+        //Button IvCalibToolUI.btnPickupGolden => btnPickGolden;
+        Button IvCalibToolUI.btnAutoFetchGrid => btnAutoFetchGrid;
+        Button IvCalibToolUI.btnAutoFetchInkMarks => btnAutoFetchInkMarks;
         Button IvCalibToolUI.btnBuildCalib => btnBuildCalib;
-        Button IvCalibToolUI.btnAutoFetchInkPts => btnAutoFetchInkPts;
-        Button IvCalibToolUI.btnBuildCalibInkAdj => btnBuildCalibInkAdj;
+        //Button IvCalibToolUI.btnBuildCalibInkAdj => btnBuildCalibInkAdj;
         Button IvCalibToolUI.btnCancel => btnCancel;
         Button IvCalibToolUI.btnOK => btnOK;
         #endregion

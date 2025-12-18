@@ -50,6 +50,7 @@ namespace LaserAlignDX.AoiModel.Calib
     {
         public JxTrayMiscSettings EmptyTraySettings = new JxTrayMiscSettings() { Description = "空盤規格設定" };
         public JxCalibGridVisionSettings GridVisionSettings = new JxCalibGridVisionSettings() { Description = "格點像測設定" };
+        public JxRect BoundRect = new JxRect("Boundary", "範圍框 (唯讀)(隱藏)");
 
         public JxCalibGridSettings() : base(name: "GridSettings", "校正參數 (格點)")
         {
@@ -61,6 +62,7 @@ namespace LaserAlignDX.AoiModel.Calib
             BindItems(new IProp[] {
                 EmptyTraySettings,
                 GridVisionSettings,
+                BoundRect,
             });
             base.OnBindingSubItems();
         }
@@ -72,8 +74,8 @@ namespace LaserAlignDX.AoiModel.Calib
     /// </summary>
     public class JxCalibGridVisionSettings : JxContainer
     {
-        public JxInt Threshold = JxInt.C255("Threshold", "格點 門限", 100);
-        public JxInt MinSize = new JxInt("Min Size", "格點 最小邊長 (pixels)", 500, new Range(10, 5000));
+        public JxInt Threshold = JxInt.C255("Threshold", "格點 門限", 128);
+        public JxInt MinSize = new JxInt("Min Size", "格點 最小邊長 (pixels)", 100, new Range(10, 5000));
 
         public JxCalibGridVisionSettings() : base(name: "Grid Vision")
         {

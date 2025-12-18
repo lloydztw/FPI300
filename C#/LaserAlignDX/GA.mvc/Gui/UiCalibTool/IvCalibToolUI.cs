@@ -35,12 +35,10 @@ namespace LaserAlignDX.Mvc.Gui
 
         Button btnGrabImage { get; }
         Button btnLoadImage { get; }
-        Button btnPickupGolden { get; }
-        Button btnRunAutoFetch { get; }
-        Button btnBuildCalib { get; }
 
-        Button btnAutoFetchInkPts { get; }
-        Button btnBuildCalibInkAdj { get; }
+        Button btnAutoFetchGrid { get; }
+        Button btnAutoFetchInkMarks { get; }
+        Button btnBuildCalib { get; }
 
         Button btnCancel { get; }
         Button btnOK { get; }
