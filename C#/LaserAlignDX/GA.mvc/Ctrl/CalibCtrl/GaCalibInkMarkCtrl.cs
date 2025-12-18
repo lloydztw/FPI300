@@ -19,17 +19,15 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
-using LaserAlignDX.AoiModel;
+using LaserAlignDX.AoiModel.Calib;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
-using LaserAlignDX.Properties;
 using LeTian.JxProps.Gui;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Web;
 using System.Windows.Forms;
 
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
@@ -77,9 +75,6 @@ namespace LaserAlignDX.Mvc.Ctrl
         CarrierEnum _activeCarrierID = CarrierEnum.C1;
         SuckerRowEnum _activeSuckerRowID = SuckerRowEnum.S1;
         int _activeViewID = 0;
-        #endregion
-
-        #region RUNTIME_IMAGE
         bool _isInkPtsFetched = false;
         #endregion
 
@@ -98,7 +93,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 var old = _jxCalibInkMarkRecipes[i];
                 disconnectPropEventHandlers(old);
-                _jxCalibInkMarkRecipes[i] = new JxCalibInkMarkSettings();
+                //_jxCalibInkMarkRecipes[i] = new JxCalibInkMarkSettings();
                 connectPropEventHandlers(_jxCalibInkMarkRecipes[i]);
                 old?.Dispose();
             }

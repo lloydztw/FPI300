@@ -542,7 +542,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                 try
                 {
-                    var bmp = GaImageUtil.LoadBigImage(fileName);
+                    var bmp = GaImageUtil.LoadBigImage(fileName, autoSaveJpg: true);
                     simLotData(fileName);
                     _lineScanImageHolder?.TakeOver(bmp, System.IO.Path.GetFileName(fileName));
                 }

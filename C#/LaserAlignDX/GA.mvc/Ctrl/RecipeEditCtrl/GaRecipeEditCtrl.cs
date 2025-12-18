@@ -17,6 +17,7 @@ using Eazy_Project_III;
 using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Match;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
@@ -119,7 +120,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             rdoCarriers[0].CheckedChanged += rdoCarrier_CheckedChanged;
             btnOpenEmptyTrayWindow.Click += (s, e) => OpenEmptyTrayInspectWindow();
             btnPickGoldenRegion.Click += (s, e) => toggleGoldenRegionPicking();
-            btnAutoCreateRegions.Click += (s, e) => AutoCreateRegions();
+
+            //btnAutoCreateRegions.Click += (s, e) => AutoCreateRegions();
+            btnAutoCreateRegions.Click += (s, e) => AutoUpdateRegions();
             _cviGoldenRegionBox.OnBoxSelected += (s, e) => BuildGoldenRegion();
 
             btnOpenTemplateMatchWindow.Click += (s, e) => OpenTemplateMatchWindow();
@@ -384,7 +387,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 
-            var bigBmp = GaImageUtil.LoadBigImage(fileName);
+            var bigBmp = GaImageUtil.LoadBigImage(fileName, autoSaveJpg: true);
 
             if (bigBmp != null)
             {
@@ -530,8 +533,13 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 更新至 recipe
             updateGoldenRegionToRecipe(imgSrc[goldenRoi], goldenRoi);
         }
+        
         void AutoCreateRegions()
         {
+            //-------------------------------------
+            // 2025-12-11 針對 校正塊 改版
+            //-------------------------------------
+#if (OPT_CREATE_REGIONS_IS_REPLACED_BY_CALIBRATION_CTRL)
             showCviResult(false);
             enableGoldenRegionPicking(false);
             _imgViewer.MatViewer.Refresh();
@@ -567,6 +575,55 @@ namespace LaserAlignDX.Mvc.Ctrl
             _cviCamGridBox.IsEmptyTrayMode = true;
             //_cviCamGridBox.IsEmptyTrayMode = false;
             _cviCamGridBox.UpdateResult(result);
+            _cviCamGridBox.Visible = true;
+            _imgViewer.MatViewer.Invalidate();
+
+            // 更新 參數畫面
+            updateRecipePropertyView(carrierID);
+
+            GaUtil.SetCursor(_wndOwner, oldCursor);
+#endif
+        }
+        void AutoUpdateRegions()
+        {
+            //-------------------------------------
+            // 2025-12-11 針對 校正塊 改版
+            //-------------------------------------
+
+            showCviResult(false);
+            enableGoldenRegionPicking(false);
+            _imgViewer.MatViewer.Refresh();
+
+            var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+            var carrierID = _currentCarrierID;
+
+            // 從參數取得 camGrid
+            var camGrid = carrierID == CarrierEnum.C1 ? _xRecipe.xCamGrid1 : _xRecipe.xCamGrid2;
+            if (camGrid == null)
+            {
+                VsMessageBox.Warning($"請為 載台{GaUtil.GetEnumDescription(carrierID)} 進行校正!");
+                return;
+            }
+
+            // 更新 CoordRef
+            updatePlcCoordsRef(carrierID);
+
+            #region NOT_USED_CODE
+            //// 設定旗標
+            //_isModified = true;
+            //// 強制保存
+            //_xRecipe.SaveCameraGrids();
+            #endregion
+
+            // 更新 GUI
+            var blocs = new List<EzBloc>();
+            blocs.AddRange(camGrid.IterBlocs());
+            var matchResult = new EzAoiEmptyTrayInspector.Model.MatchResult((int)carrierID, camGrid, blocs);
+
+            _cviCamGridBox.TransCameraToWorld = _sysModel.TransformsModel.GetCameraPhysicTransform(carrierID);
+            _cviCamGridBox.IsEmptyTrayMode = true;
+            //_cviCamGridBox.IsEmptyTrayMode = false;
+            _cviCamGridBox.UpdateResult(matchResult);
             _cviCamGridBox.Visible = true;
             _imgViewer.MatViewer.Invalidate();
 

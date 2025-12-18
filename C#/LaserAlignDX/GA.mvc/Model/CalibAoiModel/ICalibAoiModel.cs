@@ -14,15 +14,28 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy.EzImage;
 using JetEazy.Match;
+using LaserAlignDX.AoiModel.Calib;
 using OpenCvSharp;
+using System;
 
 
 namespace LaserAlignDX.AoiModel
 {
-    public interface ICalibAoiModel : IxEmptyTrayInspector
+    public interface ICalibAoiModel : IDisposable
     {
+        void ResetAndClear();
+
+        /// <summary>
+        /// 設定全域校正參數
+        /// </summary>
+        void SetRecipe(JxCalibRecipe recipe);
+
+        ErrCodes BuildGoldenGridTemplate(object dummy, IEzImage ezImage);
+
         MatchResult FetchGridNodes(CarrierEnum carrierID, Mat fullfovImg, bool refine = true);
+
         bool AdjustBadNodes(CarrierEnum carrierID, EzBlocsGrid grid);
         
         ///// <summary>
@@ -32,5 +45,7 @@ namespace LaserAlignDX.AoiModel
         ///// <param name="grid">像測格位點 (單位 pixels)</param>
         ///// <param name="dir">方向, 0: X, 1: Y, 2: XY, 其他: OFF</param>
         //void ScanSelfErrors(CarrierEnum carrierID, EzBlocsGrid grid, int dir, out double maxErr, out int maxErrRow, out int maxRowCol);
+
+        void SetRecipe(EzAoiEmptyTrayInspector.Model.JxAoiRecipe recipe);
     }
 }

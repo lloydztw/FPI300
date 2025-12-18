@@ -13,22 +13,95 @@
  */
 #endregion
 
-using LeTian.JxProps;
-using System.Drawing;
 
-namespace LaserAlignDX.AoiModel
+using EzAoiEmptyTrayInspector.Model;
+using LeTian.JxProps;
+using JxPointF = LeTian.JxProps.JxBase<System.Drawing.PointF>;
+using JxRect = LeTian.JxProps.JxBase<System.Drawing.Rectangle>;
+
+
+namespace LaserAlignDX.AoiModel.Calib
 {
-    using JxPointF = JxBase<PointF>;
-    using JxRect = JxBase<Rectangle>;
+    /// <summary>
+    /// 全域座標 校正參數
+    /// </summary>
+    public class JxCalibRecipe : JxContainer
+    {
+        public JxCalibGridSettings GridSettings = new JxCalibGridSettings();
+        public JxCalibInkMarkSettings InkMarkSettings = new JxCalibInkMarkSettings(SuckerRowEnum.S1);
+        public JxCalibInkMarkSettings InkMarkSettings2 = new JxCalibInkMarkSettings(SuckerRowEnum.S2);
+        public override void OnBindingSubItems()
+        {
+            // 綁定以下成員, 會自動顯示在GUI編輯視窗.
+            BindItems(new IProp[] {
+                GridSettings,
+                InkMarkSettings,
+                InkMarkSettings2,
+            });
+            base.OnBindingSubItems();
+        }
+    }
+
 
     /// <summary>
-    /// 點墨參數
+    /// 全域座標 校正參數 (格點頁)
+    /// </summary>
+    public class JxCalibGridSettings : JxContainer
+    {
+        public JxTrayMiscSettings EmptyTraySettings = new JxTrayMiscSettings() { Description = "空盤規格設定" };
+        public JxCalibGridVisionSettings GridVisionSettings = new JxCalibGridVisionSettings() { Description = "格點像測設定" };
+
+        public JxCalibGridSettings() : base(name: "GridSettings", "校正參數 (格點)")
+        {
+
+        }
+        public override void OnBindingSubItems()
+        {
+            // 綁定以下成員, 會自動顯示在GUI編輯視窗.
+            BindItems(new IProp[] {
+                EmptyTraySettings,
+                GridVisionSettings,
+            });
+            base.OnBindingSubItems();
+        }
+    }
+
+
+    /// <summary>
+    /// 格點像測設定
+    /// </summary>
+    public class JxCalibGridVisionSettings : JxContainer
+    {
+        public JxInt Threshold = JxInt.C255("Threshold", "格點 門限", 100);
+        public JxInt MinSize = new JxInt("Min Size", "格點 最小邊長 (pixels)", 500, new Range(10, 5000));
+
+        public JxCalibGridVisionSettings() : base(name: "Grid Vision")
+        {
+        }
+        public override void OnBindingSubItems()
+        {
+            // 綁定以下成員, 會自動顯示在GUI編輯視窗.
+            BindItems(new IProp[] {
+                Threshold,
+                MinSize,
+            });
+            base.OnBindingSubItems();
+        }
+    }
+
+
+    /// <summary>
+    /// 全域座標 校正參數 (點墨頁)
     /// </summary>
     public class JxCalibInkMarkSettings: JxContainer
     {
         public JxCalibInkMarkVision Vision = new JxCalibInkMarkVision(description: "校正塊像測設定");
         public JxCalibInkMarkPoints Marks = new JxCalibInkMarkPoints(description: "點位標記 (唯讀)");
 
+        public JxCalibInkMarkSettings(SuckerRowEnum id) : base($"InkMark {id}", $"校正參數 (點墨 {id})")
+        {
+
+        }
         public override void OnBindingSubItems()
         {
             // 綁定以下成員, 會自動顯示在GUI編輯視窗.
@@ -39,6 +112,7 @@ namespace LaserAlignDX.AoiModel
             base.OnBindingSubItems();
         }
 
+        #region PUBLIC_HELPER_FUNCTIONS
         public JxPointF GetInkPoint(int cornerID)
         {
             //switch (cornerID)
@@ -63,8 +137,13 @@ namespace LaserAlignDX.AoiModel
             //}
             return Marks.GetRawMotorPoint(cornerID);
         }
+        #endregion
     }
 
+
+    /// <summary>
+    /// 校正塊像測設定
+    /// </summary>
     public class JxCalibInkMarkVision : JxContainer
     {
         public JxInt BlockThreshold = JxInt.C255("Block Threshold", "校正塊 門限", 200);
@@ -84,6 +163,10 @@ namespace LaserAlignDX.AoiModel
         }
     }
 
+
+    /// <summary>
+    /// 墨點 (Runtime ReadOnly)
+    /// </summary>
     public class JxCalibInkMarkPoints : JxContainer
     {
         public JxRect BoundRect = new JxRect("Boundary", "範圍框 (唯讀)");
@@ -99,7 +182,6 @@ namespace LaserAlignDX.AoiModel
         public JxCalibInkMarkPoints(string name = "Marks", string description = null) : base(name, description)
         {
         }
-
         public override void OnBindingSubItems()
         {
             // 綁定以下成員, 會自動顯示在GUI編輯視窗.
@@ -117,6 +199,7 @@ namespace LaserAlignDX.AoiModel
             base.OnBindingSubItems();
         }
 
+        #region PUBLIC_HELPER_FUNCTIONS
         public JxPointF GetInkPoint(int cornerID)
         {
             switch (cornerID)
@@ -139,5 +222,6 @@ namespace LaserAlignDX.AoiModel
                 default: return null;
             }
         }
+        #endregion
     }
 }

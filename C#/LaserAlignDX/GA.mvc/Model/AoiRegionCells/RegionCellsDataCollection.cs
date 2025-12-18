@@ -24,6 +24,9 @@ using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 
 namespace LaserAlignDX.AoiModel
 {
+    /// <summary>
+    /// 將來要把所有的 RegionCells 都交由 此容器載體管理
+    /// </summary>
     public partial class RegionCellsDataCollection : IDisposable
     {
         #region GLOBAL_MESS
@@ -170,7 +173,7 @@ namespace LaserAlignDX.AoiModel
         }
 
         /// <summary>
-        /// 【空盤檢測】加入格位外 疑似有料的區塊
+        /// 【空盤檢測】加入格位外 疑似有料的區塊 (預備將來改版使用)
         /// </summary>
         public void AppendOutGridBloc(EzBloc bloc)
         {

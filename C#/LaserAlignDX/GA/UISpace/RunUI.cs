@@ -4,6 +4,7 @@ using JetEazy.DBSpace;
 using JetEazy.EzImage;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Utils;
 using LaserAlignDX;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
@@ -235,6 +236,7 @@ namespace PhotoMachine.UISpace
             //    i++;
             //}
         }
+
         //// 定义不同错误类别的颜色
         //Color[] categoryColors =
         //{
@@ -300,12 +302,14 @@ namespace PhotoMachine.UISpace
                 string dstFilename = SaveFilePicker("JPG Files (*.jpg)|*.jpg|BMP Files (*.bmp)|*.bmp|PNG Files (*.png)|*.png", "");
                 if (!string.IsNullOrEmpty(dstFilename))
                 {
-                    using (IEzImage ezImage = new EzFreeBitmap(srcBmp, false))
-                    {
-                        ezImage.Save(dstFilename);
-                    }
+                    var oldCur = GaUtil.SetCursor(this, Cursors.AppStarting);
+                    this.FindForm().Refresh();
+
+                    GaImageUtil.SaveBigImage(dstFilename, srcBmp);
                     string msg = isOffLine ? "離線圖檔 已經另存至:" : "相機圖檔 已經保存至:";
                     VsMessageBox.Info(ToChangeLanguage(msg) + Environment.NewLine + dstFilename);
+
+                    GaUtil.SetCursor(this, oldCur);
                 }
                 srcBmp.Dispose();
             }

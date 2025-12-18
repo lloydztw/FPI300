@@ -14,6 +14,7 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy.Match;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
 using NeedleX.ProcessSpace;
@@ -76,6 +77,13 @@ namespace LaserAlignDX.Mvc.Model
         /// (用於 參數編輯模式)
         /// </summary>
         MatchResult AutoBuildRegionCells(Bitmap fullfovBmp);
+
+        /// <summary>
+        /// 建立 座標轉換 與 Region Cells 格點 
+        /// (2025-12-11 針對 校正塊 改版)
+        /// (用於 參數編輯模式)
+        /// </summary>
+        bool BuildTransformAndRegionCells(CarrierEnum carrierID, EzBlocsGrid camGrid);
 
         /// <summary>
         /// 單筆寫入 座標數據 至 PLC

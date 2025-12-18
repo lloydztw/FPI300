@@ -170,7 +170,7 @@ namespace LaserAlignDX.Mvc.Model
             GaUtil.LOG($"[SysModel] 重新載入參數 {gaaraRecipeName}", Color.Blue);
             #endregion
 
-            //(3) 重新載入 EmptyTrayAoiRecipe
+            //(4) 重新載入 EmptyTrayAoiRecipe
             using (var jx = loadEmptyTrayAoiRecipe(false))
             {
                 if (jx != null)
@@ -179,6 +179,7 @@ namespace LaserAlignDX.Mvc.Model
                 }
             }
 
+            #region NOT_USED_CODE
             ////(3) PitchX and PitchY 
             //double pitchX = _xRecipe.xRealOffsetX;  // default from xRecipe
             //double pitchY = _xRecipe.xRealOffsetY;  // default from xRecipe
@@ -186,18 +187,24 @@ namespace LaserAlignDX.Mvc.Model
             //var rows = camGrid.Rows;
             //var cols = camGrid.Cols;
             //var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
+            #endregion
 
-            //(4) build Runtime Plc Grid
+            //(5) build Runtime Plc Grid
             var plcGrid = buildRuntimePlcGrid(runtimeCamGrid);
 
-            //(5) set Runtime Plc Grid
+            //(6) set Runtime Plc Grid
             transformsModel.UpdateRuntimePlcGrid(plcGrid, camGridC1, camGridC2);
 
-            //(6) 自動建立陣列
+            //(7) 自動建立陣列
             buildRegionCells(ActiveCarrierID, runtimeCamGrid, false);
         }
+        
         public MatchResult AutoBuildRegionCells(Bitmap fullfovBmp)
         {
+            //-----------------------------
+            // 2025-12-11 針對 校正塊 改版
+            //-----------------------------
+
             //(1) 自動抓取 格點
             var matchResult = fetchCameraGrid(fullfovBmp);
             var camGrid = matchResult?.Grid;
@@ -223,6 +230,53 @@ namespace LaserAlignDX.Mvc.Model
             TransformsModel.UpdateRuntimePlcGrid(null, camGridC1, camGridC2);
 
             return matchResult;
+        }
+
+        public bool BuildTransformAndRegionCells(CarrierEnum carrierID, EzBlocsGrid camGrid)
+        {
+            //-----------------------------
+            // 2025-12-11 針對 校正塊 改版
+            //-----------------------------
+            bool ok = false;
+
+            //(0) 檢查 camGrid 狀態
+            if (camGrid == null)
+            {
+                //"無法抓到格點!"
+                var errCode = ErrCodes.CAN_NOT_FETCH_CAMERA_GRID;
+                var errMsg = JetEazy.QxNums.GetEnumDescription(errCode);
+                OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
+                return false;
+            }
+            else if (checkCameraGrid(ActiveCarrierID, camGrid, notify: true) != null)
+            {
+                return false;
+            }
+
+            var calibModel = CalibAoiModel;
+            var transformsModel = TransformsModel;
+
+            //(1) 建立 Transform
+            transformsModel.BuildAll();
+
+            if (camGrid != null)
+            {
+                //(2) 去除異常 格位 再重建一次 Transform
+                if (calibModel.AdjustBadNodes(carrierID, camGrid))
+                    transformsModel.BuildAll();
+
+                //(3) 建立 RegionCells
+                buildRegionCells(carrierID, camGrid, optWriteBlackToRecipe: true);
+
+                //(4) 更新 camGrid
+                var camGridC1 = carrierID == CarrierEnum.C1 ? camGrid : null;
+                var camGridC2 = carrierID == CarrierEnum.C2 ? camGrid : null;
+                transformsModel.UpdateRuntimePlcGrid(null, camGridC1, camGridC2);
+
+                ok = true;
+            }
+
+            return ok;
         }
 
         #region PRIVATE_REGION_CELL_FUNCTIONS
@@ -288,7 +342,7 @@ namespace LaserAlignDX.Mvc.Model
 
         private void buildRegionCells(CarrierEnum carrierID, EzBlocsGrid camGrid, bool optWriteBlackToRecipe)
         {
-            if (TravellerTransforms.OPT_USING_XRECIPE_CAM_GRID)
+            if (TravellerTransforms.OPT_CALIB_GRID_USING_MOTOR_COORD)
                 buildRegionCells_motor(carrierID, camGrid, optWriteBlackToRecipe);
             else
                 buildRegionCells_world(carrierID, camGrid, optWriteBlackToRecipe);

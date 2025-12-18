@@ -448,7 +448,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     if (!string.IsNullOrEmpty(fileName))
                     {
                         var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
-                        using (Bitmap bmpFly = GaImageUtil.LoadBigImage(fileName))
+                        using (Bitmap bmpFly = GaImageUtil.LoadBigImage(fileName, autoSaveJpg:true))
                         {
                             var flyID = new FlyID(idx + 1, idx);
                             flyRunAoiOne(flyID, bmpFly);

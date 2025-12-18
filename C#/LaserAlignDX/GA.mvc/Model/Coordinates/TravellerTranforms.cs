@@ -31,20 +31,26 @@ namespace LaserAlignDX.Model.Coords
     public partial class TravellerTransforms : IDisposable
     {
         #region CONFIG
+        /// <summary>
+        /// 校正點數
+        /// </summary>
         public const int N_CALIB_POINTS = 4;
-        public static bool OPT_USING_XRECIPE_CAM_GRID => true;
+        /// <summary>
+        /// 目前是使用 Motor Coordinate
+        /// </summary>
+        internal static bool OPT_CALIB_GRID_USING_MOTOR_COORD => true;
         #endregion
 
         #region PRIVATE_GLOBAL_TRANSFORM_MEMBERS
         PlcGridPoints _calibPlcGrid = new PlcGridPoints();
         QTransform[] _transforms = new QTransform[]
         {
-            new QTransform("C1_P", "pix", "mm"),
-            new QTransform("C1_M1S1", "pix", "mm"),
-            new QTransform("C1_M1S2", "pix", "mm"),
-            new QTransform("C2_P", "pix", "mm"),
-            new QTransform("C2_M2S1", "pix", "mm"),
-            new QTransform("C2_M2S2", "pix", "mm"),
+            new QTransform("C1_P", "pix", "mm"),        // 線掃相機C1 <--> world
+            new QTransform("C1_M1S1", "pix", "mm"),     // 線掃相機C1 <--> motors (sucker 1)
+            new QTransform("C1_M1S2", "pix", "mm"),     // 線掃相機C1 <--> motors (sucker 2)
+            new QTransform("C2_P", "pix", "mm"),        // 線掃相機C2 <--> world
+            new QTransform("C2_M2S1", "pix", "mm"),     // 線掃相機C2 <--> motors (sucker 1)
+            new QTransform("C2_M2S2", "pix", "mm"),     // 線掃相機C2 <--> motors (sucker 2)
         };
         int getIndex(CarrierEnum C, SuckerRowEnum S)
         {
@@ -89,6 +95,7 @@ namespace LaserAlignDX.Model.Coords
             int index = getIndex(C);
             return _transforms[index];
         }
+
         public QTransform this[CarrierEnum C, SuckerRowEnum S]
         {
             get => GetCameraMotorTransform(C, S);
@@ -311,7 +318,7 @@ namespace LaserAlignDX.Model.Coords
             var transCP = this.GetCameraPhysicTransform(C);
 
             //(4) 計算 (簡單 使用 馬達座標)
-            if (OPT_USING_XRECIPE_CAM_GRID)
+            if (OPT_CALIB_GRID_USING_MOTOR_COORD)
             {
                 //(4.1) 檢查 Runtime CamGrid
                 var runtimeCamGrid = C == CarrierEnum.C1 ? _runtimeCamGridC1 : _runtimeCamGridC2;
@@ -346,6 +353,7 @@ namespace LaserAlignDX.Model.Coords
         /// </summary>
         public (ErrCodes, string) GetCoordsRef(CarrierEnum C, out QVector camCoord, out QVector s1MotorCoord, out QVector s2MotorCoord)
         {
+            #region NOT_USED_CODE
             //#region DEFAULT_VALUES
             //ErrCodes errCode = ErrCodes.OK;
             //camCoord = new QVector(0, 0);
@@ -399,6 +407,7 @@ namespace LaserAlignDX.Model.Coords
             ////(6) Return value
             //errMsg = null;
             //return ErrCodes.OK;
+            #endregion
 
             return GetNodeCoords(C, 0, 0, out camCoord, out var _, out s1MotorCoord, out s2MotorCoord);
         }

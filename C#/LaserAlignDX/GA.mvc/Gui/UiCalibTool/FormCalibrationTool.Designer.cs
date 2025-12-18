@@ -83,16 +83,16 @@ namespace LaserAlignDX.Mvc.Gui
             this.tbLayoutDockRight.Controls.Add(this.tableLayoutPanel1, 0, 0);
             this.tbLayoutDockRight.Controls.Add(this.panelBtns, 0, 2);
             this.tbLayoutDockRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.tbLayoutDockRight.Location = new System.Drawing.Point(660, 0);
+            this.tbLayoutDockRight.Location = new System.Drawing.Point(743, 0);
             this.tbLayoutDockRight.Margin = new System.Windows.Forms.Padding(0);
             this.tbLayoutDockRight.Name = "tbLayoutDockRight";
             this.tbLayoutDockRight.RowCount = 5;
-            this.tbLayoutDockRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 80F));
+            this.tbLayoutDockRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 96F));
             this.tbLayoutDockRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tbLayoutDockRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tbLayoutDockRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tbLayoutDockRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 80F));
-            this.tbLayoutDockRight.Size = new System.Drawing.Size(600, 975);
+            this.tbLayoutDockRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 96F));
+            this.tbLayoutDockRight.Size = new System.Drawing.Size(675, 1170);
             this.tbLayoutDockRight.TabIndex = 31;
             // 
             // groupBox1
@@ -100,11 +100,11 @@ namespace LaserAlignDX.Mvc.Gui
             this.groupBox1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.groupBox1.Controls.Add(this.gwPanePropsViewer1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.groupBox1.Location = new System.Drawing.Point(4, 374);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.groupBox1.Location = new System.Drawing.Point(4, 450);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(8, 18, 8, 12);
-            this.groupBox1.Size = new System.Drawing.Size(592, 518);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(9, 22, 9, 14);
+            this.groupBox1.Size = new System.Drawing.Size(667, 620);
             this.groupBox1.TabIndex = 29;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "像測參數";
@@ -114,22 +114,22 @@ namespace LaserAlignDX.Mvc.Gui
             this.gwPanePropsViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gwPanePropsViewer1.Editable = true;
             this.gwPanePropsViewer1.ImageList = null;
-            this.gwPanePropsViewer1.Location = new System.Drawing.Point(8, 36);
+            this.gwPanePropsViewer1.Location = new System.Drawing.Point(9, 44);
             this.gwPanePropsViewer1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.gwPanePropsViewer1.Name = "gwPanePropsViewer1";
-            this.gwPanePropsViewer1.Size = new System.Drawing.Size(576, 470);
+            this.gwPanePropsViewer1.Size = new System.Drawing.Size(649, 562);
             this.gwPanePropsViewer1.TabIndex = 0;
             // 
             // gvCalibPointsDataGridView1
             // 
             this.gvCalibPointsDataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvCalibPointsDataGridView1.Font = new System.Drawing.Font("微软雅黑", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(3, 84);
-            this.gvCalibPointsDataGridView1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(3, 101);
+            this.gvCalibPointsDataGridView1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.gvCalibPointsDataGridView1.Name = "gvCalibPointsDataGridView1";
             this.gvCalibPointsDataGridView1.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.gvCalibPointsDataGridView1.SelectedIndex = 0;
-            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(594, 169);
+            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(669, 203);
             this.gvCalibPointsDataGridView1.TabIndex = 0;
             // 
             // panelB
@@ -138,10 +138,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.panelB.Controls.Add(this.btnCancel);
             this.panelB.Controls.Add(this.btnOK);
             this.panelB.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelB.Location = new System.Drawing.Point(0, 895);
+            this.panelB.Location = new System.Drawing.Point(0, 1074);
             this.panelB.Margin = new System.Windows.Forms.Padding(0);
             this.panelB.Name = "panelB";
-            this.panelB.Size = new System.Drawing.Size(600, 80);
+            this.panelB.Size = new System.Drawing.Size(675, 96);
             this.panelB.TabIndex = 32;
             // 
             // btnCancel
@@ -150,10 +150,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCancel.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(438, 12);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnCancel.Location = new System.Drawing.Point(493, 14);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(148, 52);
+            this.btnCancel.Size = new System.Drawing.Size(166, 62);
             this.btnCancel.TabIndex = 24;
             this.btnCancel.Text = "退出";
             this.btnCancel.UseVisualStyleBackColor = false;
@@ -164,10 +164,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnOK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOK.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOK.Location = new System.Drawing.Point(282, 12);
-            this.btnOK.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnOK.Location = new System.Drawing.Point(317, 14);
+            this.btnOK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(148, 52);
+            this.btnOK.Size = new System.Drawing.Size(166, 62);
             this.btnOK.TabIndex = 23;
             this.btnOK.Text = "保存资料";
             this.btnOK.UseVisualStyleBackColor = false;
@@ -181,11 +181,12 @@ namespace LaserAlignDX.Mvc.Gui
             this.tableLayoutPanel1.Controls.Add(this.panel1, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.panel2, 1, 0);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 3);
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 4);
+            this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(594, 74);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(669, 88);
             this.tableLayoutPanel1.TabIndex = 1;
             // 
             // panel1
@@ -197,12 +198,13 @@ namespace LaserAlignDX.Mvc.Gui
             this.panel1.Controls.Add(this.rdoCarrier2, 1, 0);
             this.panel1.Controls.Add(this.rdoCarrier1, 0, 0);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(3, 3);
+            this.panel1.Location = new System.Drawing.Point(3, 4);
+            this.panel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel1.Name = "panel1";
             this.panel1.RowCount = 1;
             this.panel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.panel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 68F));
-            this.panel1.Size = new System.Drawing.Size(291, 68);
+            this.panel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 82F));
+            this.panel1.Size = new System.Drawing.Size(328, 80);
             this.panel1.TabIndex = 29;
             // 
             // rdoCarrier2
@@ -214,10 +216,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.rdoCarrier2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.rdoCarrier2.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rdoCarrier2.ForeColor = System.Drawing.Color.Black;
-            this.rdoCarrier2.Location = new System.Drawing.Point(148, 5);
-            this.rdoCarrier2.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.rdoCarrier2.Location = new System.Drawing.Point(167, 6);
+            this.rdoCarrier2.Margin = new System.Windows.Forms.Padding(3, 6, 3, 6);
             this.rdoCarrier2.Name = "rdoCarrier2";
-            this.rdoCarrier2.Size = new System.Drawing.Size(140, 58);
+            this.rdoCarrier2.Size = new System.Drawing.Size(158, 68);
             this.rdoCarrier2.TabIndex = 9;
             this.rdoCarrier2.Text = "載台 2";
             this.rdoCarrier2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -232,10 +234,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.rdoCarrier1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.rdoCarrier1.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rdoCarrier1.ForeColor = System.Drawing.Color.Black;
-            this.rdoCarrier1.Location = new System.Drawing.Point(3, 5);
-            this.rdoCarrier1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.rdoCarrier1.Location = new System.Drawing.Point(3, 6);
+            this.rdoCarrier1.Margin = new System.Windows.Forms.Padding(3, 6, 3, 6);
             this.rdoCarrier1.Name = "rdoCarrier1";
-            this.rdoCarrier1.Size = new System.Drawing.Size(139, 58);
+            this.rdoCarrier1.Size = new System.Drawing.Size(158, 68);
             this.rdoCarrier1.TabIndex = 7;
             this.rdoCarrier1.TabStop = true;
             this.rdoCarrier1.Text = "載台 1";
@@ -251,12 +253,13 @@ namespace LaserAlignDX.Mvc.Gui
             this.panel2.Controls.Add(this.rdoSucker2, 1, 0);
             this.panel2.Controls.Add(this.rdoSucker1, 0, 0);
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(300, 3);
+            this.panel2.Location = new System.Drawing.Point(337, 4);
+            this.panel2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.panel2.Name = "panel2";
             this.panel2.RowCount = 1;
             this.panel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.panel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 68F));
-            this.panel2.Size = new System.Drawing.Size(291, 68);
+            this.panel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 82F));
+            this.panel2.Size = new System.Drawing.Size(329, 80);
             this.panel2.TabIndex = 30;
             // 
             // rdoSucker2
@@ -268,10 +271,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.rdoSucker2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.rdoSucker2.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rdoSucker2.ForeColor = System.Drawing.Color.Black;
-            this.rdoSucker2.Location = new System.Drawing.Point(148, 5);
-            this.rdoSucker2.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.rdoSucker2.Location = new System.Drawing.Point(167, 6);
+            this.rdoSucker2.Margin = new System.Windows.Forms.Padding(3, 6, 3, 6);
             this.rdoSucker2.Name = "rdoSucker2";
-            this.rdoSucker2.Size = new System.Drawing.Size(140, 58);
+            this.rdoSucker2.Size = new System.Drawing.Size(159, 68);
             this.rdoSucker2.TabIndex = 11;
             this.rdoSucker2.Text = "吸嘴排 2";
             this.rdoSucker2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -286,10 +289,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.rdoSucker1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.rdoSucker1.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.rdoSucker1.ForeColor = System.Drawing.Color.Black;
-            this.rdoSucker1.Location = new System.Drawing.Point(3, 5);
-            this.rdoSucker1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.rdoSucker1.Location = new System.Drawing.Point(3, 6);
+            this.rdoSucker1.Margin = new System.Windows.Forms.Padding(3, 6, 3, 6);
             this.rdoSucker1.Name = "rdoSucker1";
-            this.rdoSucker1.Size = new System.Drawing.Size(139, 58);
+            this.rdoSucker1.Size = new System.Drawing.Size(158, 68);
             this.rdoSucker1.TabIndex = 9;
             this.rdoSucker1.TabStop = true;
             this.rdoSucker1.Text = "吸嘴排 1";
@@ -307,11 +310,11 @@ namespace LaserAlignDX.Mvc.Gui
             this.panelBtns.Controls.Add(this.btnAutoFindCalibPoints);
             this.panelBtns.Controls.Add(this.btnPickGolden);
             this.panelBtns.Controls.Add(this.btnAutoFetchInkPts);
-            this.panelBtns.Location = new System.Drawing.Point(4, 260);
-            this.panelBtns.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.panelBtns.Location = new System.Drawing.Point(4, 313);
+            this.panelBtns.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelBtns.Name = "panelBtns";
-            this.panelBtns.Padding = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.panelBtns.Size = new System.Drawing.Size(592, 108);
+            this.panelBtns.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panelBtns.Size = new System.Drawing.Size(666, 129);
             this.panelBtns.TabIndex = 28;
             this.panelBtns.Text = "像測操作";
             // 
@@ -320,10 +323,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnBuildCalib.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
             this.btnBuildCalib.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnBuildCalib.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnBuildCalib.Location = new System.Drawing.Point(395, 11);
-            this.btnBuildCalib.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnBuildCalib.Location = new System.Drawing.Point(444, 13);
+            this.btnBuildCalib.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnBuildCalib.Name = "btnBuildCalib";
-            this.btnBuildCalib.Size = new System.Drawing.Size(150, 80);
+            this.btnBuildCalib.Size = new System.Drawing.Size(169, 96);
             this.btnBuildCalib.TabIndex = 25;
             this.btnBuildCalib.Text = "執行校正";
             this.btnBuildCalib.UseVisualStyleBackColor = false;
@@ -333,10 +336,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnLoadImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnLoadImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnLoadImage.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnLoadImage.Location = new System.Drawing.Point(55, 53);
-            this.btnLoadImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnLoadImage.Location = new System.Drawing.Point(62, 64);
+            this.btnLoadImage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnLoadImage.Name = "btnLoadImage";
-            this.btnLoadImage.Size = new System.Drawing.Size(150, 38);
+            this.btnLoadImage.Size = new System.Drawing.Size(169, 46);
             this.btnLoadImage.TabIndex = 22;
             this.btnLoadImage.Text = "加載圖片";
             this.btnLoadImage.UseVisualStyleBackColor = false;
@@ -346,10 +349,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnGrabImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnGrabImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGrabImage.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGrabImage.Location = new System.Drawing.Point(55, 11);
-            this.btnGrabImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnGrabImage.Location = new System.Drawing.Point(62, 13);
+            this.btnGrabImage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnGrabImage.Name = "btnGrabImage";
-            this.btnGrabImage.Size = new System.Drawing.Size(150, 38);
+            this.btnGrabImage.Size = new System.Drawing.Size(169, 46);
             this.btnGrabImage.TabIndex = 21;
             this.btnGrabImage.Text = "取像";
             this.btnGrabImage.UseVisualStyleBackColor = false;
@@ -359,10 +362,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnBuildCalibInkAdj.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.btnBuildCalibInkAdj.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnBuildCalibInkAdj.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnBuildCalibInkAdj.Location = new System.Drawing.Point(395, 11);
-            this.btnBuildCalibInkAdj.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnBuildCalibInkAdj.Location = new System.Drawing.Point(444, 13);
+            this.btnBuildCalibInkAdj.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnBuildCalibInkAdj.Name = "btnBuildCalibInkAdj";
-            this.btnBuildCalibInkAdj.Size = new System.Drawing.Size(150, 80);
+            this.btnBuildCalibInkAdj.Size = new System.Drawing.Size(169, 96);
             this.btnBuildCalibInkAdj.TabIndex = 27;
             this.btnBuildCalibInkAdj.Text = "執行 墨點 校正";
             this.btnBuildCalibInkAdj.UseVisualStyleBackColor = false;
@@ -373,12 +376,12 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnAutoFindCalibPoints.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnAutoFindCalibPoints.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnAutoFindCalibPoints.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAutoFindCalibPoints.Location = new System.Drawing.Point(225, 53);
-            this.btnAutoFindCalibPoints.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnAutoFindCalibPoints.Location = new System.Drawing.Point(253, 13);
+            this.btnAutoFindCalibPoints.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnAutoFindCalibPoints.Name = "btnAutoFindCalibPoints";
-            this.btnAutoFindCalibPoints.Size = new System.Drawing.Size(150, 38);
+            this.btnAutoFindCalibPoints.Size = new System.Drawing.Size(169, 97);
             this.btnAutoFindCalibPoints.TabIndex = 26;
-            this.btnAutoFindCalibPoints.Text = "自動抓取四角";
+            this.btnAutoFindCalibPoints.Text = "自動抓取 格點";
             this.btnAutoFindCalibPoints.UseVisualStyleBackColor = false;
             // 
             // btnPickGolden
@@ -386,10 +389,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnPickGolden.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnPickGolden.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnPickGolden.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnPickGolden.Location = new System.Drawing.Point(225, 11);
-            this.btnPickGolden.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnPickGolden.Location = new System.Drawing.Point(253, 13);
+            this.btnPickGolden.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnPickGolden.Name = "btnPickGolden";
-            this.btnPickGolden.Size = new System.Drawing.Size(150, 38);
+            this.btnPickGolden.Size = new System.Drawing.Size(169, 46);
             this.btnPickGolden.TabIndex = 17;
             this.btnPickGolden.Text = "框取 Golden";
             this.btnPickGolden.UseVisualStyleBackColor = false;
@@ -399,12 +402,12 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnAutoFetchInkPts.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnAutoFetchInkPts.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnAutoFetchInkPts.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAutoFetchInkPts.Location = new System.Drawing.Point(225, 11);
-            this.btnAutoFetchInkPts.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnAutoFetchInkPts.Location = new System.Drawing.Point(253, 13);
+            this.btnAutoFetchInkPts.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnAutoFetchInkPts.Name = "btnAutoFetchInkPts";
-            this.btnAutoFetchInkPts.Size = new System.Drawing.Size(150, 80);
+            this.btnAutoFetchInkPts.Size = new System.Drawing.Size(169, 96);
             this.btnAutoFetchInkPts.TabIndex = 28;
-            this.btnAutoFetchInkPts.Text = "自動 抓取 墨點";
+            this.btnAutoFetchInkPts.Text = "自動抓取 墨點";
             this.btnAutoFetchInkPts.UseVisualStyleBackColor = false;
             this.btnAutoFetchInkPts.Visible = false;
             // 
@@ -413,9 +416,9 @@ namespace LaserAlignDX.Mvc.Gui
             this.panelDockLeft.Controls.Add(this.tabControl1);
             this.panelDockLeft.Dock = System.Windows.Forms.DockStyle.Left;
             this.panelDockLeft.Location = new System.Drawing.Point(2, 0);
-            this.panelDockLeft.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.panelDockLeft.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panelDockLeft.Name = "panelDockLeft";
-            this.panelDockLeft.Size = new System.Drawing.Size(654, 975);
+            this.panelDockLeft.Size = new System.Drawing.Size(736, 1170);
             this.panelDockLeft.TabIndex = 1;
             // 
             // tabControl1
@@ -425,19 +428,20 @@ namespace LaserAlignDX.Mvc.Gui
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
+            this.tabControl1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(654, 975);
+            this.tabControl1.Size = new System.Drawing.Size(736, 1170);
             this.tabControl1.TabIndex = 32;
             // 
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.jezTransImageViewPanel1);
             this.tabPage1.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.tabPage1.Location = new System.Drawing.Point(4, 34);
+            this.tabPage1.Location = new System.Drawing.Point(4, 39);
             this.tabPage1.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(646, 937);
+            this.tabPage1.Size = new System.Drawing.Size(728, 1127);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "1. 大校正板";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -448,17 +452,17 @@ namespace LaserAlignDX.Mvc.Gui
             this.jezTransImageViewPanel1.Location = new System.Drawing.Point(0, 0);
             this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
-            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(646, 937);
+            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(728, 1127);
             this.jezTransImageViewPanel1.TabIndex = 0;
             // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.jezTransImageViewPanel2);
             this.tabPage2.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.tabPage2.Location = new System.Drawing.Point(4, 34);
+            this.tabPage2.Location = new System.Drawing.Point(4, 39);
             this.tabPage2.Margin = new System.Windows.Forms.Padding(0);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(646, 937);
+            this.tabPage2.Size = new System.Drawing.Size(728, 1127);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "2 點墨校正塊";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -469,20 +473,20 @@ namespace LaserAlignDX.Mvc.Gui
             this.jezTransImageViewPanel2.Location = new System.Drawing.Point(0, 0);
             this.jezTransImageViewPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.jezTransImageViewPanel2.Name = "jezTransImageViewPanel2";
-            this.jezTransImageViewPanel2.Size = new System.Drawing.Size(646, 937);
+            this.jezTransImageViewPanel2.Size = new System.Drawing.Size(728, 1127);
             this.jezTransImageViewPanel2.TabIndex = 1;
             // 
             // FormCalibrationTool
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.Gray;
-            this.ClientSize = new System.Drawing.Size(1262, 976);
+            this.ClientSize = new System.Drawing.Size(1420, 1171);
             this.Controls.Add(this.tbLayoutDockRight);
             this.Controls.Add(this.panelDockLeft);
             this.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "FormCalibrationTool";
             this.Padding = new System.Windows.Forms.Padding(2, 0, 2, 1);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

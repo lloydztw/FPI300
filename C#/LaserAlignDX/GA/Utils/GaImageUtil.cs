@@ -32,7 +32,7 @@ namespace JetEazy.Utils
     {
         /// <summary>
         /// 載入巨圖
-        public static Bitmap LoadBigImage(string fileName, int option = 0)
+        public static Bitmap LoadBigImage(string fileName, int option = 0, bool autoSaveJpg = false)
         {
             if (string.IsNullOrEmpty(fileName))
                 throw new Exception($"檔案不存在: {fileName}");
@@ -48,6 +48,12 @@ namespace JetEazy.Utils
             {
                 //NOTE: 使用 FreeImageBitmap 載入圖檔 耗時 2.7 s
                 bigBmp = loadBigImageViaFreeImageBitmap(fileName, false);
+            }
+
+            if (autoSaveJpg && System.IO.Path.GetExtension(fileName).ToLower() != ".jpg")
+            {
+                var autoJpgFile = System.IO.Path.ChangeExtension(fileName, ".jpg");
+                SaveBigImage(autoJpgFile, bigBmp);
             }
 
             return bigBmp;

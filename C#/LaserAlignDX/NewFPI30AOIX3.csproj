@@ -360,7 +360,7 @@
   <ItemGroup>
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
-    <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibInkMarkCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
@@ -380,13 +380,18 @@
     <Compile Include="GA.mvc\Gui\.Interactor\CviRotRectBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviTransCoordInfo.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\IvDrawItem.cs" />
-    <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_abs.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v3.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v3.Designer.cs">
+      <DependentUpon>FormCalibrationTool_v3.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\IvFlyCamViewUI.cs" />
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.cs">
@@ -445,9 +450,11 @@
     <Compile Include="GA.mvc\.Enums\InspectReason.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellsDataCollection.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellX3Class.cs" />
-    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_dots.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v3.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\JxCalibRecipe.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\QMicroChipTransform_v30.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\Supports\TravellerTranformsGaaraExt.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3MeasureSpec.cs" />
@@ -455,7 +462,6 @@
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeParaGridClass.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
-    <Compile Include="GA.mvc\Model\CalibAoiModel\JxCalibInkMarkSettings.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\JxMetadataUtil.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyMetadataUtil.cs" />
@@ -463,12 +469,6 @@
     <Compile Include="GA.mvc\Model\SysModel\ITravellerSysModel.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerSysModel.cs" />
     <Compile Include="GA.mvc\GaMvcPaths.cs" />
-    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.Designer.cs">
-      <DependentUpon>FormCalibrationTool.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA.mvc\Gui\UiCalibTool\GvCalibPointsDataGridView.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -500,7 +500,6 @@
     <Compile Include="GA.mvc\Model\AoiModel\ScanInspectModeEnum.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\PlcGridPoints.cs" />
     <Compile Include="GA.mvc\.Enums\CarrierEnum.cs" />
-    <Compile Include="GA.mvc\Model\Coordinates\Supports\TravellerTranformsGaaraExt.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\TravellerTranforms.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />
@@ -680,8 +679,8 @@
     <EmbeddedResource Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.resx">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool.resx">
-      <DependentUpon>FormCalibrationTool.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v3.resx">
+      <DependentUpon>FormCalibrationTool_v3.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\GvCalibPointsDataGridView.resx">
       <DependentUpon>GvCalibPointsDataGridView.cs</DependentUpon>
@@ -770,6 +769,7 @@
     </EmbeddedResource>
     <None Include="GA.mvc\Ctrl\Readme.md" />
     <None Include="GA.mvc\Gui\Readme.md" />
+    <None Include="GA.mvc\Model\AI\Readme.md" />
     <None Include="GA.mvc\Model\CustomerModel\Readme.md" />
     <None Include="GA.mvc\Model\Readme.md" />
     <None Include="GA.mvc\Model\Recipes\JxRecipes\Readme.md" />
