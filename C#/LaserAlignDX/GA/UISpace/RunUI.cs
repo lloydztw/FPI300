@@ -278,29 +278,37 @@ namespace PhotoMachine.UISpace
 
         private void BtnSaveImage_Click(object sender, EventArgs e)
         {
-            if (IScanCam.GetFreeImageBitmap() != null)
+            Bitmap srcBmp = null;
+            bool isOffLine = false;
+
+            if (Traveller106.Universal.IsNoUseCCD)
             {
-                string _filepath = SaveFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
-                if (!string.IsNullOrEmpty(_filepath))
-                {
-                    using (IEzImage ezImage = new EzFreeBitmap(IScanCam.GetFreeImageBitmap().ToBitmap(), true))
-                    {
-                        ezImage.Save(_filepath);
-                    }
-                    //IScanCam.GetFreeImageBitmap().Save(_filepath, FreeImageAPI.FREE_IMAGE_FORMAT.FIF_BMP);
-                    VsMessageBox.Info($"{ToChangeLanguage("图片保存完成.路径:")}{Environment.NewLine + _filepath}");
-                }
+                var offlineBmp = GaMvcConfig.SysModel.LineScanImageHolder.PeekBitmap();
+                srcBmp = (Bitmap)offlineBmp?.Clone();
+                isOffLine = true;
+            }
+            else
+            {
+                // 注意: IScanCam.GetFreeImageBitmap() 所取得的 FreeBitmap 由 Camera Driver 自行維持其生命周期 
+                var cameraFreeBmp = IScanCam.GetFreeImageBitmap();
+                srcBmp = cameraFreeBmp?.ToBitmap();
+                isOffLine = false;
             }
 
-            //if (Traveller106.Universal.bmpGlobalFreeImage != null)
-            //{
-            //    string _filepath = SaveFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
-            //    if (!string.IsNullOrEmpty(_filepath))
-            //    {
-            //        Traveller106.Universal.bmpGlobalFreeImage.Save(_filepath, FreeImageAPI.FREE_IMAGE_FORMAT.FIF_BMP);
-            //        JetEazy.BasicSpace.VsMSG.Instance.Warning($"图片保存完成，路径：{Environment.NewLine + _filepath}", false);
-            //    }
-            //}
+            if (srcBmp != null)
+            {
+                string dstFilename = SaveFilePicker("JPG Files (*.jpg)|*.jpg|BMP Files (*.bmp)|*.bmp|PNG Files (*.png)|*.png", "");
+                if (!string.IsNullOrEmpty(dstFilename))
+                {
+                    using (IEzImage ezImage = new EzFreeBitmap(srcBmp, false))
+                    {
+                        ezImage.Save(dstFilename);
+                    }
+                    string msg = isOffLine ? "離線圖檔 已經另存至:" : "相機圖檔 已經保存至:";
+                    VsMessageBox.Info(ToChangeLanguage(msg) + Environment.NewLine + dstFilename);
+                }
+                srcBmp.Dispose();
+            }
         }
 
         private void BtnSingleSnap_Click(object sender, EventArgs e)
