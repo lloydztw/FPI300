@@ -27,11 +27,6 @@ namespace LaserAlignDX.AoiModel
     public interface ICalibAoiModel : IDisposable
     {
         /// <summary>
-        /// 設定全域校正參數 (由 caller 維護 recipe 生命週期)
-        /// </summary>
-        void SetRecipe(JxCalibRecipe recipe);
-
-        /// <summary>
         /// Caller 必須維護 fullfovImg 與 recipe 生命週期
         /// </summary>
         EzBlocsGrid FetchBoardGrid(CarrierEnum carrierID, Mat fullfovImg, JxCalibRecipe recipe);
@@ -55,6 +50,10 @@ namespace LaserAlignDX.AoiModel
 
 #if (OPT_DEPRECATED_AFTER_VER_3200)
         void ResetAndClear();
+        /// <summary>
+        /// 設定全域校正參數 (由 caller 維護 recipe 生命週期)
+        /// </summary>
+        void SetRecipe(JxCalibRecipe recipe);
         ErrCodes BuildGoldenGridTemplate(object dummy, IEzImage ezImage);
         void SetRecipe(EzAoiEmptyTrayInspector.Model.JxAoiRecipe recipe);
         MatchResult FetchGridNodes(CarrierEnum carrierID, Mat fullfovImg, bool refine = true);

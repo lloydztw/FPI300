@@ -17,8 +17,10 @@
 using AForge.Imaging.Filters;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
+using JetEazy.QMath;
 using JetEazy.QvMath;
 using LeTian.JxProps;
+using System;
 using System.Drawing;
 using System.Windows.Documents;
 using JxPointF = LeTian.JxProps.JxBase<System.Drawing.PointF>;
@@ -128,6 +130,7 @@ namespace LaserAlignDX.AoiModel.Calib
     {
         public JxCalibInkMarkVision Vision = new JxCalibInkMarkVision(description: "校正塊像測設定");
         public JxCalibInkMarkPoints Marks = new JxCalibInkMarkPoints(description: "點位標記 (唯讀)(隱藏)");
+
         public JxCalibInkMarkSettings(SuckerRowEnum id) : base($"InkMark {id}", $"校正參數 (點墨 {id})")
         {
 
@@ -143,18 +146,6 @@ namespace LaserAlignDX.AoiModel.Calib
         }
 
         #region PUBLIC_HELPER_FUNCTIONS
-        public JxPointF GetRawMotorPoint(int cornerID)
-        {
-            //switch (cornerID)
-            //{
-            //    case 0: return RawMotorLT;
-            //    case 1: return RawMotorRT;
-            //    case 2: return RawMotorRD;
-            //    case 3: return RawMotorLD;
-            //    default: return null;
-            //}
-            return Marks.GetRawMotorPoint(cornerID);
-        }
         public void GetInkMarks(out EzBloc[] blocs)
         {
             Marks.GetInkMarks(out blocs);
@@ -162,6 +153,14 @@ namespace LaserAlignDX.AoiModel.Calib
         public void SetInkMarks(EzBloc[] blocs)
         {
             Marks.SetInkMarks(blocs);
+        }
+        public void GetMotorCoords(out QVector[] coords)
+        {
+            Marks.GetMotorCoords(out coords);
+        }
+        public void SetMotorCoords(QVector[] coords)
+        {
+            Marks.SetMotorCoords(coords);
         }
         #endregion
     }
@@ -224,17 +223,6 @@ namespace LaserAlignDX.AoiModel.Calib
         }
 
         #region PUBLIC_HELPER_FUNCTIONS
-        public JxPointF GetRawMotorPoint(int cornerID)
-        {
-            switch (cornerID)
-            {
-                case 0: return RawMotorLT;
-                case 1: return RawMotorRT;
-                case 2: return RawMotorRD;
-                case 3: return RawMotorLD;
-                default: return null;
-            }
-        }
         public void GetInkMarks(out EzBloc[] blocs)
         {
             blocs = new EzBloc[]
@@ -252,6 +240,26 @@ namespace LaserAlignDX.AoiModel.Calib
             if (blocs.Length > 1) InkRT.SetBloc(blocs[1]);
             if (blocs.Length > 2) InkRD.SetBloc(blocs[2]);
             if (blocs.Length > 3) InkLD.SetBloc(blocs[3]);
+        }
+        public void GetMotorCoords(out QVector[] coords)
+        {
+            var jxPoints = new[]
+            {
+                RawMotorLT,
+                RawMotorRT,
+                RawMotorRD,
+                RawMotorLD,
+            };
+            coords = Array.ConvertAll(jxPoints, jx => new QVector(jx.Value.X, jx.Value.Y));
+        }
+        public void SetMotorCoords(QVector[] coords)
+        {
+            if (coords == null) return;
+            var pts = Array.ConvertAll(coords, v => v == null ? PointF.Empty : new PointF((float)v.X, (float)v.Y));
+            RawMotorLT.Value = pts[0];
+            RawMotorRT.Value = pts[1];
+            RawMotorRD.Value = pts[2];
+            RawMotorLD.Value = pts[3];
         }
         #endregion
     }
