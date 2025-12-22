@@ -800,7 +800,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         bool SetActiveView(CarrierEnum C, SuckerRowEnum S, CalibViewEnum vid, bool force = false)
         {
-            6190bool isAnyChanged = _activeCarrierID != C || _activeSuckerRowID != S || _activeViewID != vid;
+            bool isAnyChanged = _activeCarrierID != C || _activeSuckerRowID != S || _activeViewID != vid;
             var oldImgFile = CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID, (int)_activeViewID);
             var newImgFile = CALIB_LAST_IMAGE_FILE(C, S, (int)vid);
             bool needsToLoadNewImage = _isEmptyImage(vid) || oldImgFile != newImgFile;
