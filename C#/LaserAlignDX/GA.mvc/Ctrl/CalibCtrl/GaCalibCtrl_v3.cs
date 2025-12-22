@@ -60,10 +60,10 @@ namespace LaserAlignDX.Mvc.Ctrl
         };
         enum CalibViewEnum : int
         {
-            [Description("大校正板")]
+            [Description("格點 校正板")]
             BigGridBoardView,
-            [Description("點墨小校正塊")]
-            SmallDotBlocsView,
+            [Description("點墨 校正塊")]
+            InkMarksView,
         };
         #endregion
 
@@ -220,7 +220,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             // ImgViewrs' EventHanlders
             _getMatViewer(CalibViewEnum.BigGridBoardView).MouseMove += MatViewer1_MouseMove;
-            _getMatViewer(CalibViewEnum.SmallDotBlocsView).MouseMove += MatViewer2_MouseMove;
+            _getMatViewer(CalibViewEnum.InkMarksView).MouseMove += MatViewer2_MouseMove;
 
             // 自動釋放資源
             _wndOwner.HandleDestroyed += (s, e) => CleanUp();
@@ -290,7 +290,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             int x = e.X;
             int y = e.Y;
 
-            var matViewer = _getMatViewer(CalibViewEnum.SmallDotBlocsView);
+            var matViewer = _getMatViewer(CalibViewEnum.InkMarksView);
             matViewer.TransCoordToWorld(ref x, ref y);
 
             for (int i = 0; i < N_CALIB_POINTS; i++)
@@ -370,7 +370,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             else
             {
-                if (_activeViewID == CalibViewEnum.SmallDotBlocsView)
+                if (_activeViewID == CalibViewEnum.InkMarksView)
                 {
                     var jx = suckerID == SuckerRowEnum.S1 ? jxRecipe.InkMarkSettings1 : jxRecipe.InkMarkSettings2;
                     pgvPanel.BuildGuiCtrls(jx);
@@ -574,7 +574,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                     }
                 }
 
-                if (_activeViewID == CalibViewEnum.SmallDotBlocsView && refresh)
+                if (_activeViewID == CalibViewEnum.InkMarksView && refresh)
                 {
                     _getMatViewer(_activeViewID)?.Refresh();
                 }
@@ -874,7 +874,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var vid = _activeViewID;
             var imgPanel = _getImgViewPanel(vid);    // _calibToolUI.ImgViewers[viewID];
             bool isEmpty = _isEmptyImage(vid);
-            bool isInkMarkMode = vid == CalibViewEnum.SmallDotBlocsView;
+            bool isInkMarkMode = vid == CalibViewEnum.InkMarksView;
 
             _btnGrabImage.Enabled = !_isRunning;
             _btnLoadImage.Enabled = !_isRunning;
@@ -922,7 +922,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
 
                 updateInkMarksToDataGridView(getActiveMarks());
-                //updateMotorCoordsToDataGridView(getActiveMotorCoords());
+                updateMotorCoordsToDataGridView(getActiveMotorCoords());
 
                 updatePropertyPanel(false);
                 updateGuiStatus();
@@ -1010,7 +1010,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         bool RunAutoFetchInkMarks(bool dump = false)
         {
             var vid = _activeViewID;
-            if (vid != CalibViewEnum.SmallDotBlocsView)
+            if (vid != CalibViewEnum.InkMarksView)
                 return false;
 
             //(0) Cursor
