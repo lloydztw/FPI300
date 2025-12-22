@@ -71,12 +71,14 @@ namespace LaserAlignDX.Mvc.Model
         /// </summary>
         void ApplyRecipe(params object[] args);
 
+#if(OPT_DEPRECATED_AFTER_VER_3200)
         /// <summary>
         /// 自動抓取陣列 
         /// (必須先指定 ActiveCarrierID)
         /// (用於 參數編輯模式)
         /// </summary>
         MatchResult AutoBuildRegionCells(Bitmap fullfovBmp);
+#endif
 
         /// <summary>
         /// 建立 座標轉換 與 Region Cells 格點 

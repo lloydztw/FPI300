@@ -15,9 +15,11 @@
 
 using EzAoiEmptyTrayInspector;
 using EzAoiEmptyTrayInspector.Model;
+using EzAoiEmptyTrayInspector.Model.Aoi;
 using JetEazy.EzImage;
 using JetEazy.Match;
 using JetEazy.QMath;
+using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel.Calib;
 using LaserAlignDX.Mvc.Model;
@@ -37,12 +39,13 @@ namespace LaserAlignDX.AoiModel
 
         #region PRIVATE_DATA
         ITravelerModel _sysModel => GaMvcConfig.SysModel;
-        IxEmptyTrayInspector _externImp;
         JxCalibRecipe _jxCalibRecipe;
-        JxAoiRecipe _jxRecipe;
+        //IxEmptyTrayInspector _externImp;
+        //JxAoiRecipe _jxRecipe;
         #endregion
 
         #region WRAPPER_FUNCTIONS_For_IxEmptyTrayInspector
+#if (OPT_DEPRECATED_AFTER_VER_3200)
         public event EventHandler<MatchResultEventArgs> OnMatched
         {
             add
@@ -177,38 +180,32 @@ namespace LaserAlignDX.AoiModel
 
             return _externImp.CropGoldenTemplate(sideId, largeImg, goldenRect);
         }
+#endif
         #endregion
 
-        public CalibAoiModel(IxEmptyTrayInspector imp)
+        public CalibAoiModel(object dummy = null)
         {
             // Caller 負責調用 imp.Dispose()
-            _externImp = imp;
+            //_externImp = imp;
         }
 
         public void Dispose()
         {
-            // Caller 負責調用 _externImp.Dispose()
-            _jxCalibRecipe?.Dispose();
+            // jxCalibRecipe 由 caller 維護其生命週期
             _jxCalibRecipe = null;
         }
 
         public void ResetAndClear()
         {
-            _externImp?.ResetAndClear();
+            //_externImp?.ResetAndClear();
         }
 
-        /// <summary>
-        /// 設定參數 (recipe 會被 CalibAoiModel 持有)
-        /// </summary>
         public void SetRecipe(JxCalibRecipe recipe)
         {
-            if (_jxCalibRecipe != recipe)
-            {
-                _jxCalibRecipe?.Dispose();
-                _jxCalibRecipe = recipe;
-            }
+            _jxCalibRecipe = recipe;
         }
 
+#if (OPT_DEPRECATED_AFTER_VER_3200)
         /// <summary>
         /// 設定參數
         /// </summary>
@@ -224,6 +221,7 @@ namespace LaserAlignDX.AoiModel
         {
             return _externImp.BuildGoldenGridTemplate(SideID.A, ezImage);
         }
+#endif
 
         /// <summary>
         /// 抓取 空載台格位點
@@ -232,27 +230,181 @@ namespace LaserAlignDX.AoiModel
         /// <param name="refine"></param>
         public MatchResult FetchGridNodes(CarrierEnum carrierID, Mat fullfovImg, bool refine)
         {
-            //(1) Peek the ezImage
-            using (var ezImage = new EzQuickImage(fullfovImg, deepCopy: false))
+            ////(1) Peek the ezImage
+            //using (var ezImage = new EzQuickImage(fullfovImg, deepCopy: false))
+            //{
+            //    //(2) Run Aoi
+            //    _externImp.RunMatch(SideID.A, ezImage);
+            //    //_externImp.RunAll((IEzImage)ezImage, wait: true);
+
+            //    //(3) Result
+            //    var matchResult = _externImp.GetMatchResult(SideID.A);
+            //    //var result = _externImp.GetResult();
+
+            //    //(4) Refine each detail locations
+            //    if (refine)
+            //    {
+            //        RefineCentroidLocations(matchResult, ezImage);
+            //    }
+
+            //    _DUMP_DOTS_PLATE_IMAGE(ezImage.Image as Mat, matchResult, $"d:\\paso.log\\calib_dots_plate_{carrierID}.jpg");
+
+            //    return matchResult;
+            //}
+            return null;
+        }
+
+        /// <summary>
+        /// Caller 必須維護 fullfovImg 與 recipe 生命週期
+        /// </summary>
+        public EzBlocsGrid FetchBoardGrid(CarrierEnum carrierID, Mat fullfovImg, JxCalibRecipe recipe)
+        {
+            var jxSettings = recipe?.GridSettings;
+            if (fullfovImg == null || jxSettings == null)
+                return null;
+
+            var roi = JetEazy.Qcvt.CV(recipe.GridSettings.BoundRect.Value);
+            GaUtil.Clip(ref roi, fullfovImg.Width, fullfovImg.Height);
+
+            var rows = jxSettings.EmptyTraySettings.FullRows.Value;
+            var cols = jxSettings.EmptyTraySettings.FullCols.Value;
+            var thres = jxSettings.GridVisionSettings.Threshold.Value;
+            var minSz = jxSettings.GridVisionSettings.MinSize.Value;
+            var maxSz = Math.Min(roi.Width, roi.Height) / 8;
+
+            using (var imgCrop = fullfovImg[roi].Clone())
             {
-                //(2) Run Aoi
-                _externImp.RunMatch(SideID.A, ezImage);
-                //_externImp.RunAll((IEzImage)ezImage, wait: true);
+                if (thres <= 0)
+                    Cv2.Threshold(imgCrop, imgCrop, 0, 255, ThresholdTypes.Otsu);
+                else
+                    Cv2.Threshold(imgCrop, imgCrop, thres, 255, ThresholdTypes.Binary);
 
-                //(3) Result
-                var matchResult = _externImp.GetMatchResult(SideID.A);
-                //var result = _externImp.GetResult();
-
-                //(4) Refine each detail locations
-                if (refine)
+                var finder = new EzBlobFinder
                 {
-                    RefineCentroidLocations(matchResult, ezImage);
+                    MorphIterations = 0,
+                    OptFillBorder = false,
+                    MinSize = new OpenCvSharp.Size(minSz, minSz),
+                    MaxSize = new OpenCvSharp.Size(maxSz, maxSz)
+                };
+                finder.FindWhiteBlobs(imgCrop, out var blocs);
+
+                var builder = new EzBlocsGridBuilder();
+                var grid = builder.Build(blocs, targetRows: rows, targetCols: cols);
+                grid?.Offset(roi.X, roi.Y);
+                return grid;
+            }
+        }
+
+        /// <summary>
+        /// Caller 必須維護 fullfovImg 與 recipe 生命週期
+        /// </summary>
+        public QvQuad2D[] FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe)
+        {
+            var inkMarks = new QvQuad2D[0];
+            var jxSettings = suckerID == SuckerRowEnum.S1 ? recipe?.InkMarkSettings1 : recipe?.InkMarkSettings2;
+            if (fullfovImg == null || jxSettings == null)
+                return inkMarks;
+
+            int NP = 4;
+
+            var roiBound = JetEazy.Qcvt.CV(recipe.GridSettings.BoundRect);
+            GaUtil.Clip(ref roiBound, fullfovImg.Width, fullfovImg.Height);
+
+            var thres = jxSettings.Vision.BlockThreshold.Value;
+            var blockMinSz = jxSettings.Vision.BlockMinSize.Value;
+
+            //(1) Find Calib Blocks 
+            var calibBlocks = new List<EzBloc>();
+            using (var imgBigCrop = fullfovImg[roiBound].Clone())
+            {
+                if (thres <= 0)
+                    Cv2.Threshold(imgBigCrop, imgBigCrop, thres, 255, ThresholdTypes.Otsu);
+                else
+                    Cv2.Threshold(imgBigCrop, imgBigCrop, thres, 255, ThresholdTypes.Binary);
+
+                var finder = new EzBlobFinder
+                {
+                    MorphIterations = 0,
+                    OptFillBorder = false,
+                    MinSize = new OpenCvSharp.Size(blockMinSz, blockMinSz)
+                };
+
+                finder.FindWhiteBlobs(imgBigCrop, out calibBlocks);
+                if (calibBlocks == null)
+                    return inkMarks;
+
+                if (calibBlocks.Count > 1)
+                {
+                    calibBlocks.Sort((a, b) =>
+                    {
+                        var px1 = a != null ? a.Pixels : 0;
+                        var px2 = b != null ? b.Pixels : 0;
+                        return px2 - px1;
+                    });
                 }
 
-                _DUMP_DOTS_PLATE_IMAGE(ezImage.Image as Mat, matchResult, $"d:\\paso.log\\calib_dots_plate_{carrierID}.jpg");
+                if (calibBlocks.Count > NP)
+                    calibBlocks.RemoveRange(NP, calibBlocks.Count - NP);
 
-                return matchResult;
+                foreach (var b in calibBlocks)
+                    b?.Offset(roiBound.X, roiBound.Y);
             }
+
+            //(2) Find the ink marks
+            if (calibBlocks.Count > 0)
+            {
+                inkMarks = new QvQuad2D[calibBlocks.Count];
+                var inkMinSz = Math.Max(2, blockMinSz / 20);
+                int markIdx = 0;
+
+                foreach (var calibBloc in calibBlocks)
+                {
+                    var roi = JetEazy.Qcvt.CV(calibBloc.Rect);
+                    roi.Inflate(-5, -5);
+                    GaUtil.Clip(ref roi, fullfovImg.Width, fullfovImg.Height);
+
+                    using (var imgCrop = fullfovImg[roi].Clone())
+                    {
+                        Cv2.Threshold(imgCrop, imgCrop, 0, 255, ThresholdTypes.Otsu);
+                        Cv2.BitwiseNot(imgCrop, imgCrop);
+
+                        EzBlobFinder finder = new EzBlobFinder
+                        {
+                            MorphIterations = 0,
+                            OptFillBorder = false,
+                            MinSize = new OpenCvSharp.Size(inkMinSz, inkMinSz)
+                        };
+                        finder.FindWhiteBlobs(imgCrop, out var whiteBlobs);
+
+                        if (whiteBlobs != null && whiteBlobs.Count > 0)
+                        {
+                            if (whiteBlobs.Count > 1)
+                            {
+                                whiteBlobs.Sort((a, b) =>
+                                {
+                                    var px1 = a != null ? a.Pixels : 0;
+                                    var px2 = b != null ? b.Pixels : 0;
+                                    return px2 - px1;
+                                });
+                            }
+
+                            foreach (var b in whiteBlobs)
+                                b?.Offset(roi.X, roi.Y);
+
+                            var bloc = whiteBlobs[0];
+                            if (bloc != null)
+                            {
+                                var quad = QvQuad2D.From(bloc.Rect);
+                                quad.SetCenter(bloc.Center);
+                                inkMarks[markIdx] = quad;
+                            }
+                        }
+                    }
+                    markIdx++;
+                }
+            }
+
+            return inkMarks;
         }
 
         public bool AdjustBadNodes(CarrierEnum carrierID, EzBlocsGrid grid)
@@ -488,49 +640,49 @@ namespace LaserAlignDX.AoiModel
         #region PRIVATE_LOCATE_FUNCTIONS
         void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg)
         {
-            var grid = matchResult?.Grid;
-            if (grid == null || _jxRecipe == null)
-                return;
+            //var grid = matchResult?.Grid;
+            //if (grid == null || _jxRecipe == null)
+            //    return;
 
-            int thresh = _jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
-            var bound = new Rect(0, 0, fullfovImg.Width, fullfovImg.Height);
-            int rows = grid.Rows;
-            int cols = grid.Cols;
+            //int thresh = _jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
+            //var bound = new Rect(0, 0, fullfovImg.Width, fullfovImg.Height);
+            //int rows = grid.Rows;
+            //int cols = grid.Cols;
 
-            bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
-            var findLocalCenter = isBlackCarrier ?
-                (Func<Mat, Mat, int, string, QVector>)this.FindLocalCenter_black_carrier_cc :
-                (Func<Mat, Mat, int, string, QVector>)this.FindLocalCenter_white_carrier;
+            //bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
+            //var findLocalCenter = isBlackCarrier ?
+            //    (Func<Mat, Mat, int, string, QVector>)this.FindLocalCenter_black_carrier_cc :
+            //    (Func<Mat, Mat, int, string, QVector>)this.FindLocalCenter_white_carrier;
 
-            for (int r = 0; r < rows; r++)
-            {
-                for (int c = 0; c < cols; c++)
-                {
-                    var bloc = grid.Get(r, c);
-                    if (bloc == null)
-                        continue;
+            //for (int r = 0; r < rows; r++)
+            //{
+            //    for (int c = 0; c < cols; c++)
+            //    {
+            //        var bloc = grid.Get(r, c);
+            //        if (bloc == null)
+            //            continue;
 
 
-                    var roi = JetEazy.Qcvt.CV(bloc.Rect);
-                    JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+            //        var roi = JetEazy.Qcvt.CV(bloc.Rect);
+            //        JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
 
-                    using (var img = fullfovImg[roi].Clone())
-                    using (var binary = new Mat())
-                    {
-                        string dumpTag = OPT_DUMP ? $"@{r}_{c}" : null;
-                        var center = findLocalCenter(img, binary, thresh, dumpTag);
+            //        using (var img = fullfovImg[roi].Clone())
+            //        using (var binary = new Mat())
+            //        {
+            //            string dumpTag = OPT_DUMP ? $"@{r}_{c}" : null;
+            //            var center = findLocalCenter(img, binary, thresh, dumpTag);
 
-                        if (center == null)
-                            continue;
+            //            if (center == null)
+            //                continue;
 
-                        center.X += roi.X;
-                        center.Y += roi.Y;
-                        bloc.Center = center;
-                        var rect = JetEazy.Qcvt.CreateCenterRect((float)center.X, (float)center.Y, (float)bloc.Rect.Width, (float)bloc.Rect.Height);
-                        bloc.Rect = Rectangle.Round(rect);
-                    }
-                }
-            }
+            //            center.X += roi.X;
+            //            center.Y += roi.Y;
+            //            bloc.Center = center;
+            //            var rect = JetEazy.Qcvt.CreateCenterRect((float)center.X, (float)center.Y, (float)bloc.Rect.Width, (float)bloc.Rect.Height);
+            //            bloc.Rect = Rectangle.Round(rect);
+            //        }
+            //    }
+            //}
         }
         QVector FindLocalCenter_white_carrier(Mat img, Mat binary, int thresh, string dumpTag)
         {
@@ -813,35 +965,35 @@ namespace LaserAlignDX.AoiModel
         {
             return;
 
-            int radius = 250;
+            //int radius = 250;
 
-            var grid = matchResult?.Grid;
-            if (grid == null || _jxRecipe == null || srcFullfovImg == null)
-                return;
+            //var grid = matchResult?.Grid;
+            //if (grid == null || _jxRecipe == null || srcFullfovImg == null)
+            //    return;
 
-            int rows = grid.Rows;
-            int cols = grid.Cols;
+            //int rows = grid.Rows;
+            //int cols = grid.Cols;
 
-            using(Mat img = srcFullfovImg / 4)
-            {
-                for (int r = 0; r < rows; r++)
-                {
-                    for (int c = 0; c < cols; c++)
-                    {
-                        var bloc = grid.Get(r, c);
-                        if (bloc == null)
-                            continue;
+            //using(Mat img = srcFullfovImg / 4)
+            //{
+            //    for (int r = 0; r < rows; r++)
+            //    {
+            //        for (int c = 0; c < cols; c++)
+            //        {
+            //            var bloc = grid.Get(r, c);
+            //            if (bloc == null)
+            //                continue;
 
-                        var cc = bloc.Center;
-                        Cv2.Circle(img, (int)cc.X, (int)cc.Y, radius, Scalar.White, -1);
-                    }
-                }
+            //            var cc = bloc.Center;
+            //            Cv2.Circle(img, (int)cc.X, (int)cc.Y, radius, Scalar.White, -1);
+            //        }
+            //    }
 
-                img.SaveImage(fileName);
-            }
+            //    img.SaveImage(fileName);
+            //}
 
-            var file2 = System.IO.Path.ChangeExtension(fileName, "_empty.jpg");
-            srcFullfovImg.SaveImage(file2);
+            //var file2 = System.IO.Path.ChangeExtension(fileName, "_empty.jpg");
+            //srcFullfovImg.SaveImage(file2);
         }
         #endregion
     }

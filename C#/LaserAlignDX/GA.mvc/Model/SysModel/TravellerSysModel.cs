@@ -103,7 +103,8 @@ namespace LaserAlignDX.Mvc.Model
             {
                 if (_calibModel == null)
                 {
-                    _calibModel = new CalibAoiModel(EmptyTrayAoiModel);
+                    //_calibModel = new CalibAoiModel(EmptyTrayAoiModel);
+                    _calibModel = new CalibAoiModel();
                 }
                 return _calibModel;
             }
@@ -198,7 +199,8 @@ namespace LaserAlignDX.Mvc.Model
             //(7) 自動建立陣列
             buildRegionCells(ActiveCarrierID, runtimeCamGrid, false);
         }
-        
+
+#if(OPT_DEPRECATED_AFTER_VER_3200)
         public MatchResult AutoBuildRegionCells(Bitmap fullfovBmp)
         {
             //-----------------------------
@@ -231,6 +233,7 @@ namespace LaserAlignDX.Mvc.Model
 
             return matchResult;
         }
+#endif
 
         public bool BuildTransformAndRegionCells(CarrierEnum carrierID, EzBlocsGrid camGrid)
         {
@@ -300,6 +303,8 @@ namespace LaserAlignDX.Mvc.Model
                 return null;
             }
         }
+
+#if(OPT_DEPRECATED_AFTER_VER_3200)
         private MatchResult fetchCameraGrid(Bitmap fullfovBmp)
         {
             using (var jx = loadEmptyTrayAoiRecipe(true))
@@ -316,6 +321,7 @@ namespace LaserAlignDX.Mvc.Model
                 }
             }
         }
+#endif
         private PlcGridPoints buildRuntimePlcGrid(EzBlocsGrid camGrid)
         {
             //(1) PitchX and PitchY 

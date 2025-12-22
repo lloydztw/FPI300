@@ -148,9 +148,6 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }));
             };
         }
-
-
-
         void connectPropEventHandlers(JxCalibInkMarkSettings rcp)
         {
             if (rcp == null)

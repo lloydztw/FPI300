@@ -14,14 +14,10 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
-using JetEazy;
-using JetEazy.FormSpace;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
-using JetEazy.OpenCV;
 using JetEazy.Transform;
 using JetEazy.Utils;
-using LaserAlignDX.AoiModel;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -49,6 +45,19 @@ namespace LaserAlignDX.Mvc.Gui
         public void Reset()
         {
             _matchResult = null;
+        }
+        public void UpdateResult(EzBlocsGrid grid)
+        {
+            if (grid == null)
+            {
+                Reset();
+                return;
+            }
+
+            var blocs = new List<EzBloc>(grid.IterBlocs());
+            var matchResult = new MatchResult(0, grid, blocs);
+            _matchResult = matchResult;
+            adjustFetchSize();
         }
         public void UpdateResult(MatchResult result)
         {
