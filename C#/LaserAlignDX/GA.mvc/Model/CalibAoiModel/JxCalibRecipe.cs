@@ -14,10 +14,13 @@
 #endregion
 
 
+using AForge.Imaging.Filters;
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy.Match;
 using JetEazy.QvMath;
 using LeTian.JxProps;
-
+using System.Drawing;
+using System.Windows.Documents;
 using JxPointF = LeTian.JxProps.JxBase<System.Drawing.PointF>;
 using JxRect = LeTian.JxProps.JxBase<System.Drawing.Rectangle>;
 
@@ -140,26 +143,6 @@ namespace LaserAlignDX.AoiModel.Calib
         }
 
         #region PUBLIC_HELPER_FUNCTIONS
-        public void GetMarks(out QvQuad2D[] quads)
-        {
-            Marks.GetMarks(out quads);
-        }
-        public void SetMarks(QvQuad2D[] quads)
-        {
-            Marks.SetMarks(quads);
-        }
-        public JxPointF GetInkPoint(int cornerID)
-        {
-            //switch (cornerID)
-            //{
-            //    case 0: return InkLT;
-            //    case 1: return InkRT;
-            //    case 2: return InkRD;
-            //    case 3: return InkLD;
-            //    default: return null;
-            //}
-            return Marks.GetInkPoint(cornerID);
-        }
         public JxPointF GetRawMotorPoint(int cornerID)
         {
             //switch (cornerID)
@@ -171,6 +154,14 @@ namespace LaserAlignDX.AoiModel.Calib
             //    default: return null;
             //}
             return Marks.GetRawMotorPoint(cornerID);
+        }
+        public void GetInkMarks(out EzBloc[] blocs)
+        {
+            Marks.GetInkMarks(out blocs);
+        }
+        public void SetInkMarks(EzBloc[] blocs)
+        {
+            Marks.SetInkMarks(blocs);
         }
         #endregion
     }
@@ -186,7 +177,6 @@ namespace LaserAlignDX.AoiModel.Calib
         public JxCalibInkMarkVision(string name = "Vision", string description = null) : base(name, description)
         {
         }
-
         public override void OnBindingSubItems()
         {
             // 綁定以下成員, 會自動顯示在GUI編輯視窗.
@@ -234,34 +224,6 @@ namespace LaserAlignDX.AoiModel.Calib
         }
 
         #region PUBLIC_HELPER_FUNCTIONS
-        public void GetMarks(out QvQuad2D[] quads)
-        {
-            quads = new QvQuad2D[4];
-            quads[0] = InkLT.GetQuad();
-            quads[1] = InkRT.GetQuad(); 
-            quads[2] = InkRD.GetQuad();
-            quads[3] = InkLD.GetQuad();
-        }
-        public void SetMarks(QvQuad2D[] quads)
-        {
-            if (quads == null) return;
-            if (quads.Length > 0) InkLT.SetQuad(quads[0]);
-            if (quads.Length > 1) InkRT.SetQuad(quads[1]);
-            if (quads.Length > 2) InkRD.SetQuad(quads[2]);
-            if (quads.Length > 3) InkLD.SetQuad(quads[3]);
-        }
-        public JxPointF GetInkPoint(int cornerID)
-        {
-            //switch (cornerID)
-            //{
-            //    case 0: return InkLT;
-            //    case 1: return InkRT;
-            //    case 2: return InkRD;
-            //    case 3: return InkLD;
-            //    default: return null;
-            //}
-            return null;
-        }
         public JxPointF GetRawMotorPoint(int cornerID)
         {
             switch (cornerID)
@@ -273,35 +235,69 @@ namespace LaserAlignDX.AoiModel.Calib
                 default: return null;
             }
         }
+        public void GetInkMarks(out EzBloc[] blocs)
+        {
+            blocs = new EzBloc[]
+            {
+                InkLT.GetBloc(),
+                InkRT.GetBloc(),
+                InkRD.GetBloc(),
+                InkLD.GetBloc(),
+            };
+        }
+        public void SetInkMarks(EzBloc[] blocs)
+        {
+            if (blocs == null) return;
+            if (blocs.Length > 0) InkLT.SetBloc(blocs[0]);
+            if (blocs.Length > 1) InkRT.SetBloc(blocs[1]);
+            if (blocs.Length > 2) InkRD.SetBloc(blocs[2]);
+            if (blocs.Length > 3) InkLD.SetBloc(blocs[3]);
+        }
         #endregion
     }
 
 
-    public class JxMark : LeTian.JxProps.JxBase<System.Drawing.RectangleF>
+    public class JxMark : JxContainer
     {
-        public JxMark() { }
+        public JxPointF Center = new JxPointF("InkMark.Center");
+        public JxRect Rect = new JxRect("InkMark.Rect");
+
         public JxMark(string name, string description = null) : base(name, description)
         {
         }
+        public JxMark() { }
+
+        public override void OnBindingSubItems()
+        {
+            // 綁定以下成員, 會自動顯示在GUI編輯視窗.
+            BindItems(new IProp[] {
+                Center,
+                Rect,
+            });
+            base.OnBindingSubItems();
+        }
 
         #region PUBLIC_HELPER_FUNCTIONS
-        public QvQuad2D GetQuad()
+        public EzBloc GetBloc()
         {
-            var quad = QvQuad2D.From(this.Value);
-            return quad;
+            var bloc = new EzBloc(this.Rect.Value, 1);
+            bloc.Center = new JetEazy.QMath.QVector(Center.Value.X, Center.Value.Y);
+            return bloc;
         }
-        public void SetQuad(QvQuad2D quad) 
+        public void SetBloc(EzBloc bloc)
         {
-            if (quad != null)
+            if (bloc != null)
             {
-                this.Value = System.Drawing.RectangleF.Empty;
+                Rect.Value = bloc.Rect;
+                if (bloc.Center != null)
+                    Center.Value = new PointF((float)bloc.Center.X, (float)bloc.Center.Y);
+                else
+                    Center.Value = PointF.Empty;
             }
             else
             {
-                quad.GetRoundaryRect(out var rect);
-                if (quad.Center != null)
-                    JetEazy.Qcvt.SetCenter(ref rect, (float)quad.Center.X, (float)quad.Center.Y);
-                this.Value = rect;
+                Rect.Value = Rectangle.Empty;
+                Center.Value = PointF.Empty;
             }
         }
         #endregion

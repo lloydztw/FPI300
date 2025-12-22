@@ -39,7 +39,7 @@ namespace LaserAlignDX.AoiModel
         /// <summary>
         /// Caller 必須維護 fullfovImg 與 recipe 生命週期 
         /// </summary>
-        QvQuad2D[] FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe);
+        EzBloc[] FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe);
 
         bool AdjustBadNodes(CarrierEnum carrierID, EzBlocsGrid grid);
 

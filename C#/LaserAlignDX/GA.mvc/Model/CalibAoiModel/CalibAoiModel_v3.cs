@@ -298,9 +298,10 @@ namespace LaserAlignDX.AoiModel
         /// <summary>
         /// Caller 必須維護 fullfovImg 與 recipe 生命週期
         /// </summary>
-        public QvQuad2D[] FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe)
+        public EzBloc[] FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe)
         {
-            var inkMarks = new QvQuad2D[0];
+            var inkMarks = new EzBloc[0];
+
             var jxSettings = suckerID == SuckerRowEnum.S1 ? recipe?.InkMarkSettings1 : recipe?.InkMarkSettings2;
             if (fullfovImg == null || jxSettings == null)
                 return inkMarks;
@@ -314,7 +315,7 @@ namespace LaserAlignDX.AoiModel
             var blockMinSz = jxSettings.Vision.BlockMinSize.Value;
 
             //(1) Find Calib Blocks 
-            var calibBlocks = new List<EzBloc>();
+            var calibChipBlocs = new List<EzBloc>();
             using (var imgBigCrop = fullfovImg[roiBound].Clone())
             {
                 if (thres <= 0)
@@ -329,13 +330,13 @@ namespace LaserAlignDX.AoiModel
                     MinSize = new OpenCvSharp.Size(blockMinSz, blockMinSz)
                 };
 
-                finder.FindWhiteBlobs(imgBigCrop, out calibBlocks);
-                if (calibBlocks == null)
+                finder.FindWhiteBlobs(imgBigCrop, out calibChipBlocs);
+                if (calibChipBlocs == null)
                     return inkMarks;
 
-                if (calibBlocks.Count > 1)
+                if (calibChipBlocs.Count > 1)
                 {
-                    calibBlocks.Sort((a, b) =>
+                    calibChipBlocs.Sort((a, b) =>
                     {
                         var px1 = a != null ? a.Pixels : 0;
                         var px2 = b != null ? b.Pixels : 0;
@@ -343,21 +344,19 @@ namespace LaserAlignDX.AoiModel
                     });
                 }
 
-                if (calibBlocks.Count > NP)
-                    calibBlocks.RemoveRange(NP, calibBlocks.Count - NP);
+                if (calibChipBlocs.Count > NP)
+                    calibChipBlocs.RemoveRange(NP, calibChipBlocs.Count - NP);
 
-                foreach (var b in calibBlocks)
+                foreach (var b in calibChipBlocs)
                     b?.Offset(roiBound.X, roiBound.Y);
             }
 
-            //(2) Find the ink marks
-            if (calibBlocks.Count > 0)
+            //(2) Find the ink blocs
+            var inkBlocs = new List<EzBloc>();
+            if (calibChipBlocs.Count > 0)
             {
-                inkMarks = new QvQuad2D[calibBlocks.Count];
                 var inkMinSz = Math.Max(2, blockMinSz / 20);
-                int markIdx = 0;
-
-                foreach (var calibBloc in calibBlocks)
+                foreach (var calibBloc in calibChipBlocs)
                 {
                     var roi = JetEazy.Qcvt.CV(calibBloc.Rect);
                     roi.Inflate(-5, -5);
@@ -393,14 +392,140 @@ namespace LaserAlignDX.AoiModel
 
                             var bloc = whiteBlobs[0];
                             if (bloc != null)
-                            {
-                                var quad = QvQuad2D.From(bloc.Rect);
-                                quad.SetCenter(bloc.Center);
-                                inkMarks[markIdx] = quad;
-                            }
+                                inkBlocs.Add(bloc);
                         }
                     }
-                    markIdx++;
+                }
+            }
+
+            //(3) Sort the ink blocs
+            if (inkBlocs.Count >= NP)
+            {
+                var builder = new EzBlocsGridBuilder();
+                var inkGrid = builder.Build(inkBlocs, targetRows: 2, targetCols: 2);
+                if (inkGrid != null)
+                    inkMarks = inkGrid.GetCornerBlocs();
+            }
+
+            return inkMarks;
+        }
+
+        /// <summary>
+        /// Caller 必須維護 fullfovImg 與 recipe 生命週期
+        /// </summary>
+        public QvQuad2D[] FetchInkMarksQ(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe)
+        {
+            var inkMarks = new QvQuad2D[0];
+
+            var jxSettings = suckerID == SuckerRowEnum.S1 ? recipe?.InkMarkSettings1 : recipe?.InkMarkSettings2;
+            if (fullfovImg == null || jxSettings == null)
+                return inkMarks;
+
+            int NP = 4;
+
+            var roiBound = JetEazy.Qcvt.CV(recipe.GridSettings.BoundRect);
+            GaUtil.Clip(ref roiBound, fullfovImg.Width, fullfovImg.Height);
+
+            var thres = jxSettings.Vision.BlockThreshold.Value;
+            var blockMinSz = jxSettings.Vision.BlockMinSize.Value;
+
+            //(1) Find Calib Blocks 
+            var calibChipBlocs = new List<EzBloc>();
+            using (var imgBigCrop = fullfovImg[roiBound].Clone())
+            {
+                if (thres <= 0)
+                    Cv2.Threshold(imgBigCrop, imgBigCrop, thres, 255, ThresholdTypes.Otsu);
+                else
+                    Cv2.Threshold(imgBigCrop, imgBigCrop, thres, 255, ThresholdTypes.Binary);
+
+                var finder = new EzBlobFinder
+                {
+                    MorphIterations = 0,
+                    OptFillBorder = false,
+                    MinSize = new OpenCvSharp.Size(blockMinSz, blockMinSz)
+                };
+
+                finder.FindWhiteBlobs(imgBigCrop, out calibChipBlocs);
+                if (calibChipBlocs == null)
+                    return inkMarks;
+
+                if (calibChipBlocs.Count > 1)
+                {
+                    calibChipBlocs.Sort((a, b) =>
+                    {
+                        var px1 = a != null ? a.Pixels : 0;
+                        var px2 = b != null ? b.Pixels : 0;
+                        return px2 - px1;
+                    });
+                }
+
+                if (calibChipBlocs.Count > NP)
+                    calibChipBlocs.RemoveRange(NP, calibChipBlocs.Count - NP);
+
+                foreach (var b in calibChipBlocs)
+                    b?.Offset(roiBound.X, roiBound.Y);
+            }
+
+            //(2) Find the ink blocs
+            var inkBlocs = new List<EzBloc>();
+            if (calibChipBlocs.Count > 0)
+            {
+                var inkMinSz = Math.Max(2, blockMinSz / 20);
+                foreach (var calibBloc in calibChipBlocs)
+                {
+                    var roi = JetEazy.Qcvt.CV(calibBloc.Rect);
+                    roi.Inflate(-5, -5);
+                    GaUtil.Clip(ref roi, fullfovImg.Width, fullfovImg.Height);
+
+                    using (var imgCrop = fullfovImg[roi].Clone())
+                    {
+                        Cv2.Threshold(imgCrop, imgCrop, 0, 255, ThresholdTypes.Otsu);
+                        Cv2.BitwiseNot(imgCrop, imgCrop);
+
+                        EzBlobFinder finder = new EzBlobFinder
+                        {
+                            MorphIterations = 0,
+                            OptFillBorder = false,
+                            MinSize = new OpenCvSharp.Size(inkMinSz, inkMinSz)
+                        };
+                        finder.FindWhiteBlobs(imgCrop, out var whiteBlobs);
+
+                        if (whiteBlobs != null && whiteBlobs.Count > 0)
+                        {
+                            if (whiteBlobs.Count > 1)
+                            {
+                                whiteBlobs.Sort((a, b) =>
+                                {
+                                    var px1 = a != null ? a.Pixels : 0;
+                                    var px2 = b != null ? b.Pixels : 0;
+                                    return px2 - px1;
+                                });
+                            }
+
+                            foreach (var b in whiteBlobs)
+                                b?.Offset(roi.X, roi.Y);
+
+                            var bloc = whiteBlobs[0];
+                            if (bloc != null)
+                                inkBlocs.Add(bloc);
+                        }
+                    }
+                }
+            }
+
+            //(3) Sort the ink blocs
+            if (inkBlocs.Count >= NP)
+            {
+                var builder = new EzBlocsGridBuilder();
+                var inkGrid = builder.Build(inkBlocs, targetRows: 2, targetCols: 2);
+                var inkBlocCorners = inkGrid.GetCornerBlocs();
+                inkMarks = new QvQuad2D[NP];
+                for (int i = 0; i < NP; i++)
+                {
+                    var bloc = inkBlocCorners[i];
+                    var quad = QvQuad2D.From(bloc.Rect);
+                    quad.SetCenter(bloc.Center);
+                    inkMarks[i] = quad;
                 }
             }
 

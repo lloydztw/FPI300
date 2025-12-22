@@ -17,7 +17,6 @@ using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Match;
 using JetEazy.OpenCV.Viewer;
-using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.AoiModel.Calib;
@@ -543,22 +542,22 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region PRIVATE_INK_MARKS_FUNCTIONS
-        QvQuad2D[] getActiveMarks()
+        EzBloc[] getActiveMarks()
         {
             var jxSettings = (_activeSuckerRowID == SuckerRowEnum.S1) ? getActiveCalibRecipe()?.InkMarkSettings1 : getActiveCalibRecipe()?.InkMarkSettings2;
             if (jxSettings != null)
             {
-                jxSettings.GetMarks(out var quads);
-                return quads;
+                jxSettings.GetInkMarks(out var marks);
+                return marks;
             }
             return null;
         }
-        void setActiveMarks(QvQuad2D[] marks)
+        void setActiveMarks(EzBloc[] marks)
         {
             var jxSettings = (_activeSuckerRowID == SuckerRowEnum.S1) ? getActiveCalibRecipe()?.InkMarkSettings1 : getActiveCalibRecipe()?.InkMarkSettings2;
-            jxSettings?.SetMarks(marks);
+            jxSettings?.SetInkMarks(marks);
         }
-        void updateInkMarks(QvQuad2D[] marks, bool refresh = false)
+        void updateInkMarks(EzBloc[] marks, bool refresh = false)
         {
             if (_cviInkMarkBoxes == null)
                 return;
@@ -580,6 +579,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 {
                     var mark = marks[idx++];
                     if (cviBox == null) continue;
+
                     if (mark != null && idx <= NP)
                     {
                         cviBox.SetBox(mark);
@@ -596,12 +596,38 @@ namespace LaserAlignDX.Mvc.Ctrl
                     _getMatViewer(_activeViewID)?.Refresh();
                 }
             }
+
+            updateInkMarksToDataGridView(marks);
+        }
+        void updateInkMarksToDataGridView(EzBloc[] marks)
+        {
+            var dgv = _dgvCalibPointsListView?.DataGridView;
+            if (dgv == null) return;
+
+            var corners = Enum.GetValues(typeof(CalibCornersEnum));
+            foreach (CalibCornersEnum corner in corners)
+            {
+                int rowId = (int)corner;
+                var camPt = (marks != null && rowId < marks.Length) ? marks[rowId].Center : null;
+
+                if (rowId >= dgv.Rows.Count)
+                {
+                    var name = GaUtil.GetEnumDescription(corner);
+                    dgv.Rows.Add(name, 0.0, 0.0, 0.0, 0.0);
+                }
+                var dgvRow = dgv.Rows[rowId];
+
+                dgvRow.Cells[1].Value = camPt != null ? camPt.X : 0.0;
+                dgvRow.Cells[2].Value = camPt != null ? camPt.Y : 0.0;
+            }
         }
         #endregion
 
         #region PRIVATE_CALIB_FUNCTIONS
         void updateCalibKeyPoints(CarrierEnum carrierID, SuckerRowEnum suckerRowID, bool toModel)
         {
+            return;
+
             if (_activeViewID != 0 && toModel)
                 return;
 
@@ -720,6 +746,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updateCalibGridBoardPoints(EzBlocsGrid camGrid)
         {
+            throw new NotImplementedException();
+
             if (_activeViewID != 0)
                 return;
 
@@ -796,7 +824,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
         }
         #endregion
-
 
         bool SetActiveView(CarrierEnum C, SuckerRowEnum S, CalibViewEnum vid, bool force = false)
         {
@@ -969,6 +996,8 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         void BuildAllTransforms(bool force = false)
         {
+            return;
+
             if (_activeViewID != 0 && !force)
                 return;
 

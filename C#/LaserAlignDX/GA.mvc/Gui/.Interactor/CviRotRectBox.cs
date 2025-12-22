@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.ImageViewerEx;
+using JetEazy.Match;
 using JetEazy.QvMath;
 using System;
 using System.Drawing;
@@ -77,6 +78,20 @@ namespace LaserAlignDX.Mvc.Gui
         public void SetBox(QvQuad2D quad2d)
         {
             _quad2D = quad2d;
+        }
+        public void SetBox(EzBloc bloc)
+        {
+            if (bloc != null)
+            {
+                var quad = QvQuad2D.From(bloc.Rect);
+                if (bloc.Center != null)
+                    quad.SetCenter(bloc.Center);
+                _quad2D = quad;
+            }
+            else
+            {
+                _quad2D = null;
+            }
         }
         public void SetBox(RectangleF rect)
         {
