@@ -26,6 +26,7 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
+using OpenCvSharp.ML;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -150,6 +151,7 @@ namespace LaserAlignDX.Mvc.Model
             var transformsModel = this.TransformsModel;
             transformsModel.Load(GaMvcPaths.CALIB_TRANSFORMS_FILE);
             transformsModel.BuildAll();
+
             GetMicroTransform(ActiveCarrierID)?.Load(null);
             GetMicroTransform(ActiveCarrierID)?.Build();
 
@@ -191,7 +193,7 @@ namespace LaserAlignDX.Mvc.Model
             #endregion
 
             //(5) build Runtime Plc Grid
-            var plcGrid = buildRuntimePlcGrid(runtimeCamGrid);
+            var plcGrid = buildRuntimePlcGrid(runtimeCamGrid.Rows, runtimeCamGrid.Cols);
 
             //(6) set Runtime Plc Grid
             transformsModel.UpdateRuntimePlcGrid(plcGrid, camGridC1, camGridC2);
@@ -256,7 +258,6 @@ namespace LaserAlignDX.Mvc.Model
                 return false;
             }
 
-            var calibModel = CalibAoiModel;
             var transformsModel = TransformsModel;
 
             //(1) 建立 Transform
@@ -264,9 +265,10 @@ namespace LaserAlignDX.Mvc.Model
 
             if (camGrid != null)
             {
-                //(2) 去除異常 格位 再重建一次 Transform
-                if (calibModel.AdjustBadNodes(carrierID, camGrid))
-                    transformsModel.BuildAll();
+                ////(2) 去除異常 格位 再重建一次 Transform
+                //var calibModel = CalibAoiModel;
+                //if (calibModel.AdjustBadNodes(carrierID, camGrid))
+                //    transformsModel.BuildAll();
 
                 //(3) 建立 RegionCells
                 buildRegionCells(carrierID, camGrid, optWriteBlackToRecipe: true);
@@ -275,6 +277,12 @@ namespace LaserAlignDX.Mvc.Model
                 var camGridC1 = carrierID == CarrierEnum.C1 ? camGrid : null;
                 var camGridC2 = carrierID == CarrierEnum.C2 ? camGrid : null;
                 transformsModel.UpdateRuntimePlcGrid(null, camGridC1, camGridC2);
+
+                //(5) 更新當下 xRecipe
+                _xRecipe.saveCamGrid(carrierID, camGrid);
+
+                //(6) Check
+                checkTrayParams(carrierID, camGrid, notify: true);
 
                 ok = true;
             }
@@ -322,11 +330,12 @@ namespace LaserAlignDX.Mvc.Model
             }
         }
 #endif
-        private PlcGridPoints buildRuntimePlcGrid(EzBlocsGrid camGrid)
+
+        private PlcGridPoints buildRuntimePlcGrid(int rows, int cols) //EzBlocsGrid camGrid)
         {
             //(1) PitchX and PitchY 
-            double pitchX = _xRecipe.xRealOffsetX;  // default from xRecipe
-            double pitchY = _xRecipe.xRealOffsetY;  // default from xRecipe
+            double pitchX = Math.Round(_xRecipe.xRealOffsetX, 5);  // default from xRecipe
+            double pitchY = Math.Round(_xRecipe.xRealOffsetY, 5);  // default from xRecipe
 
             //(2) 重新載入 EmptyTrayAoiRecipe
             using (var jx = loadEmptyTrayAoiRecipe(false))
@@ -340,8 +349,8 @@ namespace LaserAlignDX.Mvc.Model
             }
 
             //(3) 設定 Runtime 跑線時期 P座標 (PLC) 格點
-            var rows = camGrid.Rows;
-            var cols = camGrid.Cols;
+            //var rows = camGrid.Rows;
+            //var cols = camGrid.Cols;
             var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
             return plcGrid;
         }
@@ -587,13 +596,17 @@ namespace LaserAlignDX.Mvc.Model
                 // 更新 CameraGrid
                 if (carrierID == CarrierEnum.C1)
                 {
-                    _xRecipe.xCamGrid1?.Dispose();
+                    var old = _xRecipe.xCamGrid1;
                     _xRecipe.xCamGrid1 = runtimeCamGrid;
+                    if (old != runtimeCamGrid)
+                        old?.Dispose();
                 }
                 else
                 {
-                    _xRecipe.xCamGrid2?.Dispose();
+                    var old = _xRecipe.xCamGrid2;
                     _xRecipe.xCamGrid2 = runtimeCamGrid;
+                    if (old != runtimeCamGrid)
+                        old?.Dispose();
                 }
 
                 // Camera Grid Points
@@ -652,35 +665,63 @@ namespace LaserAlignDX.Mvc.Model
                 GaUtil.LOG_ERROR(ex, "clearRegionCells");
             }
         }
+        #endregion
 
+        #region PRIVATE_CHECK_FUNCTIONS
         string checkCameraGrid(CarrierEnum carrierID, EzBlocsGrid camGrid, bool notify)
         {
-            //var errCode = ErrCodes.OK;
-            //string errMsg = null;
-
-            //if (camGrid == null)
-            //{
-            //    errCode = ErrCodes.NO_CAMERA_GRID;
-            //    errMsg = JetEazy.QxNums.GetEnumDescription(carrierID)
-            //           + " " + JetEazy.QxNums.GetEnumDescription(errCode)
-            //           + " !";
-            //}
-            //else if (camGrid.Rows < 2 || camGrid.Cols < 2)
-            //{
-            //    errCode = ErrCodes.LOW_GRID_ROWS_COLS;
-            //    errMsg = JetEazy.QxNums.GetEnumDescription(carrierID)
-            //           + " " + JetEazy.QxNums.GetEnumDescription(errCode)
-            //           + $" rows={camGrid.Rows}, cols={camGrid.Rows} !";
-            //}
-
-            //if (notify)
-            //    OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
-            //return errMsg;
-
             (var errCode, var errMsg) = TransformsModel.checkCameraGrid(carrierID, camGrid);
 
             if (errCode != ErrCodes.OK)
             {
+                if (notify)
+                    OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
+                return errMsg;
+            }
+
+            return null;
+        }
+        string checkTrayParams(CarrierEnum carrierID, EzBlocsGrid camGrid, bool notify)
+        {
+            var errCode = ErrCodes.OK;
+            var errs = new List<string>();
+
+            // 比對 EmptyTrayAoi 的設定
+            using (var jx = loadEmptyTrayAoiRecipe(false))
+            {
+                var traySettings = jx?.TrayMiscSettings;
+                if (traySettings != null)
+                {
+                    double pitchX = Math.Round((double)traySettings.PitchX.Value, 3);
+                    double pitchY = Math.Round((double)traySettings.PitchY.Value, 3);
+
+                    var plcGrid = _transformsModel.getCalibPlcGrid();
+                    if (plcGrid != null)
+                    {
+                        double plcPitchX = Math.Round(plcGrid.PitchX, 3);
+                        double plcPitchY = Math.Round(plcGrid.PitchY, 3);
+                        if (pitchX != plcPitchX)
+                            errs.Add($"空盤檢測 PitchX= {pitchX}  vs  校正參數 PitchX={plcPitchX}");
+                        if (pitchY != plcPitchY)
+                            errs.Add($"空盤檢測 PitchY= {pitchY}  vs  校正參數 PitchY={plcPitchY}");
+                    }
+
+                    if (camGrid != null)
+                    {
+                        int rows = traySettings.FullRows.Value;
+                        int cols = traySettings.FullCols.Value;
+                        if (rows != camGrid.Rows)
+                            errs.Add($"空盤檢測 Rows= {rows}  vs  校正參數 Rows={camGrid.Rows}");
+                        if (cols != camGrid.Cols)
+                            errs.Add($"空盤檢測 Cols= {cols}  vs  校正參數 Cols={camGrid.Cols}");
+                    }
+                }
+            }
+
+            if (errs.Count > 0)
+            {
+                errCode = ErrCodes.ERR_TRAY_CONFIG_CONFLICTS;
+                string errMsg = JetEazy.QxNums.GetEnumDescription(errCode) + "\n\r" + string.Join("\n\r", errs);
                 if (notify)
                     OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
                 return errMsg;

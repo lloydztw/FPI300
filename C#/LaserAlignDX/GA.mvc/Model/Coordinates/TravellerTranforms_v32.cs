@@ -109,6 +109,11 @@ namespace LaserAlignDX.Model.Coords
         }
 #endif
 
+        public PlcGridPoints getCalibPlcGrid()
+        {
+            // 2025-12-23 新增
+            return _calibPlcGrid;
+        }
         public EzBlocsGrid GetCalibCameraGrid(CarrierEnum C)
         {
             // 2025-12-23 新增
@@ -117,7 +122,10 @@ namespace LaserAlignDX.Model.Coords
         public void SetCalibCameraGrid(CarrierEnum C, EzBlocsGrid camGrid)
         {
             // 2025-12-23 新增
+            var old = _calibCamGrids[(int)C];
             _calibCamGrids[(int)C] = camGrid;
+            if (old != camGrid)
+                old?.Dispose();
         }
 
         /// <summary>
@@ -281,7 +289,7 @@ namespace LaserAlignDX.Model.Coords
             for (int i = 0; i < NGrids; i++)
             {
                 string str = lines[i];
-                gs.DeserializeEx(str, out _calibCamGrids[i]);
+                gs.Deserialize(str, out _calibCamGrids[i]);
             }
         }
         void saveCalibCamGrids(string iniFileName)
@@ -292,7 +300,7 @@ namespace LaserAlignDX.Model.Coords
             var gs = new EzBlocsGridSerializer();
             for (int i = 0; i < NGrids; i++)
             {
-                string str = gs.SerializeEx(_calibCamGrids[i]);
+                string str = gs.Serialize(_calibCamGrids[i]);
                 lines[i] = str;
             }
 
@@ -350,8 +358,10 @@ namespace LaserAlignDX.Model.Coords
         {
             if (plcGrid != null)
                 _runtimePlcGrid = plcGrid;
+
             if (camGrid1 != null)
                 _runtimeCamGridC1 = camGrid1;
+
             if (camGrid2 != null)
                 _runtimeCamGridC2 = camGrid2;
         }

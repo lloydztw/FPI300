@@ -13,10 +13,7 @@
  */
 #endregion
 
-using EzAoiEmptyTrayInspector.Model;
-using JetEazy.EzImage;
 using JetEazy.Match;
-using JetEazy.QvMath;
 using LaserAlignDX.AoiModel.Calib;
 using OpenCvSharp;
 using System;

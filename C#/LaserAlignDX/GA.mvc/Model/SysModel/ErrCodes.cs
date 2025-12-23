@@ -72,5 +72,8 @@ namespace LaserAlignDX.Mvc.Model
 
         [Description("晶粒格點 邊隙 計算異常!")]
         ERR_EDGE_GAP_CALCULATION,
+
+        [Description("盤面參數設定不一致!")]
+        ERR_TRAY_CONFIG_CONFLICTS,
     }
 }

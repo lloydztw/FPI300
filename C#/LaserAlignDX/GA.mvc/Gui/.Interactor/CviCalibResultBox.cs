@@ -159,7 +159,8 @@ namespace LaserAlignDX.Mvc.Gui
         void drawCalibResult(CvImageViewer viewer, Graphics gxView)
         {
             // 畫出 有效的 校正格位 Blocs (有吸嘴)
-            draw_bloc_rects(viewer, gxView, iter_calib_grid_node_blocs(), Color.Blue, Color.DarkBlue, 0.25f);
+            //draw_bloc_rects(viewer, gxView, iter_calib_grid_node_blocs(), Color.Blue, Color.DarkBlue, 0.25f);
+            draw_bloc_rects(viewer, gxView, iter_calib_grid_node_blocs(), Color.Lime, Color.Green, 0.25f);
         }
         void draw_grid_lines(CvImageViewer viewer, Graphics gxView, EzBlocsGrid grid)
         {

@@ -381,7 +381,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 grid = null;
             }
         }
-        void saveCamGrid(CarrierEnum carrierID, EzBlocsGrid grid)
+        public void saveCamGrid(CarrierEnum carrierID, EzBlocsGrid grid)
         {
             if (grid == null)
                 return;

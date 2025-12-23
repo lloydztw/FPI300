@@ -129,7 +129,7 @@ namespace LaserAlignDX.AoiModel.Calib
     public class JxCalibInkMarkSettings: JxContainer
     {
         public JxCalibInkMarkVision Vision = new JxCalibInkMarkVision(description: "校正塊像測設定");
-        public JxCalibInkMarkPoints Marks = new JxCalibInkMarkPoints(description: "點位標記 (唯讀)(隱藏)");
+        public JxCalibInkMarkPoints MarksStorage = new JxCalibInkMarkPoints(description: "點位標記 (唯讀)(隱藏)");
 
         public JxCalibInkMarkSettings(SuckerRowEnum id) : base($"InkMark {id}", $"校正參數 (點墨 {id})")
         {
@@ -140,7 +140,7 @@ namespace LaserAlignDX.AoiModel.Calib
             // 綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
                 Vision,
-                Marks,
+                MarksStorage,
             });
             base.OnBindingSubItems();
         }
@@ -148,19 +148,19 @@ namespace LaserAlignDX.AoiModel.Calib
         #region PUBLIC_HELPER_FUNCTIONS
         public void GetInkMarks(out EzBloc[] blocs)
         {
-            Marks.GetInkMarks(out blocs);
+            MarksStorage.GetInkMarks(out blocs);
         }
         public void SetInkMarks(EzBloc[] blocs)
         {
-            Marks.SetInkMarks(blocs);
+            MarksStorage.SetInkMarks(blocs);
         }
         public void GetMotorCoords(out QVector[] coords)
         {
-            Marks.GetMotorCoords(out coords);
+            MarksStorage.GetMotorCoords(out coords);
         }
         public void SetMotorCoords(QVector[] coords)
         {
-            Marks.SetMotorCoords(coords);
+            MarksStorage.SetMotorCoords(coords);
         }
         #endregion
     }

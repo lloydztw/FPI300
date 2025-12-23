@@ -62,11 +62,13 @@ namespace LaserAlignDX.Model.Coords
 
         public double PitchX
         {
-            get; set;
+            get; 
+            private set;
         }
         public double PitchY
         {
-            get; set;
+            get; 
+            private set;
         }
 
         [JsonIgnore]

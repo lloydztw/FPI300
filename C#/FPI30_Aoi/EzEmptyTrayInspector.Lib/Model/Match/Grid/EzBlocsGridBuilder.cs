@@ -116,6 +116,8 @@ namespace JetEazy.Match
             int ymax = 0;
             foreach (var bloc in blocs)
             {
+                if (bloc == null) 
+                    continue;
                 xmin = Math.Min(xmin, bloc.Rect.X);
                 ymin = Math.Min(ymin, bloc.Rect.Y);
                 xmax = Math.Max(xmax, bloc.Rect.Right);
@@ -157,6 +159,9 @@ namespace JetEazy.Match
             // 暴力搜尋
             foreach (var cur in blocs)
             {
+                if (cur == null) 
+                    continue;
+
                 var links = new QuadLinkNode();
                 cur.Tag = links;
 
@@ -219,6 +224,9 @@ namespace JetEazy.Match
 
             foreach (var bloc in blocs)
             {
+                if (bloc == null)
+                    continue;
+
                 if (bloc.Tag is QuadLinkNode link)
                 {
                     EzBloc blocRight = link.Right;

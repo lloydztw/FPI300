@@ -500,7 +500,6 @@
     <Compile Include="GA.mvc\Model\AoiModel\ScanInspectModeEnum.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\PlcGridPoints.cs" />
     <Compile Include="GA.mvc\.Enums\CarrierEnum.cs" />
-    <Compile Include="GA.mvc\Model\Coordinates\TravellerTranforms.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\StringBuilderExt.cs" />
@@ -508,6 +507,7 @@
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\PowerTechReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\XxxCompanyReportBuilder.cs" />
     <Compile Include="GA.mvc\GaMvcConfig.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\TravellerTranforms_v32.cs" />
     <Compile Include="GA\BasicSpace\ChipClass.cs" />
     <Compile Include="GA\BasicSpace\CollectResultClass.cs" />
     <Compile Include="GA\BasicSpace\FindRectByVM.cs" />

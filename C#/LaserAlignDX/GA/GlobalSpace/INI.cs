@@ -654,35 +654,35 @@ namespace Traveller106
         [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
-        [DisplayName("01.图像解析度")]
+        [DisplayName("001.图像解析度")]
         [Browsable(false)]
         public float ImageResolution { get; set; } = 0.0134f;
 
         [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
-        [DisplayName("01a.图像X方向精度")]
+        [DisplayName("001a.图像X方向精度")]
         [Browsable(false)]
         public float ImageResolutionX { get; set; } = 0.0073f;
 
         [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
-        [DisplayName("01b.图像Y方向精度")]
+        [DisplayName("001b.图像Y方向精度")]
         [Browsable(false)]
         public float ImageResolutionY { get; set; } = 0.00715f;
 
         [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
-        [DisplayName("02.飞拍图像解析度")]
+        [DisplayName("01.飞拍图像解析度")]
         [Browsable(true)]
         public float FlyImageResolution { get; set; } = 0.034f;
 
         [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位(毫秒)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999)]
-        [DisplayName("03.取像延时")]
+        [DisplayName("02.取像延时")]
         [Browsable(true)]
         public int DelayImageTime { get; set; } = 1000;
 
@@ -730,25 +730,29 @@ namespace Traveller106
         const string X3_Cat3 = "A03.全域補償設定";
         [CategoryAttribute(X3_Cat3), DescriptionAttribute("true开 false关")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("01.强制全检")]
-        [Browsable(true)]
-        public bool IsForceInspect { get; set; } = true;
+        [DisplayName("001.强制全检")]
+        [Browsable(false)]
+        public bool IsForceInspect
+        {
+            get { return true; }
+            set { }
+        }
 
         [CategoryAttribute(X3_Cat3), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("02.线扫补偿X")]
+        [DisplayName("01.线扫补偿X")]
         [Browsable(true)]
         public float Cal_Bcx { get; set; } = 0;
 
         [CategoryAttribute(X3_Cat3), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("03.线扫补偿Y")]
+        [DisplayName("02.线扫补偿Y")]
         [Browsable(true)]
         public float Cal_Bcy { get; set; } = 0;
 
         [CategoryAttribute(X3_Cat3), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
-        [DisplayName("04.线扫补偿角度")]
+        [DisplayName("03.线扫补偿角度")]
         [Browsable(true)]
         public float Cal_Bca { get; set; } = 0;
 

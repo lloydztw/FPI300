@@ -13,10 +13,8 @@
  */
 #endregion
 
-using EzAoiEmptyTrayInspector;
 using EzAoiEmptyTrayInspector.Model;
 using EzAoiEmptyTrayInspector.Model.Aoi;
-using JetEazy.EzImage;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
@@ -28,7 +26,6 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using ErrCodes = EzAoiEmptyTrayInspector.Model.ErrCodes;
 
 
 namespace LaserAlignDX.AoiModel
@@ -195,6 +192,7 @@ namespace LaserAlignDX.AoiModel
             _jxCalibRecipe = null;
         }
 
+#if (OPT_DEPRECATED_AFTER_VER_3200)
         public void ResetAndClear()
         {
             //_externImp?.ResetAndClear();
@@ -205,7 +203,6 @@ namespace LaserAlignDX.AoiModel
             _jxCalibRecipe = recipe;
         }
 
-#if (OPT_DEPRECATED_AFTER_VER_3200)
         /// <summary>
         /// 設定參數
         /// </summary>
@@ -221,7 +218,6 @@ namespace LaserAlignDX.AoiModel
         {
             return _externImp.BuildGoldenGridTemplate(SideID.A, ezImage);
         }
-#endif
 
         /// <summary>
         /// 抓取 空載台格位點
@@ -253,6 +249,7 @@ namespace LaserAlignDX.AoiModel
             //}
             return null;
         }
+#endif
 
         /// <summary>
         /// Caller 必須維護 fullfovImg 與 recipe 生命週期
@@ -536,6 +533,7 @@ namespace LaserAlignDX.AoiModel
         {
             bool isChanged = false;
 
+#if (OPT_RESERVED)
             var transformsModel = _sysModel?.TransformsModel;
             var transCP = transformsModel?.GetCameraPhysicTransform(carrierID);
             if (transformsModel == null || grid == null)
@@ -602,6 +600,7 @@ namespace LaserAlignDX.AoiModel
 
                 grid.RebuildRowColTags();
             }
+#endif
 
             return isChanged;
         }
