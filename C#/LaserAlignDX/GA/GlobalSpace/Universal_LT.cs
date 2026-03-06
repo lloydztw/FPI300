@@ -29,7 +29,7 @@ namespace Traveller106
         public static readonly bool N_THREADS_ENABLED = true;
         public static readonly int N_THREADS = 16;
 
-        public static bool IsNoUseCCD = false;
+        public static bool IsNoUseCCD = true;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
@@ -41,13 +41,14 @@ namespace Traveller106
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
         public static FactoryName FACTORYNAME = FactoryName.NONE;
 
+#if (OPT_NOT_USED)
         /// <summary>
         /// 这个用来区分是否在图片上画图
         /// </summary>
         public static bool IsDrawImage = true;
         public static bool IsOfflineDataVerifty = false;
         public static bool IsOfflineAutoCaliTest = false;
-
+#endif
         /// <summary>
         /// 是否打开飞拍界面  如果打开了 则主程序不要飞拍测试
         /// </summary>
@@ -62,6 +63,7 @@ namespace Traveller106
 
                 if (IsNoUseCCD)
                 {
+                    #region 如果是模擬模式_動態選擇_資料夾
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M01_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M02_";
                     //return "D:\\AUTOMATION\\Eazy FPI30\\_M03_";
@@ -80,6 +82,7 @@ namespace Traveller106
                         VsMessageBox.Info($"[離線版] [使用] {_sim_root_path}");
                     }
                     return _sim_root_path;
+                    #endregion
                 }
 
                 return defaultPath;

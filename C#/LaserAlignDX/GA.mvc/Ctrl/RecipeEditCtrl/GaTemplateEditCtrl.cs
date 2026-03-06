@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
 using JetEazy.OpenCV;
 using JetEazy.QvMath;
@@ -23,6 +24,7 @@ using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LaserAlignDX.Properties;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
@@ -37,6 +39,13 @@ namespace LaserAlignDX.Mvc.Ctrl
 {
     public partial class GaTemplateEditCtrl
     {
+        #region CONSTS
+        /// <summary>
+        /// 海康 邊線自動框 最小內縮 
+        /// </summary>
+        const int MIN_INDENT_FOR_MVD = -32;
+        #endregion
+
         #region ENUM
         enum OpSelector : int
         {
@@ -62,6 +71,10 @@ namespace LaserAlignDX.Mvc.Ctrl
         InspectX3ParaClass _xInspectX3
         {
             get { return InspectX3ParaClass.Instance; }
+        }
+        MatchAlgorithmEnum _xAlgorithm
+        {
+            get => _xInspectX3.xAlgorithm;
         }
         #endregion
 
@@ -256,8 +269,6 @@ namespace LaserAlignDX.Mvc.Ctrl
                 pg.PropertyValueChanged += Pg_PropertyValueChanged;
         }
 
-
-
         #region EVENT_HANDLERS
         private void Window_HandleCreated(object sender, EventArgs e)
         {
@@ -293,9 +304,15 @@ namespace LaserAlignDX.Mvc.Ctrl
         private void Pg_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
             _isPropertyModified = true;
+            string propertyName = e.ChangedItem?.PropertyDescriptor?.Name;
+
+            if (propertyName == "xAlgorithm")
+            {
+                updateNumBorderIndentDynamically();
+            }
+
             if (_opSelector == OpSelector.LineBorders)
             {
-                string propertyName = e.ChangedItem?.PropertyDescriptor?.Name;
                 if (propertyName == "xCarrierBackground")
                 {
                     //自動刷新 邊線 抓取結果
@@ -391,6 +408,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 refreshDispUI(DS1);
                 refreshDispUI(DS3);
                 updateLineSegmentBoxes(_opSelector == OpSelector.LineBorders);
+                
             }
         }
         void BuildGoldenChipTemplate()
@@ -441,6 +459,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void AutoLayoutLineBorders_000()
         {
+#if (false)
             if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
             {
                 VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
@@ -477,12 +496,15 @@ namespace LaserAlignDX.Mvc.Ctrl
             updateLineBorderBoxes(true);
             updateLineSegmentBoxes(true);
             _isLineBorderModified = true;
+#endif
         }
         void AutoLayoutLineBorders()
         {
             if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
             {
-                VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
+                //VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
+                var errMsg = GaUtil.GetEnumDescription(ErrCodes.WARN_NO_GOLDN_TEMPLATE_SETUP);
+                VsMessageBox.Warning(errMsg);
                 return;
             }
 
@@ -492,8 +514,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 BuildGoldenChipTemplate();
             }
 
-
-            var ind = (int)_editorUI.numBorderIndent.Value;
+            //>>> var ind = (int)_editorUI.numBorderIndent.Value;
+            var ind = updateNumBorderIndentDynamically();
             var ext = (int)_editorUI.numBorderExtend.Value;
             var ratio = (double)_editorUI.numLineSpanPercentage.Value * 0.01;
 
@@ -508,40 +530,81 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (_goldenQuad2D == null)
             {
                 #region 重新抓取 goldenQuad2D
-                var matchers = _xRecipe.mvdprinttemp_Find;
-                var matcher = matchers.GetMatcher(0);
-                matcher.SetRecipeParams(_xRecipe.InspectParams);
-                matcher.Train(_xBmpGoldenChipTemplate);
-                _goldenQuad2D = matcher.GoldenQuad2D?.Clone();
-                _goldenQuad2D?.Offset(_xGoldenChipRect.X, _xGoldenChipRect.Y);
+                try
+                {
+                    var matchers = _xRecipe.mvdprinttemp_Find;
+                    var matcher = matchers.GetMatcher(0);
+                    matcher.SetRecipeParams(_xRecipe.InspectParams);
+                    matcher.Train(_xBmpGoldenChipTemplate);
+                    _goldenQuad2D = matcher.GoldenQuad2D?.Clone();
+                    _goldenQuad2D?.Offset(_xGoldenChipRect.X, _xGoldenChipRect.Y);
+                }
+                catch (Exception ex)
+                {
+                    var errMsg = GaUtil.GetEnumDescription(ErrCodes.WARN_CAN_NOT_FIND_QUAD_2D) + "\n\r\n\r" + ex.Message;
+                    VsMessageBox.Warning(errMsg);
+                    return;
+                }
                 #endregion
             }
+
             if (_goldenQuad2D != null)
             {
-                // ind 固定在 baseRect 與 quadRect 中間處
-                var quadRect = Rectangle.Round(_goldenQuad2D.BoundaryRect);
-                var inX = (quadRect.X + baseRect.X) / 2;
-                var inY = (quadRect.Y + baseRect.Y) / 2;
-                var inX2 = (quadRect.Right + baseRect.Right) / 2;
-                var inY2 = (quadRect.Bottom + baseRect.Bottom) / 2;
-                var xL = baseRect.X;
-                var xR = baseRect.Right;
-                var indL = Math.Abs(inX - xL);
-                var indR = Math.Abs(inX2 - xR);
-                var yT = baseRect.Y;
-                var yB = baseRect.Bottom;
-                var indT = Math.Abs(inY - yT);
-                var indB = Math.Abs(inY2 - yB);
-                int i = 0;
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xL - ext, yT + dh / 2, indL + ext, hh);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yT - ext, ww, indT + ext);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xR - indR, yT + dh / 2, indR + ext, hh);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yB - indB, ww, indB + ext);
+                if (_xAlgorithm == MatchAlgorithmEnum.GridMatch)
+                {
+                    // ind 固定在 baseRect 與 quadRect 中間處
+                    var quadRect = Rectangle.Round(_goldenQuad2D.BoundaryRect);
+                    var inX = (quadRect.X + baseRect.X) / 2;
+                    var inY = (quadRect.Y + baseRect.Y) / 2;
+                    var inX2 = (quadRect.Right + baseRect.Right) / 2;
+                    var inY2 = (quadRect.Bottom + baseRect.Bottom) / 2;
+                    var xL = baseRect.X;
+                    var xR = baseRect.Right;
+                    var indL = Math.Abs(inX - xL);
+                    var indR = Math.Abs(inX2 - xR);
+                    var yT = baseRect.Y;
+                    var yB = baseRect.Bottom;
+                    var indT = Math.Abs(inY - yT);
+                    var indB = Math.Abs(inY2 - yB);
+                    
+                    int i = 0;
+                    _cviLineBorderBoxes[i++].Box = new Rectangle(xL - ext, yT + dh / 2, indL + ext, hh);
+                    _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yT - ext, ww, indT + ext);
+                    _cviLineBorderBoxes[i++].Box = new Rectangle(xR - indR, yT + dh / 2, indR + ext, hh);
+                    _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yB - indB, ww, indB + ext);
 
-                _bypassWindowEvents = true;
-                _editorUI.numBorderIndent.Enabled = false;
-                GaUtil.SetNum(_editorUI.numBorderIndent, (indL + indR + indT + indB) / 4m);
-                _bypassWindowEvents = false;
+                    //_bypassWindowEvents = true;
+                    //_editorUI.numBorderIndent.Enabled = false;
+                    //GaUtil.SetNum(_editorUI.numBorderIndent, (indL + indR + indT + indB) / 4m);
+                    //_bypassWindowEvents = false;
+                    updateNumBorderIndentDynamically((indL + indR + indT + indB) / 4);
+                }
+                else
+                {
+                    // ind 固定在 baseRect 與 quadRect 中間處
+                    var quadRect = Rectangle.Round(_goldenQuad2D.BoundaryRect);
+                    var extraIndent = (int)Math.Abs(_editorUI.numBorderIndent.Minimum) / 2;
+
+                    var inX = (quadRect.X + baseRect.X) / 2 + extraIndent;
+                    var inY = (quadRect.Y + baseRect.Y) / 2 + extraIndent;
+                    var inX2 = (quadRect.Right + baseRect.Right) / 2 - extraIndent;
+                    var inY2 = (quadRect.Bottom + baseRect.Bottom) / 2 - extraIndent;
+                    
+                    var xL = baseRect.X;
+                    var xR = baseRect.Right;
+                    var yT = baseRect.Y;
+                    var yB = baseRect.Bottom;
+                    var indL = Math.Abs(inX - xL);
+                    var indR = Math.Abs(inX2 - xR);
+                    var indT = Math.Abs(inY - yT);
+                    var indB = Math.Abs(inY2 - yB);
+
+                    int i = 0;
+                    _cviLineBorderBoxes[i++].Box = new Rectangle(xL - ext, yT + dh / 2, indL + ext, hh);
+                    _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yT - ext, ww, indT + ext);
+                    _cviLineBorderBoxes[i++].Box = new Rectangle(xR - indR, yT + dh / 2, indR + ext, hh);
+                    _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yB - indB, ww, indB + ext);
+                }
             }
             else
             {
@@ -553,7 +616,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _cviLineBorderBoxes[i++].Box = new Rectangle(baseRect.Right - ind, y + dh / 2, ind + ext, hh);
                 _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, baseRect.Bottom - ind, ww, ind + ext);
 
-                _editorUI.numBorderIndent.Enabled = true;
+                //>>> _editorUI.numBorderIndent.Enabled = true;
+                updateNumBorderIndentDynamically();
             }
 
             refreshDispUI(DS1);
@@ -841,7 +905,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var settings = Properties.Settings.Default;
                 if (save)
                 {
-                    settings.lineBorderIndent = (int)_editorUI.numBorderIndent.Value;
+                    //>>> settings.lineBorderIndent = (int)_editorUI.numBorderIndent.Value;
+                    settings.lineBorderIndent = updateNumBorderIndentDynamically();
                     settings.lineBorderExt = (int)_editorUI.numBorderExtend.Value;
                     settings.lineSpanPercentage = (float)_editorUI.numLineSpanPercentage.Value;
                     settings.Save();
@@ -849,10 +914,12 @@ namespace LaserAlignDX.Mvc.Ctrl
                 else
                 {
                     _bypassWindowEvents = true;
-                    GaUtil.SetNum(_editorUI.numBorderIndent, settings.lineBorderIndent);
+                    //>>> GaUtil.SetNum(_editorUI.numBorderIndent, settings.lineBorderIndent);
                     GaUtil.SetNum(_editorUI.numBorderExtend, settings.lineBorderExt);
                     GaUtil.SetNum(_editorUI.numLineSpanPercentage, (decimal)settings.lineSpanPercentage);
                     _bypassWindowEvents = false;
+
+                    updateNumBorderIndentDynamically(settings.lineBorderIndent);
                 }
             }
             catch
@@ -950,10 +1017,47 @@ namespace LaserAlignDX.Mvc.Ctrl
             _editorUI.btnPickGolden.Enabled = _opSelector == OpSelector.Golden;
             _editorUI.btnAutoLineBorders.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.btnBuildMircoTransform.Enabled = _opSelector == OpSelector.LineBorders;
-            _editorUI.numBorderIndent.Enabled = false && _opSelector == OpSelector.LineBorders;
+
+            //>>> _editorUI.numBorderIndent.Enabled = false && _opSelector == OpSelector.LineBorders;
+            updateNumBorderIndentDynamically();
+
             _editorUI.numBorderExtend.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.numLineSpanPercentage.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.btnTryScanQrCode.Enabled = _opSelector == OpSelector.QrCode;
+        }
+        int updateNumBorderIndentDynamically(int? indent = null)
+        {
+            //----------------------------------------------
+            // 根據晶粒型態動態配置 內緣 NumericUpDown
+            //----------------------------------------------
+            var num = _editorUI.numBorderIndent;
+            if (num == null)
+                return 0;
+
+            decimal value = indent != null ? indent.Value : num.Value;
+
+            _bypassWindowEvents = true;
+
+            if(_xAlgorithm == MatchAlgorithmEnum.GridMatch)
+            {
+                // 格點型 晶粒
+                num.Minimum = 1;
+                GaUtil.SetNum(num, 1);
+                num.Enabled = false;
+            }
+            else
+            {
+                // 一般型 晶粒 (使用海康 template match)
+                num.Enabled = true;
+                num.Minimum = MIN_INDENT_FOR_MVD;
+                if (value >= 0)
+                    value = num.Minimum / 2m;
+                GaUtil.SetNum(num, value);
+            }
+
+            _bypassWindowEvents = false;
+
+            return (int)num.Value;
         }
         #endregion
 

@@ -159,7 +159,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// <summary>
         /// 用來維持 舊接口 相容性 之 使用模式
         /// </summary>
-        Bitmap _bmpOrgFlyRuntime = null;
+        Bitmap _bmpOrgFlyRuntime = new Bitmap(1,1,System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
         /// <summary>
         /// 舊接口: Caller 會管理 bmpOrgFly 生命週期
         /// </summary>
@@ -1133,14 +1133,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             {
                 err = PrintTempTrain();
                 if (err != 0)
-                    VsMessageBox.Warning("加載 (晶粒匹配) 參數 訓練失敗!");
+                    VsMessageBox.Warning("加載 (晶粒匹配) 參數 訓練失敗!\n\r該參數尚未建立\n\r或未插入 Dongle.");
             }
 
             if (err == 0)
             {
                 err = PrintTempFlyTrain();
                 if (err != 0)
-                    VsMessageBox.Warning("加載 飛拍 參數 訓練失敗!");
+                    VsMessageBox.Warning("加載 飛拍 參數 訓練失敗!\n\r該參數尚未建立\n\r或未插入 Dongle.");
             }
 
             return err;

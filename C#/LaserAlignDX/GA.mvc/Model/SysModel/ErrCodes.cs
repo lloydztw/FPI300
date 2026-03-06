@@ -43,6 +43,9 @@ namespace LaserAlignDX.Mvc.Model
         [Description("參數 格點陣列 (Camera Grid) 行列數太小")]
         LOW_GRID_ROWS_COLS,
 
+        [Description("參數 模板訓練失敗, 無法建立 GoldenQuad2D!")]
+        ERR_CANNOT_LOAD_,
+
         [Description("無法抓到格點")]
         CAN_NOT_FETCH_CAMERA_GRID,
 
@@ -75,5 +78,11 @@ namespace LaserAlignDX.Mvc.Model
 
         [Description("盤面參數設定不一致!")]
         ERR_TRAY_CONFIG_CONFLICTS,
+
+        [Description("請先設定 晶粒匹配樣本!")]
+        WARN_NO_GOLDN_TEMPLATE_SETUP,
+
+        [Description("無法找到 GoldenQuad2D!")]
+        WARN_CAN_NOT_FIND_QUAD_2D,
     }
 }

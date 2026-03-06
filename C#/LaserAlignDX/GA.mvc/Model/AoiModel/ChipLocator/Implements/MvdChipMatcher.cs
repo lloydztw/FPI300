@@ -47,6 +47,11 @@ namespace LaserAlignDX.AoiModel
         //public int xMvdMaxOcc { get; set; } = 1;
         #endregion
 
+        #region PRIVATE_RUNTIME_DATA
+        QvQuad2D _goldenQuad2D = null;
+        QvQuad2D _resultQuad2D = null;
+        #endregion
+
         public Size TemplateSize
         {
             get;
@@ -67,13 +72,10 @@ namespace LaserAlignDX.AoiModel
         {
             //bmpObj_Image?.Dispose();
             //bmpObj_Image = null;
-
             //bmpRun_Image?.Dispose();
             //bmpRun_Image = null;
-
             //xMvdObj_Image?.Dispose();
             //xMvdObj_Image = null;
-
             //xMvdRun_Image?.Dispose();
             //xMvdRun_Image = null;
 
@@ -104,13 +106,11 @@ namespace LaserAlignDX.AoiModel
 
             //bmpObj_Image?.Dispose();
             //bmpObj_Image = (Bitmap)bmpTemplate.Clone();
-
             ////CMvdRectangleF cMvd = new CMvdRectangleF(
             ////    xRegionTrain.Width / 2,
             ////    xRegionTrain.Height / 2,
             ////    xRegionTrain.Width,
             ////    xRegionTrain.Height);
-
             //// bool bOK = HikTrainBmp();
 
             //---------------------------------------------------------------
@@ -120,12 +120,16 @@ namespace LaserAlignDX.AoiModel
 
             bool bOK = HikTrain2(xMvdObj_Image);
 
+            // 2026-03-06 整合海康 Template Match
+            var rect = new RectangleF(PointF.Empty, TemplateSize);
+            _goldenQuad2D = QvQuad2D.From(rect);
+
             return bOK;
         }
 
         public QvQuad2D GoldenQuad2D
         {
-            get => throw new NotImplementedException();
+            get => _goldenQuad2D;
         }
 
         /// <summary>
@@ -162,6 +166,9 @@ namespace LaserAlignDX.AoiModel
 
             bOK = HikRun2(xMvdRun_Image);
 
+            // 根據 HikRun2 的結果, 生成 _resultQuad2D
+            _resultQuad2D = toQuad2D(xResults, TemplateSize);
+
             return bOK;
         }
 
@@ -170,19 +177,24 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         public EzBlocsGrid GetResultPadsGrid()
         {
-            // 海康版的 template match 不支援
+            // 海康版的 template match 沒有 PADs
             return null;
         }
 
+        /// <summary>
+        /// 取得 廣義的四角多邊形
+        /// </summary>
         public QvQuad2D GetResultQuad2D()
         {
-            throw new NotImplementedException();
-            return null;
+            return _resultQuad2D;
         }
 
+        /// <summary>
+        /// 調試用
+        /// </summary>
         public object GetResultDetails()
         {
-            throw new NotImplementedException();
+            // 海康版的 template match 不支援
             return null;
         }
 
@@ -479,15 +491,13 @@ namespace LaserAlignDX.AoiModel
                 cAlmightyPatmatchToolObj.Run();
 
                 // Get the result
-
                 VisionDesigner.AlmightyPatMatch.CAlmightyPatMatchResult cHPMatchRes = cAlmightyPatmatchToolObj.Result;
 
                 //foreach (var item in cHPMatchRes.MatchInfoList)
                 //{
-
                 //    Console.WriteLine("MatchPoint: ({0},{1})", item.MatchPoint.fX, item.MatchPoint.fY);
-
                 //}
+
                 int resultcount = cHPMatchRes.MatchInfoList.Count;
                 if (resultcount > 0)
                 {
@@ -711,6 +721,18 @@ namespace LaserAlignDX.AoiModel
             //return cMvdImage;
 
             return GaImageUtil.BitmapToCMvdImage(bmpInputImg);
+        }
+        QvQuad2D toQuad2D(List<xFindResult> xResults, SizeF size, float offsetX = 0f, float offsetY = 0f)
+        {
+            if(xResults==null || xResults.Count==0) 
+                return null;
+            var xResult = xResults[0];
+            var box = new QvBox2D();
+            box.SetBox(PointF.Empty, size);
+            box.SetCenter(xResult.fCenterX + offsetX, xResult.fCenterY + offsetY);
+            box.SetTheta(xResult.fAngle / 180.0 * Math.PI);
+            var quad2D = QvQuad2D.From(box);
+            return quad2D;
         }
         #endregion
     }

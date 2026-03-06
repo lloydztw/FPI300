@@ -61,7 +61,7 @@ namespace LaserAlignDX.OPSpace
             mvdFindLineClass = null;
             mvdPairLineClass?.Dispose();
             mvdPairLineClass = null;
-         
+
             try { OutGridLink?.Dispose(); } catch { }
             OutGridLink = null;
         }
@@ -233,7 +233,7 @@ namespace LaserAlignDX.OPSpace
                     return;
 
                 _inspectResult = result;
-                
+
                 if (result != InspectReason.PASS)
                     _inspectNgList.Add(result);
             }
@@ -316,7 +316,7 @@ namespace LaserAlignDX.OPSpace
 
             mvdFindLineClass.Background = xInspect.xCarrierBackground;
             resultLine = mvdFindLineClass.Run(bmp, roi, sideIndex);
-            
+
             //cMvdLineSegmentFsOut[borderIndex] = resultLine;
             return resultLine;
         }
@@ -924,7 +924,7 @@ namespace LaserAlignDX.OPSpace
             return PTF.X.ToString("0.000") + "," + PTF.Y.ToString("0.000");
         }
 #endif
-#endregion
+        #endregion
 
         /// <summary>
         /// 清除上一次的檢測結果
@@ -935,7 +935,7 @@ namespace LaserAlignDX.OPSpace
 
             try { OutGridLink?.Dispose(); } catch { }
             OutGridLink = null;
-            
+
             ////<<< 廢除 >>> xFindResult = new AUVision.xFindResult();
 
             //inspectReason = InspectReason.PASS;
