@@ -259,18 +259,21 @@ namespace EzAoiEmptyTrayInspector.Model
             }
         }
 
-        public ErrCodes BuildGoldenGridTemplate(SideID sideId, IEzImage largeImg)
+        public (ErrCodes, int, int) BuildGoldenGridTemplate(SideID sideId, IEzImage largeImg, int targetRows, int targetCols)
         {
+            int suggestRows = 0;
+            int suggestCols = 0;
+
             if (!_recipe.VisionSettings.Match.UseGrid.Value)
             {
                 _LOG.Warn("Match.UseGrid 沒啟用");
-                return ErrCodes.OK;
+                return (ErrCodes.OK, suggestRows, suggestCols);
             }
 
             var err = CanMatch(sideId, largeImg);
             if (err != ErrCodes.OK)
             {
-                return err;
+                return (err, suggestRows, suggestCols);
             }
 
             RunMatch(sideId, largeImg);
@@ -279,17 +282,17 @@ namespace EzAoiEmptyTrayInspector.Model
             if (matchGrid == null)
             {
                 err = ErrCodes.NO_MATCH_GRID;
-                return err;
+                return (err, suggestRows, suggestCols);
             }
 
             _LOG.Info("[AOI] 建立 Golden Grid ... ");
-            int goldenRowsByUser = _recipe.TrayMiscSettings.FullRows;
-            int goldenColsByUser = _recipe.TrayMiscSettings.FullCols;
-            int goldenRows = matchGrid.Rows;
-            int goldenCols = matchGrid.Cols;
+            suggestRows = matchGrid.Rows;
+            suggestCols = matchGrid.Cols;
 
             // 防呆檢查 
-            if (goldenRowsByUser != goldenRows || goldenColsByUser != goldenCols)
+            int goldenRowsByUser = targetRows > 0 ? targetRows : _recipe.TrayMiscSettings.FullRows;
+            int goldenColsByUser = targetCols > 0 ? targetCols : _recipe.TrayMiscSettings.FullCols;
+            if (goldenRowsByUser != suggestRows || goldenColsByUser != suggestCols)
             {
                 err = ErrCodes.GRID_ROWS_COLS_ARE_NOT_THE_SAME_AS_USER_INPUT;
             }
@@ -314,7 +317,7 @@ namespace EzAoiEmptyTrayInspector.Model
             }
 
             ResetAndClear(sideId);      //@<<< BuildGoldenGridTemplate
-            return err;
+            return (err, suggestRows, suggestCols);
         }
 
 

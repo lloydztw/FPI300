@@ -25,9 +25,8 @@ using LeTian.JxRecipesTool.Ctrl;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-
-using CviGoldenBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
+using CviGoldenBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 
 
 namespace EzAoiEmptyTrayInspector.Ctrl
@@ -419,11 +418,56 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             if (_imgViewer == null || _imgSource == null || _model == null)
                 return;
 
-            var err = _model.BuildGoldenGridTemplate(SideID.A, _imgSource);
-            if (err != ErrCodes.OK)
+            getRecipeRowsCols(out int targetRows, out int targetCols);
+
+            while (true)
             {
-                var msg = QxNums.GetEnumDescription(err);
-                MessageBox.Show(msg, _frmOwner.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                (var err, var suggestRows, var suggestCols) = _model.BuildGoldenGridTemplate(SideID.A, _imgSource, targetRows, targetCols);
+
+                if (err != ErrCodes.OK)
+                {
+                    var msg = QxNums.GetEnumDescription(err);
+                    if (err == ErrCodes.GRID_ROWS_COLS_ARE_NOT_THE_SAME_AS_USER_INPUT)
+                    {
+                        msg += $"\n\r\n\r視覺辨識: rows={suggestRows} , cols={suggestCols}";
+                        msg += $"\n\r\n\r";
+                        msg += "\n\r是否自動更新參數設定的 (rows, cols)";
+                        msg += "\n\r再自動重新抓取?";
+                        var ret = MessageBox.Show(msg, _frmOwner.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                        if (ret == DialogResult.Yes)
+                        {
+                            adjustRecipeRowsCols(suggestRows, suggestCols);
+                            _wndRcpHostPanel.Invalidate();
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show(msg, _frmOwner.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+
+                break;
+            }
+        }
+
+
+        void getRecipeRowsCols(out int rows, out int cols)
+        {
+            var recipe = _recipesMgr?.ActiveRecipe as JxAoiRecipe;
+            var settings = recipe?.TrayMiscSettings;
+            rows = settings!=null ? settings.FullRows.Value : 0;
+            cols = settings!=null ? settings.FullCols.Value : 0;
+        }
+        void adjustRecipeRowsCols(int rows, int cols)
+        {
+            var recipe = _recipesMgr?.ActiveRecipe as JxAoiRecipe;
+            var settings = recipe?.TrayMiscSettings;
+            if (settings != null)
+            {
+                settings.FullRows.Value = rows;
+                settings.FullCols.Value = cols;
             }
         }
         #endregion
