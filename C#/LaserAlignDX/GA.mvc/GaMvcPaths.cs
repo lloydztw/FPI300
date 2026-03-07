@@ -25,29 +25,32 @@ namespace LaserAlignDX
     public static class GaMvcPaths
     {
         public static string GA_WORK_PATH => Traveller106.Universal.WORKPATH;
+
+        /// <summary>
+        /// 大校正板 像測調教 參數檔
+        /// </summary>
         public static string CALIB_RECIPE_FILE(CarrierEnum C, object dummy = null)
         {
-            //string tag = "";
-            //if (viewID > 0)
-            //{
-            //    tag = $"@{C}#{S}";
-            //}
-            //else
-            //{
-            //    if (C != CarrierEnum.C1)
-            //        tag = $"@{C}";
-            //}
-            ////string ext = C != CarrierEnum.C1 ? $"@{C}.json" : ".json";
-            //string ext = tag + ".json";
-            //return System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Vision_Settings" + ext);
-
             string fileName = System.IO.Path.Combine(GA_WORK_PATH, "Calibration", $"Jx_Calib_Recipe@{C}.json");
             return fileName;
         }
-        public static string CALIB_TRANSFORMS_FILE
+        
+        /// <summary>
+        /// 基礎座標轉換系統 保存檔案 (所有參數檔共用)
+        /// </summary>
+        public static string COMMON_BASE_TRANSFORMS_INI_FILE
         {
-            // 共用一份
             get => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Transforms.ini");
+        }
+
+        /// <summary>
+        /// 個別參數 座標轉換系統 保存檔案
+        /// </summary>
+        public static string TRANSFORMS_INI_FILE(string fname)
+        {
+            string path = System.IO.Path.GetDirectoryName(fname);
+            string iniFile = System.IO.Path.Combine(path, "Jx_Transforms.ini");
+            return iniFile;
         }
     }
 }

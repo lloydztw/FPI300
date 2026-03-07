@@ -13,6 +13,7 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using LaserAlignDX.AoiModel.Calib;
 using OpenCvSharp;
@@ -24,15 +25,20 @@ namespace LaserAlignDX.AoiModel
     public interface ICalibAoiModel : IDisposable
     {
         /// <summary>
-        /// Caller 必須維護 fullfovImg 與 recipe 生命週期
+        /// 抓取 大校正板 的格點
+        /// <br/> The caller 必須維護 fullfovImg 與 recipe 生命週期
         /// </summary>
         EzBlocsGrid FetchBoardGrid(CarrierEnum carrierID, Mat fullfovImg, JxCalibRecipe recipe);
 
         /// <summary>
-        /// Caller 必須維護 fullfovImg 與 recipe 生命週期 
+        /// 抓取 墨點  
+        /// <br/> The caller 必須維護 fullfovImg 與 recipe 生命週期 
         /// </summary>
         EzBloc[] FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe);
 
+        /// <summary>
+        /// 保留
+        /// </summary>
         bool AdjustBadNodes(CarrierEnum carrierID, EzBlocsGrid grid);
 
 #if (OPT_DEBUG)
@@ -53,7 +59,8 @@ namespace LaserAlignDX.AoiModel
         void SetRecipe(JxCalibRecipe recipe);
         ErrCodes BuildGoldenGridTemplate(object dummy, IEzImage ezImage);
         void SetRecipe(EzAoiEmptyTrayInspector.Model.JxAoiRecipe recipe);
-        MatchResult FetchGridNodes(CarrierEnum carrierID, Mat fullfovImg, bool refine = true);
 #endif
+
+        MatchResult FetchGridNodes(IxEmptyTrayInspector aoiModel, CarrierEnum carrierID, Mat fullfovImg, bool refine = true);
     }
 }

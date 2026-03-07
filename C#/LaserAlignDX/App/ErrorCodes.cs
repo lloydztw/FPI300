@@ -17,7 +17,7 @@ using System.ComponentModel;
 
 namespace LaserAlignDX.Mvc.Model
 {
-    public enum ErrCodes : int
+    public enum ErrorCodes : int
     {
         [Description("OK")]
         OK = 0,
@@ -46,7 +46,7 @@ namespace LaserAlignDX.Mvc.Model
         [Description("參數 模板訓練失敗, 無法建立 GoldenQuad2D!")]
         ERR_CANNOT_LOAD_,
 
-        [Description("無法抓到格點")]
+        [Description("無法抓到格位")]
         CAN_NOT_FETCH_CAMERA_GRID,
 
         [Description("空盤檢測 參數沒建立")]

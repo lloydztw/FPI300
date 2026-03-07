@@ -15,6 +15,7 @@
 
 using EzAoiEmptyTrayInspector.Model;
 using EzAoiEmptyTrayInspector.Model.Aoi;
+using JetEazy.EzImage;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
@@ -761,52 +762,84 @@ namespace LaserAlignDX.AoiModel
         }
 #endif
 
-        #region PRIVATE_LOCATE_FUNCTIONS
-        void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg)
+        /// <summary>
+        /// 進階 抓取 空載台格位點
+        /// </summary>
+        public MatchResult FetchGridNodes(IxEmptyTrayInspector aoi, CarrierEnum carrierID, Mat fullfovImg, bool refine)
         {
-            //var grid = matchResult?.Grid;
-            //if (grid == null || _jxRecipe == null)
-            //    return;
+            if (aoi == null)
+                return null;
 
-            //int thresh = _jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
-            //var bound = new Rect(0, 0, fullfovImg.Width, fullfovImg.Height);
-            //int rows = grid.Rows;
-            //int cols = grid.Cols;
+            //(1) Peek the ezImage
+            using (var ezImage = new EzQuickImage(fullfovImg, deepCopy: false))
+            {
+                //(2) Run Aoi
+                aoi.RunMatch(SideID.A, ezImage);
+                //_externImp.RunAll((IEzImage)ezImage, wait: true);
 
-            //bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
-            //var findLocalCenter = isBlackCarrier ?
-            //    (Func<Mat, Mat, int, string, QVector>)this.FindLocalCenter_black_carrier_cc :
-            //    (Func<Mat, Mat, int, string, QVector>)this.FindLocalCenter_white_carrier;
+                //(3) Result
+                var matchResult = aoi.GetMatchResult(SideID.A);
+                //var result = _externImp.GetResult();
 
-            //for (int r = 0; r < rows; r++)
-            //{
-            //    for (int c = 0; c < cols; c++)
-            //    {
-            //        var bloc = grid.Get(r, c);
-            //        if (bloc == null)
-            //            continue;
+                //(4) Refine each detail locations
+                if (refine)
+                {
+                    var recipe = aoi.GetRecipe();
+                    RefineCentroidLocations(matchResult, ezImage, recipe);
+                }
+
+                _DUMP_DOTS_PLATE_IMAGE(ezImage.Image as Mat, matchResult, $"d:\\paso.log\\calib_dots_plate_{carrierID}.jpg");
+
+                return matchResult;
+            }
+        }
+
+        #region PRIVATE_LOCATE_FUNCTIONS
+        void RefineCentroidLocations(MatchResult matchResult, Mat fullfovImg, JxAoiRecipe jxRecipe)
+        {
+            var grid = matchResult?.Grid;
+            if (grid == null || jxRecipe == null)
+                return;
+
+            int thresh = jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
+            var bound = new Rect(0, 0, fullfovImg.Width, fullfovImg.Height);
+            int rows = grid.Rows;
+            int cols = grid.Cols;
+
+            bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
+            var findLocalCenter = isBlackCarrier ?
+                (Func<Mat, Mat, int, string, QVector>)this.FindLocalCenter_black_carrier_cc :
+                (Func<Mat, Mat, int, string, QVector>)this.FindLocalCenter_white_carrier;
+
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    var bloc = grid.Get(r, c);
+                    if (bloc == null)
+                        continue;
 
 
-            //        var roi = JetEazy.Qcvt.CV(bloc.Rect);
-            //        JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+                    var roi = JetEazy.Qcvt.CV(bloc.Rect);
+                    JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
 
-            //        using (var img = fullfovImg[roi].Clone())
-            //        using (var binary = new Mat())
-            //        {
-            //            string dumpTag = OPT_DUMP ? $"@{r}_{c}" : null;
-            //            var center = findLocalCenter(img, binary, thresh, dumpTag);
+                    using (var img = fullfovImg[roi].Clone())
+                    using (var binary = new Mat())
+                    {
+                        string dumpTag = OPT_DUMP ? $"@{r}_{c}" : null;
+                        var center = findLocalCenter(img, binary, thresh, dumpTag);
 
-            //            if (center == null)
-            //                continue;
+                        if (center == null)
+                            continue;
 
-            //            center.X += roi.X;
-            //            center.Y += roi.Y;
-            //            bloc.Center = center;
-            //            var rect = JetEazy.Qcvt.CreateCenterRect((float)center.X, (float)center.Y, (float)bloc.Rect.Width, (float)bloc.Rect.Height);
-            //            bloc.Rect = Rectangle.Round(rect);
-            //        }
-            //    }
-            //}
+                        center.X += roi.X;
+                        center.Y += roi.Y;
+                        bloc.Center = center;
+                        var rect = JetEazy.Qcvt.CreateCenterRect((float)center.X, (float)center.Y, (float)bloc.Rect.Width, (float)bloc.Rect.Height);
+                        bloc.Rect = Rectangle.Round(rect);
+                    }
+                }
+            }
         }
         QVector FindLocalCenter_white_carrier(Mat img, Mat binary, int thresh, string dumpTag)
         {

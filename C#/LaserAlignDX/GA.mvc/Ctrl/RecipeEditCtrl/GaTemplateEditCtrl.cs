@@ -503,7 +503,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
             {
                 //VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
-                var errMsg = GaUtil.GetEnumDescription(ErrCodes.WARN_NO_GOLDN_TEMPLATE_SETUP);
+                var errMsg = GaUtil.GetEnumDescription(Model.ErrorCodes.WARN_NO_GOLDN_TEMPLATE_SETUP);
                 VsMessageBox.Warning(errMsg);
                 return;
             }
@@ -541,7 +541,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
                 catch (Exception ex)
                 {
-                    var errMsg = GaUtil.GetEnumDescription(ErrCodes.WARN_CAN_NOT_FIND_QUAD_2D) + "\n\r\n\r" + ex.Message;
+                    var errMsg = GaUtil.GetEnumDescription(Model.ErrorCodes.WARN_CAN_NOT_FIND_QUAD_2D) + "\n\r\n\r" + ex.Message;
                     VsMessageBox.Warning(errMsg);
                     return;
                 }
@@ -1220,7 +1220,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var targetSize = new SizeF(_xInspectX3.xTemplateChipWidth, _xInspectX3.xTemplateChipHeight);
                 var err = aoiModel.BuildMicroChipTransform(targetSize, lines.ToArray(), regionBmp, regionRoi);
 
-                if (err != ErrCodes.OK)
+                if (err != Model.ErrorCodes.OK)
                 {
                     string errMsg = "無法建立 Micro Transform:\n\r\n\r" + GaUtil.GetEnumDescription(err);
                     VsMessageBox.Warning(errMsg);

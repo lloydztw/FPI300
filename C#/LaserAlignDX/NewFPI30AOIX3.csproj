@@ -358,6 +358,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App\Config.cs" />
+    <Compile Include="App\Prompts.cs" />
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />
@@ -453,6 +455,7 @@
     <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v3.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\JxCalibRecipe.cs" />
+    <Compile Include="GA.mvc\Model\Coordinates\ITravellerTransforms.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\QMicroChipTransform_v30.cs" />
     <Compile Include="GA.mvc\Model\Coordinates\Supports\TravellerTranformsGaaraExt.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
@@ -465,7 +468,7 @@
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\JxMetadataUtil.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyMetadataUtil.cs" />
-    <Compile Include="GA.mvc\Model\SysModel\ErrCodes.cs" />
+    <Compile Include="App\ErrorCodes.cs" />
     <Compile Include="GA.mvc\Model\SysModel\ITravellerSysModel.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerSysModel.cs" />
     <Compile Include="GA.mvc\GaMvcPaths.cs" />
@@ -767,6 +770,7 @@
     <EmbeddedResource Include="GA\UISpace\UIMVC\View\PosUI.resx">
       <DependentUpon>PosUI.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="App\Readme.md" />
     <None Include="GA.mvc\Ctrl\Readme.md" />
     <None Include="GA.mvc\Gui\Readme.md" />
     <None Include="GA.mvc\Model\AI\Readme.md" />

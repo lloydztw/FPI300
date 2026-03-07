@@ -13,6 +13,7 @@ using JetEazy.Interface;
 using JetEazy.OPSpace;
 using JetEazy.PropertyGridSpace;
 using JetEazy.Utils;
+using JzDisplay;
 using LaserAlignDX.BasicSpace.ParaSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -29,13 +30,13 @@ namespace Traveller106
         public static readonly bool N_THREADS_ENABLED = true;
         public static readonly int N_THREADS = 16;
 
-        public static bool IsNoUseCCD = true;
+        public static bool IsNoUseCCD => LaserAlignDX.GlobalConfig.IsSim;
         public static bool IsNoUseIO = IsNoUseCCD;
         public static bool IsNoUseMotor = IsNoUseIO;
         public static bool IsSilentMode = IsNoUseIO;
         public static bool IsAutoLogin = IsNoUseCCD;
 
-        public const string VersionDate = "2025/12/23";
+        public static string VersionDate => LaserAlignDX.GlobalConfig.VersionDate;
 
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;

@@ -39,7 +39,7 @@ namespace EzAoiEmptyTrayInspector.Model
         {
             get { return _grid; }
         }
-        internal MatchResult MatchResult
+        public MatchResult MatchResult
         {
             get { return _matchResult; }
         }

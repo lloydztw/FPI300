@@ -33,7 +33,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Traveller106;
 using VisionDesigner;
-using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
+using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
 
 namespace LaserAlignDX.AoiModel.V3
@@ -104,7 +104,7 @@ namespace LaserAlignDX.AoiModel.V3
                 // 在此無需釋放 巨圖
                 markRunEnd(false);
                 fire_AoiEnd();
-                var errCode = ErrCodes.EXCEPTION_AT_AOI_RUN;
+                var errCode = ErrorCodes.EXCEPTION_AT_AOI_RUN;
                 string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
                 GaUtil.LOG(errMsg, Color.Red);
                 _LOG_ERROR(ex, $"異常 @ {GetType().Name}.Run");
@@ -482,7 +482,7 @@ namespace LaserAlignDX.AoiModel.V3
                 cell.RunHeight = dimension.Height;
 
                 //(4) 異常
-                if (err != ErrCodes.OK)
+                if (err != ErrorCodes.OK)
                     throw new Exception(GaUtil.GetEnumDescription(err));
             }
             catch (Exception ex)

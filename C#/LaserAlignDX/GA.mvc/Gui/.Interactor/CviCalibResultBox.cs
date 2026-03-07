@@ -18,6 +18,8 @@ using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.Transform;
 using JetEazy.Utils;
+using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Mvc.Model;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -29,6 +31,10 @@ namespace LaserAlignDX.Mvc.Gui
     public class CviCalibResultBox : CviAbsTooltipBox
     {
         public event EventHandler OnRequestDumpBindaryImage;
+
+        #region PRIVATE_KERNEL_DATA
+        ITravellerTransforms _trfModel;
+        #endregion
 
         #region PRIVATE_DATA
         MatchResult _matchResult;
@@ -42,6 +48,10 @@ namespace LaserAlignDX.Mvc.Gui
         int _debugOption = -1;
         #endregion
 
+        public void Attach(ITravellerTransforms trfModel)
+        {
+            _trfModel = trfModel;
+        }
         public void Reset()
         {
             _matchResult = null;
@@ -605,8 +615,7 @@ namespace LaserAlignDX.Mvc.Gui
             if (bloc == null)
                 return;
 
-            var transformsModel = GaMvcConfig.SysModel.TransformsModel;
-            (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, row, col);
+            (var motorDelta, var worldDelta) = _trfModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, row, col);
 
             //sb.AppendLine();
             sb.AppendLine($"Physic 變動值 ΔX = {worldDelta.X:0.000} mm");
@@ -674,7 +683,6 @@ namespace LaserAlignDX.Mvc.Gui
 
             int rows = _grid.Rows;
             int cols = _grid.Cols;
-            var transformsModel = GaMvcConfig.SysModel.TransformsModel;
 
             double maxErr = 0;
             int maxErrRow = -1;
@@ -687,7 +695,7 @@ namespace LaserAlignDX.Mvc.Gui
                     var bloc = _grid[r, c];
                     if (bloc == null) continue;
 
-                    (var motorDelta, var worldDelta) = transformsModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, r, c);
+                    (var motorDelta, var worldDelta) = _trfModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, r, c);
 
                     double err;
                     if (option == 0)

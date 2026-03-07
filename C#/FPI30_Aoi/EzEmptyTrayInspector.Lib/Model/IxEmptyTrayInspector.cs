@@ -40,6 +40,11 @@ namespace EzAoiEmptyTrayInspector.Model
         /// 設定參數
         /// </summary>
         void SetRecipe(AOI_RECIPE recipe);
+        
+        /// <summary>
+        /// 目前參數
+        /// </summary>
+        AOI_RECIPE GetRecipe();
 
         /// <summary>
         /// 讓 Recipe Editor 調適試跑使用
@@ -48,14 +53,16 @@ namespace EzAoiEmptyTrayInspector.Model
 
         /// <summary>
         /// 從 巨圖 擷取 吸嘴圖形 當 Golden Template 
-        /// (於 Recipe Editor 中使用)
+        /// <br/> 於 Recipe Editor 中使用
         /// </summary>
         bool CropGoldenTemplate(SideID sideId, IEzImage largeImg, Rectangle goldenRect);
 
         /// <summary>
         /// 根据 吸嘴 golden image 建立 整盤 格線定位點 
-        /// (於 Recipe Editor 中使用)
+        /// <br/> 於 Recipe Editor 中使用
+        /// <br/> 返回值 Err, suggestRows, suggestCols
         /// </summary>
+        /// 
         (ErrCodes, int, int) BuildGoldenGridTemplate(SideID sideId, IEzImage largeIm, int targetRows, int targetCols);
 
         ErrCodes CanMatch(SideID sideId, IEzImage img);

@@ -231,7 +231,7 @@ namespace LaserAlignDX.AoiModel
         {
             OnAoiProgressing?.Invoke(sender, e);
         }
-        protected void fire_AoiError(ErrCodes err, string message)
+        protected void fire_AoiError(ErrorCodes err, string message)
         {
             OnError?.Invoke(this, new ProcessEventArgs(message, err));
         }

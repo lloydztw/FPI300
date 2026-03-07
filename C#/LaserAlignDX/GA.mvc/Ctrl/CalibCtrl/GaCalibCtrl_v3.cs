@@ -75,7 +75,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region GLOBAL_PATH
-        internal static string CALIB_TRANSFORMS_FILE => GaMvcPaths.CALIB_TRANSFORMS_FILE;
+        internal static string CALIB_TRANSFORMS_FILE => GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE;
         internal static string CALIB_RECIPE_FILE(CarrierEnum C, params object[] dummyArgs)
         {
             return GaMvcPaths.CALIB_RECIPE_FILE(C);
@@ -97,7 +97,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             get { return Traveller106.Universal.IxLineScan; }
         }
-        TravellerTransforms _transforms => GaMvcConfig.SysModel.TransformsModel;
+        ITravellerTransforms _commonBaseTrf => TravellerTransforms.CommonBase;
         RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         #endregion
 
@@ -150,6 +150,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         public void Attach(IvCalibToolUI toolView)
         {
             _calibToolUI = toolView;
+            _cviGridResultBox.Attach(TravellerTransforms.CommonBase);
+
             //_btnPickupGolden.Tag = _btnPickupGolden.BackColor;
 
             instanceRecipes();
@@ -528,7 +530,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region PRIVATE_GRID_BOARD_FUNCTIONS
         EzBlocsGrid getActiveBoardGrid()
         {
-            var grid = _transforms?.GetCalibCameraGrid(_activeCarrierID);
+            var grid = _commonBaseTrf?.GetCalibCameraGrid(_activeCarrierID);
             return grid;
         }
         void setActiveBoardGrid(EzBlocsGrid camGrid)
@@ -536,7 +538,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (camGrid == null)
                 return;
 
-            //(1) 取出參數設定的 pitch, rows, cols
+            //(1) 從 共用校正參數 取出 pitch, rows, cols
             var jxRecipe = getActiveCalibRecipe();
             var traySettings = jxRecipe.GridSettings.EmptyTraySettings;
             var pitchX = (double)traySettings.PitchX.Value;
@@ -556,8 +558,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             //(3) 將 校正點位群 更新到 座標轉換 系統 (Model)
             if (areAllRowsColsMatched)
             {
-                _transforms.ConfigGlobalCalibPlcGrid(rows, cols, pitchX, pitchY);
-                _transforms.SetCalibCameraGrid(_activeCarrierID, camGrid);
+                _commonBaseTrf.ConfigGlobalCalibPlcGrid(rows, cols, pitchX, pitchY);
+                _commonBaseTrf.SetCalibCameraGrid(_activeCarrierID, camGrid);
             }
 
             //(4) 設定 旗標
@@ -569,8 +571,8 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             _cviGridResultBox.ActiveCarrierID = _activeCarrierID;
             _cviGridResultBox.ActiveSuckerRowID = _activeSuckerRowID;
-            _cviGridResultBox.TransCameraToMotor = _transforms?.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
-            _cviGridResultBox.TransCameraToWorld = _transforms?.GetCameraPhysicTransform(_activeCarrierID);
+            _cviGridResultBox.TransCameraToMotor = _commonBaseTrf?.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+            _cviGridResultBox.TransCameraToWorld = _commonBaseTrf?.GetCameraPhysicTransform(_activeCarrierID);
 
             _cviGridResultBox.UpdateResult(camGrid);
             _cviGridResultBox.Visible = camGrid != null;
@@ -583,7 +585,11 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region PRIVATE_INK_MARKS_FUNCTIONS
         EzBloc[] getActiveInkMarks()
         {
-            var jxSettings = (_activeSuckerRowID == SuckerRowEnum.S1) ? getActiveCalibRecipe()?.InkMarkSettings1 : getActiveCalibRecipe()?.InkMarkSettings2;
+            //從 共用校正參數, 取出 inkMarks
+            var calibRecipe = getActiveCalibRecipe();
+            var jxSettings = (_activeSuckerRowID == SuckerRowEnum.S1) ?  
+                                calibRecipe?.InkMarkSettings1: 
+                                calibRecipe?.InkMarkSettings2;
             if (jxSettings != null)
             {
                 jxSettings.GetInkMarks(out var marks);
@@ -591,17 +597,22 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             return null;
         }
-        void setActiveInkMarks(EzBloc[] marks)
+        void setActiveInkMarks(EzBloc[] inkMarks)
         {
-            var jxSettings = (_activeSuckerRowID == SuckerRowEnum.S1) ? getActiveCalibRecipe()?.InkMarkSettings1 : getActiveCalibRecipe()?.InkMarkSettings2;
-            jxSettings?.SetInkMarks(marks);
+            //將 inkMarks 更新到 共用校正參數
+            var calibRecipe = getActiveCalibRecipe();
+            var jxSettings = (_activeSuckerRowID == SuckerRowEnum.S1) ? 
+                                calibRecipe?.InkMarkSettings1: 
+                                calibRecipe?.InkMarkSettings2;
+            jxSettings?.SetInkMarks(inkMarks);
         }
-        void updateInkMarkBoxes(EzBloc[] marks, bool refresh = false)
+        void updateInkMarkBoxes(EzBloc[] inkMarks, bool refresh = false)
         {
+            //將 inkMarks 更新到 GUI
             if (_cviInkMarkBoxes == null)
                 return;
 
-            if (marks == null)
+            if (inkMarks == null)
             {
                 foreach (var box in _cviInkMarkBoxes)
                 {
@@ -612,11 +623,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             else
             {
                 int idx = 0;
-                var NP = Math.Min(marks.Length, _cviInkMarkBoxes.Length);
+                var NP = Math.Min(inkMarks.Length, _cviInkMarkBoxes.Length);
 
                 foreach (var cviBox in _cviInkMarkBoxes)
                 {
-                    var mark = marks[idx++];
+                    var mark = inkMarks[idx++];
                     if (cviBox == null) continue;
 
                     if (mark != null && idx <= NP)
@@ -639,7 +650,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region PRIVATE_MOTOR_COORDS_FUNCTIONS
         QCoord[] getActiveMotorCoords()
         {
-            var transform = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+            var transform = _commonBaseTrf.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
             var trfCalibCorners = transform.GetCalibCornerPoints();
             var motorPts = trfCalibCorners?.GetAll(isSrc: false);
             //var camPts = trfCalibCorners?.GetAll(isSrc: true);
@@ -757,7 +768,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                     return;
                 }
 
-                var transform = _transforms.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+                var transform = _commonBaseTrf.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
                 if (transform == null)
                 {
                     VsMessageBox.Warning($"沒有座標轉換 模型 {_activeCarrierID} {_activeSuckerRowID}!");
@@ -1156,7 +1167,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             if (sysModel != null && boardGrid != null)
             {
-                ok = sysModel.BuildTransformAndRegionCells(_activeCarrierID, boardGrid);
+                ok = sysModel.BuildCommonBaseTransforms(_activeCarrierID, boardGrid);
 
                 if (ok)
                 {
@@ -1271,10 +1282,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 connectPropEventHandlers(jx);
 
             // (2) Load TRANSFORMS (永遠載入全域設定)
-            _transforms.Load(CALIB_TRANSFORMS_FILE);
+            _commonBaseTrf.Load(CALIB_TRANSFORMS_FILE);
 
             // (3) 第一次建置座標轉換
-            _transforms.BuildAll();
+            _commonBaseTrf.BuildAll();
         }
         void SaveSettings(bool force = false)
         {
@@ -1282,8 +1293,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             // (1) TRANSFORMS
             if (force || _isCoordModified)
             {
-                _transforms.Save(CALIB_TRANSFORMS_FILE);
-                _transforms.SaveGaaraIniFile();
+                _commonBaseTrf.Save(CALIB_TRANSFORMS_FILE);
+                //_transforms.SaveGaaraIniFile();
                 _isCoordModified = false;
             }
 

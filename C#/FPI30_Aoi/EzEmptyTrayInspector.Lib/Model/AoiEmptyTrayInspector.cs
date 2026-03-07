@@ -219,6 +219,11 @@ namespace EzAoiEmptyTrayInspector.Model
             }
         }
 
+        public JxAoiRecipe GetRecipe()
+        {
+            return _recipe;
+        }
+
         void ReleaseRecipe()
         {
             _recipe?.Dispose();

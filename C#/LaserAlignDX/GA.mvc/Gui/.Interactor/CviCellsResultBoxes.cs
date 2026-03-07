@@ -559,7 +559,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             get; set;
         }
-        public TravellerTransforms TransformsModel
+        public ITravellerTransforms TransformsModel
         {
             get;
             set;
@@ -787,7 +787,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 return;
 
             (var err, var errMsg) = TransformsModel.GetNodeCoords(ActiveCarrierID, row, col, out var _, out var world_target, out var s1_target, out var s2_target);
-            if (err != Model.ErrCodes.OK)
+            if (err != Model.ErrorCodes.OK)
                 return;
 
             QVector world_current = null;
@@ -1063,7 +1063,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var account = Traveller106.Universal.ACCDB.AccNow;
             if (account == null || !account.IsAllowSetupRecipe)
             {
-                VsMessageBox.Warning("請先登入 擁有修改參數權限 的 帳號!");
+                //VsMessageBox.Warning("請先登入 擁有修改參數權限 的 帳號!");
+                VsMessageBox.Warning(GaUtil.GetEnumDescription(Prompts.Warn_No_Privilege));
                 return false;
             }
             return true;

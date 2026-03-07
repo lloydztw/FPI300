@@ -49,9 +49,9 @@ namespace LaserAlignDX.AoiModel.V3
 
         #region KERNEL_MEMBERS
         /// <summary>
-        /// 2025-09-10 新座標轉換
+        /// 2026-03-08  線性遷移後 的 座標轉換系統
         /// </summary>
-        TravellerTransforms _transformModel => _sysModel.TransformsModel;
+        ITravellerTransforms _transformModel => _sysModel.TransformsModel;
         ITransform _transCP;
         ITransform _transCS1;
         ITransform _transCS2;
@@ -140,7 +140,7 @@ namespace LaserAlignDX.AoiModel.V3
                 // 在此無需釋放 巨圖
                 markRunEnd(false);
                 fire_AoiEnd();
-                var errCode = Mvc.Model.ErrCodes.EXCEPTION_AT_AOI_RUN;
+                var errCode = Mvc.Model.ErrorCodes.EXCEPTION_AT_AOI_RUN;
                 string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
                 fire_AoiError(errCode, errMsg);
                 GaUtil.LOG(errMsg, Color.Red);

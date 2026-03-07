@@ -22,6 +22,7 @@ using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.FormSpace;
+using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -31,6 +32,7 @@ using OpenCvSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
@@ -66,7 +68,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         RadioButton[] rdoCarriers => _rcpEditUI.rdoCarriers;
         Button btnOpenEmptyTrayWindow => _rcpEditUI.btnOpenEmptyTrayWindow;
         Button btnPickGoldenRegion => _rcpEditUI.btnPickGoldenChipRegion;
-        Button btnAutoCreateRegions => _rcpEditUI.btnAutoCreateCellRegions;
+        Button btnAutoCreateRegionsArray => _rcpEditUI.btnAutoCreateCellRegions;
         Button btnOpenTemplateMatchWindow => _rcpEditUI.btnOpenTemplateMatchWindow;
         Button btnOpenFlyCameraRecipeEditor => _rcpEditUI.btnOpenFlyCamRcpWindow;
         Button btnOpenLightCtrlWindow => _rcpEditUI.btnOpenLightCtrlWindow;
@@ -80,6 +82,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         #region RUNTIME_DATA
         CarrierEnum _currentCarrierID = CarrierEnum.C1;
+        ITravellerTransforms _trfModel => GaMvcConfig.SysModel.TransformsModel;
         bool _isGoldenRegionPicking => _cviGoldenRegionBox.Visible;
         bool _isModified = false;
         #endregion
@@ -89,6 +92,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             _rcpEditUI = editorView;
             _wndOwner = _rcpEditUI.Window.FindForm();
             btnPickGoldenRegion.Tag = btnPickGoldenRegion.BackColor;
+
+            _cviCamGridBox.Attach(_trfModel);
 
             initImgViewer();
             connectEventHandlers();
@@ -121,8 +126,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             btnOpenEmptyTrayWindow.Click += (s, e) => OpenEmptyTrayInspectWindow();
             btnPickGoldenRegion.Click += (s, e) => toggleGoldenRegionPicking();
 
-            //btnAutoCreateRegions.Click += (s, e) => AutoCreateRegions();
-            btnAutoCreateRegions.Click += (s, e) => AutoUpdateRegions();
+            btnAutoCreateRegionsArray.Click += (s, e) => AutoCreateRegionsArray();
             _cviGoldenRegionBox.OnBoxSelected += (s, e) => BuildGoldenRegion();
 
             btnOpenTemplateMatchWindow.Click += (s, e) => OpenTemplateMatchWindow();
@@ -211,7 +215,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             bool hasImage = _imgViewer.Image != null;
             btnSaveImage.Enabled = hasImage;
             btnPickGoldenRegion.Enabled = hasImage;
-            btnAutoCreateRegions.Enabled = hasImage;
+            btnAutoCreateRegionsArray.Enabled = hasImage;
             btnOpenTemplateMatchWindow.Enabled = hasImage;
         }
         void toggleGoldenRegionPicking()
@@ -273,7 +277,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 _currentCarrierID = carrierID;
                 updateRecipePropertyView(carrierID);
-                updatePlcCoordsRef(carrierID);
+                updatePlcCoordsRef(_trfModel, carrierID);
                 updateRecipeOrgBmpToViewer(carrierID);
             }
         }
@@ -333,13 +337,13 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             _xParamGrid.xStageNumber = (StageNumber)carrierID;
         }
-        void updatePlcCoordsRef(CarrierEnum carrierID)
+        void updatePlcCoordsRef(ITravellerTransforms trfModel, CarrierEnum carrierID)
         {
-            (var err, var errMsg) = _sysModel.TransformsModel.GetCoordsRef(carrierID, out var camCoord, out var s1MotorCoord, out var s2MotorCoord);
+            (var err, var errMsg) = trfModel.GetCoordsRef(carrierID, out var camCoord, out var s1MotorCoord, out var s2MotorCoord);
 
             _rcpEditUI.UpdateCoordsRef(camCoord, s1MotorCoord, s2MotorCoord);
 
-            if (err != ErrCodes.OK)
+            if (err != Model.ErrorCodes.OK)
             {
                 //VsMSG.Instance.Warning(errMsg, true);
                 VsMessageBox.Warning(errMsg);
@@ -508,16 +512,6 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
             }
         }
-        void WriteCoordsRefToPlc()
-        {
-            bool ok = _sysModel.WriteAllCoordsToPlc(out string errMsg);
-            if (ok)
-                //VsMSG.Instance.Tishi("座標成功寫入至 PLC.");
-                VsMessageBox.Info("座標成功寫入至 PLC.");
-            else
-                //VsMSG.Instance.Warning(msg, true);
-                VsMessageBox.Warning(errMsg);
-        }
 
         void BuildGoldenRegion()
         {
@@ -533,59 +527,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 更新至 recipe
             updateGoldenRegionToRecipe(imgSrc[goldenRoi], goldenRoi);
         }
-        
-        void AutoCreateRegions()
-        {
-            //-------------------------------------
-            // 2025-12-11 針對 校正塊 改版
-            //-------------------------------------
-#if (OPT_CREATE_REGIONS_IS_REPLACED_BY_CALIBRATION_CTRL)
-            showCviResult(false);
-            enableGoldenRegionPicking(false);
-            _imgViewer.MatViewer.Refresh();
 
-            var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
-            var carrierID = _currentCarrierID;
-
-            // 從參數取得 bmpOrg
-            Bitmap srcBmp = _xRecipe.PeekBmpOrg(carrierID);
-            if (srcBmp == null)
-            {
-                //VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
-                VsMessageBox.Warning($"{GaUtil.GetEnumDescription(carrierID)} : 參數沒有 bmpOrg 影像!");
-                return;
-            }
-
-            // 自動建構 Region Cells
-            _sysModel.ActiveCarrierID = carrierID;
-            var result = _sysModel.AutoBuildRegionCells(srcBmp);
-            if (result == null || result.Grid == null)
-                return;
-
-            // 更新 CoordRef
-            updatePlcCoordsRef(_currentCarrierID);
-
-            // 設定旗標
-            _isModified = true;
-            // 強制保存
-            _xRecipe.SaveCameraGrids();
-
-            // 更新 GUI
-            _cviCamGridBox.TransCameraToWorld = _sysModel.TransformsModel.GetCameraPhysicTransform(carrierID);
-            _cviCamGridBox.IsEmptyTrayMode = true;
-            //_cviCamGridBox.IsEmptyTrayMode = false;
-            _cviCamGridBox.UpdateResult(result);
-            _cviCamGridBox.Visible = true;
-            _imgViewer.MatViewer.Invalidate();
-
-            // 更新 參數畫面
-            updateRecipePropertyView(carrierID);
-
-            GaUtil.SetCursor(_wndOwner, oldCursor);
-#endif
-        }
         void AutoUpdateRegions()
         {
+#if(OPT_REMARK_2026_0308)
             //-------------------------------------
             // 2025-12-11 針對 校正塊 改版
             //-------------------------------------
@@ -631,6 +576,89 @@ namespace LaserAlignDX.Mvc.Ctrl
             updateRecipePropertyView(carrierID);
 
             GaUtil.SetCursor(_wndOwner, oldCursor);
+#endif
+        }
+        void AutoCreateRegionsArray()
+        {                
+            //---------------------------------------------------------------
+            // 2026-03-08 針對個別參數 進行 座標轉換系統 線性 遷移
+            //---------------------------------------------------------------
+
+            // 鼠標 (忙碌)
+            var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
+            try
+            {
+                showCviResult(false);
+                enableGoldenRegionPicking(false);
+                _imgViewer.MatViewer.Refresh();
+
+                // 載台號
+                var carrierID = _currentCarrierID;
+
+                // 從參數取得 bmpOrg
+                Bitmap srcBmp = _xRecipe.PeekBmpOrg(carrierID);
+                if (srcBmp == null)
+                {
+                    //VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
+                    VsMessageBox.Warning($"{GaUtil.GetEnumDescription(carrierID)} : 參數沒有 bmpOrg 影像!");
+                    return;
+                }
+
+                // 自動抓取陣列 並進行 座標轉換系統 線性遷移
+                _sysModel.ActiveCarrierID = carrierID;
+                bool ok = _sysModel.AutoBuildRegionCellsArray(carrierID, srcBmp, out var result);
+                if (!ok)
+                {
+                    // _sysModel 內部會自動發出報警 Event
+                    return;
+                }
+
+                // 線性遷移後 的 座標轉換系統
+                var trfModel = _sysModel.TransformsModel;
+
+                // 更新 PlcCoordRef 到 GUI (個別參數 準被寫給 PLC 的馬達參考座標點)
+                updatePlcCoordsRef(trfModel, carrierID);
+
+                // 設定旗標
+                _isModified = true;
+
+                // 參數 強制保存
+                _xRecipe.SaveCameraGrids();
+                trfModel?.Save(GaMvcPaths.TRANSFORMS_INI_FILE(_xRecipe.INIFILE));
+
+                // 更新 格位陣列 到 GUI
+                _cviCamGridBox.Attach(trfModel);
+                _cviCamGridBox.TransCameraToWorld = trfModel.GetCameraPhysicTransform(carrierID);
+                _cviCamGridBox.IsEmptyTrayMode = true;
+                _cviCamGridBox.UpdateResult(result);
+                _cviCamGridBox.Visible = true;
+                _imgViewer.MatViewer.Invalidate();
+
+                // 更新 參數畫面
+                updateRecipePropertyView(carrierID);
+
+                // 是否直接把 CoordsRef 寫入PLC ?
+                var ret = VsMessageBox.Question(GaUtil.GetEnumDescription(Prompts.Question_Write_CoordRefs_To_PLC));
+                if (ret == DialogResult.Yes)
+                    WriteCoordsRefToPlc();
+
+            }
+            finally
+            {
+                // 鼠標 (恢復) 
+                GaUtil.SetCursor(_wndOwner, oldCursor);
+            }
+        }
+        void WriteCoordsRefToPlc()
+        {
+            bool ok = _sysModel.WriteAllCoordsToPlc(out string errMsg);
+            if (ok)
+                //VsMSG.Instance.Tishi("座標成功寫入至 PLC.");
+                VsMessageBox.Info(GaUtil.GetEnumDescription(Prompts.Info_Write_CoordRefs_To_PLC_OK));
+            else
+                //VsMSG.Instance.Warning(msg, true);
+                VsMessageBox.Warning(errMsg);
         }
 
         void LoadSettings(bool reloadGaara = false)

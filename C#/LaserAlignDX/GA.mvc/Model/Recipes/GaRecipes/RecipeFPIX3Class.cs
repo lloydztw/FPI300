@@ -364,8 +364,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region 參數區_LT_CAM_GRIDS
-        public EzBlocsGrid xCamGrid1 = null;
-        public EzBlocsGrid xCamGrid2 = null;
+        public EzBlocsGrid xCamGrid1 { get; set; } = null;
+        public EzBlocsGrid xCamGrid2 { get; set; } = null;
         void loadCamGrids(CarrierEnum carrierID, out EzBlocsGrid grid)
         {
             var file = System.IO.Path.Combine(PathIndexStr, $"camGrid_{carrierID}.txt");
@@ -448,8 +448,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //xLineRight = StringtoRectF(ReadINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             //xLineBottom = StringtoRectF(ReadINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
 
-            loadCamGrids(CarrierEnum.C1, out xCamGrid1);
-            loadCamGrids(CarrierEnum.C2, out xCamGrid2);
+            loadCamGrids(CarrierEnum.C1, out var grid1);    xCamGrid1 = grid1;
+            loadCamGrids(CarrierEnum.C2, out var grid2);    xCamGrid2 = grid2;
 
             //(LD1) 各種模板 (根據載台號 載入不同對應的設定值)
             _dtoGoldenRegionTemplate.SetTag(_CARRIER_TAG).Load(INIFILE);

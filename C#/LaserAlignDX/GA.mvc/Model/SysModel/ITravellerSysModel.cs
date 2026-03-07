@@ -42,11 +42,11 @@ namespace LaserAlignDX.Mvc.Model
         /// 空盤檢測 AOI
         /// </summary>
         IxEmptyTrayInspector EmptyTrayAoiModel { get; }
-        
+
         /// <summary>
-        /// 座標轉換系統
+        /// 線性遷移後 的 座標轉換系統
         /// </summary>
-        TravellerTransforms TransformsModel { get; }
+        ITravellerTransforms TransformsModel { get; }
 
         QMicroChipTransform GetMicroTransform(CarrierEnum carrierID);
         
@@ -71,21 +71,19 @@ namespace LaserAlignDX.Mvc.Model
         /// </summary>
         void ApplyRecipe(params object[] args);
 
-#if(OPT_DEPRECATED_AFTER_VER_3200)
         /// <summary>
-        /// 自動抓取陣列 
-        /// (必須先指定 ActiveCarrierID)
-        /// (用於 參數編輯模式)
+        /// 使用多點校正版 建立 所有參數檔 共用的 座標轉換 與 Region Cells 格點
+        /// <br/> 用於 校正 參數編輯模式
+        /// <br/> 2025-12-11 針對 校正塊 改版
         /// </summary>
-        MatchResult AutoBuildRegionCells(Bitmap fullfovBmp);
-#endif
+        bool BuildCommonBaseTransforms(CarrierEnum carrierID, EzBlocsGrid camGrid);
 
         /// <summary>
-        /// 建立 座標轉換 與 Region Cells 格點 
-        /// (2025-12-11 針對 校正塊 改版)
-        /// (用於 參數編輯模式)
+        /// 個別參數 自動抓取陣列 並 進行 座標系統 線性遷移
+        /// <br/> 用於 參數編輯模式
+        /// <br/> 必須曾經執行過 BuildTransformAndRegionCells
         /// </summary>
-        bool BuildTransformAndRegionCells(CarrierEnum carrierID, EzBlocsGrid camGrid);
+        bool AutoBuildRegionCellsArray(CarrierEnum carrierID, Bitmap fullfovBmp, out MatchResult result);
 
         /// <summary>
         /// 單筆寫入 座標數據 至 PLC

@@ -93,7 +93,7 @@ namespace Traveller106
                 if (!System.IO.File.Exists(fileName))
                 {
                     if (!silent)
-                        PromptWarning($"[{GaUtil.GetEnumDescription(C)}] {GaUtil.GetEnumDescription(ErrCodes.NO_EMPTY_TRAY_RECIPE)}\n\r\n\r{recipeName}");
+                        PromptWarning($"[{GaUtil.GetEnumDescription(C)}] {GaUtil.GetEnumDescription(ErrorCodes.NO_EMPTY_TRAY_RECIPE)}\n\r\n\r{recipeName}");
                     return false;
                 }
             }

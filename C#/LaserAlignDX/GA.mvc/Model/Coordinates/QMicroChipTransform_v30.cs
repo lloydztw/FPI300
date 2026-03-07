@@ -23,7 +23,7 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using System;
 using System.Drawing;
-using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
+using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
 
 namespace LaserAlignDX.Model.Coords
@@ -85,7 +85,7 @@ namespace LaserAlignDX.Model.Coords
         public bool Build()
         {
             var err = buildTrfs();
-            bool ok = err == ErrCodes.OK;
+            bool ok = err == ErrorCodes.OK;
             return ok;
         }
         public void Load(string filename)
@@ -113,11 +113,11 @@ namespace LaserAlignDX.Model.Coords
             _mmPerPixel?.SaveIni(filename, sectName, "mmPerPixel", fixDigit: false);
         }
 
-        ErrCodes buildTrfs()
+        ErrorCodes buildTrfs()
         {
-            ErrCodes err = ErrCodes.OK;
+            ErrorCodes err = ErrorCodes.OK;
             var trfs = new[] { _localTrf, _padsTrf };
-            var errs = new[] { ErrCodes.ERR_WEAK_LINE_CONDITION, ErrCodes.ERR_WEAK_PADS_CONDITION };
+            var errs = new[] { ErrorCodes.ERR_WEAK_LINE_CONDITION, ErrorCodes.ERR_WEAK_PADS_CONDITION };
             int idx = 0;
             foreach (var trf in trfs)
             {
@@ -127,7 +127,7 @@ namespace LaserAlignDX.Model.Coords
                     trf.CheckBuildCondition(out var det1, out var det2);
                     GaUtil.LOG($"MATRIX_{trf.Name} det1 = {det1:0.000000}");
                     GaUtil.LOG($"MATRIX_{trf.Name} det2 = {det2:0.000000}");
-                    if (!ok && err == ErrCodes.OK)
+                    if (!ok && err == ErrorCodes.OK)
                         err = errs[idx];
                 }
                 idx++;
@@ -135,13 +135,13 @@ namespace LaserAlignDX.Model.Coords
             return err;
         }
 
-        public ErrCodes BuildMicroTransform(SizeF targetDim, EzLSD.LineSegment[] lines, GaChipData chipData)
+        public ErrorCodes BuildMicroTransform(SizeF targetDim, EzLSD.LineSegment[] lines, GaChipData chipData)
         {
             int NP = 4;
 
             //(0) Check Lines Condition
             var err = check(lines, chipData);
-            if (err != ErrCodes.OK)
+            if (err != ErrorCodes.OK)
                 return err;
 
             //(1) ROI offset
@@ -230,13 +230,13 @@ namespace LaserAlignDX.Model.Coords
 
             return err;
         }
-        public ErrCodes CalcChipDimension(out SizeF dimension, EzLSD.LineSegment[] lines, GaChipData chipData, bool includePadGaps)
+        public ErrorCodes CalcChipDimension(out SizeF dimension, EzLSD.LineSegment[] lines, GaChipData chipData, bool includePadGaps)
         {
             return CalcChipDimension_PadTrf(out dimension, lines, chipData, includePadGaps);
         }
 
         #region PRIVATE_CALC_DIMENSION_FUNCTIONS
-        ErrCodes CalcChipDimension_PadTrf(out SizeF dimension, EzLSD.LineSegment[] lines, GaChipData chipData, bool includePadGaps)
+        ErrorCodes CalcChipDimension_PadTrf(out SizeF dimension, EzLSD.LineSegment[] lines, GaChipData chipData, bool includePadGaps)
         {
             dimension = SizeF.Empty;
             ITransform runtimePadTrf = null;
@@ -245,7 +245,7 @@ namespace LaserAlignDX.Model.Coords
             {
                 //(0) check lines condition
                 var err = check(lines, chipData);
-                if (err != ErrCodes.OK)
+                if (err != ErrorCodes.OK)
                     return err;
 
                 //(1) chipQuad2D
@@ -316,7 +316,7 @@ namespace LaserAlignDX.Model.Coords
             catch (Exception ex)
             {
                 _LOG_ERROR(ex, "CalcChipDimension_PadTrf");
-                return ErrCodes.ERR_EDGE_DIM_CALCULATION;
+                return ErrorCodes.ERR_EDGE_DIM_CALCULATION;
             }
             finally
             {
@@ -359,20 +359,20 @@ namespace LaserAlignDX.Model.Coords
         #endregion
 
         #region PRIVAE_CALC_PAD_EDGE_GAP_FUNCTIONS
-        ErrCodes CalcPadEdgeGaps_000_none_S(EzLSD.LineSegment[] edgeLines, GaChipData chipData, ITransform runtimePadTrf)
+        ErrorCodes CalcPadEdgeGaps_000_none_S(EzLSD.LineSegment[] edgeLines, GaChipData chipData, ITransform runtimePadTrf)
         {
             try
             {
-                ErrCodes err;
+                ErrorCodes err;
 
                 //(0) check
                 err = check(edgeLines, chipData);
-                if (err != ErrCodes.OK)
+                if (err != ErrorCodes.OK)
                     return err;
 
                 //(1) 收集量測點 (單位 pixels)
                 err = getPadGapMeasurePoints(out QVector[] gapMeaturePts, edgeLines, chipData);
-                if (err != ErrCodes.OK)
+                if (err != ErrorCodes.OK)
                     return err;
 
                 //(2) 紀錄量測點(使用複製, 以防止被後續運算改動) (單位 pixels)
@@ -434,28 +434,28 @@ namespace LaserAlignDX.Model.Coords
                 tp1 = gapMeaturePts[idx++];
                 chipData.PadEdgeGaps.LD.Y = Math.Round((tp0 - tp1).NormLength, 3);
 
-                return ErrCodes.OK;
+                return ErrorCodes.OK;
             }
             catch (Exception ex)
             {
                 _LOG_ERROR(ex, "CalcPadEdgeGaps");
-                return ErrCodes.ERR_EDGE_GAP_CALCULATION;
+                return ErrorCodes.ERR_EDGE_GAP_CALCULATION;
             }
         }
-        ErrCodes CalcPadEdgeGaps(EzLSD.LineSegment[] edgeLines, GaChipData chipData, ITransform runtimePadTrf)
+        ErrorCodes CalcPadEdgeGaps(EzLSD.LineSegment[] edgeLines, GaChipData chipData, ITransform runtimePadTrf)
         {
             try
             {
-                ErrCodes err;
+                ErrorCodes err;
 
                 //(0) check
                 err = check(edgeLines, chipData);
-                if (err != ErrCodes.OK)
+                if (err != ErrorCodes.OK)
                     return err;
 
                 //(1) 收集量測點 (單位 pixels)
                 err = getPadGapMeasurePoints(out QVector[] gapMeaturePts, out QVector[] padCornerCenters, edgeLines, chipData);
-                if (err != ErrCodes.OK)
+                if (err != ErrorCodes.OK)
                     return err;
 
                 //(2) 紀錄量測點(使用複製, 以防止被後續運算改動) (單位 pixels)
@@ -531,15 +531,15 @@ namespace LaserAlignDX.Model.Coords
                 chipData.PadEdgeGaps.LD.Y = Math.Round((tp0 - tp1).NormLength, 3);
                 chipData.PadEdgeGaps.S7 = Math.Round((tp0 - PC[3]).NormLength, 3);
 
-                return ErrCodes.OK;
+                return ErrorCodes.OK;
             }
             catch (Exception ex)
             {
                 _LOG_ERROR(ex, "CalcPadEdgeGaps");
-                return ErrCodes.ERR_EDGE_GAP_CALCULATION;
+                return ErrorCodes.ERR_EDGE_GAP_CALCULATION;
             }
         }
-        ErrCodes getPadGapMeasurePoints(out QVector[] gapMeasurePoints, out QVector[] padCornerCenters, EzLSD.LineSegment[] edgeLines, GaChipData chipData)
+        ErrorCodes getPadGapMeasurePoints(out QVector[] gapMeasurePoints, out QVector[] padCornerCenters, EzLSD.LineSegment[] edgeLines, GaChipData chipData)
         {
             //------------------------------------------------
             //(0) 順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY
@@ -560,7 +560,7 @@ namespace LaserAlignDX.Model.Coords
             //(1) GRID
             var padsGrid = chipData?.PadsGrid;
             if (padsGrid == null)
-                return ErrCodes.ERR_NO_CHIP_PADS;
+                return ErrorCodes.ERR_NO_CHIP_PADS;
 
             //(2) PAD CORNERs : 0左上, 1右上, 2右下, 3左下
             EzBlocsGridAnalyzer.CalcQuad2D(padsGrid, out QvQuad2D padsBoundaryQuad, true);
@@ -571,11 +571,11 @@ namespace LaserAlignDX.Model.Coords
             var padsMidCorners = padsMidQuad?.Corners;
             if (padsBoundaryCorners == null || padsBoundaryCorners.Length < NP ||
                 padsMidCorners == null || padsMidCorners.Length < NP)
-                return ErrCodes.ERR_LACK_CHIP_PAD_CORNER;
+                return ErrorCodes.ERR_LACK_CHIP_PAD_CORNER;
             for (int i = 0; i < NP; i++)
             {
                 if (padsBoundaryCorners[i] == null || padsMidCorners[i] == null)
-                    return ErrCodes.ERR_LACK_CHIP_PAD_CORNER;
+                    return ErrorCodes.ERR_LACK_CHIP_PAD_CORNER;
             }
             padCornerCenters = Array.ConvertAll(padsMidCorners, c => new QVector(c));
 
@@ -634,9 +634,9 @@ namespace LaserAlignDX.Model.Coords
                 gapMeasurePoints[jj + 1] = Pj;
             }
 
-            return ErrCodes.OK;
+            return ErrorCodes.OK;
         }
-        ErrCodes getPadGapMeasurePoints(out QVector[] gapMeasurePoints, EzLSD.LineSegment[] edgeLines, GaChipData chipData)
+        ErrorCodes getPadGapMeasurePoints(out QVector[] gapMeasurePoints, EzLSD.LineSegment[] edgeLines, GaChipData chipData)
         {
             //------------------------------------------------
             //(0) 順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY
@@ -656,7 +656,7 @@ namespace LaserAlignDX.Model.Coords
             //(1) GRID
             var padsGrid = chipData?.PadsGrid;
             if (padsGrid == null)
-                return ErrCodes.ERR_NO_CHIP_PADS;
+                return ErrorCodes.ERR_NO_CHIP_PADS;
 
             //(2) PAD CORNERs : 0左上, 1右上, 2右下, 3左下
             EzBlocsGridAnalyzer.CalcQuad2D(padsGrid, out QvQuad2D padsBoundaryQuad, true);
@@ -667,11 +667,11 @@ namespace LaserAlignDX.Model.Coords
             var padsMidCorners = padsMidQuad?.Corners;
             if (padsBoundaryCorners == null || padsBoundaryCorners.Length < NP ||
                 padsMidCorners == null || padsMidCorners.Length < NP)
-                return ErrCodes.ERR_LACK_CHIP_PAD_CORNER;
+                return ErrorCodes.ERR_LACK_CHIP_PAD_CORNER;
             for (int i = 0; i < NP; i++)
             {
                 if (padsBoundaryCorners[i] == null || padsMidCorners[i] == null)
-                    return ErrCodes.ERR_LACK_CHIP_PAD_CORNER;
+                    return ErrorCodes.ERR_LACK_CHIP_PAD_CORNER;
             }
 
             //------------------------------------------------
@@ -729,18 +729,18 @@ namespace LaserAlignDX.Model.Coords
                 gapMeasurePoints[jj + 1] = Pj;
             }
 
-            return ErrCodes.OK;
+            return ErrorCodes.OK;
         }
         #endregion
 
         #region HELPER_FUNCTIONS
-        ErrCodes check(EzLSD.LineSegment[] lines, GaChipData chipData)
+        ErrorCodes check(EzLSD.LineSegment[] lines, GaChipData chipData)
         {
             if (chipData == null || chipData.ChipQuad2D == null)
-                return ErrCodes.ERR_NO_CHIP_LOCATION;
+                return ErrorCodes.ERR_NO_CHIP_LOCATION;
             return checkLines(lines);
         }
-        ErrCodes checkLines(EzLSD.LineSegment[] lines)
+        ErrorCodes checkLines(EzLSD.LineSegment[] lines)
         {
             int count = 0;
             if (lines != null)
@@ -751,7 +751,7 @@ namespace LaserAlignDX.Model.Coords
                         count++;
                 }
             }
-            return count >= 4 ? ErrCodes.OK : ErrCodes.ERR_WEAK_LINE_CONDITION;
+            return count >= 4 ? ErrorCodes.OK : ErrorCodes.ERR_WEAK_LINE_CONDITION;
         }
         QVector[] transform(QVector[] points, ITransform trf)
         {

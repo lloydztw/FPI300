@@ -20,7 +20,7 @@ using System;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
+using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 using XRecipe = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
 
@@ -57,7 +57,7 @@ namespace LaserAlignDX.Mvc.Gui
         private void BtnOK_Click(object sender, EventArgs e)
         {
             var err = BuildMicroTransform();
-            if (err != ErrCodes.OK)
+            if (err != ErrorCodes.OK)
             {
                 VsMessageBox.Warning(GaUtil.GetEnumDescription(err));
                 return;
@@ -146,19 +146,19 @@ namespace LaserAlignDX.Mvc.Gui
             }
         }
 
-        ErrCodes BuildMicroTransform()
+        ErrorCodes BuildMicroTransform()
         {
             var aoiModel = _sysModel?.AoiModel;
             if (aoiModel == null)
-                return ErrCodes.NO_AOI_MODEL;
+                return ErrorCodes.NO_AOI_MODEL;
 
             var fullfovBmp = _sysModel?.LineScanImageHolder?.PeekBitmap();
             if (fullfovBmp == null)
-                return ErrCodes.NO_LINE_SCAN_IMAGE;
+                return ErrorCodes.NO_LINE_SCAN_IMAGE;
 
             var chipData = ActiveCell?.ChipData;
             if (chipData == null)
-                return ErrCodes.ERR_NO_CHIP_LOCATION;
+                return ErrorCodes.ERR_NO_CHIP_LOCATION;
 
             var goldenW = (float)numChipWidth.Value;
             var goldenH = (float)numChipHeight.Value;
@@ -168,7 +168,7 @@ namespace LaserAlignDX.Mvc.Gui
             var regionRoi = Rectangle.Round(chipData.CellRoi);
             GaUtil.Clip(ref regionRoi, fullfovBmp.Size);
             if (regionRoi.Width < 2 || regionRoi.Height < 2)
-                return ErrCodes.ERR_NO_CHIP_LOCATION;
+                return ErrorCodes.ERR_NO_CHIP_LOCATION;
 
             using (var regionBmp = fullfovBmp.Clone(Rectangle.Round(regionRoi), System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {

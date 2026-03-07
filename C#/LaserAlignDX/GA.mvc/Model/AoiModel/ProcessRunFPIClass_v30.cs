@@ -21,7 +21,7 @@ using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using System.Threading;
-using ErrCodes = LaserAlignDX.Mvc.Model.ErrCodes;
+using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 
 
@@ -271,7 +271,7 @@ namespace LaserAlignDX.AoiModel.V3
         }
         #endregion
 
-        public ErrCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi)
+        public ErrorCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi)
         {
             //(1) 晶粒定位
             //      chipData.Roi = cellRoi;
@@ -280,12 +280,12 @@ namespace LaserAlignDX.AoiModel.V3
             //      chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
             bool ok = _aoiChipLoc.LocateOneChip(regionBmp, ref regionRoi, out var chipData);
             if (!ok || chipData == null)
-                return ErrCodes.ERR_NO_CHIP_LOCATION;
+                return ErrorCodes.ERR_NO_CHIP_LOCATION;
 
             //(2) 檢查 PadsGrid
             if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch && chipData.PadsGrid == null)
             {
-                return ErrCodes.ERR_NO_CHIP_PADS;
+                return ErrorCodes.ERR_NO_CHIP_PADS;
             }
 
             //(3) 建立 Micro Transform
@@ -294,7 +294,7 @@ namespace LaserAlignDX.AoiModel.V3
             var err = microTrf.BuildMicroTransform(targetSize, lines, chipData);
 
             //(4) 保存參數
-            if (err == ErrCodes.OK)
+            if (err == ErrorCodes.OK)
                 microTrf.Save(null);
 
             return err;
@@ -380,7 +380,7 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 markRunEnd(false);
                 //fire_AoiEnd();
-                var errCode = Mvc.Model.ErrCodes.EXCEPTION_AT_AOI_RUN;
+                var errCode = Mvc.Model.ErrorCodes.EXCEPTION_AT_AOI_RUN;
                 string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
                 fire_AoiError(errCode, errMsg);
                 _LOG_ERROR(ex, "_RunChipLocAndMeasurement");
@@ -410,7 +410,7 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 markRunEnd(false);
                 //fire_AoiEnd();
-                var errCode = Mvc.Model.ErrCodes.EXCEPTION_AT_AOI_RUN;
+                var errCode = Mvc.Model.ErrorCodes.EXCEPTION_AT_AOI_RUN;
                 string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
                 fire_AoiError(errCode, errMsg);
                 _LOG_ERROR(ex, "_RunEmptyTray");

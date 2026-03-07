@@ -45,7 +45,7 @@ namespace LaserAlignDX.AoiModel
         /// <summary>
         /// 為 參數編輯 所用
         /// </summary>
-        ErrCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi);
+        ErrorCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi);
 
         /// <summary>
         /// 調試 用
