@@ -76,7 +76,7 @@ namespace LaserAlignDX.Mvc.Model
         /// <br/> 用於 參數編輯模式
         /// <br/> 必須曾經執行過 BuildTransformAndRegionCells
         /// </summary>
-        bool AutoBuildRegionCells(CarrierEnum carrierID, Bitmap fullfovBmp, out MatchResult result);
+        bool AutoBuildRegionCells(CarrierEnum carrierID, Bitmap fullfovBmp, bool migrate, out MatchResult result);
 
         /// <summary>
         /// 單筆寫入 座標數據 至 PLC

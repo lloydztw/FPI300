@@ -140,6 +140,8 @@ namespace JetEazy.FormSpace
                 this.lblMessage.Text = msg;
                 pictureBox1.BackgroundImage = Properties.Resources.question;
                 panel1.BackColor = Color.Ivory;
+                btnOK.Text = "Yes";
+                btnCancel.Text = "No";
             }
         }
         #endregion

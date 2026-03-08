@@ -13,6 +13,9 @@ namespace LaserAlignDX
         [Description("是否直接把 參考坐標點 (CoordRefs) 寫入PLC?")]
         Question_Write_CoordRefs_To_PLC,
 
+        [Description("是否 同時進行 座標系統 線性遷移?")]
+        Question_To_Migrate_Transforms_Models,
+
         [Description("座標成功寫入至 PLC.")]
         Info_Write_CoordRefs_To_PLC_OK,
 

@@ -276,7 +276,7 @@ namespace LaserAlignDX.Mvc.Model
             }
         }
 
-        public bool AutoBuildRegionCells(CarrierEnum carrierID, Bitmap fullfovBmp, out MatchResult matchResult)
+        public bool AutoBuildRegionCells(CarrierEnum carrierID, Bitmap fullfovBmp, bool migrate, out MatchResult matchResult)
         {
             // 個別參數 【自動抓取陣列】 並 進行 【座標系統 線性遷移】
             // <br/> 用於 參數編輯模式
@@ -294,24 +294,39 @@ namespace LaserAlignDX.Mvc.Model
                 return false;
             }
 
-            //(2) 載入 共用 座標轉換系統
-            var commonBaseTrf = TravellerTransforms.CommonBase;
-            commonBaseTrf.Load(GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE);
-            commonBaseTrf.BuildAll();
+            if (migrate || _transformsModel == null)
+            {
+                //(2.1) 載入 共用 座標轉換系統
+                var commonBaseTrf = TravellerTransforms.CommonBase;
+                commonBaseTrf.Load(GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE);
+                commonBaseTrf.BuildAll();
 
-            //(3) 線性轉移 建立 個別 座標轉換系統
-            string gaaraRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
-            var trfModel = this.CreateLinearMigration(gaaraRecipeName, carrierID, camGrid, commonBaseTrf);
+                //(2.2) 線性轉移 建立 個別 座標轉換系統
+                string gaaraRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
+                var trfModel = this.CreateLinearMigration(gaaraRecipeName, carrierID, camGrid, commonBaseTrf);
 
-            //(4) 核查 結果
-            if (checkCameraGrid(trfModel, carrierID, camGrid, notify: true) != ErrorCodes.OK)
-                return false;
+                //(2.3) 核查 結果
+                if (checkCameraGrid(trfModel, carrierID, camGrid, notify: true) != ErrorCodes.OK)
+                    return false;
 
-            //(5) 記入 線性轉移後 座標轉換系統
-            _transformsModel = trfModel;
+                //(2.4) 記入 線性轉移後 座標轉換系統
+                _transformsModel = trfModel;
 
-            //(6) 建立格點陣列
-            bool ok = buildRegionCells(trfModel, carrierID, camGrid, optWriteBlackToRecipe: true);      //@ AutoBuildRegionCellsArray
+                //(2.5) clean up
+                TravellerTransforms.Keep(_transformsModel.Name);
+            }
+            else
+            {
+                //(3.1) 直接使用現有的 座標轉換系統
+                var trfModel = _transformsModel;
+
+                //(3.2) 核查 結果
+                if (checkCameraGrid(trfModel, carrierID, camGrid, notify: true) != ErrorCodes.OK)
+                    return false;
+            }
+
+            //(4) 建立格點陣列
+            bool ok = buildRegionCells(_transformsModel, carrierID, camGrid, optWriteBlackToRecipe: true);      //@ AutoBuildRegionCellsArray
 
             return ok;
         }

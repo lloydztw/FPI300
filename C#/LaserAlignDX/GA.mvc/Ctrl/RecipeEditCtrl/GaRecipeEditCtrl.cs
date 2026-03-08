@@ -579,10 +579,11 @@ namespace LaserAlignDX.Mvc.Ctrl
 #endif
         }
         void AutoCreateRegionsArray()
-        {                
+        {
             //---------------------------------------------------------------
             // 2026-03-08 針對個別參數 進行 座標轉換系統 線性 遷移
             //---------------------------------------------------------------
+            bool migrate = VsMessageBox.Question(GaUtil.GetEnumDescription(Prompts.Question_To_Migrate_Transforms_Models)) == DialogResult.OK;
 
             // 鼠標 (忙碌)
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
@@ -605,9 +606,9 @@ namespace LaserAlignDX.Mvc.Ctrl
                     return;
                 }
 
-                // 自動抓取陣列 並進行 座標轉換系統 線性遷移
+                // 自動抓取陣列 (並進行 座標轉換系統 線性遷移)
                 _sysModel.ActiveCarrierID = carrierID;
-                bool ok = _sysModel.AutoBuildRegionCells(carrierID, srcBmp, out var result);
+                bool ok = _sysModel.AutoBuildRegionCells(carrierID, srcBmp, migrate, out var result);
                 if (!ok)
                 {
                     // _sysModel 內部會自動發出報警 Event
@@ -624,7 +625,6 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _isModified = true;
 
                 // 參數 強制保存
-                _xRecipe.SaveCameraGrids();
                 trfModel?.Save(GaMvcPaths.TRANSFORMS_INI_FILE(_xRecipe.INIFILE));
 
                 // 更新 格位陣列 到 GUI
@@ -668,6 +668,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 
                 _xRecipe.Load();
+                //>>> _sysModel.TransformsModel?.Load(GaMvcPaths.TRANSFORMS_INI_FILE(_xRecipe.INIFILE));
 
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
@@ -677,7 +678,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (force || _isModified)
             {
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
+
+                _isModified = false;
                 _xRecipe.Save();
+                //_sysModel.TransformsModel?.Save(GaMvcPaths.TRANSFORMS_INI_FILE(_xRecipe.INIFILE));
+
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
         }
