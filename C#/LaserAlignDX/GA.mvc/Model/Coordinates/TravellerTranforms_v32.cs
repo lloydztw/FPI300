@@ -92,6 +92,10 @@ namespace LaserAlignDX.Model.Coords
             // 2025-12-23 新增
             return _calibCamGrids[(int)C];
         }
+
+        /// <summary>
+        /// 設定 校正格點 (相機座標)
+        /// </summary>
         public void SetCalibCameraGrid(CarrierEnum C, EzBlocsGrid camGrid)
         {
             // 2025-12-23 新增

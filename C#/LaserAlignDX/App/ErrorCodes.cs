@@ -49,9 +49,14 @@ namespace LaserAlignDX.Mvc.Model
         [Description("空盤檢測 參數沒建立")]
         NO_EMPTY_TRAY_RECIPE,
 
-        [Description("無法抓到 空盤 格位點")]
-        Err_can_not_fetch_empty_tray_grid,
+        [Description("像測 無法抓到 格位點\n\r請確認 滿盤 行列數 (rows, cols) 是否設定正確!")]
+        AoiErr_can_not_fetch_camera_grid,
 
+        [Description("像測 抓到的 格位點 不一致!")]
+        AoiErr_camera_grid_not_consistent,
+
+        [Description("沒有 共用校正參數")]
+        CalibErr_No_Recipe,
 
         [Description("沒有 座標轉換 模型")]
         CalibErr_No_Transform_Model,
@@ -61,12 +66,6 @@ namespace LaserAlignDX.Mvc.Model
 
         [Description("馬達座標 標定 不完整")]
         CalibErr_Motor_Coords_Not_Completed,
-
-        [Description("無法抓到 大校正板 格位點")]
-        CalibErr_can_not_fetch_board_grid,
-
-        [Description("大校正板 點位 不一致!")]
-        CalibErr_board_grid_not_consistent,
 
         [Description("節距 (Pitch) 不一致!")]
         CalibErr_pitch_not_consistent,

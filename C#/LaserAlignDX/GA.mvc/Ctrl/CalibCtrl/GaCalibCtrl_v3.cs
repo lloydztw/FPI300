@@ -530,43 +530,71 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region PRIVATE_GRID_BOARD_FUNCTIONS
-        EzBlocsGrid getActiveBoardGrid()
+        /// <summary>
+        /// 從 共用座標轉換系統 取出 相機 格點
+        /// </summary>
+        EzBlocsGrid getActiveBoardGridInTrf()
         {
             var grid = _commonBaseTrf?.GetCalibCameraGrid(_activeCarrierID);
             return grid;
         }
-        void setActiveBoardGrid(EzBlocsGrid boardGrid)
+        /// <summary>
+        /// 將 大校正板 格點 記入 共用座標轉換系統
+        /// </summary>
+        bool setActiveBoardGridToTrf(EzBlocsGrid boardGrid)
         {
-            if (boardGrid == null)
-                return;
+            //(0) 檢查 boardGrid
+            var err = VerifyBoardGrid(boardGrid, out string errDetails);
+            if (err != ErrorCodes.OK)
+            {
+                var msg = GaUtil.GetEnumDescription(err) + "\n\r" + errDetails;
+                VsMessageBox.Warning(msg);
+                return false;
+            }
 
-            //(1) 從 共用校正參數 取出 pitch, rows, cols
+            //(1) 檢查 共用校正參數
             var jxRecipe = getActiveCalibRecipe();
-            var traySettings = jxRecipe.GridSettings.EmptyTraySettings;
+            var traySettings = jxRecipe?.GridSettings?.EmptyTraySettings;
+            if (traySettings == null)
+            {
+                var msg = GaUtil.GetEnumDescription(ErrorCodes.CalibErr_No_Recipe);
+                VsMessageBox.Warning(msg);
+                return false;
+            }
+
+            //(2) 從 共用校正參數 取出 pitch, rows, cols
             var pitchX = (double)traySettings.PitchX.Value;
             var pitchY = (double)traySettings.PitchY.Value;
             var rows = (int)traySettings.FullRows.Value;
             var cols = (int)traySettings.FullCols.Value;
 
-            //(2) Check
-            bool areAllRowsColsMatched = (rows == boardGrid.Rows && cols == boardGrid.Cols);
-            if (!areAllRowsColsMatched)
-            {
-                string msg = $"像測的 Rows={boardGrid.Rows} Cols={boardGrid.Cols} 與\n\r"
-                           + $"參數的 Rows={rows} Cols={cols} 不一致 !";
-                MessageBox.Show(msg, _wndOwner.FindForm().Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }
+            ////(2) Check
+            //bool areAllRowsColsMatched = (rows == boardGrid.Rows && cols == boardGrid.Cols);
+            //if (!areAllRowsColsMatched)
+            //{
+            //    string msg = $"像測的 Rows={boardGrid.Rows} Cols={boardGrid.Cols} 與\n\r"
+            //               + $"參數的 Rows={rows} Cols={cols} 不一致 !";
+            //    MessageBox.Show(msg, _wndOwner.FindForm().Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            //}
+            ////(3) 將 校正點位群 更新到 座標轉換 系統 (Model)
+            //if (areAllRowsColsMatched)
+            //{
+            //    _commonBaseTrf.ConfigGlobalCalibPlcGrid(rows, cols, pitchX, pitchY);
+            //    _commonBaseTrf.SetCalibCameraGrid(_activeCarrierID, boardGrid);
+            //}
 
-            //(3) 將 校正點位群 更新到 座標轉換 系統 (Model)
-            if (areAllRowsColsMatched)
-            {
-                _commonBaseTrf.ConfigGlobalCalibPlcGrid(rows, cols, pitchX, pitchY);
-                _commonBaseTrf.SetCalibCameraGrid(_activeCarrierID, boardGrid);
-            }
+            //(3) 將 大校正板 格點 記入 座標轉換系統
+            _commonBaseTrf.ConfigGlobalCalibPlcGrid(rows, cols, pitchX, pitchY);
+            _commonBaseTrf.SetCalibCameraGrid(_activeCarrierID, boardGrid);
 
             //(4) 設定 旗標
             _isCoordModified = true;
+
+            return true;
         }
+        /// <summary>
+        /// 更新 相機格點 到 GUI
+        /// </summary>
         void updateBoardGridBox(EzBlocsGrid camGrid, bool refresh = false)
         {
             _cviGridResultBox.IsEmptyTrayMode = false;
@@ -1024,7 +1052,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 dgvUpdateMotorCoords(motorCoords);
 
                 bool refresh1 = _activeViewID == CalibViewEnum.BigGridBoardView;
-                updateBoardGridBox(getActiveBoardGrid(), refresh1);
+                updateBoardGridBox(getActiveBoardGridInTrf(), refresh1);
 
                 bool refresh2 = _activeViewID == CalibViewEnum.InkMarksView;
                 updateInkMarkBoxes(inkMarks, refresh2);
@@ -1076,28 +1104,28 @@ namespace LaserAlignDX.Mvc.Ctrl
                     return false;
 
                 //(3) Run AOI
-                var camGrid = _calibModel.FetchBoardGrid(_activeCarrierID, fullfovImg, getActiveCalibRecipe());
+                var boardGrid = _calibModel.FetchBoardGrid(_activeCarrierID, fullfovImg, getActiveCalibRecipe());
 
                 //(4) Update Grid Result
-                setActiveBoardGrid(camGrid);
-                updateBoardGridBox(camGrid, refresh: true);
+                bool ok = setActiveBoardGridToTrf(boardGrid);
+                updateBoardGridBox(boardGrid, refresh: true);
                 _isCoordModified = true;
 
                 //(5) MessageBoxe
                 #region MESSAGE_BOX
                 GaUtil.SetCursor(_wndOwner, oldCursor);
-                if (camGrid == null)
-                {
-                    string msg = "無法自動抓到 格點!\n\r請確認 滿盤 行列數 (rows, cols) 是否設定正確!";
-                    MessageBox.Show(msg, "Calib", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
-                else if (dump)
+                //if (boardGrid == null)
+                //{
+                //    string msg = "無法自動抓到 格點!\n\r請確認 滿盤 行列數 (rows, cols) 是否設定正確!";
+                //    MessageBox.Show(msg, "Calib", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                //}
+                if (ok && dump)
                 {
                     VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib");
                 }
                 #endregion
 
-                return camGrid != null;
+                return boardGrid != null;
             }
             catch (Exception ex)
             {
@@ -1184,7 +1212,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 updateAllData(true);
 
                 //(2) 查核 大校正版 格位點 的正確性!
-                var boardGrid = getActiveBoardGrid();
+                var boardGrid = getActiveBoardGridInTrf();
                 var err = VerifyBoardGrid(boardGrid, out string errDetails);
                 if (err != ErrorCodes.OK)
                 {
@@ -1247,7 +1275,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         /// </summary>
         bool AdjustCalibPointsToTrf(CarrierEnum C, SuckerRowEnum S, EzBloc[] inkMarks, QCoord[] userInputMotorCoords)
         {
+#if (OPT_REV_2026_0308_LEGACY)
             var transform = _commonBaseTrf?.GetCameraMotorTransform(C, S);
+
             if (transform == null)
             {
                 //沒有 座標轉換 模型
@@ -1287,6 +1317,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             trfCalibPoints.SetAll(camPts, motorPts);
 
             return true;
+#endif
+            var sysModel = GaMvcConfig.SysModel as TravellerSysModel;
+            var err = sysModel.AdjustCalibPointsToTrf(_commonBaseTrf, C, S, inkMarks, userInputMotorCoords);
+            return (err == ErrorCodes.OK);
         }
 
         ErrorCodes VerifyBoardGrid(EzBlocsGrid boardGrid, out string errDetails)
@@ -1294,7 +1328,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             errDetails = "";
 
             if (boardGrid == null)
-                return ErrorCodes.CalibErr_can_not_fetch_board_grid;
+            {
+                return ErrorCodes.AoiErr_can_not_fetch_camera_grid;
+            }
 
             var traySettings = getActiveCalibRecipe()?.GridSettings?.EmptyTraySettings;
             if (traySettings != null)
@@ -1312,7 +1348,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 if (!string.IsNullOrEmpty(err))
                 {
                     errDetails = err;
-                    return ErrorCodes.CalibErr_board_grid_not_consistent;
+                    return ErrorCodes.AoiErr_camera_grid_not_consistent;
                 }
             }
 
