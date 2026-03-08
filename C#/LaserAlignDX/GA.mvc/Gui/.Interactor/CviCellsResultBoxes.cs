@@ -1064,7 +1064,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (account == null || !account.IsAllowSetupRecipe)
             {
                 //VsMessageBox.Warning("請先登入 擁有修改參數權限 的 帳號!");
-                VsMessageBox.Warning(GaUtil.GetEnumDescription(Prompts.Warn_No_Privilege));
+                VsMessageBox.Warning(GaUtil.GetEnumDescription(Prompts.No_Privilege));
                 return false;
             }
             return true;

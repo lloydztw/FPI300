@@ -111,9 +111,9 @@ namespace LaserAlignDX.Model.Coords
         }
 
         /// <summary>
-        /// 更新 全域校正 C座標 (Camera) 格點
+        /// 更新 全域校正 C座標 (Camera) 格點 (停用)
         /// </summary>
-        public void UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid calibCamGrid)
+        void __UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid calibCamGrid)
         {
             if (calibCamGrid == null)
                 return;
@@ -323,9 +323,9 @@ namespace LaserAlignDX.Model.Coords
     partial class TravellerTransforms
     {
         #region PRIVATE_RUNTIME_DATA
-        PlcGridPoints _runtimePlcGrid = null;
-        EzBlocsGrid _runtimeCamGridC1 = null;
-        EzBlocsGrid _runtimeCamGridC2 = null;
+        PlcGridPoints _runtimePlcGrid => _calibPlcGrid;
+        EzBlocsGrid _runtimeCamGridC1 => _calibCamGrids[(int)CarrierEnum.C1];
+        EzBlocsGrid _runtimeCamGridC2 => _calibCamGrids[(int)CarrierEnum.C2];
         #endregion
 
         #region 跑線時期_函式群
@@ -335,6 +335,7 @@ namespace LaserAlignDX.Model.Coords
         /// </summary>
         public void UpdateRuntimePlcGrid(PlcGridPoints plcGrid, EzBlocsGrid camGrid1 = null, EzBlocsGrid camGrid2 = null)
         {
+#if (OPT_REV_2026_0308_REPLACED_BY_LINEAR_MIGRATION)
             if (plcGrid != null)
                 _runtimePlcGrid = plcGrid;
 
@@ -343,16 +344,17 @@ namespace LaserAlignDX.Model.Coords
 
             if (camGrid2 != null)
                 _runtimeCamGridC2 = camGrid2;
+#endif
         }
 
         /// <summary>
         /// 取出 Runtime 跑線時期 標準格點 座標數據
         /// </summary>
-        public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId, 
-                                                out QVector camCoord, 
+        public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId,
+                                                out QVector camCoord,
                                                 out QVector worldCoord,
-                                                out QVector s1MotorCoord, 
-                                                out QVector s2MotorCoord )
+                                                out QVector s1MotorCoord,
+                                                out QVector s2MotorCoord)
         {
             #region DEFAULT_VALUES
             ErrorCodes errCode;
@@ -384,9 +386,9 @@ namespace LaserAlignDX.Model.Coords
                 //(4.1) 檢查 Runtime CamGrid
                 var runtimeCamGrid = C == CarrierEnum.C1 ? _runtimeCamGridC1 : _runtimeCamGridC2;
                 (errCode, errMsg) = checkCameraGrid(C, runtimeCamGrid);
-                if(errCode != ErrorCodes.OK) 
+                if (errCode != ErrorCodes.OK)
                     return (errCode, errMsg);
-                
+
                 camCoord = runtimeCamGrid.Get(rowId, colId)?.Center;
                 if (camCoord == null)
                     camCoord = new QVector(0, 0);
@@ -605,7 +607,7 @@ namespace LaserAlignDX.Model.Coords
             (var err, var errMsg) = GetNodeCoords(C, rowId, colId, out var _, out var world_target, out var s1_target, out var s2_target);
             if (err != ErrorCodes.OK)
             {
-                return (new QVector(0,0), new QVector(0, 0));
+                return (new QVector(0, 0), new QVector(0, 0));
             }
 
             var transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
@@ -745,7 +747,7 @@ namespace LaserAlignDX.Model.Coords
         }
         #endregion
 
-        #region 建構解構_函式群
+        #region 建構_解構_函式群
         protected TravellerTransforms(string name)
         {
             QVector.Percision = 12;
@@ -757,6 +759,13 @@ namespace LaserAlignDX.Model.Coords
         {
             foreach (var trf in _transforms)
                 trf?.Dispose();
+
+            for (int i = 0, N = _calibCamGrids.Length; i < N; i++)
+            {
+                _calibCamGrids[i]?.Dispose();
+                _calibCamGrids[i] = null;
+            }
+
             unregister(this);
         }
 
@@ -809,31 +818,5 @@ namespace LaserAlignDX.Model.Coords
             DisposeAll(name, "$CommonBase$");
         }
         #endregion
-
-        /// <summary>
-        /// 根據 新的 相機格點 (陣列) 線性遷移 生成新的轉換公式
-        /// </summary>
-        public ITravellerTransforms BuildLinearMigration(string name, CarrierEnum carrierID, EzBlocsGrid camRegionsArray)
-        {
-            if (string.IsNullOrEmpty(name))
-                return null;
-
-            var commonBase = CommonBase;
-            var result = Instance(name);
-
-            if (true)
-            {
-                var tmpFile = "d:\\paso.log\\jx_transforms.ini";
-                commonBase.Save(tmpFile);
-                result.Load(tmpFile);
-
-                var plcGrid = commonBase._calibPlcGrid;
-                var camGrid1 = carrierID == CarrierEnum.C1 ? camRegionsArray : null;
-                var camGrid2 = carrierID == CarrierEnum.C2 ? camRegionsArray : null;
-                result.UpdateRuntimePlcGrid(plcGrid, camGrid1, camGrid2);
-            }
-
-            return result;
-        }
     }
 }

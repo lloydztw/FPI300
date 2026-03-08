@@ -36,149 +36,6 @@ namespace LaserAlignDX.AoiModel
         public static bool OPT_DUMP = false;
 
         #region PRIVATE_DATA
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
-        JxCalibRecipe _jxCalibRecipe;
-        //IxEmptyTrayInspector _externImp;
-        //JxAoiRecipe _jxRecipe;
-        #endregion
-
-        #region WRAPPER_FUNCTIONS_For_IxEmptyTrayInspector
-#if (OPT_DEPRECATED_AFTER_VER_3200)
-        public event EventHandler<MatchResultEventArgs> OnMatched
-        {
-            add
-            {
-                _externImp.OnMatched += value;
-            }
-
-            remove
-            {
-                _externImp.OnMatched -= value;
-            }
-        }
-        public event EventHandler<AoiResultEventArgs> OnFinalResulted
-        {
-            add
-            {
-                _externImp.OnFinalResulted += value;
-            }
-
-            remove
-            {
-                _externImp.OnFinalResulted -= value;
-            }
-        }
-        public event EventHandler OnStateChanged
-        {
-            add
-            {
-                _externImp.OnStateChanged += value;
-            }
-
-            remove
-            {
-                _externImp.OnStateChanged -= value;
-            }
-        }
-        public int ID => _externImp.ID;
-        public object State => _externImp.State;
-        public int AddRef()
-        {
-            return _externImp.AddRef();
-        }
-        public ErrCodes BuildGoldenGridTemplate(SideID sideId, IEzImage largeImg)
-        {
-            return _externImp.BuildGoldenGridTemplate(sideId, largeImg);
-        }
-        public ErrCodes CanMatch(SideID sideId, IEzImage img)
-        {
-            return _externImp.CanMatch(sideId, img);
-        }
-        public ErrCodes CanRunAll(IEzImage imgA, IEzImage imgB = null)
-        {
-            return _externImp.CanRunAll(imgA, imgB);
-        }
-        public MatchResult GetMatchResult(SideID sideId)
-        {
-            return _externImp.GetMatchResult(sideId);
-        }
-        public EzEmptyTrayResult GetResult()
-        {
-            return _externImp.GetResult();
-        }
-        public bool IsError()
-        {
-            return _externImp.IsError();
-        }
-        public bool IsReady()
-        {
-            return _externImp.IsReady();
-        }
-        public bool IsSafeToExit()
-        {
-            return _externImp.IsSafeToExit();
-        }
-        public void ResetAndClear(SideID sideId = SideID.All)
-        {
-            _externImp.ResetAndClear(sideId);
-        }
-        public void RunAll(IEzImage imgA, IEzImage imgB = null, string outputFile = null, string dumpPath = null, bool wait = false)
-        {
-            _externImp.RunAll(imgA, imgB, outputFile, dumpPath, wait);
-        }
-        public void RunAll(Bitmap bmp, bool wait = true, string dumpPath = null)
-        {
-            _externImp.RunAll(bmp, wait, dumpPath);
-        }
-        public void RunMatch(SideID sideId, IEzImage img, string dumpPath = null)
-        {
-            _externImp.RunMatch(sideId, img, dumpPath);
-        }
-        public void TryApplyFilters(SideID sideId, IEzImage img, JxRotAngleSettings settings, out object result)
-        {
-            _externImp.TryApplyFilters(sideId, img, settings, out result);
-        }
-        public bool CropGoldenTemplate(SideID sideId, IEzImage largeImg, Rectangle goldenRect)
-        {
-            // 目前 在此 '不需要' 精選
-            // 由 RefineCentroidLocations 負責 調整 更精確位置
-            #region 自動精選_goldenRect
-            if (true)
-            {
-                using (var bmpCrop = ImageUtil.CropBmp(largeImg, goldenRect))
-                using (var bridge = new JetEazy.OpenCV.QxImageBridge(bmpCrop))
-                using (var mask = new Mat())
-                {
-                    bool inversed = _jxRecipe.VisionSettings.Inverse.Value;
-                    double thresh = _jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
-                    if (thresh > 0)
-                    {
-                        Cv2.Threshold(bridge.Image, mask, thresh, 255, ThresholdTypes.Binary);
-                    }
-                    else
-                    {
-                        thresh = Cv2.Threshold(bridge.Image, mask, 0, 255, ThresholdTypes.Otsu);
-                        GaUtil.LOG($"Otsu Thresh = {(int)thresh}");
-                    }
-                    if (inversed)
-                        Cv2.BitwiseNot(mask, mask);
-
-                    findWhiteBlobs(mask, out var whiteBlobs);
-                    if (whiteBlobs.Count > 0)
-                    {
-                        whiteBlobs.Sort((b1, b2) => b2.Pixels - b1.Pixels);
-                        var rect = whiteBlobs[0].Rect;
-                        rect.X += goldenRect.X;
-                        rect.Y += goldenRect.Y;
-                        goldenRect = rect;
-                    }
-                }
-            }
-            #endregion
-
-            return _externImp.CropGoldenTemplate(sideId, largeImg, goldenRect);
-        }
-#endif
         #endregion
 
         public CalibAoiModel(object dummy = null)
@@ -190,70 +47,12 @@ namespace LaserAlignDX.AoiModel
         public void Dispose()
         {
             // jxCalibRecipe 由 caller 維護其生命週期
-            _jxCalibRecipe = null;
-        }
-
-#if (OPT_DEPRECATED_AFTER_VER_3200)
-        public void ResetAndClear()
-        {
-            //_externImp?.ResetAndClear();
-        }
-
-        public void SetRecipe(JxCalibRecipe recipe)
-        {
-            _jxCalibRecipe = recipe;
+            //_jxCalibRecipe = null;
         }
 
         /// <summary>
-        /// 設定參數
-        /// </summary>
-        public void SetRecipe(JxAoiRecipe recipe)
-        {
-            // recipe 會被 _externImp 持有,
-            // 所以 _jxRecipe  不用 Dispose
-            _externImp.SetRecipe(recipe);
-            _jxRecipe = recipe;
-        }
-
-        public ErrCodes BuildGoldenGridTemplate(object dummy, IEzImage ezImage)
-        {
-            return _externImp.BuildGoldenGridTemplate(SideID.A, ezImage);
-        }
-
-        /// <summary>
-        /// 抓取 空載台格位點
-        /// </summary>
-        /// <param name="fullfovImg"></param>
-        /// <param name="refine"></param>
-        public MatchResult FetchGridNodes(CarrierEnum carrierID, Mat fullfovImg, bool refine)
-        {
-            ////(1) Peek the ezImage
-            //using (var ezImage = new EzQuickImage(fullfovImg, deepCopy: false))
-            //{
-            //    //(2) Run Aoi
-            //    _externImp.RunMatch(SideID.A, ezImage);
-            //    //_externImp.RunAll((IEzImage)ezImage, wait: true);
-
-            //    //(3) Result
-            //    var matchResult = _externImp.GetMatchResult(SideID.A);
-            //    //var result = _externImp.GetResult();
-
-            //    //(4) Refine each detail locations
-            //    if (refine)
-            //    {
-            //        RefineCentroidLocations(matchResult, ezImage);
-            //    }
-
-            //    _DUMP_DOTS_PLATE_IMAGE(ezImage.Image as Mat, matchResult, $"d:\\paso.log\\calib_dots_plate_{carrierID}.jpg");
-
-            //    return matchResult;
-            //}
-            return null;
-        }
-#endif
-
-        /// <summary>
-        /// Caller 必須維護 fullfovImg 與 recipe 生命週期
+        /// 抓取 大校正板 的格點
+        /// <br/> The caller 必須維護 fullfovImg 與 recipe 生命週期
         /// </summary>
         public EzBlocsGrid FetchBoardGrid(CarrierEnum carrierID, Mat fullfovImg, JxCalibRecipe recipe)
         {
@@ -294,7 +93,9 @@ namespace LaserAlignDX.AoiModel
         }
 
         /// <summary>
-        /// Caller 必須維護 fullfovImg 與 recipe 生命週期
+        /// 抓取 墨點 (Ink Marks)
+        /// <br/> 用 EzBloc[] 回傳
+        /// <br/> The caller 必須維護 fullfovImg 與 recipe 生命週期 
         /// </summary>
         public EzBloc[] FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe)
         {
@@ -409,7 +210,9 @@ namespace LaserAlignDX.AoiModel
         }
 
         /// <summary>
-        /// Caller 必須維護 fullfovImg 與 recipe 生命週期
+        /// 抓取 墨點 (Ink Marks)
+        /// <br/> 用 QvQuad2D[] 回傳
+        /// <br/> The caller 必須維護 fullfovImg 與 recipe 生命週期 
         /// </summary>
         public QvQuad2D[] FetchInkMarksQ(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe)
         {
@@ -530,6 +333,9 @@ namespace LaserAlignDX.AoiModel
             return inkMarks;
         }
 
+        /// <summary>
+        /// 保留
+        /// </summary>
         public bool AdjustBadNodes(CarrierEnum carrierID, EzBlocsGrid grid)
         {
             bool isChanged = false;
@@ -606,164 +412,8 @@ namespace LaserAlignDX.AoiModel
             return isChanged;
         }
 
-#if (OPT_RESERVED)
-        Mat TryRun(Mat fullfovImg, out MatchResult matchResult, bool optOutputBindaryImage = false)
-        {
-            //(1) Peek the ezImage
-            using (var ezImage = new EzQuickImage(fullfovImg, deepCopy: false))
-            {
-                //(2) Run Aoi
-                _externImp.RunMatch(SideID.A, ezImage);
-
-                //(3) Result
-                matchResult = _externImp.GetMatchResult(SideID.A);
-
-                //(4) Refine each detail locations
-                this.RefineCentroidLocations(matchResult, ezImage);
-
-                return null;
-            }
-        }
-        Mat RefineCentroidLocations_000(MatchResult matchResult, Mat fullfovImg, bool optOutputBindaryImage = false)
-        {
-            var grid = matchResult?.Grid;
-            if (grid == null || _jxRecipe == null)
-                return null;
-
-            bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
-            if (isBlackCarrier)
-            {
-                return _RefineCentroidLocations_BlackCarrier(matchResult, fullfovImg, optOutputBindaryImage);
-            }
-            else
-            {
-                return  _RefineCentroidLocations_WhiteCarrier(matchResult, fullfovImg, optOutputBindaryImage);
-            }
-        }
-        Mat _RefineCentroidLocations_WhiteCarrier(MatchResult matchResult, Mat fullfovImg, bool optOutputBinaryImage = false)
-        {
-            var grid = matchResult?.Grid;
-            if (grid == null || _jxRecipe == null)
-                return null;
-
-            //bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
-            int thresh = _jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
-            var bound = new Rect(0, 0, fullfovImg.Width, fullfovImg.Height);
-            int rows = grid.Rows;
-            int cols = grid.Cols;
-
-            Mat imgOutput = optOutputBinaryImage ? Mat.Zeros(fullfovImg.Size(), MatType.CV_8UC1) : null;
-
-            for (int r = 0; r < rows; r++)
-            {
-                for (int c = 0; c < cols; c++)
-                {
-                    var bloc = grid.Get(r, c);
-                    if (bloc == null) continue;
-
-                    var roi = JetEazy.Qcvt.CV(bloc.Rect);
-                    JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
-
-                    using (var img = fullfovImg[roi].Clone())
-                    using (var binary = new Mat())
-                    {
-                        // 將 白色載台影像 反向, 形成 淺色晶粒 深色背景
-                        Cv2.BitwiseNot(img, img);
-                        if (thresh <= 0)
-                            Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
-                        else
-                            Cv2.Threshold(img, binary, thresh, 255, ThresholdTypes.Binary);
-
-                        _DUMP(img, "img", r, c);
-                        _DUMP(binary, "binary", r, c);
-                        if (imgOutput != null)
-                            imgOutput[roi] = binary;
-
-                        findWhiteBlobs(binary, out var whiteBlobs);
-                        if (whiteBlobs.Count == 0) continue;
-                        whiteBlobs.Sort((b1, b2) => b2.Pixels - b1.Pixels);
-
-                        // 使用質心 (for 白色載台)
-                        var center = whiteBlobs[0].Center;
-                        center.X += roi.X;
-                        center.Y += roi.Y;
-                        bloc.Center = center;
-                        var rc = JetEazy.Qcvt.CreateCenterRect((float)center.X, (float)center.Y, (float)bloc.Rect.Width, (float)bloc.Rect.Height);
-                        bloc.Rect = Rectangle.Round(rc);
-                    }
-                }
-            }
-
-            return imgOutput;
-        }
-        Mat _RefineCentroidLocations_BlackCarrier(MatchResult matchResult, Mat fullfovImg, bool optOutputBinaryImage = false)
-        {
-            var grid = matchResult?.Grid;
-            if (grid == null || _jxRecipe == null)
-                return null;
-
-            //>>> bool isBlackCarrier = checkIfDarkBackground(fullfovImg);
-            int thresh = _jxRecipe.VisionSettings.OutGridBlocThreshold.Value;
-            var bound = new Rect(0, 0, fullfovImg.Width, fullfovImg.Height);
-            int rows = grid.Rows;
-            int cols = grid.Cols;
-
-            Mat imgOutput = null;
-            if (optOutputBinaryImage)
-                imgOutput = Mat.Zeros(fullfovImg.Size(), MatType.CV_8UC1);
-
-            for (int r = 0; r < rows; r++)
-            {
-                for (int c = 0; c < cols; c++)
-                {
-                    var bloc = grid.Get(r, c);
-                    if (bloc == null) continue;
-                    if (!bloc.IsMajorNode())
-                        continue;
-
-                    var roi = JetEazy.Qcvt.CV(bloc.Rect);
-                    JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
-
-                    using (var img = fullfovImg[roi].Clone())
-                    using (var binary = new Mat())
-                    {
-                        if (thresh <= 0)
-                            Cv2.Threshold(img, binary, 0, 255, ThresholdTypes.Otsu);
-                        else
-                            Cv2.Threshold(img, binary, thresh, 255, ThresholdTypes.Binary);
-
-                        Cv2.Erode(binary, binary, null, iterations: 2);
-                        Cv2.Dilate(binary, binary, null, iterations: 2);
-                        Cv2.Rectangle(binary, new Rect(0, 0, binary.Width, binary.Height), Scalar.White, 2);
-                        Cv2.FloodFill(binary, new OpenCvSharp.Point(0, 0), Scalar.Black);
-
-                        _DUMP(img, "img", r, c);
-                        _DUMP(binary, "binary", r, c);
-                        if (imgOutput != null)
-                            imgOutput[roi] = binary;
-
-                        findWhiteBlobs(binary, out var whiteBlobs);
-                        if (whiteBlobs.Count == 0) continue;
-                        whiteBlobs.Sort((b1, b2) => b2.Pixels - b1.Pixels);
-
-                        //>>> var center = whiteBlobs[0].Center;
-                        // 黑色載台 使用 質心誤差大, 改用 rect 中心
-                        var center = JetEazy.Qcvt.CenterF(ref whiteBlobs[0].Rect);
-                        center.X += roi.X;
-                        center.Y += roi.Y;
-                        bloc.Center = new JetEazy.QMath.QVector(center.X, center.Y);
-                        var rc = JetEazy.Qcvt.CreateCenterRect((float)center.X, (float)center.Y, (float)bloc.Rect.Width, (float)bloc.Rect.Height);
-                        bloc.Rect = Rectangle.Round(rc);
-                    }
-                }
-            }
-
-            return imgOutput;
-        }
-#endif
-
         /// <summary>
-        /// 進階 抓取 空載台格位點
+        /// 進階 抓取 空載台 格位點
         /// </summary>
         public MatchResult FetchGridNodes(IxEmptyTrayInspector aoi, CarrierEnum carrierID, Mat fullfovImg, bool refine)
         {

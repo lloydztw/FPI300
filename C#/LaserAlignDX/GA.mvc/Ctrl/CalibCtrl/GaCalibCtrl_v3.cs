@@ -13,6 +13,7 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Match;
@@ -23,16 +24,16 @@ using LaserAlignDX.AoiModel;
 using LaserAlignDX.AoiModel.Calib;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
+using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.JxProps;
 using LeTian.JxProps.Gui;
-using MoveGraphLibrary;
+using NeedleX.ProcessSpace;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Media.Animation;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
 using QCoord = JetEazy.QMath.QVector;
@@ -160,6 +161,8 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             LoadSettings();
             connectEventHandlers();
+
+            _isCoordModified = false;
         }
 
         #region PRIVATE_INIT_FUNCTIONS
@@ -217,7 +220,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _btnAutoFetchInkMarks.Click += (s, e) => RunAutoFetchInkMarks();
 
             if (_btnBuildCalib != null)
-                _btnBuildCalib.Click += (s, e) => BuildAllTransforms();
+                _btnBuildCalib.Click += (s, e) => BuildCommonBaseTransforms();
 
             _cviGridResultBox.OnRequestDumpBindaryImage += (s, e) => RunAutoFetchGrid(dump: true);
 
@@ -318,7 +321,6 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region PRIVATE_UPDATE_FUNCTIONS
         void updateAllData(bool toModel)
         {
-            //>>> updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, toModel);
             dgvUpdateAllCalibKeyPoints(toModel);
             updatePropertyPanel(toModel);
         }
@@ -533,9 +535,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             var grid = _commonBaseTrf?.GetCalibCameraGrid(_activeCarrierID);
             return grid;
         }
-        void setActiveBoardGrid(EzBlocsGrid camGrid)
+        void setActiveBoardGrid(EzBlocsGrid boardGrid)
         {
-            if (camGrid == null)
+            if (boardGrid == null)
                 return;
 
             //(1) 從 共用校正參數 取出 pitch, rows, cols
@@ -547,10 +549,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             var cols = (int)traySettings.FullCols.Value;
 
             //(2) Check
-            bool areAllRowsColsMatched = (rows == camGrid.Rows && cols == camGrid.Cols);
+            bool areAllRowsColsMatched = (rows == boardGrid.Rows && cols == boardGrid.Cols);
             if (!areAllRowsColsMatched)
             {
-                string msg = $"像測的 Rows={camGrid.Rows} Cols={camGrid.Cols} 與\n\r"
+                string msg = $"像測的 Rows={boardGrid.Rows} Cols={boardGrid.Cols} 與\n\r"
                            + $"參數的 Rows={rows} Cols={cols} 不一致 !";
                 MessageBox.Show(msg, _wndOwner.FindForm().Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
@@ -559,7 +561,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (areAllRowsColsMatched)
             {
                 _commonBaseTrf.ConfigGlobalCalibPlcGrid(rows, cols, pitchX, pitchY);
-                _commonBaseTrf.SetCalibCameraGrid(_activeCarrierID, camGrid);
+                _commonBaseTrf.SetCalibCameraGrid(_activeCarrierID, boardGrid);
             }
 
             //(4) 設定 旗標
@@ -583,9 +585,11 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region PRIVATE_INK_MARKS_FUNCTIONS
-        EzBloc[] getActiveInkMarks()
+        /// <summary>
+        /// 從 共用校正參數, 取出 inkMarks
+        /// </summary>
+        EzBloc[] getActiveInkMarksInRecipe()
         {
-            //從 共用校正參數, 取出 inkMarks
             var calibRecipe = getActiveCalibRecipe();
             var jxSettings = (_activeSuckerRowID == SuckerRowEnum.S1) ?  
                                 calibRecipe?.InkMarkSettings1: 
@@ -597,7 +601,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             return null;
         }
-        void setActiveInkMarks(EzBloc[] inkMarks)
+        /// <summary>
+        /// 將 inkMarks 記入 共用校正參數
+        /// </summary>
+        void setActiveInkMarksToRecipe(EzBloc[] inkMarks)
         {
             //將 inkMarks 更新到 共用校正參數
             var calibRecipe = getActiveCalibRecipe();
@@ -606,9 +613,11 @@ namespace LaserAlignDX.Mvc.Ctrl
                                 calibRecipe?.InkMarkSettings2;
             jxSettings?.SetInkMarks(inkMarks);
         }
+        /// <summary>
+        /// 將 inkMarks 更新到 GUI
+        /// </summary>
         void updateInkMarkBoxes(EzBloc[] inkMarks, bool refresh = false)
         {
-            //將 inkMarks 更新到 GUI
             if (_cviInkMarkBoxes == null)
                 return;
 
@@ -648,7 +657,10 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region PRIVATE_MOTOR_COORDS_FUNCTIONS
-        QCoord[] getActiveMotorCoords()
+        /// <summary>
+        /// 從 commonBaseTrf 取出 馬達座標
+        /// </summary>
+        QCoord[] getActiveMotorCoordsInTrf()
         {
             var transform = _commonBaseTrf.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
             var trfCalibCorners = transform.GetCalibCornerPoints();
@@ -671,6 +683,16 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var name = GaUtil.GetEnumDescription(corner);
                 dgv.Rows.Add(name, "", "", "", "");
             }
+
+            dgv.CellValueChanged += (s, e) =>
+            {
+                // 排除標題列
+                if (e.RowIndex >= 0)
+                {
+                    _isCoordModified = true;
+                }
+            };
+
         }
         void dgvUpdateInkMarks(EzBloc[] inkMarks)
         {
@@ -700,7 +722,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 dgvRow.Cells[4].Value = motorPt != null ? motorPt.Y : 0.0;
             }
         }
-        void dgvGetMotorCoords(out QCoord[] motorCoords)
+        void dgvGetUserInputMotorCoords(out QCoord[] motorCoords)
         {
             motorCoords = null;
 
@@ -754,24 +776,29 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             if (toModel)
             {
+#if (OPT_REV_2026_0308_LEGACY)
                 dgvGetMotorCoords(out var motorCoords);
                 if (motorCoords == null)
                 {
-                    VsMessageBox.Warning("馬達座標 不完整!");
+                    //VsMessageBox.Warning("馬達座標 不完整!");
+                    VsMessageBox.Warning(GaUtil.GetEnumDescription(Prompts.Warn_Motor_Coords_Not_Completed));
                     return;
                 }
 
                 var inkMarks = getActiveInkMarks();
                 if (inkMarks == null)
                 {
-                    VsMessageBox.Warning("點墨 不完整!");
+                    //VsMessageBox.Warning("點墨 不完整!");
+                    VsMessageBox.Warning(GaUtil.GetEnumDescription(Prompts.Warn_Ink_Marks_Not_Completed));
                     return;
                 }
 
                 var transform = _commonBaseTrf.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
                 if (transform == null)
                 {
-                    VsMessageBox.Warning($"沒有座標轉換 模型 {_activeCarrierID} {_activeSuckerRowID}!");
+                    //VsMessageBox.Warning($"沒有座標轉換 模型 {_activeCarrierID} {_activeSuckerRowID}!");
+                    string msg = GaUtil.GetEnumDescription(Prompts.Warn_No_Transform) + $" {_activeCarrierID} {_activeSuckerRowID}";
+                    VsMessageBox.Warning(msg);
                     return;
                 }
 
@@ -788,11 +815,15 @@ namespace LaserAlignDX.Mvc.Ctrl
                 trfCalibPoints.SetAll(camPts, motorPts);
 
                 _isCoordModified = true;
+#endif
+                var inkMarks = getActiveInkMarksInRecipe();
+                dgvGetUserInputMotorCoords(out var userInputMotorCoords);
+                AdjustCalibPointsToTrf(_activeCarrierID, _activeSuckerRowID, inkMarks, userInputMotorCoords);
             }
             else
             {
-                var inkMarks = getActiveInkMarks();
-                var motorCoords = getActiveMotorCoords();
+                var inkMarks = getActiveInkMarksInRecipe();
+                var motorCoords = getActiveMotorCoordsInTrf();
                 dgvUpdateInkMarks(inkMarks);
                 dgvUpdateMotorCoords(motorCoords);
             }
@@ -986,8 +1017,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 updateBoundRectBox(false);
 
-                var inkMarks = getActiveInkMarks();
-                var motorCoords = getActiveMotorCoords();
+                var inkMarks = getActiveInkMarksInRecipe();
+                var motorCoords = getActiveMotorCoordsInTrf();
                 
                 dgvUpdateInkMarks(inkMarks);
                 dgvUpdateMotorCoords(motorCoords);
@@ -1023,6 +1054,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
         }
 
+        /// <summary>
+        /// 自動抓取 大校正版 的 格位點
+        /// </summary>
         bool RunAutoFetchGrid(bool dump = false)
         {
             //(0) Cursor
@@ -1067,7 +1101,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             catch (Exception ex)
             {
-                GaUtil.SetCursor(_wndOwner, oldCursor);
+                //GaUtil.SetCursor(_wndOwner, oldCursor);
                 VsMessageBox.Warning($"異常: {ex.Message}");
                 return false;
             }
@@ -1077,6 +1111,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
         }
+
+        /// <summary>
+        /// 自動抓取 墨點 (目前只用四角)
+        /// </summary>
         bool RunAutoFetchInkMarks(bool dump = false)
         {
             //(0) Cursor
@@ -1098,8 +1136,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 //(1) Run AOI
                 var inkMarks = _calibModel.FetchInkMarks(_activeCarrierID, _activeSuckerRowID, fullfovImg, getActiveCalibRecipe());
 
-                //(2) Marks
-                setActiveInkMarks(inkMarks);
+                //(2) Update InkMarks to GUI
+                setActiveInkMarksToRecipe(inkMarks);
                 updateInkMarkBoxes(inkMarks, refresh: true);
                 dgvUpdateInkMarks(inkMarks);
 
@@ -1131,58 +1169,185 @@ namespace LaserAlignDX.Mvc.Ctrl
                 GaUtil.SetCursor(_wndOwner, oldCursor);
             }
         }
-        void BuildAllTransforms(bool force = false)
+        
+        /// <summary>
+        /// 建立 座標轉換系統
+        /// </summary>
+        void BuildCommonBaseTransforms(bool force = false)
         {
             //(0) Cursor
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 
-            updateAllData(true);
-
-#if (OPT_OLD_CODE)
-            _transforms.BuildAll();
-
-            // 去除異常 格位 再重建一次
-            var lastCamGrid = _lastMatchResult?.Grid;
-            if (lastCamGrid != null)
+            try
             {
-                if (_calibModel.AdjustBadNodes(_activeCarrierID, lastCamGrid))
+                //(1) 更新 Gui 輸入數據到 Model
+                updateAllData(true);
+
+                //(2) 查核 大校正版 格位點 的正確性!
+                var boardGrid = getActiveBoardGrid();
+                var err = VerifyBoardGrid(boardGrid, out string errDetails);
+                if (err != ErrorCodes.OK)
                 {
-                    updateCalibKeyPoints(lastCamGrid);
-                    _cviResultBox.UpdateResult(_lastMatchResult);
-                    _transforms.BuildAll();
+                    var msg = GaUtil.GetEnumDescription(err) + "\n\r" + errDetails;
+                    VsMessageBox.Warning(msg);
+                    return;
                 }
-            }
+
+                //(3) 建立 Transform
+                _commonBaseTrf.BuildAll();
+                _isCoordModified = true;
+
+
+                //(4) 去除異常 格位 再重建一次 Transform
+#if (OPT_RESERVED)
+                if (_calibModel.AdjustBadNodes(carrierID, camGrid))
+                    transformsModel.BuildAll();
 #endif
 
-            bool ok = false;
-            var sysModel = GaMvcConfig.SysModel;
-            var boardGrid = getActiveBoardGrid();
+#if (OPT_REV_2026_0308_LEGACY)
+                if (sysModel != null && boardGrid != null)
+                {
+                    ok = sysModel.BuildCommonBaseTransforms(_activeCarrierID, boardGrid);
 
-            if (boardGrid == null)
+                    if (ok)
+                    {
+                        bool refresh = _activeViewID == CalibViewEnum.BigGridBoardView;
+                        updateBoardGridBox(boardGrid, refresh);
+                    }
+                }
+#endif
+
+                //(5) 檢查 CommonBaseTrf 的結果
+                err = VerifyCommonBaseTrf(out errDetails);
+                if (err != ErrorCodes.OK)
+                {
+                    var msg = GaUtil.GetEnumDescription(err) + "\n\r" + errDetails;
+                    VsMessageBox.Warning(msg);
+                    return;
+                }
+
+                //(6) 成功訊息
+                string info = GaUtil.GetEnumDescription(_activeCarrierID) 
+                            + " && " + GaUtil.GetEnumDescription(_activeSuckerRowID)
+                            + "\n\r\n\r" + GaUtil.GetEnumDescription(Prompts.Info_CommonBase_Trf_Successed);
+                VsMessageBox.Info(info);
+            }
+            catch (Exception ex)
             {
-                GaUtil.SetCursor(_wndOwner, Cursors.AppStarting);
-                VsMessageBox.Warning("請先抓取 大校正版 的格點!");
-                ok = false;
+                VsMessageBox.Warning($"異常: {ex.Message}");
+            }
+            finally
+            {
+                GaUtil.SetCursor(_wndOwner, oldCursor);
+            }
+        }
+
+        /// <summary>
+        /// 根據 墨點, 調整 commonBaseTrf 的 馬達校正 座標
+        /// </summary>
+        bool AdjustCalibPointsToTrf(CarrierEnum C, SuckerRowEnum S, EzBloc[] inkMarks, QCoord[] userInputMotorCoords)
+        {
+            var transform = _commonBaseTrf?.GetCameraMotorTransform(C, S);
+            if (transform == null)
+            {
+                //沒有 座標轉換 模型
+                string msg = GaUtil.GetEnumDescription(ErrorCodes.CalibErr_No_Transform_Model) + $" {C} {S}";
+                VsMessageBox.Warning(msg);
+                return false;
+            }
+            if (inkMarks == null)
+            {
+                //點墨 不完整
+                VsMessageBox.Warning(GaUtil.GetEnumDescription(ErrorCodes.CalibErr_Ink_Marks_Not_Completed));
+                return false;
+            }
+            if (userInputMotorCoords == null)
+            {
+                //馬達座標 不完整
+                VsMessageBox.Warning(GaUtil.GetEnumDescription(ErrorCodes.CalibErr_Motor_Coords_Not_Completed));
+                return false;
             }
 
-            if (sysModel != null && boardGrid != null)
-            {
-                ok = sysModel.BuildCommonBaseTransforms(_activeCarrierID, boardGrid);
+            // 重新設定校正點 (兩盤兩排總共 4x4 = 16 點)
+            var trfCalibPoints = transform.GetCalibGridPoints();
 
-                if (ok)
+            // 相機校正點: 來自 墨點
+            var camPts = new QCoord[2, 2] {
+                    { inkMarks[0].Center, inkMarks[1].Center },
+                    { inkMarks[3].Center, inkMarks[2].Center },
+                };
+
+            // 馬達校正點: 來自 USER 輸入之馬達座標
+            var motorPts = new QCoord[2, 2] {
+                    { userInputMotorCoords[0], userInputMotorCoords[1] },
+                    { userInputMotorCoords[3], userInputMotorCoords[2] },
+                };
+
+            // 記入 commonBaseTrf
+            trfCalibPoints.SetAll(camPts, motorPts);
+
+            return true;
+        }
+
+        ErrorCodes VerifyBoardGrid(EzBlocsGrid boardGrid, out string errDetails)
+        {
+            errDetails = "";
+
+            if (boardGrid == null)
+                return ErrorCodes.CalibErr_can_not_fetch_board_grid;
+
+            var traySettings = getActiveCalibRecipe()?.GridSettings?.EmptyTraySettings;
+            if (traySettings != null)
+            {
+                string err = "";
+
+                int rcpRows = traySettings.FullRows.Value;
+                int rcpCols = traySettings.FullCols.Value;
+
+                if (rcpRows != boardGrid.Rows)
+                    err += $"\n\r參數 Rows={rcpRows}  vs  像測 Rows={boardGrid.Rows}";
+                if (rcpCols != boardGrid.Cols)
+                    err += $"\n\r參數 Cols={rcpCols}  vs  像測 Cols={boardGrid.Cols}";
+
+                if (!string.IsNullOrEmpty(err))
                 {
-                    bool refresh = _activeViewID == CalibViewEnum.BigGridBoardView;
-                    updateBoardGridBox(boardGrid, refresh);
+                    errDetails = err;
+                    return ErrorCodes.CalibErr_board_grid_not_consistent;
                 }
             }
 
-            GaUtil.SetCursor(_wndOwner, oldCursor);
+            return ErrorCodes.OK;
+        }
+        ErrorCodes VerifyCommonBaseTrf(out string errDetails)
+        {
+            errDetails = "";
 
-            if (ok)
+            var plcGrid = _commonBaseTrf?.getCalibPlcGrid();
+            if (plcGrid == null)
+                return ErrorCodes.NO_RUNTIME_PLC_GRID;
+
+            var traySettings = getActiveCalibRecipe()?.GridSettings?.EmptyTraySettings;
+            if (traySettings != null && plcGrid != null)
             {
-                string name = GaUtil.GetEnumDescription(_activeCarrierID) + " && " + GaUtil.GetEnumDescription(_activeSuckerRowID);
-                VsMessageBox.Info($"{name}\n\r\n\r座標系統建置完成!");
+                string err = "";
+                double rcpPitchX = Math.Round((double)traySettings.PitchX.Value, 3);
+                double rcpPitchY = Math.Round((double)traySettings.PitchY.Value, 3);
+                double plcPitchX = Math.Round(plcGrid.PitchX, 3);
+                double plcPitchY = Math.Round(plcGrid.PitchY, 3);
+
+                if (rcpPitchX != plcPitchX)
+                    err += $"\n\r參數 PitchX={rcpPitchX}  vs  共用座標系統 PitchX={plcPitchX}";
+                if (rcpPitchY != plcPitchY)
+                    err += $"\n\r參數 PitchY={rcpPitchY}  vs  共用座標系統 PitchY={plcPitchY}";
+
+                if (!string.IsNullOrEmpty(err))
+                {
+                    errDetails = err;
+                    return ErrorCodes.OK;
+                }
             }
+
+            return ErrorCodes.OK;
         }
 
         void LoadImage(string fileName = null, int viewID = -1)
@@ -1294,7 +1459,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (force || _isCoordModified)
             {
                 _commonBaseTrf.Save(CALIB_TRANSFORMS_FILE);
-                //_transforms.SaveGaaraIniFile();
+                //>>> _transforms.SaveGaaraIniFile();
                 _isCoordModified = false;
             }
 

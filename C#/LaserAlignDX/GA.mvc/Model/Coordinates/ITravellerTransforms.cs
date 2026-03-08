@@ -31,10 +31,10 @@ namespace LaserAlignDX.Model.Coords
         /// </summary>
         void SetCalibCameraGrid(CarrierEnum C, EzBlocsGrid camGrid);
 
-        /// <summary>
-        /// 更新 校正格點 (相機座標)
-        /// </summary>
-        void UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid calibCamGrid);
+        ///// <summary>
+        ///// 更新 校正格點 (相機座標) (停用)
+        ///// </summary>
+        //void UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid calibCamGrid);
 
         /// <summary>
         /// 取得 校正格點 (相機座標)
@@ -54,10 +54,10 @@ namespace LaserAlignDX.Model.Coords
 
         #region 跑線時期_函數群
 
-        /// <summary>
-        /// 設定 Runtime 跑線時期 P座標 (PLC) 格點
-        /// </summary>
-        void UpdateRuntimePlcGrid(PlcGridPoints plcGrid, EzBlocsGrid camGrid1 = null, EzBlocsGrid camGrid2 = null);
+        ///// <summary>
+        ///// 設定 Runtime 跑線時期 P座標 (PLC) 格點 (停用)
+        ///// </summary>
+        //void UpdateRuntimePlcGrid(PlcGridPoints plcGrid, EzBlocsGrid camGrid1 = null, EzBlocsGrid camGrid2 = null);
 
         /// <summary>
         /// 取出 Runtime 跑線時期 標準格點 座標數據
@@ -86,10 +86,5 @@ namespace LaserAlignDX.Model.Coords
         void Load(string iniFileName);
         void Save(string iniFileName);
         #endregion
-
-        /// <summary>
-        /// 根據 個別參數 像測找到的 "格點陣列" 線性遷移 生成新的 座標轉換系統
-        /// </summary>
-        ITravellerTransforms BuildLinearMigration(string name, CarrierEnum carrierID, EzBlocsGrid camRegionsArray);
     }
 }

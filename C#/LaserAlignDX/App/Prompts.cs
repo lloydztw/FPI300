@@ -8,12 +8,15 @@ namespace LaserAlignDX
     public enum Prompts : int
     {
         [Description("請先登入 擁有修改參數權限 的 帳號!")]
-        Warn_No_Privilege,
+        No_Privilege,
 
         [Description("是否直接把 參考坐標點 (CoordRefs) 寫入PLC?")]
         Question_Write_CoordRefs_To_PLC,
 
         [Description("座標成功寫入至 PLC.")]
         Info_Write_CoordRefs_To_PLC_OK,
+
+        [Description("共用座標系統 建置完成.")]
+        Info_CommonBase_Trf_Successed,
     }
 }

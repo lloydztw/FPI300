@@ -61,6 +61,9 @@ namespace LaserAlignDX.AoiModel
         void SetRecipe(EzAoiEmptyTrayInspector.Model.JxAoiRecipe recipe);
 #endif
 
+        /// <summary>
+        /// 進階 抓取 空載台 格位點
+        /// </summary>
         MatchResult FetchGridNodes(IxEmptyTrayInspector aoiModel, CarrierEnum carrierID, Mat fullfovImg, bool refine = true);
     }
 }

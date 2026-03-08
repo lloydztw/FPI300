@@ -14,12 +14,10 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
-using JetEazy.EzImage;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
-using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
@@ -27,19 +25,17 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
-using OpenCvSharp.ML;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
-using ZXing;
 using EmptyTrayAoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
 
 
 namespace LaserAlignDX.Mvc.Model
 {
-    public class TravellerSysModel : ITravelerModel
+    public partial class TravellerSysModel : ITravelerModel
     {
         public event EventHandler<ProcessEventArgs> OnError;
 
@@ -210,40 +206,12 @@ namespace LaserAlignDX.Mvc.Model
 
         public void ApplyRecipe(params object[] args)
         {
-            //(0) 載入個別的 TransformsModel
-            string gaaraRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
-            TravellerTransforms.DisposeAll();
-            var trfModel = TravellerTransforms.Instance(gaaraRecipeName);
-            var trfFile = GaMvcPaths.TRANSFORMS_INI_FILE(_xRecipe.INIFILE);
-            if (!System.IO.File.Exists(trfFile))
-                trfFile = GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE;
-            trfModel.Load(trfFile);
-            trfModel.BuildAll();
-
-            //(1) MicroTransform
-            GetMicroTransform(ActiveCarrierID)?.Load(null);
-            GetMicroTransform(ActiveCarrierID)?.Build();
-
-            //(2) 重新載入 _xRecipe
+            //(1) 重新載入 _xRecipe
             _xRecipe.ChangeActiveCarrier(ActiveCarrierID, forceToReload: true);
-
-            //(3) 載入 Camera Grid (保存在個別參數 _xRecipe 中, 與 trfModel 內)
-            var trfCamGridC1 = trfModel.GetCalibCameraGrid(CarrierEnum.C1);
-            var trfCamGridC2 = trfModel.GetCalibCameraGrid(CarrierEnum.C2);
-            if (trfCamGridC1 != null) _xRecipe.xCamGrid1 = trfCamGridC1;
-            if (trfCamGridC2 != null) _xRecipe.xCamGrid2 = trfCamGridC2;
-            var camGridC1 = _xRecipe.xCamGrid1;
-            var camGridC2 = _xRecipe.xCamGrid2;
-            var runtimeCamGrid = (CarrierEnum.C1 == ActiveCarrierID) ? camGridC1 : camGridC2;
-
-            //(4) 檢查 camGrid 的數據狀態
-            var err = checkCameraGrid(trfModel, ActiveCarrierID, runtimeCamGrid, notify: true);
-            if (err != null)
-                return;
-
+            string gaaraRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
             GaUtil.LOG($"[SysModel] 重新載入參數 {gaaraRecipeName}", Color.Blue);
 
-            //(5) 重新載入 EmptyTrayAoiRecipe
+            //(2) 空盤檢測AOI 重新載入 EmptyTrayAoiRecipe
             using (var jx = loadEmptyTrayAoiRecipe(false))      //將參數載入 AoiModel @ ApplyRecipe
             {
                 if (jx != null)
@@ -252,76 +220,60 @@ namespace LaserAlignDX.Mvc.Model
                 }
             }
 
-            //(6) 根據當下 _xRecipe 數據, 來建立 Runtime Plc Grid
-            var plcGrid = buildRuntimePlcGrid(runtimeCamGrid.Rows, runtimeCamGrid.Cols);
+            //(3) 載入 TransformsModel
+            _transformsModel = TravellerTransforms.Instance(gaaraRecipeName);
+            var trfFile = GaMvcPaths.TRANSFORMS_INI_FILE(_xRecipe.INIFILE);
+            if (System.IO.File.Exists(trfFile))
+            {
+                //*** 載入個別的 TransformsModel ***
+                _transformsModel.Load(trfFile);
+                _transformsModel.BuildAll();
+            }
+            else
+            {
+                if (true)
+                {
+                    //*** 簡單載入 COMMON_BASE ***
+                    _transformsModel.Load(GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE);
+                    _transformsModel.BuildAll();
+                }
+                else
+                {
+                    //*** 自動執行 線性遷移 ***
+                    //var commonBaseTrf = TravellerTransforms.CommonBase;
+                    //var camGridC1 = _xRecipe.xCamGrid1;
+                    //var camGridC2 = _xRecipe.xCamGrid2;
+                    //var activeCamGrid = (CarrierEnum.C1 == ActiveCarrierID) ? camGridC1 : camGridC2;
+                    //_transformsModel = commonBaseTrf.CreateLinearMigration(gaaraRecipeName, ActiveCarrierID, activeCamGrid);
+                    //_transformsModel.BuildAll();
+                    //_transformsModel.Save(trfFile);
+                }
+            }
 
-            //(7) set Runtime Plc Grid
-            trfModel.UpdateRuntimePlcGrid(plcGrid, camGridC1, camGridC2);
+            if (true)
+            {
+                //(4) 更新 xCamGrid
+                var camGridC1 = _transformsModel.GetCalibCameraGrid(CarrierEnum.C1);
+                var camGridC2 = _transformsModel.GetCalibCameraGrid(CarrierEnum.C2);
+                //if (camGridC1 != null) _xRecipe.xCamGrid1 = camGridC1; else camGridC1 = _xRecipe.xCamGrid1;
+                //if (camGridC2 != null) _xRecipe.xCamGrid2 = camGridC2; else camGridC2 = _xRecipe.xCamGrid2;
+                var activeCamGrid = CarrierEnum.C1 == ActiveCarrierID ? camGridC1 : camGridC2;
 
-            //(8) 自動建立陣列
-            buildRegionCellsArray(trfModel, ActiveCarrierID, runtimeCamGrid, false);          //@ ApplyRecipe
+                //(5) 檢查 camGrid 的數據狀態
+                var err = checkCameraGrid(_transformsModel, ActiveCarrierID, activeCamGrid, notify: true);
+                if (err != null)
+                    return;
 
-            //(9) 設定當下的 Transforms
-            _transformsModel = trfModel;
+                //(6) MicroTransform
+                GetMicroTransform(ActiveCarrierID)?.Load(null);
+                GetMicroTransform(ActiveCarrierID)?.Build();
+
+                //(7) 自動建立陣列
+                var ok = buildRegionCells(_transformsModel, ActiveCarrierID, activeCamGrid, false);         //@ ApplyRecipe
+            }
         }
 
-        public bool BuildCommonBaseTransforms(CarrierEnum carrierID, EzBlocsGrid camGrid)
-        {
-            // 使用多點校正版 建立 所有參數檔 共用的 座標轉換 與 Region Cells 格點
-            // 用於 校正 參數編輯模式
-            // 2025-12-11 針對 校正塊 改版
-            
-            bool ok = false;
-            var commonBaseTrf = TravellerTransforms.CommonBase;
-
-            //(0) 檢查 camGrid 狀態
-            if (camGrid == null)
-            {
-                //"無法抓到格點!"
-                var errCode = ErrorCodes.CAN_NOT_FETCH_CAMERA_GRID;
-                var errMsg = JetEazy.QxNums.GetEnumDescription(errCode);
-                OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
-                return false;
-            }
-            else if (checkCameraGrid(commonBaseTrf, ActiveCarrierID, camGrid, notify: true) != null)
-            {
-                return false;
-            }
-
-            //(1) 建立 Transform
-            commonBaseTrf.BuildAll();
-
-            if (camGrid != null)
-            {
-                //(2) 去除異常 格位 再重建一次 Transform
-#if (OPT_RESERVED)
-                var calibModel = CalibAoiModel;
-                if (calibModel.AdjustBadNodes(carrierID, camGrid))
-                    transformsModel.BuildAll();
-#endif
-
-                //(3) 建立 格位陣列 (RegionCellsArrary)
-                ok = buildRegionCellsArray(commonBaseTrf, carrierID, camGrid, optWriteBlackToRecipe: true);         //@ BuildTransformAndRegionCells (Global)
-
-                //(4) 更新 格位點 (camGrid)
-                var camGridC1 = carrierID == CarrierEnum.C1 ? camGrid : null;
-                var camGridC2 = carrierID == CarrierEnum.C2 ? camGrid : null;
-                commonBaseTrf.UpdateRuntimePlcGrid(null, camGridC1, camGridC2);
-
-                //(5) 更新當下 xRecipe
-                //>>> 注意: 必須由 個別參數 編輯模式 重新執行 【抓取陣列】
-                //>>> AutoBuildRegionCellsArray(carrierID, null, out var _);
-
-                //(6) 查核 參數設定 正確性
-                var err = checkTrayParams(carrierID, camGrid, notify: true);
-
-                ok &= string.IsNullOrEmpty(err);
-            }
-
-            return ok;
-        }
-
-        public bool AutoBuildRegionCellsArray(CarrierEnum carrierID, Bitmap fullfovBmp, out MatchResult matchResult)
+        public bool AutoBuildRegionCells(CarrierEnum carrierID, Bitmap fullfovBmp, out MatchResult matchResult)
         {
             // 個別參數 【自動抓取陣列】 並 進行 【座標系統 線性遷移】
             // <br/> 用於 參數編輯模式
@@ -332,38 +284,33 @@ namespace LaserAlignDX.Mvc.Model
             var camGrid = matchResult?.Grid;
             if (camGrid == null)
             {
-                //"無法抓到格位點!"
-                var errCode = ErrorCodes.CAN_NOT_FETCH_CAMERA_GRID;
+                // 無法抓到 空盤 格位點
+                var errCode = ErrorCodes.Err_can_not_fetch_empty_tray_grid;
                 var errMsg = JetEazy.QxNums.GetEnumDescription(errCode);
                 OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
                 return false;
             }
 
-            //(2) 線性轉移 建立 座標轉換系統
+            //(2) 載入 共用 座標轉換系統
             var commonBaseTrf = TravellerTransforms.CommonBase;
             commonBaseTrf.Load(GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE);
             commonBaseTrf.BuildAll();
+
+            //(3) 線性轉移 建立 個別 座標轉換系統
             string gaaraRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
-            var trfModel = commonBaseTrf.BuildLinearMigration(gaaraRecipeName, carrierID, camGrid);
+            var trfModel = this.CreateLinearMigration(gaaraRecipeName, carrierID, camGrid, commonBaseTrf);
 
-            //(3) 核查 結果
+            //(4) 核查 結果
             if (checkCameraGrid(trfModel, carrierID, camGrid, notify: true) != null)
-            {
-                // checkCameraGrid 內部, 會自動發出 異常事件.
                 return false;
-            }
 
-            //(4) 指定 線性轉移後 座標轉換系統
-            _transformsModel = (TravellerTransforms)trfModel;
+            //(5) 記入 線性轉移後 座標轉換系統
+            _transformsModel = trfModel;
 
-            //(5) 建立格點陣列
-            bool ok = buildRegionCellsArray(trfModel, carrierID, camGrid, optWriteBlackToRecipe: true);   //@ AutoBuildRegionCellsArray
+            //(6) 建立格點陣列
+            bool ok = buildRegionCells(trfModel, carrierID, camGrid, optWriteBlackToRecipe: true);      //@ AutoBuildRegionCellsArray
 
-            //(6) 更新 個別 座標轉換系統 的 camGrid (格點陣列)
-            var camGridC1 = carrierID == CarrierEnum.C1 ? camGrid : null;
-            var camGridC2 = carrierID == CarrierEnum.C2 ? camGrid : null;
-
-            return ok && camGrid != null;
+            return ok;
         }
 
         #region PRIVATE_REGION_CELL_FUNCTIONS
@@ -401,8 +348,31 @@ namespace LaserAlignDX.Mvc.Model
             }
         }
         
+        private void getPlcGridPitchFromRecipe(JxAoiRecipe emptyTrayRecipe, out double pitchX, out double pitchY)
+        {
+            //-------------------------------------------------
+            // 根據當下 參數 數據, 取得 plc grid 的 pitch
+            //-------------------------------------------------
+            //(1) 優先從 emptyTrayRecipe 取出 當值
+            var settings = emptyTrayRecipe?.TrayMiscSettings;
+            if (settings != null)
+            {
+                pitchX = (double)settings.PitchX.Value;
+                pitchY = (double)settings.PitchY.Value;
+            }
+            //(2) 否則從 _xRecipe 取出 當 默認值
+            else
+            {
+                pitchX = _xRecipe.xRealOffsetX;   // default from xRecipe
+                pitchY = _xRecipe.xRealOffsetY;   // default from xRecipe
+            }
+            //(3) 去除多餘的小數點
+            pitchX = Math.Round(pitchX, 5);
+            pitchY = Math.Round(pitchY, 5);
+        }
         private PlcGridPoints buildRuntimePlcGrid(int rows, int cols)
         {
+#if (OPT_REMARK_2026_0308)
             //-------------------------------------------------
             // 根據當下 _xRecipe 數據, 來建立 Runtime Plc Grid
             //-------------------------------------------------
@@ -412,7 +382,7 @@ namespace LaserAlignDX.Mvc.Model
             double pitchY = Math.Round(_xRecipe.xRealOffsetY, 5);   // default from xRecipe
 
             //(2) 重新載入 EmptyTrayAoiRecipe
-            using (var jx = loadEmptyTrayAoiRecipe(false))          //只讀取當下參數設定值 @ buildRuntimePlcGrid
+            using (var jx = loadEmptyTrayAoiRecipe(false))       //只讀取當下參數設定值 @ buildRuntimePlcGrid
             {
                 if (jx != null)
                 {
@@ -427,8 +397,16 @@ namespace LaserAlignDX.Mvc.Model
             //var cols = camGrid.Cols;
             var plcGrid = new PlcGridPoints(rows, cols, pitchX, pitchY);
             return plcGrid;
+#endif
+            return null;
         }
-        private bool buildRegionCellsArray(ITravellerTransforms trfModel, CarrierEnum carrierID, EzBlocsGrid camGrid, bool optWriteBlackToRecipe)
+
+        /// <summary>
+        /// 建立 格點陣列 並將相關數據 更新至 _xRecipe.
+        /// <br/> 更新 xRecipe.xRegionCells
+        /// <br/> 更新 xParaGrid (RecipeParaGridClass.Instance) (當 optWriteBackToRecipe)
+        /// </summary>
+        private bool buildRegionCells(ITravellerTransforms trfModel, CarrierEnum carrierID, EzBlocsGrid camGrid, bool optWriteBlackToRecipe)
         {
             bool ok;
             if (TravellerTransforms.OPT_CALIB_GRID_USING_MOTOR_COORD)
@@ -520,6 +498,7 @@ namespace LaserAlignDX.Mvc.Model
                     return false;
                 }
 
+#if (OPT_REV_2026_0308_LEGACY)
                 // 更新 CameraGrid
                 if (carrierID == CarrierEnum.C1)
                 {
@@ -531,6 +510,7 @@ namespace LaserAlignDX.Mvc.Model
                     _xRecipe.xCamGrid2?.Dispose();
                     _xRecipe.xCamGrid2 = camGrid;
                 }
+#endif
 
                 // Camera Grid Points
                 var camPt00 = camGrid[0, 0];
@@ -584,9 +564,9 @@ namespace LaserAlignDX.Mvc.Model
 
             return true;
         }
-        private bool buildRegionCells_motor(ITravellerTransforms trfModel, CarrierEnum carrierID, EzBlocsGrid runtimeCamGrid, bool optWriteBlackToRecipe)
+        private bool buildRegionCells_motor(ITravellerTransforms trfModel, CarrierEnum carrierID, EzBlocsGrid camGrid, bool optWriteBlackToRecipe)
         {
-            if (runtimeCamGrid == null)
+            if (camGrid == null)
             {
                 //>>> camGrid = _jxRecipe.EmptyTrayParams.TrayMiscSettings.GetGoldenGrid(true);
                 return false;
@@ -618,7 +598,7 @@ namespace LaserAlignDX.Mvc.Model
             double standardChipHeight = xInpectParam.mHeightStand;
 
             //(3) CamBasePt and Sucker1_BasePt
-            var camBasePt = runtimeCamGrid[0, 0].Center;
+            var camBasePt = camGrid[0, 0].Center;
             var motorBasePt = transCM1.Trans(camBasePt);
 
             //(4) 從 EmptyTrayAoi 取得 PitchX, PitchY 的設定
@@ -637,7 +617,7 @@ namespace LaserAlignDX.Mvc.Model
             //(5) 用 Zigzag 順序加入至 xRegionCells
             int index = 0;
             QVector nodeBase = motorBasePt;
-            foreach ((int r, int c, EzBloc bloc) in runtimeCamGrid.IterZigzag())
+            foreach ((int r, int c, EzBloc bloc) in camGrid.IterZigzag())
             {
                 var cell = new RegionCellX3Class();
                 cell.Index = index;
@@ -662,35 +642,37 @@ namespace LaserAlignDX.Mvc.Model
             //(6) 更新 數據到 xParaGrid 參數
             if (optWriteBlackToRecipe)
             {
-                var rows = runtimeCamGrid.Rows;
-                var cols = runtimeCamGrid.Cols;
+                var rows = camGrid.Rows;
+                var cols = camGrid.Cols;
                 if (rows < 2 || cols < 2)
                 {
                     // 上層的 AutoBuildRegionCells 已經警示過了. 
                     return false;
                 }
 
+#if (OPT_REV_2026_0308_LEGACY)
                 // 更新 CameraGrid
                 if (carrierID == CarrierEnum.C1)
                 {
                     var old = _xRecipe.xCamGrid1;
-                    _xRecipe.xCamGrid1 = runtimeCamGrid;
-                    if (old != runtimeCamGrid)
+                    _xRecipe.xCamGrid1 = camGrid;
+                    if (old != camGrid)
                         old?.Dispose();
                 }
                 else
                 {
                     var old = _xRecipe.xCamGrid2;
-                    _xRecipe.xCamGrid2 = runtimeCamGrid;
-                    if (old != runtimeCamGrid)
+                    _xRecipe.xCamGrid2 = camGrid;
+                    if (old != camGrid)
                         old?.Dispose();
                 }
+#endif
 
                 // Camera Grid Points
-                var p00 = transCM1.Trans(runtimeCamGrid[0, 0].Center);
-                var p01 = transCM1.Trans(runtimeCamGrid[0, cols - 1].Center);
-                var p10 = transCM1.Trans(runtimeCamGrid[rows - 1, 0].Center);
-                var p11 = transCM1.Trans(runtimeCamGrid[rows - 1, cols - 1].Center);
+                var p00 = transCM1.Trans(camGrid[0, 0].Center);
+                var p01 = transCM1.Trans(camGrid[0, cols - 1].Center);
+                var p10 = transCM1.Trans(camGrid[rows - 1, 0].Center);
+                var p11 = transCM1.Trans(camGrid[rows - 1, cols - 1].Center);
                 var corners = new[] { p00, p01, p11, p10 }; // 左上, 右上, 右下, 左下
 
                 // xAngle
@@ -753,54 +735,6 @@ namespace LaserAlignDX.Mvc.Model
 
             if (errCode != ErrorCodes.OK)
             {
-                if (notify)
-                    OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
-                return errMsg;
-            }
-
-            return null;
-        }
-        string checkTrayParams(CarrierEnum carrierID, EzBlocsGrid camGrid, bool notify)
-        {
-            var errCode = ErrorCodes.OK;
-            var errs = new List<string>();
-
-            // 比對 EmptyTrayAoi 的設定
-            using (var jx = loadEmptyTrayAoiRecipe(false))      //只讀取當下參數設定值 @ checkTrayParams
-            {
-                var traySettings = jx?.TrayMiscSettings;
-                if (traySettings != null)
-                {
-                    double pitchX = Math.Round((double)traySettings.PitchX.Value, 3);
-                    double pitchY = Math.Round((double)traySettings.PitchY.Value, 3);
-
-                    var plcGrid = _transformsModel.getCalibPlcGrid();
-                    if (plcGrid != null)
-                    {
-                        double plcPitchX = Math.Round(plcGrid.PitchX, 3);
-                        double plcPitchY = Math.Round(plcGrid.PitchY, 3);
-                        if (pitchX != plcPitchX)
-                            errs.Add($"空盤檢測 PitchX= {pitchX}  vs  校正參數 PitchX={plcPitchX}");
-                        if (pitchY != plcPitchY)
-                            errs.Add($"空盤檢測 PitchY= {pitchY}  vs  校正參數 PitchY={plcPitchY}");
-                    }
-
-                    if (camGrid != null)
-                    {
-                        int rows = traySettings.FullRows.Value;
-                        int cols = traySettings.FullCols.Value;
-                        if (rows != camGrid.Rows)
-                            errs.Add($"空盤檢測 Rows= {rows}  vs  校正參數 Rows={camGrid.Rows}");
-                        if (cols != camGrid.Cols)
-                            errs.Add($"空盤檢測 Cols= {cols}  vs  校正參數 Cols={camGrid.Cols}");
-                    }
-                }
-            }
-
-            if (errs.Count > 0)
-            {
-                errCode = ErrorCodes.ERR_TRAY_CONFIG_CONFLICTS;
-                string errMsg = JetEazy.QxNums.GetEnumDescription(errCode) + "\n\r" + string.Join("\n\r", errs);
                 if (notify)
                     OnError?.Invoke(this, new ProcessEventArgs(errMsg, errCode));
                 return errMsg;
@@ -901,5 +835,33 @@ namespace LaserAlignDX.Mvc.Model
             }
         }
         #endregion
+    }
+
+
+    partial class TravellerSysModel
+    {
+        /// <summary>
+        /// 根據 新的 相機格點 newCamGrid, 從 baseTrf 線性遷移 生成新的 座標轉換系統
+        /// </summary>
+        public ITravellerTransforms CreateLinearMigration(string name, CarrierEnum carrierID, EzBlocsGrid newCamGrid, ITravellerTransforms baseTrf)
+        {
+            if (string.IsNullOrEmpty(name))
+                return null;
+
+            var newTrf = TravellerTransforms.Instance(name);
+
+            if (false)
+            {
+                //*** QUICK_DEBUG ***
+                var tmpFile = "d:\\paso.log\\jx_transforms.ini";
+                baseTrf.Save(tmpFile);
+                newTrf.Load(tmpFile);
+                return newTrf;
+            }
+
+            // 請實作此函式
+
+            return newTrf;
+        }
     }
 }

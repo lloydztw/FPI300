@@ -34,7 +34,7 @@ namespace LaserAlignDX.Mvc.Model
         [Description("缺少 '全域校正' 數據")]
         NO_CALIB_TRANSFORM,
 
-        [Description("缺少 跑線時期的 PLC 格點\n\r\n\r請設定 '空盤檢測'")]
+        [Description("缺少 PLC 格點\n\r\n\r請設定 '空盤檢測'")]
         NO_RUNTIME_PLC_GRID,
 
         [Description("參數 格點陣列 (Camera Grid) 沒有建置\n\r\n\r請執行 '生成陣列'")]
@@ -44,13 +44,33 @@ namespace LaserAlignDX.Mvc.Model
         LOW_GRID_ROWS_COLS,
 
         [Description("參數 模板訓練失敗, 無法建立 GoldenQuad2D!")]
-        ERR_CANNOT_LOAD_,
-
-        [Description("無法抓到格位")]
-        CAN_NOT_FETCH_CAMERA_GRID,
+        CANNOT_FETCH_GOLDEN_QUAD_2D,
 
         [Description("空盤檢測 參數沒建立")]
         NO_EMPTY_TRAY_RECIPE,
+
+        [Description("無法抓到 空盤 格位點")]
+        Err_can_not_fetch_empty_tray_grid,
+
+
+        [Description("沒有 座標轉換 模型")]
+        CalibErr_No_Transform_Model,
+
+        [Description("點墨 標定 不完整!")]
+        CalibErr_Ink_Marks_Not_Completed,
+
+        [Description("馬達座標 標定 不完整")]
+        CalibErr_Motor_Coords_Not_Completed,
+
+        [Description("無法抓到 大校正板 格位點")]
+        CalibErr_can_not_fetch_board_grid,
+
+        [Description("大校正板 點位 不一致!")]
+        CalibErr_board_grid_not_consistent,
+
+        [Description("節距 (Pitch) 不一致!")]
+        CalibErr_pitch_not_consistent,
+
 
         [Description("線掃AOI 運行異常 (可能沒有加密狗)")]
         EXCEPTION_AT_AOI_RUN,
@@ -83,6 +103,6 @@ namespace LaserAlignDX.Mvc.Model
         WARN_NO_GOLDN_TEMPLATE_SETUP,
 
         [Description("無法找到 GoldenQuad2D!")]
-        WARN_CAN_NOT_FIND_QUAD_2D,
+        WARN_CAN_NOT_FETCH_QUAD_2D,
     }
 }

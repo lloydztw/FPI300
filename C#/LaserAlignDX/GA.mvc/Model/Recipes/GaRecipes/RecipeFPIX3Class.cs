@@ -364,6 +364,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region 參數區_LT_CAM_GRIDS
+#if (OPT_REV_2026_0308_LEGACY)
         public EzBlocsGrid xCamGrid1 { get; set; } = null;
         public EzBlocsGrid xCamGrid2 { get; set; } = null;
         void loadCamGrids(CarrierEnum carrierID, out EzBlocsGrid grid)
@@ -403,6 +404,61 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             saveCamGrid(CarrierEnum.C1, xCamGrid1);
             saveCamGrid(CarrierEnum.C2, xCamGrid2);
         }
+#else
+        public EzBlocsGrid xCamGrid1
+        {
+            //*** 交給 TransformsModel 管理 ***
+            get => GaMvcConfig.SysModel.TransformsModel.GetCalibCameraGrid(CarrierEnum.C1);
+            set { }
+        }
+        public EzBlocsGrid xCamGrid2
+        {
+            //*** 交給 TransformsModel 管理 ***
+            get => GaMvcConfig.SysModel.TransformsModel.GetCalibCameraGrid(CarrierEnum.C2);
+            set { }
+        }
+        void loadCamGrids(CarrierEnum carrierID, out EzBlocsGrid grid)
+        {
+            //*** 交給 TransformsModel 管理 ***
+
+            //var file = System.IO.Path.Combine(PathIndexStr, $"camGrid_{carrierID}.txt");
+            //if (System.IO.File.Exists(file))
+            //{
+            //    string str = System.IO.File.ReadAllText(file);
+            //    var ss = new EzBlocsGridSerializer();
+            //    ss.Deserialize(str, out grid);
+            //    return;
+            //}
+            //else
+            //{
+            //    grid = null;
+            //}
+            //if (carrierID == CarrierEnum.C1) xCamGrid1 = grid;
+            //if (carrierID == CarrierEnum.C2) xCamGrid2 = grid;
+
+            grid = carrierID == CarrierEnum.C1 ? xCamGrid1 : xCamGrid2;
+        }
+        public void saveCamGrid(CarrierEnum carrierID, EzBlocsGrid grid)
+        {
+            //*** 交給 TransformsModel 管理 ***
+
+            //if (grid == null)
+            //    return;
+            //var file = System.IO.Path.Combine(PathIndexStr, $"camGrid_{carrierID}.txt");
+            //var ss = new EzBlocsGridSerializer();
+            //string str = ss.Serialize(grid);
+            //System.IO.File.WriteAllText(file, str);
+        }
+        void disposeCamGrids()
+        {
+            //*** 交給 TransformsModel 管理 ***
+        }
+        public void SaveCameraGrids()
+        {
+            saveCamGrid(CarrierEnum.C1, xCamGrid1);
+            saveCamGrid(CarrierEnum.C2, xCamGrid2);
+        }
+#endif
         #endregion
 
         #region 參數區_其他子群
@@ -448,8 +504,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //xLineRight = StringtoRectF(ReadINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             //xLineBottom = StringtoRectF(ReadINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
 
-            loadCamGrids(CarrierEnum.C1, out var grid1);    xCamGrid1 = grid1;
-            loadCamGrids(CarrierEnum.C2, out var grid2);    xCamGrid2 = grid2;
+            loadCamGrids(CarrierEnum.C1, out var grid1);
+            loadCamGrids(CarrierEnum.C2, out var grid2);
 
             //(LD1) 各種模板 (根據載台號 載入不同對應的設定值)
             _dtoGoldenRegionTemplate.SetTag(_CARRIER_TAG).Load(INIFILE);
@@ -977,7 +1033,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             return isgood;
         }
 #endif
-        #endregion
+#endregion
 
         #region NO_USE_本專案沒用到_但是這應該放在_AOI_RESULT_區域
         private int PassCount = 0;

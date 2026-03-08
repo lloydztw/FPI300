@@ -528,7 +528,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             updateGoldenRegionToRecipe(imgSrc[goldenRoi], goldenRoi);
         }
 
-        void AutoUpdateRegions()
+        void __AutoUpdateRegions()
         {
 #if(OPT_REMARK_2026_0308)
             //-------------------------------------
@@ -607,7 +607,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
                 // 自動抓取陣列 並進行 座標轉換系統 線性遷移
                 _sysModel.ActiveCarrierID = carrierID;
-                bool ok = _sysModel.AutoBuildRegionCellsArray(carrierID, srcBmp, out var result);
+                bool ok = _sysModel.AutoBuildRegionCells(carrierID, srcBmp, out var result);
                 if (!ok)
                 {
                     // _sysModel 內部會自動發出報警 Event
@@ -638,10 +638,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 // 更新 參數畫面
                 updateRecipePropertyView(carrierID);
 
-                // 是否直接把 CoordsRef 寫入PLC ?
-                var ret = VsMessageBox.Question(GaUtil.GetEnumDescription(Prompts.Question_Write_CoordRefs_To_PLC));
-                if (ret == DialogResult.Yes)
-                    WriteCoordsRefToPlc();
+                //// 是否直接把 CoordsRef 寫入PLC ?
+                //var ret = VsMessageBox.Question(GaUtil.GetEnumDescription(Prompts.Question_Write_CoordRefs_To_PLC));
+                //if (ret == DialogResult.Yes)
+                //    WriteCoordsRefToPlc();
 
             }
             finally

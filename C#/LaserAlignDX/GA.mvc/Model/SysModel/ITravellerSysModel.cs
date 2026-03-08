@@ -72,18 +72,11 @@ namespace LaserAlignDX.Mvc.Model
         void ApplyRecipe(params object[] args);
 
         /// <summary>
-        /// 使用多點校正版 建立 所有參數檔 共用的 座標轉換 與 Region Cells 格點
-        /// <br/> 用於 校正 參數編輯模式
-        /// <br/> 2025-12-11 針對 校正塊 改版
-        /// </summary>
-        bool BuildCommonBaseTransforms(CarrierEnum carrierID, EzBlocsGrid camGrid);
-
-        /// <summary>
         /// 個別參數 自動抓取陣列 並 進行 座標系統 線性遷移
         /// <br/> 用於 參數編輯模式
         /// <br/> 必須曾經執行過 BuildTransformAndRegionCells
         /// </summary>
-        bool AutoBuildRegionCellsArray(CarrierEnum carrierID, Bitmap fullfovBmp, out MatchResult result);
+        bool AutoBuildRegionCells(CarrierEnum carrierID, Bitmap fullfovBmp, out MatchResult result);
 
         /// <summary>
         /// 單筆寫入 座標數據 至 PLC
