@@ -1591,10 +1591,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [CategoryAttribute(_Cat01), DescriptionAttribute("")]
         [DisplayName("03 啟用 缺陷檢測")]
         [Browsable(true)]
-        [ReadOnly(true)]
+        //[ReadOnly(true)]
         public bool optChipDefectsInspect
         {
-            get => _spec.optChipDefectsInspect = false;     // 暫時不開放
+            get => _spec.optChipDefectsInspect;// = false;     // 暫時不開放
             set => _spec.optChipDefectsInspect = value;
         }
         #endregion

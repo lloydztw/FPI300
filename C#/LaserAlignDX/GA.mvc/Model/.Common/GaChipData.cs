@@ -82,6 +82,11 @@ namespace LaserAlignDX.Model
         /// </summary>
         public readonly GaPadEdgeGaps PadEdgeGaps = new GaPadEdgeGaps();
 
+        ///<summary>
+        /// 瑕疵區塊
+        /// </summary>
+        public QvBox2D[] DefectBlobs { get; set; } = null;
+
         /// <summary>
         /// 調試用 之 額外資料
         /// </summary>

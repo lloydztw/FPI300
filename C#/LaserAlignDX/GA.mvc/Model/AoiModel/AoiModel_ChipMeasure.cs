@@ -93,7 +93,7 @@ namespace LaserAlignDX.AoiModel.V3
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
                 RunChipsMeasurement(bmpFullfov);
                 RunChipsMeasurement2ndForNGs(bmpFullfov);
-                RunDefectsAndQrCode(bmpFullfov);
+                RunDefectsAndQrCode(bmpFullfov, LineScanCamImageHolder.PeekMvdImage());
 
                 markRunEnd(true);
                 fire_AoiEnd();
@@ -873,7 +873,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// LETIAN: 读码测试 搬移至此.
         /// caller 負責 bmpInputImage 生命
         /// </summary>
-        private void RunDefectsAndQrCode(Bitmap bmpFullfov)
+        private void RunDefectsAndQrCode(Bitmap bmpFullfov,CMvdImage cMvdImage)
         {
             bool go = QrUsed || _xInspect.optChipDefectsInspect;
             if (!go)
@@ -924,13 +924,28 @@ namespace LaserAlignDX.AoiModel.V3
                         //    PixelFormat.Format8bppIndexed);
                         //cell.DetectDefects(xRecipe.bmpDefectTemplate, cell.bmpItemRun, cell.bmpItemMask);
 
+                        var templateSize = _xRecipe.bmpDefectTemplate.Size;
+                        var chipCenter = cell.ChipData.ChipQuad2D.Center;
+                        var chipAngle = cell.ChipData.ChipQuad2D.Angle;      //如果把 _xRecipe.bmpDefectTemplate 當成無角度的 rectangle 就不需要減 GoldenQuad2D.Angle
+                        //var box2d = new QvBox2D();
+                        //box2d.SetBox(PointF.Empty, templateSize);
+                        //box2d.SetCenter((float)chipCenter.X, (float)chipCenter.Y);
+                        //box2d.SetTheta((float)chipAngle * Math.PI / 180.0);
+                        //var mvdRectX = GaMvdExt.ToCMvdRectangleF(box2d);
+
+                        var mvdRectX = new CMvdRectangleF((float)chipCenter.X, (float)chipCenter.Y, templateSize.Width, templateSize.Height)
+                        {
+                            Angle = (float)chipAngle
+                        };
+
                         var bmpTemplate = _xRecipe.bmpDefectTemplate;
                         var bmpMask = _xRecipe.bmpprintmask;
-                        var roi = _xRecipe.xRegionTrain;
-                        roi.X += regionRoi.X;
-                        roi.Y += regionRoi.Y;
-
-                        using (var bmpRun = bmpFullfov.Clone(roi, PixelFormat.Format8bppIndexed))
+                        //var roi = _xRecipe.xRegionTrain;
+                        //roi.X += regionRoi.X;
+                        //roi.Y += regionRoi.Y;
+                        
+                        using (var bmpRun = cell.GetAffineTrainsFormRunBmp(cMvdImage, mvdRectX))
+                        //using (var bmpRun = bmpFullfov.Clone(roi, PixelFormat.Format8bppIndexed))
                         {
                             cell.DetectDefects(bmpTemplate, bmpRun, bmpMask);
                         }
