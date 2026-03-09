@@ -15,7 +15,9 @@
 
 
 using AUVision;
+using JetEazy;
 using JetEazy.Match;
+using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
 using System;
@@ -50,6 +52,7 @@ namespace LaserAlignDX.AoiModel
         #region PRIVATE_RUNTIME_DATA
         QvQuad2D _goldenQuad2D = null;
         QvQuad2D _resultQuad2D = null;
+        EzBlocsGrid _pseudoPadsGrid = null;
         #endregion
 
         public Size TemplateSize
@@ -104,6 +107,7 @@ namespace LaserAlignDX.AoiModel
         {
             this.TemplateSize = bmpTemplate.Size;
 
+            #region OLD_CODE
             //bmpObj_Image?.Dispose();
             //bmpObj_Image = (Bitmap)bmpTemplate.Clone();
             ////CMvdRectangleF cMvd = new CMvdRectangleF(
@@ -112,18 +116,19 @@ namespace LaserAlignDX.AoiModel
             ////    xRegionTrain.Width,
             ////    xRegionTrain.Height);
             //// bool bOK = HikTrainBmp();
+            #endregion
 
             //---------------------------------------------------------------
             //NOTE: cAlmightyPatternObj 負責接管 xMvdObj_Image 生命週期
             //---------------------------------------------------------------
             var xMvdObj_Image = GaImageUtil.BitmapToCMvdImage(bmpTemplate);
-
             bool bOK = HikTrain2(xMvdObj_Image);
 
-            // 2026-03-06 整合海康 Template Match
+            //---------------------------------------------------------------
+            // REV_2026-03-09 整合海康 Template Match
+            //---------------------------------------------------------------
             var rect = new RectangleF(PointF.Empty, TemplateSize);
             _goldenQuad2D = QvQuad2D.From(rect);
-
             return bOK;
         }
 
@@ -140,13 +145,16 @@ namespace LaserAlignDX.AoiModel
         /// <param name="bmpScene">由 caller 維護其生命週期</param>
         public bool RunMatch(Bitmap bmpScene)
         {
+            #region OLD_CODE
             // 實時更新 MVD 主要設定
             //this.xMvdAngle = _recipeParams.xAngle;
             //this.xMvdTolerance = _recipeParams.xTolerance;
             //this.xMaxOverlap = _recipeParams.xMaxOverlap;
+            #endregion
 
             bool bOK;
 
+            #region OLD_CODE
             //// OLD:
             ////      HikRunBmp()
             ////          xMvdRun_Image?.Dispose();
@@ -158,17 +166,21 @@ namespace LaserAlignDX.AoiModel
             //this.bmpRun_Image?.Dispose();
             //this.bmpRun_Image = (Bitmap)bmpScene.Clone();
             //bOK = HikRunBmp();
+            #endregion
 
             //---------------------------------------------------------------
             //NOTE: cAlmightyPatmatchToolObj 負責接管 xMvdRun_Image 生命週期
             //---------------------------------------------------------------
             var xMvdRun_Image = GaImageUtil.BitmapToCMvdImage(bmpScene);
-
             bOK = HikRun2(xMvdRun_Image);
 
-            // 根據 HikRun2 的結果, 生成 _resultQuad2D
+            //---------------------------------------------------------------
+            // REV_2026-03-09 整合海康 Template Match
+            //---------------------------------------------------------------
+            // (1) 合成 _resultQuad2D (根據 xResults (HikRun2 的結果)) 
             _resultQuad2D = toQuad2D(xResults, TemplateSize);
-
+            // (2) 合成 _pseudoPadsGrid (根據 _resultPadsGrid 與 _goldenQuad2D)
+            _pseudoPadsGrid = makePseudoPadsGrid(_resultQuad2D, _goldenQuad2D);
             return bOK;
         }
 
@@ -177,8 +189,8 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         public EzBlocsGrid GetResultPadsGrid()
         {
-            // 海康版的 template match 沒有 PADs
-            return null;
+            // REV_2026-03-09 整合海康 Template Match
+            return _pseudoPadsGrid;
         }
 
         /// <summary>
@@ -733,6 +745,91 @@ namespace LaserAlignDX.AoiModel
             box.SetTheta(xResult.fAngle / 180.0 * Math.PI);
             var quad2D = QvQuad2D.From(box);
             return quad2D;
+        }
+        EzBlocsGrid makePseudoPadsGrid(QvQuad2D resultQuad2D, QvQuad2D goldenQuad2D)
+        {
+            if (resultQuad2D == null || goldenQuad2D == null)
+                return null;
+
+            goldenQuad2D.GetMidSize(out var chipSize);
+            var padSize = 8f;
+            var chipCenter = resultQuad2D.GetCenter();
+            var chipCorners = resultQuad2D.Corners;
+
+            if (true)
+            {
+                //----------------------------------
+                // 建立簡單 2 x 2 PADS 
+                //----------------------------------
+                //      [0, 1]
+                //      [3, 2]
+                //----------------------------------
+                var padBlocs = new List<EzBloc>();
+                var shift = (padSize / 2) * 1.414f;
+                foreach (var corner in chipCorners)
+                {
+                    var padCenter = corner + unitVect(corner, chipCenter) * shift;
+                    var padRect = Qcvt.CreateCenterRect((int)padCenter.X, (int)padCenter.Y, (int)padSize, (int)padSize);
+                    var padBloc = new EzBloc(padRect, 1.0) { Center = padCenter };
+                    padBlocs.Add(padBloc);
+                }
+
+                var builder = new EzBlocsGridBuilder();
+                var pitchU = (padBlocs[0].Center - padBlocs[1].Center).NormLength;
+                var pitchV = (padBlocs[0].Center - padBlocs[3].Center).NormLength;
+                var pitch = new QVector(pitchU, pitchV);
+                var padsGrid = builder.BuildEmptyGrid(padBlocs, 2, 2, pitch);
+                padsGrid.Set(0, 0, padBlocs[0]);
+                padsGrid.Set(0, 1, padBlocs[1]);
+                padsGrid.Set(1, 1, padBlocs[2]);
+                padsGrid.Set(1, 0, padBlocs[3]);
+                return padsGrid;
+            }
+            else
+            {
+                //-------------------------------------------
+                // 建立簡單 3 x 3 PADS  (尚未完成)
+                //-------------------------------------------
+                // 加入 4角
+                var padCornerNodes = new List<QVector>();
+                var shift = (padSize / 2) * 1.414f;
+                foreach (var corner in chipCorners)
+                {
+                    var pt = corner + unitVect(corner, chipCenter) * shift;
+                    padCornerNodes.Add(pt);
+                }
+                // 加入 各邊 中點
+                var padAllNodes = new List<QVector>();
+                for (int i = 0, N = padCornerNodes.Count; i < N; i++)
+                {
+                    int j = (i + 1) % N;
+                    var pt = (padCornerNodes[i] + padCornerNodes[j]) / 2.0;
+                    padAllNodes.Add(pt);
+
+                }
+                // 加入 正中點
+                padAllNodes.Add(goldenQuad2D.Center);
+
+                // 建立 Blocs
+                var padBlocs = new List<EzBloc>();
+                foreach (var pt in padAllNodes)
+                {
+                    var padRect = Qcvt.CreateCenterRect((int)pt.X, (int)pt.Y, (int)padSize, (int)padSize);
+                    var padBloc = new EzBloc(padRect, 1.0) { Center = pt };
+                    padBlocs.Add(padBloc);
+                }
+
+                // 建立 GRID
+                var builder = new EzBlocsGridBuilder();
+                var padsGrid = builder.Build(padBlocs, null, 3, 3);
+                return padsGrid;
+            }
+        }
+        QVector unitVect(QVector v1, QVector v2)
+        {
+            var v = v2 - v1;
+            v = v / v.NormLength;
+            return v;
         }
         #endregion
     }

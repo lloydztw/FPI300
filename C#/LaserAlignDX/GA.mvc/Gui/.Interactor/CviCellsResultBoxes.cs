@@ -1515,6 +1515,15 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void OpenPadsFiltersEditorDlg()
         {
+            // REV_2026-03-09 整合海康 Template Match
+            if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.TemplateMatch)
+            {
+                var msg = GaUtil.GetEnumDescription(MatchAlgorithmEnum.TemplateMatch) + "\n\r" 
+                        + GaUtil.GetEnumDescription(Prompts.Warn_the_function_is_not_supported);
+                VsMessageBox.Warning(msg);
+                return;
+            }
+
             var cell = (_cursorBloc as CellBloc)?.Cell;
             if (cell == null) return;
 

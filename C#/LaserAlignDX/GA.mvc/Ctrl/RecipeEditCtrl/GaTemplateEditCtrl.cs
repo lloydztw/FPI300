@@ -31,6 +31,7 @@ using OpenCvSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using VisionDesigner;
 
@@ -500,6 +501,10 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void AutoLayoutLineBorders()
         {
+            //-----------------------------------------------------------------------------------
+            // REV_2026 - 03 - 09 整合海康 Template Match
+            //-----------------------------------------------------------------------------------
+
             if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
             {
                 //VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
@@ -527,15 +532,17 @@ namespace LaserAlignDX.Mvc.Ctrl
             var dw = W - ww;
             var dh = H - hh;
 
+            // 重新抓取 goldenQuad2D
             if (_goldenQuad2D == null)
             {
-                #region 重新抓取 goldenQuad2D
                 try
                 {
-                    var matchers = _xRecipe.mvdprinttemp_Find;
-                    var matcher = matchers.GetMatcher(0);
-                    matcher.SetRecipeParams(_xRecipe.InspectParams);
+                    var matcherComposite = _xRecipe.mvdprinttemp_Find;
+                    matcherComposite.SetRecipeParams(_xRecipe.InspectParams);   //<<< 使用 matcherComposite.SetRecipeParams 才能反映 _xAlogrithm
+
+                    var matcher = matcherComposite.GetMatcher(0);
                     matcher.Train(_xBmpGoldenChipTemplate);
+
                     _goldenQuad2D = matcher.GoldenQuad2D?.Clone();
                     _goldenQuad2D?.Offset(_xGoldenChipRect.X, _xGoldenChipRect.Y);
                 }
@@ -545,7 +552,6 @@ namespace LaserAlignDX.Mvc.Ctrl
                     VsMessageBox.Warning(errMsg);
                     return;
                 }
-                #endregion
             }
 
             if (_goldenQuad2D != null)

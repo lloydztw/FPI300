@@ -92,14 +92,14 @@ namespace JetEazy.Match
             return globalGrid;
         }
 
-        public EzBlocsGrid BuildEmptyGrid(IList<EzBloc> blocs, int rows, int cols)
+        public EzBlocsGrid BuildEmptyGrid(IList<EzBloc> blocs, int rows, int cols, QVector assignedPitch = null)
         {
             if (blocs == null)
                 return null;
 
             var bound = get_boundary(blocs);
             var aveSize = get_ave_size(blocs);
-            var pitch = search_best_pitches(blocs, aveSize);
+            var pitch = assignedPitch == null ? search_best_pitches(blocs, aveSize) : assignedPitch;
             if (pitch.X <= 0) pitch.X = bound.Width;
             if (pitch.Y <= 0) pitch.Y = bound.Height;
 

@@ -27,8 +27,8 @@ namespace Traveller106
 {
     public class Universal : JetEazy.Universal
     {
-        public static readonly bool N_THREADS_ENABLED = true;
-        public static readonly int N_THREADS = 16;
+        public static bool N_THREADS_ENABLED => LaserAlignDX.GlobalConfig.N_THREADS_ENABLED;
+        public static int N_THREADS => LaserAlignDX.GlobalConfig.N_THREADS;
 
         public static bool IsNoUseCCD => LaserAlignDX.GlobalConfig.IsSim;
         public static bool IsNoUseIO = IsNoUseCCD;
@@ -37,7 +37,6 @@ namespace Traveller106
         public static bool IsAutoLogin = IsNoUseCCD;
 
         public static string VersionDate => LaserAlignDX.GlobalConfig.VersionDate;
-
         public const VersionEnum VERSION = VersionEnum.LASER;
         public const OptionEnum OPTION = OptionEnum.MAIN_FPIX3;
         public static FactoryName FACTORYNAME = FactoryName.NONE;

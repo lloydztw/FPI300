@@ -821,12 +821,16 @@ namespace LaserAlignDX.AoiModel.V3
 
             if (ok)
             {
-                //(2) offset
+                //(2) OFFSET
                 var padsGrid = chipMatcher.GetResultPadsGrid();
                 padsGrid?.Offset(cellRoi.X, cellRoi.Y);
+
+                // REV_2026-03-09  整合海康 Template Match
+                //>>> 格點型 晶粒 : chipQuad 不需要再次 Offset
+                //>>> 一般型 晶粒 : chipQuad 需要再次 Offset (暫時性)
                 var chipQuad = chipMatcher.GetResultQuad2D();
-                //>>> chipQuad 不需要再次 Offset
-                //>>> chipQuad?.Offset(cellRoi.X, cellRoi.Y);
+                if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.TemplateMatch)
+                    chipQuad?.Offset(cellRoi.X, cellRoi.Y);
 
                 //(3) 將定位結果記入 cell.ChipData
                 chipData = new GaChipData();
