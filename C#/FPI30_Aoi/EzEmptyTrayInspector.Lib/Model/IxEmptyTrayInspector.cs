@@ -62,7 +62,6 @@ namespace EzAoiEmptyTrayInspector.Model
         /// <br/> 於 Recipe Editor 中使用
         /// <br/> 返回值 Err, suggestRows, suggestCols
         /// </summary>
-        /// 
         (ErrCodes, int, int) BuildGoldenGridTemplate(SideID sideId, IEzImage largeIm, int targetRows, int targetCols);
 
         ErrCodes CanMatch(SideID sideId, IEzImage img);
