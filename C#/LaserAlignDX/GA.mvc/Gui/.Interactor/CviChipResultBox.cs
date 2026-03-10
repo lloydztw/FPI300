@@ -52,6 +52,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         List<IvDrawItem> _drawItems = new List<IvDrawItem>();
         List<IvDrawItem> _drawItemsDetails = new List<IvDrawItem>();
         List<IvDrawItem> _drawItemsNgGapCorners = new List<IvDrawItem>();
+        List<IvDrawItem> _drawItemsDefectBlobs = new List<IvDrawItem>();
         Font _font = null;
         #endregion
 
@@ -75,6 +76,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             _drawItems.Clear();
             _drawItemsDetails.Clear();
             _drawItemsNgGapCorners.Clear();
+            _drawItemsDefectBlobs.Clear();
             _bypassNg = false;
         }
         public void UpdateResult(XCell cell, bool bypassNg)
@@ -102,6 +104,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 draw_ChipsLoc(viewer, gxView);
                 draw_ChipDetails(viewer, gxView);
+                draw_DefectBlobs(viewer, gxView);
                 draw_QrCode_One(viewer, gxView, _cell);
 
                 if (!isWorld)
@@ -233,6 +236,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             updateDrawItems_For_ChipLocate();
             updateDrawItems_For_ChipMeasure();
+            updateDrawItems_For_DefectBlobs();
             updateDrawItems_For_AiTrainCorners();
         }
         void updateDrawItems_For_ChipLocate()
@@ -414,6 +418,25 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             _drawItemsDetails.AddRange(drawItemsOfBorderBoxes);
             _drawItemsNgGapCorners.AddRange(drawItemsOfNgGapPads);
         }
+        void updateDrawItems_For_DefectBlobs()
+        {
+            if (!_xRecipe.InspectParams.optChipDefectsInspect)
+                return;
+
+            var drawItems = new List<IvDrawItem>();
+
+            var defectBlobs = _cell?.ChipData?.DefectBlobs;
+            if (defectBlobs == null || defectBlobs.Length == 0)
+                return;
+
+            foreach ( var defectBlob in defectBlobs )
+            {
+                var item = new CviRotRectBox(defectBlob, Color.Red, blend: 0.3f);
+                drawItems.Add(item);
+            }
+
+            _drawItemsDefectBlobs= drawItems;
+        }
         void updateDrawItems_For_AiTrainCorners()
         {
 #if (OPT_USE_AI)
@@ -585,6 +608,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #endregion
 
         #region DRAW_QRCODE_FUNCTIONS
+        void draw_DefectBlobs(CvImageViewer viewer, Graphics gxView)
+        {
+            if (_drawItemsDefectBlobs == null)
+                return;
+
+            foreach (var item in _drawItemsDefectBlobs)
+                item?.OnDraw(viewer, gxView);
+        }
         void draw_QrCode_One(CvImageViewer viewer, Graphics gxView, XCell cell)
         {
             if (!_xRecipe.InspectParams.optChipDefectsInspect)
@@ -608,7 +639,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 var y = cc.fY + 120;
                 string text = cell.RunCodeInfo?.Content;
                 gxView.DrawString(text, _font, Brushes.Black, x, y);
-
             }
         }
         #endregion

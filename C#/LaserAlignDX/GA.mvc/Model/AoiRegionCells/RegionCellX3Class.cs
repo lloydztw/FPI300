@@ -6,6 +6,8 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using VisionDesigner;
 using VisionDesigner.Code2DReader;
 using VisionDesigner.ImageArithmetic;
@@ -23,6 +25,7 @@ namespace LaserAlignDX.OPSpace
         VisionDesigner.ImageBinary.CImageBinaryTool cImageBinaryToolObj = null;// new VisionDesigner.ImageBinary.CImageBinaryTool();
         VisionDesigner.ImageMorph.CImageMorphTool cImageMorphToolObj = null;// new VisionDesigner.ImageMorph.CImageMorphTool();
         VisionDesigner.BlobFind.CBlobFindTool cBlobFindToolObj = null;// new VisionDesigner.BlobFind.CBlobFindTool();
+        VisionDesigner.ImageAffineTransform.CImageAffineTransformTool cImageAffineTransformToolObj = null;
         Mvd2DReaderClass mvd2DReader = null;// new Mvd2DReaderClass();
         MvdFindLineClass mvdFindLineClass = null;
         MvdPairLineClass mvdPairLineClass = null;
@@ -61,6 +64,8 @@ namespace LaserAlignDX.OPSpace
             mvdFindLineClass = null;
             mvdPairLineClass?.Dispose();
             mvdPairLineClass = null;
+            cImageAffineTransformToolObj?.Dispose();
+            cImageAffineTransformToolObj = null;
 
             try { OutGridLink?.Dispose(); } catch { }
             OutGridLink = null;
@@ -252,6 +257,106 @@ namespace LaserAlignDX.OPSpace
         ///// Runtime 跑線後的 LineSegment Border Box2D
         ///// </summary>
         //public CMvdShape[] cMvdShapesForFindLineRegion = new CMvdShape[4];
+        #endregion
+
+        #region MVD_IMAGE_AFFINETRANSFORM
+        /// <summary>
+        /// 抓取全域图形的转正图像 位置框由前期定位决定
+        /// </summary>
+        /// <param name="cMvdImage">全域图像</param>
+        /// <returns></returns>
+        public Bitmap GetAffineTrainsFormRunBmp(CMvdImage cMvdImage, CMvdShape cMvdShape)
+        {
+            if (cImageAffineTransformToolObj == null)
+                cImageAffineTransformToolObj = new VisionDesigner.ImageAffineTransform.CImageAffineTransformTool();
+            cImageAffineTransformToolObj.BasicParam.Aspect = 1;
+            cImageAffineTransformToolObj.InputImage = cMvdImage;
+            cImageAffineTransformToolObj.ROIShape = cMvdShape;
+            cImageAffineTransformToolObj.Run();
+            //输出结果
+            return CMvdImageToBitmapEx(cImageAffineTransformToolObj.Result.OutputImage);
+        }
+        /// <summary>
+        /// cMvdImage 转 Bitmap
+        /// </summary>
+        /// <param name="cMvdImage"></param>
+        /// <returns></returns>
+        Bitmap CMvdImageToBitmapEx(CMvdImage cMvdImage)
+        {
+            Bitmap bmpInputImg = null;
+            byte[] buffer = new byte[cMvdImage.GetImageData(0).arrDataBytes.Length];
+            buffer = cMvdImage.GetImageData(0).arrDataBytes;
+
+            if (MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08 == cMvdImage.PixelFormat)
+            {
+                Int32 imageWidth = Convert.ToInt32(cMvdImage.Width);
+                Int32 imageHeight = Convert.ToInt32(cMvdImage.Height);
+                PixelFormat bitMaPixelFormat = PixelFormat.Format8bppIndexed;
+                bmpInputImg = new Bitmap(imageWidth, imageHeight, bitMaPixelFormat);
+                int offset = imageWidth % 4 != 0 ? (4 - imageWidth % 4) : 0;//添加冗余位，变成4的倍数
+                int strid = imageWidth + offset;
+                int bitmapBytesLenth = strid * imageHeight;
+                byte[] bitmapDataBytes = new byte[bitmapBytesLenth];
+                for (int i = 0; i < imageHeight; i++)
+                {
+                    for (int j = 0; j < strid; j++)
+                    {
+                        int bitIndex = i * strid + j;
+                        int mvdIndex = i * imageWidth + j;
+                        if (j >= imageWidth)
+                        {
+                            bitmapDataBytes[bitIndex] = 0;//冗余位填充0
+                        }
+                        else
+                        {
+                            bitmapDataBytes[bitIndex] = buffer[mvdIndex];
+                        }
+                    }
+                }
+                BitmapData bitmapData = bmpInputImg.LockBits(new Rectangle(0, 0, imageWidth, imageHeight), ImageLockMode.WriteOnly, bitMaPixelFormat);
+                IntPtr imageBufferPtr = bitmapData.Scan0;
+                Marshal.Copy(bitmapDataBytes, 0, imageBufferPtr, bitmapBytesLenth);
+                bmpInputImg.UnlockBits(bitmapData);
+
+                var colorPalettes = bmpInputImg.Palette;
+                for (int j = 0; j < 256; j++)
+                {
+                    colorPalettes.Entries[j] = Color.FromArgb(j, j, j);
+                }
+                bmpInputImg.Palette = colorPalettes;
+            }
+            else if (MVD_PIXEL_FORMAT.MVD_PIXEL_RGB_RGB24_C3 == cMvdImage.PixelFormat)
+            {
+                Int32 imageWidth = Convert.ToInt32(cMvdImage.Width);
+                Int32 imageHeight = Convert.ToInt32(cMvdImage.Height);
+                PixelFormat bitMaPixelFormat = PixelFormat.Format24bppRgb;
+                bmpInputImg = new Bitmap(imageWidth, imageHeight, bitMaPixelFormat);
+                int offset = imageWidth % 4 != 0 ? (4 - (imageWidth * 3) % 4) : 0;//添加冗余位，变成4的倍数
+                int strid = imageWidth * 3 + offset;
+                int bitmapBytesLenth = strid * imageHeight;
+                byte[] bitmapDataBytes = new byte[bitmapBytesLenth];
+                for (int i = 0; i < imageHeight; i++)
+                {
+                    for (int j = 0; j < imageWidth; j++)
+                    {
+                        int mvdIndex = i * imageWidth * 3 + j * 3;
+                        int bitIndex = i * strid + j * 3;
+                        bitmapDataBytes[bitIndex] = buffer[mvdIndex + 2];
+                        bitmapDataBytes[bitIndex + 1] = buffer[mvdIndex + 1];
+                        bitmapDataBytes[bitIndex + 2] = buffer[mvdIndex];
+                    }
+                    for (int k = 0; k < offset; k++)
+                    {
+                        bitmapDataBytes[i * strid + imageWidth * 3 + k] = 0;
+                    }
+                }
+                BitmapData bitmapData = bmpInputImg.LockBits(new Rectangle(0, 0, imageWidth, imageHeight), ImageLockMode.WriteOnly, bitMaPixelFormat);
+                IntPtr imageBufferPtr = bitmapData.Scan0;
+                Marshal.Copy(bitmapDataBytes, 0, imageBufferPtr, bitmapBytesLenth);
+                bmpInputImg.UnlockBits(bitmapData);
+            }
+            return bmpInputImg;
+        }
         #endregion
 
         #region MVD_LINE_SEGMENTS
@@ -1155,6 +1260,17 @@ namespace LaserAlignDX.OPSpace
                 //inspectReasons.Add(InspectReason.INS_DEFECTERR);
                 MarkResult(InspectReason.NG_APPEARANCE);
 
+                List<CMvdRectangleF> cMvdRectangleFs = new List<CMvdRectangleF>();
+                foreach (CMvdRectangleF mvdRectangleF in _blobMvdRectFNGList)
+                {
+                    mvdRectangleF.CenterX += MvdRunPositionFix.CenterX - _defectRunRoiSize.Width / 2;  // bmpItemRun.Width / 2;
+                    mvdRectangleF.CenterY += MvdRunPositionFix.CenterY - _defectRunRoiSize.Height / 2; // bmpItemRun.Height / 2;
+                    //mvdRectangleF.BorderColor = new MVD_COLOR(255, 0, 0);
+                    //mvdRectangleF.BorderWidth = 1;
+                    cMvdRectangleFs.Add(mvdRectangleF);
+                }
+
+                ChipData.DefectBlobs = Array.ConvertAll(cMvdRectangleFs.ToArray(), b => b.ToBox2D());
                 if (IsSaveDebugPicture)
                 {
                     //cImageBinaryToolObj?.Result?.OutputImage?.SaveImage($"{SaveDebugPath}\\Detect\\{lblName}_Diff2.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
@@ -1167,6 +1283,8 @@ namespace LaserAlignDX.OPSpace
                         System.IO.Directory.CreateDirectory(dumpFolder);
 
                     string fileStem = System.IO.Path.Combine(dumpFolder, lblName);
+                    cImageArithmeticToolObj?.InputImage1?.SaveImage(fileStem + "_Template.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    cImageArithmeticToolObj?.InputImage2?.SaveImage(fileStem + "_Run.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
                     cImageBinaryToolObj?.Result?.OutputImage?.SaveImage(fileStem + "_Diff2.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
                     cBlobFindToolObj?.RegionImage?.SaveImage(fileStem + "_Diff2_1.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
                     cBlobFindRes?.BlobImage?.SaveImage(fileStem + "_Diff3.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);

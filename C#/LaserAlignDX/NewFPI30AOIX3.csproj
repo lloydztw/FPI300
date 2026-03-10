@@ -229,6 +229,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Common\MVDImage.Net.dll</HintPath>
     </Reference>
+    <Reference Include="MVDImageAffineTransform.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=85794d8c0bf3f2be, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDImageAffineTransform.NET.dll</HintPath>
+    </Reference>
     <Reference Include="MVDImageArithmetic.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=572f56b863e4ebce, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDImageArithmetic.NET.dll</HintPath>
