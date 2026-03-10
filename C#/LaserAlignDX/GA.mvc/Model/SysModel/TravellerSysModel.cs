@@ -14,7 +14,6 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
-using JetEazy.FormSpace;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
@@ -29,7 +28,6 @@ using NeedleX.ProcessSpace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
 using EmptyTrayAoiFactory = EzAoiEmptyTrayInspector.AoiFactory;

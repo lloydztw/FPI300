@@ -21,7 +21,6 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel.Calib;
-using LaserAlignDX.Mvc.Model;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using System;

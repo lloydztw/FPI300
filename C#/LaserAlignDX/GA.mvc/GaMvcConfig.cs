@@ -20,7 +20,6 @@ using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
-using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -102,7 +101,7 @@ namespace LaserAlignDX
             }
             catch(Exception ex)
             {
-                LtDebug.LOG.Error(ex, "[OpenRecipeEditor] 異常");
+                //LtDebug.LOG.Error(ex, "[OpenRecipeEditor] 異常");
             }
         }
         public static void OpenTamplateEditor(CarrierEnum C)
