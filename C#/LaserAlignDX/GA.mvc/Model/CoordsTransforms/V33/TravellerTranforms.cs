@@ -42,7 +42,7 @@ namespace LaserAlignDX.Model.Coords.V33
         #endregion
 
         #region NLOG
-        static NLog.ILogger _LOG => LtDebug.LOG;
+        internal static NLog.ILogger _LOG => LtDebug.LOG;
         #endregion
 
         #region PRIVATE_TRANSFORM_MEMBERS
@@ -316,6 +316,7 @@ namespace LaserAlignDX.Model.Coords.V33
 
         public void BuildAll()
         {
+            GaUtil.LOG($"座標系統 [{Name}] 建構 : 開始");
             foreach (var trf in _transforms)
             {
                 if (trf == null) continue;
@@ -324,14 +325,21 @@ namespace LaserAlignDX.Model.Coords.V33
                 GaUtil.LOG($"MATRIX_{trf.Name} det1 = {det1:0.000000}");
                 GaUtil.LOG($"MATRIX_{trf.Name} det2 = {det2:0.000000}");
             }
+            GaUtil.LOG($"座標系統 [{Name}] 建構 : 完成");
         }
         public void Load(string iniFileName)
         {
+            if (!System.IO.File.Exists(iniFileName))
+                return;
+            GaUtil.LOG($"校正參數 [{Name}] 載入 : {iniFileName}");
             LoadIni(iniFileName);
+            GaUtil.LOG($"校正參數 [{Name}] 載入 : OK");
         }
         public void Save(string iniFileName)
         {
+            GaUtil.LOG($"校正參數 [{Name}] 保存 : {iniFileName}");
             SaveIni(iniFileName);
+            GaUtil.LOG($"校正參數 [{Name}] 保存 : OK");
         }
 
         #region 查核_函式群

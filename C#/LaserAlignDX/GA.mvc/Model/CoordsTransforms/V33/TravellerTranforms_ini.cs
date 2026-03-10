@@ -23,7 +23,7 @@ namespace LaserAlignDX.Model.Coords.V33
 {
     partial class TravellerTransforms
     {
-        public void LoadIni(string iniFileName)
+        void LoadIni(string iniFileName)
         {
             if (!System.IO.File.Exists(iniFileName))
             {
@@ -31,7 +31,7 @@ namespace LaserAlignDX.Model.Coords.V33
                 return;
             }
 
-            _LOG.Info($"載入 [校正參數 (Trf)] @ [{Name}] : {iniFileName}");
+            //_LOG.Info($"載入 [校正參數 (Trf)] @ [{Name}] : {iniFileName}");
 
             _worldGrid.Load(iniFileName, "GlobalCalibPlcGrid");
 
@@ -42,9 +42,9 @@ namespace LaserAlignDX.Model.Coords.V33
 
             loadCalibCamGrids(iniFileName, updateToTrf: true);
         }
-        public void SaveIni(string iniFileName)
+        void SaveIni(string iniFileName)
         {
-            _LOG.Info($"寫入 [校正參數 (Trf)] @ [{Name}] : {iniFileName}");
+            //_LOG.Info($"寫入 [校正參數 (Trf)] @ [{Name}] : {iniFileName}");
 
             _worldGrid.Save(iniFileName, "GlobalCalibPlcGrid");
 

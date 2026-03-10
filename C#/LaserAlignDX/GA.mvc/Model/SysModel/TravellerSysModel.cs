@@ -29,6 +29,7 @@ using NeedleX.ProcessSpace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
 using EmptyTrayAoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
@@ -283,7 +284,7 @@ namespace LaserAlignDX.Mvc.Model
             // 個別參數 【自動抓取陣列】 並 進行 【座標系統 線性遷移】
             // <br/> 用於 參數編輯模式
             // <br/> 必須曾經執行過 BuildTransformAndRegionCells
-            ErrorCodes err;
+            ErrorCodes err = ErrorCodes.OK;
 
             //(1) 抓取 空盤 格位點
             matchResult = fetchEmptyTrayCameraGrid(fullfovBmp);
@@ -298,23 +299,18 @@ namespace LaserAlignDX.Mvc.Model
 
             if (migrate || _transformsModel == null)
             {
-                //(2.1) 載入 共用 座標轉換系統
-                var commonBaseTrf = TravellerTransformFactory.CommonBase;
-                commonBaseTrf.Load(GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE);
-                commonBaseTrf.BuildAll();
-
-                //(2.2) 線性轉移 建立 個別 座標轉換系統
+                //(2.1) 線性轉移 建立 個別 座標轉換系統
                 string gaaraRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
-                var trfModel = this.CreateLinearMigration(gaaraRecipeName, carrierID, camGrid, commonBaseTrf);
+                var trfModel = this.CreateLinearMigration(gaaraRecipeName, carrierID, camGrid);
 
-                //(2.3) 核查 結果
-                if (checkCameraGrid(trfModel, carrierID, camGrid, notify: true) != ErrorCodes.OK)
-                    return false;
+                //(2.2) 核查 結果
+                err = checkCameraGrid(trfModel, carrierID, camGrid, notify: true);
 
-                //(2.4) 記入 線性轉移後 座標轉換系統
-                _transformsModel = trfModel;
+                //(2.3) 記入 線性轉移後 座標轉換系統
+                if (err == ErrorCodes.OK || _transformsModel == null)
+                    _transformsModel = trfModel;
 
-                //(2.5) clean up
+                //(2.4) clean up others
                 TravellerTransformFactory.Keep(_transformsModel.Name);
             }
             else
@@ -323,14 +319,17 @@ namespace LaserAlignDX.Mvc.Model
                 var trfModel = _transformsModel;
 
                 //(3.2) 核查 結果
-                if (checkCameraGrid(trfModel, carrierID, camGrid, notify: true) != ErrorCodes.OK)
-                    return false;
+                err = checkCameraGrid(trfModel, carrierID, camGrid, notify: true);
             }
 
-            //(4) 建立格點陣列
-            bool ok = buildRegionCells(_transformsModel, carrierID, camGrid, optWriteBlackToRecipe: true);      //@ AutoBuildRegionCellsArray
+            if (err == ErrorCodes.OK)
+            {
+                //(4) 建立格點陣列
+                bool ok = buildRegionCells(_transformsModel, carrierID, camGrid, optWriteBlackToRecipe: true);      //@ AutoBuildRegionCellsArray
+                return ok;
+            }
 
-            return ok;
+            return false;
         }
 
         #region PRIVATE_EMPTY_TRAY_HELPER_FUNCTIONS
@@ -861,66 +860,34 @@ namespace LaserAlignDX.Mvc.Model
         /// <summary>
         /// 根據 新的 相機格點 newCamGrid, 從 baseTrf 線性遷移 生成新的 座標轉換系統
         /// </summary>
-        public ITravellerTransforms CreateLinearMigration(string name, CarrierEnum carrierID, EzBlocsGrid newCamGrid, ITravellerTransforms baseTrf)
+        ITravellerTransforms CreateLinearMigration(string name, CarrierEnum carrierID, EzBlocsGrid newCamGrid)
         {
-            //while (true)
-            //{
-            //    if (string.IsNullOrEmpty(name))
-            //        break;
+            //(0) 無論如何 都先建立 Instance
+            var newTrf = TravellerTransformFactory.Instance(name);
 
-            //    //(0) Instance
-            //    var newTrf = TravellerTransformFactory.Instance(name);
+            //(1) 檢查 當前 空盤檢測參數 
+            var emptyTrayRecipe = EmptyTrayAoiModel.GetRecipe();
+            if (emptyTrayRecipe == null)
+            {
+                ErrorCodes err;
+                string errMsg = GaUtil.GetEnumDescription(err = ErrorCodes.NO_EMPTY_TRAY_RECIPE);
+                OnError?.Invoke(this, new ProcessEventArgs(errMsg, err));
+                return newTrf;
+            }
 
-            //    //(1.0) 檢查 當前 空盤檢測參數 
-            //    var emptyTrayRecipe = EmptyTrayAoiModel.GetRecipe();
-            //    if (emptyTrayRecipe == null)
-            //    {
-            //        ErrorCodes err;
-            //        string errMsg = GaUtil.GetEnumDescription(err = ErrorCodes.NO_EMPTY_TRAY_RECIPE);
-            //        OnError?.Invoke(this, new ProcessEventArgs(errMsg, err));
-            //        break;
-            //    }
-            //    //(1.1) 取得 pitchX, pitchY, rows, cols
-            //    getGridPitchFromRecipe(emptyTrayRecipe, out double pitchX, out double pitchY);
-            //    var rows = emptyTrayRecipe.TrayMiscSettings.FullRows.Value;
-            //    var cols = emptyTrayRecipe.TrayMiscSettings.FullCols.Value;
-            //    //(1.2) 檢查 (rows, cols) 一致性
-            //    if (checkCameraGridConsistent(newCamGrid, rows, cols, notify: true) != ErrorCodes.OK)
-            //        break;
+            //(2) 取得 pitchX, pitchY, rows, cols
+            getGridPitchFromRecipe(emptyTrayRecipe, out double pitchX, out double pitchY);
+            var rows = emptyTrayRecipe.TrayMiscSettings.FullRows.Value;
+            var cols = emptyTrayRecipe.TrayMiscSettings.FullCols.Value;
+            //(3) 檢查 (rows, cols) 一致性
+            if (checkCameraGridConsistent(newCamGrid, rows, cols, notify: true) != ErrorCodes.OK)
+                return newTrf;
 
-            //    //(2) [線性遷移] 重新設定 rows, cols, pitchX, pitchY 布局
-            //    newTrf.ConfigWorldGridPoints(rows, cols, pitchX, pitchY);
+            //(4) [線性遷移] 重新設定 rows, cols, pitchX, pitchY 布局
+            var newPitch = new QVector2(pitchX, pitchY);
+            newTrf = TravellerTransformFactory.CreateLinearMigration(name, carrierID, newCamGrid, newPitch);
 
-            //    //(3) [線性遷移] 重新設定 相機格點
-            //    newTrf.SetCalibCamGrid(carrierID, newCamGrid);
-
-            //    ////(4) [線性遷移] 線性遷移 相機-馬達 座標轉換系統 (保留)
-            //    //foreach (SuckerRowEnum suckerID in Enum.GetValues(typeof(SuckerRowEnum)))
-            //    //{
-            //    //    var baseTransCM = baseTrf.GetCameraMotorTransform(carrierID, suckerID);
-            //    //    var newTransCM = newTrf.GetCameraMotorTransform(carrierID, suckerID);
-            //    //    var newCorners = newTransCM.GetCalibCornerPoints();
-            //    //    int NC = newCorners.Counts;
-            //    //    for (int i = 0; i < NC; i++)
-            //    //    {
-            //    //        newCorners.Get(i, out var camPt, out var _);
-            //    //        var migratedMotorPt = baseTransCM.Trans(camPt);
-            //    //        newCorners.Set(i, camPt, migratedMotorPt);
-            //    //    }
-            //    //}
-
-            //    //(5) Build
-            //    newTrf.BuildAll();
-            //    return newTrf;
-            //}
-
-            //*** CLONE_COMMON_BASE_AS_DEFAULT ***
-            var tmpPath = System.IO.Path.GetTempPath();
-            var tmpFile = System.IO.Path.Combine(tmpPath, $"jx_clone_transform.ini");
-            var clonedTrf = TravellerTransformFactory.Instance(name);
-            baseTrf.Save(tmpFile);
-            clonedTrf.Load(tmpFile);
-            return clonedTrf;
+            return newTrf;
         }
     }
 }

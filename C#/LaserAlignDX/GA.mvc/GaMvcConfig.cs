@@ -20,6 +20,7 @@ using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
+using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -88,16 +89,21 @@ namespace LaserAlignDX
         // VIEW ----------------------------------------------------
         public static void OpenRecipeEditor()
         {
-            var backID = _sysModel.ActiveCarrierID;
-
-            using (var dlg = new FormRcpEditorTool())
+            try
             {
-                dlg.ShowDialog();
+                var backID = _sysModel.ActiveCarrierID;
+                using (var dlg = new FormRcpEditorTool())
+                {
+                    dlg.ShowDialog();
+                }
+                //為安全起見, 重新再次載入 Recipe
+                _sysModel.ActiveCarrierID = backID;
+                _sysModel.ApplyRecipe();
             }
-
-            //為安全起見, 重新再次載入 Recipe
-            _sysModel.ActiveCarrierID = backID;
-            _sysModel.ApplyRecipe();
+            catch(Exception ex)
+            {
+                LtDebug.LOG.Error(ex, "[OpenRecipeEditor] 異常");
+            }
         }
         public static void OpenTamplateEditor(CarrierEnum C)
         {
