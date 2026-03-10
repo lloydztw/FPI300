@@ -455,9 +455,15 @@
     <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v3.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\JxCalibRecipe.cs" />
-    <Compile Include="GA.mvc\Model\Coordinates\ITravellerTransforms.cs" />
-    <Compile Include="GA.mvc\Model\Coordinates\QMicroChipTransform_v30.cs" />
-    <Compile Include="GA.mvc\Model\Coordinates\Supports\TravellerTranformsGaaraExt.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\Support\QRegistable.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\IWorldGridPoints.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\ITravellerTransforms.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\IMicroChipTransform.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\TravellerTransformFactory.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\QWorldGridPoints.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\QMicroChipTransform.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTranforms_ini.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTranforms.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3MeasureSpec.cs" />
@@ -501,7 +507,6 @@
     <Compile Include="GA.mvc\Model\SysModel\TravellerBigImagesHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ScanInspectModeEnum.cs" />
-    <Compile Include="GA.mvc\Model\Coordinates\PlcGridPoints.cs" />
     <Compile Include="GA.mvc\.Enums\CarrierEnum.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />
@@ -510,7 +515,6 @@
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\PowerTechReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\XxxCompanyReportBuilder.cs" />
     <Compile Include="GA.mvc\GaMvcConfig.cs" />
-    <Compile Include="GA.mvc\Model\Coordinates\TravellerTranforms_v32.cs" />
     <Compile Include="GA\BasicSpace\ChipClass.cs" />
     <Compile Include="GA\BasicSpace\CollectResultClass.cs" />
     <Compile Include="GA\BasicSpace\FindRectByVM.cs" />

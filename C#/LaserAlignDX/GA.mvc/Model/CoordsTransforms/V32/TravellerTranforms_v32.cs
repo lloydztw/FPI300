@@ -20,21 +20,19 @@ using JetEazy.Transform;
 using JetEazy.Utils;
 using LeTian.AoiLib;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
 
-namespace LaserAlignDX.Model.Coords
+namespace LaserAlignDX.Model.Coords.V32
 {
     /// <summary>
     /// Traveller106 專案 的 所有座標系
     /// </summary>
-    public partial class TravellerTransforms : IDisposable, ITravellerTransforms
+    public partial class TravellerTransforms : IDisposable
     {
         #region CONFIG
         /// <summary>
-        /// 校正點數 (馬達座標)
+        /// 校正點數
         /// </summary>
         public const int N_CALIB_POINTS = 4;
         /// <summary>
@@ -43,7 +41,7 @@ namespace LaserAlignDX.Model.Coords
         internal static bool OPT_CALIB_GRID_USING_MOTOR_COORD => true;
         #endregion
 
-        #region PRIVATE_TRANSFORM_MEMBERS
+        #region PRIVATE_GLOBAL_TRANSFORM_MEMBERS
         PlcGridPoints _calibPlcGrid = new PlcGridPoints();
         EzBlocsGrid[] _calibCamGrids = new EzBlocsGrid[Enum.GetValues(typeof(CarrierEnum)).Length];
         QTransform[] _transforms = new QTransform[]
@@ -65,11 +63,29 @@ namespace LaserAlignDX.Model.Coords
         }
         #endregion
 
-        public string Name
+        #region SINGLETON
+        static TravellerTransforms _instance;
+        TravellerTransforms()
         {
-            get;
-            protected set;
+            QVector.Percision = 12;
         }
+        #endregion
+
+        public static TravellerTransforms Instance
+        {
+            get
+            {
+                if(_instance == null)
+                    _instance = new TravellerTransforms();
+                return _instance;
+            }
+        }
+        public void Dispose()
+        {
+            foreach (var trf in _transforms)
+                trf?.Dispose();
+        }
+
         public QTransform GetCameraMotorTransform(CarrierEnum C, SuckerRowEnum S)
         {
             int index = getIndex(C, S);
@@ -81,7 +97,17 @@ namespace LaserAlignDX.Model.Coords
             return _transforms[index];
         }
 
-        #region 校正時期_函式群
+#if(OPT_RESERVED)
+        public QTransform this[CarrierEnum C, SuckerRowEnum S]
+        {
+            get => GetCameraMotorTransform(C, S);
+        }
+        public QTransform this[CarrierEnum C]
+        {
+            get => GetCameraPhysicTransform(C);
+        }
+#endif
+
         public PlcGridPoints getCalibPlcGrid()
         {
             // 2025-12-23 新增
@@ -92,10 +118,6 @@ namespace LaserAlignDX.Model.Coords
             // 2025-12-23 新增
             return _calibCamGrids[(int)C];
         }
-
-        /// <summary>
-        /// 設定 校正格點 (相機座標)
-        /// </summary>
         public void SetCalibCameraGrid(CarrierEnum C, EzBlocsGrid camGrid)
         {
             // 2025-12-23 新增
@@ -115,9 +137,9 @@ namespace LaserAlignDX.Model.Coords
         }
 
         /// <summary>
-        /// 更新 全域校正 C座標 (Camera) 格點 (停用)
+        /// 更新 全域校正 C座標 (Camera) 格點
         /// </summary>
-        void __UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid calibCamGrid)
+        public void UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid calibCamGrid)
         {
             if (calibCamGrid == null)
                 return;
@@ -163,8 +185,8 @@ namespace LaserAlignDX.Model.Coords
                     calibCamGrid[r,c].Center,
                     calibCamGrid[r,0].Center,
                 };
-                var phyCornerPts = new[]
-                {
+                    var phyCornerPts = new[]
+                    {
                     calibPlcGrid[r0,0],
                     calibPlcGrid[r0,c],
                     calibPlcGrid[r,c],
@@ -205,9 +227,7 @@ namespace LaserAlignDX.Model.Coords
                 GaUtil.LOG($"MATRIX_{trf.Name} det2 = {det2:0.000000}");
             }
         }
-        #endregion
 
-        #region INI_FILE_FUNCIONS
         public void Load(string iniFileName)
         {
             if (!System.IO.File.Exists(iniFileName))
@@ -216,8 +236,7 @@ namespace LaserAlignDX.Model.Coords
                 return;
             }
 
-            LtDebug.LOG.Info($"載入 [校正參數 (Trf)] @ [{Name}] : {iniFileName}");
-
+            LtDebug.LOG.Debug($"載入 [校正參數 (Trf)] {iniFileName}");
             _calibPlcGrid.Load(iniFileName, "GlobalCalibPlcGrid");
             foreach (var trf in _transforms)
             {
@@ -227,10 +246,10 @@ namespace LaserAlignDX.Model.Coords
             // 2025-12-23 新增
             loadCalibCamGrids(iniFileName);
         }
+
         public void Save(string iniFileName)
         {
-            LtDebug.LOG.Info($"寫入 [校正參數 (Trf)] @ [{Name}] : {iniFileName}");
-
+            LtDebug.LOG.Debug($"寫入 [校正參數 (Trf)] {iniFileName}");
             _calibPlcGrid.Save(iniFileName, "GlobalCalibPlcGrid");
             foreach (var trf in _transforms)
             {
@@ -240,7 +259,6 @@ namespace LaserAlignDX.Model.Coords
             // 2025-12-23 新增
             saveCalibCamGrids(iniFileName);
         }
-        #endregion
 
         #region PRIVATE_FILE_IO_FUNCTIONS
         string normalizeCalibCamGridDataFile(string iniFileName)
@@ -266,11 +284,11 @@ namespace LaserAlignDX.Model.Coords
             var lines = System.IO.File.ReadAllLines(fileName);
             NGrids = Math.Min(NGrids, lines.Length);
 
-            var GS = new EzBlocsGridSerializer();
+            var gs = new EzBlocsGridSerializer();
             for (int i = 0; i < NGrids; i++)
             {
                 string str = lines[i];
-                GS.Deserialize(str, out _calibCamGrids[i]);
+                gs.Deserialize(str, out _calibCamGrids[i]);
             }
         }
         void saveCalibCamGrids(string iniFileName)
@@ -278,10 +296,10 @@ namespace LaserAlignDX.Model.Coords
             int NGrids = _calibCamGrids.Length;
             var lines = new string[NGrids];
 
-            var GS = new EzBlocsGridSerializer();
+            var gs = new EzBlocsGridSerializer();
             for (int i = 0; i < NGrids; i++)
             {
-                string str = GS.Serialize(_calibCamGrids[i]);
+                string str = gs.Serialize(_calibCamGrids[i]);
                 lines[i] = str;
             }
 
@@ -293,7 +311,7 @@ namespace LaserAlignDX.Model.Coords
         }
         #endregion
 
-        #region PRIVATE_HELPER_FUNCTIONS
+        #region PRIVATE_FUNCTIONS
         QVector[,] toCalibGrid(EzBlocsGrid camGrid)
         {
             int rows = camGrid.Rows;
@@ -327,19 +345,16 @@ namespace LaserAlignDX.Model.Coords
     partial class TravellerTransforms
     {
         #region PRIVATE_RUNTIME_DATA
-        PlcGridPoints _runtimePlcGrid => _calibPlcGrid;
-        EzBlocsGrid _runtimeCamGridC1 => _calibCamGrids[(int)CarrierEnum.C1];
-        EzBlocsGrid _runtimeCamGridC2 => _calibCamGrids[(int)CarrierEnum.C2];
+        PlcGridPoints _runtimePlcGrid = null;
+        EzBlocsGrid _runtimeCamGridC1 = null;
+        EzBlocsGrid _runtimeCamGridC2 = null;
         #endregion
-
-        #region 跑線時期_函式群
 
         /// <summary>
         /// 設定 Runtime 跑線時期 P座標 (PLC) 格點
         /// </summary>
         public void UpdateRuntimePlcGrid(PlcGridPoints plcGrid, EzBlocsGrid camGrid1 = null, EzBlocsGrid camGrid2 = null)
         {
-#if (OPT_REV_2026_0308_REPLACED_BY_LINEAR_MIGRATION)
             if (plcGrid != null)
                 _runtimePlcGrid = plcGrid;
 
@@ -348,17 +363,16 @@ namespace LaserAlignDX.Model.Coords
 
             if (camGrid2 != null)
                 _runtimeCamGridC2 = camGrid2;
-#endif
         }
 
         /// <summary>
         /// 取出 Runtime 跑線時期 標準格點 座標數據
         /// </summary>
-        public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId,
-                                                out QVector camCoord,
+        public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId, 
+                                                out QVector camCoord, 
                                                 out QVector worldCoord,
-                                                out QVector s1MotorCoord,
-                                                out QVector s2MotorCoord)
+                                                out QVector s1MotorCoord, 
+                                                out QVector s2MotorCoord )
         {
             #region DEFAULT_VALUES
             ErrorCodes errCode;
@@ -390,9 +404,9 @@ namespace LaserAlignDX.Model.Coords
                 //(4.1) 檢查 Runtime CamGrid
                 var runtimeCamGrid = C == CarrierEnum.C1 ? _runtimeCamGridC1 : _runtimeCamGridC2;
                 (errCode, errMsg) = checkCameraGrid(C, runtimeCamGrid);
-                if (errCode != ErrorCodes.OK)
+                if(errCode != ErrorCodes.OK) 
                     return (errCode, errMsg);
-
+                
                 camCoord = runtimeCamGrid.Get(rowId, colId)?.Center;
                 if (camCoord == null)
                     camCoord = new QVector(0, 0);
@@ -611,7 +625,7 @@ namespace LaserAlignDX.Model.Coords
             (var err, var errMsg) = GetNodeCoords(C, rowId, colId, out var _, out var world_target, out var s1_target, out var s2_target);
             if (err != ErrorCodes.OK)
             {
-                return (new QVector(0, 0), new QVector(0, 0));
+                return (new QVector(0,0), new QVector(0, 0));
             }
 
             var transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
@@ -631,10 +645,8 @@ namespace LaserAlignDX.Model.Coords
             return (motorDelta, worldDelta);
         }
 
-        #endregion
-
-        #region 查核_函式群
-        public (ErrorCodes, string) checkCameraGrid(CarrierEnum carrierID, EzBlocsGrid camGrid)
+        #region CHECK_FUNCTIONS
+        internal (ErrorCodes, string) checkCameraGrid(CarrierEnum carrierID, EzBlocsGrid camGrid)
         {
             var errCode = ErrorCodes.OK;
             string errMsg = null;
@@ -656,7 +668,7 @@ namespace LaserAlignDX.Model.Coords
 
             return (errCode, errMsg);
         }
-        public (ErrorCodes, string) checkTransforms(CarrierEnum carrierID)
+        internal (ErrorCodes, string) checkTransforms(CarrierEnum carrierID)
         {
             var transCP = this.GetCameraPhysicTransform(carrierID);
             var transCM1 = this.GetCameraMotorTransform(carrierID, SuckerRowEnum.S1);
@@ -667,20 +679,20 @@ namespace LaserAlignDX.Model.Coords
 
             if (transCP == null)
             {
-                errCode = ErrorCodes.NO_CALIB_TRANSFORM;
+                errCode = ErrorCodes.CalibErr_No_Transform_Model;
                 errMsg = JetEazy.QxNums.GetEnumDescription(carrierID);
             }
             else
             {
                 if (transCM1 == null)
                 {
-                    errCode = ErrorCodes.NO_CALIB_TRANSFORM;
+                    errCode = ErrorCodes.CalibErr_No_Transform_Model;
                     errMsg += JetEazy.QxNums.GetEnumDescription(carrierID) + " " + JetEazy.QxNums.GetEnumDescription(SuckerRowEnum.S1) + "\n\r";
                 }
 
                 if (transCM2 == null)
                 {
-                    errCode = ErrorCodes.NO_CALIB_TRANSFORM;
+                    errCode = ErrorCodes.CalibErr_No_Transform_Model;
                     errMsg += JetEazy.QxNums.GetEnumDescription(carrierID) + " " + JetEazy.QxNums.GetEnumDescription(SuckerRowEnum.S2) + "\n\r";
                 }
             }
@@ -695,7 +707,7 @@ namespace LaserAlignDX.Model.Coords
                 return (errCode, errMsg);
             }
         }
-        public (ErrorCodes, string) checkRuntimePlcGrid()
+        internal (ErrorCodes, string) checkRuntimePlcGrid()
         {
             var errCode = ErrorCodes.OK;
             string errMsg = null;
@@ -719,107 +731,6 @@ namespace LaserAlignDX.Model.Coords
             {
                 return (errCode, errMsg);
             }
-        }
-        #endregion
-    }
-
-
-    partial class TravellerTransforms
-    {
-        #region PRIVATE_STATIC_REGISTER_TABLE
-        static Dictionary<string, TravellerTransforms> _registerTable = new Dictionary<string, TravellerTransforms>();
-        static void register(TravellerTransforms obj)
-        {
-            if (obj == null)
-                return;
-            if(!_registerTable.ContainsKey(obj.Name)) 
-                _registerTable.Add(obj.Name, obj);
-        }
-        static void unregister(TravellerTransforms obj)
-        {
-            if (obj == null) return;
-            if(_registerTable.ContainsKey(obj.Name))
-                _registerTable.Remove(obj.Name);
-        }
-        static TravellerTransforms find(string name)
-        {
-            if(string.IsNullOrEmpty(name))
-                return null;
-            if (_registerTable.ContainsKey(name))
-                return _registerTable[name];
-            return null;
-        }
-        #endregion
-
-        #region 建構_解構_函式群
-        protected TravellerTransforms(string name)
-        {
-            QVector.Percision = 12;
-            Name = name;
-            register(this);
-        }
-
-        void IDisposable.Dispose()
-        {
-            foreach (var trf in _transforms)
-                trf?.Dispose();
-
-            for (int i = 0, N = _calibCamGrids.Length; i < N; i++)
-            {
-                _calibCamGrids[i]?.Dispose();
-                _calibCamGrids[i] = null;
-            }
-
-            unregister(this);
-        }
-
-        /// <summary>
-        /// 所有參數共用基礎 的 座標轉換系統
-        /// </summary>
-        public static TravellerTransforms CommonBase
-        {
-            get
-            {
-                return Instance("$CommonBase$");
-            }
-        }
-
-        /// <summary>
-        /// 個別參數 的 座標轉換系統
-        /// </summary>
-        public static TravellerTransforms Instance(string name)
-        {
-            var instance = find(name);
-            if (instance == null)
-                instance = new TravellerTransforms(name);
-            return instance;
-        }
-
-        /// <summary>
-        /// 卸載所有 座標轉換系統 (exclusiveNames 除外)
-        /// </summary>
-        public static void DisposeAll(params string[] exclusiveNames)
-        {
-            var keeps = Array.ConvertAll(exclusiveNames, name => find(name));
-
-            var allObjs = _registerTable.Values.ToList();
-            foreach(IDisposable obj in allObjs)
-            {
-                if (Array.IndexOf(keeps, obj) < 0)
-                    obj?.Dispose();
-            }
-
-            _registerTable.Clear();
-            foreach (var keep in keeps)
-                register(keep);
-        }
-
-        /// <summary>
-        /// 只保留 name (與 $CommonBase$) 兩個 座標轉換系統 其餘都卸載
-        /// </summary>
-        public static void Keep(string name)
-        {
-            DisposeAll(name, "$CommonBase$");
         }
         #endregion
     }

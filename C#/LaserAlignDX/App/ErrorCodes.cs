@@ -31,8 +31,8 @@ namespace LaserAlignDX.Mvc.Model
         [Description("Machine.PLCIO 還沒配置")]
         NO_PLC_IO,
 
-        [Description("缺少 '全域校正' 數據")]
-        NO_CALIB_TRANSFORM,
+        [Description("空盤檢測 參數沒建立")]
+        NO_EMPTY_TRAY_RECIPE,
 
         [Description("缺少 PLC 格點\n\r\n\r請設定 '空盤檢測'")]
         NO_RUNTIME_PLC_GRID,
@@ -40,14 +40,11 @@ namespace LaserAlignDX.Mvc.Model
         [Description("參數 格點陣列 (Camera Grid) 沒有建置\n\r\n\r請執行 '生成陣列'")]
         NO_CAMERA_GRID,
 
-        [Description("參數 格點陣列 (Camera Grid) 行列數太小")]
+        [Description("格點陣列 (Camera Grid) 行列數太小")]
         LOW_GRID_ROWS_COLS,
 
         [Description("參數 模板訓練失敗, 無法建立 GoldenQuad2D!")]
         CANNOT_FETCH_GOLDEN_QUAD_2D,
-
-        [Description("空盤檢測 參數沒建立")]
-        NO_EMPTY_TRAY_RECIPE,
 
         [Description("像測 無法抓到 格位點\n\r請確認 滿盤 行列數 (rows, cols) 是否設定正確!")]
         AoiErr_can_not_fetch_camera_grid,

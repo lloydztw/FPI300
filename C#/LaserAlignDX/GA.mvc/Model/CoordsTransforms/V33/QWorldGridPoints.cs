@@ -17,33 +17,34 @@ using JetEazy.QMath;
 using Newtonsoft.Json;
 
 
-namespace LaserAlignDX.Model.Coords
+namespace LaserAlignDX.Model.Coords.V33
 {
     /// <summary>
-    /// 空台上理想的格點 (mm)
+    /// 理想的格點 (mm)
     /// </summary>
-    public class PlcGridPoints
+    internal class QWorldGridPoints : IWorldGridPoints
     {
         #region PROTECTED_DATA
         protected QVector _org = new QVector(0, 0);
         #endregion
 
-        public PlcGridPoints()
+        public QWorldGridPoints()
         {
-            Rows = 22;
-            Cols = 7;
-            PitchX = 9.6;
-            PitchY = 10.5;
+            Config(22, 7, 9.6, 10.5);
         }
-        public PlcGridPoints(int rows, int cols, double pitchX, double pitchY)
+        public QWorldGridPoints(int rows, int cols, double pitchX, double pitchY)
+        {
+            Config(rows, cols, pitchX, pitchY);
+        }
+
+        public void Config(int rows, int cols, double pitchX, double pitchY)
         {
             Rows = rows;
             Cols = cols;
             PitchX = pitchX;
             PitchY = pitchY;
         }
-
-        public void Offset(double dx, double dy)
+        void Offset(double dx, double dy)
         {
             _org.X = dx;
             _org.Y = dy;
@@ -52,14 +53,13 @@ namespace LaserAlignDX.Model.Coords
         public int Rows
         {
             get;
-            set;
+            private set;
         }
         public int Cols
         {
             get;
-            set;
+            private set;
         }
-
         public double PitchX
         {
             get; 
@@ -74,9 +74,9 @@ namespace LaserAlignDX.Model.Coords
         [JsonIgnore]
         public QVector this[int row, int col]
         {
-            get => GetGridPoint(row, col);
+            get => Get(row, col);
         }
-        public QVector GetGridPoint(int row, int col)
+        public QVector Get(int row, int col)
         {
             if (row < 0)
                 row = Rows + row;

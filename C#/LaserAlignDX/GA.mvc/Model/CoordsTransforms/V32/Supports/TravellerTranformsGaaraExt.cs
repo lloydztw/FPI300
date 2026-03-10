@@ -18,7 +18,7 @@ using JetEazy.QMath;
 using JetEazy.Transform;
 using LeTian.AoiLib;
 
-namespace LaserAlignDX.Model.Coords
+namespace LaserAlignDX.Model.Coords.V32
 {
     /// <summary>
     /// 為 TravellerTransforms 外掛轉換 Gaara 數據的函式

@@ -19,6 +19,7 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
+using LaserAlignDX.Model.Coords.Support;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using System;
@@ -26,12 +27,12 @@ using System.Drawing;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
 
-namespace LaserAlignDX.Model.Coords
+namespace LaserAlignDX.Model.Coords.V33
 {
     /// <summary>
     /// 透視投影座標轉換
     /// </summary>
-    public partial class QMicroChipTransform : ITransform
+    public partial class QMicroChipTransform : QRegistable, IMicroChipTransform
     {
         #region PRIVATE_DATA
         QVector _mmPerPixel = new QVector(1.0, 1.0);
@@ -41,8 +42,10 @@ namespace LaserAlignDX.Model.Coords
 
         public QMicroChipTransform(string name, string srcUnit, string dstUnit)
         {
+            Name = name;
             _localTrf = new QTransform(name, srcUnit, dstUnit);
             _padsTrf = new QTransform(name + "_PAD", "pix", "pix");
+            Register(this);
         }
         public QMicroChipTransform(string name) : this(name, "pix", "mm")
         {
@@ -53,11 +56,13 @@ namespace LaserAlignDX.Model.Coords
             _localTrf = null;
             _padsTrf?.Dispose();
             _padsTrf = null;
+            Unregister(this);
         }
 
-        public string Name
+        public override string Name
         {
-            get => _localTrf.Name;
+            get;
+            protected set;
         }
         public ICalibGridPoints GetCalibGridPoints()
         {

@@ -17,6 +17,7 @@
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
+using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model;
@@ -49,7 +50,8 @@ namespace LaserAlignDX.AoiModel.V3
 
         #region KERNEL_MEMBERS
         //ITransform _worldTransform;
-        QMicroChipTransform _microTransform;
+        //QMicroChipTransform _microTransform;
+        IMicroChipTransform _microTransform;
         #endregion
 
         #region RUNTIME_DATA

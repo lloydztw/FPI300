@@ -3,11 +3,11 @@
 將來優化後的分層架構
 
 # 1. AoiModel
-	ChipLocator			(晶粒定位)
-	ChipMeasurer		(晶粒尺寸)	(To Be Continued)
-	ChipQrCode			(QRcode)	(To Be Continued)
-	DefectsInspector	(瑕疵檢查)	(To Be Continued)
-	EmptyTrayInspector	(空盤檢查)	(To Be Continued)
+	AoiModel_EmptyTray			(空盤檢查)
+	AoiModel_ChipLoc			(晶粒定位)
+	AoiModel_ChipMeasure		(晶粒尺寸)
+	AoiModel_Defects			(瑕疵檢查)	(To Be Continued) (待分拆)
+	AoiModel_ChipQrCode			(QRcode)	(To Be Continued) (待分拆)
 
 ## 1.1 MVD LineSegment Finder
 	GA\BasicSpace\MvdLineFinders\
@@ -26,7 +26,7 @@
 	TravellerTransforms
 
 # 4. CustomerModel
-	ReportBuilders		 (檢測結果 報表生成)
+	ReportBuilders			(檢測結果 報表生成)
 
 # 5. Recipe
 	請參考 GA.mvc\Model\Recipe\Readme.md

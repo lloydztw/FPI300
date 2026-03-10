@@ -6,58 +6,40 @@ using System;
 
 namespace LaserAlignDX.Model.Coords
 {
-    public interface ITravellerTransforms : IDisposable
+    public interface ITravellerTransforms : ITravellerTransformsCalib, IDisposable
     {
         string Name { get; }
 
         /// <summary>
         /// 取得 相機 與 馬達座標 之 轉換
         /// </summary>
-        QTransform GetCameraMotorTransform(CarrierEnum C, SuckerRowEnum S);
+        ITransform GetCameraMotorTransform(CarrierEnum C, SuckerRowEnum S);
 
         /// <summary>
         /// 取得 相機 與 世界座標 之 轉換
         /// </summary>
-        QTransform GetCameraPhysicTransform(CarrierEnum C);
-
-        #region 校正時期_函式群
-        /// <summary>
-        /// 規劃 校正格點 (PLC 座標) (P座標) 
-        /// </summary>
-        PlcGridPoints ConfigGlobalCalibPlcGrid(int rows, int cols, double pitchX, double pitchY);
+        ITransform GetCameraPhysicTransform(CarrierEnum C);
 
         /// <summary>
-        /// 設定 校正格點 (相機座標)
+        /// 理想格點 (World) (P座標)
         /// </summary>
-        void SetCalibCameraGrid(CarrierEnum C, EzBlocsGrid camGrid);
+        IWorldGridPoints GetWorldGridPoints();
 
-        ///// <summary>
-        ///// 更新 校正格點 (相機座標) (停用)
-        ///// </summary>
-        //void UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid calibCamGrid);
+        #region 建構時期_函式群
 
         /// <summary>
-        /// 取得 校正格點 (相機座標)
+        /// 規劃 理想格點 (World) (P座標) 
         /// </summary>
-        EzBlocsGrid GetCalibCameraGrid(CarrierEnum C);
-
-        /// <summary>
-        /// 取得 校正格點 (PLC 座標)
-        /// </summary>
-        PlcGridPoints getCalibPlcGrid();
+        IWorldGridPoints ConfigWorldGridPoints(int rows, int cols, double pitchX, double pitchY);
 
         /// <summary>
         /// 建立 所有座標 轉換公式
         /// </summary>
         void BuildAll();
+
         #endregion
 
         #region 跑線時期_函數群
-
-        ///// <summary>
-        ///// 設定 Runtime 跑線時期 P座標 (PLC) 格點 (停用)
-        ///// </summary>
-        //void UpdateRuntimePlcGrid(PlcGridPoints plcGrid, EzBlocsGrid camGrid1 = null, EzBlocsGrid camGrid2 = null);
 
         /// <summary>
         /// 取出 Runtime 跑線時期 標準格點 座標數據
@@ -65,26 +47,49 @@ namespace LaserAlignDX.Model.Coords
         (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId, out QVector camCoord, out QVector worldCoord, out QVector s1MotorCoord, out QVector s2MotorCoord);
 
         /// <summary>
-        /// 取出 Runtime 跑線時期 各別載台 PLC 所需要的參考點 座標數據
+        /// 取出 Runtime 跑線時期 各別載台 PLC 所需要的參考點 座標數據 (對應 row=0, col=0)
         /// </summary>
         (ErrorCodes, string) GetCoordsRef(CarrierEnum C, out QVector camCoord, out QVector s1MotorCoord, out QVector s2MotorCoord);
 
         /// <summary>
         /// 計算 PLC 補償量
         /// </summary>
+        /// <returns>(馬達補償量, 世界座標差值)</returns>
         (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId);
 
         #endregion
 
         #region 查核_函式群
+
         (ErrorCodes, string) checkCameraGrid(CarrierEnum carrierID, EzBlocsGrid camGrid);
         (ErrorCodes, string) checkTransforms(CarrierEnum carrierID);
-        (ErrorCodes, string) checkRuntimePlcGrid();
+
         #endregion
 
-        #region INI_FILE_FUNCTIONS
+        #region 檔案載入與保存
+
         void Load(string iniFileName);
         void Save(string iniFileName);
+
         #endregion
+    }
+
+
+    public interface ITravellerTransformsCalib
+    {
+        /// <summary>
+        /// 取得 Camera-To-World 校正格點 (相機座標) (for 多點校正)
+        /// </summary>
+        EzBlocsGrid GetCalibCamGrid(CarrierEnum C);
+
+        /// <summary>
+        /// 設定 Camera-To-World 校正格點 (相機座標) (for 多點校正)
+        /// </summary>
+        bool SetCalibCamGrid(CarrierEnum C, EzBlocsGrid camGrid);
+
+        /// <summary>
+        /// 設定 Camera-To-Motor 校正墨點 (順時針四角: 左上, 右上, 右下, 左下)
+        /// </summary>
+        ErrorCodes SetCalibMotorCoords(CarrierEnum C, SuckerRowEnum S, QVector[] inkMarks, QVector[] motorCoords);
     }
 }

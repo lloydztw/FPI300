@@ -408,13 +408,13 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public EzBlocsGrid xCamGrid1
         {
             //*** 交給 TransformsModel 管理 ***
-            get => GaMvcConfig.SysModel.TransformsModel.GetCalibCameraGrid(CarrierEnum.C1);
+            get => GaMvcConfig.SysModel.TransformsModel.GetCalibCamGrid(CarrierEnum.C1);
             set { }
         }
         public EzBlocsGrid xCamGrid2
         {
             //*** 交給 TransformsModel 管理 ***
-            get => GaMvcConfig.SysModel.TransformsModel.GetCalibCameraGrid(CarrierEnum.C2);
+            get => GaMvcConfig.SysModel.TransformsModel.GetCalibCamGrid(CarrierEnum.C2);
             set { }
         }
         void loadCamGrids(CarrierEnum carrierID, out EzBlocsGrid grid)

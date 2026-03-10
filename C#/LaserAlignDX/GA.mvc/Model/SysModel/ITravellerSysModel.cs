@@ -48,7 +48,7 @@ namespace LaserAlignDX.Mvc.Model
         /// </summary>
         ITravellerTransforms TransformsModel { get; }
 
-        QMicroChipTransform GetMicroTransform(CarrierEnum carrierID);
+        IMicroChipTransform GetMicroTransform(CarrierEnum carrierID);
         
         /// <summary>
         /// 跑線巨圖管理者

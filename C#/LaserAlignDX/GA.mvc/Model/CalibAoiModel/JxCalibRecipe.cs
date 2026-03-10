@@ -146,18 +146,30 @@ namespace LaserAlignDX.AoiModel.Calib
         }
 
         #region PUBLIC_HELPER_FUNCTIONS
+        /// <summary>
+        /// 順時針四角: 左上, 右上, 右下, 左下 
+        /// </summary>
         public void GetInkMarks(out EzBloc[] blocs)
         {
             MarksStorage.GetInkMarks(out blocs);
         }
+        /// <summary>
+        /// 順時針四角: 左上, 右上, 右下, 左下 
+        /// </summary>
         public void SetInkMarks(EzBloc[] blocs)
         {
             MarksStorage.SetInkMarks(blocs);
         }
+        /// <summary>
+        /// 順時針四角: 左上, 右上, 右下, 左下 
+        /// </summary>
         public void GetMotorCoords(out QVector[] coords)
         {
             MarksStorage.GetMotorCoords(out coords);
         }
+        /// <summary>
+        /// 順時針四角: 左上, 右上, 右下, 左下 
+        /// </summary>
         public void SetMotorCoords(QVector[] coords)
         {
             MarksStorage.SetMotorCoords(coords);
@@ -189,7 +201,7 @@ namespace LaserAlignDX.AoiModel.Calib
 
 
     /// <summary>
-    /// 墨點 (Runtime ReadOnly)
+    /// 墨點群 (Runtime ReadOnly)
     /// </summary>
     public class JxCalibInkMarkPoints : JxContainer
     {
@@ -265,6 +277,9 @@ namespace LaserAlignDX.AoiModel.Calib
     }
 
 
+    /// <summary>
+    /// 墨點記號
+    /// </summary>
     public class JxMark : JxContainer
     {
         public JxPointF Center = new JxPointF("InkMark.Center");
