@@ -14,11 +14,9 @@
 #endregion
 
 
-using AUVision;
 using JetEazy.Match;
 using JetEazy.QvMath;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using RecipeParams = LaserAlignDX.OPSpace.RecipeSpace.InspectX3ParaClass;
 
