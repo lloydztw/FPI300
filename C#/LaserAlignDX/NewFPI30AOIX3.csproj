@@ -466,8 +466,8 @@
     <Compile Include="GA.mvc\Model\CoordsTransforms\TravellerTransformFactory.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V33\QWorldGridPoints.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V33\QMicroChipTransform.cs" />
-    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTranforms_ini.cs" />
-    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTranforms.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms_ini.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3MeasureSpec.cs" />
