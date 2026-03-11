@@ -2,7 +2,7 @@
 {
     public class GlobalConfig
     {
-        public static bool IsSim => false;
+        public static bool IsSim => true;
         public static string VersionDate => "2026-03-11";
 
         public static readonly bool N_THREADS_ENABLED = true;

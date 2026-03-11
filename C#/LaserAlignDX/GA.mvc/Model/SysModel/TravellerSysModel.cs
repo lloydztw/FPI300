@@ -430,8 +430,8 @@ namespace LaserAlignDX.Mvc.Model
             }
 
             //(2) goldenChipRect (in camera coordinates)
-            SizeF cellViewSizeF;
-            if (true)
+            SizeF cellViewSizeF = _xRecipe.xRegionTrain.Size;
+            if (false)
             {
                 // 從晶粒長寬規格 mWidthStand, mHeightStand (mm)
                 // 反推其在 Camera 座標系上 的大小
