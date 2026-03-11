@@ -19,10 +19,11 @@ using OpenCvSharp;
 
 namespace JetEazy.Transform
 {
-    public static class QTransform_Ini
+    partial class QTransform
     {
-        public static void LoadIni(this QTransform trf, string iniFileName, string sectName = null)
+        public void LoadIni(string iniFileName, string sectName = null)
         {
+            var trf = this;
             if (sectName == null)
                 sectName = trf.Name;
 
@@ -63,8 +64,9 @@ namespace JetEazy.Transform
             _load(trf._mat, iniFileName, sectName + "_MAT");
             _load(trf._matInv, iniFileName, sectName + "_MAT_INV");
         }
-        public static void SaveIni(this QTransform trf, string iniFileName, string sectName = null)
+        public void SaveIni(string iniFileName, string sectName = null)
         {
+            var trf = this;
             if (sectName == null)
                 sectName = trf.Name;
 
@@ -85,6 +87,7 @@ namespace JetEazy.Transform
             _save(trf._matInv, iniFileName, sectName + "_MAT_INV");
         }
 
+        #region PRIVATE_INI_FILE_FUNCTIONS
         private static void _load(Mat mx, string iniFileName, string sectName)
         {
             int iRows = mx.Rows;
@@ -125,6 +128,7 @@ namespace JetEazy.Transform
             string strValue = value.ToString();
             JetEazy.Win32.Win32Ini.Save(strValue, iniFileName, sectName, strKeyA);
         }
+        #endregion
     }
 
     public static class QVector_Ini
@@ -146,13 +150,25 @@ namespace JetEazy.Transform
 
             return nDim >= 2;
         }
-        public static void SaveIni(this QVector v, string iniFileName, string sectName, string keyName, bool fixDigit = false)
+        public static void SaveIni(this QVector v, string iniFileName, string sectName, string keyName, int decimalPlaces=-1)
         {
             if (v != null)
             {
-                string str = fixDigit ? 
-                            $"QVector, {v.Length}, {v.X:0.000000}, {v.Y:0.000000}" :
-                            $"QVector, {v.Length}, {v.X}, {v.Y}";
+                string str;
+
+                if (decimalPlaces >= 0)
+                {
+                    // 動態產生格式字串，例如 decimalPlaces 為 2 時，format 為 "F2"
+                    string format = "F" + decimalPlaces;
+                    // 使用 CultureInfo.InvariantCulture 確保小數點始終為 '.'
+                    str = $"QVector, {v.Length}, {v.X.ToString(format, System.Globalization.CultureInfo.InvariantCulture)}, {v.Y.ToString(format, System.Globalization.CultureInfo.InvariantCulture)}";
+                }
+                else
+                {
+                    // 預設輸出（不限制位數）
+                    str = $"QVector, {v.Length}, {v.X}, {v.Y}";
+                }
+
                 JetEazy.Win32.Win32Ini.Save(str, iniFileName, sectName, keyName);
             }
             else

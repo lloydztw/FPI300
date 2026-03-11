@@ -115,7 +115,7 @@ namespace LaserAlignDX.Model.Coords.V33
 
             string sectName = Name + "_extra_settings";
             //_roiCenterPt?.SaveIni(filename, sectName, "roiCenterPt");
-            _mmPerPixel?.SaveIni(filename, sectName, "mmPerPixel", fixDigit: false);
+            _mmPerPixel?.SaveIni(filename, sectName, "mmPerPixel");
         }
 
         ErrorCodes buildTrfs()

@@ -16,7 +16,6 @@
 using JetEazy.QMath;
 using OpenCvSharp;
 using System;
-using System.Collections.Generic;
 
 
 namespace JetEazy.Transform
@@ -195,8 +194,8 @@ namespace JetEazy.Transform
             _matInv = null;
 
             // 正規化數據
-            var srcPts = Normalize(_srcPoints, SrcDynamicRanges());
-            var dstPts = Normalize(_dstPoints, DstDynamicRanges());
+            var srcPts = DynamicRangeUtil.Normalize(_srcPoints, SrcDynamicRanges());
+            var dstPts = DynamicRangeUtil.Normalize(_dstPoints, DstDynamicRanges());
 
             // 正轉換
             //_mat = Cv2.GetPerspectiveTransform(srcPts, dstPts);
@@ -240,7 +239,7 @@ namespace JetEazy.Transform
 
             var srcRanges = SrcDynamicRanges();
             var dstRanges = DstDynamicRanges();
-            var srcPts = Normalize(coords, srcRanges);
+            var srcPts = DynamicRangeUtil.Normalize(coords, srcRanges);
 
             //var unit = coords[0].UNIT;
             //var order = coords[0].ORDER;
@@ -252,7 +251,7 @@ namespace JetEazy.Transform
             //var dstOrder = _dstRefs[0].ORDER;
             //var ret = Array.ConvertAll(dstPts, pt => new QCoord(pt.X * dstOrder, pt.Y * dstOrder, dstOrder, dstUnit));
 
-            var ret = DeNormalize(dstPts, dstRanges);
+            var ret = DynamicRangeUtil.DeNormalize(dstPts, dstRanges);
             return ret;
         }
         public QVector[] InvTrans(QVector[] coords)
@@ -262,7 +261,7 @@ namespace JetEazy.Transform
 
             var srcRanges = SrcDynamicRanges();
             var dstRanges = DstDynamicRanges();
-            var dstPts = Normalize(coords, dstRanges);
+            var dstPts = DynamicRangeUtil.Normalize(coords, dstRanges);
 
             //var unit = coords[0].UNIT;
             //var order = coords[0].ORDER;
@@ -274,7 +273,7 @@ namespace JetEazy.Transform
             //var srcOrder = _srcRefs[0].ORDER;
             //var ret = Array.ConvertAll(dstPts, pt => new QCoord(pt.X * srcOrder, pt.Y * srcOrder, order, srcUnit));
 
-            var ret = DeNormalize(srcPts, srcRanges);
+            var ret = DynamicRangeUtil.DeNormalize(srcPts, srcRanges);
             return ret;
         }
 
@@ -296,20 +295,19 @@ namespace JetEazy.Transform
             if (rows < 2 || cols <2)
                 throw new ArgumentException($"校正點數 必須大於 2x2 點!");
         }
-
         #endregion
 
         public virtual void Load(string filename)
         {
+            LoadIni(filename);
             //LoadJson(filename);
             //LoadBin(filename);
-            this.LoadIni(filename);
         }
         public virtual void Save(string filename)
         {
+            SaveIni(filename);
             //SaveJson(filename);
             //SaveBin(filename);
-            this.SaveIni(filename);
         }
     }
 
@@ -377,46 +375,6 @@ namespace JetEazy.Transform
             return ranges;
         }
         #endregion
-
-        public static Point2d[] Normalize(QVector[] coords, DynamicRange[] ranges)
-        {
-            var pts = Array.ConvertAll(coords, (c) =>
-            {
-                var pt = new Point2d()
-                {
-                    X = ranges[0].Normalize(c.X),
-                    Y = ranges[1].Normalize(c.Y)
-                };
-                return pt;
-            });
-            return pts;
-        }
-        public static Point2d[] Normalize(QVector[,] coords, DynamicRange[] ranges)
-        {
-            var pts = new List<Point2d>();
-            foreach(var c in coords)
-            {
-                if (c == null) continue;
-                var pt = new Point2d()
-                {
-                    X = ranges[0].Normalize(c.X),
-                    Y = ranges[1].Normalize(c.Y)
-                };
-                pts.Add(pt);
-            }
-            return pts.ToArray();
-        }
-        public static QVector[] DeNormalize(Point2d[] points, DynamicRange[] ranges, params object[] args)
-        {
-            var coords = Array.ConvertAll(points, (p) =>
-            {
-                double x = ranges[0].DeNormalize(p.X);
-                double y = ranges[1].DeNormalize(p.Y);
-                var coord = new QVector(x, y);
-                return coord;
-            });
-            return coords;
-        }
 
         #region RESERVED
         static QTransform Merge(params QTransform[] transforms)

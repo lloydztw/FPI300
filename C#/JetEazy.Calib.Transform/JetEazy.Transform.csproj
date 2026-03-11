@@ -34,6 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Interface\ICalibPoints.cs" />
+    <Compile Include="Model\DynamicRangeUtil.cs" />
     <Compile Include="Model\QTransform_ini.cs" />
     <Compile Include="Model\DynamicRange.cs" />
     <Compile Include="Model\QCoord.cs" />
