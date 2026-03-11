@@ -28,15 +28,16 @@ namespace LaserAlignDX.Model.Coords.V33
     /// <summary>
     /// Traveller106 專案 的 所有座標系
     /// </summary>
-    public partial class TravellerTransforms : QRegistable, IDisposable, ITravellerTransforms
+    internal partial class TravellerTransforms : QRegistable, IDisposable, ITravellerTransforms
     {
         #region CONFIG
         /// <summary>
-        /// 校正點數 (馬達座標)
+        /// 馬達校正點數 (使用者所需要輸入的馬達座標點數)
         /// </summary>
-        public const int N_CALIB_POINTS = 4;
+        public const int N_CALIB_MOTOR_POINTS = 4;
         /// <summary>
-        /// 目前是使用 Motor Coordinate
+        /// VER_3.3.0.0 線性遷移 使用 WORLD_COORD
+        /// <br/> OPT_CALIB_GRID_USING_MOTOR_COORD == false
         /// </summary>
         public const bool OPT_CALIB_GRID_USING_MOTOR_COORD = false;
         #endregion

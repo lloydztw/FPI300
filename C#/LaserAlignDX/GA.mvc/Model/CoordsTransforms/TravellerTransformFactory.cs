@@ -1,7 +1,6 @@
 ﻿using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.Utils;
-using LeTian.AoiLib;
 using System;
 using QMicroChipTransform = LaserAlignDX.Model.Coords.V33.QMicroChipTransform;
 using TravellerTransforms = LaserAlignDX.Model.Coords.V33.TravellerTransforms;
@@ -11,8 +10,15 @@ namespace LaserAlignDX.Model.Coords
     public partial class TravellerTransformFactory
     {
         #region CONSTS
+        /// <summary>
+        /// 馬達校正點數 (使用者所需要輸入的馬達座標點數)
+        /// </summary>
+        public static int N_CALIB_MOTOR_POINTS => TravellerTransforms.N_CALIB_MOTOR_POINTS;
+        /// <summary>
+        /// VER_3.3.0.0 線性遷移 使用 WORLD_COORD
+        /// <br/> OPT_CALIB_GRID_USING_MOTOR_COORD == false
+        /// </summary>
         public static bool OPT_CALIB_GRID_USING_MOTOR_COORD => TravellerTransforms.OPT_CALIB_GRID_USING_MOTOR_COORD;
-        public static int N_CALIB_POINTS => TravellerTransforms.N_CALIB_POINTS;
         #endregion
 
         public static IMicroChipTransform CreateMicroChipTransform(string name)
@@ -101,10 +107,10 @@ namespace LaserAlignDX.Model.Coords
                     commonBaseTrf.BuildAll();
                 }
 
-                //(3) [線性遷移] Camera-ToWorld 座標轉換系統 : 重新設定 rows, cols, pitchX, pitchY 布局
+                //(3) [線性遷移] Camera-World 座標轉換系統 : 重新設定 rows, cols, pitchX, pitchY 布局
                 newTrf.ConfigWorldGridPoints(newCamGrid.Rows, newCamGrid.Cols, newPitch.X, newPitch.Y);
 
-                //(4) [線性遷移] Camera-ToWorld 座標轉換系統 : 重新設定 相機格點
+                //(4) [線性遷移] Camera-World 座標轉換系統 : 重新設定 相機格點
                 newTrf.SetCalibCamGrid(carrierID, newCamGrid);
 
                 //(5) [線性遷移] Camera-Motor 座標轉換系統

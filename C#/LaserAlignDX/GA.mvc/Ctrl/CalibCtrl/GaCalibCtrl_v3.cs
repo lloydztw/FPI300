@@ -42,7 +42,7 @@ namespace LaserAlignDX.Mvc.Ctrl
     public class GaCalibCtrl
     {
         #region CONSTANTS
-        static int N_CALIB_POINTS => TravellerTransformFactory.N_CALIB_POINTS;
+        static int N_CALIB_MOTOR_POINTS => TravellerTransformFactory.N_CALIB_MOTOR_POINTS;
         static int N_CARRIERS_NUMBER => Enum.GetValues(typeof(CarrierEnum)).Length;
         #endregion
 
@@ -138,7 +138,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region INTERACTORS
         CviBoundBox _cviBigBoundBox = new CviBoundBox(Brushes.Blue, 1, 3) { Visible = true };
         CviCalibResultBox _cviGridResultBox = new CviCalibResultBox() { Visible = false };
-        CviCalibPointBox[] _cviInkMarkBoxes = new CviCalibPointBox[N_CALIB_POINTS];
+        CviCalibPointBox[] _cviInkMarkBoxes = new CviCalibPointBox[N_CALIB_MOTOR_POINTS];
         #endregion
 
         #region RUNTIME_DATA
@@ -299,7 +299,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var matViewer = _getMatViewer(CalibViewEnum.InkMarksView);
             matViewer.TransCoordToWorld(ref x, ref y);
 
-            for (int i = 0; i < N_CALIB_POINTS; i++)
+            for (int i = 0; i < N_CALIB_MOTOR_POINTS; i++)
             {
                 var box = _cviInkMarkBoxes[i];
                 if (box == null) continue;

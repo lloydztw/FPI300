@@ -23,6 +23,8 @@ namespace JetEazy.Transform
 {
     /// <summary>
     /// 透視投影座標轉換
+    /// <br/> 多點校正: 使用 FindHomography 建構 線性轉換矩陣
+    /// <br/> 座標轉換: 使用 PerspectiveTransform 進行計算
     /// </summary>
     public partial class QTransform : ITransform, ICalibCornerPoints, ICalibGridPoints
     {
@@ -309,8 +311,6 @@ namespace JetEazy.Transform
             //SaveBin(filename);
             this.SaveIni(filename);
         }
-
-
     }
 
     partial class QTransform

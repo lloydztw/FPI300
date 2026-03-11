@@ -19,7 +19,7 @@ using JetEazy.QMath;
 namespace JetEazy.Transform
 {
     /// <summary>
-    /// 座標系 抽象類別
+    /// 座標
     /// </summary>
     internal class QCoord : QVector
     {

@@ -32,7 +32,7 @@ namespace LaserAlignDX.Model.Coords.V33
     /// <summary>
     /// 透視投影座標轉換
     /// </summary>
-    public partial class QMicroChipTransform : QRegistable, IMicroChipTransform
+    internal partial class QMicroChipTransform : QRegistable, IMicroChipTransform
     {
         #region PRIVATE_DATA
         QVector _mmPerPixel = new QVector(1.0, 1.0);
