@@ -163,6 +163,7 @@ namespace LaserAlignDX.AoiModel.V3
             }
             #endregion
         }
+
         /// <summary>
         /// 瑕疵檢測 (數群晶粒) (限用於同一線程內)
         /// </summary>
@@ -194,10 +195,7 @@ namespace LaserAlignDX.AoiModel.V3
                 if (go)
                 {
                     //(3) 單一晶粒 瑕疵檢測
-                    if (_xInspect.xAlgorithm == MatchAlgorithmEnum.TemplateMatch)
-                        RunOneChipDefects_mvd(cell, cellBmp, ref cellRoi);
-                    else
-                        RunOneChipDefects_cv(cell, cellBmp, ref cellRoi);
+                    RunOneChipDefects(cell, cellBmp, ref cellRoi);
                 }
             }
         }
@@ -205,90 +203,58 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 瑕疵檢查 (單一晶粒) 
         /// </summary>
-        private void RunOneChipDefects_mvd(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
+        private void RunOneChipDefects(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
         {
             try
             {
-                var templateSize = _xRecipe.bmpDefectTemplate.Size;
-                var chipCenter = cell.ChipData.ChipQuad2D.Center;
-                var chipAngle = cell.ChipData.ChipQuad2D.Angle;
-
-                // 取的 center 的 local 圖像座標 (cellRoi 左上角為 (0,0))
-                double cx = chipCenter.X - cellRoi.X;
-                double cy = chipCenter.Y - cellRoi.Y;
-
-                // 以 (cx,cy) 為中心 建立 長寬為 templateSize, 角度為 chipAngle 的 海康矩形
-                // 如果把 _xRecipe.bmpDefectTemplate 當成無角度的 rectangle 就不需要減 GoldenQuad2D.Angle
-                var mvdRectX = new CMvdRectangleF((float)cx, (float)cy, templateSize.Width, templateSize.Height)
-                {
-                    Angle = (float)chipAngle
-                };
-
-                //var box2d = new QvBox2D();
-                //box2d.SetBox(PointF.Empty, templateSize);
-                //box2d.SetCenter((float)cx (float)cy;
-                //box2d.SetTheta((float)chipAngle * Math.PI / 180.0);
-                //var mvdRectX = GaMvdExt.ToCMvdRectangleF(box2d);
-
-                var bmpTemplate = _xRecipe.bmpDefectTemplate;
-                var bmpMask = _xRecipe.bmpprintmask;
-                //var roi = _xRecipe.xRegionTrain;
-                //roi.X += regionRoi.X;
-                //roi.Y += regionRoi.Y;
-
-                //*****************************************************************************
-                // 利用海康 對 cellBmp Affine Transform 
-                // (注意:此處會被多線程 同時調用)
-                //*****************************************************************************
-                using (var cMvdImage = GaImageUtil.BitmapToCMvdImage(cellBmp))
-                using (var bmpRun = cell.GetAffineTrainsFormRunBmp(cMvdImage, mvdRectX))
-                {
-                    // 使用海康進行 瑕疵檢測
-                    cell.DetectDefects(bmpTemplate, bmpRun, bmpMask);
-                }
-            }
-            catch (Exception ex)
-            {
-                _LOG_ERROR(ex, $"cell.DetectDefects 異常 @ ({cell.CellRow},{cell.CellCol})!");
-                //_xInspect.optChipDefectsInspect = false;
-            }
-        }
-
-        /// <summary>
-        /// 瑕疵檢查 (單一晶粒) 
-        /// </summary>
-        private void RunOneChipDefects_cv(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
-        {
-            try
-            {
-                var templateSize = _xRecipe.bmpDefectTemplate.Size;
-                var templateQuad = QvQuad2D.From(new RectangleF(0,0,templateSize.Width,templateSize.Height));
-
-                var goldenChipQuad = cell.ChipData.GoldenQuad2D;
-                var goldenChipCenter = goldenChipQuad.Center;
-
-                var runtimeChipQuad = cell.ChipData.ChipQuad2D.Clone();
-                runtimeChipQuad.Offset(-cellRoi.X, -cellRoi.Y);
-
-
                 CMvdRectangleF mvdRectX;
 
-                var templatePoints = Array.ConvertAll(templateQuad.Corners, c => new OpenCvSharp.Point2f((float)c.X, (float)c.Y));
-                var goldenPoints = Array.ConvertAll(goldenChipQuad.Corners, c => new OpenCvSharp.Point2f((float)c.X, (float)c.Y));
-                var runtimePoints = Array.ConvertAll(runtimeChipQuad.Corners, c => new OpenCvSharp.Point2f((float)c.X, (float)c.Y));
-
-                using (var matrix = Cv2.GetPerspectiveTransform(goldenPoints, runtimePoints))
+                if (_xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
                 {
-                    var pts = Cv2.PerspectiveTransform(templatePoints, matrix);
-                    var rotatedRect = Cv2.MinAreaRect(pts);
-                    var ccx = rotatedRect.Center.X;
-                    var ccy = rotatedRect.Center.Y;
-                    var cwidth = rotatedRect.Size.Width;
-                    var cheight = rotatedRect.Size.Height;
-                    var angle = rotatedRect.Angle;
-                    mvdRectX = new CMvdRectangleF((float)ccx, (float)ccy, cwidth, cheight)
+                    var templateSize = _xRecipe.bmpDefectTemplate.Size;
+                    var templateQuad = QvQuad2D.From(new RectangleF(0, 0, templateSize.Width, templateSize.Height));
+
+                    var goldenChipQuad = cell.ChipData.GoldenQuad2D;
+                    var goldenChipCenter = goldenChipQuad.Center;
+
+                    var runtimeChipQuad = cell.ChipData.ChipQuad2D.Clone();
+                    runtimeChipQuad.Offset(-cellRoi.X, -cellRoi.Y);
+
+                    var templatePoints = Array.ConvertAll(templateQuad.Corners, c => new OpenCvSharp.Point2f((float)c.X, (float)c.Y));
+                    var goldenPoints = Array.ConvertAll(goldenChipQuad.Corners, c => new OpenCvSharp.Point2f((float)c.X, (float)c.Y));
+                    var runtimePoints = Array.ConvertAll(runtimeChipQuad.Corners, c => new OpenCvSharp.Point2f((float)c.X, (float)c.Y));
+
+                    // 將 templatePoints 從 golden domain 投影回到 runtime domain
+                    using (var matrix = Cv2.GetPerspectiveTransform(goldenPoints, runtimePoints))
                     {
-                        Angle = (float)angle
+                        var crop_pts = Cv2.PerspectiveTransform(templatePoints, matrix);
+                        var crop_rotatedRect = Cv2.MinAreaRect(crop_pts);
+                        var crop_cx = crop_rotatedRect.Center.X;
+                        var crop_cy = crop_rotatedRect.Center.Y;
+                        var crop_width = crop_rotatedRect.Size.Width;
+                        var crop_height = crop_rotatedRect.Size.Height;
+                        var angle = crop_rotatedRect.Angle;
+                        mvdRectX = new CMvdRectangleF((float)crop_cx, (float)crop_cy, crop_width, crop_height)
+                        {
+                            Angle = (float)angle
+                        };
+                    }
+                }
+                else
+                {
+                    var templateSize = _xRecipe.bmpDefectTemplate.Size;
+                    var chipCenter = cell.ChipData.ChipQuad2D.Center;
+                    var chipAngle = cell.ChipData.ChipQuad2D.Angle;
+
+                    // 取的 center 的 local 圖像座標 (cellRoi 左上角為 (0,0))
+                    double cx = chipCenter.X - cellRoi.X;
+                    double cy = chipCenter.Y - cellRoi.Y;
+
+                    // 以 (cx,cy) 為中心 建立 長寬為 templateSize, 角度為 chipAngle 的 海康矩形
+                    // 如果把 _xRecipe.bmpDefectTemplate 當成無角度的 rectangle 就不需要減 GoldenQuad2D.Angle
+                    mvdRectX = new CMvdRectangleF((float)cx, (float)cy, templateSize.Width, templateSize.Height)
+                    {
+                        Angle = (float)chipAngle
                     };
                 }
 
@@ -308,11 +274,10 @@ namespace LaserAlignDX.AoiModel.V3
             }
             catch (Exception ex)
             {
-                _LOG_ERROR(ex, $"cell.DetectDefects 異常 @ ({cell.CellRow},{cell.CellCol})!");
+                _LOG_ERROR(ex, $"RunOneChipDefects 異常 @ ({cell.CellRow},{cell.CellCol})!");
                 //_xInspect.optChipDefectsInspect = false;
             }
         }
-
         #endregion
     }
 }
