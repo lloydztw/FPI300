@@ -242,7 +242,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// Golden Chip Rect
         /// 更精確(內縮)的晶粒矩形區域
         /// 位於 Golden Region (xRectRegionPrint) 之內
-        /// 相對於 xRectRegionPrint 的左上角為零點
+        /// 相對於 Golden Region (xRectRegionPrint) 的左上角為零點
         /// </summary>
         public RectangleF xRegionTrain
         {

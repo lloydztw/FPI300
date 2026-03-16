@@ -81,7 +81,8 @@ namespace LaserAlignDX.OPSpace
         #endregion
 
         /// <summary>
-        /// ROI (FullFov Camera Coordinates) (單位 pixel)
+        /// runtime chip ROI (FullFov Camera Coordinates) (單位 pixel)
+        /// 更精確(內縮)的晶粒矩形區域 (對應 xRecipe.xRegionTrain) 
         /// </summary>
         public RectangleF viewRectF = new RectangleF();
         /// <summary>

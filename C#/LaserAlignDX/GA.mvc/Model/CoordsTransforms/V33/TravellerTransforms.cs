@@ -483,12 +483,12 @@ namespace LaserAlignDX.Model.Coords.V33
             if (errCode != ErrorCodes.OK)
                 return (errCode, errMsg);
 
-            //(2) 檢查 Runtime PlcGrid
+            //(2) 檢查 World Grid
             (errCode, errMsg) = checkWorldGrid();
             if (errCode != ErrorCodes.OK)
                 return (errCode, errMsg);
 
-            //(3) 取出 Camera To Motor Transforms (Global)
+            //(3) 取出 Camera To Motor Transforms
             var transCM1 = this.GetCameraMotorTransform(C, SuckerRowEnum.S1);
             var transCM2 = this.GetCameraMotorTransform(C, SuckerRowEnum.S2);
             var transCP = this.GetCameraPhysicTransform(C);
@@ -666,6 +666,10 @@ namespace LaserAlignDX.Model.Coords.V33
         /// <returns>(馬達補償量, 世界座標差值)</returns>
         public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
         {
+            // 根據 (rowId, colId) 取得 載台C 格位節點 之 以下座標:
+            //      world_target 格點的 世界座標
+            //      s1_target    格點的 吸嘴1 +馬達座標
+            //      s2_target    格點的 吸嘴2 馬達座標
             (var err, var errMsg) = GetNodeCoords(C, rowId, colId, out var _, out var world_target, out var s1_target, out var s2_target);
             if (err != ErrorCodes.OK)
             {

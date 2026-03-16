@@ -96,12 +96,13 @@ namespace LaserAlignDX.AoiModel.V3
         #region SUB_MODELS
         AoiModel_ChipLoc _aoiChipLoc = new AoiModel_ChipLoc();
         AoiModel_ChipMeasure _aoiChipMeasure = new AoiModel_ChipMeasure();
+        AoiModel_Defects _aoiChipDefects = new AoiModel_Defects();
         AoiModel_EmptyTray _aoiEmptyTray = new AoiModel_EmptyTray();
         #endregion
 
         void initSubModels()
         {
-            var subModels = new AoiModelBase[] { _aoiChipLoc, _aoiChipMeasure, _aoiEmptyTray };
+            var subModels = new AoiModelBase[] { _aoiChipLoc, _aoiChipMeasure, _aoiChipDefects, _aoiEmptyTray };
             foreach (var subModel in subModels)
             {
                 //model.OnAoiBegin+=
@@ -141,13 +142,13 @@ namespace LaserAlignDX.AoiModel.V3
         }
         public bool QrUsed
         {
-            get { return _aoiChipMeasure.QrUsed; }
-            set { _aoiChipMeasure.QrUsed = value; }
+            get { return _aoiChipDefects.QrUsed; }
+            set { _aoiChipDefects.QrUsed = value; }
         }
         public bool QrJudged
         {
-            get { return _aoiChipMeasure.QrJudged; }
-            set { _aoiChipMeasure.QrJudged = value; }
+            get { return _aoiChipDefects.QrJudged; }
+            set { _aoiChipDefects.QrJudged = value; }
         }
 
         #region PUBLIC_RESULT_PACKERS_FOR_PLC
@@ -362,13 +363,16 @@ namespace LaserAlignDX.AoiModel.V3
                 _aoiChipLoc.Run();
                 var cellGroups = _aoiChipLoc.CellGroups;
 
-                // 量測
+                // 尺寸量測
                 _aoiChipMeasure.SetCellGroups(cellGroups);
                 _aoiChipMeasure.Run();
 
+                // 瑕疵檢測
+                _aoiChipDefects.SetCellGroups(cellGroups);
+                _aoiChipDefects.Run();
+
                 // 釋放 多執行續的 CellGroups
                 _aoiChipLoc.DisposeCellGroups();
-
                 // 後處理: 標記不明區塊
                 _aoiChipLoc.PostMarkAmbiguousBlocs();
 

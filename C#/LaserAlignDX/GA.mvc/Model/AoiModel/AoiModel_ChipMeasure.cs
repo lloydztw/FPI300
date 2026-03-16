@@ -58,6 +58,7 @@ namespace LaserAlignDX.AoiModel.V3
         bool _is2ndRun;
         #endregion
 
+#if(OPT_OLD_CODE)
         public bool QrUsed
         {
             get;
@@ -68,6 +69,7 @@ namespace LaserAlignDX.AoiModel.V3
             get;
             set;
         }
+#endif
 
         public void SetCellGroups(GaCellsGroup[] cellGroups)
         {
@@ -76,7 +78,7 @@ namespace LaserAlignDX.AoiModel.V3
 
         public override void Run()
         {
-            bool go = _xInspect.optChipMeasurement || _xInspect.optChipDefectsInspect || QrUsed;
+            bool go = _xInspect.optChipMeasurement; // || _xInspect.optChipDefectsInspect || QrUsed;
             if (!go)
                 return;
 
@@ -94,7 +96,9 @@ namespace LaserAlignDX.AoiModel.V3
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
                 RunChipsMeasurement(bmpFullfov);
                 RunChipsMeasurement2ndForNGs(bmpFullfov);
-                RunDefectsAndQrCode(bmpFullfov, LineScanCamImageHolder.PeekMvdImage());
+
+                // Defects And QrCode 拉出 成為一個 獨立的 AoiModel_Defects
+                // RunDefectsAndQrCode(bmpFullfov, LineScanCamImageHolder.PeekMvdImage());
 
                 markRunEnd(true);
                 fire_AoiEnd();
@@ -554,6 +558,7 @@ namespace LaserAlignDX.AoiModel.V3
             }
         }
 
+#if(OPT_OLD_CODE)
         /// <summary>
         /// 計算 選轉&平移 後的 邊線框 (左, 上, 右, 下)
         /// </summary>
@@ -640,7 +645,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 計算 選轉&平移 後的 邊線框 (左, 上, 右, 下)
         /// </summary>
-        private QvQuad2D[] CalcRuntimeLocalLineBorderQuads_fine(RegionCellX3Class cell, RectangleF cellRoi)
+        private QvQuad2D[] _CalcRuntimeLocalLineBorderQuads_fine(RegionCellX3Class cell, RectangleF cellRoi)
         {
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
@@ -733,6 +738,7 @@ namespace LaserAlignDX.AoiModel.V3
                 throw ex;
             }
         }
+#endif
 
         /// <summary>
         /// 計算 選轉&平移 後的 邊線框 (左, 上, 右, 下)
@@ -870,6 +876,7 @@ namespace LaserAlignDX.AoiModel.V3
             }
         }
 
+#if(OPT_OLD_CODE)
         /// <summary>
         /// LETIAN: 读码测试 搬移至此.
         /// caller 負責 bmpInputImage 生命
@@ -987,6 +994,7 @@ namespace LaserAlignDX.AoiModel.V3
                 }
             }
         }
+#endif
         #endregion
 
         #region PRIVATE_HELPER_FUNCTIONS
