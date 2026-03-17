@@ -14,27 +14,17 @@
 #endregion
 
 
-using JetEazy.OpenCV;
-using JetEazy.QMath;
-using JetEazy.QvMath;
 using JetEazy.Utils;
-using LaserAlignDX.BasicSpace;
-using LaserAlignDX.Model;
-using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Traveller106;
-using VisionDesigner;
-using VisionDesigner.ImageArithmetic;
-using VisionDesigner.PositionFix;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
+using MvdDefectDetector = LaserAlignDX.Model.Defects.V3.MvdDefectDetector;
 
 
 namespace LaserAlignDX.AoiModel.V3
@@ -42,21 +32,18 @@ namespace LaserAlignDX.AoiModel.V3
     /// <summary>
     /// 晶粒尺寸量測
     /// </summary>
-    public partial class AoiModel_Defects : AoiModelBase
+    public partial class AoiModel_Defects : AoiModelBase, IDisposable
     {
         #region GLOBAL_MESS
         InspectX3ParaClass _xInspect => base._xRecipe.InspectParams;
         #endregion
 
         #region KERNEL_MEMBERS
-        //ITransform _worldTransform;
-        //QMicroChipTransform _microTransform;
-        IMicroChipTransform _microTransform;
+        MvdDefectDetector[] _detectors = new MvdDefectDetector[0];
         #endregion
 
         #region RUNTIME_DATA
         GaCellsGroup[] _cellGroups;
-        bool _is2ndRun;
         #endregion
 
         public bool QrUsed
@@ -68,6 +55,14 @@ namespace LaserAlignDX.AoiModel.V3
         {
             get;
             set;
+        }
+
+        public override void Dispose()
+        {
+            var detectors = _detectors;
+            _detectors = new MvdDefectDetector[0];
+            foreach(var detector in detectors)
+                detector?.Dispose();
         }
 
         public void SetCellGroups(GaCellsGroup[] cellGroups)
@@ -106,6 +101,7 @@ namespace LaserAlignDX.AoiModel.V3
             }
         }
 
+        #region DEBUG
         /// <summary>
         /// 調試 使用 (一次只測一個 cell)
         /// </summary>
@@ -115,10 +111,26 @@ namespace LaserAlignDX.AoiModel.V3
             var chipData = cell?.ChipData;
             if (chipData == null || chipData.ChipQuad2D == null)
                 return;
-            RunOneChipDefects(cell, cellBmp, ref cellRoi);
+            _detectors[0].RunOneChipDefects(cell, cellBmp, ref cellRoi);
         }
+        #endregion
 
         #region PRIVATE_FUNCTIONS
+        private void prepareDetectors(int NThreads)
+        {
+            if (NThreads > _detectors.Length)
+            {
+                var lst = new List<MvdDefectDetector>(_detectors);
+                for (int i = _detectors.Length; i < NThreads; i++)
+                {
+                    lst.Add(new MvdDefectDetector());
+                }
+                _detectors = lst.ToArray();
+            }
+            foreach (var detector in _detectors)
+                detector?.Init();
+        }
+
         /// <summary>
         ///  將 Gaara 的 瑕疵檢測 移植為多線程
         /// </summary>
@@ -130,13 +142,15 @@ namespace LaserAlignDX.AoiModel.V3
             fire_AoiBegin("晶粒瑕疵檢測");
 
             // 暫時強制使用 single thread
-            bool usingMultiThread = false; // Universal.N_THREADS_ENABLED;
+            bool usingMultiThread = Universal.N_THREADS_ENABLED;
+            //usingMultiThread = false;
 
             #region 準備_CELL_GROUPS
             int N_GROUPS = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;
             var groups = _cellGroups != null ? _cellGroups : GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
             if (groups == null || groups.Length == 0)
                 return;
+            prepareDetectors(groups.Length);
             #endregion
 
             if (!usingMultiThread)
@@ -171,6 +185,7 @@ namespace LaserAlignDX.AoiModel.V3
         {
             var fullFovSize = cellsGroup.FullFovRect.Size;
             var debugSB = new StringBuilder();
+            var detector = _detectors[threadIdx];
 
             foreach (var gaCell in cellsGroup)
             {
@@ -195,15 +210,16 @@ namespace LaserAlignDX.AoiModel.V3
                 if (go)
                 {
                     //(3) 單一晶粒 瑕疵檢測
-                    RunOneChipDefects(cell, cellBmp, ref cellRoi);
+                    detector.RunOneChipDefects(cell, cellBmp, ref cellRoi);
                 }
             }
         }
 
+#if(OPT_OLD_CODE)
         /// <summary>
         /// 瑕疵檢查 (單一晶粒) 
         /// </summary>
-        private void RunOneChipDefects(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
+        private void _RunOneChipDefects(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
         {
             try
             {
@@ -278,6 +294,7 @@ namespace LaserAlignDX.AoiModel.V3
                 //_xInspect.optChipDefectsInspect = false;
             }
         }
+#endif
         #endregion
     }
 }

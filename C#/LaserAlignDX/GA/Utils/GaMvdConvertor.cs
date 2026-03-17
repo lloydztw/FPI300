@@ -155,7 +155,7 @@ namespace LaserAlignDX
         /// Caller 必須接管 mvdImage 與 srcBmp 之生命週期 !!!
         /// (有用到 Data Copy, 耗時)
         /// </summary>
-        public static CMvdImage ToCMvdImage(Bitmap srcBmp)
+        public static CMvdImage ToCMvdImage(this Bitmap srcBmp)
         {
             CMvdImage cMvdImage = new CMvdImage();
 

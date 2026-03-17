@@ -431,7 +431,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             foreach ( var defectBlob in defectBlobs )
             {
-                var item = new CviRotRectBox(defectBlob, Color.Red, blend: 0.3f);
+                var item = new CviRotRectBox(defectBlob, Color.HotPink, blend: 0.5f);
                 drawItems.Add(item);
             }
 

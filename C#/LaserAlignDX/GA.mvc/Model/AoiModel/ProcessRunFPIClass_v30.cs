@@ -54,10 +54,17 @@ namespace LaserAlignDX.AoiModel.V3
             _instance?.Dispose();
             _instance = null;
         }
-        public void Dispose()
+        public override void Dispose()
         {
             // To DO: 請把自己清乾淨
             //_DisposeTools();
+
+            _aoiChipLoc?.Dispose();
+            _aoiChipLoc = null;
+            _aoiChipMeasure?.Dispose();
+            _aoiChipMeasure = null;
+            _aoiChipDefects?.Dispose();
+            _aoiChipDefects = null; 
         }
 
         #region GLOBAL_MESS

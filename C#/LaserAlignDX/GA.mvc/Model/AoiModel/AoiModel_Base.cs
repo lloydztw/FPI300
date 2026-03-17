@@ -31,7 +31,7 @@ using Traveller106;
 
 namespace LaserAlignDX.AoiModel
 {
-    public abstract class AoiModelBase
+    public abstract class AoiModelBase : IDisposable
     {
         public event EventHandler<GaProgressEventArgs> OnAoiProgressing;
         public event EventHandler<GaProgressEventArgs> OnAoiBegin;
@@ -248,6 +248,10 @@ namespace LaserAlignDX.AoiModel
             GaUtil.LOG($"[異常] {ex.Message}", Color.Red);
         }
         #endregion
+
+        public virtual void Dispose()
+        {
+        }
 
         public abstract void Run();
 

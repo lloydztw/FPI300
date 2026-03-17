@@ -448,6 +448,7 @@
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_ChipLoc.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_Defects.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_EmptyTray.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\DefectDetector\MvdDefectDetector.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v30.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaBigImageHolder.cs" />
