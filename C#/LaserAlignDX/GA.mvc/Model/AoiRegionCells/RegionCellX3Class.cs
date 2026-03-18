@@ -21,11 +21,11 @@ namespace LaserAlignDX.OPSpace
     {
         #region MVD_TOOLS
         CPositionFixTool cPositionFixToolObj = null;// new VisionDesigner.PositionFix.CPositionFixTool();
-        CImageArithmeticTool cImageArithmeticToolObj = null;// new CImageArithmeticTool();
-        VisionDesigner.ImageBinary.CImageBinaryTool cImageBinaryToolObj = null;// new VisionDesigner.ImageBinary.CImageBinaryTool();
-        VisionDesigner.ImageMorph.CImageMorphTool cImageMorphToolObj = null;// new VisionDesigner.ImageMorph.CImageMorphTool();
-        VisionDesigner.BlobFind.CBlobFindTool cBlobFindToolObj = null;// new VisionDesigner.BlobFind.CBlobFindTool();
-        VisionDesigner.ImageAffineTransform.CImageAffineTransformTool cImageAffineTransformToolObj = null;
+        //CImageArithmeticTool cImageArithmeticToolObj = null;// new CImageArithmeticTool();
+        //VisionDesigner.ImageBinary.CImageBinaryTool cImageBinaryToolObj = null;// new VisionDesigner.ImageBinary.CImageBinaryTool();
+        //VisionDesigner.ImageMorph.CImageMorphTool cImageMorphToolObj = null;// new VisionDesigner.ImageMorph.CImageMorphTool();
+        //VisionDesigner.BlobFind.CBlobFindTool cBlobFindToolObj = null;// new VisionDesigner.BlobFind.CBlobFindTool();
+        //VisionDesigner.ImageAffineTransform.CImageAffineTransformTool cImageAffineTransformToolObj = null;
         Mvd2DReaderClass mvd2DReader = null;// new Mvd2DReaderClass();
         MvdFindLineClass mvdFindLineClass = null;
         MvdPairLineClass mvdPairLineClass = null;
@@ -50,22 +50,22 @@ namespace LaserAlignDX.OPSpace
         {
             cPositionFixToolObj?.Dispose();
             cPositionFixToolObj = null;
-            cImageArithmeticToolObj?.Dispose();
-            cImageArithmeticToolObj = null;
-            cImageBinaryToolObj?.Dispose();
-            cImageBinaryToolObj = null;
-            cImageMorphToolObj?.Dispose();
-            cImageMorphToolObj = null;
-            cBlobFindToolObj?.Dispose();
-            cBlobFindToolObj = null;
+            //cImageArithmeticToolObj?.Dispose();
+            //cImageArithmeticToolObj = null;
+            //cImageBinaryToolObj?.Dispose();
+            //cImageBinaryToolObj = null;
+            //cImageMorphToolObj?.Dispose();
+            //cImageMorphToolObj = null;
+            //cBlobFindToolObj?.Dispose();
+            //cBlobFindToolObj = null;
             mvd2DReader?.Dispose();
             mvd2DReader = null;
             mvdFindLineClass?.Dispose();
             mvdFindLineClass = null;
             mvdPairLineClass?.Dispose();
             mvdPairLineClass = null;
-            cImageAffineTransformToolObj?.Dispose();
-            cImageAffineTransformToolObj = null;
+            //cImageAffineTransformToolObj?.Dispose();
+            //cImageAffineTransformToolObj = null;
 
             try { OutGridLink?.Dispose(); } catch { }
             OutGridLink = null;
@@ -261,6 +261,7 @@ namespace LaserAlignDX.OPSpace
         #endregion
 
         #region MVD_IMAGE_AFFINETRANSFORM
+#if (OPT_REPLACED_BY_MvdDefectDetector)
         /// <summary>
         /// 抓取全域图形的转正图像 位置框由前期定位决定
         /// </summary>
@@ -358,6 +359,7 @@ namespace LaserAlignDX.OPSpace
             }
             return bmpInputImg;
         }
+#endif
         #endregion
 
         #region MVD_LINE_SEGMENTS
@@ -771,6 +773,7 @@ namespace LaserAlignDX.OPSpace
         #endregion
 
         #region MVD_DEFECT_INSPECT_MEMBERS
+#if (OPT_REPLACED_BY_MvdDefectDetector)
         private List<CMvdRectangleF> _blobMvdRectFNGList = new List<CMvdRectangleF>();
         private SizeF _defectRunRoiSize = new SizeF(100, 100);
         public List<CMvdRectangleF> DrawBlobNGList()
@@ -817,6 +820,7 @@ namespace LaserAlignDX.OPSpace
             }
             return cMvdRectangleFs;
         }
+#endif
         #endregion
 
         #region OLD_CODE
@@ -1084,7 +1088,6 @@ namespace LaserAlignDX.OPSpace
         }
 
         #region MVD_AOI_FUNCTIONS
-
 #if (OPT_NOT_USED)
         /// <summary>
         /// 计算修正后的位置框
@@ -1166,6 +1169,7 @@ namespace LaserAlignDX.OPSpace
             return cPositionFixToolObj.Result.CorrectedShape;
         }
 
+#if (OPT_REPLACED_BY_MvdDefectDetector)
         public void DetectDefects(Bitmap bmpTemplate, Bitmap bmpRun, Bitmap bmpMask)
         {
             //string dumpFolder = System.IO.Path.Combine(SaveDebugPath, "Detect");
@@ -1292,6 +1296,7 @@ namespace LaserAlignDX.OPSpace
                 }
             }
         }
+#endif
 
         public void DeCode2D(Bitmap eBmpRun, PointF Poi_CodeBase, bool eJudged = false)
         {

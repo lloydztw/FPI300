@@ -52,6 +52,7 @@ namespace JetEazy.UISpace
         //Language Setup
         JzLanguageClass myLanguage = new JzLanguageClass();
 
+        public PictureBox picLogo => pictureBox1;
         PictureBox picExit;
 
         Button btnLogin;
@@ -308,6 +309,8 @@ namespace JetEazy.UISpace
 
         void picExit_DoubleClick(object sender, EventArgs e)
         {
+            pictureBox1.BackgroundImage.Save("d:\\paso.log\\logo.png");
+
             if (LOGINStatus != ESSStatusEnum.LOGOUT)
             {
                 JetEazy.BasicSpace.VsMSG.Instance.Warning("請登出!\n回到跑線正常狀態,\n才能退出程式!");

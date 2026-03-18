@@ -158,14 +158,6 @@ namespace PhotoMachine.UISpace
 
             txtLotNo.ReadOnly = true;
             txtStripID.ReadOnly = true;
-
-            if (!DesignMode)
-            {
-                HandleCreated += (s, e) =>
-                {
-                    GaMvcConfig.SysModel.AoiModel.OnLotDataChanged += AoiModel_OnLotDataChanged;
-                };
-            }
         }
 
         private void AoiModel_OnLotDataChanged(object sender, EventArgs e)
@@ -430,6 +422,14 @@ namespace PhotoMachine.UISpace
 
             //SetLotID(xRecipe.xLotNoStr);
             SetDuriation("0 s");
+
+
+            if (!DesignMode)
+            {
+                var model = GaMvcConfig.SysModel?.AoiModel;
+                if (model != null)
+                    model.OnLotDataChanged += AoiModel_OnLotDataChanged;
+            }
         }
 
         public string GetProductBarcode()
