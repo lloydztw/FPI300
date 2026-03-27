@@ -26,6 +26,7 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LeTian.AoiLib;
 using LeTian.JxProps.PropertyMeta;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
@@ -643,6 +644,12 @@ namespace LaserAlignDX.Mvc.Ctrl
                 //if (ret == DialogResult.Yes)
                 //    WriteCoordsRefToPlc();
 
+            }
+            catch(Exception ex)
+            {
+                LtDebug.LOG.Error(ex, "[異常] 自動生成陣列");
+                MessageBox.Show(ex.Message + "\r\n\r\n" + ex.StackTrace, "自動生成陣列異常", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                throw;
             }
             finally
             {

@@ -302,16 +302,31 @@ namespace LaserAlignDX.Model.Coords.V33
             if (camGrid.Rows < 2 || camGrid.Cols < 2)
                 return;
 
+            //var calib = trfCameraToWorld.GetCalibGridPoints();
+            //for (int r = 0, rows = camGrid.Rows; r < rows; r++)
+            //{
+            //    for (int c = 0, cols = camGrid.Cols; c < cols; c++)
+            //    {
+            //        var camPt = camGrid.Get(r, c)?.Center;
+            //        var worldPt = _worldGrid.Get(r, c);
+            //        calib.Update(r, c, camPt, worldPt);
+            //    }
+            //}
+
             var calib = trfCameraToWorld.GetCalibGridPoints();
+            int newRows = camGrid.Rows;
+            int newCols = camGrid.Cols;
+            var srcPoints = new QVector[newRows, newCols];
+            var dstPoints = new QVector[newRows, newCols];
             for (int r = 0, rows = camGrid.Rows; r < rows; r++)
             {
                 for (int c = 0, cols = camGrid.Cols; c < cols; c++)
                 {
-                    var camPt = camGrid.Get(r, c)?.Center;
-                    var worldPt = _worldGrid.Get(r, c);
-                    calib.Update(r, c, camPt, worldPt);
+                    srcPoints[r, c] = camGrid.Get(r, c)?.Center;
+                    dstPoints[r, c] = _worldGrid.Get(r, c);
                 }
             }
+            calib.SetAll(srcPoints, dstPoints);
         }
         #endregion
 
