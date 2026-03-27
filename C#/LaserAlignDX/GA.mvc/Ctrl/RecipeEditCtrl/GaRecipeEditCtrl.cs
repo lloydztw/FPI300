@@ -647,7 +647,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             catch(Exception ex)
             {
-                LtDebug.LOG.Error(ex, "[異常] 自動生成陣列");
+                // Model 內部已經有 NLOG 了
+                // LtDebug.LOG.Error(ex, "[異常] 自動生成陣列");
                 MessageBox.Show(ex.Message + "\r\n\r\n" + ex.StackTrace, "自動生成陣列異常", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw;
             }
