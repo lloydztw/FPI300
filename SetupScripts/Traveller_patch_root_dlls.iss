@@ -6,7 +6,7 @@
 [Setup]
 AppPublisher=JetEazy System Co., Ltd.
 AppPublisherURL=http://www.jeteazy.com
-AppVersion=3.3.0.3
+AppVersion=3.3.0.5
 AppCopyright=Copyright (C) 2025 JetEazy System Co., Ltd.
 ;WizardImageFile=JetEazySetup.bmp
 
@@ -16,7 +16,7 @@ DefaultGroupName=JetEazy FPI30
 Compression=lzma
 SolidCompression=yes
 OutputDir=.\bin
-OutputBaseFileName=Traveller_Patch_3.3.0.3
+OutputBaseFileName=Traveller_Patch_3.3.0.5_sim_C
 
 [Files]
 ; BIN & DLL
@@ -27,7 +27,8 @@ Source: "..\bin\Debug\NLog.config";                                             
 Source: "..\C#\FPI30_Aoi\bin\Debug\EzAoiEmptyTrayInspector.App.exe";              DestDir: "{app}\_BIN_";   Flags: ignoreversion
 
 [Icons]
-Name: "{group}\Travller106 主程式";       Filename: "{app}\_BIN_\FPI30AOIX3.exe";                         WorkingDir: "{app}\_BIN_"
-Name: "{group}\Travller106 參數打包程式"; Filename: "{app}\_BIN_\Traveller.Data.Packer.exe";              WorkingDir: "{app}\_BIN_"
+Name: "{commondesktop}\Travller106 主程式";    Filename: "{app}\_BIN_\FPI30AOIX3.exe";                WorkingDir: "{app}\_BIN_"
+Name: "{group}\Travller106 主程式";            Filename: "{app}\_BIN_\FPI30AOIX3.exe";                WorkingDir: "{app}\_BIN_"
+Name: "{group}\Travller106 參數打包程式";      Filename: "{app}\_BIN_\Traveller.Data.Packer.exe";     WorkingDir: "{app}\_BIN_"
 
 [Code]

@@ -60,15 +60,13 @@ namespace LaserAlignDX.Model.Coords
         /// </summary>
         public static void Keep(string name)
         {
-            TravellerTransforms.DisposeAll(name, "$CommonBase$");
+            TravellerTransforms.DisposeAll(name, "$CommonBase$", "C1_Micro", "C2_Micro");
         }
     }
 
 
     partial class TravellerTransformFactory
     {
-        static bool OPT_CLONE_BY_LOAD_FILE => true;
-
         #region NLOG
         internal static NLog.ILogger _LOG => TravellerTransforms._LOG;
         #endregion
@@ -88,52 +86,35 @@ namespace LaserAlignDX.Model.Coords
 
                 //(0) CommonBase
                 var commonBaseTrf = CommonBase;
+                commonBaseTrf.Load(GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE);
+                commonBaseTrf.BuildAll();
 
                 //(1) Instance
                 var newTrf = TravellerTransformFactory.Instance(name);
 
-                //(2) 簡單透過檔案進行 Clone
-                if (OPT_CLONE_BY_LOAD_FILE)
-                {
-                    //var tmpPath = System.IO.Path.GetTempPath();
-                    //var tmpFile = System.IO.Path.Combine(tmpPath, $"jx_clone_transform.ini");
-                    //var clonedTrf = TravellerTransformFactory.Instance(name);
-                    //commonBaseTrf.Save(tmpFile);
-                    newTrf.Load(GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE);
-                }
-                else
-                {
-                    commonBaseTrf.Load(GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE);
-                    commonBaseTrf.BuildAll();
-                }
-
-                //(3) [線性遷移] Camera-World 座標轉換系統 : 重新設定 rows, cols, pitchX, pitchY 布局
+                //(2) [線性遷移] Camera-World 座標轉換系統 : 重新設定 rows, cols, pitchX, pitchY 布局
                 newTrf.ConfigWorldGridPoints(newCamGrid.Rows, newCamGrid.Cols, newPitch.X, newPitch.Y);
 
-                //(4) [線性遷移] Camera-World 座標轉換系統 : 重新設定 相機格點
+                //(3) [線性遷移] Camera-World 座標轉換系統 : 重新設定 相機格點
                 newTrf.SetCalibCamGrid(carrierID, newCamGrid);
 
-                //(5) [線性遷移] Camera-Motor 座標轉換系統
-                if (!OPT_CLONE_BY_LOAD_FILE)
+                //(4) [線性遷移] Camera-Motor 座標轉換系統 (使用 commonBaseTrf)
+                foreach (SuckerRowEnum suckerID in Enum.GetValues(typeof(SuckerRowEnum)))
                 {
-                    // 因為 Camera-Motor 座標轉換系統 的 校正點位, 沿用 CommonBase 沒有變動.
-                    // 所以 !OPT_CLONE_BY_LOAD_FILE 成立時, 以下才需要執行.
-                    foreach (SuckerRowEnum suckerID in Enum.GetValues(typeof(SuckerRowEnum)))
-                    {
-                        var srcTrfCM = commonBaseTrf.GetCameraMotorTransform(carrierID, suckerID);
-                        var srcCalib = srcTrfCM.GetCalibGridPoints();
-                        int rows = srcCalib.Rows;
-                        int cols = srcCalib.Cols;
-                        var camPts = new QVector[rows, cols];
-                        var motorPts = new QVector[rows, cols];
-                        for (int r = 0; r < rows; r++)
-                            for (int c = 0; c < cols; c++)
-                                srcCalib.Get(r, c, out camPts[r, c], out motorPts[r, c]);
+                    var srcTrfCM = commonBaseTrf.GetCameraMotorTransform(carrierID, suckerID);
+                    var dstTrfCM = newTrf.GetCameraMotorTransform(carrierID, suckerID);
+                    var srcCalib = srcTrfCM.GetCalibGridPoints();
+                    var dstCalib = dstTrfCM.GetCalibGridPoints();
 
-                        var dstTrfCM = newTrf.GetCameraMotorTransform(carrierID, suckerID);
-                        var dstCalib = dstTrfCM.GetCalibGridPoints();
-                        dstCalib.SetAll(camPts, motorPts);
-                    }
+                    int rows = srcCalib.Rows;
+                    int cols = srcCalib.Cols;
+                    var camPts = new QVector[rows, cols];
+                    var motorPts = new QVector[rows, cols];
+                    for (int r = 0; r < rows; r++)
+                        for (int c = 0; c < cols; c++)
+                            srcCalib.Get(r, c, out camPts[r, c], out motorPts[r, c]);
+
+                    dstCalib.SetAll(camPts, motorPts);
                 }
 
                 //(6) Build

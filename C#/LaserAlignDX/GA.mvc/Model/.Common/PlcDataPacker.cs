@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.AccountMgr;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -277,8 +278,12 @@ namespace LaserAlignDX.Model
                 return true;
 
             StringBuilder errors = new StringBuilder();
-            int rows = _xRecipe.xCamGrid1.Rows;
-            int cols = _xRecipe.xCamGrid1.Cols;
+            var model = GaMvcConfig.SysModel;
+            var carrierID = model.ActiveCarrierID;
+            var camGrid = carrierID == CarrierEnum.C1 ? _xRecipe.xCamGrid1 : _xRecipe.xCamGrid2;
+            int rows = camGrid.Rows;
+            int cols = camGrid.Cols;
+
             var table = new RegionCellX3Class[rows, cols];
             int index = -1;
             bool ok = true;
