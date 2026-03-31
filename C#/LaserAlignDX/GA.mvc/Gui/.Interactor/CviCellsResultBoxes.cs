@@ -818,7 +818,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             #endregion
 
-            #region PHYSIC_目標座標
+            #region WORLD_目標座標
             sb.AppendLine();
             sb.AppendLine().Append("Physic 目標(X,Y) = (").AppendValues((float)world_target.X, (float)world_target.Y).Append(") mm");
             if (camPt != null)
@@ -828,16 +828,17 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             #region 變動值
             if (camPt != null)
             {
-                var world_delta = world_current - world_target;
-                var motor_delta = s1_current - s1_target;
+                //var world_delta = world_current - world_target;
+                //var motor_delta = s1_current - s1_target;
+                (var motor_delta, var world_delta) = TransformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
                 sb.AppendLine();
                 sb.AppendLine($"Physic 變動值 ΔX = {world_delta.X:0.000} mm");
                 sb.AppendLine($"Physic 變動值 ΔY = {world_delta.Y:0.000} mm");
                 if (!_withPadGaps)
                 {
                     sb.AppendLine();
-                    sb.AppendLine($"PLC 格點 補償量 ΔX = {motor_delta.X:0.000} mm");
-                    sb.AppendLine($"PLC 格點 補償量 ΔY = {motor_delta.Y:0.000} mm");
+                    sb.AppendLine($"PLC 補償量 ΔX = {motor_delta.X:0.000} mm");
+                    sb.AppendLine($"PLC 補償量 ΔY = {motor_delta.Y:0.000} mm");
                 }
             }
             #endregion

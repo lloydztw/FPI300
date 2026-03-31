@@ -582,9 +582,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             _cviGridResultBox.IsEmptyTrayMode = false;
 
             _cviGridResultBox.ActiveCarrierID = _activeCarrierID;
-            _cviGridResultBox.ActiveSuckerRowID = _activeSuckerRowID;
-            _cviGridResultBox.TransCameraToMotor = _commonBaseTrf?.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+            //_cviGridResultBox.ActiveSuckerRowID = _activeSuckerRowID;
             _cviGridResultBox.TransCameraToWorld = _commonBaseTrf?.GetCameraPhysicTransform(_activeCarrierID);
+            _cviGridResultBox.TransCameraToMotor = _commonBaseTrf?.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
 
             _cviGridResultBox.UpdateResult(camGrid);
             _cviGridResultBox.Visible = camGrid != null;

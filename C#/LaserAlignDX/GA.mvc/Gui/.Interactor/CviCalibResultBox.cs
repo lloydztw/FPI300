@@ -80,11 +80,15 @@ namespace LaserAlignDX.Mvc.Gui
             get;
             set;
         }
+        public ITransform TransCameraToWorld
+        {
+            get; set;
+        }
         public ITransform TransCameraToMotor
         {
             get; set;
         }
-        public ITransform TransCameraToWorld
+        public ITransform TransCameraToMotor2
         {
             get; set;
         }
@@ -92,10 +96,10 @@ namespace LaserAlignDX.Mvc.Gui
         {
             get; set;
         }
-        public SuckerRowEnum ActiveSuckerRowID
-        {
-            get; set;
-        }
+        //public SuckerRowEnum ActiveSuckerRowID
+        //{
+        //    get; set;
+        //}
 
         #region OVERRIDES
         public override void OnKeyDown(CvImageViewer viewer, KeyEventArgs e)
@@ -525,7 +529,7 @@ namespace LaserAlignDX.Mvc.Gui
 
             appendCameraCoords(sb, cursorBloc, cursorBloc2);
 
-            if (TransCameraToMotor != null)
+            if (TransCameraToMotor != null || TransCameraToMotor2 != null)
             {
                 appendMotorCoords(sb, cursorBloc, cursorBloc2);
                 showScore = false;
@@ -568,24 +572,29 @@ namespace LaserAlignDX.Mvc.Gui
         }
         void appendMotorCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
-            var transform = TransCameraToMotor;
-            if (bloc == null || transform == null)
+            if (bloc == null)
                 return;
 
-            var motorCoord = transform.Trans(bloc.Center);
-
             sb.AppendLine();
-            sb.AppendLine($"吸嘴馬達座標 X = {motorCoord.X:0.000} mm");
-            sb.AppendLine($"載台馬達座標 Y = {motorCoord.Y:0.000} mm");
 
-            if (bloc != null && bloc2 != null && bloc != bloc2)
+            var trfs = new[] { TransCameraToMotor, TransCameraToMotor2 };
+            foreach (var transform in trfs)
             {
-                var motorCoord2 = transform.Trans(bloc2.Center);
-                var dv = motorCoord - motorCoord2;
-                double dist = dv.NormLength;
-                sb.AppendLine($"馬達座標 dX = {dv.X:0.000} mm");
-                sb.AppendLine($"馬達座標 dY = {dv.Y:0.000} mm");
-                sb.AppendLine($"馬達座標 距離 = {dist:0.000} mm");
+                if (transform == null)
+                    continue;
+
+                var motorName = transform.Name.Contains("S2") ? "S2" : "S1";
+                var motorCoord = transform.Trans(bloc.Center);
+                sb.AppendLine($"{motorName}馬達座標 (X,Y) = ({motorCoord.X:0.000}, {motorCoord.Y:0.000}) mm");
+
+                if (bloc != null && bloc2 != null && bloc != bloc2)
+                {
+                    var motorCoord2 = transform.Trans(bloc2.Center);
+                    var dv = motorCoord - motorCoord2;
+                    double dist = dv.NormLength;
+                    sb.AppendLine($"馬達座標 差值 (dX,dY) = ({dv.X:0.000}, {dv.Y:0.000}) mm");
+                    sb.AppendLine($"馬達座標 距離 = {dist:0.000} mm");
+                }
             }
         }
         void appendWorldCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
@@ -597,16 +606,14 @@ namespace LaserAlignDX.Mvc.Gui
             var worldCoord = transform.Trans(bloc.Center);
 
             sb.AppendLine();
-            sb.AppendLine($"Physic座標 X = {worldCoord.X:0.000} mm");
-            sb.AppendLine($"Physic座標 Y = {worldCoord.Y:0.000} mm");
+            sb.AppendLine($"Physic座標 (X,Y) = ({worldCoord.X:0.000}, {worldCoord.Y:0.000}) mm");
 
             if (bloc != null && bloc2 != null && bloc != bloc2)
             {
                 var worldCoord2 = transform.Trans(bloc2.Center);
                 var dv = worldCoord - worldCoord2;
                 double dist = dv.NormLength;
-                sb.AppendLine($"Physic座標 dX = {dv.X:0.000} mm");
-                sb.AppendLine($"Physic座標 dY = {dv.Y:0.000} mm");
+                sb.AppendLine($"Physic座標 差值 (dX,dY) = ({dv.X:0.000}, {dv.Y:0.000}) mm");
                 sb.AppendLine($"Physic座標 距離 = {dist:0.000} mm");
             }
         }
@@ -621,8 +628,8 @@ namespace LaserAlignDX.Mvc.Gui
             sb.AppendLine($"Physic 變動值 ΔX = {worldDelta.X:0.000} mm");
             sb.AppendLine($"Physic 變動值 ΔY = {worldDelta.Y:0.000} mm");
             sb.AppendLine();
-            sb.AppendLine($"PLC 格點 補償量 dX = {motorDelta.X:0.000} mm");
-            sb.AppendLine($"PLC 格點 補償量 dY = {motorDelta.Y:0.000} mm");
+            sb.AppendLine($"PLC 補償量 ΔX = {motorDelta.X:0.000} mm");
+            sb.AppendLine($"PLC 補償量 ΔY = {motorDelta.Y:0.000} mm");
         }
 
         #region MENU_STRIP_FUNCTIONS
