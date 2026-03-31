@@ -679,7 +679,7 @@ namespace LaserAlignDX.Model.Coords.V33
         /// 計算 載台 C, 馬達吸嘴中心 對其吸到 camPt 所需要的補償量
         /// </summary>
         /// <returns>(馬達補償量, 世界座標差值)</returns>
-        public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
+        public (QVector, QVector) CalcPlcCompensation_000(CarrierEnum C, QVector camPt, int rowId, int colId)
         {
             // 根據 (rowId, colId) 取得 載台C 格位節點 之 以下座標:
             //      world_target 格點的 世界座標
@@ -706,6 +706,58 @@ namespace LaserAlignDX.Model.Coords.V33
 
             // WorldDetla
             var worldDelta = world_current - world_target;
+
+            return (motorDelta, worldDelta);
+        }
+
+        /// <summary>
+        /// 根據 像測點 camPt 與 目標格點 (rowId, colID), 
+        /// 計算 載台 C, 馬達吸嘴中心 對其吸到 camPt 所需要的補償量
+        /// </summary>
+        /// <returns>(馬達補償量, 世界座標差值)</returns>
+        public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
+        {
+            ErrorCodes err;
+            string errMsg;
+
+            (err, errMsg) = GetNodeCoords(C, 0, 0, out var _, out var _, out var s1_org, out var s2_org);
+
+            var pitchX = _worldGrid.PitchX;
+            var pitchY = _worldGrid.PitchY;
+            var pitchVect = new QVector(pitchX * colId, pitchY * rowId);
+
+            // 馬達 天真認為格位中心所在 座標
+            var s1_naive = s1_org + pitchVect;
+            var s2_naive = s2_org + pitchVect;
+
+            //// 根據 (rowId, colId) 取得 載台C 格位節點 之 以下座標:
+            ////      world_target 格點的 世界座標
+            ////      s1_target    格點的 吸嘴1 馬達座標
+            ////      s2_target    格點的 吸嘴2 馬達座標
+            (err, errMsg) = GetNodeCoords(C, rowId, colId, out var _, out var world_node, out var s1_node, out var s2_node);
+            if (err != ErrorCodes.OK)
+            {
+                return (new QVector(0, 0), new QVector(0, 0));
+            }
+
+            var transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
+            var transCM2 = GetCameraMotorTransform(C, SuckerRowEnum.S2);
+            var transCP = GetCameraPhysicTransform(C);
+
+            // 由 像測點 推算 對應馬達值
+            var s1_current = transCM1.Trans(camPt);
+            var s2_current = transCM2.Trans(camPt);
+            // 由 像測點 推算 對應 世界值
+            var world_current = transCP.Trans(camPt);
+
+            // 注意: 德龍補償量 == 量測現值 - 目標值
+            //var naiveDelta = s1_node - s1_naive;
+            //var motorDelta = s1_current - s1_node;
+            //motorDelta = motorDelta + naiveDelta;
+            var motorDelta = s1_current - s1_naive;
+
+            // WorldDetla
+            var worldDelta = world_current - world_node;
 
             return (motorDelta, worldDelta);
         }
