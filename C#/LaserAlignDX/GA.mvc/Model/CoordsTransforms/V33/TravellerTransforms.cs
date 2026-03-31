@@ -731,9 +731,9 @@ namespace LaserAlignDX.Model.Coords.V33
             var s2_naive = s2_org + pitchVect;
 
             //// 根據 (rowId, colId) 取得 載台C 格位節點 之 以下座標:
-            ////      world_target 格點的 世界座標
-            ////      s1_target    格點的 吸嘴1 馬達座標
-            ////      s2_target    格點的 吸嘴2 馬達座標
+            ////      world_node 格點的 世界座標
+            ////      s1_node    格點的 吸嘴1 馬達座標
+            ////      s2_node    格點的 吸嘴2 馬達座標
             (err, errMsg) = GetNodeCoords(C, rowId, colId, out var _, out var world_node, out var s1_node, out var s2_node);
             if (err != ErrorCodes.OK)
             {
