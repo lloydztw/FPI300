@@ -529,7 +529,7 @@ namespace LaserAlignDX.Model.Coords.V33
             //(4.2) 使用 World Coords
             else
             {
-                // (r,c) -> World
+                // (row, col) -> World
                 worldCoord = _worldGrid.Get(rowId, colId);
                 // World -> Camera
                 camCoord = transCP.InvTrans(worldCoord);
@@ -720,17 +720,18 @@ namespace LaserAlignDX.Model.Coords.V33
             ErrorCodes err;
             string errMsg;
 
+            //(1) 取得 馬達 左上角 (row=0, col=0) 點位 的 參考座標 (這個也是 PC 會寫給 PLC 的參考座標)
             (err, errMsg) = GetNodeCoords(C, 0, 0, out var _, out var _, out var s1_org, out var s2_org);
 
             var pitchX = _worldGrid.PitchX;
             var pitchY = _worldGrid.PitchY;
             var pitchVect = new QVector(pitchX * colId, pitchY * rowId);
 
-            // 馬達 天真認為格位中心所在 座標
+            //(2) PLC 天真的推算 (rowId, colID) 格位中心 所在的 馬達座標 (預想值)
             var s1_naive = s1_org + pitchVect;
             var s2_naive = s2_org + pitchVect;
 
-            //// 根據 (rowId, colId) 取得 載台C 格位節點 之 以下座標:
+            //(3) 根據 (rowId, colId) 取得 載台C 格位中心 之 以下座標:
             ////      world_node 格點的 世界座標
             ////      s1_node    格點的 吸嘴1 馬達座標
             ////      s2_node    格點的 吸嘴2 馬達座標
@@ -744,19 +745,19 @@ namespace LaserAlignDX.Model.Coords.V33
             var transCM2 = GetCameraMotorTransform(C, SuckerRowEnum.S2);
             var transCP = GetCameraPhysicTransform(C);
 
-            // 由 像測點 推算 對應馬達值
+            //(4) 由 像測點 推算 對應 馬達座標值
             var s1_current = transCM1.Trans(camPt);
             var s2_current = transCM2.Trans(camPt);
-            // 由 像測點 推算 對應 世界值
+            //(5) 由 像測點 推算 對應 世界座標值
             var world_current = transCP.Trans(camPt);
 
-            // 注意: 德龍補償量 == 量測現值 - 目標值
-            //var naiveDelta = s1_node - s1_naive;
-            //var motorDelta = s1_current - s1_node;
-            //motorDelta = motorDelta + naiveDelta;
+            //(6) 【德龍補償量】 == 量測現值 - 預想值
+            //// var naiveDelta = s1_node - s1_naive;
+            //// var motorDelta = s1_current - s1_node;
+            //// motorDelta = motorDelta + naiveDelta;
             var motorDelta = s1_current - s1_naive;
 
-            // WorldDetla
+            //(7) WorldDetla (參考調試用)
             var worldDelta = world_current - world_node;
 
             return (motorDelta, worldDelta);
