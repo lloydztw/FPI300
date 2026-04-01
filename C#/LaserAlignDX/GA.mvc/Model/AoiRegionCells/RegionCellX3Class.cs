@@ -244,6 +244,14 @@ namespace LaserAlignDX.OPSpace
                     _inspectNgList.Add(result);
             }
         }
+        public IEnumerable<InspectReason> IterNgResults()
+        {
+            if (_inspectNgList != null)
+            {
+                for (int i = _inspectNgList.Count - 1; i >= 0; i--)
+                    yield return _inspectNgList[i];
+            }
+        }
 
         #region OLD_CODE
         ///// <summary>
