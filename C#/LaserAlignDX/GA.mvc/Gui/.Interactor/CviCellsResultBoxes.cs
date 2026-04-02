@@ -18,6 +18,7 @@ using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
+using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
@@ -563,6 +564,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             get;
             set;
+        }
+        public override ITransform TransCameraToWorld
+        {
+            get => TransformsModel?.GetCameraPhysicTransform(ActiveCarrierID);
+            set { }
         }
 
         #region TOOL_TIP_FUNCTIONS

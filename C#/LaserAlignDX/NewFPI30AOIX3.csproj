@@ -381,6 +381,7 @@
     <Compile Include="GA.mvc\Gui\.Interactor\CviCellsResultBoxes.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviGoldenPickingBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviLineSegmentsBox.cs" />
+    <Compile Include="GA.mvc\Gui\.Interactor\CviRuler.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviRcpBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviFlyAoiResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviRotRectBox.cs" />

@@ -81,10 +81,10 @@ namespace LaserAlignDX.Mvc.Gui
             get;
             set;
         }
-        public ITransform TransCameraToWorld
-        {
-            get; set;
-        }
+        //public ITransform TransCameraToWorld
+        //{
+        //    get; set;
+        //}
         public ITransform TransCameraToMotor
         {
             get; set;
