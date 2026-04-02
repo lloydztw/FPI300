@@ -40,6 +40,9 @@
     <Compile Include="Model\QCoord.cs" />
     <Compile Include="Interface\ITransform.cs" />
     <Compile Include="Model\QTransform.cs" />
+    <Compile Include="Model\QxCoordsTransform.cs" />
+    <Compile Include="Model\QxCoordsTransform_ini.cs" />
+    <Compile Include="Model\Support\ZoneManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

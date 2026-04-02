@@ -850,18 +850,18 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             #region 變動值
             if (camPt != null)
             {
-                (var motor_delta, var world_delta) = TransformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
+                (var motorDelta, var worldDelta) = TransformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
                 if (!_withPadGaps)
                 {
                     sb.AppendLine();
-                    sb.AppendLine($"Physic 變動值 ΔX = {world_delta.X:0.000} mm");
-                    sb.AppendLine($"Physic 變動值 ΔY = {world_delta.Y:0.000} mm");
+                    sb.AppendLine($"Physic 變動值 ΔX = {worldDelta.X:0.000} mm");
+                    sb.AppendLine($"Physic 變動值 ΔY = {worldDelta.Y:0.000} mm");
                 }
                 if (true || !_withPadGaps)
                 {
                     sb.AppendLine();
-                    sb.AppendLine($"PLC 補償量 ΔX = {motor_delta.X:0.000} mm");
-                    sb.AppendLine($"PLC 補償量 ΔY = {motor_delta.Y:0.000} mm");
+                    sb.AppendLine($"PLC 補償量 ΔX = {motorDelta.X:0.000} mm");
+                    sb.AppendLine($"PLC 補償量 ΔY = {motorDelta.Y:0.000} mm");
                 }
             }
             #endregion

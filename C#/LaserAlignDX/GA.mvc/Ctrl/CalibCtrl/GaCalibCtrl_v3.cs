@@ -31,6 +31,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
@@ -584,7 +585,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             _cviGridResultBox.ActiveCarrierID = _activeCarrierID;
             //_cviGridResultBox.ActiveSuckerRowID = _activeSuckerRowID;
             _cviGridResultBox.TransCameraToWorld = _commonBaseTrf?.GetCameraPhysicTransform(_activeCarrierID);
-            _cviGridResultBox.TransCameraToMotor = _commonBaseTrf?.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+            _cviGridResultBox.TransCameraToMotor = _commonBaseTrf?.GetCameraMotorTransform(_activeCarrierID, SuckerRowEnum.S1);
+            _cviGridResultBox.TransCameraToMotor2 = _commonBaseTrf?.GetCameraMotorTransform(_activeCarrierID, SuckerRowEnum.S2);
 
             _cviGridResultBox.UpdateResult(camGrid);
             _cviGridResultBox.Visible = camGrid != null;
@@ -1176,7 +1178,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         /// <summary>
         /// 將 User 輸入的馬達座標值 記入 CommmonBaseTrf
         /// </summary>
-        bool UpdateUserInputMotorCoordsToTrf()
+        bool UpdateUserInputMotorCoordsToTrf(bool verify = true)
         {
             var dgv = _dgvCalibPointsListView?.DataGridView;
             if (dgv == null)
@@ -1185,17 +1187,61 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return false;
             }
 
-
             var inkMarks = getActiveInkMarksInRecipe();
             var inkMarkPts = Array.ConvertAll(inkMarks, im => im.Center);
             dgvGetUserInputMotorCoords(out var userInputMotorCoords);
 
-            var err = _commonBaseTrf.SetCalibMotorCoords(_activeCarrierID, _activeSuckerRowID, inkMarkPts, userInputMotorCoords);
+            if (verify)
+            {
+                #region 驗證參數數據
+                var errs = new List<string>();
+                for (int i = 0, NP = inkMarkPts.Length; i < NP; i++)
+                {
+                    var diff = inkMarkPts[i] - _cviInkMarkBoxes[i].Quad2D.Center;
+                    if(diff.NormLength > 0.001)
+                    {
+                        errs.Add($"  墨點 [{i}]: 參數({inkMarkPts[i].X:F3}, {inkMarkPts[i].Y:F3}) vs GUI({_cviInkMarkBoxes[i].Quad2D.Center.X:F3}, {_cviInkMarkBoxes[i].Quad2D.Center.Y:F3})");
+                    }
+                }
+                if(errs.Count > 0)
+                {
+                    var errMsg = "以下 墨點, 參數 與 GUI, 兩者誤差太大:\n\r";
+                    errMsg += string.Join("\n\r", errs);
+                    VsMessageBox.Warning(errMsg);
+                    return false;
+                }
+                #endregion
+            }
 
+            var err = _commonBaseTrf.SetCalibMotorCoords(_activeCarrierID, _activeSuckerRowID, inkMarkPts, userInputMotorCoords);
             if (err != ErrorCodes.OK)
             {
                 VsMessageBox.Warning(GaUtil.GetEnumDescription(err));
                 return false;
+            }
+
+            if (verify)
+            {
+                #region 驗證座標轉換結果
+                var trfCamToMotor = _commonBaseTrf.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+                var motorPts = Array.ConvertAll(inkMarkPts, camPt => trfCamToMotor.Trans(camPt));
+                var errs = new List<string>();
+                for (int i = 0, NP = motorPts.Length; i < NP; i++)
+                {
+                    var diff = motorPts[i] - userInputMotorCoords[i];
+                    if (diff.NormLength > 0.001)
+                    {
+                        errs.Add($"  馬達點位 [{i}]: 轉換後({motorPts[i].X:F3}, {motorPts[i].Y:F3}) vs 輸入({userInputMotorCoords[i].X:F3}, {userInputMotorCoords[i].Y:F3})");
+                    }
+                }
+                if (errs.Count > 0)
+                {
+                    var errMsg = "以下 馬達點位, 座標轉換 與 User 輸入, 兩者誤差太大:\n\r";
+                    errMsg += string.Join("\n\r", errs);
+                    VsMessageBox.Warning(errMsg);
+                    return false;
+                }
+                #endregion
             }
 
             return true;
@@ -1253,6 +1299,11 @@ namespace LaserAlignDX.Mvc.Ctrl
                             + " && " + GaUtil.GetEnumDescription(_activeSuckerRowID)
                             + "\n\r\n\r" + GaUtil.GetEnumDescription(Prompts.Info_CommonBase_Trf_Successed);
                 VsMessageBox.Info(info);
+
+                //(8) 更新 Interactor
+                _cviGridResultBox.TransCameraToWorld = _commonBaseTrf?.GetCameraPhysicTransform(_activeCarrierID);
+                _cviGridResultBox.TransCameraToMotor = _commonBaseTrf?.GetCameraMotorTransform(_activeCarrierID, SuckerRowEnum.S1);
+                _cviGridResultBox.TransCameraToMotor2 = _commonBaseTrf?.GetCameraMotorTransform(_activeCarrierID, SuckerRowEnum.S2);
             }
             catch (Exception ex)
             {

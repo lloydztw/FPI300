@@ -59,14 +59,17 @@ namespace LaserAlignDX.Model.Coords.V33
         /// <summary>
         /// 各種 座標轉換 集合
         /// </summary>
-        QTransform[] _transforms = new QTransform[]
+        ITransform[] _transforms = new ITransform[]
         {
-            new QTransform("C1_P", "pix", "mm"),        // 線掃相機C1 <--> world
-            new QTransform("C1_M1S1", "pix", "mm"),     // 線掃相機C1 <--> motors (sucker 1)
-            new QTransform("C1_M1S2", "pix", "mm"),     // 線掃相機C1 <--> motors (sucker 2)
-            new QTransform("C2_P", "pix", "mm"),        // 線掃相機C2 <--> world
-            new QTransform("C2_M2S1", "pix", "mm"),     // 線掃相機C2 <--> motors (sucker 1)
-            new QTransform("C2_M2S2", "pix", "mm"),     // 線掃相機C2 <--> motors (sucker 2)
+            new QxCoordsTransform("C1_P", "pix", "mm"),         // 線掃相機C1 <--> world
+            //new QTransform("C1_P", "pix", "mm"),                // 線掃相機C1 <--> world
+            new QTransform("C1_M1S1", "pix", "mm"),             // 線掃相機C1 <--> motors (sucker 1)
+            new QTransform("C1_M1S2", "pix", "mm"),             // 線掃相機C1 <--> motors (sucker 2)
+
+            new QxCoordsTransform("C2_P", "pix", "mm"),         // 線掃相機C2 <--> world
+            //new QTransform("C2_P", "pix", "mm"),                // 線掃相機C2 <--> world
+            new QTransform("C2_M2S1", "pix", "mm"),             // 線掃相機C2 <--> motors (sucker 1)
+            new QTransform("C2_M2S2", "pix", "mm"),             // 線掃相機C2 <--> motors (sucker 2)
         };
         int getIndex(CarrierEnum C, SuckerRowEnum S)
         {
@@ -480,10 +483,10 @@ namespace LaserAlignDX.Model.Coords.V33
         #region 跑線時期_函式群
 
         public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId,
-                                                out QVector camCoord,
-                                                out QVector worldCoord,
-                                                out QVector s1MotorCoord,
-                                                out QVector s2MotorCoord)
+                                                    out QVector camCoord,
+                                                    out QVector worldCoord,
+                                                    out QVector s1MotorCoord,
+                                                    out QVector s2MotorCoord)
         {
             #region DEFAULT_VALUES
             ErrorCodes errCode;
@@ -515,7 +518,7 @@ namespace LaserAlignDX.Model.Coords.V33
 
             //(4) 計算 (使用 Camera To Motor 座標轉換)
             bool isCalculated = false;
-            if (true)   //>>> || OPT_CALIB_GRID_USING_MOTOR_COORD)
+            if (false)   //>>> || OPT_CALIB_GRID_USING_MOTOR_COORD)
             {
                 //(4.1) 檢查 Runtime CamGrid
                 var runtimeCamGrid = _calibCamGrids[(int)C];
