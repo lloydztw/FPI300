@@ -21,6 +21,7 @@ using JetEazy.QMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
+using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
@@ -390,20 +391,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             else
             {
-                foreach (var cell in cells)
+                //---------------------------------------------------------------------------------------------
+                // 2026-04-04
+                // 使用 RegionCellsDataCollection 來管理 _xRecipe.xRegionCells
+                // 以維持 PASS/NG 統計數量的一致性 !
+                //---------------------------------------------------------------------------------------------
+                using (var cellsCollection = new RegionCellsDataCollection(cells))
                 {
-                    if (checkResult(cell, out bool isPass, out bool isEmpty))
-                    {
-                        if (isEmpty)
-                            empty++;
-                        else if (isPass)
-                            pass++;
-                        else
-                            ng++;
-                    }
+                    cellsCollection.GetStatistics(out pass, out ng, out empty);
+                    updateTitle($"OK= {pass}, NG= {ng}, 疑似空位= {empty}");
                 }
-
-                updateTitle($"OK= {pass}, NG= {ng}, 疑似空位= {empty}");
             }
         }
         void updateTitle(string text)

@@ -254,19 +254,30 @@ namespace LaserAlignDX.Model
         /// </summary>
         public static IEnumerable<RegionCellX3Class> IterFinalResultCells(IEnumerable<RegionCellX3Class> cells = null)
         {
+            //---------------------------------------------------------------------------------------------
+            // 2026-04-04
+            // 使用 RegionCellsDataCollection 來管理 _xRecipe.xRegionCells
+            // 以維持 PASS/NG 統計數量的一致性 !
+            //---------------------------------------------------------------------------------------------
+
             if (cells == null)
                 cells = _xRecipe.xRegionCells;
 
-            foreach (var cell in cells)
+            //foreach (var cell in cells)
+            //{
+            //    var outGridCell = cell?.OutGridLink;
+            //    if (outGridCell != null)
+            //        yield return outGridCell;
+            //    else
+            //        yield return cell;
+            //}
+
+            using (var cellsCollection = new RegionCellsDataCollection(cells))
             {
-                var outGridCell = cell?.OutGridLink;
-                if (outGridCell != null)
-                    yield return outGridCell;
-                else
+                foreach (var cell in cellsCollection.IterFinalCells())
                     yield return cell;
             }
         }
-
 
         /// <summary>
         /// 調試用: 檢查最後 cell (row,col) 是否正確

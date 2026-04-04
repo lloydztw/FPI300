@@ -433,36 +433,22 @@ namespace LaserAlignDX.AoiModel.V3
 
             int passCount = 0;
             int ngCount = 0;
+            int total = 0;
 
-            //foreach (var cell in _xRecipe.xRegionCells)
-            //{
-            //    if (cell == null)
-            //        continue;
-            //    //if (cell.inspectReason == InspectReason.PASS && cell.inspectReasons.Count == 0)
-            //    if(cell.IsResultPass())
-            //        passCount++;
-            //    //else if (cell.inspectReason != InspectReason.INS_ALIGNERR)
-            //    else if (!cell.IsResultEmptyPlaceHold())
-            //        ngCount++;
-            //}
+            //---------------------------------------------------------------------------------------------
+            // 2026-04-04
+            // 使用 RegionCellsDataCollection 來管理 _xRecipe.xRegionCells
+            // 以維持 PASS/NG 統計數量的一致性 !
+            //---------------------------------------------------------------------------------------------
 
-            foreach (var cell in PlcDataPacker.IterFinalResultCells())
+            using (var cellsCollection = new RegionCellsDataCollection(_xRecipe.xRegionCells))
             {
-                if (cell == null) continue;
-                if (cell.IsResultPass())
-                    passCount++;
-                else if (cell.IsEmptyPlaceHold())
-                    continue;
-                else if (cell.IsAmbiguousBloc())
-                    continue;
-                else
-                    ngCount++;
+                total = cellsCollection.GetStatistics(out passCount, out ngCount, out int emptyCount);
             }
 
             bool isPass;
             if (optUsePercentage)
             {
-                var total = passCount + ngCount;
                 if (total > 0)
                     isPass = 100.0 * ngCount / total < _xRecipe.InspectParams.xTotalNgPercentage;
                 else

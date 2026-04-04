@@ -24,7 +24,7 @@ using System.Drawing;
 using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 
 
-namespace LaserAlignDX.AoiModel
+namespace LaserAlignDX.AoiModel.D
 {
     /// <summary>
     /// 將來要把所有的 RegionCells 都交由 此容器載體管理
@@ -77,9 +77,10 @@ namespace LaserAlignDX.AoiModel
 
         #region PRIVATE_DATA_HOLDERS
         object _sync = new object();
-        bool _isCellsOwner;
-        EzBlocsGrid _grid;
+        uint _KEY(int row, int col) => ((uint)row << 16) + (uint)col;
+        Dictionary<uint,XCell> _dict;
         IList<EzBloc> _outGridBlocs;
+        bool _isCellsOwner;
         #endregion
 
         #region PRIVATE_SETTINGS_DATA
@@ -128,9 +129,9 @@ namespace LaserAlignDX.AoiModel
             {
                 lock (_sync)
                 {
-                    cleanUp(_grid);
+                    cleanUp(_dict);
                     cleanUp(_outGridBlocs);
-                    _grid = buildGrid(cells);
+                    _dict = buildDict(cells);
                     _outGridBlocs = new List<EzBloc>();
                     removeOverlapOutgridCells();
                 }
@@ -145,8 +146,8 @@ namespace LaserAlignDX.AoiModel
             // 調用此函式 避免 源頭的 cells 被 Dispose
             lock (_sync)
             {
-                _grid?.Dispose();
-                _grid = null;
+                _dict?.Clear();
+                _dict = null;
                 _outGridBlocs = null;
                 _isCellsOwner = false;
             }
@@ -159,8 +160,8 @@ namespace LaserAlignDX.AoiModel
             {
                 if (!_isCellsOwner)
                     Detach();
-                cleanUp(_grid);
-                _grid = null;
+                cleanUp(_dict);
+                _dict = null;
                 cleanUp(_outGridBlocs);
                 _outGridBlocs = null;
             }
@@ -177,23 +178,28 @@ namespace LaserAlignDX.AoiModel
 
         public int Rows
         {
-            get => _grid != null ? _grid.Rows : 0;
+            get;
+            private set;
         }
         public int Cols
         {
-            get => _grid != null ? _grid.Cols : 0;
+            get;
+            private set;
         }
 
         public XCell GetGridCell(int row, int col)
         {
-            var bloc = (CellBloc)_grid?.Get(row, col);
-            var cell = bloc?.Cell;
-            return cell;
+            if (_dict != null)
+            {
+                uint key = _KEY(row, col);
+                if (_dict.TryGetValue(key, out var cell))
+                    return cell;
+            }
+            return null;
         }
         public XCell GetFinalCell(int row, int col)
         {
-            var bloc = (CellBloc)_grid?.Get(row, col);
-            var cell = bloc?.Cell;
+            var cell = GetGridCell(row, col);
             var outGridCell = cell?.OutGridLink;
             
             if (outGridCell != null)
@@ -209,11 +215,9 @@ namespace LaserAlignDX.AoiModel
         }
         public IEnumerable<XCell> IterGridCells()
         {
-            if (_grid != null)
+            if (_dict != null)
             {
-                int rows = _grid.Rows;
-                int cols = _grid.Cols;
-                foreach ((var r, var c) in Zigzag.IterZigzag(rows, cols))
+                foreach ((var r, var c) in Zigzag.IterZigzag(Rows, Cols))
                 {
                     var cell = GetGridCell(r, c);
                     if (cell != null)
@@ -223,11 +227,9 @@ namespace LaserAlignDX.AoiModel
         }
         public IEnumerable<XCell> IterFinalCells()
         {
-            if (_grid != null)
+            if (_dict != null)
             {
-                int rows = _grid.Rows;
-                int cols = _grid.Cols;
-                foreach ((var r, var c) in Zigzag.IterZigzag(rows, cols))
+                foreach ((var r, var c) in Zigzag.IterZigzag(Rows, Cols))
                 {
                     var cell = GetFinalCell(r, c);
                     yield return cell;
@@ -265,116 +267,49 @@ namespace LaserAlignDX.AoiModel
                 _outGridBlocs.Add(bloc);
         }
 
-        #region OLD_CODE
-#if (OPT_RESERVED)
-        public IEnumerable<EzBloc> iterNonEmptyBlocs(bool onGrid)
-        {
-            if (onGrid)
-            {
-                if (_grid != null)
-                {
-                    foreach (CellBloc bloc in _grid)
-                    {
-                        var cell = bloc?.Cell;
-                        if (cell != null && !bloc.IsEmpty)
-                            yield return bloc;
-                    }
-                }
-            }
-            else
-            {
-                if (_outGridBlocs != null)
-                {
-                    foreach (EzBloc bloc in _outGridBlocs)
-                    {
-                        if (bloc == null) continue;
-                        yield return bloc;
-                    }
-                }
-            }
-        }
-        public IEnumerable<EzBloc> iterEmptyBlocs()
-        {
-            foreach (CellBloc bloc in _grid)
-            {
-                var cell = bloc?.Cell;
-                if (cell != null && bloc.IsEmpty)
-                    yield return bloc;
-            }
-        }
-        public IEnumerable<CellBloc> iterCellBlocs()
-        {
-            if (_grid != null)
-            {
-                foreach (var cell in _grid)
-                {
-                    if (cell is CellBloc cb)
-                        yield return cb;
-                }
-            }
-            if (_outGridBlocs != null)
-            {
-                foreach (var bloc in _outGridBlocs)
-                {
-                    if (bloc is CellBloc cb)
-                        yield return cb;
-                }
-            }
-        }
-#endif
-        #endregion
-
         #region PRIVATE_FUNCTIONS
-        EzBlocsGrid buildGrid(IEnumerable<XCell> cells)
+
+        Dictionary<uint,XCell> buildDict(IEnumerable<XCell> cells)
         {
+            var dict = new Dictionary<uint, XCell>();
+            var repeateCells = new List<XCell>();
             int rows = 0;
             int cols = 0;
-            var blocs = new List<EzBloc>();
 
-            #region 蒐集_CELL_BLOCS
             foreach (var cell in cells)
             {
-                if (cell == null) 
+                if (cell == null)
                     continue;
-
-                //CellBloc cbloc;
-                //if (_mode == ScanInspectMode.NOTRAY)
-                //    cbloc = new CellBloc(cell, cell.viewRectF);
-                //else
-                //    cbloc = new CellBloc(cell);
-
-                var cbloc = new CellBloc(cell, cell.viewRectF);
-                blocs.Add(cbloc);
                 rows = Math.Max(rows, cell.CellRow + 1);
                 cols = Math.Max(cols, cell.CellCol + 1);
+                uint key = _KEY(cell.CellRow, cell.CellCol);
+                if (!dict.ContainsKey(key))
+                    dict.Add(key, cell);
+                else
+                    repeateCells.Add(cell);
             }
-            #endregion
 
-            var builder = new EzBlocsGridBuilder();
-            var grid = builder.BuildEmptyGrid(blocs, rows, cols);
+            this.Rows = rows;
+            this.Cols = cols;
 
-            #region 將_CELL_BLOCS_填入_GRID
-            foreach (CellBloc bloc in blocs)
+            if (repeateCells.Count != 0)
             {
-                int r = bloc.Cell.CellRow;
-                int c = bloc.Cell.CellCol;
-                grid.Set(r, c, bloc);
-            }
-            #endregion
-
-            return grid;
-        }
-        void cleanUp(EzBlocsGrid grid)
-        {
-            if (grid != null)
-            {
-                foreach (var item in grid)
+                foreach (var cell in repeateCells)
                 {
-                    if (item is CellBloc cb)
-                    {
-                        cb.Cell?.Dispose();
-                    }
+                    LtDebug.LOG.Error($"發現重複的 Cell[{cell.CellRow},{cell.CellCol}]，已將其 ChipData 設為 null 以避免後續錯誤");
+                    cell.ChipData = null;
                 }
+            }
+
+            return dict;
+        }
+        void cleanUp(Dictionary<uint, XCell> dict)
+        {
+            if (dict != null)
+            {
+                foreach (var cell in dict.Values)
+                    cell?.Dispose();
+                dict.Clear();
             }
         }
         void cleanUp(IList<EzBloc> list)

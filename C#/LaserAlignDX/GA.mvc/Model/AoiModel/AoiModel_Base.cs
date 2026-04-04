@@ -251,6 +251,8 @@ namespace LaserAlignDX.AoiModel
 
         public virtual void Dispose()
         {
+            _regionCells?.Dispose();
+            _regionCells = null;
         }
 
         public abstract void Run();
@@ -260,14 +262,21 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         protected void ResetCellsResultData()
         {
-            _xRecipe.xOutBlocs?.Clear();
-            foreach (var cell in _xRecipe.xRegionCells)
-                cell?.Reset();
+            //---------------------------------------------------------------------------------------------
+            // 2026-04-04 重構前的程式碼，已改為使用 RegionCellsDataCollection 來管理 _xRecipe.xRegionCells
+            //---------------------------------------------------------------------------------------------
+            // _xRecipe.xOutBlocs?.Clear();
+            // foreach (var cell in _xRecipe.xRegionCells)
+            //    cell?.Reset();
 
+            //---------------------------------------------------------------------------------------------
+            // 2026-04-04
             // 使用 RegionCellsDataCollection 來管理 _xRecipe.xRegionCells
-            _regionCells?.Detach();
+            // 以維持 PASS/NG 統計數量的一致性 !
+            //---------------------------------------------------------------------------------------------
             _regionCells?.Dispose();
             _regionCells = new RegionCellsDataCollection(_xRecipe.xRegionCells);
+            _regionCells.Reset();
 
             // 自動設定 Extend
             if (true)

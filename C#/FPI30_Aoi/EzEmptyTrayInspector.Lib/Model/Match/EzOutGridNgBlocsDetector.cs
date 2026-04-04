@@ -587,7 +587,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 JetEazy.IO.QxPathUtility.InitDirectory(_dumpPath);
                 string stem = System.IO.Path.GetFileName(_dumpPath);
                 string size_tag = $"-{image.Width}x{image.Height}.png";
-                dumpFile = System.IO.Path.Combine(_dumpPath, stem + dumpFile + size_tag);
+                dumpFile = System.IO.Path.Combine(_dumpPath, dumpFile + size_tag);
                 image?.SaveImage(dumpFile);
             }
             catch

@@ -66,6 +66,12 @@ namespace LaserAlignDX.Model
                 }
                 else
                 {
+                    //---------------------------------------------------------------------------------------------
+                    // 2026-04-04
+                    // 使用 RegionCellsDataCollection 來管理 _xRecipe.xRegionCells
+                    // 以維持 PASS/NG 統計數量的一致性 !
+                    //---------------------------------------------------------------------------------------------
+
                     using (var cellsCollection = new RegionCellsDataCollection(_xRecipe.xRegionCells))
                     {
                         int rows = cellsCollection.Rows;
@@ -78,7 +84,6 @@ namespace LaserAlignDX.Model
                                 appendOneCellData(reportSB, cell);
                             }
                         }
-                        cellsCollection.Detach();
                     }
                 }
 
