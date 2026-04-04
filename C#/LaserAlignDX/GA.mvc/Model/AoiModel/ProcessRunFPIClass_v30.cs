@@ -443,7 +443,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             using (var cellsCollection = new RegionCellsDataCollection(_xRecipe.xRegionCells))
             {
-                total = cellsCollection.GetStatistics(out passCount, out ngCount, out int emptyCount);
+                total = cellsCollection.GetStatistics(out passCount, out ngCount, out int emptyCount, out int unknowns);
             }
 
             bool isPass;

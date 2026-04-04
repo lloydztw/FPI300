@@ -234,26 +234,30 @@ namespace LaserAlignDX.AoiModel
                 }
             }
         }
-        public int GetStatistics(out int passCount, out int ngCount, out int emptyCount)
+        public int GetStatistics(out int passCount, out int ngCount, out int emptyCount, out int unknownCount)
         {
-            int total = 0;
+            int totalCellsCount = 0;
             ngCount = 0;
             passCount = 0;
             emptyCount = 0;
+            unknownCount = 0;
+
             foreach (var cell in IterFinalCells())
             {
                 if (cell != null)
                 {
-                    total++;
+                    totalCellsCount++;
                     if (cell.IsResultPass())
                         passCount++;
-                    else if (!cell.IsEmptyPlaceHold())
-                        ngCount++;
-                    else
+                    else if (cell.IsEmptyPlaceHold())
                         emptyCount++;
+                    else if (cell.IsAmbiguousBloc())
+                        unknownCount++;
+                    else if (cell.ChipData != null)
+                        ngCount++;
                 }
             }
-            return total;
+            return totalCellsCount;
         }
 
         /// <summary>

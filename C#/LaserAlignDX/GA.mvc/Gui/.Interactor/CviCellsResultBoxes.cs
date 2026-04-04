@@ -398,8 +398,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 //---------------------------------------------------------------------------------------------
                 using (var cellsCollection = new RegionCellsDataCollection(cells))
                 {
-                    cellsCollection.GetStatistics(out pass, out ng, out empty);
-                    updateTitle($"OK= {pass}, NG= {ng}, 疑似空位= {empty}");
+                    cellsCollection.GetStatistics(out pass, out ng, out empty, out int unknowns);
+                    string msg = $"OK= {pass}, NG= {ng}, 空位= {empty}";
+                    if (unknowns > 0) msg += $", 異物= {unknowns}";
+                    updateTitle(msg);
                 }
             }
         }
