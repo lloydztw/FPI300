@@ -738,7 +738,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public float xCharWidth { get; set; } = 15.1f;
         [CategoryAttribute(_Cat2), DescriptionAttribute("单位pixel")]
-        [DisplayName("A02.字符缺陷高度")]
+        [DisplayName("A02.字符缺陷尺寸Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(true)]
@@ -756,7 +756,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public float xBackgroudWidth { get; set; } = 15.1f;
         [CategoryAttribute(_Cat2), DescriptionAttribute("单位pixel")]
-        [DisplayName("A05.背景缺陷高度")]
+        [DisplayName("A05.背景缺陷尺寸Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(true)]

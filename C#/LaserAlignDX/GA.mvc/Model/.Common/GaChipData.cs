@@ -118,11 +118,11 @@ namespace LaserAlignDX.Model
     public class GaChipDimension
     {
         /// <summary>
-        /// 量測结果: 晶粒宽度 (單位 mm)
+        /// 量測结果: 晶粒尺寸X (單位 mm)
         /// </summary>
         public float ChipWidth { get; set; } = 0;
         /// <summary>
-        /// 量測结果: 晶粒高度 (單位 mm)
+        /// 量測结果: 晶粒尺寸Y (單位 mm)
         /// </summary>
         public float ChipHeight { get; set; } = 0;
 

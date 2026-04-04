@@ -63,8 +63,8 @@ namespace LaserAlignDX.Model
             str += $"{cell.RunAngle.ToString(_digitFormat)}" + ",";
             if (cell.xInspect.bOpenLineMeasure)
             {
-                str += $"宽度[{cell.RunWidth.ToString(_digitFormat)}]" + ",";
-                str += $"高度[{cell.RunHeight.ToString(_digitFormat)}]" + ",";
+                str += $"尺寸X[{cell.RunWidth.ToString(_digitFormat)}]" + ",";
+                str += $"尺寸Y[{cell.RunHeight.ToString(_digitFormat)}]" + ",";
             }
             if (cell.xInspect.bCheckMeasureOffset)
             {
@@ -115,10 +115,10 @@ namespace LaserAlignDX.Model
             sb.Append("").AppendValues(cell.RunX, cell.RunY, cell.RunAngle).Append(",");
             if (cell.xInspect.optChipMeasurement)
             {
-                //str += $"宽度[{cell.RunWidth.ToString(_digitFormat)}]" + ",";
-                //str += $"高度[{cell.RunHeight.ToString(_digitFormat)}]" + ",";
-                sb.Append("宽度[").AppendValues(cell.RunWidth).Append("],");
-                sb.Append("高度[").AppendValues(cell.RunHeight).Append("],");
+                //str += $"尺寸X[{cell.RunWidth.ToString(_digitFormat)}]" + ",";
+                //str += $"尺寸Y[{cell.RunHeight.ToString(_digitFormat)}]" + ",";
+                sb.Append("尺寸X[").AppendValues(cell.RunWidth).Append("],");
+                sb.Append("尺寸Y[").AppendValues(cell.RunHeight).Append("],");
             }
 
             //if (cell.xInspect.optPadEdgeGapsMeasurement)

@@ -44,7 +44,7 @@ namespace LaserAlignDX.BasicSpace
         }
 
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵行数")]
-        [DisplayName("A01.行数")]
+        [DisplayName("A01.Rows 行数")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999)]
         [Browsable(true)]
@@ -55,7 +55,7 @@ namespace LaserAlignDX.BasicSpace
         }
 
         [CategoryAttribute(cat1), DescriptionAttribute("矩阵列数")]
-        [DisplayName("A02.列数")]
+        [DisplayName("A02.Cols 列数")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999)]
         [Browsable(true)]
@@ -109,8 +109,8 @@ namespace LaserAlignDX.BasicSpace
             set { xRecipe.xColumnOffset = value; }
         }
 
-        [CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品宽度")]
-        [DisplayName("A07.Chip宽度(mm)")]
+        [CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品尺寸X")]
+        [DisplayName("A07.Chip 尺寸X (mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
         [Browsable(true)]
@@ -120,8 +120,8 @@ namespace LaserAlignDX.BasicSpace
             set { xRecipe.xChipWidth = value; }
         }
 
-        [CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品高度")]
-        [DisplayName("A08.Chip高度(mm)")]
+        [CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品尺寸Y")]
+        [DisplayName("A08.Chip 尺寸Y (mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999f, 1f, 2)]
         [Browsable(true)]
@@ -132,7 +132,7 @@ namespace LaserAlignDX.BasicSpace
         }
 
         [CategoryAttribute(cat1), DescriptionAttribute("模板匹配搜寻范围X扩大的像素")]
-        [DisplayName("A09.外扩X(pix)")]
+        [DisplayName("A09.外扩X (pix)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999f, 1f, 2)]
         [Browsable(true)]
@@ -144,7 +144,7 @@ namespace LaserAlignDX.BasicSpace
         }
 
         [CategoryAttribute(cat1), DescriptionAttribute("模板匹配搜寻范围Y扩大的像素")]
-        [DisplayName("A10.外扩Y(pix)")]
+        [DisplayName("A10.外扩Y (pix)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999f, 1f, 2)]
         [Browsable(true)]

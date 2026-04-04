@@ -706,7 +706,7 @@ namespace LaserAlignDX.AoiModel.V3
             }
             #endregion
 
-            #region 寬度量測
+            #region 尺寸X量測
             try
             {
                 var mvdLines = cell.cMvdLineSegmentFsOut;
@@ -735,20 +735,20 @@ namespace LaserAlignDX.AoiModel.V3
 
                         //Console.WriteLine("Angle: {0}", cL2LMeasureRes.Angle);
                         //Console.WriteLine("Vertical distance: {0}", cL2LMeasureRes.VerticalAbsDist);
-                        LtDebug.LOG.Info("寬度量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
-                        LtDebug.LOG.Info("寬度量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
+                        LtDebug.LOG.Info("尺寸X量測: Angle = {0:0.00}", cL2LMeasureRes.Angle);
+                        LtDebug.LOG.Info("尺寸X量測: Vertical distance = {0:0.000}", cL2LMeasureRes.VerticalAbsDist);
                     }
                 }
             }
             catch (MvdException ex)
             {
                 //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-                LtDebug.LOG.Error(ex, "寬度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                LtDebug.LOG.Error(ex, "尺寸X量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
             }
             catch (System.Exception ex)
             {
                 //Console.WriteLine("Fail with error " + ex.Message);
-                LtDebug.LOG.Error(ex, "寬度量測 異常");
+                LtDebug.LOG.Error(ex, "尺寸X量測 異常");
             }
             #endregion
 #endif

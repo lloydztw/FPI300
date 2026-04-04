@@ -48,7 +48,7 @@ namespace LaserAlignDX.Mvc.Gui
             int col = dgv.Columns.Count - 2;
             foreach (string coordName in new[] { "World X", "World Y" })
             {
-                dgv.Columns[col].HeaderText = coordName;
+                //dgv.Columns[col].HeaderText = coordName;
                 dgv.Columns[col].ReadOnly = true;
                 col++;
             }

@@ -133,7 +133,7 @@ namespace LaserAlignDX.OPSpace
         /// </summary>
         public PointF Sur2 = new PointF();
         /// <summary>
-        /// 测量结果: 晶粒宽度 (單位 mm)
+        /// 测量结果: 晶粒尺寸X (單位 mm)
         /// </summary>
         public float RunWidth
         {
@@ -141,7 +141,7 @@ namespace LaserAlignDX.OPSpace
             set => ChipData.ChipDimension.ChipWidth = value;
         }
         /// <summary>
-        /// 测量结果: 晶粒高度 (單位 mm)
+        /// 测量结果: 晶粒尺寸Y (單位 mm)
         /// </summary>
         public float RunHeight
         {
@@ -905,8 +905,8 @@ namespace LaserAlignDX.OPSpace
             str += $"{RunAngle.ToString(m_Format)}" + ",";
             if (xInspect.bOpenLineMeasure)
             {
-                str += $"宽度[{RunWidth.ToString(m_Format)}]" + ",";
-                str += $"高度[{RunHeight.ToString(m_Format)}]" + ",";
+                str += $"尺寸X[{RunWidth.ToString(m_Format)}]" + ",";
+                str += $"尺寸Y[{RunHeight.ToString(m_Format)}]" + ",";
             }
             if (xInspect.bCheckMeasureOffset)
             {
@@ -951,8 +951,8 @@ namespace LaserAlignDX.OPSpace
             str += $"马达2=[{PointF000ToString(Sur2)}]{Environment.NewLine}";
             if (xInspect.bOpenLineMeasure)
             {
-                str += $"尺寸宽度X[{RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
-                str += $"尺寸高度Y[{RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"尺寸X[{RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"尺寸Y[{RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
             }
             if (xInspect.bCheckMeasureOffset)
             {
@@ -979,8 +979,8 @@ namespace LaserAlignDX.OPSpace
             str += $"编号" + ",";
             str += $"名称" + ",";
             str += $"是否检测" + ",";
-            str += $"尺寸宽度X" + ",";
-            str += $"尺寸高度Y" + ",";
+            str += $"尺寸X" + ",";
+            str += $"尺寸Y" + ",";
             str += $"位置偏移X" + ",";
             str += $"位置偏移Y" + ",";
             str += $"原始X" + ",";

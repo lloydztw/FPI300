@@ -1,6 +1,5 @@
 ﻿using Common.RecipeSpace;
 using Eazy_Project_III;
-using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.FormSpace;
 using JetEazy.Match;
@@ -1726,7 +1725,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public EdgeBackGroundType xCarrierBackground { get; set; }
 
         [CategoryAttribute(_Cat04), DescriptionAttribute("單位 mm")]
-        [DisplayName("02 樣本寬度")]
+        [DisplayName("02 樣本尺寸X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
@@ -1737,7 +1736,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         [CategoryAttribute(_Cat04), DescriptionAttribute("單位 mm")]
-        [DisplayName("03 樣本高度")]
+        [DisplayName("03 樣本尺寸Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
@@ -1824,14 +1823,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public int xThresholdValue { get; set; } = 128;
 
         [CategoryAttribute(_Cat7), DescriptionAttribute("单位pixel")]
-        [DisplayName("02 缺陷宽度")]
+        [DisplayName("02 缺陷尺寸X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(true)]
         public float xCharWidth { get; set; } = 15.1f;
 
         [CategoryAttribute(_Cat7), DescriptionAttribute("单位pixel")]
-        [DisplayName("03 缺陷高度")]
+        [DisplayName("03 缺陷尺寸Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(true)]
@@ -1845,14 +1844,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public float xCharArea { get; set; } = 30.1f;
 
         [CategoryAttribute(_Cat7), DescriptionAttribute("单位pixel")]
-        [DisplayName("05 背景缺陷宽度")]
+        [DisplayName("05 背景缺陷尺寸X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(false)]
         public float xBackgroudWidth { get; set; } = 15.1f;
 
         [CategoryAttribute(_Cat7), DescriptionAttribute("单位pixel")]
-        [DisplayName("06 背景缺陷高度")]
+        [DisplayName("06 背景缺陷尺寸Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(false)]
@@ -1882,7 +1881,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         const string _Cat5 = "5. 尺寸规格设置";
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("01 標準寬度")]
+        [DisplayName("01 標準尺寸X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
@@ -1893,7 +1892,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("01a 寬度上公差")]
+        [DisplayName("01a 尺寸X上公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
@@ -1904,7 +1903,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("01b 寬度下公差")]
+        [DisplayName("01b 尺寸X下公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
@@ -1915,7 +1914,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("02 標準高度")]
+        [DisplayName("02 標準尺寸Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
@@ -1926,7 +1925,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("02a 高度上公差")]
+        [DisplayName("02a 尺寸Y上公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
@@ -1937,7 +1936,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("02b 高度下公差")]
+        [DisplayName("02b 尺寸Y下公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]

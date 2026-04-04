@@ -103,7 +103,7 @@ namespace LaserAlignDX.Model
         #region PRIVATE_FUNCTIONS
         void appendHeader(StringBuilder sb)
         {
-            sb.Append("編號, 行列標記, 晶粒狀態, 尺寸(寬), 尺寸(高), 原始X, 原始Y, 補償X, 補償Y, 補償角度");
+            sb.Append("編號, 行列標記, 晶粒狀態, 寬(尺寸X), 高(尺寸Y), 原始X, 原始Y, 補償X, 補償Y, 補償角度");
             sb.Append(", LUX, LUY, RUX, RUY, RDX, RDY, LDX, LDY");
             sb.Append(", S1, S2, S3, S4, S5, S6, S7, S8");
             sb.Append(", TiltRatio");

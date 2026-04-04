@@ -528,7 +528,7 @@ namespace LaserAlignDX.AoiModel.V0
 
                             }
 
-                            //宽度
+                            //尺寸X
 
                             try
 
@@ -1311,7 +1311,7 @@ namespace LaserAlignDX.AoiModel.V0
 
                                 }
 
-                                //宽度
+                                //尺寸X
 
                                 try
 
@@ -1614,7 +1614,7 @@ namespace LaserAlignDX.AoiModel.V0
                                 Console.WriteLine("Fail with error " + ex.Message);
                             }
 
-                            //宽度
+                            //尺寸X
 
                             try
                             {

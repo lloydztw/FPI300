@@ -734,7 +734,7 @@ namespace LaserAlignDX.AoiModel.V26
             }
             #endregion
 
-            #region 寬度量測
+            #region 尺寸X量測
             EzLSD.LineSegment line1 = null;     //上邊線
             EzLSD.LineSegment line3 = null;     //下邊線
             try
@@ -762,12 +762,12 @@ namespace LaserAlignDX.AoiModel.V26
             catch (MvdException ex)
             {
                 //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
-                _NLOG.Error(ex, "寬度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                _NLOG.Error(ex, "尺寸X量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
             }
             catch (System.Exception ex)
             {
                 //Console.WriteLine("Fail with error " + ex.Message);
-                _NLOG.Error(ex, "寬度量測 異常");
+                _NLOG.Error(ex, "尺寸X量測 異常");
             }
             #endregion
 #endif
@@ -793,11 +793,11 @@ namespace LaserAlignDX.AoiModel.V26
             }
             catch(Exception ex)
             {
-                _NLOG.Error(ex, "晶粒 長寬量測 異常");
+                _NLOG.Error(ex, "晶粒 長尺寸X量測 異常");
             }
             #endregion
 
-            #region 計算格點型晶粒的邊緣寬度
+            #region 計算格點型晶粒的邊緣尺寸X
             if (xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch && xInspect.bCheckMeasureOffset && chipBox2D != null)
             {
                 try
@@ -842,7 +842,7 @@ namespace LaserAlignDX.AoiModel.V26
                 }
                 catch (MvdException ex)
                 {
-                    _NLOG.Error(ex, "計算格點型晶粒的邊緣寬度 異常");
+                    _NLOG.Error(ex, "計算格點型晶粒的邊緣尺寸X 異常");
                 }
             }
             #endregion
@@ -1103,7 +1103,7 @@ namespace LaserAlignDX.AoiModel.V26
             }
             #endregion
 
-            #region 寬度量測
+            #region 尺寸X量測
             bool ok2 = false;
             try
             {
@@ -1130,12 +1130,12 @@ namespace LaserAlignDX.AoiModel.V26
             }
             catch (MvdException ex)
             {
-                _NLOG.Error(ex, "寬度量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                _NLOG.Error(ex, "尺寸X量測 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
             }
             catch (System.Exception ex)
             {
                 //Console.WriteLine("Fail with error " + ex.Message);
-                _NLOG.Error(ex, "寬度量測 異常");
+                _NLOG.Error(ex, "尺寸X量測 異常");
             }
             #endregion
 
