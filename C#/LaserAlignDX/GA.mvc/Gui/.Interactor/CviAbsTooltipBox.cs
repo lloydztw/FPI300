@@ -15,6 +15,7 @@
 
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
+using JetEazy.Transform;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -36,6 +37,7 @@ namespace LaserAlignDX.Mvc.Gui
         protected ToolTip _toolTip = new ToolTip();
         protected EzBloc _cursorBloc = null;
         protected EzBloc _cursorBloc2 = null;
+        protected CviRuler _cviRuler = new CviRuler(Color.Cyan, 1);
         #endregion
 
         #region PRIVATE_DATA
@@ -81,7 +83,7 @@ namespace LaserAlignDX.Mvc.Gui
 
             draw_cursor(viewer, gxView, _cursorBloc2, Color.White);
             draw_cursor(viewer, gxView, _cursorBloc, Color.Orange);
-            draw_line(viewer, gxView, _cursorBloc, _cursorBloc2, Color.Cyan);
+            draw_ruler(viewer, gxView, _cursorBloc, _cursorBloc2, Color.Cyan);
 
             if (!isWorld)
                 viewer.SwitchToViewportCoordinate(gxView);
@@ -220,122 +222,164 @@ namespace LaserAlignDX.Mvc.Gui
             if (from == null || to == null)
                 return;
 
-            var pen = viewer.GetOnePixelPen(color);
             var lx = (float)from.Center.X;
             var ly = (float)from.Center.Y;
             var cx = (float)to.Center.X;
             var cy = (float)to.Center.Y;
 
-            bool isWorldDrawing = viewer.IsInWorldCoordinate();
-            if (!isWorldDrawing)
+            bool inWorld = viewer.IsInWorldCoordinate();
+
+
+
+            // 直接在世界座標系統畫線，只能用 GetOnePixelPen 來畫線，無法精確控制粗細。
+            //var pen= viewer.GetOnePixelPen(color);
+            //if (!inWorld)
+            //{
+            //    viewer.TransWorldToViewport(ref lx, ref ly);
+            //    viewer.TransWorldToViewport(ref cx, ref cy);
+            //}
+            //gxView.DrawLine(pen, lx, ly, cx, cy);
+
+            // 切換 VIEW 座標系統來畫線，可以準確控制畫筆粗細
+            if (inWorld)
+                viewer.SwitchToViewportCoordinate(gxView);
+
+            using (Pen pen = new Pen(color, 3f))
             {
                 viewer.TransWorldToViewport(ref lx, ref ly);
                 viewer.TransWorldToViewport(ref cx, ref cy);
+                gxView.DrawLine(pen, lx, ly, cx, cy);
             }
 
-            gxView.DrawLine(pen, lx, ly, cx, cy);
+            if(inWorld)
+                viewer.SwitchToWorldCoordinate(gxView);
         }
-        //void draw_centroids(CvImageViewer viewer, Graphics gxView, IEnumerable<EzBloc> blocs, bool debug = false)
-        //{
-        //    if (blocs == null)
-        //        return;
+        void draw_ruler(CvImageViewer viewer, Graphics gxView, EzBloc from, EzBloc to, Color color)
+        {
+            if (from == null || to == null)
+                return;
 
-        //    //bool isWorldO = viewer.IsInWorldCoordinate();
-        //    //if (isWorldO)
-        //    //    viewer.SwitchToViewportCoordinate(gxView);
+            // VER 3.3.0.5x 系列 暫時不開放 Ruler 功能。
+            if (true || TransCameraToWorld == null)
+            {
+                draw_line(viewer, gxView, from, to, color);
+                return;
+            }
 
-        //    bool isWorldDrawing = viewer.IsInWorldCoordinate();
-        //    var penMajorMark = new Pen(Color.Green, 5f);
-        //    var majorPoints = new List<PointF>();
-        //    var predictPoints = new List<PointF>();
-        //    var residuals = new List<PointF>();
+            var p1 = new PointF((float)from.Center.X, (float)from.Center.Y);
+            var p2 = new PointF((float)to.Center.X, (float)to.Center.Y);
+            var w1 = TransCameraToWorld.Trans(from.Center);
+            var w2 = TransCameraToWorld.Trans(to.Center);
+            var dist = (w2 - w1).NormLength;
 
-        //    foreach (var bloc in blocs)
-        //    {
-        //        if (bloc == null)
-        //            continue;
+            _cviRuler.UpdateEndPoints(p1, p2, dist);
+            _cviRuler.SetColor(color);
+            _cviRuler.OnDraw(viewer, gxView);
+        }
 
-        //        var cx = (float)bloc.Center.X;
-        //        var cy = (float)bloc.Center.Y;
-        //        if (!isWorldDrawing)
-        //            viewer.TransWorldToViewport(ref cx, ref cy);
+#if (OPT_RESERVED)
+        void draw_centroids(CvImageViewer viewer, Graphics gxView, IEnumerable<EzBloc> blocs, bool debug = false)
+        {
+            if (blocs == null)
+                return;
 
-        //        if (bloc.Owner == null)
-        //        {
-        //            residuals.Add(new PointF(cx, cy));
-        //        }
-        //        else if (bloc.Tag is QuadLinkNode link)
-        //        {
-        //            majorPoints.Add(new PointF(cx, cy));
+            //bool isWorldO = viewer.IsInWorldCoordinate();
+            //if (isWorldO)
+            //    viewer.SwitchToViewportCoordinate(gxView);
 
-        //            for (int i = 0; i < 4; i++)
-        //            {
-        //                EzBloc next = link[(QuadLinkNode.Dir)i];
-        //                if (next == null)
-        //                    continue;
+            bool isWorldDrawing = viewer.IsInWorldCoordinate();
+            var penMajorMark = new Pen(Color.Green, 5f);
+            var majorPoints = new List<PointF>();
+            var predictPoints = new List<PointF>();
+            var residuals = new List<PointF>();
 
-        //                // centroid lines
-        //                if (debug && i < 2)
-        //                {
-        //                    var cx2 = (float)next.Center.X;
-        //                    var cy2 = (float)next.Center.Y;
-        //                    if (!isWorldDrawing)
-        //                        viewer.TransWorldToViewport(ref cx2, ref cy2);
+            foreach (var bloc in blocs)
+            {
+                if (bloc == null)
+                    continue;
 
-        //                    var penLine = viewer.GetOnePixelPen(Color.Gray);
-        //                    gxView.DrawLine(penLine, cx, cy, cx2, cy2);
-        //                }
+                var cx = (float)bloc.Center.X;
+                var cy = (float)bloc.Center.Y;
+                if (!isWorldDrawing)
+                    viewer.TransWorldToViewport(ref cx, ref cy);
 
-        //                // 小箭頭
-        //                if (penMajorMark != null)
-        //                {
-        //                    var v = (next.Center - bloc.Center);
-        //                    v = v / v.NormLength * 10.0;
-        //                    var pt = bloc.Center + v;
-        //                    var cx3 = (float)pt.X;
-        //                    var cy3 = (float)pt.Y;
-        //                    if (!isWorldDrawing)
-        //                        viewer.TransWorldToViewport(ref cx3, ref cy3);
+                if (bloc.Owner == null)
+                {
+                    residuals.Add(new PointF(cx, cy));
+                }
+                else if (bloc.Tag is QuadLinkNode link)
+                {
+                    majorPoints.Add(new PointF(cx, cy));
 
-        //                    gxView.DrawLine(penMajorMark, cx, cy, cx3, cy3);
-        //                }
-        //            }
-        //        }
-        //        else
-        //        {
-        //            predictPoints.Add(new PointF(cx, cy));
-        //        }
-        //    }
+                    for (int i = 0; i < 4; i++)
+                    {
+                        EzBloc next = link[(QuadLinkNode.Dir)i];
+                        if (next == null)
+                            continue;
 
-        //    // Dot
-        //    var dot = new RectangleF(0, 0, 8, 8);
-        //    foreach (var pt in predictPoints)
-        //    {
-        //        Qcvt.SetCenter(ref dot, pt.X, pt.Y);
-        //        gxView.FillRectangle(Brushes.Purple, dot);
-        //    }
-        //    foreach (var pt in majorPoints)
-        //    {
-        //        Qcvt.SetCenter(ref dot, pt.X, pt.Y);
-        //        gxView.FillRectangle(Brushes.Lime, dot);
-        //    }
+                        // centroid lines
+                        if (debug && i < 2)
+                        {
+                            var cx2 = (float)next.Center.X;
+                            var cy2 = (float)next.Center.Y;
+                            if (!isWorldDrawing)
+                                viewer.TransWorldToViewport(ref cx2, ref cy2);
 
-        //    if (residuals.Count > 0)
-        //    {
-        //        var pen = viewer.GetOnePixelPen(Color.Pink);
-        //        dot.Inflate(dot.Width / 2, dot.Height / 2);
-        //        foreach (var pt in residuals)
-        //        {
-        //            Qcvt.SetCenter(ref dot, pt.X, pt.Y);
-        //            gxView.DrawEllipse(pen, dot);
-        //        }
-        //    }
+                            var penLine = viewer.GetOnePixelPen(Color.Gray);
+                            gxView.DrawLine(penLine, cx, cy, cx2, cy2);
+                        }
 
-        //    penMajorMark?.Dispose();
+                        // 小箭頭
+                        if (penMajorMark != null)
+                        {
+                            var v = (next.Center - bloc.Center);
+                            v = v / v.NormLength * 10.0;
+                            var pt = bloc.Center + v;
+                            var cx3 = (float)pt.X;
+                            var cy3 = (float)pt.Y;
+                            if (!isWorldDrawing)
+                                viewer.TransWorldToViewport(ref cx3, ref cy3);
 
-        //    //if (isWorldO)
-        //    //    viewer.SwitchToWorldCoordinate(gxView);
-        //}
+                            gxView.DrawLine(penMajorMark, cx, cy, cx3, cy3);
+                        }
+                    }
+                }
+                else
+                {
+                    predictPoints.Add(new PointF(cx, cy));
+                }
+            }
+
+            // Dot
+            var dot = new RectangleF(0, 0, 8, 8);
+            foreach (var pt in predictPoints)
+            {
+                Qcvt.SetCenter(ref dot, pt.X, pt.Y);
+                gxView.FillRectangle(Brushes.Purple, dot);
+            }
+            foreach (var pt in majorPoints)
+            {
+                Qcvt.SetCenter(ref dot, pt.X, pt.Y);
+                gxView.FillRectangle(Brushes.Lime, dot);
+            }
+
+            if (residuals.Count > 0)
+            {
+                var pen = viewer.GetOnePixelPen(Color.Pink);
+                dot.Inflate(dot.Width / 2, dot.Height / 2);
+                foreach (var pt in residuals)
+                {
+                    Qcvt.SetCenter(ref dot, pt.X, pt.Y);
+                    gxView.DrawEllipse(pen, dot);
+                }
+            }
+
+            penMajorMark?.Dispose();
+
+            //if (isWorldO)
+            //    viewer.SwitchToWorldCoordinate(gxView);
+        }
+#endif
         #endregion
 
         #region PRIVATE_FETCH_FUNCTIONS
@@ -484,6 +528,10 @@ namespace LaserAlignDX.Mvc.Gui
         }
         #endregion
 
+        public virtual ITransform TransCameraToWorld
+        { 
+            get; set; 
+        }
         public EzBloc GetCursorBloc(int index)
         {
             if (index == 0) return _cursorBloc;

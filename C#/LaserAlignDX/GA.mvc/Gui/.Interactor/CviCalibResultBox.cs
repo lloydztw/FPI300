@@ -16,6 +16,7 @@
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
+using JetEazy.QMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.Model.Coords;
@@ -80,11 +81,15 @@ namespace LaserAlignDX.Mvc.Gui
             get;
             set;
         }
+        //public ITransform TransCameraToWorld
+        //{
+        //    get; set;
+        //}
         public ITransform TransCameraToMotor
         {
             get; set;
         }
-        public ITransform TransCameraToWorld
+        public ITransform TransCameraToMotor2
         {
             get; set;
         }
@@ -92,10 +97,10 @@ namespace LaserAlignDX.Mvc.Gui
         {
             get; set;
         }
-        public SuckerRowEnum ActiveSuckerRowID
-        {
-            get; set;
-        }
+        //public SuckerRowEnum ActiveSuckerRowID
+        //{
+        //    get; set;
+        //}
 
         #region OVERRIDES
         public override void OnKeyDown(CvImageViewer viewer, KeyEventArgs e)
@@ -519,25 +524,26 @@ namespace LaserAlignDX.Mvc.Gui
 
             var sb = new StringBuilder();
 
-            var rowCol = (cursorBloc.Tag as QuadLinkNode)?.rowCol;
-            if (rowCol != null)
-                sb.Append("格點: [").AppendValues(rowCol.Row, rowCol.Col).AppendLine("]");
+            if (getRowCol(cursorBloc, out int row, out int col))
+                sb.Append("格點: [").AppendValues(row, col).AppendLine("]");
 
             appendCameraCoords(sb, cursorBloc, cursorBloc2);
 
-            if (TransCameraToMotor != null)
+            if (TransCameraToMotor != null || TransCameraToMotor2 != null)
             {
                 appendMotorCoords(sb, cursorBloc, cursorBloc2);
                 showScore = false;
             }
+
             if (TransCameraToWorld != null)
             {
                 appendWorldCoords(sb, cursorBloc, cursorBloc2);
                 showScore = false;
             }
-            if (TransCameraToMotor != null && TransCameraToMotor != null && cursorBloc2 == null && rowCol != null)
+
+            if (TransCameraToMotor != null && cursorBloc2 == null && row >= 0 && col >= 0)
             {
-                appendPlcCompensation(sb, cursorBloc, rowCol.Row, rowCol.Col);
+                appendPlcCompensation(sb, cursorBloc, row, col);
                 showScore = false;
             }
 
@@ -568,51 +574,64 @@ namespace LaserAlignDX.Mvc.Gui
         }
         void appendMotorCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
-            var transform = TransCameraToMotor;
-            if (bloc == null || transform == null)
+            if (bloc == null)
                 return;
 
-            var motorCoord = transform.Trans(bloc.Center);
-
             sb.AppendLine();
-            sb.AppendLine($"吸嘴馬達座標 X = {motorCoord.X:0.000} mm");
-            sb.AppendLine($"載台馬達座標 Y = {motorCoord.Y:0.000} mm");
 
-            if (bloc != null && bloc2 != null && bloc != bloc2)
+            var trfs = new[] { TransCameraToMotor, TransCameraToMotor2 };
+            foreach (var trfCamToMotor in trfs)
             {
-                var motorCoord2 = transform.Trans(bloc2.Center);
-                var dv = motorCoord - motorCoord2;
-                double dist = dv.NormLength;
-                sb.AppendLine($"馬達座標 dX = {dv.X:0.000} mm");
-                sb.AppendLine($"馬達座標 dY = {dv.Y:0.000} mm");
-                sb.AppendLine($"馬達座標 距離 = {dist:0.000} mm");
+                if (trfCamToMotor == null)
+                    continue;
+
+                var motorName = trfCamToMotor.Name.Contains("S2") ? "S2" : "S1";
+                var motorCoord = trfCamToMotor.Trans(bloc.Center);
+
+                sb.AppendLine($"{motorName}馬達座標 (X,Y) = ({motorCoord.X:0.000}, {motorCoord.Y:0.000}) mm");
+
+                if (bloc != null && bloc2 != null && bloc != bloc2)
+                {
+                    var motorCoord2 = trfCamToMotor.Trans(bloc2.Center);
+                    var dv = motorCoord - motorCoord2;
+                    double dist = dv.NormLength;
+                    sb.AppendLine($"馬達座標 差值 (dX,dY) = ({dv.X:0.000}, {dv.Y:0.000}) mm");
+                    sb.AppendLine($"馬達座標 距離 = {dist:0.000} mm");
+                    sb.AppendLine();
+                }
             }
         }
         void appendWorldCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
-            var transform = TransCameraToWorld;
-            if (bloc == null || transform == null)
+            var trfCameraToWorld = TransCameraToWorld;
+            if (bloc == null || trfCameraToWorld == null)
                 return;
 
-            var worldCoord = transform.Trans(bloc.Center);
+            //QVector world_node = null;
+            //if (getRowCol(bloc, out int row, out int col))
+            //    trfCameraToWorld.GetCalibGridPoints().Get(row, col, out _, out world_node);
+
+            var worldCoord = trfCameraToWorld.Trans(bloc.Center);
 
             sb.AppendLine();
-            sb.AppendLine($"Physic座標 X = {worldCoord.X:0.000} mm");
-            sb.AppendLine($"Physic座標 Y = {worldCoord.Y:0.000} mm");
+
+            //if (world_node != null)
+            //    sb.AppendLine($"World 座標 (X,Y) = ({world_node.X:0.000}, {world_node.Y:0.000}) mm");
+
+            sb.AppendLine($"Physic 座標 (X,Y) = ({worldCoord.X:0.000}, {worldCoord.Y:0.000}) mm");
 
             if (bloc != null && bloc2 != null && bloc != bloc2)
             {
-                var worldCoord2 = transform.Trans(bloc2.Center);
+                var worldCoord2 = trfCameraToWorld.Trans(bloc2.Center);
                 var dv = worldCoord - worldCoord2;
                 double dist = dv.NormLength;
-                sb.AppendLine($"Physic座標 dX = {dv.X:0.000} mm");
-                sb.AppendLine($"Physic座標 dY = {dv.Y:0.000} mm");
-                sb.AppendLine($"Physic座標 距離 = {dist:0.000} mm");
+                sb.AppendLine($"Physic 座標 差值 (dX,dY) = ({dv.X:0.000}, {dv.Y:0.000}) mm");
+                sb.AppendLine($"Physic 座標 距離 = {dist:0.000} mm");
             }
         }
         void appendPlcCompensation(StringBuilder sb, EzBloc bloc, int row, int col)
         {
-            if (bloc == null)
+            if (bloc == null || row < 0 || col < 0)
                 return;
 
             (var motorDelta, var worldDelta) = _trfModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, row, col);
@@ -620,9 +639,17 @@ namespace LaserAlignDX.Mvc.Gui
             //sb.AppendLine();
             sb.AppendLine($"Physic 變動值 ΔX = {worldDelta.X:0.000} mm");
             sb.AppendLine($"Physic 變動值 ΔY = {worldDelta.Y:0.000} mm");
+
             sb.AppendLine();
-            sb.AppendLine($"PLC 格點 補償量 dX = {motorDelta.X:0.000} mm");
-            sb.AppendLine($"PLC 格點 補償量 dY = {motorDelta.Y:0.000} mm");
+            sb.AppendLine($"PLC 補償量 ΔX = {motorDelta.X:0.000} mm");
+            sb.AppendLine($"PLC 補償量 ΔY = {motorDelta.Y:0.000} mm");
+        }
+        bool getRowCol(EzBloc bloc, out int row, out int col)
+        {
+            var rowCol = (bloc?.Tag as QuadLinkNode)?.rowCol;
+            row = rowCol != null ? rowCol.Row : -1;
+            col = rowCol != null ? rowCol.Col : -1;
+            return row >= 0 && col >= 0;
         }
 
         #region MENU_STRIP_FUNCTIONS

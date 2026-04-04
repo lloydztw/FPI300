@@ -1606,7 +1606,7 @@ namespace EzAoiEmptyTrayInspector.Model
             var dict = new Dictionary<object, bool>();
             _OFFSET(matchResult.Blocs, dict, dx, dy);
             _OFFSET(matchResult.OutGridBlocs, dict, dx, dy);
-            _OFFSET(matchResult.Grid.IterBlocs(), dict, dx, dy);
+            _OFFSET(matchResult.Grid?.IterBlocs(), dict, dx, dy);
         }
         void _OFFSET(IEnumerable<EzBloc> blocs, Dictionary<object, bool> foundDict, int dx, int dy)
         {

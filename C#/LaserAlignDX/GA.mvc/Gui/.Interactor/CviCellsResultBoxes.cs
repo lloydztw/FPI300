@@ -18,8 +18,10 @@ using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
+using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
+using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
@@ -389,20 +391,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             else
             {
-                foreach (var cell in cells)
+                //---------------------------------------------------------------------------------------------
+                // 2026-04-04
+                // 使用 RegionCellsDataCollection 來管理 _xRecipe.xRegionCells
+                // 以維持 PASS/NG 統計數量的一致性 !
+                //---------------------------------------------------------------------------------------------
+                using (var cellsCollection = new RegionCellsDataCollection(cells))
                 {
-                    if (checkResult(cell, out bool isPass, out bool isEmpty))
-                    {
-                        if (isEmpty)
-                            empty++;
-                        else if (isPass)
-                            pass++;
-                        else
-                            ng++;
-                    }
+                    cellsCollection.GetStatistics(out pass, out ng, out empty);
+                    updateTitle($"OK= {pass}, NG= {ng}, 疑似空位= {empty}");
                 }
-
-                updateTitle($"OK= {pass}, NG= {ng}, 疑似空位= {empty}");
             }
         }
         void updateTitle(string text)
@@ -563,6 +561,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             get;
             set;
+        }
+        public override ITransform TransCameraToWorld
+        {
+            get => TransformsModel?.GetCameraPhysicTransform(ActiveCarrierID);
+            set { }
         }
 
         #region TOOL_TIP_FUNCTIONS
@@ -727,10 +730,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 bool isShowScore = true;
                 var sb = new StringBuilder();
 
-                if (cell != null)
-                {
-                    sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
-                }
+                if (!IsEmptyTrayMode && !isEmpty)
+                    appendPassNG(sb, cell);
+
+                sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
 
                 appendCameraCoords(sb, cursorBloc, cursorBloc2);
 
@@ -758,6 +761,25 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             catch (Exception ex)
             {
                 return "";
+            }
+        }
+        void appendPassNG(StringBuilder sb, XCell cell)
+        {
+            if (cell == null)
+                return;
+            
+            if (cell.IsResultPass())
+            {
+                sb.AppendLine("🟢 PASS").AppendLine();
+            }
+            else
+            {
+                foreach (InspectReason ng in cell.IterNgResults())
+                {
+                    var ngText = GaUtil.GetEnumDescription(ng);
+                    sb.AppendLine($"⛔️ {ngText} ⛔️").AppendLine();
+                    break;
+                }
             }
         }
         void appendCameraCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
@@ -806,7 +828,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
 
             #region S1_S2_馬達座標
-            if (!_withPadGaps)
+            if (true || !_withPadGaps)
             {
                 sb.AppendLine().Append("S1 馬達目標(X,Y) = (").AppendValues((float)s1_target.X, (float)s1_target.Y).Append(") mm");
                 if (camPt != null)
@@ -818,26 +840,31 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             #endregion
 
-            #region PHYSIC_目標座標
-            sb.AppendLine();
-            sb.AppendLine().Append("Physic 目標(X,Y) = (").AppendValues((float)world_target.X, (float)world_target.Y).Append(") mm");
-            if (camPt != null)
-                sb.AppendLine().Append("Physic 座標(X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+            #region WORLD_目標座標
+            if (!_withPadGaps)
+            {
+                sb.AppendLine();
+                sb.AppendLine().Append("Physic 目標(X,Y) = (").AppendValues((float)world_target.X, (float)world_target.Y).Append(") mm");
+                if (camPt != null)
+                    sb.AppendLine().Append("Physic 座標(X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+            }
             #endregion
 
             #region 變動值
             if (camPt != null)
             {
-                var world_delta = world_current - world_target;
-                var motor_delta = s1_current - s1_target;
-                sb.AppendLine();
-                sb.AppendLine($"Physic 變動值 ΔX = {world_delta.X:0.000} mm");
-                sb.AppendLine($"Physic 變動值 ΔY = {world_delta.Y:0.000} mm");
+                (var motorDelta, var worldDelta) = TransformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
                 if (!_withPadGaps)
                 {
                     sb.AppendLine();
-                    sb.AppendLine($"PLC 格點 補償量 ΔX = {motor_delta.X:0.000} mm");
-                    sb.AppendLine($"PLC 格點 補償量 ΔY = {motor_delta.Y:0.000} mm");
+                    sb.AppendLine($"Physic 變動值 ΔX = {worldDelta.X:0.000} mm");
+                    sb.AppendLine($"Physic 變動值 ΔY = {worldDelta.Y:0.000} mm");
+                }
+                if (true || !_withPadGaps)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine($"PLC 補償量 ΔX = {motorDelta.X:0.000} mm");
+                    sb.AppendLine($"PLC 補償量 ΔY = {motorDelta.Y:0.000} mm");
                 }
             }
             #endregion

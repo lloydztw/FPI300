@@ -630,7 +630,10 @@ namespace LaserAlignDX.Mvc.Ctrl
 
                 // 更新 格位陣列 到 GUI
                 _cviCamGridBox.Attach(trfModel);
+                _cviCamGridBox.ActiveCarrierID = carrierID;
                 _cviCamGridBox.TransCameraToWorld = trfModel.GetCameraPhysicTransform(carrierID);
+                _cviCamGridBox.TransCameraToMotor = trfModel.GetCameraMotorTransform(carrierID, SuckerRowEnum.S1);
+                _cviCamGridBox.TransCameraToMotor2 = trfModel.GetCameraMotorTransform(carrierID, SuckerRowEnum.S2);
                 _cviCamGridBox.IsEmptyTrayMode = true;
                 _cviCamGridBox.UpdateResult(result);
                 _cviCamGridBox.Visible = true;

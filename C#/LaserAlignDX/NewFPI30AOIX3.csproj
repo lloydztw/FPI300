@@ -384,6 +384,7 @@
     <Compile Include="GA.mvc\Gui\.Interactor\CviRcpBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviFlyAoiResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviRotRectBox.cs" />
+    <Compile Include="GA.mvc\Gui\.Interactor\CviRuler.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviTransCoordInfo.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\IvDrawItem.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_abs.cs" />
