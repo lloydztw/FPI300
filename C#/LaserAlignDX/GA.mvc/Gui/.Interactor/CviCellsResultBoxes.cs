@@ -779,9 +779,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 foreach (InspectReason ng in cell.IterNgResults())
                 {
                     var ngText = GaUtil.GetEnumDescription(ng);
-                    sb.AppendLine($"⛔️ {ngText} ⛔️").AppendLine();
-                    break;
+                    sb.AppendLine($"⛔️ {ngText}");
                 }
+                sb.AppendLine();
             }
         }
         void appendCameraCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)

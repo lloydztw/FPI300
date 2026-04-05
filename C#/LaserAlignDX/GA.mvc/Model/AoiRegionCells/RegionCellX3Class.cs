@@ -244,12 +244,23 @@ namespace LaserAlignDX.OPSpace
                     _inspectNgList.Add(result);
             }
         }
-        public IEnumerable<InspectReason> IterNgResults()
+        /// <summary>
+        /// 枚舉所有 NG
+        /// </summary>
+        public IEnumerable<InspectReason> IterNgResults(bool reverse = false)
         {
             if (_inspectNgList != null)
             {
-                for (int i = _inspectNgList.Count - 1; i >= 0; i--)
-                    yield return _inspectNgList[i];
+                if (reverse)
+                {
+                    for (int i = _inspectNgList.Count - 1; i >= 0; i--)
+                        yield return _inspectNgList[i];
+                }
+                else
+                {
+                    foreach (var ng in _inspectNgList)
+                        yield return ng;
+                }
             }
         }
 
