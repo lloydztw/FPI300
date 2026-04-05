@@ -400,7 +400,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     cellsCollection.GetStatistics(out pass, out ng, out empty, out int unknowns);
                     string msg = $"OK= {pass}, NG= {ng}, 空位= {empty}";
-                    if (unknowns > 0) msg += $", 異物= {unknowns}";
+                    if (unknowns > 0) msg += $", 疑似異物= {unknowns}";
                     updateTitle(msg);
                 }
             }
