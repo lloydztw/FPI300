@@ -1281,7 +1281,7 @@ namespace NeedleX.FormSpace
             switch (camid)
             {
                 case 0: lblCamName.Text = "全域特征定位相机"; break;
-                case 1: lblCamName.Text = "特微检测尺寸Y相机"; break;
+                case 1: lblCamName.Text = "特微检测高度相机"; break;
                 default: lblCamName.Text = "显微相机"; break;
 
             }

@@ -109,9 +109,9 @@ namespace LaserAlignDX.Mvc.Gui
             dataGridView1.ColumnHeadersDefaultCellStyle = headerStyle;
             // 星號 column 隱藏
             dataGridView1.RowHeadersVisible = false;
-            // Row Height 尺寸Y固定
+            // Row Height 高度固定
             dataGridView1.AllowUserToResizeRows = false;
-            // 讓 DataGridView 自動調整欄位尺寸X以填滿可用空間
+            // 讓 DataGridView 自動調整欄位寬度以填滿可用空間
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             //// 設定 DataGridView 的預設樣式
             //// 注意：這會影響到所有的儲存格

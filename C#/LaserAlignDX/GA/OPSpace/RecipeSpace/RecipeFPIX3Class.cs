@@ -1502,7 +1502,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         #endregion
 
-        #region 尺寸X_SPEC
+        #region 尺寸_SPEC
 
         const string _Cat4 = "A04.尺寸规格设置";
 
