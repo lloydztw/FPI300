@@ -61,14 +61,14 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         // 傾斜(踩腳) 門限值
         public float TiltRatioThres = 0.0125f;
 
-        // 尺寸宽度 spec (mm)
+        // 尺寸X spec (mm)
         public readonly DtoSpecValue StandardWidth = new DtoSpecValue(9.0f, 0.050f, 0.050f);
+        // 尺寸Y spec (mm)
         public readonly DtoSpecValue StandardHeight = new DtoSpecValue(9.9f, 0.050f, 0.050f);
 
         // Pad邊隙 spec (mm)
         public readonly DtoSpecValue PadEdgeGapX = new DtoSpecValue(0.375f, 0.127f, 0.127f);
         public readonly DtoSpecValue PadEdgeGapY = new DtoSpecValue(0.300f, 0.127f, 0.127f);
-
 
         public override void Load(string iniFileName)
         {

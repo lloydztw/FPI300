@@ -18,7 +18,6 @@ using EzAoiEmptyTrayInspector;
 using JetEazy.FormSpace;
 using JetEazy.Utils;
 using LaserAlignDX;
-using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Model;
 using System;
 using System.Drawing;

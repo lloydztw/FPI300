@@ -48,7 +48,7 @@
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(90, 27);
             this.label1.TabIndex = 0;
-            this.label1.Text = "寬 (mm)";
+            this.label1.Text = "尺寸X (mm)";
             // 
             // numChipHeight
             // 
@@ -134,7 +134,7 @@
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(90, 27);
             this.label2.TabIndex = 39;
-            this.label2.Text = "高 (mm)";
+            this.label2.Text = "尺寸Y (mm)";
             // 
             // lblInfo
             // 

@@ -90,8 +90,8 @@ namespace LaserAlignDX.Mvc.Gui
             {
                 var dpX = (meansurePts[0] - meansurePts[2]).NormLength;
                 var dpY = (meansurePts[1] - meansurePts[3]).NormLength;
-                sb.AppendLine().Append($"晶粒.寬 = {dpX:0.0} pix");
-                sb.AppendLine().Append($"晶粒.高 = {dpY:0.0} pix");
+                sb.AppendLine().Append($"晶粒.尺寸X = {dpX:0.0} pix");
+                sb.AppendLine().Append($"晶粒.尺寸Y = {dpY:0.0} pix");
             }
             else
             {
@@ -113,8 +113,8 @@ namespace LaserAlignDX.Mvc.Gui
                 {
                     var pW = (p0 - p1).NormLength;
                     var pH = (p0 - p2).NormLength;
-                    sb.AppendLine().Append($"PAD.寬 = {pW:0.0} pix");
-                    sb.AppendLine().Append($"PAD.高 = {pH:0.0} pix");
+                    sb.AppendLine().Append($"PAD.尺寸X = {pW:0.0} pix");
+                    sb.AppendLine().Append($"PAD.尺寸Y = {pH:0.0} pix");
                 }
             }
             #endregion

@@ -33,8 +33,8 @@ namespace LaserAlignDX.OPSpace
             str += $"马达2=[{PointF000ToString(cell.Sur2)}]{Environment.NewLine}";
             if (cell.xInspect.bOpenLineMeasure)
             {
-                str += $"尺寸宽度X[{cell.RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
-                str += $"尺寸高度Y[{cell.RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"尺寸X[{cell.RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"尺寸Y[{cell.RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
             }
             if (cell.xInspect.bCheckMeasureOffset)
             {
@@ -68,8 +68,8 @@ namespace LaserAlignDX.OPSpace
             str += $"{cell.RunAngle.ToString(m_Format)}" + ",";
             if (cell.xInspect.bOpenLineMeasure)
             {
-                str += $"宽度[{cell.RunWidth.ToString(m_Format)}]" + ",";
-                str += $"高度[{cell.RunHeight.ToString(m_Format)}]" + ",";
+                str += $"尺寸X[{cell.RunWidth.ToString(m_Format)}]" + ",";
+                str += $"尺寸Y[{cell.RunHeight.ToString(m_Format)}]" + ",";
             }
             if (cell.xInspect.bCheckMeasureOffset)
             {

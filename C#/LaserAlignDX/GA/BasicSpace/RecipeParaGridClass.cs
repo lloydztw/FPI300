@@ -109,8 +109,8 @@ namespace LaserAlignDX.BasicSpace
             set { xRecipe.xColumnOffset = value; }
         }
 
-        [CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品宽度")]
-        [DisplayName("A07.Chip宽度(mm)")]
+        [CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品尺寸X")]
+        [DisplayName("A07.Chip 尺寸X (mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 1f, 2)]
         [Browsable(true)]
@@ -120,8 +120,8 @@ namespace LaserAlignDX.BasicSpace
             set { xRecipe.xChipWidth = value; }
         }
 
-        [CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品高度")]
-        [DisplayName("A08.Chip高度(mm)")]
+        [CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品尺寸Y")]
+        [DisplayName("A08.Chip 尺寸Y (mm)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999f, 1f, 2)]
         [Browsable(true)]

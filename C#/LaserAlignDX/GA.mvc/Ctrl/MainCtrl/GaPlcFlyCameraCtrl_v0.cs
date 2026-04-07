@@ -1476,8 +1476,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Fly.V0
             str += $"编号" + ",";
             str += $"名称" + ",";
             str += $"是否检测" + ",";
-            str += $"尺寸宽度X" + ",";
-            str += $"尺寸高度Y" + ",";
+            str += $"尺寸X" + ",";
+            str += $"尺寸Y" + ",";
             str += $"位置偏移X" + ",";
             str += $"位置偏移Y" + ",";
             str += $"原始X" + ",";

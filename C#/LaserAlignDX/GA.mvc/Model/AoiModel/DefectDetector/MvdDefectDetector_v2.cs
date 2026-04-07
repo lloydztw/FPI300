@@ -85,7 +85,7 @@ namespace LaserAlignDX.Model.Defects.V2
                         imgRun.Height != imgTemplate.Height ||
                         imgRun.PixelFormat != imgTemplate.PixelFormat )
                     {
-                        var errMsg = $"imgRun @ [{cell.CellRow},{cell.CellCol}] 長寬或格式不同!";
+                        var errMsg = $"imgRun @ [{cell.CellRow},{cell.CellCol}] 尺寸X,尺寸Y,或格式不同!";
                         System.Diagnostics.Debug.WriteLine( errMsg );
                     }
                     // 使用海康進行 瑕疵檢測

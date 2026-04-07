@@ -84,11 +84,11 @@ namespace LaserAlignDX.OPSpace
         public float RunAngle = 0;
         
         /// <summary>
-        /// 测量结果宽度
+        /// 测量结果尺寸X
         /// </summary>
         public float RunWidth = 0;
         /// <summary>
-        /// 测量结果高度
+        /// 测量结果尺寸Y
         /// </summary>
         public float RunHeight = 0;
         /// <summary>
@@ -622,8 +622,8 @@ namespace LaserAlignDX.OPSpace
             str += $"{RunAngle.ToString(m_Format)}" + ",";
             if (xInspect.bOpenLineMeasure)
             {
-                str += $"宽度[{RunWidth.ToString(m_Format)}]" + ",";
-                str += $"高度[{RunHeight.ToString(m_Format)}]" + ",";
+                str += $"尺寸X[{RunWidth.ToString(m_Format)}]" + ",";
+                str += $"尺寸Y[{RunHeight.ToString(m_Format)}]" + ",";
             }
             if (xInspect.bCheckMeasureOffset)
             {
@@ -668,8 +668,8 @@ namespace LaserAlignDX.OPSpace
             str += $"马达2=[{PointF000ToString(Sur2)}]{Environment.NewLine}";
             if (xInspect.bOpenLineMeasure)
             {
-                str += $"尺寸宽度X[{RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
-                str += $"尺寸高度Y[{RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"尺寸X[{RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
+                str += $"尺寸Y[{RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
             }
             if (xInspect.bCheckMeasureOffset)
             {
@@ -696,8 +696,8 @@ namespace LaserAlignDX.OPSpace
             str += $"编号" + ",";
             str += $"名称" + ",";
             str += $"是否检测" + ",";
-            str += $"尺寸宽度X" + ",";
-            str += $"尺寸高度Y" + ",";
+            str += $"尺寸X" + ",";
+            str += $"尺寸Y" + ",";
             str += $"位置偏移X" + ",";
             str += $"位置偏移Y" + ",";
             str += $"原始X" + ",";

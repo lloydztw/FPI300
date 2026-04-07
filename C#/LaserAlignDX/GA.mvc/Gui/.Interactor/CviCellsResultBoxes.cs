@@ -398,8 +398,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 //---------------------------------------------------------------------------------------------
                 using (var cellsCollection = new RegionCellsDataCollection(cells))
                 {
-                    cellsCollection.GetStatistics(out pass, out ng, out empty);
-                    updateTitle($"OK= {pass}, NG= {ng}, 疑似空位= {empty}");
+                    cellsCollection.GetStatistics(out pass, out ng, out empty, out int unknowns);
+                    string msg = $"OK= {pass}, NG= {ng}, 空位= {empty}";
+                    if (unknowns > 0) msg += $", 疑似異物= {unknowns}";
+                    updateTitle(msg);
                 }
             }
         }
@@ -777,9 +779,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 foreach (InspectReason ng in cell.IterNgResults())
                 {
                     var ngText = GaUtil.GetEnumDescription(ng);
-                    sb.AppendLine($"⛔️ {ngText} ⛔️").AppendLine();
-                    break;
+                    sb.AppendLine($"⛔️ {ngText}");
                 }
+                sb.AppendLine();
             }
         }
         void appendCameraCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
@@ -917,8 +919,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         var cH = _xRecipe.InspectParams.mHeightStand;
                         var dx = Math.Round(cell.RunWidth - cW, 3);
                         var dy = Math.Round(cell.RunHeight - cH, 3);
-                        sb.AppendLine().Append($"晶粒.寬 = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
-                        sb.AppendLine().Append($"晶粒.高 = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
+                        sb.AppendLine().Append($"晶粒.尺寸X = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
+                        sb.AppendLine().Append($"晶粒.尺寸Y = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
                         #endregion
 
                         #region 尺寸量測詳細點位
@@ -926,8 +928,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         if (chipDim != null && chipDim.GetPixelSize(out double dpX, out double dpY))
                         {
                             sb.AppendLine();
-                            sb.AppendLine().Append($"晶粒.寬 = {dpX:0.0} pix");
-                            sb.AppendLine().Append($"晶粒.高 = {dpY:0.0} pix");
+                            sb.AppendLine().Append($"晶粒.尺寸X = {dpX:0.0} pix");
+                            sb.AppendLine().Append($"晶粒.尺寸Y = {dpY:0.0} pix");
                         }
                         #endregion
 
@@ -936,8 +938,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         if (getChapPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
                         {
                             sb.AppendLine();
-                            sb.AppendLine().Append($"PAD.跨距.寬 = {padSpanW:0.0} pix");
-                            sb.AppendLine().Append($"PAD.跨距.高 = {padSpanH:0.0} pix");
+                            sb.AppendLine().Append($"PAD.跨距.尺寸X = {padSpanW:0.0} pix");
+                            sb.AppendLine().Append($"PAD.跨距.尺寸Y = {padSpanH:0.0} pix");
                         }
                         #endregion
 

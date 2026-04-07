@@ -39,10 +39,10 @@ namespace LaserAlignDX.Model
 
             if (cell.xInspect.bOpenLineMeasure)
             {
-                //str += $"尺寸宽度X[{RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
-                //str += $"尺寸高度Y[{RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
-                sb.Append("尺寸宽度X= ").AppendValues(cell.RunWidth).AppendLine(" mm");
-                sb.Append("尺寸宽度Y= ").AppendValues(cell.RunHeight).AppendLine(" mm");
+                //str += $"尺寸X[{RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
+                //str += $"尺寸Y[{RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
+                sb.Append("尺寸X= ").AppendValues(cell.RunWidth).AppendLine(" mm");
+                sb.Append("尺寸Y= ").AppendValues(cell.RunHeight).AppendLine(" mm");
             }
             if (cell.xInspect.bCheckMeasureOffset)
             {
@@ -84,8 +84,8 @@ namespace LaserAlignDX.Model
             //str += $"马达2=[{PointF000ToString(Sur2)}]{Environment.NewLine}";
             //if (xInspect.bOpenLineMeasure)
             //{
-            //    str += $"尺寸宽度X[{RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
-            //    str += $"尺寸高度Y[{RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
+            //    str += $"尺寸X[{RunWidth.ToString(m_Format)}mm]{Environment.NewLine}";
+            //    str += $"尺寸Y[{RunHeight.ToString(m_Format)}mm]{Environment.NewLine}";
             //}
             //if (xInspect.bCheckMeasureOffset)
             //{
