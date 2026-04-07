@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using JetEazy;
+﻿using JetEazy;
 using JetEazy.ControlSpace;
 using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.ControlSpace.PLCSpace;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace JetEazy.ControlSpace.MotionSpace
 {
@@ -183,6 +184,7 @@ namespace JetEazy.ControlSpace.MotionSpace
                 AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISHOME];
                 if (string.IsNullOrEmpty(address.Address0))
                     return false;
+                return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
                 return PLC[address.SiteNo].IOData.GetBit(address.Address0);
             }
             set
@@ -202,6 +204,7 @@ namespace JetEazy.ControlSpace.MotionSpace
                 AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISONSITE];
                 if (string.IsNullOrEmpty(address.Address0))
                     return false;
+                return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
                 return PLC[address.SiteNo].IOData.GetBit(address.Address0);
             }
         }
@@ -212,6 +215,7 @@ namespace JetEazy.ControlSpace.MotionSpace
                 AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISSVON];
                 if (string.IsNullOrEmpty(address.Address0))
                     return false;
+                return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
                 return PLC[address.SiteNo].IOData.GetBit(address.Address0);
             }
         }
@@ -222,6 +226,7 @@ namespace JetEazy.ControlSpace.MotionSpace
                 AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISBREAK];
                 if (string.IsNullOrEmpty(address.Address0))
                     return false;
+                return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
                 return !PLC[address.SiteNo].IOData.GetBit(address.Address0);
             }
         }
@@ -232,6 +237,7 @@ namespace JetEazy.ControlSpace.MotionSpace
                 AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISERROR];
                 if (string.IsNullOrEmpty(address.Address0))
                     return false;
+                return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
                 return PLC[address.SiteNo].IOData.GetBit(address.Address0);
             }
         }
@@ -247,26 +253,38 @@ namespace JetEazy.ControlSpace.MotionSpace
         {
             get
             {
-                if (MotionMMMode == 1)
-                {
-                    AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONNOW];
+                AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONNOW];
+                string readvari = PLC[address.SiteNo].ReadVari(address.Address0).ToLower();
+                if (string.IsNullOrEmpty(readvari))
+                    return 0;
+                float.TryParse(readvari, out var stepposition);
+                return stepposition;
 
-                    short setH = PLC[address.SiteNo].IOData.GetMW(address.Address0);
-                    short setL = PLC[address.SiteNo].IOData.GetMW(address.Address1);
+                //if (MotionMMMode == 1)
+                //{
+                //    AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONNOW];
 
-                    //接收plc数据
-                    byte[] bytesH = BitConverter.GetBytes(setH);
-                    byte[] bytesL = BitConverter.GetBytes(setL);
+                //    short setH = PLC[address.SiteNo].IOData.GetMW(address.Address0);
+                //    short setL = PLC[address.SiteNo].IOData.GetMW(address.Address1);
 
-                    byte[] d = new byte[bytesH.Length + bytesL.Length];
-                    Array.Copy(bytesH, 0, d, 0, bytesH.Length);
-                    Array.Copy(bytesL, 0, d, bytesH.Length, bytesL.Length);
+                //    //接收plc数据
+                //    byte[] bytesH = BitConverter.GetBytes(setH);
+                //    byte[] bytesL = BitConverter.GetBytes(setL);
 
-                    float myFloat = BitConverter.ToSingle(d, 0);
-                    return myFloat;
-                }
+                //    byte[] d = new byte[bytesH.Length + bytesL.Length];
+                //    Array.Copy(bytesH, 0, d, 0, bytesH.Length);
+                //    Array.Copy(bytesL, 0, d, bytesH.Length, bytesL.Length);
 
-                return (float)StepPositionNow / (float)ONEMMSTEP;
+                //    float myFloat = BitConverter.ToSingle(d, 0);
+                //    return myFloat;
+                //}
+                //else if (MotionMMMode == 2)
+                //{
+                //    AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONNOW];
+                //    return float.Parse(PLC[address.SiteNo].ReadVari(address.Address0).ToLower());
+                //}
+
+                //return (float)StepPositionNow / (float)ONEMMSTEP;
             }
         }
         public override string RulerPositionNowString
@@ -280,29 +298,33 @@ namespace JetEazy.ControlSpace.MotionSpace
         {
             get
             {
-                if (MotionMMMode == 1)
-                {
-                    AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_RULERSTEPPOSITIONNOW];
+                AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_RULERSTEPPOSITIONNOW];
+                if (address.SiteNo != -1)
+                    return float.Parse(PLC[address.SiteNo].ReadVari(address.Address0).ToLower());
+                return 0;
+                //if (MotionMMMode == 1)
+                //{
+                //    AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_RULERSTEPPOSITIONNOW];
 
-                    short setH = PLC[address.SiteNo].IOData.GetMW(address.Address0);
-                    short setL = PLC[address.SiteNo].IOData.GetMW(address.Address1);
+                //    short setH = PLC[address.SiteNo].IOData.GetMW(address.Address0);
+                //    short setL = PLC[address.SiteNo].IOData.GetMW(address.Address1);
 
-                    //接收plc数据
-                    byte[] bytesH = BitConverter.GetBytes(setH);
-                    byte[] bytesL = BitConverter.GetBytes(setL);
+                //    //接收plc数据
+                //    byte[] bytesH = BitConverter.GetBytes(setH);
+                //    byte[] bytesL = BitConverter.GetBytes(setL);
 
-                    byte[] d = new byte[bytesH.Length + bytesL.Length];
-                    Array.Copy(bytesH, 0, d, 0, bytesH.Length);
-                    Array.Copy(bytesL, 0, d, bytesH.Length, bytesL.Length);
+                //    byte[] d = new byte[bytesH.Length + bytesL.Length];
+                //    Array.Copy(bytesH, 0, d, 0, bytesH.Length);
+                //    Array.Copy(bytesL, 0, d, bytesH.Length, bytesL.Length);
 
-                    float myFloat = BitConverter.ToSingle(d, 0);
-                    return myFloat;
-                }
+                //    float myFloat = BitConverter.ToSingle(d, 0);
+                //    return myFloat;
+                //}
 
-                if (RULERONEMMSTEP == 0)
-                    return 0;
-                else
-                    return (float)RulerStepPositionNow / (float)RULERONEMMSTEP;
+                //if (RULERONEMMSTEP == 0)
+                //    return 0;
+                //else
+                //    return (float)RulerStepPositionNow / (float)RULERONEMMSTEP;
             }
         }
         public override int StepPositionNow
@@ -317,18 +339,18 @@ namespace JetEazy.ControlSpace.MotionSpace
                 //ulong ret = 0;
                 Int32 ret = 0;
 
-                AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONNOW];
+                //AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONNOW];
 
-                //ret = PLC[address.SiteNo].IOData.GetData(address.Address1);
-                //ret += (ret << 16) + PLC[address.SiteNo].IOData.GetData(address.Address0);
+                ////ret = PLC[address.SiteNo].IOData.GetData(address.Address1);
+                ////ret += (ret << 16) + PLC[address.SiteNo].IOData.GetData(address.Address0);
 
-                //ret = PLC[address.SiteNo].IOData.GetData(address.Address0);
+                ////ret = PLC[address.SiteNo].IOData.GetData(address.Address0);
 
-                if (string.IsNullOrEmpty(address.Address1))
-                    ret = HEXSigned32(ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address0), 4));
-                else
-                    ret = HEXSigned32(ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address1), 4) +
-                                                       ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address0), 4));
+                //if (string.IsNullOrEmpty(address.Address1))
+                //    ret = HEXSigned32(ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address0), 4));
+                //else
+                //    ret = HEXSigned32(ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address1), 4) +
+                //                                       ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address0), 4));
 
                 return (int)ret;
             }
@@ -343,15 +365,15 @@ namespace JetEazy.ControlSpace.MotionSpace
                     return;
                 }
 
-                AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONSET];
+                //AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONSET];
 
-                long setH = value >> 16;
-                long setL = value % 65536;
+                //long setH = value >> 16;
+                //long setL = value % 65536;
 
-                //PLC[address.SiteNo].SetData(address.Address0, ValueToHEX(setL, 4));
-                //PLC[address.SiteNo].SetData(address.Address1, ValueToHEX(setH, 4));
-                PLC[address.SiteNo].SetData(ValueToHEX(setL, 4), address.Address0);
-                PLC[address.SiteNo].SetData(ValueToHEX(setH, 4), address.Address1);
+                ////PLC[address.SiteNo].SetData(address.Address0, ValueToHEX(setL, 4));
+                ////PLC[address.SiteNo].SetData(address.Address1, ValueToHEX(setH, 4));
+                //PLC[address.SiteNo].SetData(ValueToHEX(setL, 4), address.Address0);
+                //PLC[address.SiteNo].SetData(ValueToHEX(setH, 4), address.Address1);
             }
         }
         public override float StepPositionSetfloat
@@ -365,22 +387,23 @@ namespace JetEazy.ControlSpace.MotionSpace
                 }
 
                 AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONSET];
+                PLC[address.SiteNo].WriteVari(address.Address0, value.ToString());
 
                 //发送给plc数据
-                byte[] hex = BitConverter.GetBytes(value);
-                byte[] h = new byte[2];
-                byte[] l = new byte[2];
+                //byte[] hex = BitConverter.GetBytes(value);
+                //byte[] h = new byte[2];
+                //byte[] l = new byte[2];
 
-                h[0] = hex[0];
-                h[1] = hex[1];
-                l[0] = hex[2];
-                l[1] = hex[3];
+                //h[0] = hex[0];
+                //h[1] = hex[1];
+                //l[0] = hex[2];
+                //l[1] = hex[3];
 
-                ushort setH = BitConverter.ToUInt16(h, 0);
-                ushort setL = BitConverter.ToUInt16(l, 0);
+                //ushort setH = BitConverter.ToUInt16(h, 0);
+                //ushort setL = BitConverter.ToUInt16(l, 0);
 
-                PLC[address.SiteNo].SetData_ushort(setH, address.Address0);
-                PLC[address.SiteNo].SetData_ushort(setL, address.Address1);
+                //PLC[address.SiteNo].SetData_ushort(setH, address.Address0);
+                //PLC[address.SiteNo].SetData_ushort(setL, address.Address1);
             }
         }
         public override int RulerStepPositionNow
@@ -389,14 +412,14 @@ namespace JetEazy.ControlSpace.MotionSpace
             {
                 Int32 ret = 0;
 
-                AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_RULERSTEPPOSITIONNOW];
+                //AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_RULERSTEPPOSITIONNOW];
 
-                //ret += PLC[address.SiteNo].IOData.GetData(address.Address1);
-                //ret += (ret << 16) + PLC[address.SiteNo].IOData.GetData(address.Address0);
+                ////ret += PLC[address.SiteNo].IOData.GetData(address.Address1);
+                ////ret += (ret << 16) + PLC[address.SiteNo].IOData.GetData(address.Address0);
 
-                //换算
-                if (!string.IsNullOrEmpty(address.Address0))
-                    ret = PLC[address.SiteNo].IOData.GetData(address.Address0);
+                ////换算
+                //if (!string.IsNullOrEmpty(address.Address0))
+                //    ret = PLC[address.SiteNo].IOData.GetData(address.Address0);
 
                 //if (string.IsNullOrEmpty(address.Address1))
                 //    ret = HEXSigned32(ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address0), 4));
@@ -414,6 +437,7 @@ namespace JetEazy.ControlSpace.MotionSpace
                 AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISREACHHOME];
                 if (string.IsNullOrEmpty(address.Address0))
                     return false;
+                return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
                 return !PLC[address.SiteNo].IOData.GetBit(address.Address0);
             }
         }
@@ -424,6 +448,7 @@ namespace JetEazy.ControlSpace.MotionSpace
                 AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISREACHUPPERLIMIT];
                 if (string.IsNullOrEmpty(address.Address0))
                     return false;
+                return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
                 return !PLC[address.SiteNo].IOData.GetBit(address.Address0);
             }
         }
@@ -434,29 +459,31 @@ namespace JetEazy.ControlSpace.MotionSpace
                 AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISREACHLOWERLIMIT];
                 if (string.IsNullOrEmpty(address.Address0))
                     return false;
+                return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
                 return !PLC[address.SiteNo].IOData.GetBit(address.Address0);
             }
         }
         public override void Go(float position)
         {
-            switch (MotionMMMode)
-            {
-                case 1:
-                    StepPositionSetfloat = position;
-                    break;
-                default:
+            StepPositionSetfloat = position;
+            //switch (MotionMMMode)
+            //{
+            //    case 1:
+            //        StepPositionSetfloat = position;
+            //        break;
+            //    default:
 
-                    //@LETIAN: 原先的寫法會有數值誤差!!!
-                    //   案例 position = 36.35 會被處理成 3634 (36.34) 
-                    //old code >>> int setposition = (int)(position * (float)ONEMMSTEP);
-                    int setposition = (int)Math.Round((double)position * ONEMMSTEP);
-                    StepPositionSet = setposition;
+            //        //@LETIAN: 原先的寫法會有數值誤差!!!
+            //        //   案例 position = 36.35 會被處理成 3634 (36.34) 
+            //        //old code >>> int setposition = (int)(position * (float)ONEMMSTEP);
+            //        int setposition = (int)Math.Round((double)position * ONEMMSTEP);
+            //        StepPositionSet = setposition;
 
-                    break;
-            }
+            //        break;
+            //}
 
             AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_GO];
-            PLC[address.SiteNo].SetIO(true, address.Address0);
+            PLC[address.SiteNo].WriteVari(address.Address0, "true");
 
             //Task task = new Task(new Action(() =>
             //{
@@ -476,28 +503,28 @@ namespace JetEazy.ControlSpace.MotionSpace
 
 
             AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_HOME];
-            PLC[address.SiteNo].SetIO(true, address.Address0);
+            PLC[address.SiteNo].WriteVari(address.Address0, "true");
         }
         public override void SVOn()
         {
             AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_SVON];
 
             if (address.SiteNo != -1)
-                PLC[address.SiteNo].SetIO(true, address.Address0);
+                PLC[address.SiteNo].WriteVari(address.Address0, "true");
         }
         public override void Reset()
         {
             AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_RESET];
 
             if(address.SiteNo != -1)
-                PLC[address.SiteNo].SetIO(true, address.Address0);
+                PLC[address.SiteNo].WriteVari(address.Address0, "true");
         }
         public override void Break()
         {
             AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_BREAK];
 
             if (address.SiteNo != -1)
-                PLC[address.SiteNo].SetIO(!IsBreack, address.Address0);
+                PLC[address.SiteNo].WriteVari(address.Address0, "true");
         }
         public override void Forward()
         {
@@ -508,10 +535,10 @@ namespace JetEazy.ControlSpace.MotionSpace
             }
 
             AddressClass forwardaddress = ADDRESSARRAY[(int)MotionAddressEnum.ADR_FORWARD];
-            PLC[forwardaddress.SiteNo].SetIO(true, forwardaddress.Address0);
+            PLC[forwardaddress.SiteNo].WriteVari(forwardaddress.Address0, "true");
 
             AddressClass backwardaddress = ADDRESSARRAY[(int)MotionAddressEnum.ADR_BACKWARD];
-            PLC[backwardaddress.SiteNo].SetIO(false, backwardaddress.Address0);
+            PLC[backwardaddress.SiteNo].WriteVari(backwardaddress.Address0, "false");
         }
         public override void Backward()
         {
@@ -522,19 +549,19 @@ namespace JetEazy.ControlSpace.MotionSpace
             }
 
             AddressClass forwardaddress = ADDRESSARRAY[(int)MotionAddressEnum.ADR_FORWARD];
-            PLC[forwardaddress.SiteNo].SetIO(false, forwardaddress.Address0);
+            PLC[forwardaddress.SiteNo].WriteVari(forwardaddress.Address0, "false");
 
             AddressClass backwardaddress = ADDRESSARRAY[(int)MotionAddressEnum.ADR_BACKWARD];
-            PLC[backwardaddress.SiteNo].SetIO(true, backwardaddress.Address0);
+            PLC[backwardaddress.SiteNo].WriteVari(backwardaddress.Address0, "true");
 
         }
         public override void Stop()
         {
             AddressClass forwardaddress = ADDRESSARRAY[(int)MotionAddressEnum.ADR_FORWARD];
-            PLC[forwardaddress.SiteNo].SetIO(false, forwardaddress.Address0);
+            PLC[forwardaddress.SiteNo].WriteVari(forwardaddress.Address0, "false");
 
             AddressClass backwardaddress = ADDRESSARRAY[(int)MotionAddressEnum.ADR_BACKWARD];
-            PLC[backwardaddress.SiteNo].SetIO(false, backwardaddress.Address0);
+            PLC[backwardaddress.SiteNo].WriteVari(backwardaddress.Address0, "false");
         }
         public override void SetSpeed(SpeedTypeEnum speedtype)
         {
@@ -578,38 +605,39 @@ namespace JetEazy.ControlSpace.MotionSpace
 
 
             AddressClass address = ADDRESSARRAY[(int)motionaddress];
+            if (address.SiteNo != -1)
+                PLC[address.SiteNo].WriteVari(address.Address0, speedvalue.ToString());
+            //if (MotionMMMode == 1)
+            //{
+            //    float speedvaluetmp = (float)speedvalue;
+            //    //发送给plc数据
+            //    byte[] hex = BitConverter.GetBytes(speedvaluetmp);
+            //    byte[] h = new byte[2];
+            //    byte[] l = new byte[2];
 
-            if (MotionMMMode == 1)
-            {
-                float speedvaluetmp = (float)speedvalue;
-                //发送给plc数据
-                byte[] hex = BitConverter.GetBytes(speedvaluetmp);
-                byte[] h = new byte[2];
-                byte[] l = new byte[2];
+            //    h[0] = hex[0];
+            //    h[1] = hex[1];
+            //    l[0] = hex[2];
+            //    l[1] = hex[3];
 
-                h[0] = hex[0];
-                h[1] = hex[1];
-                l[0] = hex[2];
-                l[1] = hex[3];
+            //    ushort setHF = BitConverter.ToUInt16(h, 0);
+            //    ushort setLF = BitConverter.ToUInt16(l, 0);
 
-                ushort setHF = BitConverter.ToUInt16(h, 0);
-                ushort setLF = BitConverter.ToUInt16(l, 0);
+            //    if (!string.IsNullOrEmpty(address.Address0))
+            //        PLC[address.SiteNo].SetData_ushort(setHF, address.Address0);
+            //    if (!string.IsNullOrEmpty(address.Address1))
+            //        PLC[address.SiteNo].SetData_ushort(setLF, address.Address1);
 
-                if (!string.IsNullOrEmpty(address.Address0))
-                    PLC[address.SiteNo].SetData_ushort(setHF, address.Address0);
-                if (!string.IsNullOrEmpty(address.Address1))
-                    PLC[address.SiteNo].SetData_ushort(setLF, address.Address1);
+            //    return;
+            //}
 
-                return;
-            }
-
-            int ispeed = (int)speedvalue;
-            long setH = ispeed >> 16;
-            long setL = ispeed % 65536;
-            if (!string.IsNullOrEmpty(address.Address0))
-                PLC[address.SiteNo].SetData(ValueToHEX(setL, 4), address.Address0);
-            if (!string.IsNullOrEmpty(address.Address1))
-                PLC[address.SiteNo].SetData(ValueToHEX(setH, 4), address.Address1);
+            //int ispeed = (int)speedvalue;
+            //long setH = ispeed >> 16;
+            //long setL = ispeed % 65536;
+            //if (!string.IsNullOrEmpty(address.Address0))
+            //    PLC[address.SiteNo].SetData(ValueToHEX(setL, 4), address.Address0);
+            //if (!string.IsNullOrEmpty(address.Address1))
+            //    PLC[address.SiteNo].SetData(ValueToHEX(setH, 4), address.Address1);
         }
         public override double GetSpeed(SpeedTypeEnum speedtype)
         {
@@ -658,32 +686,33 @@ namespace JetEazy.ControlSpace.MotionSpace
             //PLC[address.SiteNo].SetData(ValueToHEX(setL, 4), address.Address0);
             //PLC[address.SiteNo].SetData(ValueToHEX(setH, 4), address.Address1);
             AddressClass address = ADDRESSARRAY[(int)motionaddress];
-            if (MotionMMMode == 1)
-            {
-                short setH = PLC[address.SiteNo].IOData.GetMW(address.Address0);
-                short setL = PLC[address.SiteNo].IOData.GetMW(address.Address1);
+            speedvalue = double.Parse(PLC[address.SiteNo].ReadVari(address.Address0).ToLower());
+            //if (MotionMMMode == 1)
+            //{
+            //    short setH = PLC[address.SiteNo].IOData.GetMW(address.Address0);
+            //    short setL = PLC[address.SiteNo].IOData.GetMW(address.Address1);
 
-                //接收plc数据
-                byte[] bytesH = BitConverter.GetBytes(setH);
-                byte[] bytesL = BitConverter.GetBytes(setL);
+            //    //接收plc数据
+            //    byte[] bytesH = BitConverter.GetBytes(setH);
+            //    byte[] bytesL = BitConverter.GetBytes(setL);
 
-                byte[] d = new byte[bytesH.Length + bytesL.Length];
-                Array.Copy(bytesH, 0, d, 0, bytesH.Length);
-                Array.Copy(bytesL, 0, d, bytesH.Length, bytesL.Length);
+            //    byte[] d = new byte[bytesH.Length + bytesL.Length];
+            //    Array.Copy(bytesH, 0, d, 0, bytesH.Length);
+            //    Array.Copy(bytesL, 0, d, bytesH.Length, bytesL.Length);
 
-                float myFloat = BitConverter.ToSingle(d, 0);
-                return (long)myFloat;
-            }
+            //    float myFloat = BitConverter.ToSingle(d, 0);
+            //    return (long)myFloat;
+            //}
 
-            if (!string.IsNullOrEmpty(address.Address1))
-                speedvalue = HEXSigned32(ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address1), 4) +
-                                                                  ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address0), 4));
-            else
-            {
-                if (!string.IsNullOrEmpty(address.Address0))
-                    speedvalue = HEXSigned32(ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address0), 4));
+            //if (!string.IsNullOrEmpty(address.Address1))
+            //    speedvalue = HEXSigned32(ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address1), 4) +
+            //                                                      ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address0), 4));
+            //else
+            //{
+            //    if (!string.IsNullOrEmpty(address.Address0))
+            //        speedvalue = HEXSigned32(ValueToHEX(PLC[address.SiteNo].IOData.GetData(address.Address0), 4));
 
-            }
+            //}
 
             return speedvalue;
         }
@@ -775,65 +804,71 @@ namespace JetEazy.ControlSpace.MotionSpace
         }
         public override void SetPos(int posindex, float position)
         {
-            AddressClass address1 = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONSET];
-            AddressClass address = new AddressClass(address1.ToString(), posindex * 2);
-            //发送给plc数据
-            byte[] hex = BitConverter.GetBytes(position);
-            byte[] h = new byte[2];
-            byte[] l = new byte[2];
+            AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONSET];
+            if (address.SiteNo != -1)
+                PLC[address.SiteNo].WriteVari(address.Address0, position.ToString());
+            //AddressClass address = new AddressClass(address1.ToString(), posindex * 2);
+            ////发送给plc数据
+            //byte[] hex = BitConverter.GetBytes(position);
+            //byte[] h = new byte[2];
+            //byte[] l = new byte[2];
 
-            h[0] = hex[0];
-            h[1] = hex[1];
-            l[0] = hex[2];
-            l[1] = hex[3];
+            //h[0] = hex[0];
+            //h[1] = hex[1];
+            //l[0] = hex[2];
+            //l[1] = hex[3];
 
-            ushort setH = BitConverter.ToUInt16(h, 0);
-            ushort setL = BitConverter.ToUInt16(l, 0);
+            //ushort setH = BitConverter.ToUInt16(h, 0);
+            //ushort setL = BitConverter.ToUInt16(l, 0);
 
-            PLC[address.SiteNo].SetData_ushort(setH, address.Address0);
-            PLC[address.SiteNo].SetData_ushort(setL, address.Address1);
+            //PLC[address.SiteNo].SetData_ushort(setH, address.Address0);
+            //PLC[address.SiteNo].SetData_ushort(setL, address.Address1);
         }
         public override void GoPos(int posindex)
         {
             AddressClass address2 = ADDRESSARRAY[(int)MotionAddressEnum.ADR_GO];
-            AddressClass address3 = new AddressClass(address2.ToString(), posindex);
-            PLC[address3.SiteNo].SetIO(true, address3.Address0);
+            //AddressClass address3 = new AddressClass(address2.ToString(), posindex);
+            //PLC[address3.SiteNo].SetIO(true, address3.Address0);
+            if (address2.SiteNo != -1)
+                PLC[address2.SiteNo].WriteVari(address2.Address0, "true");
         }
         public override bool IsOnSitePos(int posindex)
         {
             AddressClass address = ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISONSITE];
             if (string.IsNullOrEmpty(address.Address0))
                 return false;
-            AddressClass address1 = new AddressClass(address.ToString(), posindex);
-            return PLC[address1.SiteNo].IOData.GetBit(address1.Address0);
+            //AddressClass address1 = new AddressClass(address.ToString(), posindex);
+            //return PLC[address1.SiteNo].IOData.GetBit(address1.Address0);
+            return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
         }
         public override float GetSetPos(int posindex)
         {
             AddressClass address1 = ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONSET];
-            AddressClass address = new AddressClass(address1.ToString(), posindex * 2);
+            return float.Parse(PLC[address1.SiteNo].ReadVari(address1.Address0).ToLower());
+            //AddressClass address = new AddressClass(address1.ToString(), posindex * 2);
 
-            if (MotionMMMode == 1)
-            {
-                PLC[address.SiteNo].GetData(address.Address0);
-                PLC[address.SiteNo].GetData(address.Address1);
+            //if (MotionMMMode == 1)
+            //{
+            //    PLC[address.SiteNo].GetData(address.Address0);
+            //    PLC[address.SiteNo].GetData(address.Address1);
 
-                short setH = PLC[address.SiteNo].IOData.GetMW(address.Address0);
-                short setL = PLC[address.SiteNo].IOData.GetMW(address.Address1);
+            //    short setH = PLC[address.SiteNo].IOData.GetMW(address.Address0);
+            //    short setL = PLC[address.SiteNo].IOData.GetMW(address.Address1);
 
-                //接收plc数据
-                byte[] bytesH = BitConverter.GetBytes(setH);
-                byte[] bytesL = BitConverter.GetBytes(setL);
+            //    //接收plc数据
+            //    byte[] bytesH = BitConverter.GetBytes(setH);
+            //    byte[] bytesL = BitConverter.GetBytes(setL);
 
-                byte[] d = new byte[bytesH.Length + bytesL.Length];
-                Array.Copy(bytesH, 0, d, 0, bytesH.Length);
-                Array.Copy(bytesL, 0, d, bytesH.Length, bytesL.Length);
+            //    byte[] d = new byte[bytesH.Length + bytesL.Length];
+            //    Array.Copy(bytesH, 0, d, 0, bytesH.Length);
+            //    Array.Copy(bytesL, 0, d, bytesH.Length, bytesL.Length);
 
-                float myFloat = BitConverter.ToSingle(d, 0);
-                return myFloat;
-            }
-            Int32 ret = 0;
-            ret = PLC[address.SiteNo].IOData.GetData(address.Address0);
-            return (float)ret / (float)ONEMMSTEP;
+            //    float myFloat = BitConverter.ToSingle(d, 0);
+            //    return myFloat;
+            //}
+            //Int32 ret = 0;
+            //ret = PLC[address.SiteNo].IOData.GetData(address.Address0);
+            //return (float)ret / (float)ONEMMSTEP;
         }
     }
 }

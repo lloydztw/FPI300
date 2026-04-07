@@ -566,6 +566,12 @@
     <Compile Include="GA\FormSpace\BannerForm.designer.cs">
       <DependentUpon>BannerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA\FormSpace\FormMotor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA\FormSpace\FormMotor.Designer.cs">
+      <DependentUpon>FormMotor.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA\FormSpace\FormProgressing.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -725,6 +731,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">
       <DependentUpon>BannerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\FormSpace\FormMotor.resx">
+      <DependentUpon>FormMotor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\FormProgressing.resx">
       <DependentUpon>FormProgressing.cs</DependentUpon>

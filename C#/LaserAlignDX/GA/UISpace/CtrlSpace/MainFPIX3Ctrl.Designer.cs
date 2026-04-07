@@ -45,11 +45,13 @@
             this.label3Ctr = new System.Windows.Forms.Label();
             this.label1Ctr = new System.Windows.Forms.Label();
             this.label4Ctr = new System.Windows.Forms.Label();
+            this.button3 = new System.Windows.Forms.Button();
             this.CtrgroupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // CtrgroupBox2
             // 
+            this.CtrgroupBox2.Controls.Add(this.button3);
             this.CtrgroupBox2.Controls.Add(this.button2);
             this.CtrgroupBox2.Controls.Add(this.button1);
             this.CtrgroupBox2.Controls.Add(this.button6);
@@ -265,6 +267,17 @@
             this.label4Ctr.Text = "心跳";
             this.label4Ctr.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // button3
+            // 
+            this.button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button3.Location = new System.Drawing.Point(6, 180);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(209, 22);
+            this.button3.TabIndex = 249;
+            this.button3.Text = "马达页面";
+            this.button3.UseVisualStyleBackColor = false;
+            // 
             // MainFPIX3Ctrl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -296,5 +309,6 @@
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button3;
     }
 }

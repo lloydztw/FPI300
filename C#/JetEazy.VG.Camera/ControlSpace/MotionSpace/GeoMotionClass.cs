@@ -96,9 +96,9 @@ namespace JetEazy.ControlSpace.MotionSpace
         public bool IsInitialOK = false;
         public bool IsNoUseMotor = false;
         /// <summary>
-        /// 马达数据转换模式 0：int模式 1：float模式读取设定位置使用
+        /// 马达数据转换模式 0：int模式 1：float模式读取设定位置使用 2:sysmac通讯
         /// </summary>
-        public int MotionMMMode = 0;
+        public int MotionMMMode = 2;
 
         /// <summary>
         /// 模擬位置

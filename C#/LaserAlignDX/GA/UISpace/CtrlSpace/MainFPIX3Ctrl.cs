@@ -1,5 +1,6 @@
 ﻿using JetEazy;
 using JetEazy.BasicSpace;
+using LaserAlignDX.GA.FormSpace;
 using System;
 using System.Drawing;
 using System.Threading;
@@ -58,6 +59,8 @@ namespace LaserAlignDX.UISpace.CtrlSpace
         Button btnSIMData;
         Button btnReady;
         Button btnCalib;
+        Button btnMotor => button3;
+        FormMotor formMotor = null;
 
         public MainFPIX3Ctrl()
         {
@@ -93,10 +96,20 @@ namespace LaserAlignDX.UISpace.CtrlSpace
             lblFlyDone = label8;
 
             btnCalib = button2;
-
+            btnMotor.Click += BtnMotor_Click;
             //btnOn = button6Ctr;
             //btnOff = button1Ctr;
             //numLightValue = numericUpDown1Ctr;
+        }
+
+        private void BtnMotor_Click(object sender, EventArgs e)
+        {
+            if (!Traveller106.Universal.IsOpenMotorWindows)
+            {
+                Traveller106.Universal.IsOpenMotorWindows = true;
+                formMotor = new FormMotor();
+                formMotor.Show();
+            }
         }
 
         Control IoPanelUI.Window => this;

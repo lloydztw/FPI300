@@ -806,7 +806,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public int PrintTempFlyRun(Bitmap ebmpInput)
         {
             mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
-            mvdprintFlytemp_Find.xMvdTolerance = FlyParaClass.Instance.xTolerance;
+            mvdprintFlytemp_Find.xMvdTolerance = 1 - FlyParaClass.Instance.xTolerance;//<<<=这里把数据反过来不知为什么明明越大越严但是实际是反过来的
             mvdprintFlytemp_Find.bmpRun_Image?.Dispose();
             mvdprintFlytemp_Find.bmpRun_Image = (Bitmap)ebmpInput.Clone();
             bool bOK = mvdprintFlytemp_Find.HikRunBmp();
