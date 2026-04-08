@@ -14,8 +14,6 @@
 #endregion
 
 
-using LaserAlignDX.Model.Coords;
-
 namespace LaserAlignDX
 {
     /// <summary>

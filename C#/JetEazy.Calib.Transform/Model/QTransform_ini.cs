@@ -1,10 +1,10 @@
-#region AUTHOR
+ï»¿#region AUTHOR
 /*
  * 
  * Copyright (c) 2025 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
- *      2025-08-13 ªì½Z (by LeTian Chang)
+ *      2025-08-13 åˆç¨¿ (by LeTian Chang)
  * 
  * http://www.jeteazy.com
  * https://github.com/lloydztw
@@ -61,7 +61,7 @@ namespace JetEazy.Transform
             trf._mat = Mat.Eye(3, 3, MatType.CV_64FC1);
             trf._matInv = Mat.Eye(3, 3, MatType.CV_64FC1);
 
-            // ¥u¶·¸ü¤J ÃöÁäÂI¸ê°T¡AÂà´«¯x°}¥i¥ÑÃöÁäÂI­pºâ±o¥X¡A¦]¦¹¤£¶·«O¦sÂà´«¯x°}¸ê°T
+            // åªé ˆè¼‰å…¥ é—œéµé»è³‡è¨Šï¼Œè½‰æ›çŸ©é™£å¯ç”±é—œéµé»è¨ˆç®—å¾—å‡ºï¼Œå› æ­¤ä¸é ˆä¿å­˜è½‰æ›çŸ©é™£è³‡è¨Š
             //_load(trf._mat, iniFileName, sectName + "_MAT");
             //_load(trf._matInv, iniFileName, sectName + "_MAT_INV");
         }
@@ -84,7 +84,7 @@ namespace JetEazy.Transform
                 }
             }
 
-            // ¥u¶·«O¦s ÃöÁäÂI¸ê°T¡AÂà´«¯x°}¥i¥ÑÃöÁäÂI­pºâ±o¥X¡A¦]¦¹¤£¶·«O¦sÂà´«¯x°}¸ê°T
+            // åªé ˆä¿å­˜ é—œéµé»è³‡è¨Šï¼Œè½‰æ›çŸ©é™£å¯ç”±é—œéµé»è¨ˆç®—å¾—å‡ºï¼Œå› æ­¤ä¸é ˆä¿å­˜è½‰æ›çŸ©é™£è³‡è¨Š
             //_save(trf._mat, iniFileName, sectName + "_MAT");
             //_save(trf._matInv, iniFileName, sectName + "_MAT_INV");
         }
@@ -160,14 +160,14 @@ namespace JetEazy.Transform
 
                 if (decimalPlaces >= 0)
                 {
-                    // °ÊºA²£¥Í®æ¦¡¦r¦ê¡A¨Ò¦p decimalPlaces ¬° 2 ®É¡Aformat ¬° "F2"
+                    // å‹•æ…‹ç”¢ç”Ÿæ ¼å¼å­—ä¸²ï¼Œä¾‹å¦‚ decimalPlaces ç‚º 2 æ™‚ï¼Œformat ç‚º "F2"
                     string format = "F" + decimalPlaces;
-                    // ¨Ï¥Î CultureInfo.InvariantCulture ½T«O¤p¼ÆÂI©l²×¬° '.'
+                    // ä½¿ç”¨ CultureInfo.InvariantCulture ç¢ºä¿å°æ•¸é»å§‹çµ‚ç‚º '.'
                     str = $"QVector, {v.Length}, {v.X.ToString(format, System.Globalization.CultureInfo.InvariantCulture)}, {v.Y.ToString(format, System.Globalization.CultureInfo.InvariantCulture)}";
                 }
                 else
                 {
-                    // ¹w³]¿é¥X¡]¤£­­¨î¦ì¼Æ¡^
+                    // é è¨­è¼¸å‡ºï¼ˆä¸é™åˆ¶ä½æ•¸ï¼‰
                     str = $"QVector, {v.Length}, {v.X}, {v.Y}";
                 }
 

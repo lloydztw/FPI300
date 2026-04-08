@@ -1,10 +1,10 @@
-#region AUTHOR
+ï»¿#region AUTHOR
 /*
  * 
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
- *      2026-04-02 Àu¤Æ (by LeTian Chang)
+ *      2026-04-02 å„ªåŒ– (by LeTian Chang)
  * 
  * http://www.jeteazy.com
  * https://github.com/lloydztw
@@ -22,9 +22,9 @@ using System;
 namespace JetEazy.Transform
 {
     /// <summary>
-    /// ³zµø§ë¼v®y¼ĞÂà´«
-    /// <br/> ¦hÂI®Õ¥¿: ¨Ï¥Î ¦h¸`ÂI°Ï°ì GetPerspectiveTransform «Øºc ½u©ÊÂà´«¯x°}¸s
-    /// <br/> ®y¼ĞÂà´«: ¨Ï¥Î PerspectiveTransform ¶i¦æ­pºâ
+    /// é€è¦–æŠ•å½±åº§æ¨™è½‰æ›
+    /// <br/> å¤šé»æ ¡æ­£: ä½¿ç”¨ å¤šç¯€é»å€åŸŸ GetPerspectiveTransform å»ºæ§‹ ç·šæ€§è½‰æ›çŸ©é™£ç¾¤
+    /// <br/> åº§æ¨™è½‰æ›: ä½¿ç”¨ PerspectiveTransform é€²è¡Œè¨ˆç®—
     /// </summary>
     public partial class QxCoordsTransform : ITransform, ICalibCornerPoints, ICalibGridPoints
     {
@@ -81,7 +81,7 @@ namespace JetEazy.Transform
         #region CLONE_AND_COPY
         public void CopyFrom(QxCoordsTransform src)
         {
-            //NOTE: ©|¥¼ÅçÃÒ¹L !!!
+            //NOTE: å°šæœªé©—è­‰é !!!
             if (src == null || src._zoneRows < 2 || src._zoneCols < 2)
             {
                 initZonePointsAndMatrices();
@@ -155,10 +155,10 @@ namespace JetEazy.Transform
             int C = cols - 1;
             switch (index)
             {
-                case 0: r = 0; c = 0; break;    // ¥ª¤W
-                case 1: r = 0; c = C; break;    // ¥k¤W
-                case 2: r = R; c = C; break;    // ¥ª¤U
-                case 3: r = R; c = 0; break;    // ¥k¤U
+                case 0: r = 0; c = 0; break;    // å·¦ä¸Š
+                case 1: r = 0; c = C; break;    // å³ä¸Š
+                case 2: r = R; c = C; break;    // å·¦ä¸‹
+                case 3: r = R; c = 0; break;    // å³ä¸‹
                 default:
                     throw new Exception("Invalide Corner Index !!!");
                     return false;
@@ -177,10 +177,10 @@ namespace JetEazy.Transform
             int c = _zoneCols - 1;
             return new QVector[]
             {
-                new QVector(pts[0,0]),          //¥ª¤W
-                new QVector(pts[0,c]),          //¥k¤U
-                new QVector(pts[r,c]),          //¥k¤U
-                new QVector(pts[r,0]),          //¥ª¤U
+                new QVector(pts[0,0]),          //å·¦ä¸Š
+                new QVector(pts[0,c]),          //å³ä¸‹
+                new QVector(pts[r,c]),          //å³ä¸‹
+                new QVector(pts[r,0]),          //å·¦ä¸‹
             };
         }
         void ICalibCornerPoints.Get(int cornerIndex, out QVector src, out QVector dst)
@@ -254,9 +254,9 @@ namespace JetEazy.Transform
             getRowsCols(srcPoints, out int rows, out int cols);
             getRowsCols(srcPoints, out int rows2, out int cols2);
             if (rows != rows2 || cols != cols2)
-                throw new Exception("®Õ¥¿ÂI¦ì¼Æ¶q ¥²¶·¤@­P!");
+                throw new Exception("æ ¡æ­£é»ä½æ•¸é‡ å¿…é ˆä¸€è‡´!");
             if (rows < 2 || cols < 2)
-                throw new ArgumentException($"®Õ¥¿ÂI¼Æ ¥²¶·¤j©ó 2x2 ÂI!");
+                throw new ArgumentException($"æ ¡æ­£é»æ•¸ å¿…é ˆå¤§æ–¼ 2x2 é»!");
         }
         #endregion
 
@@ -264,15 +264,15 @@ namespace JetEazy.Transform
         {
             try
             {
-                // 1. ±j¨î­«¸m Dynamic Range¡A½T«O­pºâ½d³ò¥]§t©Ò¦³·sÂI¦ì
+                // 1. å¼·åˆ¶é‡ç½® Dynamic Rangeï¼Œç¢ºä¿è¨ˆç®—ç¯„åœåŒ…å«æ‰€æœ‰æ–°é»ä½
                 SrcDynamicRanges(reset: true);
                 DstDynamicRanges(reset: true);
 
-                // 2. ÀË¬dÂI¦ì¦³®Ä©Ê
+                // 2. æª¢æŸ¥é»ä½æœ‰æ•ˆæ€§
                 checkPointsCondition(_srcPoints, _dstPoints);
                 syncZoneDimensions();
 
-                // 3. ¹w¥ı¶] ¥¿³W¤Æ¼Æ¾Ú, Åı¨t²Î§ì¨ì ¾ãÅéªº dynamic range¡A
+                // 3. é å…ˆè·‘ æ­£è¦åŒ–æ•¸æ“š, è®“ç³»çµ±æŠ“åˆ° æ•´é«”çš„ dynamic rangeï¼Œ
                 var dummy1 = DynamicRangeUtil.Normalize(_srcPoints, SrcDynamicRanges());
                 var dummy2 = DynamicRangeUtil.Normalize(_dstPoints, DstDynamicRanges());
 
@@ -328,7 +328,7 @@ namespace JetEazy.Transform
             {
                 for (int c = 0; c < _zoneCols - 1; c++)
                 {
-                    // ­pºâ¥¿¦V»P°f¦V¯x°}ªº¦æ¦C¦¡¡A½T«O¯x°}«D©_²§ (Non-singular)
+                    // è¨ˆç®—æ­£å‘èˆ‡é€†å‘çŸ©é™£çš„è¡Œåˆ—å¼ï¼Œç¢ºä¿çŸ©é™£éå¥‡ç•° (Non-singular)
                     double d1 = (_mats[r, c] == null || _mats[r, c].Empty()) ? 0.0 : _mats[r, c].Determinant();
                     double d2 = (_matsInv[r, c] == null || _matsInv[r, c].Empty()) ? 0.0 : _matsInv[r, c].Determinant();
 
@@ -348,25 +348,25 @@ namespace JetEazy.Transform
 
             try
             {
-                // 1. ´M§äÂI©Ò¦bªº View ºô®æ°Ï°ì (r, c)
+                // 1. å°‹æ‰¾é»æ‰€åœ¨çš„ View ç¶²æ ¼å€åŸŸ (r, c)
                 _getSrcZone(out int r, out int c, pt);
 
-                // 2. ¨ú±o ¥¿¦VÂà´« (View to World) ¯x°}
+                // 2. å–å¾— æ­£å‘è½‰æ› (View to World) çŸ©é™£
                 var matrix = _mats?[r, c];
                 if (matrix == null)
                     return pt;
 
-                // 3. °Ñ¦Ò QTransform ¬yµ{¡GNormalize -> Transform -> DeNormalize
+                // 3. åƒè€ƒ QTransform æµç¨‹ï¼šNormalize -> Transform -> DeNormalize
                 var srcRanges = SrcDynamicRanges();
                 var dstRanges = DstDynamicRanges();
 
-                // 4. ¥¿³W¤Æ src (view) ®y¼Ğ
+                // 4. æ­£è¦åŒ– src (view) åº§æ¨™
                 var srcPts = Normalize(new[] { pt }, srcRanges);
 
-                // 5. °õ¦æ³zµøÂà´« (¨Ï¥Î OpenCV)
+                // 5. åŸ·è¡Œé€è¦–è½‰æ› (ä½¿ç”¨ OpenCV)
                 var dstPts = Cv2.PerspectiveTransform(srcPts, matrix);
 
-                // 6. ¤Ï¥¿³W¤Æ¦^ dst (world) ®y¼Ğ
+                // 6. åæ­£è¦åŒ–å› dst (world) åº§æ¨™
                 var rets = DeNormalize(dstPts, dstRanges);
                 return rets[0];
             }
@@ -382,25 +382,25 @@ namespace JetEazy.Transform
 
             try
             {
-                // 1. ´M§äÂI©Ò¦bªº dst (world) ºô®æ°Ï°ì (r, c)
+                // 1. å°‹æ‰¾é»æ‰€åœ¨çš„ dst (world) ç¶²æ ¼å€åŸŸ (r, c)
                 _getDstZone(out int r, out int c, pt);
 
-                // 2. ¨ú±o °f¦VÂà´« (World to View) ¯x°}
+                // 2. å–å¾— é€†å‘è½‰æ› (World to View) çŸ©é™£
                 var matInv = _matsInv?[r, c];
                 if (matInv == null)
                     return pt;
 
-                // 3. °Ñ¦Ò QTransform ¬yµ{¡GNormalize -> Transform -> DeNormalize
+                // 3. åƒè€ƒ QTransform æµç¨‹ï¼šNormalize -> Transform -> DeNormalize
                 var srcRanges = SrcDynamicRanges();
                 var dstRanges = DstDynamicRanges();
 
-                // 4. ¥¿³W¤Æ dst (world) ®y¼Ğ
+                // 4. æ­£è¦åŒ– dst (world) åº§æ¨™
                 var dstPts = Normalize(new[] { pt }, dstRanges);
 
-                // 5. °õ¦æ³zµøÂà´« (¨Ï¥Î OpenCV)
+                // 5. åŸ·è¡Œé€è¦–è½‰æ› (ä½¿ç”¨ OpenCV)
                 var srcPts = Cv2.PerspectiveTransform(dstPts, matInv);
 
-                // 6. ¤Ï¥¿³W¤Æ¦^ src (view) ®y¼Ğ
+                // 6. åæ­£è¦åŒ–å› src (view) åº§æ¨™
                 var rets = DeNormalize(srcPts, srcRanges);
                 return rets[0];
             }
@@ -488,7 +488,7 @@ namespace JetEazy.Transform
         #region PRIVATE_PERCISE_CHECK_FUNCTIONS
         private void _roundToHalfPixels(QVector[,] vv)
         {
-            //NOTE: ¦b¤j¦h¼Æ²{¥N°ªºë«×¨t²Î¤¤¡A¤£«ØÄ³¶}±Ò¦¹¥\¯à!
+            //NOTE: åœ¨å¤§å¤šæ•¸ç¾ä»£é«˜ç²¾åº¦ç³»çµ±ä¸­ï¼Œä¸å»ºè­°é–‹å•Ÿæ­¤åŠŸèƒ½!
         }
         private void _verifyNodePoints()
         {
@@ -529,7 +529,7 @@ namespace JetEazy.Transform
 
         public void Load(string fileName)
         {
-            // ¥u¸ü¤J src/dst ÂI¦ì
+            // åªè¼‰å…¥ src/dst é»ä½
             LoadIni(fileName);
 
             syncZoneDimensions();
@@ -538,7 +538,7 @@ namespace JetEazy.Transform
         }
         public void Save(string fileName)
         {
-            // ¥u«O¦s src/dst ÂI¦ì
+            // åªä¿å­˜ src/dst é»ä½
             SaveIni(fileName);
         }
     }
@@ -611,7 +611,7 @@ namespace JetEazy.Transform
         }
         private bool _getSrcZone(out int r, out int c, QVector vs)
         {
-            // ¨Ï¥Î ZoneManager ¶i¦æ°ª®Ä·j´M
+            // ä½¿ç”¨ ZoneManager é€²è¡Œé«˜æ•ˆæœå°‹
             return _srcZoneManager.FindZone(vs, out r, out c, (pt, row, col) => _inZone(pt, row, col, isSrc: true));
         }
         private bool _getDstZone(out int r, out int c, QVector vd)
@@ -620,18 +620,18 @@ namespace JetEazy.Transform
         }
         private bool _inZone(QVector pt, int r, int c, bool isSrc)
         {
-            // ¨ú±o¸Ó°Ï°ìªº¥|­Ó³»ÂI
+            // å–å¾—è©²å€åŸŸçš„å››å€‹é ‚é»
             var pts = _getGridNodes(isSrc ? _srcPoints : _dstPoints, r, c);
             bool inside = false;
             int j = pts.Length - 1;
 
             for (int i = 0; i < pts.Length; i++)
             {
-                // §PÂ_®g½u¬O§_¬ï¹L pts[i] »P pts[j] ²Õ¦¨ªºÃä
+                // åˆ¤æ–·å°„ç·šæ˜¯å¦ç©¿é pts[i] èˆ‡ pts[j] çµ„æˆçš„é‚Š
                 if (((pts[i].y > pt.y) != (pts[j].y > pt.y)) &&
                     (pt.x < (pts[j].x - pts[i].x) * (pt.y - pts[i].y) / (pts[j].y - pts[i].y) + pts[i].x))
                 {
-                    inside = !inside; // §ä¨ì¤@­Ó¥æÂI¡A¤ÏÂàª¬ºA
+                    inside = !inside; // æ‰¾åˆ°ä¸€å€‹äº¤é»ï¼Œåè½‰ç‹€æ…‹
                 }
                 j = i;
             }
@@ -841,7 +841,7 @@ namespace JetEazy.Transform
         }
 #endif
         /// <summary>
-        /// ¨ú±o¨Ó·½ºİ(View)ªº°ÊºA½d³ò¡A­Y¬°ªÅ«h®Ú¾Ú _srcPoints ¦Û°Ê«Ø¥ß
+        /// å–å¾—ä¾†æºç«¯(View)çš„å‹•æ…‹ç¯„åœï¼Œè‹¥ç‚ºç©ºå‰‡æ ¹æ“š _srcPoints è‡ªå‹•å»ºç«‹
         /// </summary>
         DynamicRange[] SrcDynamicRanges(bool reset = false)
         {
@@ -850,7 +850,7 @@ namespace JetEazy.Transform
                 _srcRanges = null;
                 return null;
             }
-            // ¥é·Ó QTransform: ¦Û°Ê®Ú¾Ú·í«eÂI¦ì«Ø¥ß Range
+            // ä»¿ç…§ QTransform: è‡ªå‹•æ ¹æ“šç•¶å‰é»ä½å»ºç«‹ Range
             if (_srcRanges == null && _srcPoints != null)
             {
                 _srcRanges = createRanges(_srcPoints);
@@ -858,7 +858,7 @@ namespace JetEazy.Transform
             return _srcRanges;
         }
         /// <summary>
-        /// ¨ú±o¥Ø¼Ğºİ(World)ªº°ÊºA½d³ò¡A­Y¬°ªÅ«h®Ú¾Ú _dstPoints ¦Û°Ê«Ø¥ß
+        /// å–å¾—ç›®æ¨™ç«¯(World)çš„å‹•æ…‹ç¯„åœï¼Œè‹¥ç‚ºç©ºå‰‡æ ¹æ“š _dstPoints è‡ªå‹•å»ºç«‹
         /// </summary>
         DynamicRange[] DstDynamicRanges(bool reset = false)
         {
@@ -867,7 +867,7 @@ namespace JetEazy.Transform
                 _dstRanges = null;
                 return null;
             }
-            // ¥é·Ó QTransform: ¦Û°Ê®Ú¾Ú·í«eÂI¦ì«Ø¥ß Range
+            // ä»¿ç…§ QTransform: è‡ªå‹•æ ¹æ“šç•¶å‰é»ä½å»ºç«‹ Range
             if (_dstRanges == null && _dstPoints != null)
             {
                 _dstRanges = createRanges(_dstPoints);
@@ -875,33 +875,33 @@ namespace JetEazy.Transform
             return _dstRanges;
         }
         /// <summary>
-        /// ¹M¾ú¤Gºûºô®æÂI¦ì¡A§ä¥X X, Y ªº³Ì¤j»P³Ì¤p­È¥H«Ø¥ß¥¿³W¤Æ½d³ò
+        /// éæ­·äºŒç¶­ç¶²æ ¼é»ä½ï¼Œæ‰¾å‡º X, Y çš„æœ€å¤§èˆ‡æœ€å°å€¼ä»¥å»ºç«‹æ­£è¦åŒ–ç¯„åœ
         /// </summary>
         DynamicRange[] createRanges(QVector[,] coords)
         {
             if (coords == null) return null;
 
-            // ªì©l¤Æ·¥­È
+            // åˆå§‹åŒ–æ¥µå€¼
             double minX = double.MaxValue, maxX = double.MinValue;
             double minY = double.MaxValue, maxY = double.MinValue;
 
-            // ¹M¾ú¤Gºû°}¦C¤¤ªº©Ò¦³ÂI
+            // éæ­·äºŒç¶­é™£åˆ—ä¸­çš„æ‰€æœ‰é»
             foreach (var coord in coords)
             {
                 if (coord == null) continue;
 
-                // ¥é·Ó QTransform ¨Ï¥Î¯Á¤Ş©ÎÄİ©Ê¦s¨ú
+                // ä»¿ç…§ QTransform ä½¿ç”¨ç´¢å¼•æˆ–å±¬æ€§å­˜å–
                 minX = Math.Min(minX, coord.x);
                 maxX = Math.Max(maxX, coord.x);
                 minY = Math.Min(minY, coord.y);
                 maxY = Math.Max(maxY, coord.y);
             }
 
-            // «ØÄ³¦b createRanges ¥[¤Jªº«OÅ@ÅŞ¿è
+            // å»ºè­°åœ¨ createRanges åŠ å…¥çš„ä¿è­·é‚è¼¯
             if (maxX <= minX) maxX = minX + 1;
             if (maxY <= minY) maxY = minY + 1;
 
-            // «Ø¥ß¤Gºû½d³ò°}¦C (N_DIMS = 2)
+            // å»ºç«‹äºŒç¶­ç¯„åœé™£åˆ— (N_DIMS = 2)
             return new DynamicRange[]
             {
                 new DynamicRange(minX, maxX),

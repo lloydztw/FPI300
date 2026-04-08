@@ -1,10 +1,10 @@
-#region AUTHOR
+ï»¿#region AUTHOR
 /*
  * 
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
- *      2026-04-02 Àu¤Æ (by LeTian Chang)
+ *      2026-04-02 å„ªåŒ– (by LeTian Chang)
  * 
  * http://www.jeteazy.com
  * https://github.com/lloydztw
@@ -23,7 +23,7 @@ namespace JetEazy.Transform
     {
         public void LoadIni(string iniFileName, string sectName = null)
         {
-            // ¥u¸ü¤J KP_ROWS, KP_COLS, SRC_KP_{r}_{c}, DST_KP_{r}_{c} ³o¨ÇÃöÁäÂI¸ê°T
+            // åªè¼‰å…¥ KP_ROWS, KP_COLS, SRC_KP_{r}_{c}, DST_KP_{r}_{c} é€™äº›é—œéµé»è³‡è¨Š
 
             var trf = this;
             if (sectName == null)
@@ -68,7 +68,7 @@ namespace JetEazy.Transform
         }
         public void SaveIni(string iniFileName, string sectName = null)
         {
-            // ¥u«O¦s KP_ROWS, KP_COLS, SRC_KP_{r}_{c}, DST_KP_{r}_{c} ³o¨ÇÃöÁäÂI¸ê°T
+            // åªä¿å­˜ KP_ROWS, KP_COLS, SRC_KP_{r}_{c}, DST_KP_{r}_{c} é€™äº›é—œéµé»è³‡è¨Š
 
             var trf = this;
             if (sectName == null)

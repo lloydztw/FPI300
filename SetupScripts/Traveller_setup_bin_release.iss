@@ -16,17 +16,17 @@ DefaultGroupName=JetEazy FPI30
 Compression=lzma
 SolidCompression=yes
 OutputDir=.\bin
-OutputBaseFileName=Traveller_Setup_3.3.1.0
+OutputBaseFileName=Traveller_Setup_3.3.1.0_release
 
 [Files]
 ; BIN & DLL
-Source: "..\bin\Debug\FPI30AOIX3.exe";                                            DestDir: "{app}\_BIN_";         Flags: ignoreversion
-Source: "..\bin\Debug\Traveller.Data.Packer.exe";                                 DestDir: "{app}\_BIN_";         Flags: ignoreversion
-Source: "..\bin\Debug\*.dll";                                                     DestDir: "{app}\_BIN_";         Flags: ignoreversion
-Source: "..\bin\Debug\NLog.config";                                               DestDir: "{app}\_BIN_";         Flags: ignoreversion
-Source: "..\C#\FPI30_Aoi\bin\Debug\EzAoiEmptyTrayInspector.App.exe";              DestDir: "{app}\_BIN_";         Flags: ignoreversion
-Source: "..\C#\Dlls\ja\*.dll";                                                    DestDir: "{app}\_BIN_\ja";      Flags: ignoreversion
-Source: "..\bin\Debug\dll\x64\*.dll";                                             DestDir: "{app}\_BIN_\dll\x64"; Flags: ignoreversion
+Source: "..\bin\Release\FPI30AOIX3.exe";                                            DestDir: "{app}\_BIN_";         Flags: ignoreversion
+Source: "..\bin\Release\Traveller.Data.Packer.exe";                                 DestDir: "{app}\_BIN_";         Flags: ignoreversion
+Source: "..\bin\Release\*.dll";                                                     DestDir: "{app}\_BIN_";         Flags: ignoreversion
+Source: "..\bin\Release\NLog.config";                                               DestDir: "{app}\_BIN_";         Flags: ignoreversion
+Source: "..\C#\FPI30_Aoi\bin\Release\EzAoiEmptyTrayInspector.App.exe";              DestDir: "{app}\_BIN_";         Flags: ignoreversion
+Source: "..\C#\Dlls\ja\*.dll";                                                      DestDir: "{app}\_BIN_\ja";      Flags: ignoreversion
+Source: "..\bin\Release\dll\x64\*.dll";                                             DestDir: "{app}\_BIN_\dll\x64"; Flags: ignoreversion
 
 ; INI & DB 
 ; (these files must be kept existing even after uninstall!)
