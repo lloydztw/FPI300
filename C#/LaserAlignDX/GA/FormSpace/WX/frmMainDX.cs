@@ -179,9 +179,7 @@ namespace Traveller106
 
 #if OPT_LETIAN_AUTO_LAYOUT
             // To fit into my screen for debug.
-#if DEBUG
             this.FormBorderStyle = FormBorderStyle.Sizable;
-#endif
             this.WindowState = FormWindowState.Maximized;
 #endif
 
