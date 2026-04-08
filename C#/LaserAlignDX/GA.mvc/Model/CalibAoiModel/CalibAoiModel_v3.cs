@@ -75,6 +75,8 @@ namespace LaserAlignDX.AoiModel
                 else
                     Cv2.Threshold(imgCrop, imgCrop, thres, 255, ThresholdTypes.Binary);
 
+                _DUMP(imgCrop, "BoardGrid", $"_binary_{carrierID}");
+
                 var finder = new EzBlobFinder
                 {
                     MorphIterations = 0,

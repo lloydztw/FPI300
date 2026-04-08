@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.QMath;
+using System;
 using System.Windows.Forms;
 
 
@@ -21,28 +22,38 @@ namespace LaserAlignDX.Mvc.Gui
 {
     public interface IvRecipeEditorUI
     {
+        event EventHandler OnActiveViewChanged;
+
         Control Window { get; }
-        JezTransImageViewPanel ImgViewer { get; }
+
+        JezTransImageViewPanel ImgViewerActive { get; }
+        JezTransImageViewPanel ImgViewerEmptyTray { get; }
+        JezTransImageViewPanel ImgViewerChipTemplate { get; }
+
         Control wndVisionSettingsPanel { get; }
 
+        RadioButton[] rdoCarriers { get; }
         Button btnLoadImage { get; }
         Button btnGrabImage { get; }
         Button btnSaveImage { get; }
-
-        RadioButton[] rdoCarriers { get; }
 
         Button btnPickGoldenChipRegion { get; }             // 選取標準 晶粒區域 樣本
         Button btnAutoCreateCellRegions { get; }            // 自動抓取 Cell Regions (生成陣列)
 
         Button btnOpenTemplateMatchWindow { get; }
         Button btnOpenEmptyTrayWindow { get; }
+
         Button btnOpenFlyCamRcpWindow { get; }
         Button btnOpenLightCtrlWindow { get; }
         Button btnWriteCoordsToPlc { get; }
 
+        Button btnFocusMotorSettings { get; }
+        Button btnFocusMotorGo { get; }
+        Control lblFocusMotorZ { get; }
+
         Button btnCancel { get; }
         Button btnOK { get; }
 
-        void UpdateCoordsRef(QVector camPt, QVector worldPtSucker1, QVector worldPtSucker2);
+        void UpdateCoordsRef(QVector camPt, QVector motorPtSucker1, QVector motorPtSucker2);
     }
 }

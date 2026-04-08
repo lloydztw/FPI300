@@ -15,82 +15,102 @@
 
 using JetEazy.QMath;
 using LaserAlignDX.Mvc.Ctrl;
-using System.Drawing;
+using System;
 using System.Windows.Forms;
 
 namespace LaserAlignDX.Mvc.Gui
 {
     public partial class FormRecipeEditor : Form, IvRecipeEditorUI
     {
+        public event EventHandler OnActiveViewChanged;
+
         public FormRecipeEditor()
         {
             InitializeComponent();
-            
-            initDataGridView();
-            rdoCarriers = new[] { rdoCarrier1, rdoCarrier2 };
-            rdoCarrier1.CheckedChanged += (s, e) => updateRdoColor(rdoCarrier1);
-            rdoCarrier2.CheckedChanged += (s, e) => updateRdoColor(rdoCarrier2);
-            
+            selectImageViewer(0);
+            rdoCarriers = new[] { wndBtnsPanel.rdoCarrier1, wndBtnsPanel.rdoCarrier2 };
+
             var ctrl = new GaRecipeEditCtrl();
             ctrl.Attach(this);
+
+            initLocalEventHandlers();
         }
 
-        void initDataGridView()
+        #region PRIVATE_FUNCTIONS
+        void initLocalEventHandlers()
         {
-            DataGridView dgv = gvCalibPointsDataGridView1.DataGridView;
+            var switchButtons = new[]
+{
+                btnSwitchToEmptyTray,
+                btnSwitchToChipTemplate,
+            };
 
-            while (dgv.Rows.Count > 2)
-                dgv.Rows.RemoveAt(dgv.Rows.Count - 1);
-
-            dgv.Rows[0].Cells[0].Value = "吸嘴1";
-            dgv.Rows[1].Cells[0].Value = "吸嘴2";
-
-            int col = dgv.Columns.Count - 2;
-            foreach (string coordName in new[] { "World X", "World Y" })
+            foreach(var btn in switchButtons)
             {
-                //dgv.Columns[col].HeaderText = coordName;
-                dgv.Columns[col].ReadOnly = true;
-                col++;
+                btn.Click += (s, e) =>
+                {
+                    int index = Array.IndexOf(switchButtons, btn);
+                    var activewViewer = selectImageViewer(index);
+                    OnActiveViewChanged?.Invoke(activewViewer, null);
+                };
             }
-
-            dgv.Columns[0].DefaultCellStyle.SelectionBackColor = dgv.DefaultCellStyle.BackColor;
-            dgv.BackgroundColor = dgv.Parent.BackColor;
-
-            //// 暫時隱藏
-            //dgv.Visible = false;
-            //btnWriteCoordsToPlc.Visible = false;
         }
+        object selectImageViewer(int index)
+        {
+            ImgViewerActive = index == 0 ? jezTransImageViewPanel1 : jezTransImageViewPanel2;
+            jezTransImageViewPanel1.Visible = index == 0;
+            jezTransImageViewPanel2.Visible = index == 1;
+            jezTransImageViewPanel1.Dock = index == 0 ? DockStyle.Fill : DockStyle.None;
+            jezTransImageViewPanel2.Dock = index == 1 ? DockStyle.Fill : DockStyle.None;
+            return ImgViewerActive;
+        }
+        #endregion
+
+        #region GUI_LINKS
+        GvRecipeBtnsPanel wndBtnsPanel => gvRecipeBtnsPanel1;
+        Button btnSwitchToEmptyTray => wndBtnsPanel.btnSwitchToEmptyTray;
+        Button btnSwitchToChipTemplate => wndBtnsPanel.btnSwitchToChipTemplate;
 
         Control IvRecipeEditorUI.Window => this;
-
-        JezTransImageViewPanel IvRecipeEditorUI.ImgViewer => jezTransImageViewPanel1;
         Control IvRecipeEditorUI.wndVisionSettingsPanel => propertyGrid1;
 
-        Button IvRecipeEditorUI.btnLoadImage => btnLoadImage;
-        Button IvRecipeEditorUI.btnGrabImage => btnGrabImage;
-        Button IvRecipeEditorUI.btnSaveImage => btnSaveImage;
+        public JezTransImageViewPanel ImgViewerActive
+        {
+            get;
+            private set;
+        }
+        JezTransImageViewPanel IvRecipeEditorUI.ImgViewerEmptyTray => jezTransImageViewPanel1;
+        JezTransImageViewPanel IvRecipeEditorUI.ImgViewerChipTemplate => jezTransImageViewPanel2;
 
         public RadioButton[] rdoCarriers
         {
-            get; 
+            get;
             private set;
         }
-        Button IvRecipeEditorUI.btnPickGoldenChipRegion => btnPickGoldenRegion;
-        Button IvRecipeEditorUI.btnAutoCreateCellRegions => btnCreateCellRegions;
+        Button IvRecipeEditorUI.btnLoadImage => wndBtnsPanel.btnLoadImage;
+        Button IvRecipeEditorUI.btnGrabImage => wndBtnsPanel.btnGrabImage;
+        Button IvRecipeEditorUI.btnSaveImage => wndBtnsPanel.btnSaveImage;
 
-        Button IvRecipeEditorUI.btnOpenTemplateMatchWindow => btnOpenTemplateMatchWindow;
-        Button IvRecipeEditorUI.btnOpenEmptyTrayWindow => btnOpenEmptyTrayWindow;
-        Button IvRecipeEditorUI.btnOpenFlyCamRcpWindow => btnOpenFlyCamRcpWindow;
-        Button IvRecipeEditorUI.btnOpenLightCtrlWindow => btnOpenLightCtrlWindow;
-        Button IvRecipeEditorUI.btnWriteCoordsToPlc => btnWriteCoordsToPlc;
+        Button IvRecipeEditorUI.btnPickGoldenChipRegion => wndBtnsPanel.btnPickGoldenRegion;
+        Button IvRecipeEditorUI.btnAutoCreateCellRegions => wndBtnsPanel.btnCreateCellRegions;
+
+        Button IvRecipeEditorUI.btnOpenTemplateMatchWindow => wndBtnsPanel.btnOpenTemplateMatchWindow;
+        Button IvRecipeEditorUI.btnOpenEmptyTrayWindow => wndBtnsPanel.btnOpenEmptyTrayWindow;
+        Button IvRecipeEditorUI.btnOpenFlyCamRcpWindow => wndBtnsPanel.btnOpenFlyCamRcpWindow;
+        Button IvRecipeEditorUI.btnOpenLightCtrlWindow => wndBtnsPanel.btnOpenLightCtrlWindow;
+        Button IvRecipeEditorUI.btnWriteCoordsToPlc => wndBtnsPanel.btnWriteCoordsToPlc;
+        
+        Button IvRecipeEditorUI.btnFocusMotorSettings => wndBtnsPanel.btnFocusMotorSettings;
+        Button IvRecipeEditorUI.btnFocusMotorGo => wndBtnsPanel.btnFocusMotorGo;
+        Control IvRecipeEditorUI.lblFocusMotorZ => wndBtnsPanel.lblFocusMotorZ;
 
         Button IvRecipeEditorUI.btnCancel => btnCancel;
         Button IvRecipeEditorUI.btnOK => btnOK;
+        #endregion
 
         void IvRecipeEditorUI.UpdateCoordsRef(QVector camPt, QVector worldPtSucker1, QVector worldPtSucker2)
         {
-            //throw new System.NotImplementedException();
-            DataGridView dgv = gvCalibPointsDataGridView1.DataGridView;
+            DataGridView dgv = wndBtnsPanel.gvCalibPointsDataGridView1.DataGridView;
             int ri = 0;
             foreach (var worldPt in new[] { worldPtSucker1, worldPtSucker2 })
             {
@@ -102,12 +122,5 @@ namespace LaserAlignDX.Mvc.Gui
                 ri++;
             }
         }
-
-        #region PRIVATE_GUI_FUNCTIONS
-        void updateRdoColor(RadioButton rdo)
-        {
-            rdo.ForeColor = rdo.Checked ? Color.Black : Color.DimGray;
-        }
-        #endregion
     }
 }

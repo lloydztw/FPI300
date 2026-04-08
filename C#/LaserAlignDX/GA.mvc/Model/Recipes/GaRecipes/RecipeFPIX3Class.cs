@@ -351,7 +351,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         internal float xAngle = 0;
         internal int xChNum = 1;
         internal int xChValue = 255;
-        //public int xUseStageNo = 0;
         internal StageNumber xStageNumber = StageNumber.N0;
         #endregion
 
@@ -360,6 +359,17 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public float xRealLeftY = 0;
         public float xRealOffsetX = 1;
         public float xRealOffsetY = 1;
+        #endregion
+
+        #region 參數區_相機工作高度
+        /// <summary>
+        /// 對焦在載台表面
+        /// </summary>
+        internal float zFocusOnCarrier;
+        /// <summary>
+        /// 對焦在晶粒表面
+        /// </summary>
+        internal float zFocusOnChip;
         #endregion
 
         #region 參數區_LT_CAM_GRIDS
@@ -454,8 +464,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         public void SaveCameraGrids()
         {
-            saveCamGrid(CarrierEnum.C1, xCamGrid1);
-            saveCamGrid(CarrierEnum.C2, xCamGrid2);
+            //*** 交給 TransformsModel 管理 ***
+            //saveCamGrid(CarrierEnum.C1, xCamGrid1);
+            //saveCamGrid(CarrierEnum.C2, xCamGrid2);
         }
 #endif
         #endregion
@@ -493,6 +504,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             xChNum = int.Parse(ReadINIValue("Recipe Basic", "xChNum", "1", INIFILE));
             xChValue = int.Parse(ReadINIValue("Recipe Basic", "xChValue", "255", INIFILE));
+            zFocusOnCarrier = float.Parse(ReadINIValue("Recipe Basic", "zFocusOnCarrier", "1", INIFILE));
+            zFocusOnChip = float.Parse(ReadINIValue("Recipe Basic", "zFocusOnChip", "1", INIFILE));
 
             //xRectRegionPrint = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrint", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             //xRegionTrain = StringtoRectF(ReadINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
@@ -566,8 +579,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "xRealOffsetX", xRealOffsetX.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xRealOffsetY", xRealOffsetY.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xStageNumber", ((int)xStageNumber).ToString(), INIFILE);
+
             WriteINIValue("Recipe Basic", "xChNum", xChNum.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xChValue", xChValue.ToString(), INIFILE);
+            WriteINIValue("Recipe Basic", "zFocusOnCarrier", zFocusOnCarrier.ToString(), INIFILE);
+            WriteINIValue("Recipe Basic", "zFocusOnChip", zFocusOnChip.ToString(), INIFILE);
 
             saveCamGrid(CarrierEnum.C1, xCamGrid1);
             saveCamGrid(CarrierEnum.C2, xCamGrid2);

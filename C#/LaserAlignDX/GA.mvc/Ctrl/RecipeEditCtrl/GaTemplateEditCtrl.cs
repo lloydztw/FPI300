@@ -13,7 +13,6 @@
  */
 #endregion
 
-using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
 using JetEazy.OpenCV;
 using JetEazy.QvMath;
@@ -24,14 +23,12 @@ using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LaserAlignDX.Properties;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using VisionDesigner;
 

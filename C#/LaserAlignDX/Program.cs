@@ -52,6 +52,11 @@ namespace LaserAlignDX
         static bool run_unit_tests()
         {
             return false;
+            //using (var dlg = new LaserAlignDX.Mvc.Gui.FormRecipeEditor())
+            //{
+            //    dlg.ShowDialog();
+            //    return true;
+            //}
             new UnitTest_FP130.Test_ChipMatcher().Run();
             return true;
         }

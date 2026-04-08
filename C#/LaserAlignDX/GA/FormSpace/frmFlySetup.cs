@@ -1,31 +1,21 @@
-﻿using Common.RecipeSpace;
-using Eazy_Project_III;
+﻿using Eazy_Project_III;
 using FreeImageAPI;
 using JetEazy.BasicSpace;
-using JetEazy.ImageViewer.Interactors;
 using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Interface;
 using JzDisplay;
 using LaserAlignDX.GA.FormSpace.FPI30Form;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
-using OpenCvSharp.Flann;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Traveller106;
 using VisionDesigner.BlobFind;
-using VM.PlatformSDKCS;
 using VsCommon.ControlSpace.MachineSpace;
 using WorldOfMoveableObjects;
 using Timer = System.Windows.Forms.Timer;
@@ -123,7 +113,8 @@ namespace LaserAlignDX.FormSpace
         private void FrmFlySetup_FormClosed(object sender, FormClosedEventArgs e)
         {
             xRecipe.ReleaseBmpOrgFly(true);
-            IxFlyAreaCam.LineTriggerAction -= IxFlyAreaCam_LineTriggerAction;
+            if (IxFlyAreaCam != null)
+                IxFlyAreaCam.LineTriggerAction -= IxFlyAreaCam_LineTriggerAction;
             Traveller106.Universal.IsOpenFlyForm = false;
         }
 
@@ -150,7 +141,9 @@ namespace LaserAlignDX.FormSpace
 
             DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
 
-            IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
+            if (IxFlyAreaCam != null)
+                IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
+
             propertyGrid1.SelectedObject = FlyParaClass.Instance;
             propertyGrid1.PropertyValueChanged += PropertyGrid1_PropertyValueChanged;
 
@@ -170,13 +163,9 @@ namespace LaserAlignDX.FormSpace
             xTimer.Tick += XTimer_Tick;
 
 #if OPT_LETIAN_AUTO_LAYOUT
-            // To fit into my screen for debug.
-#if DEBUG
             this.FormBorderStyle = FormBorderStyle.Sizable;
+            //this.WindowState = FormWindowState.Maximized;
 #endif
-            this.WindowState = FormWindowState.Maximized;
-#endif
-
         }
 
         private void PropertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
@@ -560,6 +549,8 @@ namespace LaserAlignDX.FormSpace
         #region TOOLS
         void getCamDevParaAndUpdateUI()
         {
+            if (IxFlyAreaCam == null)
+                return;
             lblExpo.Text = $"{IxFlyAreaCam.GetExposure()} us";
             lblGain.Text = $"{IxFlyAreaCam.GetGain()} dB";
         }

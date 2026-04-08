@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.ControlSpace.PLCSpace;
 using JetEazy.Utils;
 using System;
 using System.Windows.Forms;
@@ -25,16 +26,14 @@ namespace LaserAlignDX.Mvc.Gui
     public partial class FormLightControl : Form
     {
         #region GLOBAL_MESS
-        protected MachineCollectionClass MACHINECollection
+        static VsLight[] LightDrivers
         {
             get
             {
-                return Universal.MACHINECollection;
+                var machineCollections = Universal.MACHINECollection;
+                var machine = machineCollections?.MACHINE as MainFPIX3MachineClass;
+                return machine?.LightCollection;
             }
-        }
-        protected MainFPIX3MachineClass MACHINE
-        {
-            get { return (MainFPIX3MachineClass)Universal.MACHINECollection.MACHINE; }
         }
         #endregion
 
@@ -109,6 +108,10 @@ namespace LaserAlignDX.Mvc.Gui
 
         void applyLightsToMachine(int ch, int value)
         {
+            var lightDrivers = LightDrivers;
+            if (lightDrivers == null)
+                return;
+
             if (ch < 0 || ch > 2)
             {
                 applyLightsToMachine(1, value);
@@ -116,11 +119,11 @@ namespace LaserAlignDX.Mvc.Gui
                 return;
             }
 
-            foreach (var machine in MACHINE.LightCollection)
+            foreach (var ligtht in lightDrivers)
             {
-                machine.ChNum = ch;
-                machine.CstLightValue = value;
-                machine.LightONOFF(value > 0);
+                ligtht.ChNum = ch;
+                ligtht.CstLightValue = value;
+                ligtht.LightONOFF(value > 0);
             }
         }
     }

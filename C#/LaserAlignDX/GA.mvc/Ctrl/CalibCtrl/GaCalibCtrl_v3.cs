@@ -31,7 +31,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
@@ -1098,7 +1097,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 if (ok && dump)
                 {
                     GaUtil.SetCursor(_wndOwner, oldCursor);
-                    VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib");
+                    VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib\\BoardGrid");
                 }
                 #endregion
 

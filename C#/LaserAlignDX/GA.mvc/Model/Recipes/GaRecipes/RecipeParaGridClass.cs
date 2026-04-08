@@ -31,6 +31,7 @@ namespace LaserAlignDX.BasicSpace
             }
         }
 
+        #region 01_基础设定_目前都只是唯讀
         const string cat1 = "01.基础设定";
         [CategoryAttribute(cat1), DescriptionAttribute("阵列角度")]
         [DisplayName("A00.阵列角度")]
@@ -154,10 +155,10 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xExtendy; }
             set { xRecipe.xExtendy = value; }
         }
+        #endregion
 
-
+        #region 02_其他设定
         const string cat2 = "02.其他设定";
-
         [CategoryAttribute(cat2), DescriptionAttribute("1-红光 2-白光 3-红白光")]
         [DisplayName("A01.灯光通道")]
         [TypeConverter(typeof(JzEnumConverter))]
@@ -179,7 +180,32 @@ namespace LaserAlignDX.BasicSpace
             set { xRecipe.xChValue = value; }
         }
 
+        [CategoryAttribute(cat2), DescriptionAttribute("線掃相機工作高度 (對焦在載台表面)")]
+        [DisplayName("A03.相機高度1 (載台) mm")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(-99999999, 99999999)]
+        [Browsable(true)]
+        [ReadOnly(false)]
+        public float zFocusOnCarrier
+        {
+            get { return xRecipe.zFocusOnCarrier; }
+            set { xRecipe.zFocusOnCarrier = value; }
+        }
 
+        [CategoryAttribute(cat2), DescriptionAttribute("線掃相機工作高度 (對焦在晶粒表面)")]
+        [DisplayName("A04.相機高度2 (晶粒) mm")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(-99999999, 99999999)]
+        [Browsable(true)]
+        [ReadOnly(false)]
+        public float zFocusOnChip
+        {
+            get { return xRecipe.zFocusOnChip; }
+            set { xRecipe.zFocusOnChip = value; }
+        }
+        #endregion
+
+        #region 03_位置矩阵设定_目前都只是唯讀
         const string cat3 = "03.位置矩阵设定";
 
         [CategoryAttribute(cat3), DescriptionAttribute("")]
@@ -238,5 +264,6 @@ namespace LaserAlignDX.BasicSpace
             get { return xRecipe.xRealOffsetY; }
             set { xRecipe.xRealOffsetY = value; }
         }
+        #endregion
     }
 }

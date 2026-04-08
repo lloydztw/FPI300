@@ -437,6 +437,12 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.Designer.cs">
       <DependentUpon>FormTemplateEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.Designer.cs">
+      <DependentUpon>GvRecipeBtnsPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
     <Compile Include="GA.mvc\Model\.Common\PlcDataPacker.cs" />
@@ -478,6 +484,7 @@
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeParaGridClass.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\UITypeEditors\PgCameraFocusCfgUI.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\JxMetadataUtil.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyMetadataUtil.cs" />
@@ -719,6 +726,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.resx">
       <DependentUpon>FormTemplateEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.resx">
+      <DependentUpon>GvRecipeBtnsPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.resx">
       <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>

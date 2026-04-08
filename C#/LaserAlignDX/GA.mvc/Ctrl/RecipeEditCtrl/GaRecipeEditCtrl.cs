@@ -17,7 +17,6 @@ using Eazy_Project_III;
 using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
-using JetEazy.Match;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
@@ -26,14 +25,12 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LeTian.AoiLib;
 using LeTian.JxProps.PropertyMeta;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
@@ -65,7 +62,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region GUI_LINKS
         internal IvRecipeEditorUI _rcpEditUI;
         Form _wndOwner;
-        JezTransImageViewPanel _imgViewer => _rcpEditUI.ImgViewer;
+        JezTransImageViewPanel _imgViewer => _rcpEditUI.ImgViewerActive;
         RadioButton[] rdoCarriers => _rcpEditUI.rdoCarriers;
         Button btnOpenEmptyTrayWindow => _rcpEditUI.btnOpenEmptyTrayWindow;
         Button btnPickGoldenRegion => _rcpEditUI.btnPickGoldenChipRegion;
@@ -108,7 +105,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region PRIVATE_INIT_FUNCTIONS
         void initImgViewer()
         {
-            var matViewer = _rcpEditUI.ImgViewer.MatViewer;
+            var matViewer = _rcpEditUI.ImgViewerActive.MatViewer;
             matViewer.AddInteractor(_cviGoldenRegionBox);
             matViewer.AddInteractor(_cviCamGridBox);
         }
@@ -235,7 +232,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 if (enabled)
                     showCviResult(false);
 
-                var matViewer = _rcpEditUI.ImgViewer.MatViewer;
+                var matViewer = _rcpEditUI.ImgViewerActive.MatViewer;
                 matViewer.Invalidate();
             }
         }
@@ -489,6 +486,8 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             using (var dlg = new frmFlySetup())
             {
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.Size = _wndOwner.Size;
                 dlg.ShowDialog();
             }
 
