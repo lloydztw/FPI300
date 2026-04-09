@@ -25,7 +25,6 @@ using LaserAlignDX.GA.FormSpace;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
-using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.JxProps;
 using LeTian.JxProps.Gui;
 using System;
@@ -710,6 +709,10 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region PRIVATE_MOTOR_FUNCTIONS
+        bool isTinyDelta(double delta)
+        {
+            return Math.Abs(delta) < Traveller106.Universal.MOTOR_TINY_DELTA;
+        }
         QVector queryCurrentMotorXY()
         {
             var motorX = getMotorX(_activeSuckerRowID);
@@ -735,7 +738,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (_commonBaseTrf != null)
             {
                 var delta = _commonBaseTrf.CameraWorkDist - motorPos;
-                if (Math.Abs(delta) > 0.0005)
+                if (!isTinyDelta(delta))
                 {
                     _commonBaseTrf.CameraWorkDist = motorPos;
                     _isCoordModified = true;
@@ -1597,7 +1600,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var currentPos = queryFocusMotorPos();
 
             var delta = targetPos - currentPos;
-            if (Math.Abs(delta) < 0.0005)
+            if (isTinyDelta(delta))
                 return;
 
             if (!silent)

@@ -224,6 +224,10 @@ namespace Traveller106
         /// </summary>
         public static IxLineScanCam IxFlyAreaCam = null;
 
+        /// <summary>
+        /// 馬達 誤差小於 0.5 um 就忽略不處理
+        /// </summary>
+        public const double MOTOR_TINY_DELTA = 0.5e-3;
         public static PLCMotionClass GetMotor(int axisID)
         {
             var machineX3 = (MainFPIX3MachineClass)Universal.MACHINECollection?.MACHINE;

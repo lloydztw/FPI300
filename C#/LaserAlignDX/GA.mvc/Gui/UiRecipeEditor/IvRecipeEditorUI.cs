@@ -22,16 +22,13 @@ namespace LaserAlignDX.Mvc.Gui
 {
     public interface IvRecipeEditorUI
     {
-        event EventHandler OnActiveViewChanged;
+        event EventHandler OnSelectedChanged;
 
         Control Window { get; }
         Control wndVisionSettingsPanel { get; }
 
-        int ActiveViewIndex { get; set; }
+        int SelectedIndex { get; set; }
         JezTransImageViewPanel ImgViewer { get; }
-        JezTransImageViewPanel GetViewer(int index);
-        //JezTransImageViewPanel ImgViewerEmptyTray { get; }
-        //JezTransImageViewPanel ImgViewerChipTemplate { get; }
 
         RadioButton[] rdoCarriers { get; }
         Button btnLoadImage { get; }

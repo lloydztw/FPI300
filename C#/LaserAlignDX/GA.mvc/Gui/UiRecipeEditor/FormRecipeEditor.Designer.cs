@@ -36,16 +36,15 @@
             this.tblayoutRight = new System.Windows.Forms.TableLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
             this.tblayoutMajor = new System.Windows.Forms.TableLayoutPanel();
+            this.panelImageViews = new System.Windows.Forms.Panel();
             this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.panelTop = new System.Windows.Forms.Panel();
             this.gvRecipeBtnsPanel1 = new LaserAlignDX.Mvc.Gui.GvRecipeBtnsPanel();
-            this.panelImageViews = new System.Windows.Forms.Panel();
-            this.jezTransImageViewPanel2 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.panelBottom.SuspendLayout();
             this.tblayoutRight.SuspendLayout();
             this.tblayoutMajor.SuspendLayout();
-            this.panelTop.SuspendLayout();
             this.panelImageViews.SuspendLayout();
+            this.panelTop.SuspendLayout();
             this.SuspendLayout();
             // 
             // panelBottom
@@ -136,16 +135,28 @@
             this.tblayoutMajor.Name = "tblayoutMajor";
             this.tblayoutMajor.RowCount = 1;
             this.tblayoutMajor.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tblayoutMajor.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tblayoutMajor.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 801F));
             this.tblayoutMajor.Size = new System.Drawing.Size(1262, 801);
             this.tblayoutMajor.TabIndex = 10;
             // 
+            // panelImageViews
+            // 
+            this.panelImageViews.BackColor = System.Drawing.Color.Gray;
+            this.panelImageViews.Controls.Add(this.jezTransImageViewPanel1);
+            this.panelImageViews.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panelImageViews.Location = new System.Drawing.Point(0, 0);
+            this.panelImageViews.Margin = new System.Windows.Forms.Padding(0);
+            this.panelImageViews.Name = "panelImageViews";
+            this.panelImageViews.Size = new System.Drawing.Size(933, 801);
+            this.panelImageViews.TabIndex = 11;
+            // 
             // jezTransImageViewPanel1
             // 
-            this.jezTransImageViewPanel1.Location = new System.Drawing.Point(41, 45);
+            this.jezTransImageViewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jezTransImageViewPanel1.Location = new System.Drawing.Point(0, 0);
             this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
-            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(283, 236);
+            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(933, 801);
             this.jezTransImageViewPanel1.TabIndex = 0;
             // 
             // panelTop
@@ -161,33 +172,13 @@
             // 
             // gvRecipeBtnsPanel1
             // 
+            this.gvRecipeBtnsPanel1.ActiveButtonIndex = 0;
             this.gvRecipeBtnsPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.gvRecipeBtnsPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gvRecipeBtnsPanel1.Location = new System.Drawing.Point(0, 0);
             this.gvRecipeBtnsPanel1.Name = "gvRecipeBtnsPanel1";
             this.gvRecipeBtnsPanel1.Size = new System.Drawing.Size(1262, 176);
             this.gvRecipeBtnsPanel1.TabIndex = 0;
-            // 
-            // panelImageViews
-            // 
-            this.panelImageViews.BackColor = System.Drawing.Color.Gray;
-            this.panelImageViews.Controls.Add(this.jezTransImageViewPanel2);
-            this.panelImageViews.Controls.Add(this.jezTransImageViewPanel1);
-            this.panelImageViews.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelImageViews.Location = new System.Drawing.Point(0, 0);
-            this.panelImageViews.Margin = new System.Windows.Forms.Padding(0);
-            this.panelImageViews.Name = "panelImageViews";
-            this.panelImageViews.Size = new System.Drawing.Size(933, 801);
-            this.panelImageViews.TabIndex = 11;
-            // 
-            // jezTransImageViewPanel2
-            // 
-            this.jezTransImageViewPanel2.Location = new System.Drawing.Point(348, 45);
-            this.jezTransImageViewPanel2.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.jezTransImageViewPanel2.Name = "jezTransImageViewPanel2";
-            this.jezTransImageViewPanel2.Size = new System.Drawing.Size(257, 236);
-            this.jezTransImageViewPanel2.TabIndex = 1;
-            this.jezTransImageViewPanel2.Visible = false;
             // 
             // FormRecipeEditor
             // 
@@ -204,8 +195,8 @@
             this.panelBottom.ResumeLayout(false);
             this.tblayoutRight.ResumeLayout(false);
             this.tblayoutMajor.ResumeLayout(false);
-            this.panelTop.ResumeLayout(false);
             this.panelImageViews.ResumeLayout(false);
+            this.panelTop.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -222,6 +213,5 @@
         private System.Windows.Forms.Panel panelTop;
         private GvRecipeBtnsPanel gvRecipeBtnsPanel1;
         private System.Windows.Forms.Panel panelImageViews;
-        private JezTransImageViewPanel jezTransImageViewPanel2;
     }
 }

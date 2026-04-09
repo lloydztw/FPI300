@@ -7,7 +7,7 @@ namespace LaserAlignDX.Mvc.Gui
 {
     public partial class GvRecipeBtnsPanel : UserControl
     {
-        public event EventHandler OnActiveViewChanged;
+        public event EventHandler OnActiveButtonIndexChanged;
 
         #region PRIVATE_DATA
         Color _colorActive;
@@ -43,7 +43,7 @@ namespace LaserAlignDX.Mvc.Gui
         }
 
         [Browsable(false)]
-        public int ActiveViewIndex
+        public int ActiveButtonIndex
         {
             get => _activeIndex;
             set => switchTo(value);
@@ -126,7 +126,7 @@ namespace LaserAlignDX.Mvc.Gui
             }
 
             if (isChanged)
-                OnActiveViewChanged?.Invoke(this, null);
+                OnActiveButtonIndexChanged?.Invoke(this, null);
         }
         #endregion
     }

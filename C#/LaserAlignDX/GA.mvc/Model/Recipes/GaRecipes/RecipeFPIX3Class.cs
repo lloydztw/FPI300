@@ -106,13 +106,21 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         #region BMP_ORG_HOLDERS
         /// <summary>
-        /// 使用 RcpBmpHolder 來動態載入 載台1 的 bmpOrg
-        /// </summary>
+        /// 使用 RcpBmpHolder 來動態載入 載台1 的 bmpOrg (對焦在晶粒)
+        /// </summary> 
         readonly RcpBmpHolder _bmpHolderOrg1 = new RcpBmpHolder("org");
         /// <summary>
-        /// 使用 RcpBmpHolder 來動態載入 載台2 的 bmpOrg
+        /// 使用 RcpBmpHolder 來動態載入 載台2 的 bmpOrg (對焦在晶粒)
         /// </summary>
         readonly RcpBmpHolder _bmpHolderOrg2 = new RcpBmpHolder("org2");
+        /// <summary>
+        /// 使用 RcpBmpHolder 來動態載入 載台1 的 bmpOrg (對焦在空載台)
+        /// </summary>
+        readonly RcpBmpHolder _bmpHolderEmpty1 = new RcpBmpHolder("orgE1");
+        /// <summary>
+        /// 使用 RcpBmpHolder 來動態載入 載台2 的 bmpOrg (對焦在空載台)
+        /// </summary>
+        readonly RcpBmpHolder _bmpHolderEmpty2 = new RcpBmpHolder("orgE2");
         /// <summary>
         /// 使用 RcpBmpHolder 來動態載入 飛拍 的 bmpOrgFly
         /// </summary>
@@ -122,6 +130,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// </summary>
         void disposeBmpOrgs()
         {
+            _bmpHolderEmpty1?.Dispose();
+            _bmpHolderEmpty2?.Dispose();
             _bmpHolderOrg1?.Dispose();
             _bmpHolderOrg2?.Dispose();
             _bmpHolderOrgFly?.Dispose();
@@ -130,27 +140,44 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region BMP_ORG_載台1_載台2
-        public Bitmap PeekBmpOrg(CarrierEnum carrierID)
+        public Bitmap PeekBmpOrg(CarrierEnum carrierID, bool focusOnEmptyCarrier)
         {
-            return carrierID == CarrierEnum.C1 ? _bmpHolderOrg1.Peek() : _bmpHolderOrg2.Peek();
+            var holder = focusOnEmptyCarrier ?
+                    ((carrierID == CarrierEnum.C1) ? _bmpHolderEmpty1 : _bmpHolderEmpty2) :
+                    ((carrierID == CarrierEnum.C1) ? _bmpHolderOrg1 : _bmpHolderOrg2);
+            
+            var bmp = holder?.Peek();
+
+            // 原有版本, 都是對焦在 chip 表面
+            if (bmp == null && focusOnEmptyCarrier)
+            {
+                holder = (carrierID == CarrierEnum.C1) ? _bmpHolderOrg1 : _bmpHolderOrg2;
+                bmp = holder?.Peek();
+            }
+
+            return bmp;
         }
-        public void TakeInBmpOrg(CarrierEnum carrierID, Bitmap bmp)
+        public void TakeInBmpOrg(CarrierEnum carrierID, bool focusOnEmptyCarrier, Bitmap bmp)
         {
-            if (carrierID == CarrierEnum.C1)
-                _bmpHolderOrg1.TakeOver(bmp);
-            else
-                _bmpHolderOrg2?.TakeOver(bmp);
+            var holder = focusOnEmptyCarrier ?
+                    ((carrierID == CarrierEnum.C1) ? _bmpHolderEmpty1 : _bmpHolderEmpty2) :
+                    ((carrierID == CarrierEnum.C1) ? _bmpHolderOrg1 : _bmpHolderOrg2);
+            holder?.TakeOver(bmp);
         }
         public void ReleaseBmpsOrg(bool save)
         {
             // bmpOrg 一般只用於參數編輯時期, 跑線時可以釋放
             if (save)
             {
-                _bmpHolderOrg1.Save();
-                _bmpHolderOrg2.Save();
+                _bmpHolderOrg1?.Save();
+                _bmpHolderOrg2?.Save();
+                _bmpHolderEmpty1?.Save();
+                _bmpHolderEmpty2?.Save();
             }
             _bmpHolderOrg1?.Dispose();
             _bmpHolderOrg2?.Dispose();
+            _bmpHolderEmpty1?.Dispose();
+            _bmpHolderEmpty2?.Dispose();
         }
         #endregion
 
