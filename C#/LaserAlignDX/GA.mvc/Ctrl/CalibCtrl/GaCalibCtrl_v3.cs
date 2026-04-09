@@ -21,6 +21,7 @@ using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.AoiModel.Calib;
+using LaserAlignDX.GA.FormSpace;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
@@ -96,11 +97,13 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             get { return Traveller106.Universal.IxLineScan; }
         }
-        ITravellerTransforms _commonBaseTrf => TravellerTransformFactory.CommonBase;
-        RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
+        IAxis getFocusMotor() => Traveller106.Universal.GetBigScanCameraFocusMotor();
+        IAxis getMotorX(SuckerRowEnum S) => Traveller106.Universal.GetMotorX(S);
+        IAxis getMotorY(CarrierEnum C) => Traveller106.Universal.GetMotorY(C);
         #endregion
 
         #region CALIB_MODEL
+        ITravellerTransforms _commonBaseTrf => TravellerTransformFactory.CommonBase;
         ICalibAoiModel _calibModel => GaMvcConfig.SysModel.CalibAoiModel;
         JxCalibRecipe[] _jxCalibRecipes = new JxCalibRecipe[N_CARRIERS_NUMBER];
         #endregion
@@ -123,6 +126,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return true;
             return false;
         }
+
         GvCalibPointsDataGridView _dgvCalibPointsListView => _calibToolUI.dgvCalibPointsListView;
         RadioButton[] _rdoCarriers => _calibToolUI.rdoCarriers;
         RadioButton[] _rdoSuckerRows => _calibToolUI.rdoSuckerRows;
@@ -131,6 +135,11 @@ namespace LaserAlignDX.Mvc.Ctrl
         Button _btnRunAutoFetchGrid => _calibToolUI.btnAutoFetchGrid;
         Button _btnAutoFetchInkMarks => _calibToolUI.btnAutoFetchInkMarks;
         Button _btnBuildCalib => _calibToolUI.btnBuildCalib;
+        
+        Button _btnMotorSettings => _calibToolUI.btnMotorSettings;
+        Button _btnFocusMotorGo => _calibToolUI.btnFocusMotorGo;
+        Control _lblFocusMotorZ => _calibToolUI.lblFocusMotorZ;
+
         Button _btnCancel => _calibToolUI.btnCancel;
         Button _btnOK => _calibToolUI.btnOK;
         #endregion
@@ -220,6 +229,13 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (_btnBuildCalib != null)
                 _btnBuildCalib.Click += (s, e) => BuildCommonBaseTransforms();
 
+            // Motors
+            if (_btnMotorSettings != null)
+                _btnMotorSettings.Click += (s, e) => OpenMotorJogWindow();
+
+            if (_btnFocusMotorGo != null)
+                _btnFocusMotorGo.Click += (s, e) => MoveFocusMotorToRecipePos();
+
             _cviGridResultBox.OnRequestDumpBindaryImage += (s, e) => RunAutoFetchBoardGrid(dump: true);
 
             _cviBigBoundBox.OnChanged += _cviBigBoundBox_OnChanged;
@@ -238,6 +254,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 {
                     //>>> updateAllData(false);
                     SetActiveView(_activeCarrierID, _activeSuckerRowID, _activeViewID, force: true);
+                    updateFocusMotorPos();
                 }));
             };
         }
@@ -314,6 +331,16 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             _dgvCalibPointsListView.SelectedIndex = -1;
         }
+        private void Dgv_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (_activeViewID == CalibViewEnum.InkMarksView)
+            {
+                if (e.RowIndex >= 0 && e.ColumnIndex == 0)
+                {
+                    dgvSyncCurrentMotorCoordsToUserInput(e.RowIndex);
+                }
+            }
+        }
         #endregion
 
         #region PRIVATE_UPDATE_FUNCTIONS
@@ -321,6 +348,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             dgvUpdateAllCalibKeyPoints(toModel);
             updatePropertyPanel(toModel);
+            updateFocusMotorPos(toModel);
         }
         void updatePropertyPanel(bool toModel)
         {
@@ -681,6 +709,64 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         #endregion
 
+        #region PRIVATE_MOTOR_FUNCTIONS
+        QVector queryCurrentMotorXY()
+        {
+            var motorX = getMotorX(_activeSuckerRowID);
+            var motorY = getMotorY(_activeCarrierID);
+            double x = motorX != null ? motorX.GetPos() : 0.0;
+            double y = motorY != null ? motorY.GetPos() : 0.0;
+            return new QVector2(x, y);
+        }
+        double queryFocusMotorPos()
+        {
+            var axis = getFocusMotor();
+            double pos = axis != null ? axis.GetPos() : 0.0;
+            return pos;
+        }
+        double getCameraFocusFromModel()
+        {
+            if (_commonBaseTrf != null)
+                return _commonBaseTrf.CameraWorkDist;
+            return 0.0;
+        }
+        void setCameraFocusToModel(double motorPos)
+        {
+            if (_commonBaseTrf != null)
+            {
+                var delta = _commonBaseTrf.CameraWorkDist - motorPos;
+                if (Math.Abs(delta) > 0.0005)
+                {
+                    _commonBaseTrf.CameraWorkDist = motorPos;
+                    _isCoordModified = true;
+                }
+            }
+        }
+        void updateFocusMotorPos(bool toModel = false)
+        {
+            // 將當下的馬達座標位置更新到 Transform Model
+            if (toModel)
+            {
+                double motorPos = queryFocusMotorPos();
+                setCameraFocusToModel(motorPos);
+            }
+
+            // 從 Transform Model 取得 focusZ
+            double focusZ = getCameraFocusFromModel();
+
+            // 如果 Transform Model 沒有設定值, 重新讀取當下馬達座標位置
+            if (focusZ == 0)
+                focusZ = queryFocusMotorPos();
+
+            // 更新到 GUI
+            var label = _lblFocusMotorZ;
+            if (label != null)
+            {
+                label.Text = $"{focusZ:0.000}";
+            }
+        }
+        #endregion
+
         #region PRIVATE_DGV_FUNCTIONS
         void dgvInit()
         {
@@ -704,6 +790,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
             };
 
+            dgv.CellContentDoubleClick += Dgv_CellContentDoubleClick;
         }
         void dgvUpdateInkMarks(EzBloc[] inkMarks)
         {
@@ -779,6 +866,27 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 VsMessageBox.Warning(ex.Message);
                 motorCoords = null;
+            }
+        }
+        void dgvSyncCurrentMotorCoordsToUserInput(int rowIndex)
+        {
+            var dgv = _dgvCalibPointsListView?.DataGridView;
+            if (rowIndex < 0 || rowIndex >= dgv.Rows.Count)
+                return;
+
+            var currentMotorPos = queryCurrentMotorXY();
+
+            var dgvRow = dgv.Rows[rowIndex];
+            var targetName = dgvRow.Cells[0].Value;
+            var msg = GaUtil.GetEnumDescription(Prompts.Question_Update_Motor_Coord_To_Calib);
+            msg += $"?\n\r\n\r(X= {currentMotorPos.X:0.000}, Y= {currentMotorPos.Y:0.000})";
+            msg += $"\n\r\n\rTo 【{targetName}】";
+            var ret = MessageBox.Show(msg, "Calibration", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (ret == DialogResult.Yes)
+            {
+                dgvRow.Cells[3].Value = currentMotorPos.X;
+                dgvRow.Cells[4].Value = currentMotorPos.Y;
             }
         }
         void dgvUpdateAllCalibKeyPoints(bool toModel)
@@ -1463,6 +1571,62 @@ namespace LaserAlignDX.Mvc.Ctrl
                 SaveImage(CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID, (int)vid));
             }
             GaUtil.SetCursor(_wndOwner, oldCursor);
+        }
+
+        void OpenMotorJogWindow()
+        {
+            // 備份當下馬達的位置
+            double lastMotorPos = queryFocusMotorPos();
+            using (var dlg = new FormMotor())
+            {
+                //>>> dlg.Attach(getFocusMotor());
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                if (dlg.ShowDialog(_wndOwner) == DialogResult.OK)
+                {
+                    updateFocusMotorPos(toModel: true);
+                }
+                else
+                {
+                    // 返回之前的位置
+                    MoveFocusMotorTo(lastMotorPos);
+                }
+            }
+        }
+        void MoveFocusMotorTo(double targetPos, bool silent = false)
+        {
+            var currentPos = queryFocusMotorPos();
+
+            var delta = targetPos - currentPos;
+            if (Math.Abs(delta) < 0.0005)
+                return;
+
+            if (!silent)
+            {
+                var msg = GaUtil.GetEnumDescription(Prompts.Question_To_Move_Big_Linescan_Motor);
+                msg += $"\n\r\n\rTo {targetPos:0.000} mm";
+                bool ok = VsMessageBox.Question(msg) == DialogResult.OK;
+                if (!ok) return;
+            }
+
+            try
+            {
+                var motor = getFocusMotor();
+                motor?.Go(currentPos, delta);
+            }
+            catch (Exception ex)
+            {
+                var err = "馬達異常:\n\r" + ex.ToString();
+                MessageBox.Show(err, "Motor Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        void MoveFocusMotorToRecipePos(bool silent = false)
+        {
+            //int activeViewIndex = _rcpEditUI.ActiveViewIndex;
+            //if (activeViewIndex == 0 || activeViewIndex == 1)
+            //{
+            //    var targetPos = getCameraFocusFromRecipe(activeViewIndex);
+            //    MoveFocusMotorTo(targetPos, silent);
+            //}
         }
 
         void LoadSettings()

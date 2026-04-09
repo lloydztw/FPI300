@@ -42,21 +42,12 @@ namespace LaserAlignDX.Mvc.Ctrl
     public partial class GaRecipeEditCtrl
     {
         #region GLOBAL_MESS
-        const int FOCUS_MOTOR_AXIS_ID = 0;
         IxLineScanCam _bigScanCamera
         {
             get => Traveller106.Universal.IxLineScan;
         }
         ITravelerModel _sysModel => GaMvcConfig.SysModel;
-        IAxis getFocusMotor()
-        {
-            int axisID = FOCUS_MOTOR_AXIS_ID;
-            var machineX3 = (MainFPIX3MachineClass)Universal.MACHINECollection?.MACHINE;
-            var plcMotions = machineX3?.PLCMOTIONCollection;
-            if (plcMotions == null || axisID >= plcMotions.Length || axisID < 0)
-                return null;
-            return plcMotions[axisID];
-        }
+        IAxis getFocusMotor() => Universal.GetBigScanCameraFocusMotor();
         #endregion
 
         #region RECIPES
@@ -398,17 +389,25 @@ namespace LaserAlignDX.Mvc.Ctrl
         void updateFocusMotorPos(bool toRecipe = false)
         {
             int activeViewIndex = _rcpEditUI.ActiveViewIndex;
-            
+
+            // 將當下的 馬達座標 更新到 參數設定
             if (toRecipe)
             {
                 double motorPos = queryFocusMotorPos();
                 setCameraFocusToRecipe(activeViewIndex, motorPos);
             }
 
+            // 從 參數設定 取得 focusZ
+            double focusZ = getCameraFocusFromRecipe(activeViewIndex);
+
+            // 如果 參數 沒有設定值, 重新讀取當下馬達座標
+            if (focusZ == 0)
+                focusZ = queryFocusMotorPos();
+
+            // 更新到 GUI
             var label = lblFocusMotorPos;
             if (label != null)
             {
-                var focusZ = getCameraFocusFromRecipe(activeViewIndex);
                 label.Text = $"{focusZ:0.000}";
             }
         }
@@ -575,8 +574,10 @@ namespace LaserAlignDX.Mvc.Ctrl
         
         void OpenFocusMotorWindow()
         {
-            using (var dlg = new FormMotorOne(FOCUS_MOTOR_AXIS_ID))
+            using (var dlg = new FormMotorOne())
             {
+                dlg.Attach(getFocusMotor());
+
                 // 備份當下馬達的位置
                 double lastMotorPos = queryFocusMotorPos();
 

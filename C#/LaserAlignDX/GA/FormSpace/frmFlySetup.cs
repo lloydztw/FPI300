@@ -148,8 +148,6 @@ namespace LaserAlignDX.FormSpace
             propertyGrid1.PropertyValueChanged += PropertyGrid1_PropertyValueChanged;
 
             this.Text = "飞拍参数设定窗口";
-            this.FormBorderStyle = FormBorderStyle.None;
-
             LanguageExClass.Instance.EnumControls(this);
 
             flyOffsetUI.Init(StageNumber.N0);
@@ -556,8 +554,8 @@ namespace LaserAlignDX.FormSpace
                 if (FlyParaClass.Instance.GetCameraExpoAndGain(out float expo, out float gain))
                 {
                     CommonLogClass.Instance.LogMessage($"設定 曝光時間= {expo} (us), 增益= {gain:0.0} (db)");
-                    IxFlyAreaCam.SetExposure(expo);
-                    IxFlyAreaCam.SetGain(gain);
+                    IxFlyAreaCam?.SetExposure(expo);
+                    IxFlyAreaCam?.SetGain(gain);
                     if (bUpdateUI)
                         getCamDevParaAndUpdateUI();
                 }

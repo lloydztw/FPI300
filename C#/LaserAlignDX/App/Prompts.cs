@@ -27,5 +27,8 @@ namespace LaserAlignDX
 
         [Description("即將移動 線掃相機 馬達")]
         Question_To_Move_Big_Linescan_Motor,
+
+        [Description("是否要採用 目前馬達 XY 座標值")]
+        Question_Update_Motor_Coord_To_Calib,
     }
 }

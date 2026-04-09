@@ -93,6 +93,11 @@ namespace LaserAlignDX.Mvc.Gui
         Button IvCalibToolUI.btnAutoFetchInkMarks => btnAutoFetchInkMarks;
         Button IvCalibToolUI.btnBuildCalib => btnBuildCalib;
         //Button IvCalibToolUI.btnBuildCalibInkAdj => btnBuildCalibInkAdj;
+
+        Button IvCalibToolUI.btnMotorSettings => gvFocusSettingPanel1.btnFocusMotorSettings;
+        Button IvCalibToolUI.btnFocusMotorGo => gvFocusSettingPanel1.btnFocusMotorGo;
+        Control IvCalibToolUI.lblFocusMotorZ => gvFocusSettingPanel1.lblFocusMotorZ;
+
         Button IvCalibToolUI.btnCancel => btnCancel;
         Button IvCalibToolUI.btnOK => btnOK;
         #endregion

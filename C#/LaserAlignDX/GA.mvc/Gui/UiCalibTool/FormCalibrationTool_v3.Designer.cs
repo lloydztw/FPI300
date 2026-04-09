@@ -51,11 +51,12 @@ namespace LaserAlignDX.Mvc.Gui
             this.panelBtns = new System.Windows.Forms.Panel();
             this.btnLoadImage = new System.Windows.Forms.Button();
             this.btnGrabImage = new System.Windows.Forms.Button();
-            this.btnAutoFetchInkMarks = new System.Windows.Forms.Button();
             this.btnBuildCalib = new System.Windows.Forms.Button();
             this.btnAutoFetchGrid = new System.Windows.Forms.Button();
+            this.btnAutoFetchInkMarks = new System.Windows.Forms.Button();
             this.panelViewers = new System.Windows.Forms.Panel();
             this.gvCalibPointsDataGridView1 = new LaserAlignDX.Mvc.Gui.GvCalibPointsDataGridView();
+            this.gvFocusSettingPanel1 = new LaserAlignDX.Mvc.Gui.GvFocusSettingPanel();
             this.jezTransImageViewPanel2 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.tblayoutTopNav.SuspendLayout();
@@ -305,7 +306,7 @@ namespace LaserAlignDX.Mvc.Gui
             // gwPanePropsViewer1
             // 
             this.gwPanePropsViewer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gwPanePropsViewer1.Editable = true;
+            this.gwPanePropsViewer1.Editable = false;
             this.gwPanePropsViewer1.ImageList = null;
             this.gwPanePropsViewer1.Location = new System.Drawing.Point(8, 36);
             this.gwPanePropsViewer1.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
@@ -357,11 +358,12 @@ namespace LaserAlignDX.Mvc.Gui
             // 
             this.panelBtns.BackColor = System.Drawing.Color.LightSteelBlue;
             this.panelBtns.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.panelBtns.Controls.Add(this.gvFocusSettingPanel1);
             this.panelBtns.Controls.Add(this.btnLoadImage);
             this.panelBtns.Controls.Add(this.btnGrabImage);
             this.panelBtns.Controls.Add(this.btnBuildCalib);
-            this.panelBtns.Controls.Add(this.btnAutoFetchGrid);
             this.panelBtns.Controls.Add(this.btnAutoFetchInkMarks);
+            this.panelBtns.Controls.Add(this.btnAutoFetchGrid);
             this.panelBtns.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelBtns.Location = new System.Drawing.Point(4, 180);
             this.panelBtns.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
@@ -376,10 +378,10 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnLoadImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnLoadImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnLoadImage.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnLoadImage.Location = new System.Drawing.Point(55, 53);
+            this.btnLoadImage.Location = new System.Drawing.Point(233, 55);
             this.btnLoadImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnLoadImage.Name = "btnLoadImage";
-            this.btnLoadImage.Size = new System.Drawing.Size(150, 38);
+            this.btnLoadImage.Size = new System.Drawing.Size(120, 38);
             this.btnLoadImage.TabIndex = 22;
             this.btnLoadImage.Text = "加載圖片";
             this.btnLoadImage.UseVisualStyleBackColor = false;
@@ -389,37 +391,23 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnGrabImage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnGrabImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGrabImage.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGrabImage.Location = new System.Drawing.Point(55, 11);
+            this.btnGrabImage.Location = new System.Drawing.Point(233, 11);
             this.btnGrabImage.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnGrabImage.Name = "btnGrabImage";
-            this.btnGrabImage.Size = new System.Drawing.Size(150, 38);
+            this.btnGrabImage.Size = new System.Drawing.Size(120, 38);
             this.btnGrabImage.TabIndex = 21;
             this.btnGrabImage.Text = "取像";
             this.btnGrabImage.UseVisualStyleBackColor = false;
-            // 
-            // btnAutoFetchInkMarks
-            // 
-            this.btnAutoFetchInkMarks.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
-            this.btnAutoFetchInkMarks.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnAutoFetchInkMarks.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAutoFetchInkMarks.Location = new System.Drawing.Point(238, 11);
-            this.btnAutoFetchInkMarks.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.btnAutoFetchInkMarks.Name = "btnAutoFetchInkMarks";
-            this.btnAutoFetchInkMarks.Size = new System.Drawing.Size(150, 80);
-            this.btnAutoFetchInkMarks.TabIndex = 28;
-            this.btnAutoFetchInkMarks.Text = "自動抓取 墨點";
-            this.btnAutoFetchInkMarks.UseVisualStyleBackColor = false;
-            this.btnAutoFetchInkMarks.Visible = false;
             // 
             // btnBuildCalib
             // 
             this.btnBuildCalib.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
             this.btnBuildCalib.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnBuildCalib.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnBuildCalib.Location = new System.Drawing.Point(413, 11);
+            this.btnBuildCalib.Location = new System.Drawing.Point(489, 11);
             this.btnBuildCalib.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnBuildCalib.Name = "btnBuildCalib";
-            this.btnBuildCalib.Size = new System.Drawing.Size(150, 80);
+            this.btnBuildCalib.Size = new System.Drawing.Size(120, 80);
             this.btnBuildCalib.TabIndex = 25;
             this.btnBuildCalib.Text = "執行校正";
             this.btnBuildCalib.UseVisualStyleBackColor = false;
@@ -430,13 +418,27 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnAutoFetchGrid.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnAutoFetchGrid.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnAutoFetchGrid.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnAutoFetchGrid.Location = new System.Drawing.Point(238, 11);
+            this.btnAutoFetchGrid.Location = new System.Drawing.Point(361, 11);
             this.btnAutoFetchGrid.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.btnAutoFetchGrid.Name = "btnAutoFetchGrid";
-            this.btnAutoFetchGrid.Size = new System.Drawing.Size(150, 81);
+            this.btnAutoFetchGrid.Size = new System.Drawing.Size(120, 80);
             this.btnAutoFetchGrid.TabIndex = 26;
-            this.btnAutoFetchGrid.Text = "自動抓取 格點";
+            this.btnAutoFetchGrid.Text = "自動抓取\r\n格點";
             this.btnAutoFetchGrid.UseVisualStyleBackColor = false;
+            // 
+            // btnAutoFetchInkMarks
+            // 
+            this.btnAutoFetchInkMarks.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.btnAutoFetchInkMarks.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnAutoFetchInkMarks.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAutoFetchInkMarks.Location = new System.Drawing.Point(361, 11);
+            this.btnAutoFetchInkMarks.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.btnAutoFetchInkMarks.Name = "btnAutoFetchInkMarks";
+            this.btnAutoFetchInkMarks.Size = new System.Drawing.Size(120, 80);
+            this.btnAutoFetchInkMarks.TabIndex = 28;
+            this.btnAutoFetchInkMarks.Text = "自動抓取\r\n墨點";
+            this.btnAutoFetchInkMarks.UseVisualStyleBackColor = false;
+            this.btnAutoFetchInkMarks.Visible = false;
             // 
             // panelViewers
             // 
@@ -460,6 +462,15 @@ namespace LaserAlignDX.Mvc.Gui
             this.gvCalibPointsDataGridView1.SelectedIndex = 0;
             this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(623, 169);
             this.gvCalibPointsDataGridView1.TabIndex = 0;
+            // 
+            // gvFocusSettingPanel1
+            // 
+            this.gvFocusSettingPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.gvFocusSettingPanel1.Location = new System.Drawing.Point(7, 11);
+            this.gvFocusSettingPanel1.Name = "gvFocusSettingPanel1";
+            this.gvFocusSettingPanel1.Padding = new System.Windows.Forms.Padding(2, 2, 0, 3);
+            this.gvFocusSettingPanel1.Size = new System.Drawing.Size(219, 82);
+            this.gvFocusSettingPanel1.TabIndex = 29;
             // 
             // jezTransImageViewPanel2
             // 
@@ -536,5 +547,6 @@ namespace LaserAlignDX.Mvc.Gui
         private System.Windows.Forms.Button btnGrabImage;
         private System.Windows.Forms.Button btnAutoFetchGrid;
         private System.Windows.Forms.Button btnAutoFetchInkMarks;
+        private GvFocusSettingPanel gvFocusSettingPanel1;
     }
 }

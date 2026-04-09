@@ -13,48 +13,38 @@
  */
 #endregion
 
-
 using Common;
 using JetEazy.ControlSpace.MotionSpace;
+using JetEazy.Interface;
 using System;
 using System.Windows.Forms;
-using Traveller106;
-using VsCommon.ControlSpace.MachineSpace;
 
 
 namespace LaserAlignDX.Mvc.Gui
 {
     public partial class FormMotorOne : Form
     {
-        #region GLOBAL_MESS
-        static PLCMotionClass getPlcMotorModel(int axisID)
-        {
-            var machineX3 = (MainFPIX3MachineClass)Universal.MACHINECollection?.MACHINE;
-            var plcMotions = machineX3?.PLCMOTIONCollection;
-            if (plcMotions == null || axisID >= plcMotions.Length || axisID < 0)
-                return null;
-            return plcMotions[axisID];
-        }
-        #endregion
-
         #region PRIVATE_DATA
+        PLCMotionClass _motorModel;
         MotionTouchPanelUIClass _motorUiCtrl;
         #endregion
 
-        public FormMotorOne(int axisID)
+        public FormMotorOne()
         {
             InitializeComponent();
-            AxisID = axisID;
             TopMost = true;
             Load += (s, e) => Init();
             FormClosed += (s, e) => CleanUp();
             btnOK.Click += (s, e) => DoConfirm();
             btnCancel.Click += (s, e) => DoCancel();
         }
-        public int AxisID
+        public void Attach(IAxis motor)
         {
-            get;
-            private set;
+            _motorModel = motor as PLCMotionClass;
+        }
+        public void Attach(PLCMotionClass motor)
+        {
+            _motorModel = motor;
         }
 
         #region PRIVATE_FUNCTIONS
@@ -66,7 +56,7 @@ namespace LaserAlignDX.Mvc.Gui
             //-----------------------------------------------------------------------------
             //(1) MODEL
             //    PLCMotionClass 繼承自 IAxis (其生命週期 由 Univeral 維持)
-            var plcMotor = getPlcMotorModel(AxisID);
+            var plcMotor = _motorModel;
             if (plcMotor == null)
                 return;
 
@@ -77,9 +67,9 @@ namespace LaserAlignDX.Mvc.Gui
             //-----------------------------------------------------------------------------
             //(3) CONTROL
             //    MotionTouchPanelUIClass 扮演著 MVC 中的 control 角色
-            //(3.1) 其建構式, 綁定了 Control 與 View
+            //(3.1) 綁定了 Control 與 View
             var motorUiCtrl = new MotionTouchPanelUIClass(motorView);
-            //(3.2) 綁定 Control 與 Model
+            //(3.2) 綁定了 Control 與 Model
             motorUiCtrl.Initial(plcMotor);
 
             //-----------------------------------------------------------------------------

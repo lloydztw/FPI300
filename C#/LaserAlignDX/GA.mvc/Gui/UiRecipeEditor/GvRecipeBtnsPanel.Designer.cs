@@ -39,12 +39,8 @@
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.label0 = new System.Windows.Forms.Label();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.gvFocusSettingPanel1 = new LaserAlignDX.Mvc.Gui.GvFocusSettingPanel();
             this.gvCalibPointsDataGridView1 = new LaserAlignDX.Mvc.Gui.GvCalibPointsDataGridView();
-            this.panelFocusZ = new System.Windows.Forms.Panel();
-            this.lblFocusMotorZ = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.btnFocusMotorGo = new System.Windows.Forms.Button();
-            this.btnFocusMotorSettings = new System.Windows.Forms.Button();
             this.btnSaveImage = new System.Windows.Forms.Button();
             this.btnGrabImage = new System.Windows.Forms.Button();
             this.rdoCarrier2 = new System.Windows.Forms.RadioButton();
@@ -56,7 +52,6 @@
             this.btnOpenEmptyTrayWindow = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel2.SuspendLayout();
-            this.panelFocusZ.SuspendLayout();
             this.SuspendLayout();
             // 
             // imageList1
@@ -168,8 +163,8 @@
             // 
             // panel2
             // 
+            this.panel2.Controls.Add(this.gvFocusSettingPanel1);
             this.panel2.Controls.Add(this.gvCalibPointsDataGridView1);
-            this.panel2.Controls.Add(this.panelFocusZ);
             this.panel2.Controls.Add(this.btnSaveImage);
             this.panel2.Controls.Add(this.btnGrabImage);
             this.panel2.Controls.Add(this.rdoCarrier2);
@@ -185,6 +180,15 @@
             this.panel2.Size = new System.Drawing.Size(1288, 138);
             this.panel2.TabIndex = 58;
             // 
+            // gvFocusSettingPanel1
+            // 
+            this.gvFocusSettingPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.gvFocusSettingPanel1.Location = new System.Drawing.Point(459, 27);
+            this.gvFocusSettingPanel1.Name = "gvFocusSettingPanel1";
+            this.gvFocusSettingPanel1.Padding = new System.Windows.Forms.Padding(6, 8, 6, 8);
+            this.gvFocusSettingPanel1.Size = new System.Drawing.Size(222, 84);
+            this.gvFocusSettingPanel1.TabIndex = 71;
+            // 
             // gvCalibPointsDataGridView1
             // 
             this.gvCalibPointsDataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
@@ -194,70 +198,6 @@
             this.gvCalibPointsDataGridView1.SelectedIndex = 0;
             this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(550, 108);
             this.gvCalibPointsDataGridView1.TabIndex = 70;
-            // 
-            // panelFocusZ
-            // 
-            this.panelFocusZ.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.panelFocusZ.Controls.Add(this.lblFocusMotorZ);
-            this.panelFocusZ.Controls.Add(this.label1);
-            this.panelFocusZ.Controls.Add(this.btnFocusMotorGo);
-            this.panelFocusZ.Controls.Add(this.btnFocusMotorSettings);
-            this.panelFocusZ.Location = new System.Drawing.Point(444, 13);
-            this.panelFocusZ.Name = "panelFocusZ";
-            this.panelFocusZ.Size = new System.Drawing.Size(251, 91);
-            this.panelFocusZ.TabIndex = 68;
-            // 
-            // lblFocusMotorZ
-            // 
-            this.lblFocusMotorZ.BackColor = System.Drawing.Color.Black;
-            this.lblFocusMotorZ.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblFocusMotorZ.ForeColor = System.Drawing.Color.Lime;
-            this.lblFocusMotorZ.Location = new System.Drawing.Point(20, 46);
-            this.lblFocusMotorZ.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.lblFocusMotorZ.Name = "lblFocusMotorZ";
-            this.lblFocusMotorZ.Size = new System.Drawing.Size(120, 31);
-            this.lblFocusMotorZ.TabIndex = 47;
-            this.lblFocusMotorZ.Text = "999.000";
-            this.lblFocusMotorZ.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(16, 12);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(124, 20);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "相機對焦 Z (mm)";
-            // 
-            // btnFocusMotorGo
-            // 
-            this.btnFocusMotorGo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
-            this.btnFocusMotorGo.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnFocusMotorGo.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnFocusMotorGo.Location = new System.Drawing.Point(167, 46);
-            this.btnFocusMotorGo.Margin = new System.Windows.Forms.Padding(4);
-            this.btnFocusMotorGo.Name = "btnFocusMotorGo";
-            this.btnFocusMotorGo.Size = new System.Drawing.Size(58, 31);
-            this.btnFocusMotorGo.TabIndex = 16;
-            this.btnFocusMotorGo.Text = "Go";
-            this.btnFocusMotorGo.UseVisualStyleBackColor = false;
-            // 
-            // btnFocusMotorSettings
-            // 
-            this.btnFocusMotorSettings.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.btnFocusMotorSettings.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btnFocusMotorSettings.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnFocusMotorSettings.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnFocusMotorSettings.ImageIndex = 0;
-            this.btnFocusMotorSettings.ImageList = this.imageList1;
-            this.btnFocusMotorSettings.Location = new System.Drawing.Point(167, 9);
-            this.btnFocusMotorSettings.Margin = new System.Windows.Forms.Padding(4);
-            this.btnFocusMotorSettings.Name = "btnFocusMotorSettings";
-            this.btnFocusMotorSettings.Size = new System.Drawing.Size(58, 27);
-            this.btnFocusMotorSettings.TabIndex = 15;
-            this.btnFocusMotorSettings.UseVisualStyleBackColor = false;
             // 
             // btnSaveImage
             // 
@@ -336,10 +276,10 @@
             this.btnOpenTemplateMatchWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnOpenTemplateMatchWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOpenTemplateMatchWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOpenTemplateMatchWindow.Location = new System.Drawing.Point(300, 52);
+            this.btnOpenTemplateMatchWindow.Location = new System.Drawing.Point(300, 69);
             this.btnOpenTemplateMatchWindow.Margin = new System.Windows.Forms.Padding(4);
             this.btnOpenTemplateMatchWindow.Name = "btnOpenTemplateMatchWindow";
-            this.btnOpenTemplateMatchWindow.Size = new System.Drawing.Size(120, 31);
+            this.btnOpenTemplateMatchWindow.Size = new System.Drawing.Size(120, 52);
             this.btnOpenTemplateMatchWindow.TabIndex = 13;
             this.btnOpenTemplateMatchWindow.Text = "模板界面";
             this.btnOpenTemplateMatchWindow.UseVisualStyleBackColor = false;
@@ -352,7 +292,7 @@
             this.btnPickGoldenRegion.Location = new System.Drawing.Point(300, 13);
             this.btnPickGoldenRegion.Margin = new System.Windows.Forms.Padding(4);
             this.btnPickGoldenRegion.Name = "btnPickGoldenRegion";
-            this.btnPickGoldenRegion.Size = new System.Drawing.Size(120, 31);
+            this.btnPickGoldenRegion.Size = new System.Drawing.Size(120, 52);
             this.btnPickGoldenRegion.TabIndex = 12;
             this.btnPickGoldenRegion.Text = "框選區域";
             this.btnPickGoldenRegion.UseVisualStyleBackColor = false;
@@ -362,10 +302,10 @@
             this.btnCreateCellRegions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnCreateCellRegions.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCreateCellRegions.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCreateCellRegions.Location = new System.Drawing.Point(300, 52);
+            this.btnCreateCellRegions.Location = new System.Drawing.Point(300, 69);
             this.btnCreateCellRegions.Margin = new System.Windows.Forms.Padding(4);
             this.btnCreateCellRegions.Name = "btnCreateCellRegions";
-            this.btnCreateCellRegions.Size = new System.Drawing.Size(120, 31);
+            this.btnCreateCellRegions.Size = new System.Drawing.Size(120, 52);
             this.btnCreateCellRegions.TabIndex = 11;
             this.btnCreateCellRegions.Text = "生成陣列";
             this.btnCreateCellRegions.UseVisualStyleBackColor = false;
@@ -378,7 +318,7 @@
             this.btnOpenEmptyTrayWindow.Location = new System.Drawing.Point(300, 13);
             this.btnOpenEmptyTrayWindow.Margin = new System.Windows.Forms.Padding(18, 6, 18, 6);
             this.btnOpenEmptyTrayWindow.Name = "btnOpenEmptyTrayWindow";
-            this.btnOpenEmptyTrayWindow.Size = new System.Drawing.Size(120, 31);
+            this.btnOpenEmptyTrayWindow.Size = new System.Drawing.Size(120, 52);
             this.btnOpenEmptyTrayWindow.TabIndex = 10;
             this.btnOpenEmptyTrayWindow.Text = "空盤檢測";
             this.btnOpenEmptyTrayWindow.UseVisualStyleBackColor = false;
@@ -394,8 +334,6 @@
             this.Size = new System.Drawing.Size(1288, 180);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
-            this.panelFocusZ.ResumeLayout(false);
-            this.panelFocusZ.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -404,17 +342,12 @@
         private System.Windows.Forms.ImageList imageList1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.Panel panel2;
-        private System.Windows.Forms.Panel panelFocusZ;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label0;
         public System.Windows.Forms.Button btnWriteCoordsToPlc;
         public System.Windows.Forms.Button btnOpenFlyCamRcpWindow;
         public System.Windows.Forms.Button btnOpenLightCtrlWindow;
         public System.Windows.Forms.Button btnSwitchToEmptyTray;
         public System.Windows.Forms.Button btnSwitchToChipTemplate;
-        public System.Windows.Forms.Label lblFocusMotorZ;
-        public System.Windows.Forms.Button btnFocusMotorGo;
-        public System.Windows.Forms.Button btnFocusMotorSettings;
         public System.Windows.Forms.Button btnSaveImage;
         public System.Windows.Forms.Button btnGrabImage;
         public System.Windows.Forms.RadioButton rdoCarrier2;
@@ -425,5 +358,6 @@
         public GvCalibPointsDataGridView gvCalibPointsDataGridView1;
         public System.Windows.Forms.Button btnOpenTemplateMatchWindow;
         public System.Windows.Forms.Button btnPickGoldenRegion;
+        private GvFocusSettingPanel gvFocusSettingPanel1;
     }
 }

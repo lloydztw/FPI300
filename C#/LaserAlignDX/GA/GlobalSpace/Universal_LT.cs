@@ -7,12 +7,14 @@ using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.CCDSpace;
 using JetEazy.ControlSpace;
+using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.DBSpace;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.OPSpace;
 using JetEazy.PropertyGridSpace;
 using JetEazy.Utils;
+using LaserAlignDX;
 using LaserAlignDX.BasicSpace.ParaSpace;
 using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -221,6 +223,30 @@ namespace Traveller106
         /// 飞拍相机
         /// </summary>
         public static IxLineScanCam IxFlyAreaCam = null;
+
+        public static PLCMotionClass GetMotor(int axisID)
+        {
+            var machineX3 = (MainFPIX3MachineClass)Universal.MACHINECollection?.MACHINE;
+            var plcMotions = machineX3?.PLCMOTIONCollection;
+            if (plcMotions == null || axisID >= plcMotions.Length || axisID < 0)
+                return null;
+            return plcMotions[axisID];
+        }
+        public static PLCMotionClass GetMotorX(SuckerRowEnum suckerID)
+        {
+            int axisID = suckerID == SuckerRowEnum.S1 ? 0 : 1;
+            return GetMotor(axisID);
+        }
+        public static PLCMotionClass GetMotorY(CarrierEnum carrierID)
+        {
+            int axisID = carrierID == CarrierEnum.C1 ? 2 : 3;
+            return GetMotor(axisID);
+        }
+        public static PLCMotionClass GetBigScanCameraFocusMotor()
+        {
+            int axisID = 4;
+            return GetMotor(axisID);
+        }
 
         public static AccDBClass ACCDB;
         public static EsssDBClass ESSDB;

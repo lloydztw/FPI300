@@ -25,6 +25,11 @@ namespace LaserAlignDX.Model.Coords
         /// </summary>
         IWorldGridPoints GetWorldGridPoints();
 
+        /// <summary>
+        /// 相機工作距離 
+        /// </summary>
+        double CameraWorkDist { get; set; }
+
         #region 建構時期_函式群
 
         /// <summary>
