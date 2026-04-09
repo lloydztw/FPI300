@@ -260,6 +260,8 @@ namespace LaserAlignDX.Model.Defects.V3
             var chipCenter = chipData?.ChipQuad2D.Center;
             if (chipCenter == null)
                 return null;
+            if (_xInspect.RoiCount <= 0)//<<如果没设定框 则跳出
+                return null;
 
             //string dumpFolder = System.IO.Path.Combine(SaveDebugPath, "Detect");
             //if (IsSaveDebugPicture)

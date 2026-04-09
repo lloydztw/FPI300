@@ -166,19 +166,20 @@ namespace LaserAlignDX.Mvc.Gui
             }
             return new CviRotRectBox[0];
         }
-        string formatText(int flyShowIndex, float offsetX, float offsetY, float offsetAngle)
+        string formatText(int flyShowIndex, float offsetX, float offsetY, float offsetAngle,string codeStr)
         {
             string text = $"[{flyShowIndex}]" +
                         $" x:{offsetX:0.000}," +
                         $" y:{offsetY:0.000}," +
-                        $" a:{offsetAngle:0.000}";
+                        $" a:{offsetAngle:0.000}"+
+                        $" 2D:{codeStr}";
             return text;
         }
         string formatText(FlyAoiResult flyAoiResult)
         {
             var meta = flyAoiResult?.MetaData;
             if (meta != null)
-                return formatText(meta.flyID.ShowID, flyAoiResult.OffsetX, flyAoiResult.OffsetY, flyAoiResult.OffsetAngle);
+                return formatText(meta.flyID.ShowID, flyAoiResult.OffsetX, flyAoiResult.OffsetY, flyAoiResult.OffsetAngle, flyAoiResult.CodeStr);
             return "";
         }
         #endregion

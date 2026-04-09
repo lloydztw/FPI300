@@ -143,7 +143,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             // 暫時強制使用 single thread
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            //usingMultiThread = false;
+            usingMultiThread = false;
 
             #region 準備_CELL_GROUPS
             int N_GROUPS = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;

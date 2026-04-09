@@ -146,17 +146,20 @@ namespace LaserAlignDX.BasicSpace
                 }
                 Code2DReaderTool.SetRunParam("RectangleFlag", "Both");
                 Code2DReaderTool.SetRunParam("AppMode", "ProMode");
-                Code2DReaderTool.SetRunParam("Loc2DCodeNum", "5");
+                Code2DReaderTool.SetRunParam("Loc2DCodeNum", "1");
                 Code2DReaderTool.SetRunParam("MaxBarSize", "1000");
                 Code2DReaderTool.SetRunParam("MinBarSize", "20");
-                if (cInputImg.Height >= 400 && cInputImg.Width >= 400)
-                    Code2DReaderTool.SetRunParam("SampleLevel", "4");
-                else if (cInputImg.Height >= 300 && cInputImg.Width >= 300)
-                    Code2DReaderTool.SetRunParam("SampleLevel", "3");
-                else if (cInputImg.Height >= 200 && cInputImg.Width >= 200)
-                    Code2DReaderTool.SetRunParam("SampleLevel", "2");
-                else
+                //if (cInputImg.Height >= 400 && cInputImg.Width >= 400)
+                //    Code2DReaderTool.SetRunParam("SampleLevel", "4");
+                //else if (cInputImg.Height >= 300 && cInputImg.Width >= 300)
+                //    Code2DReaderTool.SetRunParam("SampleLevel", "3");
+                //else if (cInputImg.Height >= 200 && cInputImg.Width >= 200)
+                //    Code2DReaderTool.SetRunParam("SampleLevel", "2");
+                //else
                     Code2DReaderTool.SetRunParam("SampleLevel", "1");
+
+                Code2DReaderTool.SetRunParam("MirrorMode", "Compatible");
+                Code2DReaderTool.SetRunParam("DiscreteFlag", "Both");
 
                 #region 变换读取
                 int i = 0;

@@ -8,6 +8,7 @@ using JetEazy.Interface;
 using JzDisplay;
 using LaserAlignDX.GA.FormSpace.FPI30Form;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LeTian.JxRecipesTool;
 using MoveGraphLibrary;
 using OpenCvSharp.Flann;
 using System;
@@ -78,6 +79,8 @@ namespace LaserAlignDX.FormSpace
         Button btnOpenFly => button4;
         Button btnLightTrigger => button5;
         Button btnSpecialCal => button6;
+        Button btnCodetest => button8;
+        RichTextBox rtbCodeContent => richTextBox1;
 
         FlyOffsetUI flyOffsetUI => flyOffsetUI1;
         FlyOffsetUI flyOffset2UI => flyOffsetUI2;
@@ -147,6 +150,7 @@ namespace LaserAlignDX.FormSpace
             btnOpenFly.Click += BtnOpenFly_Click;
             btnLightTrigger.Click += BtnLightTrigger_Click;
             btnSpecialCal.Click += BtnSpecialCal_Click;
+            btnCodetest.Click += BtnCodetest_Click;
 
             DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
 
@@ -177,6 +181,13 @@ namespace LaserAlignDX.FormSpace
             this.WindowState = FormWindowState.Maximized;
 #endif
 
+        }
+
+        private void BtnCodetest_Click(object sender, EventArgs e)
+        {
+            rtbCodeContent.Text = "";
+            aoiDecodeCode(xRecipe.bmpprintFlytemplate, out string text);
+            rtbCodeContent.Text = $"[{DateTime.Now.ToString("HH:mm:ss")}] {text}";
         }
 
         private void PropertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
@@ -388,7 +399,7 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnGetLocalImage_Click(object sender, EventArgs e)
         {
-            string _filename = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
+            string _filename = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("JPG Files (*.jpg)|*.JPG|" + "All files (*.*)|*.*", "");
             if (!string.IsNullOrEmpty(_filename))
             {
                 FreeImageBitmap freeImageBitmap = new FreeImageBitmap(_filename);
@@ -558,6 +569,29 @@ namespace LaserAlignDX.FormSpace
         }
 
         #region TOOLS
+        //----------------------------------------------------------------------------
+        // 此處函式不牽扯到 GUI, 將來要納入 AOI MODEL
+        //----------------------------------------------------------------------------
+        void aoiDecodeCode(Bitmap srcBmp, out string text)
+        {
+            if (srcBmp == null)
+            {
+                text = "";
+                return;
+            }
+
+            //>>> xRecipe.mvd2DReader.Run(xRecipe.bmpcodetemplate,
+            //>>>       new RectangleF(0, 0, xRecipe.bmpcodetemplate.Width, xRecipe.bmpcodetemplate.Height));
+
+            var aoiTool = xRecipe.fly2DReader;
+            var roi = new RectangleF(0, 0, srcBmp.Width, srcBmp.Height);
+
+            aoiTool.Run(srcBmp, roi);
+
+            var decodeInfo = aoiTool.DCodeInfo;
+            text = decodeInfo != null ? decodeInfo.Content : "";
+        }
+
         void getCamDevParaAndUpdateUI()
         {
             lblExpo.Text = $"{IxFlyAreaCam.GetExposure()} us";
