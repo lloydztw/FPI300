@@ -25,12 +25,13 @@ namespace LaserAlignDX.Mvc.Gui
         event EventHandler OnActiveViewChanged;
 
         Control Window { get; }
-
-        JezTransImageViewPanel ImgViewerActive { get; }
-        JezTransImageViewPanel ImgViewerEmptyTray { get; }
-        JezTransImageViewPanel ImgViewerChipTemplate { get; }
-
         Control wndVisionSettingsPanel { get; }
+
+        int ActiveViewIndex { get; set; }
+        JezTransImageViewPanel ImgViewer { get; }
+        JezTransImageViewPanel GetViewer(int index);
+        //JezTransImageViewPanel ImgViewerEmptyTray { get; }
+        //JezTransImageViewPanel ImgViewerChipTemplate { get; }
 
         RadioButton[] rdoCarriers { get; }
         Button btnLoadImage { get; }

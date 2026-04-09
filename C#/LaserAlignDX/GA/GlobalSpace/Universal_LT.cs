@@ -52,6 +52,10 @@ namespace Traveller106
         /// 是否打开飞拍界面  如果打开了 则主程序不要飞拍测试
         /// </summary>
         public static bool IsOpenFlyForm = false;
+        /// <summary>
+        /// 马达测试窗口是否打开标志
+        /// </summary>
+        public static bool IsOpenMotorWindows = false;
 
         static string _sim_root_path = null;
         public static string APP_ROOT_PATH 
@@ -376,7 +380,7 @@ namespace Traveller106
                         case OptionEnum.MAIN_FPIX3:
 
                             opstr += "1,";  //1個 PLC  
-                            opstr += "0,";   //14個軸
+                            opstr += "6,";   //14個軸
                             opstr += $"2,";   //0 Projector
                             opstr += "0,";   //4 barcode sacn
 

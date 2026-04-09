@@ -34,24 +34,34 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
+using VsCommon.ControlSpace.MachineSpace;
+
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
     public partial class GaRecipeEditCtrl
     {
         #region GLOBAL_MESS
-        IxLineScanCam IScanCam
+        const int FOCUS_MOTOR_AXIS_ID = 0;
+        IxLineScanCam _bigScanCamera
         {
-            get { return Traveller106.Universal.IxLineScan; }
+            get => Traveller106.Universal.IxLineScan;
         }
         ITravelerModel _sysModel => GaMvcConfig.SysModel;
-        IProcessRunFPI _aoiModel => _sysModel.AoiModel;
+        IAxis getFocusMotor()
+        {
+            int axisID = FOCUS_MOTOR_AXIS_ID;
+            var machineX3 = (MainFPIX3MachineClass)Universal.MACHINECollection?.MACHINE;
+            var plcMotions = machineX3?.PLCMOTIONCollection;
+            if (plcMotions == null || axisID >= plcMotions.Length || axisID < 0)
+                return null;
+            return plcMotions[axisID];
+        }
         #endregion
 
         #region RECIPES
         RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         RecipeParaGridClass _xParamGrid => RecipeParaGridClass.Instance;
-        //JxRecipeCombo _jxRecipeCombo => _sysModel?.GetCurrentRecipe();
         #endregion
 
         #region INTERACTOR
@@ -62,7 +72,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region GUI_LINKS
         internal IvRecipeEditorUI _rcpEditUI;
         Form _wndOwner;
-        JezTransImageViewPanel _imgViewer => _rcpEditUI.ImgViewerActive;
+        JezTransImageViewPanel _imgViewer => _rcpEditUI.ImgViewer;
         RadioButton[] rdoCarriers => _rcpEditUI.rdoCarriers;
         Button btnOpenEmptyTrayWindow => _rcpEditUI.btnOpenEmptyTrayWindow;
         Button btnPickGoldenRegion => _rcpEditUI.btnPickGoldenChipRegion;
@@ -74,6 +84,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         Button btnGrabImage => _rcpEditUI.btnGrabImage;
         Button btnLoadImage => _rcpEditUI.btnLoadImage;
         Button btnSaveImage => _rcpEditUI.btnSaveImage;
+        Button btnFocusMotorSettings => _rcpEditUI.btnFocusMotorSettings;
+        Button btnFocusMotorGo => _rcpEditUI.btnFocusMotorGo;
+        Control lblFocusMotorPos => _rcpEditUI.lblFocusMotorZ;
         Button btnCancel => _rcpEditUI.btnCancel;
         Button btnOK => _rcpEditUI.btnOK;
         #endregion
@@ -105,12 +118,15 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region PRIVATE_INIT_FUNCTIONS
         void initImgViewer()
         {
-            var matViewer = _rcpEditUI.ImgViewerActive.MatViewer;
+            var matViewer = _rcpEditUI.ImgViewer.MatViewer;
             matViewer.AddInteractor(_cviGoldenRegionBox);
             matViewer.AddInteractor(_cviCamGridBox);
         }
         void connectEventHandlers()
-        {
+        {         
+            // ActiveViewChanged
+            _rcpEditUI.OnActiveViewChanged += rcpEditUI_OnActiveViewChanged;
+
             LtAoiFactory.OnLineScanRequested += LtAoi_OnLineScanRequested;
 
             btnOK.Click += (s, e) => CloseWindow(confirm: true);
@@ -132,11 +148,15 @@ namespace LaserAlignDX.Mvc.Ctrl
             btnOpenLightCtrlWindow.Click += (s, e) => OpenLightCtrlWindow();
             btnWriteCoordsRefToPlc.Click += (s, e) => WriteCoordsRefToPlc();
 
+            // Camera Focus Motor
+            if (btnFocusMotorSettings != null)
+                btnFocusMotorSettings.Click += (s, e) => OpenFocusMotorWindow();
+            if (btnFocusMotorGo != null)
+                btnFocusMotorGo.Click += (s, e) => MoveFocusMotorToRecipePos();
+
             // ProperyGrid
             if ( _rcpEditUI.wndVisionSettingsPanel is PropertyGrid pg)
-            {
                 pg.PropertyValueChanged += Pg_PropertyValueChanged;
-            }
 
             // 自動釋放所有資源
             _rcpEditUI.Window.HandleDestroyed += (s, e) => Dispose();
@@ -144,16 +164,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             // 延遲更新參數
             _rcpEditUI.Window.HandleCreated += (s, e) =>
             {
-                //var delayAction = new Action(() =>
-                //{
-                //    var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
-                //    makeSomeReadonlyInGaaraRecipe();
-                //    _currentCarrierID = _sysModel.ActiveCarrierID;
-                //    updateAllRecipeData(false, _currentCarrierID);
-                //    _rcpEditUI.rdoCarriers[(int)_currentCarrierID].Checked = true;
-                //    GaUtil.SetCursor(_wndOwner, oldCursor);
-                //});
-                //_wndOwner.BeginInvoke(delayAction);
                 new Action(() =>
                 {
                     System.Threading.Thread.Sleep(100);
@@ -173,8 +183,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _wndOwner.Refresh();
 
                 makeSomeReadonlyInGaaraRecipe();
-                _currentCarrierID = _sysModel.ActiveCarrierID;
-                updateAllRecipeData(false, _currentCarrierID);
+                updateAllRecipeData(false, _currentCarrierID = _sysModel.ActiveCarrierID);
                 _rcpEditUI.rdoCarriers[(int)_currentCarrierID].Checked = true;
 
                 GaUtil.SetCursor(_wndOwner, oldCursor);
@@ -183,6 +192,11 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region EVENT_HANDLERS
+        private void rcpEditUI_OnActiveViewChanged(object sender, EventArgs e)
+        {
+            updateFocusMotorPos();
+            _wndOwner.BeginInvoke(new Action(() => MoveFocusMotorToRecipePos()));
+        }
         private void rdoCarrier_CheckedChanged(object sender, EventArgs e)
         {
             var carrierID = rdoCarriers[0].Checked ? CarrierEnum.C1 : CarrierEnum.C2;
@@ -232,7 +246,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 if (enabled)
                     showCviResult(false);
 
-                var matViewer = _rcpEditUI.ImgViewerActive.MatViewer;
+                var matViewer = _rcpEditUI.ImgViewer.MatViewer;
                 matViewer.Invalidate();
             }
         }
@@ -258,6 +272,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 "xRealOffsetX",
                 "xRealOffsetY",
                 "xStageNumber",
+                "zFocusOnCarrier",
+                "zFocusOnChip",
             };
 
             TypeDescriptor.AddProvider(
@@ -277,9 +293,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 updateRecipePropertyView(carrierID);
                 updatePlcCoordsRef(_trfModel, carrierID);
                 updateRecipeOrgBmpToViewer(carrierID);
+                updateFocusMotorPos();
             }
         }
-        void updateRecipeOrgBmpToViewer(CarrierEnum carrierID)
+        void updateRecipeOrgBmpToViewer(CarrierEnum carrierID, bool isFocusOnCarrier = false)
         {
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 
@@ -355,6 +372,48 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         #endregion
 
+        #region PRIVATE_FOCUS_Z_FUNCTIONS
+        double queryFocusMotorPos()
+        {
+            var axis = getFocusMotor();
+            double pos = axis != null ? axis.GetPos() : 0.0;
+            return pos;
+        }
+        double getCameraFocusFromRecipe(int activeViewIndex)
+        {
+            if (activeViewIndex == 0)
+                return _xRecipe.zFocusOnCarrier;
+            else if (activeViewIndex == 1)
+                return _xRecipe.zFocusOnChip;
+            else
+                return 0.0;
+        }
+        void setCameraFocusToRecipe(int activeViewIndex, double motorPos)
+        {
+            if (activeViewIndex == 0)
+                _xRecipe.zFocusOnCarrier = (float)motorPos;
+            else if (activeViewIndex == 1)
+                _xRecipe.zFocusOnChip = (float)motorPos;
+        }
+        void updateFocusMotorPos(bool toRecipe = false)
+        {
+            int activeViewIndex = _rcpEditUI.ActiveViewIndex;
+            
+            if (toRecipe)
+            {
+                double motorPos = queryFocusMotorPos();
+                setCameraFocusToRecipe(activeViewIndex, motorPos);
+            }
+
+            var label = lblFocusMotorPos;
+            if (label != null)
+            {
+                var focusZ = getCameraFocusFromRecipe(activeViewIndex);
+                label.Text = $"{focusZ:0.000}";
+            }
+        }
+        #endregion
+
         void ChangeActiveCarrier(CarrierEnum C)
         {
             if (C != _currentCarrierID)
@@ -407,7 +466,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
 
-            var freeBmp = IScanCam.GetFreeImageBitmap();
+            var freeBmp = _bigScanCamera.GetFreeImageBitmap();
             if (freeBmp != null)
             {
                 var bigBmp = freeBmp.ToBitmap();
@@ -486,6 +545,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             using (var dlg = new frmFlySetup())
             {
+                dlg.FormBorderStyle = FormBorderStyle.Sizable;
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.Size = _wndOwner.Size;
                 dlg.ShowDialog();
@@ -512,6 +572,62 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
             }
         }
+        
+        void OpenFocusMotorWindow()
+        {
+            using (var dlg = new FormMotorOne(FOCUS_MOTOR_AXIS_ID))
+            {
+                // 備份當下馬達的位置
+                double lastMotorPos = queryFocusMotorPos();
+
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                if (dlg.ShowDialog(_wndOwner) == DialogResult.OK)
+                {
+                    updateFocusMotorPos(toRecipe: true);
+                }
+                else
+                {
+                    // 返回之前的位置
+                    MoveFocusMotorTo(lastMotorPos);
+                }
+            }
+        }
+        void MoveFocusMotorTo(double targetPos, bool silent = false)
+        {
+            var currentPos = queryFocusMotorPos();
+
+            var delta = targetPos - currentPos;
+            if (Math.Abs(delta) < 0.0005)
+                return;
+
+            if (!silent)
+            {
+                var msg = GaUtil.GetEnumDescription(Prompts.Question_To_Move_Big_Linescan_Motor);
+                msg += $"\n\r\n\rTo {targetPos:0.000} mm";
+                bool ok = VsMessageBox.Question(msg) == DialogResult.OK;
+                if (!ok) return;
+            }
+
+            try
+            {
+                var motor = getFocusMotor();
+                motor?.Go(currentPos, delta);
+            }
+            catch(Exception ex)
+            {
+                var err = "馬達異常:\n\r" + ex.ToString();
+                MessageBox.Show(err, "Motor Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        void MoveFocusMotorToRecipePos(bool silent = false)
+        {
+            int activeViewIndex = _rcpEditUI.ActiveViewIndex;
+            if (activeViewIndex == 0 || activeViewIndex == 1)
+            {
+                var targetPos = getCameraFocusFromRecipe(activeViewIndex);
+                MoveFocusMotorTo(targetPos, silent);
+            }
+        }
 
         void BuildGoldenRegion()
         {
@@ -528,6 +644,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             updateGoldenRegionToRecipe(imgSrc[goldenRoi], goldenRoi);
         }
 
+        #region OLD_CODE
         void __AutoUpdateRegions()
         {
 #if(OPT_REMARK_2026_0308)
@@ -578,6 +695,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             GaUtil.SetCursor(_wndOwner, oldCursor);
 #endif
         }
+        #endregion
+
         void AutoCreateRegionsArray()
         {
             //---------------------------------------------------------------

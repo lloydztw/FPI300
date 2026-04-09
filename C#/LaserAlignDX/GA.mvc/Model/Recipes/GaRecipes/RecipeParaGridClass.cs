@@ -185,7 +185,7 @@ namespace LaserAlignDX.BasicSpace
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(-99999999, 99999999)]
         [Browsable(true)]
-        [ReadOnly(false)]
+        [ReadOnly(true)]
         public float zFocusOnCarrier
         {
             get { return xRecipe.zFocusOnCarrier; }
@@ -197,7 +197,7 @@ namespace LaserAlignDX.BasicSpace
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(-99999999, 99999999)]
         [Browsable(true)]
-        [ReadOnly(false)]
+        [ReadOnly(true)]
         public float zFocusOnChip
         {
             get { return xRecipe.zFocusOnChip; }

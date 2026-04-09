@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmFlySetup));
             this.pnlBottom = new System.Windows.Forms.Panel();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
@@ -70,7 +71,7 @@
             this.pnlBottom.Controls.Add(this.button2);
             this.pnlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlBottom.Location = new System.Drawing.Point(0, 849);
-            this.pnlBottom.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pnlBottom.Margin = new System.Windows.Forms.Padding(4);
             this.pnlBottom.Name = "pnlBottom";
             this.pnlBottom.Size = new System.Drawing.Size(1365, 151);
             this.pnlBottom.TabIndex = 12;
@@ -81,7 +82,7 @@
             this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button1.Location = new System.Drawing.Point(1073, 85);
-            this.button1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(140, 62);
             this.button1.TabIndex = 15;
@@ -94,7 +95,7 @@
             this.button2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button2.Location = new System.Drawing.Point(1221, 85);
-            this.button2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button2.Margin = new System.Windows.Forms.Padding(4);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(140, 62);
             this.button2.TabIndex = 16;
@@ -115,7 +116,7 @@
             this.pnlTop.Controls.Add(this.button7);
             this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTop.Location = new System.Drawing.Point(0, 0);
-            this.pnlTop.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pnlTop.Margin = new System.Windows.Forms.Padding(4);
             this.pnlTop.Name = "pnlTop";
             this.pnlTop.Size = new System.Drawing.Size(1365, 156);
             this.pnlTop.TabIndex = 11;
@@ -171,7 +172,7 @@
             this.button6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.button6.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button6.Location = new System.Drawing.Point(760, 68);
-            this.button6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button6.Margin = new System.Windows.Forms.Padding(4);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(120, 31);
             this.button6.TabIndex = 37;
@@ -183,7 +184,7 @@
             this.button5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button5.Location = new System.Drawing.Point(632, 68);
-            this.button5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button5.Margin = new System.Windows.Forms.Padding(4);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(120, 31);
             this.button5.TabIndex = 36;
@@ -195,7 +196,7 @@
             this.button4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button4.Location = new System.Drawing.Point(504, 68);
-            this.button4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button4.Margin = new System.Windows.Forms.Padding(4);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(120, 31);
             this.button4.TabIndex = 35;
@@ -207,7 +208,7 @@
             this.button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button3.Location = new System.Drawing.Point(504, 28);
-            this.button3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button3.Margin = new System.Windows.Forms.Padding(4);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(120, 31);
             this.button3.TabIndex = 34;
@@ -219,9 +220,9 @@
             this.groupBox1.Controls.Add(this.radioButton2);
             this.groupBox1.Controls.Add(this.radioButton1);
             this.groupBox1.Location = new System.Drawing.Point(192, 15);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
             this.groupBox1.Size = new System.Drawing.Size(267, 125);
             this.groupBox1.TabIndex = 33;
             this.groupBox1.TabStop = false;
@@ -231,7 +232,7 @@
             // 
             this.radioButton2.AutoSize = true;
             this.radioButton2.Location = new System.Drawing.Point(35, 52);
-            this.radioButton2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.radioButton2.Margin = new System.Windows.Forms.Padding(4);
             this.radioButton2.Name = "radioButton2";
             this.radioButton2.Size = new System.Drawing.Size(118, 19);
             this.radioButton2.TabIndex = 1;
@@ -244,7 +245,7 @@
             this.radioButton1.AutoSize = true;
             this.radioButton1.Checked = true;
             this.radioButton1.Location = new System.Drawing.Point(35, 25);
-            this.radioButton1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.radioButton1.Margin = new System.Windows.Forms.Padding(4);
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(118, 19);
             this.radioButton1.TabIndex = 0;
@@ -257,7 +258,7 @@
             this.button7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.button7.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button7.Location = new System.Drawing.Point(16, 28);
-            this.button7.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.button7.Margin = new System.Windows.Forms.Padding(4);
             this.button7.Name = "button7";
             this.button7.Size = new System.Drawing.Size(120, 31);
             this.button7.TabIndex = 22;
@@ -268,7 +269,7 @@
             // 
             this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Right;
             this.propertyGrid1.Location = new System.Drawing.Point(949, 156);
-            this.propertyGrid1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.propertyGrid1.Margin = new System.Windows.Forms.Padding(4);
             this.propertyGrid1.Name = "propertyGrid1";
             this.propertyGrid1.Size = new System.Drawing.Size(416, 693);
             this.propertyGrid1.TabIndex = 10;
@@ -281,7 +282,7 @@
             this.tabControl2.Controls.Add(this.tabPage4);
             this.tabControl2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl2.Location = new System.Drawing.Point(0, 156);
-            this.tabControl2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabControl2.Margin = new System.Windows.Forms.Padding(4);
             this.tabControl2.Name = "tabControl2";
             this.tabControl2.SelectedIndex = 0;
             this.tabControl2.Size = new System.Drawing.Size(949, 693);
@@ -291,7 +292,7 @@
             // 
             this.tabPage3.Controls.Add(this.DS1);
             this.tabPage3.Location = new System.Drawing.Point(4, 25);
-            this.tabPage3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage3.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Size = new System.Drawing.Size(941, 664);
             this.tabPage3.TabIndex = 0;
@@ -312,9 +313,9 @@
             // 
             this.tabPage2.Controls.Add(this.DS2);
             this.tabPage2.Location = new System.Drawing.Point(4, 25);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(941, 663);
+            this.tabPage2.Size = new System.Drawing.Size(941, 664);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "测试图片";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -326,16 +327,16 @@
             this.DS2.Location = new System.Drawing.Point(0, 0);
             this.DS2.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.DS2.Name = "DS2";
-            this.DS2.Size = new System.Drawing.Size(941, 663);
+            this.DS2.Size = new System.Drawing.Size(941, 664);
             this.DS2.TabIndex = 7;
             // 
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.flyOffsetUI1);
             this.tabPage1.Location = new System.Drawing.Point(4, 25);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(941, 663);
+            this.tabPage1.Size = new System.Drawing.Size(941, 664);
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "载台一补偿";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -344,18 +345,18 @@
             // 
             this.flyOffsetUI1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flyOffsetUI1.Location = new System.Drawing.Point(0, 0);
-            this.flyOffsetUI1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.flyOffsetUI1.Margin = new System.Windows.Forms.Padding(5);
             this.flyOffsetUI1.Name = "flyOffsetUI1";
-            this.flyOffsetUI1.Size = new System.Drawing.Size(941, 663);
+            this.flyOffsetUI1.Size = new System.Drawing.Size(941, 664);
             this.flyOffsetUI1.TabIndex = 0;
             // 
             // tabPage4
             // 
             this.tabPage4.Controls.Add(this.flyOffsetUI2);
             this.tabPage4.Location = new System.Drawing.Point(4, 25);
-            this.tabPage4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.tabPage4.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(941, 663);
+            this.tabPage4.Size = new System.Drawing.Size(941, 664);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "载台二补偿";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -364,9 +365,9 @@
             // 
             this.flyOffsetUI2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flyOffsetUI2.Location = new System.Drawing.Point(0, 0);
-            this.flyOffsetUI2.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
+            this.flyOffsetUI2.Margin = new System.Windows.Forms.Padding(5);
             this.flyOffsetUI2.Name = "flyOffsetUI2";
-            this.flyOffsetUI2.Size = new System.Drawing.Size(941, 663);
+            this.flyOffsetUI2.Size = new System.Drawing.Size(941, 664);
             this.flyOffsetUI2.TabIndex = 1;
             // 
             // frmFlySetup
@@ -379,7 +380,8 @@
             this.Controls.Add(this.pnlBottom);
             this.Controls.Add(this.pnlTop);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "frmFlySetup";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "frmFlySetup";

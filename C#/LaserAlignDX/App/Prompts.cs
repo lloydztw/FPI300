@@ -24,5 +24,8 @@ namespace LaserAlignDX
 
         [Description("不支援此功能.")]
         Warn_the_function_is_not_supported,
+
+        [Description("即將移動 線掃相機 馬達")]
+        Question_To_Move_Big_Linescan_Motor,
     }
 }

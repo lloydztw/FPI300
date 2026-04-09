@@ -1,14 +1,19 @@
-﻿using System.Drawing;
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace LaserAlignDX.Mvc.Gui
 {
     public partial class GvRecipeBtnsPanel : UserControl
     {
+        public event EventHandler OnActiveViewChanged;
+
         #region PRIVATE_DATA
         Color _colorActive;
         Color _colorPassive;
         Button[] _majorButtons;
+        int _activeIndex;
         #endregion
 
         public GvRecipeBtnsPanel()
@@ -30,11 +35,18 @@ namespace LaserAlignDX.Mvc.Gui
             _colorPassive = _majorButtons[1].BackColor;
 
             foreach (var btnMajor in _majorButtons)
-                btnMajor.Click += (s, e) => switchTo(s as Button);
+                btnMajor.Click += (s, e) => switchTo(Array.IndexOf(_majorButtons, s));
 
             var rdoCarriers = new[] { rdoCarrier1, rdoCarrier2 };
             foreach (var rdoCarrier in rdoCarriers)
                 rdoCarrier.CheckedChanged += (s, e) => updateRdoColor(s as RadioButton);
+        }
+
+        [Browsable(false)]
+        public int ActiveViewIndex
+        {
+            get => _activeIndex;
+            set => switchTo(value);
         }
 
         void initDataGridView()
@@ -71,11 +83,15 @@ namespace LaserAlignDX.Mvc.Gui
         {
             rdo.ForeColor = rdo.Checked ? Color.Black : Color.DimGray;
         }
-        void switchTo(Button btnTarget)
+        void switchTo(int targetIndex)
         {
-            if (btnTarget == null)
+            if (targetIndex < 0 || targetIndex >= _majorButtons.Length)
                 return;
 
+            bool isChanged = _activeIndex != targetIndex;
+            _activeIndex = targetIndex;
+
+            var btnTarget = _majorButtons[targetIndex];
             foreach (var btn in _majorButtons)
             {
                 btn.BackColor = (btn == btnTarget) ? _colorActive : _colorPassive;
@@ -104,6 +120,9 @@ namespace LaserAlignDX.Mvc.Gui
                 btnWriteCoordsToPlc.Visible = false;
                 panel2.Enabled = false;
             }
+
+            if (isChanged)
+                OnActiveViewChanged?.Invoke(this, null);
         }
     }
 }

@@ -161,11 +161,6 @@ namespace LaserAlignDX.FormSpace
             xTimer.Interval = 50;
             xTimer.Enabled = true;
             xTimer.Tick += XTimer_Tick;
-
-#if OPT_LETIAN_AUTO_LAYOUT
-            this.FormBorderStyle = FormBorderStyle.Sizable;
-            //this.WindowState = FormWindowState.Maximized;
-#endif
         }
 
         private void PropertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)

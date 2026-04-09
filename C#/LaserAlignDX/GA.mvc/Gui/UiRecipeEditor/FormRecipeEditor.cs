@@ -36,33 +36,22 @@ namespace LaserAlignDX.Mvc.Gui
             initLocalEventHandlers();
         }
 
-        #region PRIVATE_FUNCTIONS
+        #region PRIVATE_MEMBERS
         void initLocalEventHandlers()
         {
-            var switchButtons = new[]
-{
-                btnSwitchToEmptyTray,
-                btnSwitchToChipTemplate,
-            };
-
-            foreach(var btn in switchButtons)
-            {
-                btn.Click += (s, e) =>
-                {
-                    int index = Array.IndexOf(switchButtons, btn);
-                    var activewViewer = selectImageViewer(index);
-                    OnActiveViewChanged?.Invoke(activewViewer, null);
-                };
-            }
+            btnSwitchToEmptyTray.Click += (s, e) => selectImageViewer(0);
+            btnSwitchToChipTemplate.Click += (s, e) => selectImageViewer(1);
+            wndBtnsPanel.OnActiveViewChanged += (s, e) => OnActiveViewChanged?.Invoke(this, e);
         }
         object selectImageViewer(int index)
         {
-            ImgViewerActive = index == 0 ? jezTransImageViewPanel1 : jezTransImageViewPanel2;
+            ImgViewer = index == 0 ? jezTransImageViewPanel1 : jezTransImageViewPanel2;
             jezTransImageViewPanel1.Visible = index == 0;
             jezTransImageViewPanel2.Visible = index == 1;
             jezTransImageViewPanel1.Dock = index == 0 ? DockStyle.Fill : DockStyle.None;
             jezTransImageViewPanel2.Dock = index == 1 ? DockStyle.Fill : DockStyle.None;
-            return ImgViewerActive;
+            ((IvRecipeEditorUI)this).ActiveViewIndex = index;
+            return ImgViewer;
         }
         #endregion
 
@@ -74,13 +63,22 @@ namespace LaserAlignDX.Mvc.Gui
         Control IvRecipeEditorUI.Window => this;
         Control IvRecipeEditorUI.wndVisionSettingsPanel => propertyGrid1;
 
-        public JezTransImageViewPanel ImgViewerActive
+        int IvRecipeEditorUI.ActiveViewIndex 
+        {
+            get => wndBtnsPanel.ActiveViewIndex;
+            set => wndBtnsPanel.ActiveViewIndex = value;
+        }
+        public JezTransImageViewPanel ImgViewer
         {
             get;
             private set;
         }
-        JezTransImageViewPanel IvRecipeEditorUI.ImgViewerEmptyTray => jezTransImageViewPanel1;
-        JezTransImageViewPanel IvRecipeEditorUI.ImgViewerChipTemplate => jezTransImageViewPanel2;
+        JezTransImageViewPanel IvRecipeEditorUI.GetViewer(int index)
+        {
+            return index == 0 ? jezTransImageViewPanel1 : jezTransImageViewPanel2;
+        }
+        //JezTransImageViewPanel IvRecipeEditorUI.ImgViewerEmptyTray => jezTransImageViewPanel1;
+        //JezTransImageViewPanel IvRecipeEditorUI.ImgViewerChipTemplate => jezTransImageViewPanel2;
 
         public RadioButton[] rdoCarriers
         {

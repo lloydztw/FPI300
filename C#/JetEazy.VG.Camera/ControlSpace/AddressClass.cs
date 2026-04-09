@@ -95,7 +95,7 @@ namespace JetEazy.ControlSpace
             return ret;
         }
 
-        public string ToString()
+        public override string ToString()
         {
             if (string.IsNullOrEmpty(Address1))
                 return SiteNo.ToString() + ":" + Address0;

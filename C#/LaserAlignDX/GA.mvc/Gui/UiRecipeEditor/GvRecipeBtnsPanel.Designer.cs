@@ -50,10 +50,10 @@
             this.rdoCarrier2 = new System.Windows.Forms.RadioButton();
             this.rdoCarrier1 = new System.Windows.Forms.RadioButton();
             this.btnLoadImage = new System.Windows.Forms.Button();
-            this.btnCreateCellRegions = new System.Windows.Forms.Button();
-            this.btnOpenEmptyTrayWindow = new System.Windows.Forms.Button();
             this.btnOpenTemplateMatchWindow = new System.Windows.Forms.Button();
             this.btnPickGoldenRegion = new System.Windows.Forms.Button();
+            this.btnCreateCellRegions = new System.Windows.Forms.Button();
+            this.btnOpenEmptyTrayWindow = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panelFocusZ.SuspendLayout();
@@ -63,7 +63,7 @@
             // 
             this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
             this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList1.Images.SetKeyName(0, "grid_3x3.png");
+            this.imageList1.Images.SetKeyName(0, "sysSettings.png");
             // 
             // btnWriteCoordsToPlc
             // 
@@ -212,7 +212,7 @@
             this.lblFocusMotorZ.BackColor = System.Drawing.Color.Black;
             this.lblFocusMotorZ.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblFocusMotorZ.ForeColor = System.Drawing.Color.Lime;
-            this.lblFocusMotorZ.Location = new System.Drawing.Point(20, 43);
+            this.lblFocusMotorZ.Location = new System.Drawing.Point(20, 46);
             this.lblFocusMotorZ.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblFocusMotorZ.Name = "lblFocusMotorZ";
             this.lblFocusMotorZ.Size = new System.Drawing.Size(120, 31);
@@ -224,7 +224,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(16, 9);
+            this.label1.Location = new System.Drawing.Point(16, 12);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(124, 20);
@@ -236,7 +236,7 @@
             this.btnFocusMotorGo.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
             this.btnFocusMotorGo.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnFocusMotorGo.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnFocusMotorGo.Location = new System.Drawing.Point(167, 43);
+            this.btnFocusMotorGo.Location = new System.Drawing.Point(167, 46);
             this.btnFocusMotorGo.Margin = new System.Windows.Forms.Padding(4);
             this.btnFocusMotorGo.Name = "btnFocusMotorGo";
             this.btnFocusMotorGo.Size = new System.Drawing.Size(58, 31);
@@ -247,14 +247,16 @@
             // btnFocusMotorSettings
             // 
             this.btnFocusMotorSettings.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.btnFocusMotorSettings.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnFocusMotorSettings.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnFocusMotorSettings.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnFocusMotorSettings.Location = new System.Drawing.Point(167, 6);
+            this.btnFocusMotorSettings.ImageIndex = 0;
+            this.btnFocusMotorSettings.ImageList = this.imageList1;
+            this.btnFocusMotorSettings.Location = new System.Drawing.Point(167, 9);
             this.btnFocusMotorSettings.Margin = new System.Windows.Forms.Padding(4);
             this.btnFocusMotorSettings.Name = "btnFocusMotorSettings";
             this.btnFocusMotorSettings.Size = new System.Drawing.Size(58, 27);
             this.btnFocusMotorSettings.TabIndex = 15;
-            this.btnFocusMotorSettings.Text = "Set";
             this.btnFocusMotorSettings.UseVisualStyleBackColor = false;
             // 
             // btnSaveImage
@@ -329,32 +331,6 @@
             this.btnLoadImage.Text = "加载图片";
             this.btnLoadImage.UseVisualStyleBackColor = false;
             // 
-            // btnCreateCellRegions
-            // 
-            this.btnCreateCellRegions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.btnCreateCellRegions.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnCreateCellRegions.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCreateCellRegions.Location = new System.Drawing.Point(300, 52);
-            this.btnCreateCellRegions.Margin = new System.Windows.Forms.Padding(4);
-            this.btnCreateCellRegions.Name = "btnCreateCellRegions";
-            this.btnCreateCellRegions.Size = new System.Drawing.Size(120, 31);
-            this.btnCreateCellRegions.TabIndex = 11;
-            this.btnCreateCellRegions.Text = "生成陣列";
-            this.btnCreateCellRegions.UseVisualStyleBackColor = false;
-            // 
-            // btnOpenEmptyTrayWindow
-            // 
-            this.btnOpenEmptyTrayWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
-            this.btnOpenEmptyTrayWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnOpenEmptyTrayWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOpenEmptyTrayWindow.Location = new System.Drawing.Point(300, 13);
-            this.btnOpenEmptyTrayWindow.Margin = new System.Windows.Forms.Padding(18, 6, 18, 6);
-            this.btnOpenEmptyTrayWindow.Name = "btnOpenEmptyTrayWindow";
-            this.btnOpenEmptyTrayWindow.Size = new System.Drawing.Size(120, 31);
-            this.btnOpenEmptyTrayWindow.TabIndex = 10;
-            this.btnOpenEmptyTrayWindow.Text = "空盤檢測";
-            this.btnOpenEmptyTrayWindow.UseVisualStyleBackColor = false;
-            // 
             // btnOpenTemplateMatchWindow
             // 
             this.btnOpenTemplateMatchWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
@@ -380,6 +356,32 @@
             this.btnPickGoldenRegion.TabIndex = 12;
             this.btnPickGoldenRegion.Text = "框選區域";
             this.btnPickGoldenRegion.UseVisualStyleBackColor = false;
+            // 
+            // btnCreateCellRegions
+            // 
+            this.btnCreateCellRegions.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.btnCreateCellRegions.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnCreateCellRegions.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnCreateCellRegions.Location = new System.Drawing.Point(300, 52);
+            this.btnCreateCellRegions.Margin = new System.Windows.Forms.Padding(4);
+            this.btnCreateCellRegions.Name = "btnCreateCellRegions";
+            this.btnCreateCellRegions.Size = new System.Drawing.Size(120, 31);
+            this.btnCreateCellRegions.TabIndex = 11;
+            this.btnCreateCellRegions.Text = "生成陣列";
+            this.btnCreateCellRegions.UseVisualStyleBackColor = false;
+            // 
+            // btnOpenEmptyTrayWindow
+            // 
+            this.btnOpenEmptyTrayWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
+            this.btnOpenEmptyTrayWindow.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnOpenEmptyTrayWindow.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnOpenEmptyTrayWindow.Location = new System.Drawing.Point(300, 13);
+            this.btnOpenEmptyTrayWindow.Margin = new System.Windows.Forms.Padding(18, 6, 18, 6);
+            this.btnOpenEmptyTrayWindow.Name = "btnOpenEmptyTrayWindow";
+            this.btnOpenEmptyTrayWindow.Size = new System.Drawing.Size(120, 31);
+            this.btnOpenEmptyTrayWindow.TabIndex = 10;
+            this.btnOpenEmptyTrayWindow.Text = "空盤檢測";
+            this.btnOpenEmptyTrayWindow.UseVisualStyleBackColor = false;
             // 
             // GvRecipeBtnsPanel
             // 

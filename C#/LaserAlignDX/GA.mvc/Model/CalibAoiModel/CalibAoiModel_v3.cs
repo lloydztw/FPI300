@@ -74,8 +74,8 @@ namespace LaserAlignDX.AoiModel
                     Cv2.Threshold(imgCrop, imgCrop, 0, 255, ThresholdTypes.Otsu);
                 else
                     Cv2.Threshold(imgCrop, imgCrop, thres, 255, ThresholdTypes.Binary);
-
-                _DUMP(imgCrop, "BoardGrid", $"_binary_{carrierID}");
+                
+                _DUMP(imgCrop, "BoardGrid", $"binary_{carrierID}", ".jpg");
 
                 var finder = new EzBlobFinder
                 {
@@ -759,13 +759,13 @@ namespace LaserAlignDX.AoiModel
                 img.SaveImage(file);
             }
         }
-        void _DUMP(Mat img, string subFolder, string tag)
+        void _DUMP(Mat img, string subFolder, string tag, string ext = ".png")
         {
             if (OPT_DUMP && img != null)
             {
                 string path = $"d:\\paso.log\\Calib\\{subFolder}";
                 JetEazy.IO.QxPathUtility.InitDirectory(path);
-                string file = System.IO.Path.Combine(path, $"{subFolder}{tag}.png");
+                string file = System.IO.Path.Combine(path, $"{subFolder}{tag}{ext}");
                 img.SaveImage(file);
             }
         }

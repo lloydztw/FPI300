@@ -407,6 +407,12 @@
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.Designer.cs">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorOne.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorOne.Designer.cs">
+      <DependentUpon>FormMotorOne.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormPadThresholdsEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -484,7 +490,6 @@
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeParaGridClass.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\UITypeEditors\PgCameraFocusCfgUI.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\JxMetadataUtil.cs" />
     <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyMetadataUtil.cs" />
@@ -572,6 +577,12 @@
     </Compile>
     <Compile Include="GA\FormSpace\BannerForm.designer.cs">
       <DependentUpon>BannerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA\FormSpace\FormMotor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA\FormSpace\FormMotor.Designer.cs">
+      <DependentUpon>FormMotor.cs</DependentUpon>
     </Compile>
     <Compile Include="GA\FormSpace\FormProgressing.cs">
       <SubType>Form</SubType>
@@ -712,6 +723,9 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.resx">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiMotorViewer\FormMotorOne.resx">
+      <DependentUpon>FormMotorOne.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormPadThresholdsEditor.resx">
       <DependentUpon>FormPadThresholdsEditor.cs</DependentUpon>
     </EmbeddedResource>
@@ -735,6 +749,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">
       <DependentUpon>BannerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\FormSpace\FormMotor.resx">
+      <DependentUpon>FormMotor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\FormProgressing.resx">
       <DependentUpon>FormProgressing.cs</DependentUpon>
