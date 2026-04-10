@@ -19,8 +19,8 @@ using JetEazy.QMath;
 using JetEazy.Utils;
 using System;
 
-using QMicroChipTransform = LaserAlignDX.Model.Coords.V35.QMicroChipTransform;
-using TravellerTransforms = LaserAlignDX.Model.Coords.V35.TravellerTransforms;
+using QMicroChipTransform = LaserAlignDX.Model.Coords.V33.QMicroChipTransform;
+using TravellerTransforms = LaserAlignDX.Model.Coords.V33.TravellerTransforms;
 
 
 namespace LaserAlignDX.Model.Coords

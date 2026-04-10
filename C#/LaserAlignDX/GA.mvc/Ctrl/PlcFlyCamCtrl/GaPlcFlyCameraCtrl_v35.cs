@@ -559,7 +559,17 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     aoiResult.OffsetAngle = 0;
                 }
                 FlyMetaData.Offset(aoiMetaData.xResultBox2D, roiRect.X, roiRect.Y);
-                
+
+
+                aoiResult.CodeStr = string.Empty;
+                //读码 目前先使用定位的裁图读码 后续可以单独增加一个读码的ROI区域
+                if (xFlyPara.bOpenCodeReader)
+                {
+                    aoiDecodeCode(bmpCrop, out string text);
+                    aoiResult.CodeStr = text;
+                }
+                _lotData.CodeStr = aoiResult.CodeStr;
+
                 aoiMetaData.xTemplateRect = xRecipe.xRectRegionPrintFly;
                 aoiMetaData.xBlobs = null;
                 aoiMetaData.roiRect = roiRect;
@@ -878,13 +888,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     int flyShowIndex = flyID.ShowID;
                     string stripID = lotData.StripID;
                     string lotID = lotData.LotID;
+                    string code = lotData.CodeStr;
 
                     //>>> string path = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{stripID}";
                     string path = System.IO.Path.Combine(INI.Instance.ResultImagePath, "flyImage", tm.ToString("yyyyMMdd"), stripID);
                     if (!Directory.Exists(path))
                         Directory.CreateDirectory(path);
 
-                    string fileName = $"{lotID}-[{flyShowIndex}]-{tm.ToString("yyyyMMddHHmmssfff")}.jpg";
+                    string fileName = $"{lotID}-[{flyShowIndex}]-[{code}]-{tm.ToString("yyyyMMddHHmmssfff")}.jpg";
                     fileName = System.IO.Path.Combine(path, fileName);
 
                     //>>> cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
@@ -896,5 +907,28 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 }
             }
         }
+        //----------------------------------------------------------------------------
+        // 此處函式不牽扯到 GUI, 將來要納入 AOI MODEL
+        //----------------------------------------------------------------------------
+        void aoiDecodeCode(Bitmap srcBmp, out string text)
+        {
+            if (srcBmp == null)
+            {
+                text = "";
+                return;
+            }
+
+            //>>> xRecipe.mvd2DReader.Run(xRecipe.bmpcodetemplate,
+            //>>>       new RectangleF(0, 0, xRecipe.bmpcodetemplate.Width, xRecipe.bmpcodetemplate.Height));
+
+            var aoiTool = xRecipe.fly2DReader;
+            var roi = new RectangleF(0, 0, srcBmp.Width, srcBmp.Height);
+
+            aoiTool.Run(srcBmp, roi);
+
+            var decodeInfo = aoiTool.DCodeInfo;
+            text = decodeInfo != null ? decodeInfo.Content : "";
+        }
+
     }
 }
