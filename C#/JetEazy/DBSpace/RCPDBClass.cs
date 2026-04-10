@@ -404,7 +404,7 @@ namespace JetEazy.DBSpace
             bool ret = false;
 
             int LastIndex = RCPItemNow.Index;
-            int SelIndex = 0;
+            int SelIndex = RCPItemNow.Index;
 
             foreach (RCPItemClass rcpitem in RCPItemList)
             {

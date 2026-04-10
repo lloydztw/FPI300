@@ -185,7 +185,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// <summary>
         /// 用來維持 舊接口 相容性 之 使用模式
         /// </summary>
-        Bitmap _bmpOrgFlyRuntime = new Bitmap(1,1,System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
+        Bitmap _bmpOrgFlyRuntime = null;// new Bitmap(1,1,System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
         /// <summary>
         /// 舊接口: Caller 會管理 bmpOrgFly 生命週期
         /// </summary>
@@ -193,8 +193,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         {
             get
             {
-                if (_bmpOrgFlyRuntime == null)
-                    _bmpOrgFlyRuntime = (Bitmap)_bmpHolderOrgFly.Peek()?.Clone();
+                //if (_bmpOrgFlyRuntime == null)
+                    _bmpOrgFlyRuntime = (Bitmap)_bmpHolderOrgFly.Peek()?.Clone();//<<这里不管怎么样都要重新加载一次不然参数页面的图片不对
                 return _bmpOrgFlyRuntime;
             }
             set
@@ -750,6 +750,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public MVD_CHIP_MATCHER mvdprinttemp_Find = new MVD_CHIP_MATCHER();
         public MvdFindClass mvdprintFlytemp_Find = new MvdFindClass();
         public Mvd2DReaderClass mvd2DReader = new Mvd2DReaderClass();
+        public Mvd2DReaderClass fly2DReader = new Mvd2DReaderClass();
         void disposeMvdTools()
         {
             mvdprinttemp_Find?.Dispose();
@@ -758,6 +759,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             mvdprintFlytemp_Find = null;
             mvd2DReader?.Dispose();
             mvd2DReader = null;
+            fly2DReader?.Dispose();
+            fly2DReader = null;
         }
         #endregion
 
@@ -849,7 +852,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public int PrintTempFlyRun(Bitmap ebmpInput)
         {
             mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
-            mvdprintFlytemp_Find.xMvdTolerance = FlyParaClass.Instance.xTolerance;
+            mvdprintFlytemp_Find.xMvdTolerance = 1 - FlyParaClass.Instance.xTolerance;//<<<=这里把数据反过来不知为什么明明越大越严但是实际是反过来的
             mvdprintFlytemp_Find.bmpRun_Image?.Dispose();
             mvdprintFlytemp_Find.bmpRun_Image = (Bitmap)ebmpInput.Clone();
             bool bOK = mvdprintFlytemp_Find.HikRunBmp();
@@ -1518,6 +1521,19 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         public bool xIsShuiPing { get; set; } = true;
         #endregion
 
+        #region A01
+        const string _Cat3 = "A03.读码设置";
+
+        [CategoryAttribute(_Cat3), DescriptionAttribute("true 打开  false  关闭")]
+        [DisplayName("A00.开启读码")]
+        //[TypeConverter(typeof(NumericUpDownTypeConverter))]
+        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
+        [Browsable(true)]
+        public bool bOpenCodeReader { get; set; } = false;
+
+
+        #endregion
+
         #region GLOBAL_OFFSETS
         [Browsable(false)]
         public PointF[] ptsOffset = new PointF[POINT_COUNT];
@@ -1541,6 +1557,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xBlobAreaMin = int.Parse(ReadINIValue("Basic", "xBlobAreaMin", "10", INIFILE));
             xBlobAreaMax = int.Parse(ReadINIValue("Basic", "xBlobAreaMax", "20000", INIFILE));
             xIsShuiPing = ReadINIValue("Basic", "xIsShuiPing", "1", INIFILE) == "1";
+
+            bOpenCodeReader = ReadINIValue("Basic", "bOpenCodeReader", "0", INIFILE) == "1";
 
             int i = 0;
             while (i < POINT_COUNT)
@@ -1567,6 +1585,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "xBlobAreaMin", xBlobAreaMin.ToString(), INIFILE);
             WriteINIValue("Basic", "xBlobAreaMax", xBlobAreaMax.ToString(), INIFILE);
             WriteINIValue("Basic", "xIsShuiPing", (xIsShuiPing ? "1" : "0"), INIFILE);
+
+            WriteINIValue("Basic", "bOpenCodeReader", (bOpenCodeReader ? "1" : "0"), INIFILE);
 
             int i = 0;
             while (i < POINT_COUNT)

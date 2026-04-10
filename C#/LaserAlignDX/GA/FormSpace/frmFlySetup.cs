@@ -1,21 +1,32 @@
-﻿using Eazy_Project_III;
+﻿using Common.RecipeSpace;
+using Eazy_Project_III;
 using FreeImageAPI;
 using JetEazy.BasicSpace;
+using JetEazy.ImageViewer.Interactors;
 using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Interface;
 using JzDisplay;
 using LaserAlignDX.GA.FormSpace.FPI30Form;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LeTian.JxRecipesTool;
 using MoveGraphLibrary;
+using OpenCvSharp.Flann;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Traveller106;
 using VisionDesigner.BlobFind;
+using VM.PlatformSDKCS;
 using VsCommon.ControlSpace.MachineSpace;
 using WorldOfMoveableObjects;
 using Timer = System.Windows.Forms.Timer;
@@ -68,6 +79,8 @@ namespace LaserAlignDX.FormSpace
         Button btnOpenFly => button4;
         Button btnLightTrigger => button5;
         Button btnSpecialCal => button6;
+        Button btnCodetest => button8;
+        RichTextBox rtbCodeContent => richTextBox1;
 
         FlyOffsetUI flyOffsetUI => flyOffsetUI1;
         FlyOffsetUI flyOffset2UI => flyOffsetUI2;
@@ -113,8 +126,7 @@ namespace LaserAlignDX.FormSpace
         private void FrmFlySetup_FormClosed(object sender, FormClosedEventArgs e)
         {
             xRecipe.ReleaseBmpOrgFly(true);
-            if (IxFlyAreaCam != null)
-                IxFlyAreaCam.LineTriggerAction -= IxFlyAreaCam_LineTriggerAction;
+            IxFlyAreaCam.LineTriggerAction -= IxFlyAreaCam_LineTriggerAction;
             Traveller106.Universal.IsOpenFlyForm = false;
         }
 
@@ -138,16 +150,17 @@ namespace LaserAlignDX.FormSpace
             btnOpenFly.Click += BtnOpenFly_Click;
             btnLightTrigger.Click += BtnLightTrigger_Click;
             btnSpecialCal.Click += BtnSpecialCal_Click;
+            btnCodetest.Click += BtnCodetest_Click;
 
             DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
 
-            if (IxFlyAreaCam != null)
-                IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
-
+            IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
             propertyGrid1.SelectedObject = FlyParaClass.Instance;
             propertyGrid1.PropertyValueChanged += PropertyGrid1_PropertyValueChanged;
 
             this.Text = "飞拍参数设定窗口";
+            this.FormBorderStyle = FormBorderStyle.None;
+
             LanguageExClass.Instance.EnumControls(this);
 
             flyOffsetUI.Init(StageNumber.N0);
@@ -159,6 +172,22 @@ namespace LaserAlignDX.FormSpace
             xTimer.Interval = 50;
             xTimer.Enabled = true;
             xTimer.Tick += XTimer_Tick;
+
+#if OPT_LETIAN_AUTO_LAYOUT
+            // To fit into my screen for debug.
+#if DEBUG
+            this.FormBorderStyle = FormBorderStyle.Sizable;
+#endif
+            this.WindowState = FormWindowState.Maximized;
+#endif
+
+        }
+
+        private void BtnCodetest_Click(object sender, EventArgs e)
+        {
+            rtbCodeContent.Text = "";
+            aoiDecodeCode(xRecipe.bmpprintFlytemplate, out string text);
+            rtbCodeContent.Text = $"[{DateTime.Now.ToString("HH:mm:ss")}] {text}";
         }
 
         private void PropertyGrid1_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
@@ -370,7 +399,7 @@ namespace LaserAlignDX.FormSpace
 
         private void BtnGetLocalImage_Click(object sender, EventArgs e)
         {
-            string _filename = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*", "");
+            string _filename = JetEazy.BasicSpace.JzToolsClass.OpenFilePicker("JPG Files (*.jpg)|*.JPG|" + "All files (*.*)|*.*", "");
             if (!string.IsNullOrEmpty(_filename))
             {
                 FreeImageBitmap freeImageBitmap = new FreeImageBitmap(_filename);
@@ -540,10 +569,31 @@ namespace LaserAlignDX.FormSpace
         }
 
         #region TOOLS
+        //----------------------------------------------------------------------------
+        // 此處函式不牽扯到 GUI, 將來要納入 AOI MODEL
+        //----------------------------------------------------------------------------
+        void aoiDecodeCode(Bitmap srcBmp, out string text)
+        {
+            if (srcBmp == null)
+            {
+                text = "";
+                return;
+            }
+
+            //>>> xRecipe.mvd2DReader.Run(xRecipe.bmpcodetemplate,
+            //>>>       new RectangleF(0, 0, xRecipe.bmpcodetemplate.Width, xRecipe.bmpcodetemplate.Height));
+
+            var aoiTool = xRecipe.fly2DReader;
+            var roi = new RectangleF(0, 0, srcBmp.Width, srcBmp.Height);
+
+            aoiTool.Run(srcBmp, roi);
+
+            var decodeInfo = aoiTool.DCodeInfo;
+            text = decodeInfo != null ? decodeInfo.Content : "";
+        }
+
         void getCamDevParaAndUpdateUI()
         {
-            if (IxFlyAreaCam == null)
-                return;
             lblExpo.Text = $"{IxFlyAreaCam.GetExposure()} us";
             lblGain.Text = $"{IxFlyAreaCam.GetGain()} dB";
         }
@@ -554,8 +604,8 @@ namespace LaserAlignDX.FormSpace
                 if (FlyParaClass.Instance.GetCameraExpoAndGain(out float expo, out float gain))
                 {
                     CommonLogClass.Instance.LogMessage($"設定 曝光時間= {expo} (us), 增益= {gain:0.0} (db)");
-                    IxFlyAreaCam?.SetExposure(expo);
-                    IxFlyAreaCam?.SetGain(gain);
+                    IxFlyAreaCam.SetExposure(expo);
+                    IxFlyAreaCam.SetGain(gain);
                     if (bUpdateUI)
                         getCamDevParaAndUpdateUI();
                 }

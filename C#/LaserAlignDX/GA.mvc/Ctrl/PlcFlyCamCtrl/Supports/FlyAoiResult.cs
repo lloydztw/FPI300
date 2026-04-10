@@ -68,12 +68,17 @@ namespace LaserAlignDX.AoiModel
         public float OffsetY;
         public float OffsetAngle;
         public FlyMetaData MetaData;
+        /// <summary>
+        /// 读码记录
+        /// </summary>
+        public string CodeStr;
     }
 
     public class FlyLotData
     {
         public string StripID;
         public string LotID;
+        public string CodeStr = "";
         public FlyLotData(string stripID, string lotID)
         {
             StripID = stripID;
