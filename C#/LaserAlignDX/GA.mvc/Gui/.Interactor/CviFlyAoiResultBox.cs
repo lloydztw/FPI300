@@ -91,15 +91,25 @@ namespace LaserAlignDX.Mvc.Gui
                     viewer.SwitchToViewportCoordinate(gxView);
 
                 //if (_aoiResult != null && _aoiResult.Code == PlcFlyResultCode.OK)
+                if (true)
                 {
-                    var rect = viewer.GetViewportRect();
+                    var rectV = viewer.GetViewportRect();
+                    var rect = rectV;
                     rect.Height = 26;
                     gxView.FillRectangle(Brushes.DimGray, rect);
 
-                    var text = formatText(_aoiResult);
+                    var title = formatText(_aoiResult);
                     var font = viewer.Font;
                     var br = _aoiResult.Code == PlcFlyResultCode.OK ? Brushes.Lime : Brushes.Red;
-                    gxView.DrawString(text, font, br, 8f, 2f);
+                    gxView.DrawString(title, font, br, 8f, 2f);
+
+                    var code2D = _aoiResult?.CodeStr;
+                    if (!string.IsNullOrEmpty(code2D))
+                    {
+                        rect.Y = rectV.Bottom - rect.Height;
+                        gxView.FillRectangle(Brushes.DimGray, rect);
+                        gxView.DrawString(code2D, font, Brushes.White, 8f, rect.Y + 2f);
+                    }
                 }
 
                 if (isWorld)
@@ -166,20 +176,19 @@ namespace LaserAlignDX.Mvc.Gui
             }
             return new CviRotRectBox[0];
         }
-        string formatText(int flyShowIndex, float offsetX, float offsetY, float offsetAngle,string codeStr)
+        string formatText(int flyShowIndex, float offsetX, float offsetY, float offsetAngle)
         {
             string text = $"[{flyShowIndex}]" +
                         $" x:{offsetX:0.000}," +
                         $" y:{offsetY:0.000}," +
-                        $" a:{offsetAngle:0.000}"+
-                        $" 2D:{codeStr}";
+                        $" a:{offsetAngle:0.000}";
             return text;
         }
         string formatText(FlyAoiResult flyAoiResult)
         {
             var meta = flyAoiResult?.MetaData;
             if (meta != null)
-                return formatText(meta.flyID.ShowID, flyAoiResult.OffsetX, flyAoiResult.OffsetY, flyAoiResult.OffsetAngle, flyAoiResult.CodeStr);
+                return formatText(meta.flyID.ShowID, flyAoiResult.OffsetX, flyAoiResult.OffsetY, flyAoiResult.OffsetAngle);
             return "";
         }
         #endregion

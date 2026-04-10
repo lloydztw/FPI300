@@ -596,9 +596,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             showCviResult(false);
             enableGoldenRegionPicking(false);
 
-            using (var dlg = new frmFlySetup())
+            using (var dlg = new FormFlySetup())
             {
-                dlg.FormBorderStyle = FormBorderStyle.Sizable;
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.Size = _wndOwner.Size;
                 dlg.ShowDialog();

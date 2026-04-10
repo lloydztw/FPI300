@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
+using System.Text;
 using VisionDesigner;
 using VisionDesigner.BlobFind;
 using MVD_CHIP_MATCHER = LaserAlignDX.AoiModel.MvdCompositeChipMatcher;
@@ -647,6 +648,30 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             base.ChangeIndex(eindex);
             InspectParams.ChangeIndex(eindex);
             FlyAoiParams.ChangeIndex(eindex);
+        }
+        public override string ToString()
+        {
+            // 回傳簡要說明
+            var sb = new StringBuilder();
+            //(1) 晶粒型態
+            string chipType = GaUtil.GetEnumDescription(InspectParams.xAlgorithm);
+            sb.AppendLine(chipType);
+            //(2) Rows x Cols
+            int rows = xRow;
+            int cols = xColumn;
+            var pitchX = xRealOffsetX;
+            var pitchY = xRealOffsetY;
+            sb.AppendLine($"格位數: {rows} x {cols}");
+            sb.AppendLine($"格位間距X: {pitchX:0.000} mm");
+            sb.AppendLine($"格位間距Y: {pitchY:0.000} mm");
+            //(3) Chip Dimentsion
+            sb.AppendLine($"晶粒尺寸X : {xChipWidth:0.000} mm");
+            sb.AppendLine($"晶粒尺寸Y : {xChipHeight:0.000} mm");
+            //(4) OPTIONS
+            sb.AppendLine($"尺寸檢測 : {InspectParams.optChipMeasurement}");
+            sb.AppendLine($"邊隙檢測 : {InspectParams.optPadEdgeGapsMeasurement}");
+            sb.AppendLine($"瑕疵檢測 : {InspectParams.optChipDefectsInspect}");
+            return sb.ToString();
         }
 
         #region 子項模板參數_保存函式
@@ -1648,7 +1673,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
 
         [CategoryAttribute(_Cat01), DescriptionAttribute("僅適用於 格點晶粒!")]
-        [DisplayName("02 啟用 PAD邊隙 檢測")]
+        [DisplayName("02 啟用 邊隙檢測")]
         [Browsable(true)]
         public bool optPadEdgeGapsMeasurement
         {

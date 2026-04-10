@@ -234,21 +234,34 @@ namespace Traveller106
             var plcMotions = machineX3?.PLCMOTIONCollection;
             if (plcMotions == null || axisID >= plcMotions.Length || axisID < 0)
                 return null;
+
+            // 軸0: 接料 Y1軸
+            // 軸1: 接料 Y2軸
+            // 軸2: 線掃 X軸
+            // 軸3: 挑揀 X1軸
+            // 軸4: 挑揀 X2軸
+            // 軸5: 線掃 Z軸
+
             return plcMotions[axisID];
         }
         public static PLCMotionClass GetMotorX(SuckerRowEnum suckerID)
         {
-            int axisID = suckerID == SuckerRowEnum.S1 ? 0 : 1;
+            // 軸3: 挑揀 X1軸
+            // 軸4: 挑揀 X2軸
+            int axisID = suckerID == SuckerRowEnum.S1 ? 3 : 4;
             return GetMotor(axisID);
         }
         public static PLCMotionClass GetMotorY(CarrierEnum carrierID)
         {
-            int axisID = carrierID == CarrierEnum.C1 ? 2 : 3;
+            // 軸0: 接料 Y1軸
+            // 軸1: 接料 Y2軸
+            int axisID = carrierID == CarrierEnum.C1 ? 0 : 1;
             return GetMotor(axisID);
         }
         public static PLCMotionClass GetBigScanCameraFocusMotor()
         {
-            int axisID = 4;
+            // 軸5: 線掃 Z軸
+            int axisID = 5;
             return GetMotor(axisID);
         }
 
