@@ -267,8 +267,8 @@ namespace PhotoMachine.UISpace
                 {
                     //RecipeTrayClass.Instance.ChangeIndex(RCPDB.Indicator);
                     xRecipe.ChangeIndex(RCPDB.Indicator);
-                    FlyParaClass.Instance.ChangeIndex(RCPDB.Indicator);
-                    InspectX3ParaClass.Instance.ChangeIndex(RCPDB.Indicator);
+                    //FlyParaClass.Instance.ChangeIndex(RCPDB.Indicator);
+                    //InspectX3ParaClass.Instance.ChangeIndex(RCPDB.Indicator);
                 }
 
                 //RecipeCHClass.Instance.Save();
@@ -295,8 +295,8 @@ namespace PhotoMachine.UISpace
                 RCPDB.DeleteLast();
                 //RecipeTrayClass.Instance.ChangeIndex(RCPDB.Indicator);
                 xRecipe.ChangeIndex(RCPDB.Indicator);
-                FlyParaClass.Instance.ChangeIndex(RCPDB.Indicator);
-                InspectX3ParaClass.Instance.ChangeIndex(RCPDB.Indicator);
+                //FlyParaClass.Instance.ChangeIndex(RCPDB.Indicator);
+                //InspectX3ParaClass.Instance.ChangeIndex(RCPDB.Indicator);
             }
             else
                 RCPDB.Restore();

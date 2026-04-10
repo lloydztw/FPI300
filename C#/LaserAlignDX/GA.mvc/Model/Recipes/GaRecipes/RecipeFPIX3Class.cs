@@ -599,6 +599,13 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             InspectParams.Save();
             FlyAoiParams.Save();
         }
+        public override void ChangeIndex(int eindex)
+        {
+            base.ChangeIndex(eindex);
+            InspectParams.ChangeIndex(eindex);
+            FlyAoiParams.ChangeIndex(eindex);
+        }
+
 
         #region 子項模板參數_保存函式
         public void SaveTemplate(string name)

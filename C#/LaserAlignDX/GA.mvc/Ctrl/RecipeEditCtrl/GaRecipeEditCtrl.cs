@@ -487,9 +487,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             showCviResult(false);
             enableGoldenRegionPicking(false);
 
-            using (var dlg = new frmFlySetup())
+            using (var dlg = new FormFlySetup())
             {
-                dlg.ShowDialog();
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.Size = _wndOwner.Size;
+                dlg.ShowDialog(_wndOwner);
             }
 
             updateAllRecipeData(false, _currentCarrierID);
