@@ -134,8 +134,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         Button _btnRunAutoFetchGrid => _calibToolUI.btnAutoFetchGrid;
         Button _btnAutoFetchInkMarks => _calibToolUI.btnAutoFetchInkMarks;
         Button _btnBuildCalib => _calibToolUI.btnBuildCalib;
-        
-        Button _btnMotorSettings => _calibToolUI.btnMotorSettings;
+
+        Button _btnOpenMotorXY => _calibToolUI.btnOpenMotorXY;
+        Button _btnOpenMotorZ => _calibToolUI.btnOpenMotorZ;
         Button _btnFocusMotorGo => _calibToolUI.btnFocusMotorGo;
         Control _lblFocusMotorZ => _calibToolUI.lblFocusMotorZ;
 
@@ -229,8 +230,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _btnBuildCalib.Click += (s, e) => BuildCommonBaseTransforms();
 
             // Motors
-            if (_btnMotorSettings != null)
-                _btnMotorSettings.Click += (s, e) => OpenMotorJogWindow();
+            if (_btnOpenMotorXY != null)
+                _btnOpenMotorXY.Click += (s, e) => OpenMotorWindowXY();
+            if (_btnOpenMotorZ != null)
+                _btnOpenMotorZ.Click += (s, e) => OpenMotorWindowZ();
 
             if (_btnFocusMotorGo != null)
                 _btnFocusMotorGo.Click += (s, e) => MoveFocusMotorToRecipePos();
@@ -1576,13 +1579,26 @@ namespace LaserAlignDX.Mvc.Ctrl
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
 
-        void OpenMotorJogWindow()
+        void OpenMotorWindowXY()
         {
             // 備份當下馬達的位置
             double lastMotorPos = queryFocusMotorPos();
             using (var dlg = new FormMotor())
             {
                 //>>> dlg.Attach(getFocusMotor());
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ShowDialog(_wndOwner);
+            }
+            // 返回之前的位置
+            MoveFocusMotorTo(lastMotorPos);
+        }
+        void OpenMotorWindowZ()
+        {
+            // 備份當下馬達的位置
+            double lastMotorPos = queryFocusMotorPos();
+            using (var dlg = new FormMotorOne())
+            {
+                dlg.Attach(getFocusMotor());
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 if (dlg.ShowDialog(_wndOwner) == DialogResult.OK)
                 {

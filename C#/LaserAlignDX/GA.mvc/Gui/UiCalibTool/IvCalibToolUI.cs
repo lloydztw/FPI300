@@ -40,7 +40,8 @@ namespace LaserAlignDX.Mvc.Gui
         Button btnAutoFetchInkMarks { get; }
         Button btnBuildCalib { get; }
 
-        Button btnMotorSettings { get; }
+        Button btnOpenMotorXY { get; }
+        Button btnOpenMotorZ { get; }
         Button btnFocusMotorGo { get; }
         Control lblFocusMotorZ { get; }
 

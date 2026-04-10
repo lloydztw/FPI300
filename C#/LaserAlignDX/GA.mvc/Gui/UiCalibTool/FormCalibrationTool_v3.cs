@@ -50,7 +50,6 @@ namespace LaserAlignDX.Mvc.Gui
                 ctrl.Attach(this);
             }
         }
-
         public int ActiveViewID
         {
             get
@@ -94,7 +93,8 @@ namespace LaserAlignDX.Mvc.Gui
         Button IvCalibToolUI.btnBuildCalib => btnBuildCalib;
         //Button IvCalibToolUI.btnBuildCalibInkAdj => btnBuildCalibInkAdj;
 
-        Button IvCalibToolUI.btnMotorSettings => gvFocusSettingPanel1.btnFocusMotorSettings;
+        Button IvCalibToolUI.btnOpenMotorXY => btnOpenMotorXY;
+        Button IvCalibToolUI.btnOpenMotorZ => gvFocusSettingPanel1.btnFocusMotorSettings;
         Button IvCalibToolUI.btnFocusMotorGo => gvFocusSettingPanel1.btnFocusMotorGo;
         Control IvCalibToolUI.lblFocusMotorZ => gvFocusSettingPanel1.lblFocusMotorZ;
 
@@ -160,6 +160,7 @@ namespace LaserAlignDX.Mvc.Gui
 
             rdoSucker1.Visible = activeID != 0;
             rdoSucker2.Visible = activeID != 0;
+            btnOpenMotorXY.Visible = activeID != 0;
         }
         void swapForeColors(Control c1, Control c2)
         {
