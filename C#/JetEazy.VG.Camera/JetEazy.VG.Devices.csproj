@@ -239,6 +239,7 @@
     <None Include="app.config" />
     <None Include="GlobalSpace\Readme.md" />
     <None Include="packages.config" />
+    <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\JetEazy\JetEazy.Basics.csproj">
