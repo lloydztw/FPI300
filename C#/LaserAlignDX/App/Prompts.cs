@@ -30,5 +30,11 @@ namespace LaserAlignDX
 
         [Description("是否要採用 目前馬達 XY 座標值")]
         Question_Update_Motor_Coord_To_Calib,
+
+        [Description("是否確定要將 馬達 回 HOME")]
+        Question_Motor_Home,
+
+        [Description("是否確定要 移動馬達 至定位")]
+        Question_Motor_GoTo_Pos,
     }
 }

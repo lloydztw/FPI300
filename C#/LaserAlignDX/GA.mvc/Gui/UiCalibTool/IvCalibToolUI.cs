@@ -13,6 +13,7 @@
  */
 #endregion
 
+using AX.Gui;
 using System;
 using System.Windows.Forms;
 
@@ -40,10 +41,8 @@ namespace LaserAlignDX.Mvc.Gui
         Button btnAutoFetchInkMarks { get; }
         Button btnBuildCalib { get; }
 
+        GwMotorSimpleGoPanel wndFocusMotorGoPanel { get; }
         Button btnOpenMotorXY { get; }
-        Button btnOpenMotorZ { get; }
-        Button btnFocusMotorGo { get; }
-        Control lblFocusMotorZ { get; }
 
         Button btnCancel { get; }
         Button btnOK { get; }

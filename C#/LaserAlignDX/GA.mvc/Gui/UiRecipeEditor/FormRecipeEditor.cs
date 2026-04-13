@@ -13,6 +13,7 @@
  */
 #endregion
 
+using AX.Gui;
 using JetEazy.QMath;
 using LaserAlignDX.Mvc.Ctrl;
 using System;
@@ -75,10 +76,11 @@ namespace LaserAlignDX.Mvc.Gui
         Button IvRecipeEditorUI.btnOpenFlyCamRcpWindow => wndBtnsPanel.btnOpenFlyCamRcpWindow;
         Button IvRecipeEditorUI.btnOpenLightCtrlWindow => wndBtnsPanel.btnOpenLightCtrlWindow;
         Button IvRecipeEditorUI.btnWriteCoordsToPlc => wndBtnsPanel.btnWriteCoordsToPlc;
-        
-        Button IvRecipeEditorUI.btnFocusMotorSettings => wndBtnsPanel.btnFocusMotorSettings;
-        Button IvRecipeEditorUI.btnFocusMotorGo => wndBtnsPanel.btnFocusMotorGo;
-        Control IvRecipeEditorUI.lblFocusMotorZ => wndBtnsPanel.lblFocusMotorZ;
+
+        GwMotorSimpleGoPanel IvRecipeEditorUI.wndFocusMotorGoPanel => wndBtnsPanel.gwMotorSimpleGoPanel1;
+        //Button IvRecipeEditorUI.btnFocusMotorSettings => wndBtnsPanel.btnFocusMotorSettings;
+        //Button IvRecipeEditorUI.btnFocusMotorGo => wndBtnsPanel.btnFocusMotorGo;
+        //Control IvRecipeEditorUI.lblFocusMotorZ => wndBtnsPanel.lblFocusMotorZ;
 
         Button IvRecipeEditorUI.btnCancel => btnCancel;
         Button IvRecipeEditorUI.btnOK => btnOK;

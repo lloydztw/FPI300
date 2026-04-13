@@ -52,7 +52,7 @@ namespace LaserAlignDX
         static bool run_unit_tests()
         {
             return false;
-            using (var dlg = new LaserAlignDX.Mvc.Gui.FormRecipeEditor())
+            using (var dlg = new LaserAlignDX.Mvc.Gui.FormMotorXY())
             {
                 dlg.ShowDialog();
                 return true;

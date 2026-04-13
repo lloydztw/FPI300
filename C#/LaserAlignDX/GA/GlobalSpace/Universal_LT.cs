@@ -258,6 +258,10 @@ namespace Traveller106
             int axisID = carrierID == CarrierEnum.C1 ? 0 : 1;
             return GetMotor(axisID);
         }
+        public static PLCMotionClass GetInkerMotor(SuckerRowEnum suckerID)
+        {
+            return GetMotor(5);
+        }
         public static PLCMotionClass GetBigScanCameraFocusMotor()
         {
             // 軸5: 線掃 Z軸

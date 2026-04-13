@@ -367,6 +367,9 @@
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />
+    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaXYInkerMotorsJogCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaSimpleMotorGoCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaCommonMotorJogCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
@@ -407,17 +410,17 @@
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.Designer.cs">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorOne.cs">
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorXY.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorOne.Designer.cs">
-      <DependentUpon>FormMotorOne.cs</DependentUpon>
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorXY.Designer.cs">
+      <DependentUpon>FormMotorXY.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GvFocusSettingPanel.cs">
-      <SubType>UserControl</SubType>
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorZ.cs">
+      <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GvFocusSettingPanel.Designer.cs">
-      <DependentUpon>GvFocusSettingPanel.cs</DependentUpon>
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorZ.Designer.cs">
+      <DependentUpon>FormMotorZ.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormPadThresholdsEditor.cs">
       <SubType>Form</SubType>
@@ -733,11 +736,11 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.resx">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiMotorViewer\FormMotorOne.resx">
-      <DependentUpon>FormMotorOne.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiMotorViewer\FormMotorXY.resx">
+      <DependentUpon>FormMotorXY.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GvFocusSettingPanel.resx">
-      <DependentUpon>GvFocusSettingPanel.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiMotorViewer\FormMotorZ.resx">
+      <DependentUpon>FormMotorZ.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormPadThresholdsEditor.resx">
       <DependentUpon>FormPadThresholdsEditor.cs</DependentUpon>
@@ -850,6 +853,10 @@
       <Project>{8aa39fb3-6b90-4faa-8183-85a1acfc10b1}</Project>
       <Name>JzDisplayLT</Name>
     </ProjectReference>
+    <ProjectReference Include="..\EzMotor.Gui\EzMotor.Gui.csproj">
+      <Project>{455201c9-5e3e-4b92-a305-e6e94816da3d}</Project>
+      <Name>EzMotor.Gui</Name>
+    </ProjectReference>
     <ProjectReference Include="..\FPI30_Aoi\EzEmptyTrayInspector.Lib\EzAoiEmptyTrayInspector.Lib.csproj">
       <Project>{a1bcdee4-dd9a-43c2-a127-90b727eb0f04}</Project>
       <Name>EzAoiEmptyTrayInspector.Lib</Name>
@@ -873,6 +880,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="coconut1.ico" />
+    <None Include="Resources\CommonPanel.bmp" />
     <None Include="Resources\grid_3x3.png" />
     <None Include="Resources\next.png" />
     <None Include="Resources\banner.bmp" />

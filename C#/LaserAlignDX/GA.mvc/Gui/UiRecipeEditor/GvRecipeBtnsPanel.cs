@@ -48,9 +48,9 @@ namespace LaserAlignDX.Mvc.Gui
             get => _activeIndex;
             set => switchTo(value);
         }
-        public Button btnFocusMotorSettings => gvFocusSettingPanel1.btnFocusMotorSettings;
-        public Button btnFocusMotorGo => gvFocusSettingPanel1.btnFocusMotorGo;
-        public Control lblFocusMotorZ => gvFocusSettingPanel1.lblFocusMotorZ;
+        //public Button btnFocusMotorSettings => gvFocusSettingPanel1.btnFocusMotorSettings;
+        //public Button btnFocusMotorGo => gvFocusSettingPanel1.btnFocusMotorGo;
+        //public Control lblFocusMotorZ => gvFocusSettingPanel1.lblFocusMotorZ;
 
         #region PRIVATE_GUI_FUNCTIONS
         void initDataGridView()

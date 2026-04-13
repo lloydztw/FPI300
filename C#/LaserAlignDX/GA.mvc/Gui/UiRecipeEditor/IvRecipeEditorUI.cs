@@ -13,6 +13,7 @@
  */
 #endregion
 
+using AX.Gui;
 using JetEazy.QMath;
 using System;
 using System.Windows.Forms;
@@ -45,9 +46,7 @@ namespace LaserAlignDX.Mvc.Gui
         Button btnOpenLightCtrlWindow { get; }
         Button btnWriteCoordsToPlc { get; }
 
-        Button btnFocusMotorSettings { get; }
-        Button btnFocusMotorGo { get; }
-        Control lblFocusMotorZ { get; }
+        GwMotorSimpleGoPanel wndFocusMotorGoPanel { get; }
 
         Button btnCancel { get; }
         Button btnOK { get; }

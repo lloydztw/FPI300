@@ -13,6 +13,7 @@
  */
 #endregion
 
+using AX.Gui;
 using LaserAlignDX.Mvc.Ctrl;
 using System;
 using System.Windows.Forms;
@@ -94,9 +95,10 @@ namespace LaserAlignDX.Mvc.Gui
         //Button IvCalibToolUI.btnBuildCalibInkAdj => btnBuildCalibInkAdj;
 
         Button IvCalibToolUI.btnOpenMotorXY => btnOpenMotorXY;
-        Button IvCalibToolUI.btnOpenMotorZ => gvFocusSettingPanel1.btnFocusMotorSettings;
-        Button IvCalibToolUI.btnFocusMotorGo => gvFocusSettingPanel1.btnFocusMotorGo;
-        Control IvCalibToolUI.lblFocusMotorZ => gvFocusSettingPanel1.lblFocusMotorZ;
+        GwMotorSimpleGoPanel IvCalibToolUI.wndFocusMotorGoPanel => gvFocusSettingPanel1;
+        //Button IvCalibToolUI.btnOpenMotorZ => gvFocusSettingPanel1.btnFocusMotorSettings;
+        //Button IvCalibToolUI.btnFocusMotorGo => gvFocusSettingPanel1.btnFocusMotorGo;
+        //Control IvCalibToolUI.lblFocusMotorZ => gvFocusSettingPanel1.lblFocusMotorZ;
 
         Button IvCalibToolUI.btnCancel => btnCancel;
         Button IvCalibToolUI.btnOK => btnOK;

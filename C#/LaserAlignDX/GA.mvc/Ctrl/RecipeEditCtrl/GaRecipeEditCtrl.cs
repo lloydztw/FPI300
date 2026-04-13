@@ -57,7 +57,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             get => Traveller106.Universal.IxLineScan;
         }
         ITravelerModel _sysModel => GaMvcConfig.SysModel;
-        IAxis getFocusMotor() => Universal.GetBigScanCameraFocusMotor();
         #endregion
 
         #region RECIPES
@@ -85,9 +84,6 @@ namespace LaserAlignDX.Mvc.Ctrl
         Button btnGrabImage => _rcpEditUI.btnGrabImage;
         Button btnLoadImage => _rcpEditUI.btnLoadImage;
         Button btnSaveImage => _rcpEditUI.btnSaveImage;
-        Button btnFocusMotorSettings => _rcpEditUI.btnFocusMotorSettings;
-        Button btnFocusMotorGo => _rcpEditUI.btnFocusMotorGo;
-        Control lblFocusMotorPos => _rcpEditUI.lblFocusMotorZ;
         Button btnCancel => _rcpEditUI.btnCancel;
         Button btnOK => _rcpEditUI.btnOK;
         #endregion
@@ -110,6 +106,8 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             initImgViewer();
             connectEventHandlers();
+
+            attachFocusMotorCtrl();
         }
         void Dispose()
         {
@@ -148,11 +146,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             btnOpenLightCtrlWindow.Click += (s, e) => OpenLightCtrlWindow();
             btnWriteCoordsRefToPlc.Click += (s, e) => WriteCoordsRefToPlc();
 
-            // Camera Focus Motor
-            if (btnFocusMotorSettings != null)
-                btnFocusMotorSettings.Click += (s, e) => OpenFocusMotorWindow();
-            if (btnFocusMotorGo != null)
-                btnFocusMotorGo.Click += (s, e) => MoveFocusMotorToRecipePos();
+            //// Camera Focus Motor
+            //if (btnFocusMotorSettings != null)
+            //    btnFocusMotorSettings.Click += (s, e) => OpenFocusMotorWindow();
+            //if (btnFocusMotorGo != null)
+            //    btnFocusMotorGo.Click += (s, e) => MoveFocusMotorToRecipePos();
 
             // ProperyGrid
             if ( _rcpEditUI.wndVisionSettingsPanel is PropertyGrid pg)
@@ -297,7 +295,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 updateRecipePropertyView(carrierID);
                 updatePlcCoordsRef(_trfModel, carrierID);
                 updateRecipeOrgBmpToViewer(carrierID);
-                updateFocusMotorPos();
+                syncFocusMotorCtrl();
             }
         }
         void updateRecipeOrgBmpToViewer(CarrierEnum carrierID)
@@ -378,66 +376,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         #endregion
 
-        #region PRIVATE_FOCUS_MOTOR_FUNCTIONS
-        bool isTinyDelta(double delta)
-        {
-            return Math.Abs(delta) < Universal.MOTOR_TINY_DELTA;
-        }
-        double queryFocusMotorPos()
-        {
-            var axis = getFocusMotor();
-            double pos = axis != null ? axis.GetPos() : 0.0;
-            return pos;
-        }
-        double getCameraFocusFromRecipe()
-        {
-            var zFocus = _focusMode == FocusMode.FocusOnCarrier ?
-                            _xRecipe.zFocusOnCarrier:
-                            _xRecipe.zFocusOnChip;
-            return zFocus;
-        }
-        void setCameraFocusToRecipe(double motorPos)
-        {
-            var old = getCameraFocusFromRecipe();
-            var delta = motorPos - old;
-            if (!isTinyDelta(delta))
-            {
-                if (_focusMode == FocusMode.FocusOnCarrier)
-                {
-                    _xRecipe.zFocusOnCarrier = (float)motorPos;
-                    _isModified = true;
-                }
-                else
-                {
-                    _xRecipe.zFocusOnChip = (float)motorPos;
-                    _isModified = true;
-                }
-            }
-        }
-        void updateFocusMotorPos(bool toRecipe = false)
-        {
-            // 將當下的 馬達座標 更新到 參數設定
-            if (toRecipe)
-            {
-                double motorPos = queryFocusMotorPos();
-                setCameraFocusToRecipe(motorPos);
-            }
 
-            // 從 參數設定 取得 focusZ
-            double focusZ = getCameraFocusFromRecipe();
-
-            // 如果 參數 沒有設定值, 重新讀取當下馬達座標
-            if (focusZ == 0)
-                focusZ = queryFocusMotorPos();
-
-            // 更新到 GUI
-            var label = lblFocusMotorPos;
-            if (label != null)
-            {
-                label.Text = $"{focusZ:0.000}";
-            }
-        }
-        #endregion
 
         (string, Bitmap) PeekBmp(CarrierEnum C, FocusMode focus)
         {
@@ -456,7 +395,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (_focusMode != newFocusMode)
             {
                 _focusMode = newFocusMode;
-                updateFocusMotorPos();
+
+                syncFocusMotorCtrl();
+
                 _wndOwner.BeginInvoke(new Action(() => MoveFocusMotorToRecipePos()));
 
                 var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
@@ -624,60 +565,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
             }
         }
-        
-        void OpenFocusMotorWindow()
-        {
-            using (var dlg = new FormMotorOne())
-            {
-                dlg.Attach(getFocusMotor());
 
-                // 備份當下馬達的位置
-                double lastMotorPos = queryFocusMotorPos();
-
-                dlg.StartPosition = FormStartPosition.CenterParent;
-                if (dlg.ShowDialog(_wndOwner) == DialogResult.OK)
-                {
-                    updateFocusMotorPos(toRecipe: true);
-                }
-                else
-                {
-                    // 返回之前的位置
-                    MoveFocusMotorTo(lastMotorPos);
-                }
-            }
-        }
-        void MoveFocusMotorTo(double targetPos, bool silent = false)
-        {
-            var currentPos = queryFocusMotorPos();
-
-            var delta = targetPos - currentPos;
-            if (isTinyDelta(delta))
-                return;
-
-            if (!silent)
-            {
-                var msg = GaUtil.GetEnumDescription(Prompts.Question_To_Move_Big_Linescan_Motor);
-                msg += $"\n\r\n\rTo {targetPos:0.000} mm";
-                bool ok = VsMessageBox.Question(msg) == DialogResult.OK;
-                if (!ok) return;
-            }
-
-            try
-            {
-                var motor = getFocusMotor();
-                motor?.Go(currentPos, delta);
-            }
-            catch(Exception ex)
-            {
-                var err = "馬達異常:\n\r" + ex.ToString();
-                MessageBox.Show(err, "Motor Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-        void MoveFocusMotorToRecipePos(bool silent = false)
-        {
-            var targetPos = getCameraFocusFromRecipe();
-            MoveFocusMotorTo(targetPos, silent);
-        }
 
         void BuildGoldenRegion()
         {
@@ -895,4 +783,63 @@ namespace LaserAlignDX.Mvc.Ctrl
     }
 
 
+    partial class GaRecipeEditCtrl
+    {
+        IAxis getFocusMotor() => Universal.GetBigScanCameraFocusMotor();
+        GaSimpleMotorGoCtrl _focusMotorCtrl = new GaSimpleMotorGoCtrl();
+        void attachFocusMotorCtrl()
+        {
+            var view = _rcpEditUI.wndFocusMotorGoPanel;
+            var dataHolder = new GaSimpleMotorGoCtrl.MotorPosHolder
+            {
+                Get = getCameraFocusFromRecipe,
+                Set = setCameraFocusToRecipe,
+            };
+
+            _focusMotorCtrl = new GaSimpleMotorGoCtrl();
+            _focusMotorCtrl.Attach(getFocusMotor(), view, dataHolder);
+        }
+
+        #region PRIVATE_FOCUS_MOTOR_FUNCTIONS
+        bool isTinyDelta(double delta)
+        {
+            return Math.Abs(delta) < Universal.MOTOR_TINY_DELTA;
+        }
+        double getCameraFocusFromRecipe()
+        {
+            var zFocus = _focusMode == FocusMode.FocusOnCarrier ?
+                            _xRecipe.zFocusOnCarrier :
+                            _xRecipe.zFocusOnChip;
+            return zFocus;
+        }
+        void setCameraFocusToRecipe(double motorPos)
+        {
+            var old = getCameraFocusFromRecipe();
+            var delta = motorPos - old;
+            if (!isTinyDelta(delta))
+            {
+                if (_focusMode == FocusMode.FocusOnCarrier)
+                {
+                    _xRecipe.zFocusOnCarrier = (float)motorPos;
+                    _isModified = true;
+                }
+                else
+                {
+                    _xRecipe.zFocusOnChip = (float)motorPos;
+                    _isModified = true;
+                }
+            }
+        }
+        void syncFocusMotorCtrl()
+        {
+            _focusMotorCtrl?.UpdatePosHolderToGui();
+        }
+        #endregion
+
+        void MoveFocusMotorToRecipePos(bool silent = false)
+        {
+            var targetPos = getCameraFocusFromRecipe();
+            _focusMotorCtrl.MoveMotorTo(targetPos, silent);
+        }
+    }
 }

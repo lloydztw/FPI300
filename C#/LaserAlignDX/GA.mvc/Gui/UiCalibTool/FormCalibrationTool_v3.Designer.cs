@@ -1,4 +1,5 @@
-﻿using LaserAlignDX.FormSpace.FPI30Form;
+﻿using AX.Gui;
+using LaserAlignDX.FormSpace.FPI30Form;
 
 namespace LaserAlignDX.Mvc.Gui
 {
@@ -41,6 +42,8 @@ namespace LaserAlignDX.Mvc.Gui
             this.panel2 = new System.Windows.Forms.TableLayoutPanel();
             this.rdoSucker2 = new System.Windows.Forms.RadioButton();
             this.rdoSucker1 = new System.Windows.Forms.RadioButton();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.btnOpenMotorXY = new System.Windows.Forms.Button();
             this.tbLayoutMain = new System.Windows.Forms.TableLayoutPanel();
             this.tbLayoutDockRight = new System.Windows.Forms.TableLayoutPanel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -50,7 +53,7 @@ namespace LaserAlignDX.Mvc.Gui
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
             this.panelBtns = new System.Windows.Forms.Panel();
-            this.gvFocusSettingPanel1 = new LaserAlignDX.Mvc.Gui.GvFocusSettingPanel();
+            this.gvFocusSettingPanel1 = new AX.Gui.GwMotorSimpleGoPanel();
             this.btnLoadImage = new System.Windows.Forms.Button();
             this.btnGrabImage = new System.Windows.Forms.Button();
             this.btnBuildCalib = new System.Windows.Forms.Button();
@@ -59,19 +62,17 @@ namespace LaserAlignDX.Mvc.Gui
             this.panelViewers = new System.Windows.Forms.Panel();
             this.jezTransImageViewPanel2 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.btnOpenMotorXY = new System.Windows.Forms.Button();
             this.tblayoutTopNav.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.tbLayoutMain.SuspendLayout();
             this.tbLayoutDockRight.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.panelB.SuspendLayout();
             this.panelBtns.SuspendLayout();
             this.panelViewers.SuspendLayout();
-            this.panel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tblayoutTopNav
@@ -108,7 +109,7 @@ namespace LaserAlignDX.Mvc.Gui
             this.tableLayoutPanel2.Name = "tableLayoutPanel2";
             this.tableLayoutPanel2.RowCount = 1;
             this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 94F));
+            this.tableLayoutPanel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 90F));
             this.tableLayoutPanel2.Size = new System.Drawing.Size(623, 90);
             this.tableLayoutPanel2.TabIndex = 31;
             // 
@@ -162,7 +163,7 @@ namespace LaserAlignDX.Mvc.Gui
             this.panel1.Name = "panel1";
             this.panel1.RowCount = 1;
             this.panel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.panel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 94F));
+            this.panel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 90F));
             this.panel1.Size = new System.Drawing.Size(245, 90);
             this.panel1.TabIndex = 29;
             // 
@@ -216,7 +217,7 @@ namespace LaserAlignDX.Mvc.Gui
             this.panel2.Name = "panel2";
             this.panel2.RowCount = 1;
             this.panel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.panel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 94F));
+            this.panel2.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 90F));
             this.panel2.Size = new System.Drawing.Size(245, 90);
             this.panel2.TabIndex = 30;
             // 
@@ -256,6 +257,30 @@ namespace LaserAlignDX.Mvc.Gui
             this.rdoSucker1.Text = "吸嘴排 1";
             this.rdoSucker1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.rdoSucker1.UseVisualStyleBackColor = true;
+            // 
+            // panel3
+            // 
+            this.panel3.Controls.Add(this.btnOpenMotorXY);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel3.Location = new System.Drawing.Point(1134, 5);
+            this.panel3.Name = "panel3";
+            this.panel3.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
+            this.panel3.Size = new System.Drawing.Size(121, 90);
+            this.panel3.TabIndex = 32;
+            // 
+            // btnOpenMotorXY
+            // 
+            this.btnOpenMotorXY.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.btnOpenMotorXY.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnOpenMotorXY.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.btnOpenMotorXY.ImageIndex = 0;
+            this.btnOpenMotorXY.Location = new System.Drawing.Point(0, 5);
+            this.btnOpenMotorXY.Name = "btnOpenMotorXY";
+            this.btnOpenMotorXY.Size = new System.Drawing.Size(121, 80);
+            this.btnOpenMotorXY.TabIndex = 34;
+            this.btnOpenMotorXY.Text = "軸控XY";
+            this.btnOpenMotorXY.UseVisualStyleBackColor = true;
+            this.btnOpenMotorXY.Visible = false;
             // 
             // tbLayoutMain
             // 
@@ -393,6 +418,7 @@ namespace LaserAlignDX.Mvc.Gui
             // 
             // gvFocusSettingPanel1
             // 
+            this.gvFocusSettingPanel1.AxisName = "相機 對焦 Z (mm)";
             this.gvFocusSettingPanel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.gvFocusSettingPanel1.Location = new System.Drawing.Point(7, 11);
             this.gvFocusSettingPanel1.Name = "gvFocusSettingPanel1";
@@ -496,30 +522,6 @@ namespace LaserAlignDX.Mvc.Gui
             this.jezTransImageViewPanel1.Size = new System.Drawing.Size(307, 869);
             this.jezTransImageViewPanel1.TabIndex = 2;
             // 
-            // panel3
-            // 
-            this.panel3.Controls.Add(this.btnOpenMotorXY);
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel3.Location = new System.Drawing.Point(1134, 5);
-            this.panel3.Name = "panel3";
-            this.panel3.Padding = new System.Windows.Forms.Padding(0, 5, 0, 5);
-            this.panel3.Size = new System.Drawing.Size(121, 90);
-            this.panel3.TabIndex = 32;
-            // 
-            // btnOpenMotorXY
-            // 
-            this.btnOpenMotorXY.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.btnOpenMotorXY.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOpenMotorXY.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnOpenMotorXY.ImageIndex = 0;
-            this.btnOpenMotorXY.Location = new System.Drawing.Point(0, 5);
-            this.btnOpenMotorXY.Name = "btnOpenMotorXY";
-            this.btnOpenMotorXY.Size = new System.Drawing.Size(121, 80);
-            this.btnOpenMotorXY.TabIndex = 34;
-            this.btnOpenMotorXY.Text = "軸控XY";
-            this.btnOpenMotorXY.UseVisualStyleBackColor = true;
-            this.btnOpenMotorXY.Visible = false;
-            // 
             // FormCalibrationTool
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -539,13 +541,13 @@ namespace LaserAlignDX.Mvc.Gui
             this.tableLayoutPanel2.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
+            this.panel3.ResumeLayout(false);
             this.tbLayoutMain.ResumeLayout(false);
             this.tbLayoutDockRight.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.panelB.ResumeLayout(false);
             this.panelBtns.ResumeLayout(false);
             this.panelViewers.ResumeLayout(false);
-            this.panel3.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -578,7 +580,7 @@ namespace LaserAlignDX.Mvc.Gui
         private System.Windows.Forms.Button btnGrabImage;
         private System.Windows.Forms.Button btnAutoFetchGrid;
         private System.Windows.Forms.Button btnAutoFetchInkMarks;
-        private GvFocusSettingPanel gvFocusSettingPanel1;
+        private GwMotorSimpleGoPanel gvFocusSettingPanel1;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Button btnOpenMotorXY;
     }
