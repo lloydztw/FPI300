@@ -1517,12 +1517,12 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             using (var dlg = new FormMotorXY())
             {
-                var inkerMotor = getInkerMotor(_activeSuckerRowID);
-                var motorX = getMotorX(_activeSuckerRowID);
-                var motorY = getMotorY(_activeCarrierID);
-                var focusMotor = getFocusMotor();
-
-                dlg.Attach(motorX, motorY, focusMotor, inkerMotor);
+                dlg.SetJogTargets(_activeCarrierID, _activeSuckerRowID);
+                //var inkerMotor = getInkerMotor(_activeSuckerRowID);
+                //var motorX = getMotorX(_activeSuckerRowID);
+                //var motorY = getMotorY(_activeCarrierID);
+                //var focusMotor = getFocusMotor();
+                //dlg.Attach(motorX, motorY, focusMotor, inkerMotor);
 
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ShowDialog(_wndOwner);
@@ -1600,8 +1600,6 @@ namespace LaserAlignDX.Mvc.Ctrl
     partial class GaCalibCtrl
     {
         #region GLOBAL_MOTOR_MESS
-        IAxis getFocusMotor() => Traveller106.Universal.GetBigScanCameraFocusMotor();
-        IAxis getInkerMotor(SuckerRowEnum S) => Traveller106.Universal.GetInkerMotor(S);
         IAxis getMotorX(SuckerRowEnum S) => Traveller106.Universal.GetMotorX(S);
         IAxis getMotorY(CarrierEnum C) => Traveller106.Universal.GetMotorY(C);
         QVector queryCurrentMotorXY()
@@ -1615,51 +1613,26 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region FOCUS_MOTOR_JOG
-        GaSimpleMotorGoCtrl _focusMotorCtrl = new GaSimpleMotorGoCtrl();
+        GaMotorZCtrl _focusMotorCtrl = null;
         void attachFocusMotorCtrl()
         {
+            // 只允許 attach 一次
+            if (_focusMotorCtrl != null)
+                return;
+
             var view = _calibToolUI.wndFocusMotorGoPanel;
-            //var view = new GaSimpleMotorGoCtrl.SimpleMotoriew
-            //{
-            //    lblMotorPos = _calibToolUI.lblFocusMotorZ,
-            //    btnMotorGo = _calibToolUI.btnFocusMotorGo,
-            //    btnSettings = _calibToolUI.btnOpenMotorZ,
-            //};
 
-            var dataHolder = new GaSimpleMotorGoCtrl.MotorPosHolder
+            _focusMotorCtrl = new GaMotorZCtrl();
+            _focusMotorCtrl.Attach(view);
+            _focusMotorCtrl.SetDataSrc(ZPosDataSrc.Calib);
+            _focusMotorCtrl.OnPosDataSrcModified += (s, e) =>
             {
-                Get = getCameraFocusFromTrf,
-                Set = setCameraFocusToTrf,
+                _isCoordModified = true;
             };
-
-            _focusMotorCtrl = new GaSimpleMotorGoCtrl();
-            _focusMotorCtrl.Attach(getFocusMotor(), view, dataHolder);
         }
         void syncFocusMotorCtrl()
         {
             _focusMotorCtrl?.UpdatePosHolderToGui();
-        }
-        double getCameraFocusFromTrf()
-        {
-            if (_commonBaseTrf != null)
-                return _commonBaseTrf.CameraWorkDist;
-            return 0.0;
-        }
-        void setCameraFocusToTrf(double motorPos)
-        {
-            if (_commonBaseTrf != null)
-            {
-                var delta = _commonBaseTrf.CameraWorkDist - motorPos;
-                if (!isTinyDelta(delta))
-                {
-                    _commonBaseTrf.CameraWorkDist = motorPos;
-                    _isCoordModified = true;
-                }
-            }
-        }
-        bool isTinyDelta(double delta)
-        {
-            return Math.Abs(delta) < Traveller106.Universal.MOTOR_TINY_DELTA;
         }
         #endregion
     }

@@ -775,6 +775,18 @@ namespace Traveller106
         [DisplayName("03.增强抓边")]
         [Browsable(false)]
         public bool IsCheat { get; set; } = false;
+
+        [CategoryAttribute(X3_Cat4), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("04.吸嘴 S1 Inker 下壓高度")]
+        [Browsable(false)]
+        public float zInkerS1 { get; set; } = 0f;
+
+        [CategoryAttribute(X3_Cat4), DescriptionAttribute("")]
+        //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
+        [DisplayName("05.吸嘴 S2 Inker 下壓高度")]
+        [Browsable(false)]
+        public float zInkerS2 { get; set; } = 0f;
         #endregion
 
         #region SQL_SETUP
@@ -932,6 +944,9 @@ namespace Traveller106
             //cali_load();
 
             //LoadIniSetup();
+
+            zInkerS1 = float.Parse(ReadINIValue("Basic", "zInkerS1", "0", INIFILE));
+            zInkerS2 = float.Parse(ReadINIValue("Basic", "zInkerS2", "0", INIFILE));
         }
         public void Save()
         {
@@ -1041,7 +1056,8 @@ namespace Traveller106
             //WriteINIValue("Basic", "take_zposhigh", take_zposhigh.ToString(), INIFILE);
             //cali_load();
 
-
+            WriteINIValue("Basie", "zInkerS1", zInkerS1.ToString(), INIFILE);
+            WriteINIValue("Basie", "zInkerS2", zInkerS2.ToString(), INIFILE);
         }
         public void SaveCaliParas()
         {

@@ -367,8 +367,9 @@
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />
-    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaXYInkerMotorsJogCtrl.cs" />
-    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaSimpleMotorGoCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaBasicMotorUtil.cs" />
+    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorXYInkerCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorZCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaCommonMotorJogCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />

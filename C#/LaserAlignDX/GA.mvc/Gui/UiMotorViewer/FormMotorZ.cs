@@ -34,13 +34,17 @@ namespace LaserAlignDX.Mvc.Gui
         
         public void Attach(IAxis motor)
         {
+            var view = gvPaneMotorJogZ1.GetJogView();
+
             _motor = motor as PLCMotionClass;
             _jogCtrl = new GaCommonMotorJogCtrl();
-            _jogCtrl.Attach(gvPaneMotorJogZ1.GetJogView(), _motor);
+            _jogCtrl.Attach(view, _motor);
+
             btnOK.Click += (s, e) => DoConfirm();
             btnCancel.Click += (s, e) => DoCancel();
             timer1.Tick += (s, e) => _jogCtrl?.Tick();
-            this.Load += (s, e) => timer1.Enabled = true;
+
+            this.Load += (s, e) => timer1.Start();
         }
 
         #region PRIVATE_FUNCTIONS

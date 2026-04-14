@@ -82,8 +82,8 @@
             // 
             // gwMotorSimpleGoPanel2
             // 
-            this.gwMotorSimpleGoPanel2.AxisName = "點墨 高度 Z (mm)";
-            this.gwMotorSimpleGoPanel2.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.gwMotorSimpleGoPanel2.AxisName = "點墨 下壓 Z";
+            this.gwMotorSimpleGoPanel2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.gwMotorSimpleGoPanel2.Location = new System.Drawing.Point(555, 403);
             this.gwMotorSimpleGoPanel2.Name = "gwMotorSimpleGoPanel2";
             this.gwMotorSimpleGoPanel2.Padding = new System.Windows.Forms.Padding(0, 2, 0, 5);
@@ -92,9 +92,9 @@
             // 
             // gwMotorSimpleGoPanel1
             // 
-            this.gwMotorSimpleGoPanel1.AxisName = "相機 對焦 Z (mm)";
-            this.gwMotorSimpleGoPanel1.BackColor = System.Drawing.Color.LightBlue;
-            this.gwMotorSimpleGoPanel1.Location = new System.Drawing.Point(555, 314);
+            this.gwMotorSimpleGoPanel1.AxisName = "點墨 歸位 Z";
+            this.gwMotorSimpleGoPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.gwMotorSimpleGoPanel1.Location = new System.Drawing.Point(555, 315);
             this.gwMotorSimpleGoPanel1.Name = "gwMotorSimpleGoPanel1";
             this.gwMotorSimpleGoPanel1.Padding = new System.Windows.Forms.Padding(0, 2, 0, 5);
             this.gwMotorSimpleGoPanel1.Size = new System.Drawing.Size(212, 88);

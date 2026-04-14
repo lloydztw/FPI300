@@ -13,8 +13,6 @@
  */
 #endregion
 
-using JetEazy.ControlSpace.MotionSpace;
-using JetEazy.Interface;
 using LaserAlignDX.Mvc.Ctrl;
 using System.Windows.Forms;
 
@@ -23,39 +21,44 @@ namespace LaserAlignDX.Mvc.Gui
     public partial class FormMotorXY : Form
     {
         #region PRIVATE_DATA
-        GaXYInkerMotorsJogCtrl _motorsCtrl;
+        GaMotorXYInkerCtrl _motorsCtrl;
         #endregion
 
         public FormMotorXY()
         {
             InitializeComponent();
+            if (!DesignMode)
+                InitGui();
+        }
+
+        public void SetJogTargets(CarrierEnum C,  SuckerRowEnum S)
+        {
+            _motorsCtrl.SetJogTargets(C, S);
+        }
+
+        void InitGui()
+        {
             FormClosed += (s, e) => CleanUp();
             btnOK.Click += (s, e) => DoConfirm();
             btnCancel.Click += (s, e) => DoCancel();
-        }
-        public void Attach(IAxis motorX, IAxis motorY, IAxis focusMotorZ, IAxis inkerMotorZ)
-        {
-            _motorsCtrl = new GaXYInkerMotorsJogCtrl();
+
             var viewX = gvPaneMotorJogXY1.GetJogViewX();
             var viewY = gvPaneMotorJogXY1.GetJogViewY();
-            _motorsCtrl.AttachMotorXY(motorX, motorY, viewX, viewY);
+            var inkerUpPanel = gwMotorSimpleGoPanel1;
+            var inkerDownPanel = gwMotorSimpleGoPanel2;
 
-            var focusPanel = gwMotorSimpleGoPanel1;
-            var inkerPanel = gwMotorSimpleGoPanel2;
-            _motorsCtrl.AttachFocusMotorZ(focusMotorZ, focusPanel);
-            _motorsCtrl.AttachInkerMotorZ(inkerMotorZ, inkerPanel);
+            _motorsCtrl = new GaMotorXYInkerCtrl();
+            _motorsCtrl.Attach(viewX, viewY, inkerUpPanel, inkerDownPanel);
 
             timer1.Tick += (s, e) => DoTick();
-            this.Load += (s, e) =>
-            {
-                timer1.Enabled = true;
-            };
+            Load += (s, e) => timer1.Start();
         }
 
         #region PRIVATE_FUNCTIONS
         void CleanUp()
         {
             timer1.Stop();
+            _motorsCtrl?.RestoreInkerMotorPos();
             _motorsCtrl = null;
         }
         void DoTick()
