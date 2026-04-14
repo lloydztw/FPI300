@@ -15,20 +15,29 @@
 
 using AX.Gui;
 using JetEazy.ControlSpace.MotionSpace;
+using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.QMath;
+using JetEazy.Utils;
+using LaserAlignDX.Mvc.Gui;
+using System;
+using System.Windows.Forms;
 using Traveller106;
 using Universal = Traveller106.Universal;
 
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
-    public class GaMotorXYInkerCtrl : IxTickable
+    public partial class GaMotorXYInkerCtrl : IxTickable
     {
+        public event EventHandler<InkerCoordsEventArgs> OnInkerCoordsUpdated;
+
         #region PRIVATE_MODEL_DATA
         PLCMotionClass _motorX;
         PLCMotionClass _motorY;
         PLCMotionClass _inkerMotorZ;
         double _backupInkerMotorPos;
+        SuckerRowEnum _activeInkerID;
         #endregion
 
         #region PRIVATE_CHILD_CTRLS
@@ -38,28 +47,55 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region GUI_LINKS
-        IvMotorJogView _viewX;
-        IvMotorJogView _viewY;
-        GwMotorSimpleGoPanel _inkerUpPanel;
-        GwMotorSimpleGoPanel _inkerDownPanel;
-        SuckerRowEnum _activeInkerID;
+        IvMotorXYInkerUI _ui;
+        IvMotorJogView _viewX => _ui?.JogViewX;
+        IvMotorJogView _viewY => _ui?.JogViewY;
+        GwMotorSimpleGoPanel _inkerUpPanel => _ui.InkerUpPanel;
+        GwMotorSimpleGoPanel _inkerDownPanel => _ui.InkerDownPanel;
         #endregion
 
         #region RUNTIME_DATA
         bool _isInkerPosModified = false;
         #endregion
 
-        public void Attach(IvMotorJogView viewX,
-                           IvMotorJogView viewY,
-                           GwMotorSimpleGoPanel inkerUpPanel,
-                           GwMotorSimpleGoPanel inkerDownPanel)
+        public void Attach(IvMotorXYInkerUI view)
         {
-            // VIEW
-            _viewX = viewX;
-            _viewY = viewY;
-            _inkerUpPanel = inkerUpPanel;
-            _inkerDownPanel = inkerDownPanel;
+            if (_ui != null) return;
+            _ui = view;
+            connectEventHandlers(_ui.InkerCornerUpdateButtons);
         }
+
+        #region PRIVATE_INIT_FUNCTIONS
+        void connectEventHandlers(Button[] cornerUpdateButtons)
+        {
+            if (cornerUpdateButtons == null) return;
+            System.Diagnostics.Debug.Assert(cornerUpdateButtons.Length == 4);
+
+            int cornerID = 0;
+            foreach (Button btnUpdateCorner in cornerUpdateButtons)
+            {
+                btnUpdateCorner.Tag = cornerID++;
+                btnUpdateCorner.Click += BtnUpdateCorner_Click;
+            }
+        }
+        #endregion
+
+        #region EVENT_HANDLERS
+        private void BtnUpdateCorner_Click(object sender, EventArgs e)
+        {
+            if (_motorX == null || _motorY == null || OnInkerCoordsUpdated == null)
+                return;
+
+            if (sender is Button btn && btn.Tag is int id)
+            {
+                var x = _motorX.GetPos();
+                var y = _motorY.GetPos();
+                var motorCoord = new QVector2(x, y);
+                var ev = new InkerCoordsEventArgs() { CornerID = id, MotorCoord = motorCoord };
+                OnInkerCoordsUpdated(this, ev);
+            }
+        }
+        #endregion
 
         public void SetJogTargets(CarrierEnum C, SuckerRowEnum S)
         {
@@ -92,12 +128,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _inkerUpPanel.lblCurrentMotorPos.Text = $"{_backupInkerMotorPos:0.000}";
                 _inkerUpPanel.btnMotorGo.Click += (s, e) => RestoreInkerMotorPos();
             }
-        }
 
-        public void Tick()
-        {
-            _jogCtrlX?.Tick();
-            _jogCtrlY?.Tick();
+            // Axis Name
+            _viewX.lblAxisName.Text = $"X Axis ({GaUtil.GetEnumDescription(S)})";
+            _viewY.lblAxisName.Text = $"Y Axis ({GaUtil.GetEnumDescription(C)})";
         }
 
         public void RestoreInkerMotorPos()
@@ -105,6 +139,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             string displayName = $"{_activeInkerID} Inker 馬達";
             _inkerMotorZ?.PromptMoveTo(_backupInkerMotorPos, displayName);
         }
+
         public void SaveModification()
         {
             if (_isInkerPosModified)
@@ -112,6 +147,12 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _isInkerPosModified = false;
                 INI.Instance.Save();
             }
+        }
+
+        public void Tick()
+        {
+            _jogCtrlX?.Tick();
+            _jogCtrlY?.Tick();
         }
     }
 }

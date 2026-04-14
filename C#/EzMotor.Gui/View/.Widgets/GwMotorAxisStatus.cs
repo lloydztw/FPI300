@@ -182,6 +182,7 @@ namespace AX.Gui
             {
                 c.Left = ccSize.Width - pad - c.Width;
             }
+            tableLayoutPanel1.Width = ccSize.Width - pad * 2;
         }
     }
 }

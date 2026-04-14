@@ -13,13 +13,18 @@
  */
 #endregion
 
+using AX.Gui;
+using JetEazy.Utils;
 using LaserAlignDX.Mvc.Ctrl;
+using System;
 using System.Windows.Forms;
 
 namespace LaserAlignDX.Mvc.Gui
 {
-    public partial class FormMotorXY : Form
+    public partial class FormMotorXY : Form, IvMotorXYInkerUI
     {
+        public event EventHandler<InkerCoordsEventArgs> OnInkerCoordsUpdated;
+
         #region PRIVATE_DATA
         GaMotorXYInkerCtrl _motorsCtrl;
         #endregion
@@ -27,14 +32,25 @@ namespace LaserAlignDX.Mvc.Gui
         public FormMotorXY()
         {
             InitializeComponent();
+
             if (!DesignMode)
                 InitGui();
         }
 
-        public void SetJogTargets(CarrierEnum C,  SuckerRowEnum S)
+        #region GUI_LINKS
+        Control IvMotorXYInkerUI.Window => this;
+        IvMotorJogView IvMotorXYInkerUI.JogViewX => gvPaneMotorJogXY1.GetJogViewX();
+        IvMotorJogView IvMotorXYInkerUI.JogViewY => gvPaneMotorJogXY1.GetJogViewY();
+        GwMotorSimpleGoPanel IvMotorXYInkerUI.InkerUpPanel => gwMotorSimpleGoPanel1;
+        GwMotorSimpleGoPanel IvMotorXYInkerUI.InkerDownPanel => gwMotorSimpleGoPanel2;
+        Button[] IvMotorXYInkerUI.InkerCornerUpdateButtons => new[]
         {
-            _motorsCtrl.SetJogTargets(C, S);
-        }
+            btnSaveLT,  // 左上
+            btnSaveRT,  // 右上
+            btnSaveRB,  // 右下
+            btnSaveLB,  // 左下
+        };
+        #endregion
 
         void InitGui()
         {
@@ -42,16 +58,21 @@ namespace LaserAlignDX.Mvc.Gui
             btnOK.Click += (s, e) => DoConfirm();
             btnCancel.Click += (s, e) => DoCancel();
 
-            var viewX = gvPaneMotorJogXY1.GetJogViewX();
-            var viewY = gvPaneMotorJogXY1.GetJogViewY();
-            var inkerUpPanel = gwMotorSimpleGoPanel1;
-            var inkerDownPanel = gwMotorSimpleGoPanel2;
-
             _motorsCtrl = new GaMotorXYInkerCtrl();
-            _motorsCtrl.Attach(viewX, viewY, inkerUpPanel, inkerDownPanel);
+            _motorsCtrl.Attach(this);
+            _motorsCtrl.OnInkerCoordsUpdated += (s, e) => OnInkerCoordsUpdated?.Invoke(s, e);
 
             timer1.Tick += (s, e) => DoTick();
             Load += (s, e) => timer1.Start();
+        }
+
+        public void SetJogTargets(CarrierEnum C,  SuckerRowEnum S)
+        {
+            var yName = GaUtil.GetEnumDescription(C);
+            var xName = GaUtil.GetEnumDescription(S);
+            Text = $"軸控 (X={xName}, Y={yName})";
+
+            _motorsCtrl.SetJogTargets(C, S);
         }
 
         #region PRIVATE_FUNCTIONS

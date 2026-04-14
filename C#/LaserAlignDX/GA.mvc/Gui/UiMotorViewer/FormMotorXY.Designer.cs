@@ -37,6 +37,10 @@
             this.gwMotorSimpleGoPanel2 = new AX.Gui.GwMotorSimpleGoPanel();
             this.gwMotorSimpleGoPanel1 = new AX.Gui.GwMotorSimpleGoPanel();
             this.gvPaneMotorJogXY1 = new AX.Gui.GvPaneMotorJogXY();
+            this.btnSaveLT = new System.Windows.Forms.Button();
+            this.btnSaveRT = new System.Windows.Forms.Button();
+            this.btnSaveLB = new System.Windows.Forms.Button();
+            this.btnSaveRB = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -112,12 +116,68 @@
             this.gvPaneMotorJogXY1.Size = new System.Drawing.Size(782, 511);
             this.gvPaneMotorJogXY1.TabIndex = 3;
             // 
+            // btnSaveLT
+            // 
+            this.btnSaveLT.BackColor = System.Drawing.Color.Silver;
+            this.btnSaveLT.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnSaveLT.Font = new System.Drawing.Font("Arial Narrow", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSaveLT.Location = new System.Drawing.Point(542, 23);
+            this.btnSaveLT.Margin = new System.Windows.Forms.Padding(4);
+            this.btnSaveLT.Name = "btnSaveLT";
+            this.btnSaveLT.Size = new System.Drawing.Size(57, 54);
+            this.btnSaveLT.TabIndex = 79;
+            this.btnSaveLT.Text = "左上\r\n記入";
+            this.btnSaveLT.UseVisualStyleBackColor = false;
+            // 
+            // btnSaveRT
+            // 
+            this.btnSaveRT.BackColor = System.Drawing.Color.Silver;
+            this.btnSaveRT.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnSaveRT.Font = new System.Drawing.Font("Arial Narrow", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSaveRT.Location = new System.Drawing.Point(716, 23);
+            this.btnSaveRT.Margin = new System.Windows.Forms.Padding(4);
+            this.btnSaveRT.Name = "btnSaveRT";
+            this.btnSaveRT.Size = new System.Drawing.Size(57, 54);
+            this.btnSaveRT.TabIndex = 80;
+            this.btnSaveRT.Text = "右上\r\n記入";
+            this.btnSaveRT.UseVisualStyleBackColor = false;
+            // 
+            // btnSaveLB
+            // 
+            this.btnSaveLB.BackColor = System.Drawing.Color.Silver;
+            this.btnSaveLB.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnSaveLB.Font = new System.Drawing.Font("Arial Narrow", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSaveLB.Location = new System.Drawing.Point(542, 194);
+            this.btnSaveLB.Margin = new System.Windows.Forms.Padding(4);
+            this.btnSaveLB.Name = "btnSaveLB";
+            this.btnSaveLB.Size = new System.Drawing.Size(57, 54);
+            this.btnSaveLB.TabIndex = 81;
+            this.btnSaveLB.Text = "左下\r\n記入";
+            this.btnSaveLB.UseVisualStyleBackColor = false;
+            // 
+            // btnSaveRB
+            // 
+            this.btnSaveRB.BackColor = System.Drawing.Color.Silver;
+            this.btnSaveRB.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnSaveRB.Font = new System.Drawing.Font("Arial Narrow", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSaveRB.Location = new System.Drawing.Point(716, 194);
+            this.btnSaveRB.Margin = new System.Windows.Forms.Padding(4);
+            this.btnSaveRB.Name = "btnSaveRB";
+            this.btnSaveRB.Size = new System.Drawing.Size(57, 54);
+            this.btnSaveRB.TabIndex = 82;
+            this.btnSaveRB.Text = "右下\r\n記入";
+            this.btnSaveRB.UseVisualStyleBackColor = false;
+            // 
             // FormMotorXY
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.ClientSize = new System.Drawing.Size(782, 573);
+            this.Controls.Add(this.btnSaveRB);
+            this.Controls.Add(this.btnSaveLB);
+            this.Controls.Add(this.btnSaveRT);
+            this.Controls.Add(this.btnSaveLT);
             this.Controls.Add(this.gwMotorSimpleGoPanel2);
             this.Controls.Add(this.gwMotorSimpleGoPanel1);
             this.Controls.Add(this.gvPaneMotorJogXY1);
@@ -143,5 +203,9 @@
         private System.Windows.Forms.Panel panel1;
         private AX.Gui.GwMotorSimpleGoPanel gwMotorSimpleGoPanel1;
         private AX.Gui.GwMotorSimpleGoPanel gwMotorSimpleGoPanel2;
+        public System.Windows.Forms.Button btnSaveLT;
+        public System.Windows.Forms.Button btnSaveRT;
+        public System.Windows.Forms.Button btnSaveLB;
+        public System.Windows.Forms.Button btnSaveRB;
     }
 }

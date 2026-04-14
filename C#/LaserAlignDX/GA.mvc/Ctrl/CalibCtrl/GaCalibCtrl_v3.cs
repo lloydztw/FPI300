@@ -331,11 +331,24 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         private void Dgv_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
+#if(OPT_REPLACED_BY_MOTOR_JOG_TOOL)
             if (_activeViewID == CalibViewEnum.InkMarksView)
             {
                 if (e.RowIndex >= 0 && e.ColumnIndex == 0)
                 {
                     dgvSyncCurrentMotorCoordsToUserInput(e.RowIndex);
+                }
+            }
+#endif
+        }
+        private void Dlg_OnInkerCoordsUpdated(object sender, InkerCoordsEventArgs e)
+        {
+            if (_activeViewID == CalibViewEnum.InkMarksView)
+            {
+                int cornerId = e.CornerID;
+                if (cornerId >= 0)
+                {
+                    dgvSyncCurrentMotorCoordsToUserInput(cornerId, e.MotorCoord);
                 }
             }
         }
@@ -808,13 +821,15 @@ namespace LaserAlignDX.Mvc.Ctrl
                 motorCoords = null;
             }
         }
-        void dgvSyncCurrentMotorCoordsToUserInput(int rowIndex)
+        void dgvSyncCurrentMotorCoordsToUserInput(int rowIndex, QVector motorCoords = null)
         {
             var dgv = _dgvCalibPointsListView?.DataGridView;
             if (rowIndex < 0 || rowIndex >= dgv.Rows.Count)
                 return;
 
-            var currentMotorPos = queryCurrentMotorXY();
+            var currentMotorPos = motorCoords == null ?
+                                    queryCurrentMotorXY() :
+                                    motorCoords;
 
             var dgvRow = dgv.Rows[rowIndex];
             var targetName = dgvRow.Cells[0].Value;
@@ -1517,18 +1532,12 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             using (var dlg = new FormMotorXY())
             {
+                dlg.OnInkerCoordsUpdated += Dlg_OnInkerCoordsUpdated;
                 dlg.SetJogTargets(_activeCarrierID, _activeSuckerRowID);
-                //var inkerMotor = getInkerMotor(_activeSuckerRowID);
-                //var motorX = getMotorX(_activeSuckerRowID);
-                //var motorY = getMotorY(_activeCarrierID);
-                //var focusMotor = getFocusMotor();
-                //dlg.Attach(motorX, motorY, focusMotor, inkerMotor);
-
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ShowDialog(_wndOwner);
             }
         }
-
         void LoadSettings()
         {
             // (1) Load VISION recipe Files

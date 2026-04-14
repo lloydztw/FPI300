@@ -101,7 +101,7 @@
             this.lblStateError.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.lblStateError.Font = new System.Drawing.Font("微軟正黑體", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.lblStateError.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.lblStateError.Location = new System.Drawing.Point(16, 87);
+            this.lblStateError.Location = new System.Drawing.Point(16, 89);
             this.lblStateError.Margin = new System.Windows.Forms.Padding(16, 2, 0, 0);
             this.lblStateError.Name = "lblStateError";
             this.lblStateError.Size = new System.Drawing.Size(68, 22);
@@ -159,7 +159,7 @@
             this.lblStateMoving.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.lblStateMoving.Font = new System.Drawing.Font("微軟正黑體", 7.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.lblStateMoving.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.lblStateMoving.Location = new System.Drawing.Point(16, 62);
+            this.lblStateMoving.Location = new System.Drawing.Point(16, 63);
             this.lblStateMoving.Margin = new System.Windows.Forms.Padding(16, 2, 0, 0);
             this.lblStateMoving.Name = "lblStateMoving";
             this.lblStateMoving.Size = new System.Drawing.Size(68, 22);
@@ -191,7 +191,7 @@
             this.lblAxisName.Margin = new System.Windows.Forms.Padding(0);
             this.lblAxisName.Name = "lblAxisName";
             this.lblAxisName.Padding = new System.Windows.Forms.Padding(0, 2, 0, 0);
-            this.lblAxisName.Size = new System.Drawing.Size(163, 35);
+            this.lblAxisName.Size = new System.Drawing.Size(168, 35);
             this.lblAxisName.TabIndex = 100;
             this.lblAxisName.Text = "X Axis Status";
             // 
@@ -210,7 +210,7 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 23F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 23F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 23F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(163, 113);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(168, 116);
             this.tableLayoutPanel1.TabIndex = 101;
             // 
             // tableLayoutPanel2

@@ -423,6 +423,7 @@
     <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorZ.Designer.cs">
       <DependentUpon>FormMotorZ.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\IvMotorXYInkerUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormPadThresholdsEditor.cs">
       <SubType>Form</SubType>
     </Compile>
