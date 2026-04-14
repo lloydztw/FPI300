@@ -16,6 +16,7 @@
 using AX.Gui;
 using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.Interface;
+using Traveller106;
 using Universal = Traveller106.Universal;
 
 
@@ -44,10 +45,14 @@ namespace LaserAlignDX.Mvc.Ctrl
         SuckerRowEnum _activeInkerID;
         #endregion
 
-        public void Attach( IvMotorJogView viewX, 
-                            IvMotorJogView viewY, 
-                            GwMotorSimpleGoPanel inkerUpPanel, 
-                            GwMotorSimpleGoPanel inkerDownPanel )
+        #region RUNTIME_DATA
+        bool _isInkerPosModified = false;
+        #endregion
+
+        public void Attach(IvMotorJogView viewX,
+                           IvMotorJogView viewY,
+                           GwMotorSimpleGoPanel inkerUpPanel,
+                           GwMotorSimpleGoPanel inkerDownPanel)
         {
             // VIEW
             _viewX = viewX;
@@ -80,6 +85,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _inkerDownCtrl = new GaMotorZCtrl();
                 _inkerDownCtrl.Attach(_inkerDownPanel);
                 _inkerDownCtrl.SetDataSrc(S);
+                _inkerDownCtrl.OnPosDataSrcModified += (s, e) => _isInkerPosModified = true;
 
                 // Inker Up Panel (只簡單保存當下的 motor pos)
                 _inkerUpPanel.btnSettings.Visible = false;
@@ -98,6 +104,14 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             string displayName = $"{_activeInkerID} Inker 馬達";
             _inkerMotorZ?.PromptMoveTo(_backupInkerMotorPos, displayName);
+        }
+        public void SaveModification()
+        {
+            if (_isInkerPosModified)
+            {
+                _isInkerPosModified = false;
+                INI.Instance.Save();
+            }
         }
     }
 }

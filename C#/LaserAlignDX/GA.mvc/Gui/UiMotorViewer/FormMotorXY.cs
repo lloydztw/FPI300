@@ -67,6 +67,7 @@ namespace LaserAlignDX.Mvc.Gui
         }
         void DoConfirm()
         {
+            _motorsCtrl?.SaveModification();
             DialogResult = DialogResult.OK;
             CleanUp();
             Close();
