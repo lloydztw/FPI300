@@ -13,7 +13,6 @@
  */
 #endregion
 
-using AX.Gui;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Match;
@@ -35,7 +34,6 @@ using System.Windows.Forms;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
 using QCoord = JetEazy.QMath.QVector;
-
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
@@ -341,6 +339,18 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
 #endif
         }
+        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (true) // if(_activeViewID == CalibViewEnum.InkMarksView)
+            {
+                if (e.ColumnIndex == 0 && e.RowIndex >= 0 && e.RowIndex < 4)
+                {
+                    dgvGetUserInputMotorCoords(out var motorCoords);
+                    var targetCoord = motorCoords[e.RowIndex];
+                    MoveMotorXY(targetCoord);
+                }
+            }
+        }
         private void Dlg_OnInkerCoordsUpdated(object sender, InkerCoordsEventArgs e)
         {
             if (_activeViewID == CalibViewEnum.InkMarksView)
@@ -437,7 +447,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             _btnAutoFetchInkMarks.Visible = !_isRunning && isInkMarkMode;
             _btnBuildCalib.Visible = !_isRunning && isInkMarkMode;
 
-            var bkColor = isInkMarkMode ? Color.Black : Color.Gray;
+            var bkColor = isInkMarkMode ? Color.Black : Color.DimGray;
             foreach (int col in new[] { 3, 4 })
             {
                 _dgvCalibPointsListView.SetReadOnly(col, !isInkMarkMode, bkColor);
@@ -743,7 +753,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
             };
 
-            dgv.CellContentDoubleClick += Dgv_CellContentDoubleClick;
+            //dgv.CellContentDoubleClick += Dgv_CellContentDoubleClick;
+            dgv.CellContentClick += Dgv_CellContentClick;
         }
         void dgvUpdateInkMarks(EzBloc[] inkMarks)
         {
@@ -828,7 +839,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return;
 
             var currentMotorPos = motorCoords == null ?
-                                    queryCurrentMotorXY() :
+                                    QueryCurrentMotorXY() :
                                     motorCoords;
 
             var dgvRow = dgv.Rows[rowIndex];
@@ -1608,16 +1619,82 @@ namespace LaserAlignDX.Mvc.Ctrl
 
     partial class GaCalibCtrl
     {
-        #region GLOBAL_MOTOR_MESS
-        IAxis getMotorX(SuckerRowEnum S) => Traveller106.Universal.GetMotorX(S);
-        IAxis getMotorY(CarrierEnum C) => Traveller106.Universal.GetMotorY(C);
-        QVector queryCurrentMotorXY()
+        #region XY_MOTOR_MESS
+        IAxis _activeMotorX => Traveller106.Universal.GetMotorX(_activeSuckerRowID);
+        IAxis _activeMotorY => Traveller106.Universal.GetMotorY(_activeCarrierID);
+        QVector QueryCurrentMotorXY()
         {
-            var motorX = getMotorX(_activeSuckerRowID);
-            var motorY = getMotorY(_activeCarrierID);
+            var motorX = _activeMotorX;
+            var motorY = _activeMotorY;
             double x = motorX != null ? motorX.GetPos() : 0.0;
             double y = motorY != null ? motorY.GetPos() : 0.0;
             return new QVector2(x, y);
+        }
+        void MoveMotorXY(QVector targetPos)
+        {
+            if (targetPos == null) return;
+
+            var motorNames = new[]
+            {
+                $"X ({GaUtil.GetEnumDescription(_activeSuckerRowID)})",
+                $"Y ({GaUtil.GetEnumDescription(_activeCarrierID)})",
+            };
+            var motors = new[]
+            {
+                _activeMotorX,
+                _activeMotorY,
+            };
+
+            int N = Math.Min(motors.Length, motorNames.Length);
+            var errs = new List<string>();
+
+            #region CHECK_MOTOR_EMPTY
+            for (int i = 0; i < N; i++)
+            {
+                if (motors[i] == null)
+                    errs.Add(motorNames[i] + " is null.");
+            }
+            if (errs.Count > 0)
+            {
+                var warnings = GaUtil.GetEnumDescription(Prompts.Warning_No_Motor);
+                warnings += "\n\r\n\r" + string.Join("\n\r", errs);
+                VsMessageBox.Warning(warnings);
+                return;
+            }
+            #endregion
+
+            #region CHECK_MOTOR_BUSY
+            for (int i = 0; i < N; i++)
+            {
+                if (!motors[i].IsOK)
+                    errs.Add(motorNames[i] + (motors[i].IsError ? " Error!" : " Busy."));
+            }
+            if (errs.Count > 0)
+            {
+                var warnings = GaUtil.GetEnumDescription(Prompts.Warning_Motor_Busy);
+                warnings += "\n\r\n\r" + string.Join("\n\r", errs);
+                VsMessageBox.Warning(warnings);
+                return;
+            }
+            #endregion
+
+            var currentPos = QueryCurrentMotorXY();
+            var delta = targetPos - currentPos;
+            if (GaBasicMotorUtil.IsTinyDelta(delta.X) && GaBasicMotorUtil.IsTinyDelta(delta.Y))
+                return;
+
+            #region PROMPTS
+            var msg = GaUtil.GetEnumDescription(Prompts.Question_Motor_GoTo_Pos);
+            msg += $"\n\r\n\r{motorNames[0]} To {targetPos.X:0.000}";
+            msg += $"\n\r\n\r{motorNames[1]} To {targetPos.Y:0.000}";
+            if (VsMessageBox.Question(msg) != DialogResult.OK)
+                return;
+            #endregion
+
+            // Y 較長先移動
+            _activeMotorY?.Go(targetPos.Y, 0);
+            // X 次之
+            _activeMotorX?.Go(targetPos.X, 0);
         }
         #endregion
 

@@ -23,10 +23,10 @@ using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 using INI = Traveller106.INI;
 using Universal = Traveller106.Universal;
-
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
@@ -72,6 +72,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             _view = panel;
             _view.btnMotorGo.Click += (s, e) => MoveMotorToPosHolder();
             _view.btnSettings.Click += (s, e) => OpenMotorJogWindow();
+            _view.lblCurrentMotorPos.ForeColor = Color.White;
         }
         public void SetDataSrc(SuckerRowEnum sucker)
         {
