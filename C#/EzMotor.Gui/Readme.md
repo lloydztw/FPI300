@@ -7,9 +7,7 @@
 	
 ## 資料夾
 
-	<proj_root>
-		│
-		├── JetEazy.Drv.Motor.Inferface					(LeTian 馬達控制的接口, 移植版本 只在 EzMotor.Gui 內部使用)
+	 <proj_root>
 		│
 		└── View										(Gui 元件)
 			  ├─ .Inteface

@@ -39,25 +39,12 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="JetEazy.Drv.Motor.Interface\Config\JxMotorAxisConfig.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\Enums\MotorSensors.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\MultiAxes\AxisSpeedProfile.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\Enums\MotorPulseFormt.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\Enums\MotorSignalLogic.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\Enums\MotorUnitMode.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\Enums\MotorState.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\Interface\IDrvMotorAxis.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\Interface\IDrvMotorGpio.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\Config\MotorAxisConfig.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\MultiAxes\MultiAxesContext.cs" />
-    <Compile Include="JetEazy.Drv.Motor.Interface\Vectors\MotVector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="View\.Interface\IvAxisStatusView.cs" />
     <Compile Include="View\.Interface\IvMotorJogView.cs" />
     <Compile Include="View\.Widgets\GwMotorSimpleGoPanel.cs">
       <SubType>UserControl</SubType>

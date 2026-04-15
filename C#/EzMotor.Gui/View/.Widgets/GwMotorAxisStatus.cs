@@ -14,19 +14,18 @@
  */
 #endregion
 
-using JetEazy.Drivers.Motor;
-using System.Drawing;
 using System.Windows.Forms;
-
 
 namespace AX.Gui
 {
-    public partial class GwMotorAxisStatus : UserControl, IvAxisStatusView
+    public partial class GwMotorAxisStatus : UserControl
     {
         #region PRIVATE_MEMBERS
+#if (OPT_USING_LT_MOTOR_INTERFACE)
         MotorState _lastState = MotorState.Unknown;
         Control _activeStateLabel = null;
         int _blinkCount = 0;
+#endif
         #endregion
 
         public GwMotorAxisStatus()
@@ -47,17 +46,20 @@ namespace AX.Gui
             }
         }
 
-        public void UpdateAxisStatus(IDrvMotorAxis axis)
-        {
-            updatePosSpeedAndSignals(axis);
-            updateMotorState(axis);
-        }
-        public void UpdateAxisName(IDrvMotorAxis axis)
-        {
-            AxisName = axis.Name + " Status";
-        }
+#if (OPT_USING_LT_MOTOR_INTERFACE)
+        //public void UpdateAxisStatus(IDrvMotorAxis axis)
+        //{
+        //    updatePosSpeedAndSignals(axis);
+        //    updateMotorState(axis);
+        //}
+        //public void UpdateAxisName(IDrvMotorAxis axis)
+        //{
+        //    AxisName = axis.Name + " Status";
+        //}
+#endif
 
         #region PRIVATE_FUNCTIONS
+#if (OPT_USING_LT_MOTOR_INTERFACE)
         void updatePosSpeedAndSignals(IDrvMotorAxis axis)
         {
             if (axis == null)
@@ -172,6 +174,7 @@ namespace AX.Gui
             if (_activeStateLabel != null)
                 _activeStateLabel.BackColor = color;
         }
+#endif
         #endregion
 
         void autoLayout()
