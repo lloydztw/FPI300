@@ -14,6 +14,7 @@
 #endregion
 
 using AX.Gui;
+using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.Mvc.Ctrl;
 using System;
@@ -66,13 +67,21 @@ namespace LaserAlignDX.Mvc.Gui
             Load += (s, e) => timer1.Start();
         }
 
-        public void SetJogTargets(CarrierEnum C,  SuckerRowEnum S)
+        public void SetJogTargets(CarrierEnum C,  SuckerRowEnum S, QVector directTargetPos = null)
         {
             var yName = GaUtil.GetEnumDescription(C);
             var xName = GaUtil.GetEnumDescription(S);
             Text = $"軸控 (X={xName}, Y={yName})";
 
             _motorsCtrl.SetJogTargets(C, S);
+
+            if (directTargetPos != null)
+            {
+                Load += (s, e) =>
+                {
+                    _motorsCtrl.BeginMoveTo(directTargetPos);
+                };
+            }
         }
 
         #region PRIVATE_FUNCTIONS

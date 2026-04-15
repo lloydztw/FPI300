@@ -226,14 +226,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (_btnOpenMotorXY != null)
                 _btnOpenMotorXY.Click += (s, e) => OpenMotorWindowXY();
 
-            //if (_btnOpenMotorZ != null)
-            //    _btnOpenMotorZ.Click += (s, e) => OpenMotorWindowZ();
-
-            //if (_btnFocusMotorGo != null)
-            //    _btnFocusMotorGo.Click += (s, e) => MoveFocusMotorToRecipePos();
-
+            // Interactors
             _cviGridResultBox.OnRequestDumpBindaryImage += (s, e) => RunAutoFetchBoardGrid(dump: true);
-
             _cviBigBoundBox.OnChanged += _cviBigBoundBox_OnChanged;
 
             // ImgViewrs' EventHanlders
@@ -1539,12 +1533,12 @@ namespace LaserAlignDX.Mvc.Ctrl
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
 
-        void OpenMotorWindowXY()
+        void OpenMotorWindowXY(QVector directTargetPos = null)
         {
             using (var dlg = new FormMotorXY())
             {
                 dlg.OnInkerCoordsUpdated += Dlg_OnInkerCoordsUpdated;
-                dlg.SetJogTargets(_activeCarrierID, _activeSuckerRowID);
+                dlg.SetJogTargets(_activeCarrierID, _activeSuckerRowID, directTargetPos);
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ShowDialog(_wndOwner);
             }
@@ -1691,10 +1685,12 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return;
             #endregion
 
-            // Y 較長先移動
-            _activeMotorY?.Go(targetPos.Y, 0);
-            // X 次之
-            _activeMotorX?.Go(targetPos.X, 0);
+            //// Y 較長先移動
+            //_activeMotorY?.Go(targetPos.Y, 0);
+            //// X 次之
+            //_activeMotorX?.Go(targetPos.X, 0);
+
+            OpenMotorWindowXY(targetPos);
         }
         #endregion
 

@@ -19,6 +19,8 @@ using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.Mvc.Gui;
 using System;
+using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Traveller106;
 using Universal = Traveller106.Universal;
@@ -54,6 +56,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region RUNTIME_DATA
         double _inkerPos;
         bool _isInkerPosModified = false;
+        bool _needsToAutoClose = false;
         #endregion
 
         public void Attach(IvMotorXYInkerUI view)
@@ -124,6 +127,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
                 // Inker Up Panel (只簡單保存當下的 motor pos)
                 _inkerUpPanel.btnSettings.Visible = false;
+                _inkerUpPanel.lblCurrentMotorPos.ForeColor = Color.White;
                 _inkerUpPanel.lblCurrentMotorPos.Text = $"{_backupInkerMotorPos:0.000}";
                 _inkerUpPanel.btnMotorGo.Click += (s, e) => RestoreInkerMotorPos();
             }
@@ -131,6 +135,18 @@ namespace LaserAlignDX.Mvc.Ctrl
             // Axis Name
             _viewX.lblAxisName.Text = $"X Axis ({GaUtil.GetEnumDescription(S)})";
             _viewY.lblAxisName.Text = $"Y Axis ({GaUtil.GetEnumDescription(C)})";
+        }
+
+        public async Task BeginMoveTo(QVector targetPos)
+        {
+            if (targetPos == null)
+                return;
+
+            _jogCtrlY.BeginMoveTo(targetPos.Y);
+            _jogCtrlX.BeginMoveTo(targetPos.X);
+
+            await Task.Delay(200);
+            _needsToAutoClose = true;
         }
 
         public void RestoreInkerMotorPos()
@@ -151,10 +167,14 @@ namespace LaserAlignDX.Mvc.Ctrl
         public void Tick()
         {
             checkInkerSafety();
+            
             _jogCtrlX?.Tick();
             _jogCtrlY?.Tick();
+
+            checkAutoCloseCondition();
         }
 
+        #region PRIVATE_FUNCTIONS
         void checkInkerSafety()
         {
             // 檢查 Inker 如果在下位, 就禁止移動 XY
@@ -178,5 +198,16 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
             }
         }
+        void checkAutoCloseCondition()
+        {
+            if (_needsToAutoClose)
+            {
+                if (_motorX.IsOK && _motorY.IsOK)
+                {
+                    _ui?.Window?.FindForm()?.Close();
+                }
+            }
+        }
+        #endregion
     }
 }

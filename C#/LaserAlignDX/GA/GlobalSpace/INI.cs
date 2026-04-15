@@ -1056,8 +1056,8 @@ namespace Traveller106
             //WriteINIValue("Basic", "take_zposhigh", take_zposhigh.ToString(), INIFILE);
             //cali_load();
 
-            WriteINIValue("Basie", "zInkerS1", zInkerS1.ToString(), INIFILE);
-            WriteINIValue("Basie", "zInkerS2", zInkerS2.ToString(), INIFILE);
+            WriteINIValue("Basic", "zInkerS1", zInkerS1.ToString(), INIFILE);
+            WriteINIValue("Basic", "zInkerS2", zInkerS2.ToString(), INIFILE);
         }
         public void SaveCaliParas()
         {

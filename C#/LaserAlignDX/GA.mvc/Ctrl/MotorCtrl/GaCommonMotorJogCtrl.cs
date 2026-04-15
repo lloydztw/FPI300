@@ -78,7 +78,16 @@ namespace LaserAlignDX.Mvc.Ctrl
             _enabled = enable;
             _forbiddenReason = forbiddenReason;
         }
-        
+
+        public void BeginMoveTo(double targetPos)
+        {
+            _ui.Window.BeginInvoke(new Action(() =>
+            {
+                numGoPosition.Value = (decimal)targetPos;
+                MoveMotorTo((float)targetPos, silent: true);
+            }));
+        }
+
         public void Tick()
         {
             PollingMotorStatus();
@@ -102,7 +111,6 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             lblError.DoubleClick += (s, e) => ResetMotor();
         }
-
         bool CheckEnabled()
         {
             if (!_enabled)
@@ -116,7 +124,6 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             _motor?.Reset();
         }
-
         void StopMotor()
         {
             _motor?.Stop();
@@ -184,7 +191,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             double pos = _motor.GetPos() + delta;
             MoveMotorTo((float)pos, silent);
         }
-
         void PollingMotorStatus()
         {
             // RESERVED
