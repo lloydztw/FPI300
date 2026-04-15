@@ -23,7 +23,6 @@ namespace LaserAlignDX.Mvc.Gui
     public partial class FormMotorZ : Form
     {
         #region PRIVATE_DATA
-        PLCMotionClass _motor;
         GaCommonMotorJogCtrl _jogCtrl;
         #endregion
 
@@ -35,11 +34,11 @@ namespace LaserAlignDX.Mvc.Gui
         public void Attach(IAxis motor)
         {
             var view = gvPaneMotorJogZ1.GetJogView();
+            view.lblAxisName.Text = Text;
 
-            _motor = motor as PLCMotionClass;
             _jogCtrl = new GaCommonMotorJogCtrl();
-            _jogCtrl.Attach(view, _motor);
-
+            _jogCtrl.Attach(view, motor);
+            
             btnOK.Click += (s, e) => DoConfirm();
             btnCancel.Click += (s, e) => DoCancel();
             timer1.Tick += (s, e) => _jogCtrl?.Tick();

@@ -76,9 +76,14 @@ namespace VsCommon.ControlSpace.MachineSpace
             i = 0;
             while (i < MotionCount)
             {
-                PLCMOTIONCollection[i] = new PLCMotionClass();
-                //>>> PLCMOTIONCollection[i].Intial(WORKPATH + "\\" + myMachineEA.ToString(), (MotionEnum)i, PLCCollection, IsNoUseMotor);
-                PLCMOTIONCollection[i].Intial(iniPath, (MotionEnum)i, PLCCollection, IsNoUseMotor);
+                //PLCMOTIONCollection[i] = new PLCMotionClass();
+                ////>>> PLCMOTIONCollection[i].Intial(WORKPATH + "\\" + myMachineEA.ToString(), (MotionEnum)i, PLCCollection, IsNoUseMotor);
+                //PLCMOTIONCollection[i].Intial(iniPath, (MotionEnum)i, PLCCollection, IsNoUseMotor);
+
+                // LETIAN: 2026-04-15 (for motor simulation)
+                PLCMotionClass plcMotor = IsNoUseMotor ? new PLCMotionSim() : new PLCMotionClass();
+                plcMotor.Intial(iniPath, (MotionEnum)i, PLCCollection, IsNoUseMotor);
+                PLCMOTIONCollection[i] = plcMotor;
 
                 i++;
             }

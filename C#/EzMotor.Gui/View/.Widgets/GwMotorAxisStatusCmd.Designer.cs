@@ -63,6 +63,11 @@
             this.numDist.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.numDist.DecimalPlaces = 3;
             this.numDist.Font = new System.Drawing.Font("Verdana", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.numDist.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            131072});
             this.numDist.Location = new System.Drawing.Point(98, 7);
             this.numDist.Margin = new System.Windows.Forms.Padding(4);
             this.numDist.Maximum = new decimal(new int[] {

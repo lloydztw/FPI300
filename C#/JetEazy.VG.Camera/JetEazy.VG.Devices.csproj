@@ -158,6 +158,7 @@
     <Compile Include="CCDSpace\Dvp2Class.cs" />
     <Compile Include="CCDSpace\CamLinkDriver\Linescan_iTK.cs" />
     <Compile Include="CCDSpace\GaCameraFactory.cs" />
+    <Compile Include="ControlSpace\MotionSpace\PLCMotionClass_Sim.cs" />
     <Compile Include="ControlSpace\MotionSpace\PLCMotionClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\CipCompoletClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\CstLightClass.cs" />
@@ -173,7 +174,6 @@
     <Compile Include="ControlSpace\EventClass.cs" />
     <Compile Include="ControlSpace\MotionSpace\CanMotionClass.cs" />
     <Compile Include="ControlSpace\MotionSpace\GeoMotionClass.cs" />
-    <Compile Include="ControlSpace\MotionSpace\PLCMotionClass_000.cs" />
     <Compile Include="ControlSpace\MotoCanSpace\CanDeviceCore.cs" />
     <Compile Include="ControlSpace\MotoCanSpace\CanDeviceMotor.cs" />
     <Compile Include="ControlSpace\MotoCanSpace\CanMotoControl.cs" />

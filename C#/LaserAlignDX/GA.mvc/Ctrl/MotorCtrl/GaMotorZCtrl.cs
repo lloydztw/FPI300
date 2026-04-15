@@ -50,7 +50,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         public event EventHandler OnPosDataSrcModified;
 
         #region PRIVATE_KERNEL_DATA
-        PLCMotionClass _motor;
+        IAxis _motor;
         IMotorPosHolder _posHolder;
         ZPosDataSrc _posHolderID;
         #endregion
@@ -192,6 +192,9 @@ namespace LaserAlignDX.Mvc.Ctrl
     {
         double Value { get; set; }
     }
+
+    #region MOTOR_Z_POS_HOLDERs
+
     class ZPosHolder_Focus_On_Calib : IMotorPosHolder
     {
         ITravellerTransforms _commonBaseTrf => TravellerTransformFactory.CommonBase;
@@ -247,4 +250,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             set => INI.Instance.zInkerS2 = (float)value;
         }
     }
+
+    #endregion
 }

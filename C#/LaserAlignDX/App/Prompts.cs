@@ -22,19 +22,22 @@ namespace LaserAlignDX
         [Description("共用座標系統 建置完成.")]
         Info_CommonBase_Trf_Successed,
 
-        [Description("不支援此功能.")]
+        [Description("不支援此功能!")]
         Warn_the_function_is_not_supported,
 
         //[Description("即將移動 線掃相機 馬達")]
         //Question_To_Move_Big_Linescan_Motor,
 
-        [Description("是否要採用 目前馬達 XY 座標值")]
+        [Description("是否要採用 目前馬達 XY 座標值?")]
         Question_Update_Motor_Coord_To_Calib,
 
-        [Description("是否確定要將 馬達 回 HOME")]
+        [Description("是否確定要將 馬達 回 HOME?")]
         Question_Motor_Home,
 
-        [Description("是否確定要 移動馬達 至定位")]
+        [Description("是否確定要 移動馬達 至定位?")]
         Question_Motor_GoTo_Pos,
+
+        [Description("Inker 在下位時, 禁止移動 馬達 XY!")]
+        Warning_MotorXY_Disabled_By_Inker_Down,
     }
 }

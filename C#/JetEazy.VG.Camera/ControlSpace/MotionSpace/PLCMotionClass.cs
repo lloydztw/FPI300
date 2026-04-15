@@ -60,8 +60,8 @@ namespace JetEazy.ControlSpace.MotionSpace
     }
     public class PLCMotionClass : GeoMotionClass
     {
-        VsCommPLC[] PLC;
-        AddressClass[] ADDRESSARRAY = new AddressClass[(int)MotionAddressEnum.COUNT];
+        protected VsCommPLC[] PLC;
+        protected AddressClass[] ADDRESSARRAY = new AddressClass[(int)MotionAddressEnum.COUNT];
         
         public override bool IsHaveBreakOption
         {
@@ -99,7 +99,7 @@ namespace JetEazy.ControlSpace.MotionSpace
 
         }
 
-        public void Intial(string path, MotionEnum motionname, VsCommPLC[] plc,bool isnousemotor)
+        public virtual void Intial(string path, MotionEnum motionname, VsCommPLC[] plc,bool isnousemotor)
         {
             PLC = plc;
             MOTIONNAME = motionname;

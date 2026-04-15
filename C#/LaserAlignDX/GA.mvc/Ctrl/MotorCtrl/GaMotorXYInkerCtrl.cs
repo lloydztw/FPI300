@@ -14,8 +14,6 @@
 #endregion
 
 using AX.Gui;
-using JetEazy.ControlSpace.MotionSpace;
-using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.QMath;
 using JetEazy.Utils;
@@ -25,7 +23,6 @@ using System.Windows.Forms;
 using Traveller106;
 using Universal = Traveller106.Universal;
 
-
 namespace LaserAlignDX.Mvc.Ctrl
 {
     public partial class GaMotorXYInkerCtrl : IxTickable
@@ -33,9 +30,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         public event EventHandler<InkerCoordsEventArgs> OnInkerCoordsUpdated;
 
         #region PRIVATE_MODEL_DATA
-        PLCMotionClass _motorX;
-        PLCMotionClass _motorY;
-        PLCMotionClass _inkerMotorZ;
+        IAxis _motorX;
+        IAxis _motorY;
+        IAxis _inkerMotorZ;
         double _backupInkerMotorPos;
         SuckerRowEnum _activeInkerID;
         #endregion
@@ -55,6 +52,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region RUNTIME_DATA
+        double _inkerPos;
         bool _isInkerPosModified = false;
         #endregion
 
@@ -151,8 +149,33 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         public void Tick()
         {
+            checkInkerSafety();
             _jogCtrlX?.Tick();
             _jogCtrlY?.Tick();
+        }
+
+        void checkInkerSafety()
+        {
+            // 檢查 Inker 如果在下位, 就禁止移動 XY
+
+            var inkerPos = _inkerMotorZ.GetPos();
+
+            if (!GaBasicMotorUtil.IsTinyDelta(_inkerPos - inkerPos))
+            {
+                _inkerPos = inkerPos;
+
+                if (_inkerPos > _backupInkerMotorPos)
+                {
+                    var reason = GaUtil.GetEnumDescription(Prompts.Warning_MotorXY_Disabled_By_Inker_Down);
+                    _jogCtrlX.SetEnable(false, reason);
+                    _jogCtrlY.SetEnable(false, reason);
+                }
+                else
+                {
+                    _jogCtrlX.SetEnable(true);
+                    _jogCtrlY.SetEnable(true);
+                }
+            }
         }
     }
 }

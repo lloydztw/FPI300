@@ -14,7 +14,6 @@
 #endregion
 
 using AX.Gui;
-using ComtactAnglePlus.FromCommon;
 using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
@@ -50,102 +49,68 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         #region RUNTIME_DATA
         bool _isMoving = false;
+        bool _enabled = true;
+        string _forbiddenReason;
         #endregion
 
-        public void Attach(IvMotorJogView view, PLCMotionClass motor)
+        public void Attach(IvMotorJogView view, IAxis motor)
         {
             _ui = view;
-            _motor = motor;
+            _motor = motor as PLCMotionClass;
 
-            var window = view.Window;
-            if (!window.IsHandleCreated)
-                window.HelpRequested += (s, e) => Init();
+            var frm = view.Window.FindForm();
+            if (!frm.IsHandleCreated)
+                frm.Load += (s, e) => Init();
             else
                 Init();
 
-            window.HandleDestroyed += (s, e) => CleanUp();
+            frm.FormClosed += (s, e) => CleanUp();
         }
 
+        public void SetEnable(bool enable, string forbiddenReason = null)
+        {
+            _enabled = enable;
+            _forbiddenReason = forbiddenReason;
+        }
+        
+        public void Tick()
+        {
+            PollingMotorStatus();
+            UpdateMotorStatus();
+        }
+
+        #region PRIVATE_FUNCTIONS
         void Init()
         {
-            UpdateMotorName();
+            UpdateMotorNameUnit();
 
             btnForward.MouseDown += (s, e) => JogForward();
             btnForward.MouseUp += (s, e) => StopMotor();
             btnBackward.MouseDown += (s, e) => JogBackward();
             btnBackward.MouseUp += (s, e) => StopMotor();
 
-            btnHome.Click += btnHome_Click;
-            btnAdd.Click += btnAdd_Click;
-            btnSub.Click += btnSub_Click;
-            btnGo.Click += btnGo_Click;
+            btnHome.Click += (s, e) => Home();
+            btnAdd.Click += (s, e) => MoveMotorDelta((float)Math.Abs(numGoPosition.Value));
+            btnSub.Click += (s, e) => MoveMotorDelta(-(float)Math.Abs(numGoPosition.Value));
+            btnGo.Click += (s, e) => MoveMotorTo((float)numGoPosition.Value);
 
             lblError.DoubleClick += (s, e) => ResetMotor();
         }
 
-        void btnGo_Click(object sender, EventArgs e)
+        bool CheckEnabled()
         {
-            var ret = VsMessageBox.Question(GaUtil.GetEnumDescription(Prompts.Question_Motor_GoTo_Pos));
-            if (DialogResult.Cancel == ret)
-                return;
-
-            _motor?.Go((float)numGoPosition.Value);
-            _isMoving = true;
-        }
-        void btnSub_Click(object sender, EventArgs e)
-        {
-            _motor?.Go(_motor.PositionNow - (float)numGoPosition.Value);
-            _isMoving = true;
-        }
-        void btnAdd_Click(object sender, EventArgs e)
-        {
-            _motor?.Go((float)numGoPosition.Value + _motor.PositionNow);
-            _isMoving = true;
-        }
-        void btnHome_Click(object sender, EventArgs e)
-        {
-            var ret = VsMessageBox.Question(GaUtil.GetEnumDescription(Prompts.Question_Motor_Home));
-            if (DialogResult.Cancel == ret)
-                return;
-
-            _motor.Home();
-            _isMoving = true;
-        }
-
-        void WriteSettingsToPLC()
-        {
-            //_motor.GOSPEED = _motorSettings.GOSPEED;
-            //_motor.SetSpeed(SpeedTypeEnum.GO);
-            //_motor.SaveData(MotionAddressEnum.GOSPEED, _motor.GOSPEED.ToString());
-
-            //_motor.GOSLOWSPEED = _motorSettings.GOSLOWSPEED;
-            ////MOTION.SetSpeed(SpeedTypeEnum.GOSLOW);
-            //_motor.SaveData(MotionAddressEnum.GOSLOWSPEED, _motor.GOSLOWSPEED.ToString());
-
-            //_motor.MANUALSPEED = _motorSettings.MANUALSPEED;
-            //_motor.SetSpeed(SpeedTypeEnum.MANUAL);
-            //_motor.SaveData(MotionAddressEnum.MANUALSPEED, _motor.MANUALSPEED.ToString());
-
-            //_motor.MANUALSLOWSPEED = _motorSettings.MANUALSLOWSPEED;
-            ////MOTION.SetSpeed(SpeedTypeEnum.MANUALSLOW);
-            //_motor.SaveData(MotionAddressEnum.MANUALSLOWSPEED, _motor.MANUALSLOWSPEED.ToString());
-
-            //_motor.HOMEHIGHSPEED = _motorSettings.HOMEHIGHSPEED;
-            //_motor.SetSpeed(SpeedTypeEnum.HOMEHIGH);
-            //_motor.SaveData(MotionAddressEnum.HOMEHIGHSPEED, _motor.HOMEHIGHSPEED.ToString());
-
-            //_motor.HOMESLOWSPEED = _motorSettings.HOMESLOWSPEED;
-            //_motor.SetSpeed(SpeedTypeEnum.HOMESLOW);
-            //_motor.SaveData(MotionAddressEnum.HOMESLOWSPEED, _motor.HOMESLOWSPEED.ToString());
-
-            //_motor.READYPOSITION = _motorSettings.READYPOSITION;// MOTION.PositionNow;
-            //_motor.TESTPOSITION = _motorSettings.TESTPOSITION;
-            //_motor.SaveData();
+            if (!_enabled)
+            {
+                string msg = !string.IsNullOrEmpty(_forbiddenReason) ? _forbiddenReason : "Disabled!";
+                VsMessageBox.Warning(msg);
+            }
+            return _enabled;
         }
         void ResetMotor()
         {
             _motor?.Reset();
         }
+
         void StopMotor()
         {
             _motor?.Stop();
@@ -153,11 +118,60 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void JogForward()
         {
+            if (!CheckEnabled()) return;
             _motor?.Forward();
+            _isMoving = true;
         }
         void JogBackward()
         {
+            if (!CheckEnabled()) return;
             _motor?.Backward();
+            _isMoving = true;
+        }
+
+        void Home()
+        {
+            if (!CheckEnabled()) return;
+
+            string msg = GaUtil.GetEnumDescription(Prompts.Question_Motor_Home);
+            string displayName = _ui.lblAxisName.Text;
+            msg += $"\n\r\n\r{displayName} To HOME";
+
+            //var ret = MessageBox.Show(msg, "Motor Control", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            //if (ret != DialogResult.Yes)
+            //    return;
+
+            if (VsMessageBox.Question(msg) != DialogResult.OK)
+                return;
+
+            _motor.Home();
+            _isMoving = true;
+        }
+        void MoveMotorTo(float pos, bool silent = false)
+        {
+            if (!CheckEnabled()) return;
+
+            if (!silent)
+            {
+                string displayName = _ui.lblAxisName.Text;
+                if (GaBasicMotorUtil.PromptMoveTo(_motor, pos, displayName, silent))
+                    _isMoving = true;
+            }
+            else
+            {
+                _motor?.Go(pos, 0);
+                _isMoving = true;
+            }
+        }
+        void MoveMotorDelta(float delta)
+        {
+            if (!CheckEnabled()) return;
+
+            // 防呆保護: 5 mm 以上 之相對位移, 會顯示提視窗.
+            bool silent = Math.Abs(delta) <= 5.0;
+
+            double pos = _motor.GetPos() + delta;
+            MoveMotorTo((float)pos, silent);
         }
 
         void PollingMotorStatus()
@@ -168,57 +182,70 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             // RESERVED
         }
+        #endregion
 
-        public void Tick()
-        {
-            PollingMotorStatus();
-            UpdateMotorStatus();
-        }
-
-        #region PRIVATE_GUI_UPDATE_FUNCTIONS
-        Color _normalColor = SystemColors.Control;
         void UpdateMotorStatus()
         {
             var motor = _motor;
             if (motor == null)
                 return;
 
-            var isOK = motor.IsOK;
-            var isError = motor.IsError;
-            var isINP = motor.IsOnSite;
-            
-            if (isINP)
-                _isMoving = false;
+            // 讀取馬達設備變量 (耗CPU時間)
+            bool isError = motor.IsError;
+            bool isOK = motor.IsOK;
+            bool isINP = motor.IsOnSite;
+            bool hasBeenHome = motor.IsHome;     // 這裡的 IsHome 貌似指 曾經成功 回HOME
 
-            var isMoving = _isMoving && isOK && !isError;
-            var isReady = isOK && !isError;
-            var isHome = motor.IsHome;
+            bool isAtLowerLimit = motor.IsReachLowerBound;
+            bool isAtUpperLimit = motor.IsReachUpperBound;
+            bool isAtOrg = motor.IsReachHomeBound;
+
             var currentPos = motor.PositionNow;
             var currentSpeed = motor.GetSpeed(SpeedTypeEnum.GO);
 
-            updateBackColor(_ui.lblStatusReady, isReady ? Color.Lime : _normalColor);
+            if (isINP)
+                _isMoving = false;
+
+            var isMoving = _isMoving && !isError;
+            var isReady = isOK && !isError;
+
             updateBackColor(_ui.lblStatusMoving, isMoving ? Color.Lime : _normalColor);
-            updateBackColor(_ui.lblStatusError, isError ? Color.Red : _normalColor);
+            updateBackColor(_ui.lblStatusReady, isReady ? Color.Lime : _normalColor);
+            updateBackColor(_ui.lblStatusError, isError ? Color.Pink : _normalColor);
+            updateBackColor(btnHome, hasBeenHome ? _normalColor : Color.Pink);
 
-            updateBackColor(btnHome, isHome ? _normalColor : Color.Red);
-            updateBackColor(btnGo, isReady ? _normalColor : Color.Red);
-            updateBackColor(btnAdd, isReady ? _normalColor : Color.Red);
-            updateBackColor(btnSub, isReady ? _normalColor : Color.Red);
-            updateBackColor(btnBackward, isReady ? _normalColor : Color.Red);
-            updateBackColor(btnForward, isReady ? _normalColor : Color.Red);
+            setEnable(btnHome, isReady && !isMoving);
+            setEnable(btnGo, isReady && !isMoving);
+            setEnable(btnAdd, isReady && !isMoving);
+            setEnable(btnSub, isReady && !isMoving);
+            setEnable(btnForward, !isError);
+            setEnable(btnBackward, !isError);
 
-            updateBackColor(_ui.lblSignalLimitP, motor.IsReachUpperBound ? Color.Pink : _normalColor);
-            updateBackColor(_ui.lblSignalLimitN, motor.IsReachLowerBound ? Color.Pink : _normalColor);
-            updateBackColor(_ui.lblSignalOrg, isHome ? Color.Gold : _normalColor);
+            updateBackColor(_ui.lblSignalLimitP, isAtUpperLimit ? Color.Pink : _normalColor);
+            updateBackColor(_ui.lblSignalLimitN, isAtLowerLimit ? Color.Pink : _normalColor);
+            updateBackColor(_ui.lblSignalOrg, isAtOrg ? Color.Gold : _normalColor);
             updateBackColor(_ui.lblSignalINP, isINP ? Color.Lime : _normalColor);
 
             updateText(lblPositionNow, $"{currentPos:0.000}");
             updateText(lblCurrentSpeed, $"{currentSpeed:0.000}");
         }
-        void UpdateMotorName()
+
+        #region PRIVATE_GUI_UPDATE_FUNCTIONS
+        Color _normalColor = SystemColors.Control;
+        void UpdateMotorNameUnit()
         {
-            updateText(_ui?.lblAxisName, _motor?.MOTIONALIAS);
-            updateText(_ui?.lblUnit, _motor?.MOTIONUNIT);
+            // 注意: MOTIONALIAS 使用中文 INI 會有亂碼.
+            //string name0 = GaBasicMotorUtil.GetDisplayName(_motor);
+            //string name1 = _ui?.Window?.FindForm()?.Text;
+            //string name = !string.IsNullOrEmpty(name1) ? name1 : name0;
+            string unit = GaBasicMotorUtil.GetUnit(_motor);
+            //updateText(_ui?.lblAxisName, name);
+            updateText(_ui?.lblUnit, unit);
+        }
+        void setEnable(Control c, bool enabled)
+        {
+            if (c != null)
+                c.Enabled = enabled;
         }
         void updateText(Control c, string text)
         {
