@@ -1,5 +1,6 @@
 ﻿
 using JetEazy.BasicSpace;
+using JetEazy.ControlSpace;
 using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.ControlSpace.PLCSpace;
 using System;
@@ -80,9 +81,8 @@ namespace VsCommon.ControlSpace.MachineSpace
                 ////>>> PLCMOTIONCollection[i].Intial(WORKPATH + "\\" + myMachineEA.ToString(), (MotionEnum)i, PLCCollection, IsNoUseMotor);
                 //PLCMOTIONCollection[i].Intial(iniPath, (MotionEnum)i, PLCCollection, IsNoUseMotor);
 
-                // LETIAN: 2026-04-15 (for motor simulation)
-                PLCMotionClass plcMotor = IsNoUseMotor ? new PLCMotionSim() : new PLCMotionClass();
-                plcMotor.Intial(iniPath, (MotionEnum)i, PLCCollection, IsNoUseMotor);
+                // LETIAN: 2026-04-15 統一由 GaMotorFactory 生成 PLCMotionClass
+                var plcMotor = GaMotorFactory.Instance(iniPath, (MotionEnum)i, PLCCollection, IsNoUseMotor);
                 PLCMOTIONCollection[i] = plcMotor;
 
                 i++;

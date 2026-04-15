@@ -67,6 +67,12 @@ namespace LaserAlignDX.Mvc.Ctrl
             frm.FormClosed += (s, e) => CleanUp();
         }
 
+        public bool JogDirInverted
+        {
+            get;
+            set;
+        }
+
         public void SetEnable(bool enable, string forbiddenReason = null)
         {
             _enabled = enable;
@@ -119,16 +125,21 @@ namespace LaserAlignDX.Mvc.Ctrl
         void JogForward()
         {
             if (!CheckEnabled()) return;
-            _motor?.Forward();
+            if (JogDirInverted)
+                _motor?.Backward();
+            else
+                _motor?.Forward();
             _isMoving = true;
         }
         void JogBackward()
         {
             if (!CheckEnabled()) return;
-            _motor?.Backward();
+            if (JogDirInverted)
+                _motor?.Forward();
+            else
+                _motor?.Backward();
             _isMoving = true;
         }
-
         void Home()
         {
             if (!CheckEnabled()) return;
@@ -225,9 +236,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             updateBackColor(_ui.lblSignalLimitN, isAtLowerLimit ? Color.Pink : _normalColor);
             updateBackColor(_ui.lblSignalOrg, isAtOrg ? Color.Gold : _normalColor);
             updateBackColor(_ui.lblSignalINP, isINP ? Color.Lime : _normalColor);
-
+            
             updateText(lblPositionNow, $"{currentPos:0.000}");
             updateText(lblCurrentSpeed, $"{currentSpeed:0.000}");
+            updateForeColor(_ui.lblCurrentSpeed, isMoving ? Color.Lime : Color.White);
         }
 
         #region PRIVATE_GUI_UPDATE_FUNCTIONS
@@ -252,10 +264,15 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (c != null && text != null)
                 c.Text = text;
         }
-        void updateBackColor(Control c, Color backColor)
+        void updateBackColor(Control c, Color color)
         {
             if (c != null)
-                c.BackColor = backColor;
+                c.BackColor = color;
+        }
+        void updateForeColor(Control c, Color color)
+        {
+            if (c != null)
+                c.ForeColor = color;
         }
         #endregion
     }

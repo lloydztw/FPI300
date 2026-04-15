@@ -242,6 +242,9 @@ namespace Traveller106
             // 軸4: 挑揀 X2軸
             // 軸5: 線掃 Z軸
 
+            // 軸6: Inker_S1 (暫時安排)
+            // 軸7: Inker_S2 (暫時安排)
+
             return plcMotions[axisID];
         }
         public static PLCMotionClass GetMotorX(SuckerRowEnum suckerID)
@@ -260,7 +263,10 @@ namespace Traveller106
         }
         public static PLCMotionClass GetInkerMotor(SuckerRowEnum suckerID)
         {
-            return GetMotor(5);
+            // 軸6: Inker_S1 (暫時安排)
+            // 軸7: Inker_S2 (暫時安排)
+            int axisID = suckerID == SuckerRowEnum.S1 ? 6 : 7;
+            return GetMotor(axisID);
         }
         public static PLCMotionClass GetBigScanCameraFocusMotor()
         {
@@ -426,17 +432,16 @@ namespace Traveller106
                             break;
                         case OptionEnum.MAIN_FPIX3:
 
-                            opstr += "1,";  //1個 PLC  
-                            opstr += "6,";   //14個軸
-                            opstr += $"2,";   //0 Projector
-                            opstr += "0,";   //4 barcode sacn
+                            opstr += "1,";      //1個 PLC  
+                            opstr += "8,";      //14個軸
+                            opstr += "2,";      //0 Projector
+                            opstr += "0,";      //4 barcode sacn
 
                             MainFPIX3MachineClass machineFPIX3 = new MainFPIX3MachineClass(Machine_EA.MAIN_FPIX3, opstr, WORKPATH, IsNoUseIO);
                             ret = machineFPIX3.Initial(IsNoUseIO, IsNoUseMotor);
 
                             MACHINECollection = new MachineCollectionClass();
                             MACHINECollection.Intial(VERSION, OPTION, machineFPIX3);
-
 
                             break;
                     }

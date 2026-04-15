@@ -158,6 +158,7 @@
     <Compile Include="CCDSpace\Dvp2Class.cs" />
     <Compile Include="CCDSpace\CamLinkDriver\Linescan_iTK.cs" />
     <Compile Include="CCDSpace\GaCameraFactory.cs" />
+    <Compile Include="ControlSpace\Factory\GaMotorFactory.cs" />
     <Compile Include="ControlSpace\MotionSpace\PLCMotionClass_Sim.cs" />
     <Compile Include="ControlSpace\MotionSpace\PLCMotionClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\CipCompoletClass.cs" />

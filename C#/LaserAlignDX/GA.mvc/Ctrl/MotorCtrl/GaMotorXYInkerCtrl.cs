@@ -111,6 +111,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _jogCtrlY = new GaCommonMotorJogCtrl();
                 _jogCtrlX.Attach(_viewX, _motorX);
                 _jogCtrlY.Attach(_viewY, _motorY);
+                _jogCtrlY.JogDirInverted = true;
             }
 
             // Inker Down CONTROL (只允許 attach 一次)
