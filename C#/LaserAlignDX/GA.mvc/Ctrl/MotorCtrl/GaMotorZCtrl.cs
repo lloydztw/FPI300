@@ -261,7 +261,8 @@ namespace LaserAlignDX.Mvc.Ctrl
     {
         public double Value
         {
-            get {
+            get
+            {
                 var plc = GaBasicMotorUtil.PLCIO;
                 if (plc != null)
                     return plc.GetFlyCamFocusZ();

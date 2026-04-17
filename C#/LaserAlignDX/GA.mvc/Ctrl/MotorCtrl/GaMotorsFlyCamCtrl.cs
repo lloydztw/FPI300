@@ -39,7 +39,6 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region PRIVATE_MODEL_DATA
         IAxis _motorX;
         IAxis _motorY;
-        IAxis _motorFocusZ;
         IAxis _motorSuckerZ;
         double _suckerSafeZ;
         #endregion
@@ -79,7 +78,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             _motorSuckerZ = Universal.GetInkerMotor(suckerID);
             _motorX = Universal.GetMotorX(suckerID);
             _motorY = Universal.GetFlyCameraY();
-            _motorFocusZ = Universal.GetFlyCameraZ();
 
             // MODEL (plc)
             _plc = GaBasicMotorUtil.PLCIO;
@@ -124,11 +122,10 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         public void MoveToTiggerPosX()
         {
-            var plc = GaBasicMotorUtil.PLCIO;
-            if (plc == null)
+            if (_plc == null)
                 return;
 
-            double pos = plc.GetFlyCamTriggerX();
+            double pos = _plc.GetFlyCamTriggerX();
             _jogCtrlX.BeginMoveTo(pos, silent: false);
         }
         public void MoveToCameraPosY()
@@ -147,10 +144,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             var on = !_plc.VacuumSucker1;
             _plc.VacuumSucker1 = on;
             updateVacuumColor(on);
-        }
-        public void RestoreFocusMotorPos()
-        {
-            _focusMotorCtrl?.MoveMotorToPosHolder();
         }
         public void SaveModification()
         {

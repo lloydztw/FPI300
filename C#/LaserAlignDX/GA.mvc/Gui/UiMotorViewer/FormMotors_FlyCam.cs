@@ -76,7 +76,6 @@ namespace LaserAlignDX.Mvc.Gui
         void CleanUp()
         {
             timer1.Stop();
-            _motorsCtrl?.RestoreFocusMotorPos();
             _motorsCtrl = null;
         }
         void DoTick()
