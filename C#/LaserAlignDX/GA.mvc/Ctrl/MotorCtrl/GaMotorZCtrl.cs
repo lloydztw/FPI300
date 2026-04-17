@@ -14,7 +14,6 @@
 #endregion
 
 using AX.Gui;
-using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
@@ -199,6 +198,7 @@ namespace LaserAlignDX.Mvc.Ctrl
     {
         double Value { get; set; }
     }
+
 
     #region MOTOR_Z_POS_HOLDERs
 

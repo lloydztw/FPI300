@@ -15,15 +15,11 @@
 
 using AX.Gui;
 using JetEazy.Interface;
-using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.Mvc.Gui;
 using System;
 using System.Drawing;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using VsCommon.ControlSpace.IOSpace;
-using VsCommon.ControlSpace.MachineSpace;
 using Universal = Traveller106.Universal;
 
 namespace LaserAlignDX.Mvc.Ctrl
@@ -168,6 +164,11 @@ namespace LaserAlignDX.Mvc.Ctrl
         void updateVacuumColor(bool on)
         {
             _ui.btnVacuum.BackColor = on ? Color.Pink : _ui.Window.BackColor;
+
+            if (on)
+                _ui.btnVacuum.Text = _ui.btnVacuum.Text.Replace("OFF", "ON");
+            else
+                _ui.btnVacuum.Text = _ui.btnVacuum.Text.Replace("ON", "OFF");
         }
         void checkInkerSafety()
         {

@@ -35,6 +35,7 @@
             this.btnCancel = new System.Windows.Forms.Button();
             this.gvPaneMotorJogZ1 = new AX.Gui.GvPaneMotorJogZ();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.btnServo = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -42,6 +43,7 @@
             // 
             this.panel1.BackColor = System.Drawing.Color.LightSteelBlue;
             this.panel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.panel1.Controls.Add(this.btnServo);
             this.panel1.Controls.Add(this.btnOK);
             this.panel1.Controls.Add(this.btnCancel);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -80,7 +82,6 @@
             // 
             // gvPaneMotorJogZ1
             // 
-            //this.gvPaneMotorJogZ1.AxisName = null;
             this.gvPaneMotorJogZ1.BackColor = System.Drawing.Color.Gray;
             this.gvPaneMotorJogZ1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("gvPaneMotorJogZ1.BackgroundImage")));
             this.gvPaneMotorJogZ1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
@@ -90,6 +91,21 @@
             this.gvPaneMotorJogZ1.Padding = new System.Windows.Forms.Padding(0, 2, 0, 8);
             this.gvPaneMotorJogZ1.Size = new System.Drawing.Size(782, 241);
             this.gvPaneMotorJogZ1.TabIndex = 76;
+            // 
+            // btnServo
+            // 
+            this.btnServo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnServo.BackColor = System.Drawing.Color.Lime;
+            this.btnServo.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnServo.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnServo.Location = new System.Drawing.Point(52, 11);
+            this.btnServo.Margin = new System.Windows.Forms.Padding(4);
+            this.btnServo.Name = "btnServo";
+            this.btnServo.Size = new System.Drawing.Size(172, 38);
+            this.btnServo.TabIndex = 76;
+            this.btnServo.Text = "Servo ON";
+            this.btnServo.UseVisualStyleBackColor = false;
+            this.btnServo.Visible = false;
             // 
             // FormMotorZ
             // 
@@ -118,5 +134,6 @@
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Button btnServo;
     }
 }

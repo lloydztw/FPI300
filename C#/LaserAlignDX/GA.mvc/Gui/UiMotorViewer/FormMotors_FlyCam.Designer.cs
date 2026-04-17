@@ -103,15 +103,15 @@
             this.gvPaneMotorJogXY1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("gvPaneMotorJogXY1.BackgroundImage")));
             this.gvPaneMotorJogXY1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.gvPaneMotorJogXY1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gvPaneMotorJogXY1.Location = new System.Drawing.Point(0, 74);
+            this.gvPaneMotorJogXY1.Location = new System.Drawing.Point(0, 72);
             this.gvPaneMotorJogXY1.Name = "gvPaneMotorJogXY1";
             this.gvPaneMotorJogXY1.Padding = new System.Windows.Forms.Padding(0, 8, 12, 8);
-            this.gvPaneMotorJogXY1.Size = new System.Drawing.Size(782, 496);
+            this.gvPaneMotorJogXY1.Size = new System.Drawing.Size(782, 498);
             this.gvPaneMotorJogXY1.TabIndex = 3;
             // 
             // button1
             // 
-            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
             this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button1.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button1.Location = new System.Drawing.Point(53, 18);
@@ -124,7 +124,7 @@
             // 
             // button2
             // 
-            this.button2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.button2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.button2.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.button2.Location = new System.Drawing.Point(285, 18);
@@ -145,7 +145,7 @@
             this.panel0.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel0.Location = new System.Drawing.Point(0, 0);
             this.panel0.Name = "panel0";
-            this.panel0.Size = new System.Drawing.Size(782, 74);
+            this.panel0.Size = new System.Drawing.Size(782, 72);
             this.panel0.TabIndex = 79;
             // 
             // button3

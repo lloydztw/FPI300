@@ -44,6 +44,8 @@ namespace LaserAlignDX.Mvc.Gui
         IvMotorJogView IvMotorsXYInkerUI.JogViewY => gvPaneMotorJogXY1.GetJogViewY();
         GwMotorSimpleGoPanel IvMotorsXYInkerUI.InkerUpPanel => gwMotorSimpleGoPanel1;
         GwMotorSimpleGoPanel IvMotorsXYInkerUI.InkerDownPanel => gwMotorSimpleGoPanel2;
+        Button IvMotorsXYInkerUI.btnMoveToInkerIdlePos => button1;
+        Button IvMotorsXYInkerUI.btnSaveInkerIdlePos => button2;
         Button[] IvMotorsXYInkerUI.InkerCornerUpdateButtons => new[]
         {
             btnSaveLT,  // 左上

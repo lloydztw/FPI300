@@ -1,6 +1,7 @@
 ﻿
 using JetEazy.ControlSpace;
 using LaserAlignDX;
+using System;
 using System.Drawing;
 
 namespace VsCommon.ControlSpace.IOSpace
@@ -527,14 +528,15 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public bool VacuumSucker1
         {
-            get;
-            set;
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
         /// <summary>
         /// 取得 吸嘴排的安全高度Z (PLC 配方設定)
         /// </summary>
         public double GetSafeZ(SuckerRowEnum suckerID)
         {
+            throw new NotImplementedException();
             return 0;
         }
         /// <summary>
@@ -542,6 +544,7 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public double GetFlyCamFocusZ()
         {
+            throw new NotImplementedException();
             return 0;
         }
         /// <summary>
@@ -549,6 +552,7 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public double GetFlyCamTriggerX(SuckerRowEnum suckerID = SuckerRowEnum.S1)
         {
+            throw new NotImplementedException();
             return 0;
         }
         /// <summary>
@@ -556,6 +560,7 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public double GetFlyCamSnapshotY()
         {
+            throw new NotImplementedException();
             return 0;
         }
 

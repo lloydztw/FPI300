@@ -154,13 +154,17 @@ namespace LaserAlignDX.Mvc.Ctrl
             await Task.Delay(200);
             _needsToAutoClose = true;
         }
-
+        public void GoToInkerIdlePos()
+        {
+        }
+        public void StoreInkerIdlePos()
+        {
+        }
         public void RestoreInkerMotorPos()
         {
             string displayName = $"{_activeInkerID} Inker 馬達";
             _inkerMotorZ?.PromptMoveTo(_inkerSafePosZ, displayName);
         }
-
         public void SaveModification()
         {
             if (_isInkerPosModified)
