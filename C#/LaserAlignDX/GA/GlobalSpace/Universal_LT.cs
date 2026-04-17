@@ -228,6 +228,8 @@ namespace Traveller106
         /// 馬達 誤差小於 0.5 um 就忽略不處理
         /// </summary>
         public const double MOTOR_TINY_DELTA = 0.5e-3;
+        public const int TOTAL_MOTORS_NUMBER = 10;
+
         public static PLCMotionClass GetMotor(int axisID)
         {
             var machineX3 = (MainFPIX3MachineClass)Universal.MACHINECollection?.MACHINE;
@@ -244,6 +246,9 @@ namespace Traveller106
 
             // 軸6: Inker_S1 (暫時安排)
             // 軸7: Inker_S2 (暫時安排)
+
+            // 軸8: FlyCam_Y (暫時安排)
+            // 軸9: FlyCam_Z (暫時安排)
 
             return plcMotions[axisID];
         }
@@ -272,6 +277,16 @@ namespace Traveller106
         {
             // 軸5: 線掃 Z軸
             int axisID = 5;
+            return GetMotor(axisID);
+        }
+        public static PLCMotionClass GetFlyCameraY()
+        {
+            int axisID = 8;
+            return GetMotor(axisID);
+        }
+        public static PLCMotionClass GetFlyCameraZ()
+        {
+            int axisID = 9;
             return GetMotor(axisID);
         }
 
@@ -416,7 +431,6 @@ namespace Traveller106
                     switch (OPTION)
                     {
                         case OptionEnum.MAIN_X1:
-
                             opstr += "1,";  //1個 PLC  
                             opstr += "0,";   //14個軸
                             opstr += $"{INI.Instance.LedControlCount},";   //0 Projector
@@ -427,13 +441,10 @@ namespace Traveller106
 
                             MACHINECollection = new MachineCollectionClass();
                             MACHINECollection.Intial(VERSION, OPTION, machine);
-
-
                             break;
-                        case OptionEnum.MAIN_FPIX3:
 
-                            opstr += "1,";      //1個 PLC  
-                            opstr += "8,";      //14個軸
+                        case OptionEnum.MAIN_FPIX3:
+                            opstr += $"1,{TOTAL_MOTORS_NUMBER},";      //1個PLC , N個馬達軸
                             opstr += "2,";      //0 Projector
                             opstr += "0,";      //4 barcode sacn
 

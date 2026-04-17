@@ -7,6 +7,7 @@ using JetEazy.Interface;
 using JetEazy.Utils;
 using JzDisplay;
 using LaserAlignDX.GA.FormSpace.FPI30Form;
+using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
 using System;
@@ -93,6 +94,8 @@ namespace LaserAlignDX.FormSpace
         FlyOffsetUI flyOffset2UI => flyOffsetUI2;
         Label lblExpo => label2;
         Label lblGain => label3;
+        
+        Button btnOpenMotorJogWindow => button9;
 
         TabControl tabMainPages => tabControl2;
         #endregion
@@ -168,6 +171,7 @@ namespace LaserAlignDX.FormSpace
             btnLightTrigger.Click += BtnLightTrigger_Click;
             btnSpecialCalc.Click += BtnSpecialCal_Click;
             btnCodetest.Click += BtnCodetest_Click;
+            btnOpenMotorJogWindow.Click += (s, ev) => OpenMotorJogWindow();
 
             DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
 
@@ -555,6 +559,15 @@ namespace LaserAlignDX.FormSpace
                 return false;
             }
             return true;
+        }
+
+        void OpenMotorJogWindow()
+        {
+            using (var dlg = new FormMotors_FlyCam())
+            {
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ShowDialog();
+            }
         }
 
         #region JzDisplay_FUNCTIONS

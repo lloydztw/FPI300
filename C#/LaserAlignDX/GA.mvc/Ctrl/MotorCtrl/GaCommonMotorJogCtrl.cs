@@ -79,12 +79,12 @@ namespace LaserAlignDX.Mvc.Ctrl
             _forbiddenReason = forbiddenReason;
         }
 
-        public void BeginMoveTo(double targetPos)
+        public void BeginMoveTo(double targetPos, bool silent = true)
         {
             _ui.Window.BeginInvoke(new Action(() =>
             {
                 numGoPosition.Value = (decimal)targetPos;
-                MoveMotorTo((float)targetPos, silent: true);
+                MoveMotorTo((float)targetPos, silent);
             }));
         }
 

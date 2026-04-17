@@ -368,7 +368,8 @@
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaBasicMotorUtil.cs" />
-    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorXYInkerCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorsFlyCamCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorsXYInkerCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorZCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaCommonMotorJogCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
@@ -411,11 +412,17 @@
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.Designer.cs">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorXY.cs">
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotors_FlyCam.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorXY.Designer.cs">
-      <DependentUpon>FormMotorXY.cs</DependentUpon>
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotors_FlyCam.Designer.cs">
+      <DependentUpon>FormMotors_FlyCam.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotors_CarierSuckerXY.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotors_CarierSuckerXY.Designer.cs">
+      <DependentUpon>FormMotors_CarierSuckerXY.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorZ.cs">
       <SubType>Form</SubType>
@@ -423,7 +430,8 @@
     <Compile Include="GA.mvc\Gui\UiMotorViewer\FormMotorZ.Designer.cs">
       <DependentUpon>FormMotorZ.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiMotorViewer\IvMotorXYInkerUI.cs" />
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\IvMotorsFlyCamUI.cs" />
+    <Compile Include="GA.mvc\Gui\UiMotorViewer\IvMotorsXYInkerUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormPadThresholdsEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -599,12 +607,6 @@
     <Compile Include="GA\FormSpace\FormFlySetup.Designer.cs">
       <DependentUpon>FormFlySetup.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA\FormSpace\FormMotor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\FormMotor.Designer.cs">
-      <DependentUpon>FormMotor.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA\FormSpace\FormProgressing.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -738,8 +740,11 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.resx">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiMotorViewer\FormMotorXY.resx">
-      <DependentUpon>FormMotorXY.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiMotorViewer\FormMotors_FlyCam.resx">
+      <DependentUpon>FormMotors_FlyCam.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiMotorViewer\FormMotors_CarierSuckerXY.resx">
+      <DependentUpon>FormMotors_CarierSuckerXY.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiMotorViewer\FormMotorZ.resx">
       <DependentUpon>FormMotorZ.cs</DependentUpon>
@@ -770,9 +775,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\FormFlySetup.resx">
       <DependentUpon>FormFlySetup.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\FormMotor.resx">
-      <DependentUpon>FormMotor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\FormProgressing.resx">
       <DependentUpon>FormProgressing.cs</DependentUpon>

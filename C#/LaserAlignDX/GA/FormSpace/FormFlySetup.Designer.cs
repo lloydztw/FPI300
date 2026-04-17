@@ -55,10 +55,11 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.DS2 = new JzDisplay.UISpace.DispUI();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.flyOffsetUI1 = new LaserAlignDX.GA.FormSpace.FPI30Form.FlyOffsetUI();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
             this.flyOffsetUI2 = new LaserAlignDX.GA.FormSpace.FPI30Form.FlyOffsetUI();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.button9 = new System.Windows.Forms.Button();
             this.pnlBottom.SuspendLayout();
             this.pnlTop.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -109,6 +110,7 @@
             // pnlTop
             // 
             this.pnlTop.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.pnlTop.Controls.Add(this.button9);
             this.pnlTop.Controls.Add(this.richTextBox1);
             this.pnlTop.Controls.Add(this.button8);
             this.pnlTop.Controls.Add(this.label3);
@@ -159,7 +161,7 @@
             this.label3.BackColor = System.Drawing.Color.Black;
             this.label3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(619, 80);
+            this.label3.Location = new System.Drawing.Point(615, 61);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(201, 29);
@@ -170,7 +172,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(573, 87);
+            this.label4.Location = new System.Drawing.Point(569, 68);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(37, 15);
@@ -182,7 +184,7 @@
             this.label2.BackColor = System.Drawing.Color.Black;
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(619, 43);
+            this.label2.Location = new System.Drawing.Point(615, 24);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(201, 29);
@@ -193,7 +195,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(573, 50);
+            this.label1.Location = new System.Drawing.Point(569, 31);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(37, 15);
@@ -256,7 +258,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(4);
-            this.groupBox1.Size = new System.Drawing.Size(214, 125);
+            this.groupBox1.Size = new System.Drawing.Size(196, 125);
             this.groupBox1.TabIndex = 33;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "飞拍模式";
@@ -351,7 +353,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 29);
             this.tabPage2.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(941, 699);
+            this.tabPage2.Size = new System.Drawing.Size(848, 689);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "测试图片";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -363,7 +365,7 @@
             this.DS2.Location = new System.Drawing.Point(0, 0);
             this.DS2.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.DS2.Name = "DS2";
-            this.DS2.Size = new System.Drawing.Size(941, 699);
+            this.DS2.Size = new System.Drawing.Size(848, 689);
             this.DS2.TabIndex = 7;
             // 
             // tabPage1
@@ -373,10 +375,19 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 29);
             this.tabPage1.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(941, 699);
+            this.tabPage1.Size = new System.Drawing.Size(848, 689);
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "载台一补偿";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // flyOffsetUI1
+            // 
+            this.flyOffsetUI1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flyOffsetUI1.Location = new System.Drawing.Point(0, 0);
+            this.flyOffsetUI1.Margin = new System.Windows.Forms.Padding(5);
+            this.flyOffsetUI1.Name = "flyOffsetUI1";
+            this.flyOffsetUI1.Size = new System.Drawing.Size(848, 689);
+            this.flyOffsetUI1.TabIndex = 0;
             // 
             // tabPage4
             // 
@@ -385,10 +396,19 @@
             this.tabPage4.Location = new System.Drawing.Point(4, 29);
             this.tabPage4.Margin = new System.Windows.Forms.Padding(4);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(941, 699);
+            this.tabPage4.Size = new System.Drawing.Size(848, 689);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "载台二补偿";
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // flyOffsetUI2
+            // 
+            this.flyOffsetUI2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.flyOffsetUI2.Location = new System.Drawing.Point(0, 0);
+            this.flyOffsetUI2.Margin = new System.Windows.Forms.Padding(5);
+            this.flyOffsetUI2.Name = "flyOffsetUI2";
+            this.flyOffsetUI2.Size = new System.Drawing.Size(848, 689);
+            this.flyOffsetUI2.TabIndex = 1;
             // 
             // imageList1
             // 
@@ -397,23 +417,17 @@
             this.imageList1.Images.SetKeyName(0, "file_png_icon.png");
             this.imageList1.Images.SetKeyName(1, "grid_3x3.png");
             // 
-            // flyOffsetUI1
+            // button9
             // 
-            this.flyOffsetUI1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flyOffsetUI1.Location = new System.Drawing.Point(0, 0);
-            this.flyOffsetUI1.Margin = new System.Windows.Forms.Padding(5);
-            this.flyOffsetUI1.Name = "flyOffsetUI1";
-            this.flyOffsetUI1.Size = new System.Drawing.Size(941, 699);
-            this.flyOffsetUI1.TabIndex = 0;
-            // 
-            // flyOffsetUI2
-            // 
-            this.flyOffsetUI2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.flyOffsetUI2.Location = new System.Drawing.Point(0, 0);
-            this.flyOffsetUI2.Margin = new System.Windows.Forms.Padding(5);
-            this.flyOffsetUI2.Name = "flyOffsetUI2";
-            this.flyOffsetUI2.Size = new System.Drawing.Size(941, 699);
-            this.flyOffsetUI2.TabIndex = 1;
+            this.button9.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
+            this.button9.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button9.Location = new System.Drawing.Point(615, 102);
+            this.button9.Margin = new System.Windows.Forms.Padding(4);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(201, 31);
+            this.button9.TabIndex = 49;
+            this.button9.Text = "馬達控制";
+            this.button9.UseVisualStyleBackColor = false;
             // 
             // FormFlySetup
             // 
@@ -475,5 +489,6 @@
         private GA.FormSpace.FPI30Form.FlyOffsetUI flyOffsetUI1;
         private GA.FormSpace.FPI30Form.FlyOffsetUI flyOffsetUI2;
         private System.Windows.Forms.ImageList imageList1;
+        private System.Windows.Forms.Button button9;
     }
 }

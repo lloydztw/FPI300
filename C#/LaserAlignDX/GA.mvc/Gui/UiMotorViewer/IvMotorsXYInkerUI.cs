@@ -20,7 +20,7 @@ using System.Windows.Forms;
 
 namespace LaserAlignDX.Mvc.Gui
 {
-    public interface IvMotorXYInkerUI
+    public interface IvMotorsXYInkerUI
     {
         event EventHandler<InkerCoordsEventArgs> OnInkerCoordsUpdated;
 

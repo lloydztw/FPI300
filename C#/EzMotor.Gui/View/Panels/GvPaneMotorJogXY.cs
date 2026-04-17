@@ -34,5 +34,15 @@ namespace AX.Gui
         {
             return new UiMotorJogView(gwMotorAxisStatusCmd2, gwMotorJogSticks1, JogStickOption.Vert);
         }
+        public string AxisName1
+        {
+            get => gwMotorAxisStatusCmd1.AxisName;
+            set => gwMotorAxisStatusCmd1.AxisName = value;
+        }
+        public string AxisName2
+        {
+            get => gwMotorAxisStatusCmd2.AxisName;
+            set => gwMotorAxisStatusCmd2.AxisName = value;
+        }
     }
 }

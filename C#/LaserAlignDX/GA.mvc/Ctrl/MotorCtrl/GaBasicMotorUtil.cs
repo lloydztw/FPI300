@@ -19,11 +19,21 @@ using JetEazy.Interface;
 using JetEazy.Utils;
 using System;
 using System.Windows.Forms;
+using VsCommon.ControlSpace.IOSpace;
+using VsCommon.ControlSpace.MachineSpace;
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
     public static class GaBasicMotorUtil
     {
+        #region GLOBAL_MESS
+        static MainFPIX3MachineClass MACHINE
+        {
+            get => (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE;
+        }
+        public static IPlcIoFPIX3 PLCIO => MACHINE?.PLCIO;
+        #endregion
+
         public static bool IsTinyDelta(double delta)
         {
             return Math.Abs(delta) < Traveller106.Universal.MOTOR_TINY_DELTA;

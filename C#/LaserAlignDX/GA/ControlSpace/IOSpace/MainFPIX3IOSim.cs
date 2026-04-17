@@ -13,6 +13,7 @@
  */
 #endregion
 
+using LaserAlignDX;
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -417,6 +418,45 @@ namespace VsCommon.ControlSpace.IOSpace
             get;
             private set;
         } = 1;
+
+
+        /// <summary>
+        /// 控制 吸嘴排1的真空 ON / OFF
+        /// </summary>
+        public bool VacuumSucker1
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// 取得 吸嘴排的安全高度Z (PLC 配方設定)
+        /// </summary>
+        public double GetSafeZ(SuckerRowEnum suckerID)
+        {
+            return 12.892414;
+        }
+        /// <summary>
+        /// 取得 飛拍相機的對焦高度Z (PLC 配方設定)
+        /// </summary>
+        public double GetFlyCamFocusZ()
+        {
+            return 128.92414;
+        }
+        /// <summary>
+        /// 取得 Sucker1 (或 Sucker2) 的 飛拍相機 觸發位置 (PLC 配方設定)
+        /// </summary>
+        public double GetFlyCamTriggerX(SuckerRowEnum suckerID = SuckerRowEnum.S1)
+        {
+            return -12.892414;
+        }
+        /// <summary>
+        /// 取得 飛拍相機 拍照時的 Y軸 位置 (PLC 配方設定)
+        /// </summary>
+        public double GetFlyCamSnapshotY()
+        {
+            return -128.92414;
+        }
+
 
         public void simActiveStage(int stageId1)
         {

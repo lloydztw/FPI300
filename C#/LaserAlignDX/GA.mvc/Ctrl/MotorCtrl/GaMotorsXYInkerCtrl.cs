@@ -27,7 +27,7 @@ using Universal = Traveller106.Universal;
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
-    public partial class GaMotorXYInkerCtrl : IxTickable
+    public partial class GaMotorsXYInkerCtrl : IxTickable
     {
         public event EventHandler<InkerCoordsEventArgs> OnInkerCoordsUpdated;
 
@@ -35,7 +35,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         IAxis _motorX;
         IAxis _motorY;
         IAxis _inkerMotorZ;
-        double _backupInkerMotorPos;
+        double _inkerSafePosZ;
         SuckerRowEnum _activeInkerID;
         #endregion
 
@@ -46,7 +46,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region GUI_LINKS
-        IvMotorXYInkerUI _ui;
+        IvMotorsXYInkerUI _ui;
         IvMotorJogView _viewX => _ui?.JogViewX;
         IvMotorJogView _viewY => _ui?.JogViewY;
         GwMotorSimpleGoPanel _inkerUpPanel => _ui.InkerUpPanel;
@@ -59,7 +59,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         bool _needsToAutoClose = false;
         #endregion
 
-        public void Attach(IvMotorXYInkerUI view)
+        public void Attach(IvMotorsXYInkerUI view)
         {
             if (_ui != null) return;
             _ui = view;
@@ -104,8 +104,14 @@ namespace LaserAlignDX.Mvc.Ctrl
             _motorX = Universal.GetMotorX(S);
             _motorY = Universal.GetMotorY(C);
             _inkerMotorZ = Universal.GetInkerMotor(S);
-            _backupInkerMotorPos = _inkerMotorZ.GetPos();
             _activeInkerID = S;
+
+            // SafePosZ
+            var plc = GaBasicMotorUtil.PLCIO;
+            if (plc != null)
+                _inkerSafePosZ = plc.GetSafeZ(S);
+            else
+                _inkerSafePosZ = _inkerMotorZ.GetPos();
 
             // XY JOG CONTROL (只允許 attach 一次)
             if (_jogCtrlX == null)
@@ -128,7 +134,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 // Inker Up Panel (只簡單保存當下的 motor pos)
                 _inkerUpPanel.btnSettings.Visible = false;
                 _inkerUpPanel.lblCurrentMotorPos.ForeColor = Color.White;
-                _inkerUpPanel.lblCurrentMotorPos.Text = $"{_backupInkerMotorPos:0.000}";
+                _inkerUpPanel.lblCurrentMotorPos.Text = $"{_inkerSafePosZ:0.000}";
                 _inkerUpPanel.btnMotorGo.Click += (s, e) => RestoreInkerMotorPos();
             }
 
@@ -152,7 +158,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         public void RestoreInkerMotorPos()
         {
             string displayName = $"{_activeInkerID} Inker 馬達";
-            _inkerMotorZ?.PromptMoveTo(_backupInkerMotorPos, displayName);
+            _inkerMotorZ?.PromptMoveTo(_inkerSafePosZ, displayName);
         }
 
         public void SaveModification()
@@ -185,7 +191,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 _inkerPos = inkerPos;
 
-                if (_inkerPos > _backupInkerMotorPos)
+                if (_inkerPos > _inkerSafePosZ)
                 {
                     var reason = GaUtil.GetEnumDescription(Prompts.Warning_MotorXY_Disabled_By_Inker_Down);
                     _jogCtrlX.SetEnable(false, reason);

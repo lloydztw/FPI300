@@ -366,6 +366,7 @@ namespace TravellerMINIX6.ProcessSpace
 
                                 MACHINEx3.PLCIO.iScanResult = 1;
                                 _LOG($"{ToChangeLanguage("发送结果为")}{(m_IsPass ? "PASS" : "FAIL")}", Color.Red);
+
                                 FireCompleted(new ProcessEventArgs("Show.X", $"{(pRun.ElapsedTime * 1.0 / 1000).ToString("0.0")} s"));
                             }
                         }

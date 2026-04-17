@@ -42,6 +42,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         InkerS1,
         [Description("S2 點墨高度 (下壓)")]
         InkerS2,
+        [Description("飛拍對焦Z")]
+        FlyCamFocusZ,
     }
 
 
@@ -101,6 +103,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 case ZPosDataSrc.InkerS2:
                     _posHolder = new ZPosHolder_Inker_S2 ();
                     _motor = Universal.GetInkerMotor(SuckerRowEnum.S2);
+                    break;
+                case ZPosDataSrc.FlyCamFocusZ:
+                    _posHolder = new ZPosHolder_FlyCamFocusZ();
+                    _motor = Universal.GetFlyCameraZ();
                     break;
                 default:
                     _posHolder = null;
@@ -249,6 +255,22 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             get => INI.Instance.zInkerS2;
             set => INI.Instance.zInkerS2 = (float)value;
+        }
+    }
+    class ZPosHolder_FlyCamFocusZ : IMotorPosHolder
+    {
+        public double Value
+        {
+            get {
+                var plc = GaBasicMotorUtil.PLCIO;
+                if (plc != null)
+                    return plc.GetFlyCamFocusZ();
+                return 0.0;
+            }
+            set
+            {
+                // 暫時不支援寫入 PLC 配方
+            }
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace LaserAlignDX.Mvc.Gui
 {
-    partial class FormMotorXY
+    partial class FormMotors_CarierSuckerXY
     {
         /// <summary>
         /// Required designer variable.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMotorXY));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMotors_CarierSuckerXY));
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.panel1 = new System.Windows.Forms.Panel();
             this.btnOK = new System.Windows.Forms.Button();
@@ -168,7 +168,7 @@
             this.btnSaveRB.Text = "右下\r\n記入";
             this.btnSaveRB.UseVisualStyleBackColor = false;
             // 
-            // FormMotorXY
+            // FormMotors_CarierSuckerXY
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -187,9 +187,9 @@
             this.Margin = new System.Windows.Forms.Padding(4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "FormMotorXY";
+            this.Name = "FormMotors_CarierSuckerXY";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Motor XY";
+            this.Text = "Motors CarrierY SuckerX";
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
 

@@ -14,23 +14,21 @@
 #endregion
 
 using AX.Gui;
-using JetEazy.QMath;
-using JetEazy.Utils;
 using LaserAlignDX.Mvc.Ctrl;
 using System;
 using System.Windows.Forms;
 
 namespace LaserAlignDX.Mvc.Gui
 {
-    public partial class FormMotorXY : Form, IvMotorXYInkerUI
+    public partial class FormMotors_FlyCam : Form, IvMotorsFlyCamUI
     {
         public event EventHandler<InkerCoordsEventArgs> OnInkerCoordsUpdated;
 
         #region PRIVATE_DATA
-        GaMotorXYInkerCtrl _motorsCtrl;
+        GaMotorsFlyCamCtrl _motorsCtrl;
         #endregion
 
-        public FormMotorXY()
+        public FormMotors_FlyCam()
         {
             InitializeComponent();
 
@@ -38,19 +36,27 @@ namespace LaserAlignDX.Mvc.Gui
                 InitGui();
         }
 
-        #region GUI_LINKS
-        Control IvMotorXYInkerUI.Window => this;
-        IvMotorJogView IvMotorXYInkerUI.JogViewX => gvPaneMotorJogXY1.GetJogViewX();
-        IvMotorJogView IvMotorXYInkerUI.JogViewY => gvPaneMotorJogXY1.GetJogViewY();
-        GwMotorSimpleGoPanel IvMotorXYInkerUI.InkerUpPanel => gwMotorSimpleGoPanel1;
-        GwMotorSimpleGoPanel IvMotorXYInkerUI.InkerDownPanel => gwMotorSimpleGoPanel2;
-        Button[] IvMotorXYInkerUI.InkerCornerUpdateButtons => new[]
+        #region GUI_PROPERTIES
+        public string AxisName1
         {
-            btnSaveLT,  // 左上
-            btnSaveRT,  // 右上
-            btnSaveRB,  // 右下
-            btnSaveLB,  // 左下
-        };
+            get => gvPaneMotorJogXY1.AxisName1;
+            set => gvPaneMotorJogXY1.AxisName1 = value;
+        }
+        public string AxisName2
+        {
+            get => gvPaneMotorJogXY1.AxisName2;
+            set => gvPaneMotorJogXY1.AxisName2 = value;
+        }
+        #endregion
+
+        #region GUI_LINKS
+        Control IvMotorsFlyCamUI.Window => this;
+        IvMotorJogView IvMotorsFlyCamUI.JogViewX => gvPaneMotorJogXY1.GetJogViewX();
+        IvMotorJogView IvMotorsFlyCamUI.JogViewY => gvPaneMotorJogXY1.GetJogViewY();
+        GwMotorSimpleGoPanel IvMotorsFlyCamUI.FocusPanelZ => gwMotorSimpleGoPanel1;
+        Button IvMotorsFlyCamUI.btnGoTriggerPosX => button1;
+        Button IvMotorsFlyCamUI.btnGoCameraPosY => button2;
+        Button IvMotorsFlyCamUI.btnVacuum => button3;
         #endregion
 
         void InitGui()
@@ -59,36 +65,18 @@ namespace LaserAlignDX.Mvc.Gui
             btnOK.Click += (s, e) => DoConfirm();
             btnCancel.Click += (s, e) => DoCancel();
 
-            _motorsCtrl = new GaMotorXYInkerCtrl();
+            _motorsCtrl = new GaMotorsFlyCamCtrl();
             _motorsCtrl.Attach(this);
-            _motorsCtrl.OnInkerCoordsUpdated += (s, e) => OnInkerCoordsUpdated?.Invoke(s, e);
 
             timer1.Tick += (s, e) => DoTick();
             Load += (s, e) => timer1.Start();
-        }
-
-        public void SetJogTargets(CarrierEnum C,  SuckerRowEnum S, QVector directTargetPos = null)
-        {
-            var yName = GaUtil.GetEnumDescription(C);
-            var xName = GaUtil.GetEnumDescription(S);
-            Text = $"軸控 (X={xName}, Y={yName})";
-
-            _motorsCtrl.SetJogTargets(C, S);
-
-            if (directTargetPos != null)
-            {
-                Load += (s, e) =>
-                {
-                    _motorsCtrl.BeginMoveTo(directTargetPos);
-                };
-            }
         }
 
         #region PRIVATE_FUNCTIONS
         void CleanUp()
         {
             timer1.Stop();
-            _motorsCtrl?.RestoreInkerMotorPos();
+            _motorsCtrl?.RestoreFocusMotorPos();
             _motorsCtrl = null;
         }
         void DoTick()

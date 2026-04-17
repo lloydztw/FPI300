@@ -1535,7 +1535,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         void OpenMotorWindowXY(QVector directTargetPos = null)
         {
-            using (var dlg = new FormMotorXY())
+            using (var dlg = new FormMotors_CarierSuckerXY())
             {
                 dlg.OnInkerCoordsUpdated += Dlg_OnInkerCoordsUpdated;
                 dlg.SetJogTargets(_activeCarrierID, _activeSuckerRowID, directTargetPos);

@@ -1,0 +1,145 @@
+飛拍模板介面
+增加 motor_x_sucker1 Motor Jog視窗
+
+增加 motor_z_camera_fly Motor Jog視窗
+
+增加(button) motor_y_camera_fly move to 飛拍位1(讀取PLC)
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 觸發位置(讀取PLC)
+
+增加(button) vacuum_sucker1 vacuum on/vacuum off
+
+
+
+
+基準校正主介面
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 待命位置X座標((讀取INI)
+
+
+             motor_y_carrier1 move to 待命位置Y座標(讀取INI)
+
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 左上X座標(讀取INI)
+
+             motor_y_carrier1 move to 左上Y座標(讀取INI)
+
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 右上X座標(讀取INI)
+
+             motor_y_carrier1 move to 右上Y座標(讀取INI)
+
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 右下X座標(讀取INI)
+             motor_y_carrier1 move to 右下Y座標(讀取INI)
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 左下X座標(讀取INI)
+             motor_y_carrier1 move to 左下Y座標(讀取INI)
+
+____________________________________________________以上為載台1吸嘴排1
+
+增加(button) motor_z_sucker2 keeps at top
+             motor_x_sucker2 move to 待命位置X座標(讀取INI)
+             motor_y_carrier1 move to 待命位置Y座標(讀取INI)
+
+增加(button) motor_z_sucker2 keeps at top
+             motor_x_sucker2 move to 左上X座標(讀取INI)
+             motor_y_carrier1 move to 左上Y座標(讀取INI)
+
+增加(button) motor_z_sucker2 keeps at top
+             motor_x_sucker2 move to 右上X座標(讀取INI)
+             motor_y_carrier1 move to 右上Y座標(讀取INI)
+
+增加(button) motor_z_sucker2 keeps at top
+             motor_x_sucker2 move to 右下X座標(讀取INI)
+             motor_y_carrier1 move to 右下Y座標(讀取INI)
+
+增加(button) motor_z_sucker2 keeps at top
+             motor_x_sucker2 move to 左下X座標(讀取INI)
+             motor_y_carrier1 move to 左下Y座標(讀取INI)
+
+____________________________________________________以上為載台1吸嘴排2
+
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 待命位置X座標(讀取INI)
+             motor_y_carrier2 move to 待命位置Y座標(讀取INI)
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 左上X座標(讀取INI)
+             motor_y_carrier2 move to 左上Y座標(讀取INI)
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 右上X座標(讀取INI)
+             motor_y_carrier2 move to 右上Y座標(讀取INI)
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 右下X座標(讀取INI)
+             motor_y_carrier2 move to 右下Y座標(讀取INI)
+
+增加(button) motor_z_sucker1 keeps at top
+             motor_x_sucker1 move to 左下X座標(讀取INI)
+             motor_y_carrier2 move to 左下Y座標(讀取INI)
+
+____________________________________________________以上為載台2吸嘴排1
+
+增加(button) motor_z_sucker2 keeps at top
+             motor_x_sucker2 move to 待命位置X座標(讀取INI)
+             motor_y_carrier1 move to 待命位置Y座標(讀取INI)
+
+增加(button) motor_z_sucker2 keeps at top
+             motor_x_sucker2 move to 左上X座標(讀取INI)
+             motor_y_carrier1 move to 左上Y座標(讀取INI)
+
+增加(button) motor_z_sucker2 keeps at top
+             motor_x_sucker2 move to 右上X座標(讀取INI)
+             motor_y_carrier1 move to 右上Y座標(讀取INI)
+
+增加(button) motor_z_sucker2 keeps at top
+             motor_x_sucker2 move to 右下X座標(讀取INI)
+             motor_y_carrier1 move to 右下Y座標(讀取INI)
+
+增加(button) motor_z_sucker2 keeps at top
+             motor_x_sucker2 move to 左下X座標(讀取INI)
+             motor_y_carrier1 move to 左下Y座標(讀取INI)
+
+____________________________________________________以上為載台2吸嘴排2
+
+增加(button) motor_z_sucker1 move to Down/up(讀取INI)
+
+增加(button) motor_z_sucker2 move to Down/up(讀取INI)
+
+[增加 motor_x_sucker1 Motor Jog視窗
+
+增加 motor_z_sucker1 Motor server on/off]
+
+[增加 motor_x_sucker2 Motor Jog視窗
+
+增加 motor_z_sucker2 Motor server on/off]
+
+增加 motor_y_carrier1 Motor Jog視窗
+
+增加 motor_y_carrier2 Motor Jog視窗
+
+增加 motor_z_sucker1 Motor Jog視窗
+
+增加 motor_z_sucker2 Motor Jog視窗
+
+
+
+
+
+
+
+
+
+
+
+
+

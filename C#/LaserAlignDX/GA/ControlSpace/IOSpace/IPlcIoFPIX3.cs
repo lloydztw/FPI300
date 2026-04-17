@@ -1,4 +1,5 @@
 ﻿using JetEazy.ControlSpace.PLCSpace;
+using LaserAlignDX;
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -114,6 +115,28 @@ namespace VsCommon.ControlSpace.IOSpace
         /// 2: 平台二
         /// </summary>
         int iScanStage { get; }
+
+
+        /// <summary>
+        /// 控制 吸嘴排1的真空 ON / OFF
+        /// </summary>
+        bool VacuumSucker1 { get; set; }
+        /// <summary>
+        /// 取得 吸嘴排的安全高度Z (PLC 配方設定)
+        /// </summary>
+        double GetSafeZ(SuckerRowEnum suckerID);
+        /// <summary>
+        /// 取得 飛拍相機的對焦高度Z (PLC 配方設定)
+        /// </summary>
+        double GetFlyCamFocusZ();
+        /// <summary>
+        /// 取得 Sucker1 (或 Sucker2) 的 飛拍相機 觸發位置 (PLC 配方設定)
+        /// </summary>
+        double GetFlyCamTriggerX(SuckerRowEnum suckerID = SuckerRowEnum.S1);
+        /// <summary>
+        /// 取得 飛拍相機 拍照時的 Y軸 位置 (PLC 配方設定)
+        /// </summary>
+        double GetFlyCamSnapshotY();
     }
 
 
