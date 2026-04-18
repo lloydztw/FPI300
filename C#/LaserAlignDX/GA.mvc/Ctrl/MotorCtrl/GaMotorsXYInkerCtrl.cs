@@ -168,6 +168,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _inkerDownCtrl = new GaMotorZCtrl();
                 _inkerDownCtrl.Attach(_inkerDownPanel);
                 _inkerDownCtrl.SetDataSrc(S);
+                _inkerDownCtrl.OnPosDataSrcModified += (s, e) => updateInkerZsColor(true);
 
                 // Inker Up Panel (只簡單 顯示 吸嘴安全高度Z)
                 _inkerUpPanel.btnSettings.Visible = false;
@@ -312,11 +313,19 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             bool isEnabled = _jogCtrlX.IsEnabled();
             bool isReady = _motorX.IsOK && _motorY.IsOK;
+
             _ui.btnMoveToInkerIdlePos.Enabled = isEnabled && isReady;
             _ui.btnSetInkerIdlePos.Enabled = isEnabled && isReady;
+
+            foreach (var btn in _ui.InkerCornerMoveToButtons)
+                btn.Enabled = isEnabled && isReady;
+            foreach (var btn in _ui.InkerCornerUpdateButtons)
+                btn.Enabled = isEnabled && isReady;
         }
-        void updateInkerZsColor()
+        void updateInkerZsColor(bool pollingAgain = false)
         {
+            if (pollingAgain)
+                _suckerCurrentPos = _motorSuckerZ.GetPos();
             bool atSafePos = GaBasicMotorUtil.AreProximityEqual(_suckerCurrentPos, _suckerSafePosZ);
             bool atDownPos = GaBasicMotorUtil.AreProximityEqual(_suckerCurrentPos, _inkerSettings.GetInkerDownZ(_activeSuckerID));
             _ui.InkerDownPanel.lblCurrentMotorPos.BackColor = atDownPos ? Color.Red : Color.Black;
