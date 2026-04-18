@@ -51,9 +51,9 @@
             this.panel1.Controls.Add(this.btnOK);
             this.panel1.Controls.Add(this.btnCancel);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel1.Location = new System.Drawing.Point(0, 570);
+            this.panel1.Location = new System.Drawing.Point(2, 566);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(782, 65);
+            this.panel1.Size = new System.Drawing.Size(778, 80);
             this.panel1.TabIndex = 76;
             // 
             // btnOK
@@ -62,10 +62,10 @@
             this.btnOK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOK.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOK.Location = new System.Drawing.Point(390, 14);
+            this.btnOK.Location = new System.Drawing.Point(207, 15);
             this.btnOK.Margin = new System.Windows.Forms.Padding(4);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(172, 38);
+            this.btnOK.Size = new System.Drawing.Size(172, 52);
             this.btnOK.TabIndex = 74;
             this.btnOK.Text = "OK";
             this.btnOK.UseVisualStyleBackColor = false;
@@ -76,10 +76,10 @@
             this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCancel.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(570, 14);
+            this.btnCancel.Location = new System.Drawing.Point(397, 15);
             this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(172, 38);
+            this.btnCancel.Size = new System.Drawing.Size(172, 52);
             this.btnCancel.TabIndex = 75;
             this.btnCancel.Text = "取消";
             this.btnCancel.UseVisualStyleBackColor = false;
@@ -89,10 +89,10 @@
             this.gwMotorSimpleGoPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.gwMotorSimpleGoPanel1.AxisName = "飛拍 焦距 Z";
             this.gwMotorSimpleGoPanel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.gwMotorSimpleGoPanel1.Location = new System.Drawing.Point(553, 462);
+            this.gwMotorSimpleGoPanel1.Location = new System.Drawing.Point(551, 451);
             this.gwMotorSimpleGoPanel1.Name = "gwMotorSimpleGoPanel1";
             this.gwMotorSimpleGoPanel1.Padding = new System.Windows.Forms.Padding(0, 2, 0, 5);
-            this.gwMotorSimpleGoPanel1.Size = new System.Drawing.Size(212, 88);
+            this.gwMotorSimpleGoPanel1.Size = new System.Drawing.Size(212, 96);
             this.gwMotorSimpleGoPanel1.TabIndex = 77;
             // 
             // gvPaneMotorJogXY1
@@ -103,10 +103,10 @@
             this.gvPaneMotorJogXY1.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("gvPaneMotorJogXY1.BackgroundImage")));
             this.gvPaneMotorJogXY1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.gvPaneMotorJogXY1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gvPaneMotorJogXY1.Location = new System.Drawing.Point(0, 72);
+            this.gvPaneMotorJogXY1.Location = new System.Drawing.Point(2, 72);
             this.gvPaneMotorJogXY1.Name = "gvPaneMotorJogXY1";
             this.gvPaneMotorJogXY1.Padding = new System.Windows.Forms.Padding(0, 8, 12, 8);
-            this.gvPaneMotorJogXY1.Size = new System.Drawing.Size(782, 498);
+            this.gvPaneMotorJogXY1.Size = new System.Drawing.Size(778, 494);
             this.gvPaneMotorJogXY1.TabIndex = 3;
             // 
             // button1
@@ -137,15 +137,16 @@
             // 
             // panel0
             // 
-            this.panel0.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.panel0.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.panel0.BackgroundImage = global::LaserAlignDX.Properties.Resources.CommonPanel;
             this.panel0.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panel0.Controls.Add(this.button3);
             this.panel0.Controls.Add(this.button2);
             this.panel0.Controls.Add(this.button1);
             this.panel0.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel0.Location = new System.Drawing.Point(0, 0);
+            this.panel0.Location = new System.Drawing.Point(2, 0);
             this.panel0.Name = "panel0";
-            this.panel0.Size = new System.Drawing.Size(782, 72);
+            this.panel0.Size = new System.Drawing.Size(778, 72);
             this.panel0.TabIndex = 79;
             // 
             // button3
@@ -165,8 +166,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.ClientSize = new System.Drawing.Size(782, 635);
+            this.BackColor = System.Drawing.Color.LightSteelBlue;
+            this.ClientSize = new System.Drawing.Size(782, 648);
             this.Controls.Add(this.gwMotorSimpleGoPanel1);
             this.Controls.Add(this.gvPaneMotorJogXY1);
             this.Controls.Add(this.panel1);
@@ -177,6 +178,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "FormMotors_FlyCam";
+            this.Padding = new System.Windows.Forms.Padding(2, 0, 2, 2);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Motors FlyCam";
             this.panel1.ResumeLayout(false);

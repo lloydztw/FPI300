@@ -138,10 +138,10 @@
 
         #endregion
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        internal System.Windows.Forms.Button btnStickLeft;
-        internal System.Windows.Forms.Button btnStickUp;
-        internal System.Windows.Forms.Button btnStickHome;
-        internal System.Windows.Forms.Button btnStickRight;
-        internal System.Windows.Forms.Button btnStickDown;
+        public System.Windows.Forms.Button btnStickLeft;
+        public System.Windows.Forms.Button btnStickUp;
+        public System.Windows.Forms.Button btnStickHome;
+        public System.Windows.Forms.Button btnStickRight;
+        public System.Windows.Forms.Button btnStickDown;
     }
 }

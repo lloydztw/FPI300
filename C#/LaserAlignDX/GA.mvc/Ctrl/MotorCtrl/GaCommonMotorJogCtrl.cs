@@ -73,14 +73,22 @@ namespace LaserAlignDX.Mvc.Ctrl
             set;
         }
 
+        public bool IsEnabled()
+        {
+            return _enabled;
+        }
+
         public void SetEnable(bool enable, string forbiddenReason = null)
         {
             _enabled = enable;
             _forbiddenReason = forbiddenReason;
         }
 
-        public void BeginMoveTo(double targetPos, bool silent = true)
+        public void BeginMoveTo(double targetPos, bool silent = false)
         {
+            if (!_enabled)
+                return;
+
             _ui.Window.BeginInvoke(new Action(() =>
             {
                 numGoPosition.Value = (decimal)targetPos;

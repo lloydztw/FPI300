@@ -492,6 +492,7 @@
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellX3Class.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v3.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
+    <Compile Include="GA.mvc\Ctrl\MotorCtrl\JxInkerMotorSettings.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\JxCalibRecipe.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\Support\QRegistable.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\IWorldGridPoints.cs" />

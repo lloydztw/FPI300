@@ -268,6 +268,7 @@ namespace Traveller106
         }
         public static PLCMotionClass GetInkerMotor(SuckerRowEnum suckerID)
         {
+            // GAARA_NEEDS_TO_IMPLEMENT
             // 軸6: Inker_S1 (暫時安排)
             // 軸7: Inker_S2 (暫時安排)
             int axisID = suckerID == SuckerRowEnum.S1 ? 6 : 7;
@@ -281,11 +282,13 @@ namespace Traveller106
         }
         public static PLCMotionClass GetFlyCameraY()
         {
+            // GAARA_NEEDS_TO_IMPLEMENT
             int axisID = 8;
             return GetMotor(axisID);
         }
         public static PLCMotionClass GetFlyCameraZ()
         {
+            // GAARA_NEEDS_TO_IMPLEMENT
             int axisID = 9;
             return GetMotor(axisID);
         }

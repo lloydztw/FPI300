@@ -14,15 +14,15 @@
 #endregion
 
 using AX.Gui;
+using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.QMath;
 using JetEazy.Utils;
+using LaserAlignDX.AoiModel.Calib;
 using LaserAlignDX.Mvc.Gui;
 using System;
 using System.Drawing;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Traveller106;
 using Universal = Traveller106.Universal;
 
 namespace LaserAlignDX.Mvc.Ctrl
@@ -30,13 +30,16 @@ namespace LaserAlignDX.Mvc.Ctrl
     public partial class GaMotorsXYInkerCtrl : IxTickable
     {
         public event EventHandler<InkerCoordsEventArgs> OnInkerCoordsUpdated;
+        public event EventHandler<InkerCoordsEventArgs> OnQueryInkerCoords;
+
+        #region INKER_SETTINGS
+        JxInkerMotorSettings _inkerSettings => JxInkerMotorSettings.Instance;
+        #endregion
 
         #region PRIVATE_MODEL_DATA
         IAxis _motorX;
         IAxis _motorY;
-        IAxis _inkerMotorZ;
-        double _inkerSafePosZ;
-        SuckerRowEnum _activeInkerID;
+        IAxis _motorSuckerZ;
         #endregion
 
         #region PRIVATE_CHILD_CTRLS
@@ -54,8 +57,10 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region RUNTIME_DATA
-        double _inkerPos;
-        bool _isInkerPosModified = false;
+        CarrierEnum _activeCarrierID;
+        SuckerRowEnum _activeSuckerID;
+        double _suckerSafePosZ;
+        double _suckerCurrentPos;
         bool _needsToAutoClose = false;
         #endregion
 
@@ -63,21 +68,38 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             if (_ui != null) return;
             _ui = view;
-            connectEventHandlers(_ui.InkerCornerUpdateButtons);
+            connectEventHandlers();
         }
 
         #region PRIVATE_INIT_FUNCTIONS
-        void connectEventHandlers(Button[] cornerUpdateButtons)
+        void connectEventHandlers()
         {
-            if (cornerUpdateButtons == null) return;
-            System.Diagnostics.Debug.Assert(cornerUpdateButtons.Length == 4);
-
-            int cornerID = 0;
-            foreach (Button btnUpdateCorner in cornerUpdateButtons)
+            var cornerUpdateButtons = _ui.InkerCornerUpdateButtons;
+            if (cornerUpdateButtons != null)
             {
-                btnUpdateCorner.Tag = cornerID++;
-                btnUpdateCorner.Click += BtnUpdateCorner_Click;
+                int cornerID = 0;
+                foreach (Button btnUpdateCorner in cornerUpdateButtons)
+                {
+                    btnUpdateCorner.Tag = cornerID++;
+                    btnUpdateCorner.Click += BtnUpdateCorner_Click;
+                }
+                System.Diagnostics.Debug.Assert(cornerUpdateButtons.Length == 4);
             }
+            var cornerMoveToButtons = _ui.InkerCornerMoveToButtons;
+            if (cornerMoveToButtons != null)
+            {
+                int cornerID = 0;
+                foreach (Button btnMoveToCorner in cornerMoveToButtons)
+                {
+                    btnMoveToCorner.Tag = cornerID++;
+                    btnMoveToCorner.Click += BtnMoveToCorner_Click;
+                }
+                System.Diagnostics.Debug.Assert(cornerMoveToButtons.Length == 4);
+            }
+
+            _ui.btnMoveToInkerIdlePos.Click += (s, e) => GoToInkerIdlePosXY();
+            _ui.btnSetInkerIdlePos.Click += (s, e) => UpdateInkerIdlePosXY(true);
+            _ui.Window.HandleDestroyed += (s, e) => CleanUp();
         }
         #endregion
 
@@ -96,22 +118,39 @@ namespace LaserAlignDX.Mvc.Ctrl
                 OnInkerCoordsUpdated(this, ev);
             }
         }
+        private void BtnMoveToCorner_Click(object sender, EventArgs e)
+        {
+            if (_motorX == null || _motorY == null || OnQueryInkerCoords == null)
+                return;
+
+            if (sender is Button btn && btn.Tag is int id)
+            {
+                var ev = new InkerCoordsEventArgs() { CornerID = id, MotorCoord = null };
+                OnQueryInkerCoords.Invoke(this, ev);
+                var targetPos = ev.MotorCoord;
+                if (targetPos != null)
+                    BeginMoveTo(targetPos);
+            }
+        }
         #endregion
 
+        /// <summary>
+        /// 設定當下的載台與吸嘴排
+        /// </summary>
         public void SetJogTargets(CarrierEnum C, SuckerRowEnum S)
         {
-            // MODEL
+            // 載台與吸嘴排編號
+            _activeCarrierID = C;
+            _activeSuckerID = S;
+
+            // MODEL (馬達群)
             _motorX = Universal.GetMotorX(S);
             _motorY = Universal.GetMotorY(C);
-            _inkerMotorZ = Universal.GetInkerMotor(S);
-            _activeInkerID = S;
+            _motorSuckerZ = Universal.GetInkerMotor(S);
 
-            // SafePosZ
+            // Sucker Safe PosZ (吸嘴安全高度Z)
             var plc = GaBasicMotorUtil.PLCIO;
-            if (plc != null)
-                _inkerSafePosZ = plc.GetSafeZ(S);
-            else
-                _inkerSafePosZ = _inkerMotorZ.GetPos();
+            _suckerSafePosZ = plc != null ? plc.GetSafeZ(S) : 0.0;
 
             // XY JOG CONTROL (只允許 attach 一次)
             if (_jogCtrlX == null)
@@ -129,49 +168,128 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _inkerDownCtrl = new GaMotorZCtrl();
                 _inkerDownCtrl.Attach(_inkerDownPanel);
                 _inkerDownCtrl.SetDataSrc(S);
-                _inkerDownCtrl.OnPosDataSrcModified += (s, e) => _isInkerPosModified = true;
 
-                // Inker Up Panel (只簡單保存當下的 motor pos)
+                // Inker Up Panel (只簡單 顯示 吸嘴安全高度Z)
                 _inkerUpPanel.btnSettings.Visible = false;
                 _inkerUpPanel.lblCurrentMotorPos.ForeColor = Color.White;
-                _inkerUpPanel.lblCurrentMotorPos.Text = $"{_inkerSafePosZ:0.000}";
-                _inkerUpPanel.btnMotorGo.Click += (s, e) => RestoreInkerMotorPos();
+                _inkerUpPanel.lblCurrentMotorPos.Text = $"{_suckerSafePosZ:0.000}";
+                _inkerUpPanel.btnMotorGo.Click += (s, e) => RestoreInkerMotorPosZ();
             }
 
             // Axis Name
             _viewX.lblAxisName.Text = $"X Axis ({GaUtil.GetEnumDescription(S)})";
             _viewY.lblAxisName.Text = $"Y Axis ({GaUtil.GetEnumDescription(C)})";
-        }
 
-        public async Task BeginMoveTo(QVector targetPos)
+            // Update GUI
+            checkInkerSafety();
+            UpdateInkerIdlePosXY(false);
+        }
+        /// <summary>
+        /// 直接移動到指定位置 (X,Y)
+        /// </summary>
+        public void BeginMoveTo(QVector targetPos, bool silent = false, bool autoClose = false)
         {
             if (targetPos == null)
                 return;
 
-            _jogCtrlY.BeginMoveTo(targetPos.Y);
-            _jogCtrlX.BeginMoveTo(targetPos.X);
+            bool go = true;
 
-            await Task.Delay(200);
-            _needsToAutoClose = true;
+            if (!silent)
+            {
+                #region CHECK_IF_TINY
+                var deltaX = targetPos.X - _motorX.GetPos();
+                var deltaY = targetPos.Y - _motorY.GetPos();
+                bool isTiny = GaBasicMotorUtil.IsTinyDelta(deltaX) && GaBasicMotorUtil.IsTinyDelta(deltaY);
+                if (isTiny)
+                    go = false;
+                #endregion
+
+                #region PROMPTS
+                if (go)
+                {
+                    var msg = GaUtil.GetEnumDescription(Prompts.Question_Motor_GoTo_Pos);
+                    var motorNameX = _viewX.lblAxisName.Text;
+                    var motorNameY = _viewY.lblAxisName.Text;
+                    msg += $"\n\r\n\r{motorNameX} To {targetPos.X:0.000}";
+                    msg += $"\n\r\n\r{motorNameY} To {targetPos.Y:0.000}";
+                    if (VsMessageBox.Question(msg) != DialogResult.OK)
+                        go = false;
+                }
+                #endregion
+
+                // 接下來的個別軸移動, 不需要再彈窗詢問了.
+                silent = true;
+            }
+
+            if (go)
+            {
+                _jogCtrlY.BeginMoveTo(targetPos.Y, silent);
+                _jogCtrlX.BeginMoveTo(targetPos.X, silent);
+            }
+
+            if (autoClose)
+            {
+                #region 延時設定自動關窗旗標
+                new Action(() =>
+                {
+                    System.Threading.Thread.Sleep(200);
+                    _needsToAutoClose = true;
+                }).BeginInvoke(null, null);
+                #endregion
+            }
         }
-        public void GoToInkerIdlePos()
+        /// <summary>
+        /// 將 Inker 移動到 待命位置 (X,Y)
+        /// </summary>
+        public void GoToInkerIdlePosXY()
         {
+            var jxPos = _inkerSettings.GetInkerIdlePosXY(_activeCarrierID, _activeSuckerID);
+            var targetPos = new QVector2(jxPos.Value.X, jxPos.Value.Y);
+            BeginMoveTo(targetPos);
         }
-        public void StoreInkerIdlePos()
+        /// <summary>
+        /// 更新 Inker 待命位置 (X,Y)
+        /// </summary>
+        /// <param name="toRecipe"></param>
+        public void UpdateInkerIdlePosXY(bool toRecipe)
         {
+            var jxPos = _inkerSettings.GetInkerIdlePosXY(_activeCarrierID, _activeSuckerID);
+
+            if (toRecipe)
+            {
+                var x = _motorX.GetPos();
+                var y = _motorY.GetPos();
+
+                #region PROMPTS
+                var msg = GaUtil.GetEnumDescription(Prompts.Question_Update_Motor_Coord_To_Calib);
+                msg += $"?\n\r\n\r(X= {x:0.000}, Y= {y:0.000})";
+                //msg += $"\n\r\n\rTo {targetName}";
+                var ret = VsMessageBox.Question(msg);
+                if (ret != DialogResult.OK)
+                    return;
+                #endregion
+
+                jxPos.Value = new PointF((float)x, (float)y);
+                _inkerSettings.Modified = true;
+            }
+
+            _ui.lblInkerIdlePos.Text = $"點墨待命位置 = ({jxPos.Value.X:0.000}, {jxPos.Value.Y:0.000})";
         }
-        public void RestoreInkerMotorPos()
+        /// <summary>
+        /// 回復 Sucker Z軸 到安全位置
+        /// </summary>
+        public void RestoreInkerMotorPosZ()
         {
-            string displayName = $"{_activeInkerID} Inker 馬達";
-            _inkerMotorZ?.PromptMoveTo(_inkerSafePosZ, displayName);
+            string displayName = $"{_activeSuckerID} Inker 馬達";
+            _motorSuckerZ?.PromptMoveTo(_suckerSafePosZ, displayName);
         }
+        /// <summary>
+        /// 自動保存 已經變更的設定
+        /// </summary>
         public void SaveModification()
         {
-            if (_isInkerPosModified)
-            {
-                _isInkerPosModified = false;
-                INI.Instance.Save();
-            }
+            if (_inkerSettings.Modified)
+                _inkerSettings.Save(null);
         }
 
         public void Tick()
@@ -181,21 +299,40 @@ namespace LaserAlignDX.Mvc.Ctrl
             _jogCtrlX?.Tick();
             _jogCtrlY?.Tick();
 
+            updateGuiStatus();
             checkAutoCloseCondition();
+        }
+        void CleanUp()
+        {
+            JxInkerMotorSettings.Instance.Dispose();
         }
 
         #region PRIVATE_FUNCTIONS
+        void updateGuiStatus()
+        {
+            bool isEnabled = _jogCtrlX.IsEnabled();
+            bool isReady = _motorX.IsOK && _motorY.IsOK;
+            _ui.btnMoveToInkerIdlePos.Enabled = isEnabled && isReady;
+            _ui.btnSetInkerIdlePos.Enabled = isEnabled && isReady;
+        }
+        void updateInkerZsColor()
+        {
+            bool atSafePos = GaBasicMotorUtil.AreProximityEqual(_suckerCurrentPos, _suckerSafePosZ);
+            bool atDownPos = GaBasicMotorUtil.AreProximityEqual(_suckerCurrentPos, _inkerSettings.GetInkerDownZ(_activeSuckerID));
+            _ui.InkerDownPanel.lblCurrentMotorPos.BackColor = atDownPos ? Color.Red : Color.Black;
+            _ui.InkerUpPanel.lblCurrentMotorPos.BackColor = atSafePos ? Color.Lime : Color.Black;
+            _ui.InkerUpPanel.lblCurrentMotorPos.ForeColor = atSafePos ? Color.Black : Color.White;
+        }
         void checkInkerSafety()
         {
             // 檢查 Inker 如果在下位, 就禁止移動 XY
+            double currentZ = _motorSuckerZ.GetPos();
 
-            var inkerPos = _inkerMotorZ.GetPos();
-
-            if (!GaBasicMotorUtil.IsTinyDelta(_inkerPos - inkerPos))
+            if (!GaBasicMotorUtil.AreProximityEqual(_suckerCurrentPos, currentZ))
             {
-                _inkerPos = inkerPos;
+                _suckerCurrentPos = currentZ;
 
-                if (_inkerPos > _inkerSafePosZ)
+                if (_suckerCurrentPos > _suckerSafePosZ)
                 {
                     var reason = GaUtil.GetEnumDescription(Prompts.Warning_MotorXY_Disabled_By_Inker_Down);
                     _jogCtrlX.SetEnable(false, reason);
@@ -206,6 +343,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                     _jogCtrlX.SetEnable(true);
                     _jogCtrlY.SetEnable(true);
                 }
+
+                updateInkerZsColor();
             }
         }
         void checkAutoCloseCondition()

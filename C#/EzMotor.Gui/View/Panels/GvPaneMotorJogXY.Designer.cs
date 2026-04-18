@@ -29,10 +29,10 @@
         private void InitializeComponent()
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.gwMotorAxisStatusCmd1 = new AX.Gui.GwMotorAxisStatusCmd();
             this.gwMotorAxisStatusCmd2 = new AX.Gui.GwMotorAxisStatusCmd();
             this.gwMotorJogSticks1 = new AX.Gui.GwMotorJogSticks();
-            this.panel1 = new System.Windows.Forms.Panel();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -53,8 +53,19 @@
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 30F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 40F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(557, 484);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(470, 484);
             this.tableLayoutPanel1.TabIndex = 3;
+            // 
+            // panel1
+            // 
+            this.panel1.BackColor = System.Drawing.Color.Transparent;
+            this.panel1.Controls.Add(this.gwMotorJogSticks1);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
+            this.panel1.Location = new System.Drawing.Point(470, 8);
+            this.panel1.Name = "panel1";
+            this.panel1.Padding = new System.Windows.Forms.Padding(0, 12, 0, 0);
+            this.panel1.Size = new System.Drawing.Size(220, 484);
+            this.panel1.TabIndex = 5;
             // 
             // gwMotorAxisStatusCmd1
             // 
@@ -65,7 +76,7 @@
             this.gwMotorAxisStatusCmd1.Margin = new System.Windows.Forms.Padding(16, 8, 16, 5);
             this.gwMotorAxisStatusCmd1.Name = "gwMotorAxisStatusCmd1";
             this.gwMotorAxisStatusCmd1.Padding = new System.Windows.Forms.Padding(2);
-            this.gwMotorAxisStatusCmd1.Size = new System.Drawing.Size(525, 229);
+            this.gwMotorAxisStatusCmd1.Size = new System.Drawing.Size(438, 229);
             this.gwMotorAxisStatusCmd1.TabIndex = 0;
             // 
             // gwMotorAxisStatusCmd2
@@ -77,7 +88,7 @@
             this.gwMotorAxisStatusCmd2.Margin = new System.Windows.Forms.Padding(16, 5, 16, 8);
             this.gwMotorAxisStatusCmd2.Name = "gwMotorAxisStatusCmd2";
             this.gwMotorAxisStatusCmd2.Padding = new System.Windows.Forms.Padding(2);
-            this.gwMotorAxisStatusCmd2.Size = new System.Drawing.Size(525, 229);
+            this.gwMotorAxisStatusCmd2.Size = new System.Drawing.Size(438, 229);
             this.gwMotorAxisStatusCmd2.TabIndex = 1;
             // 
             // gwMotorJogSticks1
@@ -85,21 +96,10 @@
             this.gwMotorJogSticks1.BackColor = System.Drawing.Color.Transparent;
             this.gwMotorJogSticks1.Dock = System.Windows.Forms.DockStyle.Top;
             this.gwMotorJogSticks1.JogStickOption = AX.Gui.JogStickOption.XY;
-            this.gwMotorJogSticks1.Location = new System.Drawing.Point(0, 18);
+            this.gwMotorJogSticks1.Location = new System.Drawing.Point(0, 12);
             this.gwMotorJogSticks1.Name = "gwMotorJogSticks1";
             this.gwMotorJogSticks1.Size = new System.Drawing.Size(220, 220);
             this.gwMotorJogSticks1.TabIndex = 4;
-            // 
-            // panel1
-            // 
-            this.panel1.BackColor = System.Drawing.Color.Transparent;
-            this.panel1.Controls.Add(this.gwMotorJogSticks1);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.panel1.Location = new System.Drawing.Point(557, 8);
-            this.panel1.Name = "panel1";
-            this.panel1.Padding = new System.Windows.Forms.Padding(0, 18, 0, 0);
-            this.panel1.Size = new System.Drawing.Size(220, 484);
-            this.panel1.TabIndex = 5;
             // 
             // GvPaneMotorJogXY
             // 
@@ -112,7 +112,7 @@
             this.Controls.Add(this.panel1);
             this.Name = "GvPaneMotorJogXY";
             this.Padding = new System.Windows.Forms.Padding(0, 8, 12, 8);
-            this.Size = new System.Drawing.Size(789, 500);
+            this.Size = new System.Drawing.Size(702, 500);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.panel1.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -123,7 +123,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private GwMotorAxisStatusCmd gwMotorAxisStatusCmd1;
         private GwMotorAxisStatusCmd gwMotorAxisStatusCmd2;
-        private GwMotorJogSticks gwMotorJogSticks1;
         private System.Windows.Forms.Panel panel1;
+        public GwMotorJogSticks gwMotorJogSticks1;
     }
 }

@@ -347,13 +347,21 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         private void Dlg_OnInkerCoordsUpdated(object sender, InkerCoordsEventArgs e)
         {
-            if (_activeViewID == CalibViewEnum.InkMarksView)
+            int cornerId = e.CornerID;
+            if (cornerId >= 0)
             {
-                int cornerId = e.CornerID;
-                if (cornerId >= 0)
-                {
-                    dgvSyncCurrentMotorCoordsToUserInput(cornerId, e.MotorCoord);
-                }
+                dgvSyncCurrentMotorCoordsToUserInput(cornerId, e.MotorCoord);
+            }
+        }
+        private void Dlg_OnQueryInkerCoords(object sender, InkerCoordsEventArgs e)
+        {
+            e.MotorCoord = null;
+            int cornerId = e.CornerID;
+            if (cornerId >= 0)
+            {
+                dgvGetUserInputMotorCoords(out var motorCoords);
+                if (motorCoords != null && motorCoords.Length > cornerId)
+                    e.MotorCoord = motorCoords[cornerId];
             }
         }
         #endregion
@@ -841,9 +849,10 @@ namespace LaserAlignDX.Mvc.Ctrl
             var msg = GaUtil.GetEnumDescription(Prompts.Question_Update_Motor_Coord_To_Calib);
             msg += $"?\n\r\n\r(X= {currentMotorPos.X:0.000}, Y= {currentMotorPos.Y:0.000})";
             msg += $"\n\r\n\rTo 【{targetName}】";
-            var ret = MessageBox.Show(msg, "Calibration", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            //>> bool ok = MessageBox.Show(msg, "Calibration", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
+            bool ok = VsMessageBox.Question(msg) == DialogResult.OK;
 
-            if (ret == DialogResult.Yes)
+            if (ok)
             {
                 dgvRow.Cells[3].Value = currentMotorPos.X;
                 dgvRow.Cells[4].Value = currentMotorPos.Y;
@@ -1538,11 +1547,15 @@ namespace LaserAlignDX.Mvc.Ctrl
             using (var dlg = new FormMotors_CarierSuckerXY())
             {
                 dlg.OnInkerCoordsUpdated += Dlg_OnInkerCoordsUpdated;
+                dlg.OnQueryInkerCoords += Dlg_OnQueryInkerCoords;
                 dlg.SetJogTargets(_activeCarrierID, _activeSuckerRowID, directTargetPos);
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ShowDialog(_wndOwner);
             }
         }
+
+
+
         void LoadSettings()
         {
             // (1) Load VISION recipe Files
@@ -1686,8 +1699,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             #endregion
 
             //// Y 較長先移動
-            //_activeMotorY?.Go(targetPos.Y, 0);
             //// X 次之
+            //_activeMotorY?.Go(targetPos.Y, 0);
             //_activeMotorX?.Go(targetPos.X, 0);
 
             OpenMotorWindowXY(targetPos);

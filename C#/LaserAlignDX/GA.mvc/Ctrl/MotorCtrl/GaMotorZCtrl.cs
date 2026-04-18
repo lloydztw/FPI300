@@ -17,6 +17,7 @@ using AX.Gui;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
+using LaserAlignDX.AoiModel.Calib;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -146,6 +147,9 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 dlg.Text = lblMotorName.Text;
                 dlg.StartPosition = FormStartPosition.CenterParent;
+                
+                // 顯示 Servo ON
+                dlg.ServoOnVisible = _posHolderID == ZPosDataSrc.FlyCamFocusZ;
 
                 dlg.Attach(motor);
                 if (dlg.ShowDialog(frmOwner) == DialogResult.OK)
@@ -243,18 +247,22 @@ namespace LaserAlignDX.Mvc.Ctrl
     }
     class ZPosHolder_Inker_S1 : IMotorPosHolder
     {
+        JxInkerMotorSettings _inkerSettings => JxInkerMotorSettings.Instance;
+
         public double Value
         {
-            get => INI.Instance.zInkerS1;
-            set => INI.Instance.zInkerS1 = (float)value;
+            get => (double)_inkerSettings.zDownS1.Value;
+            set => _inkerSettings.zDownS1.Value = (decimal)value;
         }
     }
     class ZPosHolder_Inker_S2 : IMotorPosHolder
     {
+        JxInkerMotorSettings _inkerSettings => JxInkerMotorSettings.Instance;
+
         public double Value
         {
-            get => INI.Instance.zInkerS2;
-            set => INI.Instance.zInkerS2 = (float)value;
+            get => (double)_inkerSettings.zDownS2.Value;
+            set => _inkerSettings.zDownS2.Value = (decimal)value;
         }
     }
     class ZPosHolder_FlyCamFocusZ : IMotorPosHolder

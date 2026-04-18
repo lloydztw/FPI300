@@ -29,9 +29,11 @@ namespace LaserAlignDX.Mvc.Gui
         IvMotorJogView JogViewY { get; }
         GwMotorSimpleGoPanel InkerUpPanel { get; }
         GwMotorSimpleGoPanel InkerDownPanel { get; }
+        Control lblInkerIdlePos { get; }
         Button btnMoveToInkerIdlePos { get; }
-        Button btnSaveInkerIdlePos { get; }
+        Button btnSetInkerIdlePos { get; }
         Button[] InkerCornerUpdateButtons { get; }
+        Button[] InkerCornerMoveToButtons { get; }
     }
 
 

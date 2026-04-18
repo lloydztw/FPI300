@@ -35,7 +35,6 @@ namespace LaserAlignDX.AoiModel.Calib
         public JxCalibGridSettings GridSettings = new JxCalibGridSettings();
         public JxCalibInkMarkSettings InkMarkSettings1 = new JxCalibInkMarkSettings(SuckerRowEnum.S1);
         public JxCalibInkMarkSettings InkMarkSettings2 = new JxCalibInkMarkSettings(SuckerRowEnum.S2);
-        public JxInkerMotorSettings InkerMotorSettings = new JxInkerMotorSettings();
         public JxRect BoundRect = new JxRect("Boundary", "範圍框 (唯讀)(隱藏)");
 
         public JxCalibRecipe()
@@ -48,7 +47,6 @@ namespace LaserAlignDX.AoiModel.Calib
                 GridSettings,
                 InkMarkSettings1,
                 InkMarkSettings2,
-                InkerMotorSettings,
                 BoundRect,
             });
             base.OnBindingSubItems();
@@ -324,34 +322,5 @@ namespace LaserAlignDX.AoiModel.Calib
             }
         }
         #endregion
-    }
-
-
-    public class JxInkerMotorSettings : JxContainer
-    {
-        public JxPointF IdlePosC1S1 = new JxPointF("InkerIdlePosC1S1(隱藏)");
-        public JxPointF IdlePosC1S2 = new JxPointF("InkerIdlePosC1S2(隱藏)");
-        public JxPointF IdlePosC2S1 = new JxPointF("InkerIdlePosC2S1(隱藏)");
-        public JxPointF IdlePosC2S2 = new JxPointF("InkerIdlePosC2S2(隱藏)");
-        public JxNumber ZDownS1 = new JxNumber("zInkerDownS1(隱藏)");
-        public JxNumber ZDownS2 = new JxNumber("zInkerDownS2(隱藏)");
-
-        public JxInkerMotorSettings() : base("InkerMotorSettings", "(隱藏)")
-        {
-        }
-
-        public override void OnBindingSubItems()
-        {
-            // 綁定以下成員, 會自動顯示在GUI編輯視窗.
-            BindItems(new IProp[] {
-                ZDownS1,
-                ZDownS2,
-                IdlePosC1S1,
-                IdlePosC1S2,
-                IdlePosC2S1,
-                IdlePosC2S2,
-            });
-            base.OnBindingSubItems();
-        }
     }
 }

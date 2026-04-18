@@ -54,16 +54,16 @@
             // lblSpeedPPS
             // 
             this.lblSpeedPPS.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.lblSpeedPPS.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblSpeedPPS.Font = new System.Drawing.Font("Arial Narrow", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblSpeedPPS.ForeColor = System.Drawing.Color.Black;
-            this.lblSpeedPPS.Location = new System.Drawing.Point(258, 38);
+            this.lblSpeedPPS.Location = new System.Drawing.Point(275, 38);
             this.lblSpeedPPS.Margin = new System.Windows.Forms.Padding(3);
             this.lblSpeedPPS.Name = "lblSpeedPPS";
-            this.lblSpeedPPS.Size = new System.Drawing.Size(63, 30);
+            this.lblSpeedPPS.Size = new System.Drawing.Size(45, 29);
             this.lblSpeedPPS.TabIndex = 92;
             this.lblSpeedPPS.Text = "00000";
             this.lblSpeedPPS.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblSpeedPPS.Visible = false;
             // 
             // lblSpeed
             // 
@@ -72,11 +72,11 @@
             this.lblSpeed.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblSpeed.Font = new System.Drawing.Font("微軟正黑體", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.lblSpeed.ForeColor = System.Drawing.Color.Lime;
-            this.lblSpeed.Location = new System.Drawing.Point(105, 37);
+            this.lblSpeed.Location = new System.Drawing.Point(112, 37);
             this.lblSpeed.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.lblSpeed.Name = "lblSpeed";
             this.lblSpeed.Padding = new System.Windows.Forms.Padding(0, 0, 3, 0);
-            this.lblSpeed.Size = new System.Drawing.Size(147, 32);
+            this.lblSpeed.Size = new System.Drawing.Size(157, 32);
             this.lblSpeed.TabIndex = 91;
             this.lblSpeed.Text = "0.000";
             this.lblSpeed.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -90,10 +90,10 @@
             this.labelS.Location = new System.Drawing.Point(4, 35);
             this.labelS.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelS.Name = "labelS";
-            this.labelS.Size = new System.Drawing.Size(94, 36);
+            this.labelS.Size = new System.Drawing.Size(101, 36);
             this.labelS.TabIndex = 90;
             this.labelS.Text = "Speed";
-            this.labelS.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.labelS.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblStateError
             // 
@@ -112,16 +112,16 @@
             // lblPosPS
             // 
             this.lblPosPS.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.lblPosPS.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblPosPS.Font = new System.Drawing.Font("Arial Narrow", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPosPS.ForeColor = System.Drawing.Color.Black;
-            this.lblPosPS.Location = new System.Drawing.Point(258, 3);
+            this.lblPosPS.Location = new System.Drawing.Point(275, 3);
             this.lblPosPS.Margin = new System.Windows.Forms.Padding(3);
             this.lblPosPS.Name = "lblPosPS";
-            this.lblPosPS.Size = new System.Drawing.Size(63, 29);
+            this.lblPosPS.Size = new System.Drawing.Size(45, 29);
             this.lblPosPS.TabIndex = 88;
             this.lblPosPS.Text = "00000";
             this.lblPosPS.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblPosPS.Visible = false;
             // 
             // lblPosition
             // 
@@ -130,11 +130,11 @@
             this.lblPosition.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblPosition.Font = new System.Drawing.Font("微軟正黑體", 10.8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.lblPosition.ForeColor = System.Drawing.Color.Lime;
-            this.lblPosition.Location = new System.Drawing.Point(105, 2);
+            this.lblPosition.Location = new System.Drawing.Point(112, 2);
             this.lblPosition.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.lblPosition.Name = "lblPosition";
             this.lblPosition.Padding = new System.Windows.Forms.Padding(0, 0, 3, 0);
-            this.lblPosition.Size = new System.Drawing.Size(147, 31);
+            this.lblPosition.Size = new System.Drawing.Size(157, 31);
             this.lblPosition.TabIndex = 87;
             this.lblPosition.Text = "0.000";
             this.lblPosition.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
@@ -148,10 +148,10 @@
             this.labelP.Location = new System.Drawing.Point(4, 0);
             this.labelP.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelP.Name = "labelP";
-            this.labelP.Size = new System.Drawing.Size(94, 35);
+            this.labelP.Size = new System.Drawing.Size(101, 35);
             this.labelP.TabIndex = 86;
             this.labelP.Text = "Position";
-            this.labelP.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.labelP.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // lblStateMoving
             // 
@@ -218,7 +218,7 @@
             this.tableLayoutPanel2.ColumnCount = 3;
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
             this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 60F));
-            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 69F));
+            this.tableLayoutPanel2.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel2.Controls.Add(this.labelP, 0, 0);
             this.tableLayoutPanel2.Controls.Add(this.labelS, 0, 1);
             this.tableLayoutPanel2.Controls.Add(this.lblPosition, 1, 0);

@@ -22,14 +22,15 @@ namespace LaserAlignDX
     /// </summary>
     public static class GaMvcPaths
     {
-        public static string GA_WORK_PATH => Traveller106.Universal.WORKPATH;
+        public static string WORK_PATH => Traveller106.Universal.WORKPATH;
+        public static string CALIBRATION_PATH => System.IO.Path.Combine(WORK_PATH, "Calibration");
 
         /// <summary>
         /// 大校正板 像測調教 參數檔
         /// </summary>
         public static string CALIB_RECIPE_FILE(CarrierEnum C, object dummy = null)
         {
-            string fileName = System.IO.Path.Combine(GA_WORK_PATH, "Calibration", $"Jx_Calib_Recipe@{C}.json");
+            string fileName = System.IO.Path.Combine(CALIBRATION_PATH, $"Jx_Calib_Recipe@{C}.json");
             return fileName;
         }
         
@@ -38,7 +39,7 @@ namespace LaserAlignDX
         /// </summary>
         public static string COMMON_BASE_TRANSFORMS_INI_FILE
         {
-            get => System.IO.Path.Combine(GA_WORK_PATH, "Calibration", "Jx_Calib_Transforms.ini");
+            get => System.IO.Path.Combine(CALIBRATION_PATH, "Jx_Calib_Transforms.ini");
         }
 
         /// <summary>

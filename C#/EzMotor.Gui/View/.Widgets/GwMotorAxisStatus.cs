@@ -45,6 +45,15 @@ namespace AX.Gui
                 lblAxisName.Text = value;
             }
         }
+        public bool PulseLabelVisible
+        {
+            get => lblPosPS.Visible;
+            set
+            {
+                lblPosPS.Visible = value;
+                lblSpeedPPS.Visible = value;
+            }
+        }
 
 #if (OPT_USING_LT_MOTOR_INTERFACE)
         //public void UpdateAxisStatus(IDrvMotorAxis axis)

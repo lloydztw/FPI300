@@ -39,6 +39,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             return Math.Abs(delta) < Traveller106.Universal.MOTOR_TINY_DELTA;
         }
 
+        public static bool AreProximityEqual(double pos1, double pos2)
+        {
+            return IsTinyDelta(pos1 - pos2);
+        }
+
         public static bool PromptMoveTo(this IAxis motor, double targetPos, string displayName = null, bool silent = false)
         {
             if (motor == null)

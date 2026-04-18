@@ -528,15 +528,17 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public bool VacuumSucker1
         {
-            get => throw new NotImplementedException();
-            set => throw new NotImplementedException();
+            // GAARA_NEEDS_TO_IMPLEMENT
+            get => throw new NotImplementedException("等待萬子實作");
+            set => throw new NotImplementedException("等待萬子實作");
         }
         /// <summary>
         /// 取得 吸嘴排的安全高度Z (PLC 配方設定)
         /// </summary>
         public double GetSafeZ(SuckerRowEnum suckerID)
         {
-            throw new NotImplementedException();
+            // GAARA_NEEDS_TO_IMPLEMENT
+            throw new NotImplementedException("等待萬子實作");
             return 0;
         }
         /// <summary>
@@ -544,7 +546,8 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public double GetFlyCamFocusZ()
         {
-            throw new NotImplementedException();
+            // GAARA_NEEDS_TO_IMPLEMENT
+            throw new NotImplementedException("等待萬子實作");
             return 0;
         }
         /// <summary>
@@ -552,7 +555,8 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public double GetFlyCamTriggerX(SuckerRowEnum suckerID = SuckerRowEnum.S1)
         {
-            throw new NotImplementedException();
+            // GAARA_NEEDS_TO_IMPLEMENT
+            throw new NotImplementedException("等待萬子實作");
             return 0;
         }
         /// <summary>
@@ -560,7 +564,8 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public double GetFlyCamSnapshotY()
         {
-            throw new NotImplementedException();
+            // GAARA_NEEDS_TO_IMPLEMENT
+            throw new NotImplementedException("等待萬子實作");
             return 0;
         }
 
