@@ -36,13 +36,14 @@ namespace LaserAlignDX.Mvc.Ctrl
         JxInkerMotorSettings _inkerSettings => JxInkerMotorSettings.Instance;
         #endregion
 
-        #region PRIVATE_MODEL_DATA
+        #region PRIVATE_MODEL_MEMBERS
         IAxis _motorX;
         IAxis _motorY;
-        IAxis _motorSuckerZ;
+        //IAxis _motorSuckerZ;
         #endregion
 
         #region PRIVATE_CHILD_CTRLS
+        GaMotorSafetyChecker _safetyCheckerZ;
         GaCommonMotorJogCtrl _jogCtrlX;
         GaCommonMotorJogCtrl _jogCtrlY;
         GaMotorZCtrl _inkerDownCtrl;
@@ -59,8 +60,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region RUNTIME_DATA
         CarrierEnum _activeCarrierID;
         SuckerRowEnum _activeSuckerID;
-        double _suckerSafePosZ;
-        double _suckerCurrentPos;
+        //double _suckerSafePosZ;
+        //double _suckerCurrentPos;
         bool _needsToAutoClose = false;
         #endregion
 
@@ -146,11 +147,13 @@ namespace LaserAlignDX.Mvc.Ctrl
             // MODEL (馬達群)
             _motorX = Universal.GetMotorX(S);
             _motorY = Universal.GetMotorY(C);
-            _motorSuckerZ = Universal.GetInkerMotor(S);
 
-            // Sucker Safe PosZ (吸嘴安全高度Z)
-            var plc = GaBasicMotorUtil.PLCIO;
-            _suckerSafePosZ = plc != null ? plc.GetSafeZ(S) : 0.0;
+            // Safety Checker (Z軸安全代理) (只允許 attach 一次)
+            if (_safetyCheckerZ == null)
+            {
+                _safetyCheckerZ = new GaMotorSafetyChecker();
+                _safetyCheckerZ.OnPosChanged += (s, e) => updateGuiStatus(true);
+            }
 
             // XY JOG CONTROL (只允許 attach 一次)
             if (_jogCtrlX == null)
@@ -168,12 +171,13 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _inkerDownCtrl = new GaMotorZCtrl();
                 _inkerDownCtrl.Attach(_inkerDownPanel);
                 _inkerDownCtrl.SetDataSrc(S);
-                _inkerDownCtrl.OnPosDataSrcModified += (s, e) => updateInkerZsColor(true);
+                _inkerDownCtrl.OnPosDataSrcModified += (s, e) => updateGuiStatus(true);
 
                 // Inker Up Panel (只簡單 顯示 吸嘴安全高度Z)
+                double safePosZ = _safetyCheckerZ.GetSafePos(_activeSuckerID);
                 _inkerUpPanel.btnSettings.Visible = false;
                 _inkerUpPanel.lblCurrentMotorPos.ForeColor = Color.White;
-                _inkerUpPanel.lblCurrentMotorPos.Text = $"{_suckerSafePosZ:0.000}";
+                _inkerUpPanel.lblCurrentMotorPos.Text = $"{safePosZ:0.000}";
                 _inkerUpPanel.btnMotorGo.Click += (s, e) => RestoreInkerMotorPosZ();
             }
 
@@ -182,8 +186,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             _viewY.lblAxisName.Text = $"Y Axis ({GaUtil.GetEnumDescription(C)})";
 
             // Update GUI
-            checkInkerSafety();
             UpdateInkerIdlePosXY(false);
+            updateGuiStatus(true);
         }
         /// <summary>
         /// 直接移動到指定位置 (X,Y)
@@ -263,7 +267,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
                 #region PROMPTS
                 var msg = GaUtil.GetEnumDescription(Prompts.Question_Update_Motor_Coord_To_Calib);
-                msg += $"?\n\r\n\r(X= {x:0.000}, Y= {y:0.000})";
+                msg += $"\n\r\n\r(X= {x:0.000}, Y= {y:0.000})";
                 //msg += $"\n\r\n\rTo {targetName}";
                 var ret = VsMessageBox.Question(msg);
                 if (ret != DialogResult.OK)
@@ -274,15 +278,16 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _inkerSettings.Modified = true;
             }
 
-            _ui.lblInkerIdlePos.Text = $"點墨待命位置 = ({jxPos.Value.X:0.000}, {jxPos.Value.Y:0.000})";
+            _ui.lblInkerIdlePos.Text = $"點墨待命位置X= {jxPos.Value.X:0.000}\n點墨待命位置Y= {jxPos.Value.Y:0.000}";
         }
         /// <summary>
         /// 回復 Sucker Z軸 到安全位置
         /// </summary>
         public void RestoreInkerMotorPosZ()
         {
-            string displayName = $"{_activeSuckerID} Inker 馬達";
-            _motorSuckerZ?.PromptMoveTo(_suckerSafePosZ, displayName);
+            //string displayName = $"{_activeSuckerID} Inker 馬達";
+            //_motorSuckerZ?.PromptMoveTo(_suckerSafePosZ, displayName);
+            _safetyCheckerZ.MoveUp(_activeSuckerID, mustDo: true);
         }
         /// <summary>
         /// 自動保存 已經變更的設定
@@ -295,8 +300,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         public void Tick()
         {
-            checkInkerSafety();
-            
+            _safetyCheckerZ?.Tick();
             _jogCtrlX?.Tick();
             _jogCtrlY?.Tick();
 
@@ -305,55 +309,62 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void CleanUp()
         {
+            _safetyCheckerZ = null;
+            _jogCtrlX = null;
+            _jogCtrlY = null;
             JxInkerMotorSettings.Instance.Dispose();
         }
 
         #region PRIVATE_FUNCTIONS
-        void updateGuiStatus()
+        void updateGuiStatus(bool updateDetails = false)
         {
-            bool isEnabled = _jogCtrlX.IsEnabled();
-            bool isReady = _motorX.IsOK && _motorY.IsOK;
+            bool isAllSafe = _safetyCheckerZ.IsAllSafe();
+            bool isReady = _motorX.IsOK && _motorY.IsOK && isAllSafe;
 
-            _ui.btnMoveToInkerIdlePos.Enabled = isEnabled && isReady;
-            _ui.btnSetInkerIdlePos.Enabled = isEnabled && isReady;
+            _ui.btnMoveToInkerIdlePos.Enabled = isReady;
+            _ui.btnSetInkerIdlePos.Enabled = isReady;
 
             foreach (var btn in _ui.InkerCornerMoveToButtons)
-                btn.Enabled = isEnabled && isReady;
+                btn.Enabled = isReady;
+
             foreach (var btn in _ui.InkerCornerUpdateButtons)
-                btn.Enabled = isEnabled && isReady;
+                btn.Enabled = isReady;
+
+            updateInkerZsColor();
+
+            if (updateDetails)
+                updateDetailsSafetyForXY();
         }
-        void updateInkerZsColor(bool pollingAgain = false)
+        void updateInkerZsColor()
         {
-            if (pollingAgain)
-                _suckerCurrentPos = _motorSuckerZ.GetPos();
-            bool atSafePos = GaBasicMotorUtil.AreProximityEqual(_suckerCurrentPos, _suckerSafePosZ);
-            bool atDownPos = GaBasicMotorUtil.AreProximityEqual(_suckerCurrentPos, _inkerSettings.GetInkerDownZ(_activeSuckerID));
+            bool atSafePos = _safetyCheckerZ.IsAtSafePos(_activeSuckerID);
+            bool atDownPos = _safetyCheckerZ.IsAtDownPos(_activeSuckerID);
             _ui.InkerDownPanel.lblCurrentMotorPos.BackColor = atDownPos ? Color.Red : Color.Black;
             _ui.InkerUpPanel.lblCurrentMotorPos.BackColor = atSafePos ? Color.Lime : Color.Black;
             _ui.InkerUpPanel.lblCurrentMotorPos.ForeColor = atSafePos ? Color.Black : Color.White;
         }
-        void checkInkerSafety()
+        void updateDetailsSafetyForXY()
         {
-            // 檢查 Inker 如果在下位, 就禁止移動 XY
-            double currentZ = _motorSuckerZ.GetPos();
-
-            if (!GaBasicMotorUtil.AreProximityEqual(_suckerCurrentPos, currentZ))
+            bool isAllSafe = _safetyCheckerZ.IsAllSafe();
+            if (isAllSafe != _jogCtrlX.IsEnabled())
             {
-                _suckerCurrentPos = currentZ;
-
-                if (_suckerCurrentPos > _suckerSafePosZ)
+                if (isAllSafe)
                 {
-                    var reason = GaUtil.GetEnumDescription(Prompts.Warning_MotorXY_Disabled_By_Inker_Down);
-                    _jogCtrlX.SetEnable(false, reason);
-                    _jogCtrlY.SetEnable(false, reason);
+                    _jogCtrlX?.SetEnable(true);
+                    _jogCtrlY?.SetEnable(true);
                 }
                 else
                 {
-                    _jogCtrlX.SetEnable(true);
-                    _jogCtrlY.SetEnable(true);
-                }
+                    var reason = GaUtil.GetEnumDescription(Prompts.Warning_MotorXY_Disabled_By_Inker_Down);
 
-                updateInkerZsColor();
+                    if (!_safetyCheckerZ.IsAboveSafePos(SuckerRowEnum.S1))
+                        reason += $"\n\r\n\r{GaUtil.GetEnumDescription(SuckerRowEnum.S1)}";
+                    if (!_safetyCheckerZ.IsAboveSafePos(SuckerRowEnum.S2))
+                        reason += $"\n\r\n\r{GaUtil.GetEnumDescription(SuckerRowEnum.S2)}";
+
+                    _jogCtrlX?.SetEnable(false, reason);
+                    _jogCtrlY?.SetEnable(false, reason);
+                }
             }
         }
         void checkAutoCloseCondition()

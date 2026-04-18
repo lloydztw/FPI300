@@ -31,6 +31,7 @@ namespace LaserAlignDX.AoiModel.Calib
         public JxPointF IdlePosC2S2 = new JxPointF("InkerIdlePosC2S2(隱藏)");
         public JxNumber zDownS1 = new JxNumber("zInkerDownS1(隱藏)");
         public JxNumber zDownS2 = new JxNumber("zInkerDownS2(隱藏)");
+        //public JxNumber zFlyCamFocus = new JxNumber("zFlyCamFocus(隱藏)");
 
         #region SINGLETON
         static JxInkerMotorSettings _instance;
@@ -63,6 +64,7 @@ namespace LaserAlignDX.AoiModel.Calib
                 IdlePosC1S2,
                 IdlePosC2S1,
                 IdlePosC2S2,
+                //zFlyCamFocus,
             });
             base.OnBindingSubItems();
         }

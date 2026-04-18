@@ -13,7 +13,6 @@
  */
 #endregion
 
-using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.Interface;
 using LaserAlignDX.Mvc.Ctrl;
 using System.Windows.Forms;
@@ -31,10 +30,10 @@ namespace LaserAlignDX.Mvc.Gui
         {
             InitializeComponent();
         }
-        public void Attach(IAxis motor)
+        public void Attach(IAxis motor, string axisName)
         {
             var view = gvPaneMotorJogZ1.GetJogView();
-            view.lblAxisName.Text = Text;
+            view.lblAxisName.Text = axisName;
 
             _jogCtrl = new GaCommonMotorJogCtrl();
             _jogCtrl.Attach(view, motor);

@@ -44,7 +44,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             return IsTinyDelta(pos1 - pos2);
         }
 
-        public static bool PromptMoveTo(this IAxis motor, double targetPos, string displayName = null, bool silent = false)
+        public static bool PromptMoveTo(this IAxis motor, double targetPos, string displayName = null, bool silent = false, bool mustDo = false)
         {
             if (motor == null)
                 return false;
@@ -55,18 +55,20 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             if (!silent)
             {
+                #region PROMPTS
                 if (string.IsNullOrEmpty(displayName))
                     displayName = GetDisplayName(motor);
 
-                var msg = GaUtil.GetEnumDescription(Prompts.Question_Motor_GoTo_Pos);
+                var prompt = mustDo ? Prompts.Info_Motor_GoTo_Pos : Prompts.Question_Motor_GoTo_Pos;
+                var msg = GaUtil.GetEnumDescription(prompt);
                 msg += $"\n\r\n\r{displayName} To {targetPos:0.000} mm";
 
-                //var ret = MessageBox.Show(msg, "Motor Control", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                //if (ret != DialogResult.Yes)
-                //    return false;
-
-                if (VsMessageBox.Question(msg) != DialogResult.OK)
+                if (mustDo)
+                    VsMessageBox.Info(msg);
+                else if (VsMessageBox.Question(msg) != DialogResult.OK)
                     return false;
+
+                #endregion
             }
 
             try

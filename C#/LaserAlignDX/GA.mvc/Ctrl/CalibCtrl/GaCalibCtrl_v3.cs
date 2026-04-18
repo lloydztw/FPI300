@@ -847,7 +847,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             var dgvRow = dgv.Rows[rowIndex];
             var targetName = dgvRow.Cells[0].Value;
             var msg = GaUtil.GetEnumDescription(Prompts.Question_Update_Motor_Coord_To_Calib);
-            msg += $"?\n\r\n\r(X= {currentMotorPos.X:0.000}, Y= {currentMotorPos.Y:0.000})";
+            msg += $"\n\r\n\r(X= {currentMotorPos.X:0.000}, Y= {currentMotorPos.Y:0.000})";
             msg += $"\n\r\n\rTo 【{targetName}】";
             //>> bool ok = MessageBox.Show(msg, "Calibration", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
             bool ok = VsMessageBox.Question(msg) == DialogResult.OK;

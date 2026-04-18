@@ -25,7 +25,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using INI = Traveller106.INI;
 using Universal = Traveller106.Universal;
 
 namespace LaserAlignDX.Mvc.Ctrl
@@ -38,9 +37,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         FocusOnChip = 0,
         [Description("對焦在空載台")]
         FocusOnCarrier,
-        [Description("S1 點墨高度 (下壓)")]
+        [Description("S1點墨下壓高度")]
         InkerS1,
-        [Description("S2 點墨高度 (下壓)")]
+        [Description("S2點墨下壓高度")]
         InkerS2,
         [Description("飛拍對焦Z")]
         FlyCamFocusZ,
@@ -66,7 +65,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         string DisplayName
         {
-            get => $"Motor ({GaUtil.GetEnumDescription(_posHolderID)})";
+            get => $"Z Axis ({GaUtil.GetEnumDescription(_posHolderID)})";
         }
 
         public void Attach(GwMotorSimpleGoPanel panel)
@@ -113,7 +112,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                     break;
             }
 
-            if(_posHolderID!=src)
+            if (_posHolderID != src)
             {
                 _posHolderID = src;
                 updateMotorPosToGui(_posHolder);
@@ -150,8 +149,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 
                 // 顯示 Servo ON
                 dlg.ServoOnVisible = _posHolderID == ZPosDataSrc.FlyCamFocusZ;
+                dlg.Attach(motor, DisplayName);
 
-                dlg.Attach(motor);
                 if (dlg.ShowDialog(frmOwner) == DialogResult.OK)
                 {
                     bool isChanged = updateMotorPos(motor, _posHolder);
@@ -163,7 +162,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 else
                 {
                     // 返回 相機馬達 之前的位置
-                    motor?.PromptMoveTo(backupMotorPos, DisplayName);
+                    motor?.PromptMoveTo(backupMotorPos, DisplayName, mustDo: true);
                 }
             }
         }

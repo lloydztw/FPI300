@@ -39,6 +39,7 @@
             this.btnSaveLB = new System.Windows.Forms.Button();
             this.btnSaveRB = new System.Windows.Forms.Button();
             this.panel0 = new System.Windows.Forms.Panel();
+            this.lblTitle = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.btnMoveLT = new System.Windows.Forms.Button();
@@ -46,7 +47,6 @@
             this.btnMoveRB = new System.Windows.Forms.Button();
             this.btnMoveLB = new System.Windows.Forms.Button();
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
-            this.lblTitle = new System.Windows.Forms.Label();
             this.gwMotorSimpleGoPanel2 = new AX.Gui.GwMotorSimpleGoPanel();
             this.gwMotorSimpleGoPanel1 = new AX.Gui.GwMotorSimpleGoPanel();
             this.gvPaneMotorJogXY1 = new AX.Gui.GvPaneMotorJogXY();
@@ -168,6 +168,21 @@
             this.panel0.Size = new System.Drawing.Size(806, 72);
             this.panel0.TabIndex = 83;
             // 
+            // lblTitle
+            // 
+            this.lblTitle.BackColor = System.Drawing.Color.Transparent;
+            this.lblTitle.Dock = System.Windows.Forms.DockStyle.Left;
+            this.lblTitle.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.lblTitle.ForeColor = System.Drawing.Color.White;
+            this.lblTitle.Location = new System.Drawing.Point(0, 0);
+            this.lblTitle.Margin = new System.Windows.Forms.Padding(0);
+            this.lblTitle.Name = "lblTitle";
+            this.lblTitle.Padding = new System.Windows.Forms.Padding(6, 2, 0, 0);
+            this.lblTitle.Size = new System.Drawing.Size(392, 72);
+            this.lblTitle.TabIndex = 101;
+            this.lblTitle.Text = "點墨待命位置X= -999.000\r\n點墨待命位置Y= -999.000";
+            this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
             // button1
             // 
             this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -255,20 +270,6 @@
             this.btnMoveLB.TabIndex = 86;
             this.btnMoveLB.Text = "↙";
             this.btnMoveLB.UseVisualStyleBackColor = false;
-            // 
-            // lblTitle
-            // 
-            this.lblTitle.BackColor = System.Drawing.Color.Transparent;
-            this.lblTitle.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
-            this.lblTitle.ForeColor = System.Drawing.Color.White;
-            this.lblTitle.Location = new System.Drawing.Point(27, 16);
-            this.lblTitle.Margin = new System.Windows.Forms.Padding(0);
-            this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Padding = new System.Windows.Forms.Padding(0, 2, 0, 0);
-            this.lblTitle.Size = new System.Drawing.Size(355, 38);
-            this.lblTitle.TabIndex = 101;
-            this.lblTitle.Text = "點墨待命位置 = (0.000, 0,000)";
-            this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // gwMotorSimpleGoPanel2
             // 

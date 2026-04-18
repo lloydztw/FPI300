@@ -40,6 +40,9 @@ namespace LaserAlignDX
         [Description("是否確定要 移動馬達 至定位?")]
         Question_Motor_GoTo_Pos,
 
+        [Description("即將 移動馬達 至定位.")]
+        Info_Motor_GoTo_Pos,
+
         [Description("Inker 在下位時, 禁止移動 馬達 XY!")]
         Warning_MotorXY_Disabled_By_Inker_Down,
     }
