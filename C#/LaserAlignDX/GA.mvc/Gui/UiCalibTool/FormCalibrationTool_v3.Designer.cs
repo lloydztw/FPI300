@@ -1,7 +1,7 @@
 ﻿using AX.Gui;
 using LaserAlignDX.FormSpace.FPI30Form;
 
-namespace LaserAlignDX.Mvc.Gui
+namespace LaserAlignDX.Mvc.Gui.Calib.V3
 {
     partial class FormCalibrationTool
     {

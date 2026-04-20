@@ -58,14 +58,17 @@ namespace LaserAlignDX.Mvc.Model
         [Description("沒有 座標轉換 模型")]
         CalibErr_No_Transform_Model,
 
+        [Description("節距 (Pitch) 不一致!")]
+        CalibErr_pitch_not_consistent,
+
         [Description("點墨 標定 不完整!")]
         CalibErr_Ink_Marks_Not_Completed,
 
-        [Description("馬達座標 標定 不完整")]
+        [Description("馬達座標 標定 不完整!")]
         CalibErr_Motor_Coords_Not_Completed,
 
-        [Description("節距 (Pitch) 不一致!")]
-        CalibErr_pitch_not_consistent,
+        [Description("馬達座標轉換系統 建置不良!")]
+        CalibErr_Motor_Coords_Transform_Build_NG,
 
 
         [Description("線掃AOI 運行異常 (可能沒有加密狗)")]

@@ -4,6 +4,7 @@
  * Copyright (c) 2025 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
+ *      2026-04-20 配合 新校正板 (陣列圓點 + INK區塊 二合一)
  *      2025-09-07 初稿 (by LeTian Chang)
  * 
  * http://www.jeteazy.com
@@ -26,7 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-namespace LaserAlignDX.AoiModel.Calib.V3
+namespace LaserAlignDX.AoiModel.Calib.V5
 {
     public class CalibAoiModel : ICalibAoiModel
     {
@@ -64,7 +65,8 @@ namespace LaserAlignDX.AoiModel.Calib.V3
             var cols = jxSettings.EmptyTraySettings.FullCols.Value;
             var thres = jxSettings.GridVisionSettings.Threshold.Value;
             var minSz = jxSettings.GridVisionSettings.MinSize.Value;
-            var maxSz = Math.Min(roi.Width, roi.Height) / 8;
+            var maxSz = jxSettings.GridVisionSettings.MaxSize.Value;
+            //>>> Math.Min(roi.Width, roi.Height) / 8;
 
             using (var imgCrop = fullfovImg[roi].Clone())
             {
@@ -88,7 +90,7 @@ namespace LaserAlignDX.AoiModel.Calib.V3
                 var grid = builder.Build(blocs, targetRows: rows, targetCols: cols);
                 grid?.Offset(roi.X, roi.Y);
 
-                _DUMP_DOTS_PLATE_IMAGE(fullfovImg, grid, "d:\\paso.log", carrierID);
+                _DUMP_DOTS_PLATE_IMAGE(fullfovImg, null, "d:\\paso.log", carrierID);
 
                 return grid;
             }
@@ -440,7 +442,7 @@ namespace LaserAlignDX.AoiModel.Calib.V3
                     RefineCentroidLocations(matchResult, ezImage, recipe);
                 }
 
-                _DUMP_DOTS_PLATE_IMAGE(ezImage.Image as Mat, matchResult?.Grid, "d:\\paso.log", carrierID);
+                //_DUMP_DOTS_PLATE_IMAGE(ezImage.Image as Mat, matchResult?.Grid, "d:\\paso.log", carrierID);
 
                 return matchResult;
             }
@@ -773,16 +775,25 @@ namespace LaserAlignDX.AoiModel.Calib.V3
         void _DUMP_DOTS_PLATE_IMAGE(Mat srcFullfovImg, EzBlocsGrid grid, string folder, CarrierEnum C)
         {
 #if (OPT_RESERVED)
+            if (srcFullfovImg == null)
+                return;
+
             string fileName = System.IO.Path.Combine(folder, $"calib_dots_plate_{C}.jpg");
 
-            int radius = 200;
+            bool withRandomInking = true;
             int extraCornerSize = 800;
-            int blendDiv = 4;
-            //blendDiv = 8;
+            int radius = 100;
+            int blendDiv = 8;
 
             //var grid = matchResult?.Grid;
-            if (grid == null || srcFullfovImg == null)
-                return;
+            if (grid == null)
+            {
+                var aoi = GaMvcConfig.SysModel.EmptyTrayAoiModel;
+                var result = FetchGridNodes(aoi, C, srcFullfovImg, false);
+                grid = result?.Grid;
+                if (grid == null)
+                    return;
+            }
 
             int rows = grid.Rows;
             int cols = grid.Cols;
@@ -804,24 +815,36 @@ namespace LaserAlignDX.AoiModel.Calib.V3
 
                 if (extraCornerSize > 0)
                 {
+                    var rnd = new Random();
+
                     var r = rows - 1;
                     var c = cols - 1;
                     var C0 = grid[0, 0].Center * 2.0 - grid[1, 1].Center;
                     var C1 = grid[0, c].Center * 2.0 - grid[1, c - 1].Center;
                     var C2 = grid[r, c].Center * 2.0 - grid[r - 1, c - 1].Center;
                     var C3 = grid[r, 0].Center * 2.0 - grid[r - 1, 1].Center;
+
                     foreach (var cc in new[] { C0, C1, C2, C3 })
                     {
                         var rect = Qcvt.CvCreateCenterRect((int)cc.X, (int)cc.Y, extraCornerSize, extraCornerSize);
                         Cv2.Rectangle(img, rect, Scalar.White, -1);
+
+                        if (withRandomInking)
+                        {
+                            int iR = radius * 12 / 10;
+                            rect.Inflate(-iR - 8, -iR - 8);
+                            int ix = rect.X + rnd.Next(rect.Width);
+                            int iy = rect.Y + rnd.Next(rect.Height);
+                            Cv2.Circle(img, ix, iy, iR, Scalar.Gray, -1);
+                        }
                     }
                 }
 
                 img.SaveImage(fileName);
             }
 
-            var file2 = System.IO.Path.ChangeExtension(fileName, "_empty.jpg");
-            srcFullfovImg.SaveImage(file2);
+            //var file2 = System.IO.Path.ChangeExtension(fileName, "_empty.jpg");
+            //srcFullfovImg.SaveImage(file2);
 #endif
         }
         #endregion

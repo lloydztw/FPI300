@@ -23,7 +23,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;xOPT_USE_AI | xFX3U | FATEK | OPT_LETIAN_AUTO_LAYOUT | xOPT_BYPASS_DONGLE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPT_CALIB_V5 | xOPT_TRANSFORM_V35 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -34,7 +34,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;xFX3U | FATEK | OPT_LETIAN_AUTO_LAYOUT | xOPT_BYPASS_DONGLE</DefineConstants>
+    <DefineConstants>TRACE;OPT_CALIB_V5 | xOPT_TRANSFORM_V35 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -366,6 +366,7 @@
     <Compile Include="App\Prompts.cs" />
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
+    <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v5.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaBasicMotorUtil.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorsFlyCamCtrl.cs" />
@@ -400,11 +401,23 @@
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v5.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v5.Designer.cs">
+      <DependentUpon>FormCalibrationTool_v5.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v3.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v3.Designer.cs">
       <DependentUpon>FormCalibrationTool_v3.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\UserControl1.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\UserControl1.Designer.cs">
+      <DependentUpon>UserControl1.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\IvFlyCamViewUI.cs" />
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.cs">
@@ -491,6 +504,7 @@
     <Compile Include="GA.mvc\.Enums\InspectReason.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellsDataCollection.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellX3Class.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v5.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v3.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\JxInkerMotorSettings.cs" />
@@ -730,11 +744,17 @@
     <EmbeddedResource Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.resx">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v5.resx">
+      <DependentUpon>FormCalibrationTool_v5.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v3.resx">
       <DependentUpon>FormCalibrationTool_v3.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\GvCalibPointsDataGridView.resx">
       <DependentUpon>GvCalibPointsDataGridView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\UserControl1.resx">
+      <DependentUpon>UserControl1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiChipCellsViewer\JezChipCellsViewPanel.resx">
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>

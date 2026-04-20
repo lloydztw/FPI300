@@ -102,6 +102,7 @@ namespace LaserAlignDX.AoiModel.Calib
     {
         public JxInt Threshold = JxInt.C255("Threshold", "格點 門限", 128);
         public JxInt MinSize = new JxInt("Min Size", "格點 最小邊長 (pixels)", 100, new Range(10, 5000));
+        public JxInt MaxSize = new JxInt("Max Size", "格點 最大邊長 (pixels)", 300, new Range(10, 5000));
 
         public JxCalibGridVisionSettings() : base(name: "Grid Vision")
         {
@@ -113,8 +114,9 @@ namespace LaserAlignDX.AoiModel.Calib
         {
             // 綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
-                Threshold,
                 MinSize,
+                MaxSize,
+                Threshold,
             });
             base.OnBindingSubItems();
         }
@@ -190,8 +192,8 @@ namespace LaserAlignDX.AoiModel.Calib
         {
             // 綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
-                BlockThreshold,
                 BlockMinSize,
+                BlockThreshold,
             });
             base.OnBindingSubItems();
         }
