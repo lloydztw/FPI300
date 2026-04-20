@@ -10,6 +10,9 @@ namespace LaserAlignDX
         [Description("請先登入 擁有修改參數權限 的 帳號!")]
         No_Privilege,
 
+        [Description("是否 重新驅動 載台線掃相機?")]
+        Question_ReTrigger_Carrier_LineScan_Camera,
+
         [Description("是否直接把 參考坐標點 (CoordRefs) 寫入PLC?")]
         Question_Write_CoordRefs_To_PLC,
 

@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using TravellerMINIX6.ProcessSpace;
 using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
@@ -187,7 +188,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             if (_rdoSuckerRows != null)
                 _rdoSuckerRows[0].CheckedChanged += _rdoSelect_CheckedChanged;
 
-            _btnGrabImage.Click += (s, e) => GrabImage();
+            _btnGrabImage.Click += (s, e) => GrabLineScanCameraImage();
             _btnLoadImage.Click += (s, e) => LoadImage();
 
             if (_btnRunAutoFetchAll != null)
@@ -377,8 +378,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
         }
         void updateGuiStatus()
         {
-            var imgPanel = _getImgViewPanel(); 
-            bool isEmpty = _isEmptyImage();
+            //var imgPanel = _getImgViewPanel(); 
+            //bool isEmpty = _isEmptyImage();
 
             _btnGrabImage.Enabled = !_isRunning;
             _btnLoadImage.Enabled = !_isRunning;
@@ -1182,7 +1183,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
 
             return err;
         }
-
         ErrorCodes VerifyCommonBaseTrf(out string errDetails)
         {
             errDetails = "";
@@ -1241,6 +1241,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
 
             return ErrorCodes.OK;
         }
+
         void OpenMotorWindowXY(QVector directTargetPos = null)
         {
             using (var dlg = new FormMotors_CarierSuckerXY())
@@ -1302,10 +1303,28 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             img?.SaveImage(fileName);
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
-        void GrabImage()
+        
+        void GrabLineScanCameraImage()
         {
             updateGuiStatus();
+            var msg = GaUtil.GetEnumDescription(Prompts.Question_ReTrigger_Carrier_LineScan_Camera);
+            bool rescan = VsMessageBox.Question(msg) == DialogResult.OK;
 
+            if (rescan)
+            {
+                //var ps = LineScanProcess.Instance;
+                //ps.Start("USER_TRIGGER");
+                MessageBox.Show("驅動 PLC 重新線掃 : 尚未完成 !");
+                UpdateLineScanCameraImage();
+            }
+            else
+            {
+                UpdateLineScanCameraImage();
+            }
+        }
+        void UpdateLineScanCameraImage()
+        {
+            updateGuiStatus();
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
             var freeBmp = IScanCam.GetFreeImageBitmap();
             if (freeBmp != null)

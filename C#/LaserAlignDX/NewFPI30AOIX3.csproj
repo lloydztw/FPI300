@@ -663,7 +663,7 @@
     <Compile Include="GA\ProcessSpace\BaseProcess.cs" />
     <Compile Include="GA\ProcessSpace\BuzzerProcess.cs" />
     <Compile Include="GA\ProcessSpace\FocusProcess.cs" />
-    <Compile Include="GA\ProcessSpace\LineScanProcess.cs" />
+    <Compile Include="GA\ProcessSpace\LineScanProcess_LT.cs" />
     <Compile Include="GA\ProcessSpace\LineScanSingleProcess.cs" />
     <Compile Include="GA\ProcessSpace\MainProcess.cs" />
     <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
