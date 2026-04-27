@@ -1,4 +1,4 @@
-using JzDisplay;
+﻿using JzDisplay;
 using Microsoft.Win32;
 using MoveGraphLibrary;
 using System;
@@ -92,6 +92,9 @@ namespace WorldOfMoveableObjects
         List<Color> clrs = new List<Color> ();          // one color per each sector
         Rotation dirDrawing;
 
+        /// <summary>
+        /// FixSector 就是消除中線 By Victor Tsai 2017/05/11
+        /// </summary>
         bool bFixSectors;
         Pen penPartition;
 
@@ -124,7 +127,7 @@ namespace WorldOfMoveableObjects
             //m_angle = Auxi_Convert .DegreeToRadian (angleDegree);
             //dirDrawing = Rotation .Clockwise;
 
-            bFixSectors = true;                                     // FixSector �N�O�������u By Victor Tsai 2017/05/11
+            bFixSectors = true;                                     // FixSector 就是消除中線 By Victor Tsai 2017/05/11
             penPartition = new Pen(Color.FromArgb(0, Color.Red), 3);
 
             CheckedValues (fVals);
@@ -154,7 +157,7 @@ namespace WorldOfMoveableObjects
 
             FromString(str);
 
-            bFixSectors = true;                                                 // FixSector �N�O�������u By Victor Tsai 2017/05/11
+            bFixSectors = true;                                                 // FixSector 就是消除中線 By Victor Tsai 2017/05/11
             penPartition = new Pen(Color.FromArgb(0, Color.Red), 3);
             CheckedValues(new double[] { 5 });
             DefaultColors();
@@ -166,7 +169,7 @@ namespace WorldOfMoveableObjects
         {
             FromString(str);
 
-            bFixSectors = true;                                                 // FixSector �N�O�������u By Victor Tsai 2017/05/11
+            bFixSectors = true;                                                 // FixSector 就是消除中線 By Victor Tsai 2017/05/11
             penPartition = new Pen(Color.FromArgb(0, Color.Red), 3);
             CheckedValues(new double[] { 5 });
             DefaultColors();
@@ -180,7 +183,7 @@ namespace WorldOfMoveableObjects
             supervisor = mvr;
         }
         /// <summary>
-        /// ����
+        /// 首件
         /// </summary>
         /// <param name="color"></param>
         public JzCircleEAG(Color color)                       //Added By Victor Tsai
@@ -199,7 +202,7 @@ namespace WorldOfMoveableObjects
 
             FromString(Figure_EAG.Circle.ToString() + ";" + CircleEAG.ToString());
 
-            bFixSectors = true;                                                 // FixSector �N�O�������u By Victor Tsai 2017/05/11
+            bFixSectors = true;                                                 // FixSector 就是消除中線 By Victor Tsai 2017/05/11
             penPartition = new Pen(Color.FromArgb(0, Color.Red), 3);
             CheckedValues(new double[] { 5 });
             DefaultColors();
@@ -216,7 +219,7 @@ namespace WorldOfMoveableObjects
             CircleEAG.Center.X += 100f;
             CircleEAG.Center.Y += 100f;
 
-            bFixSectors = true;                                                 // FixSector �N�O�������u By Victor Tsai 2017/05/11
+            bFixSectors = true;                                                 // FixSector 就是消除中線 By Victor Tsai 2017/05/11
             penPartition = new Pen(Color.FromArgb(0, Color.Red), 3);
             CheckedValues(new double[] { 5 });
             DefaultColors();

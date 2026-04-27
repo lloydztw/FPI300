@@ -1,4 +1,4 @@
-/****************************************************************************
+Ôªø/****************************************************************************
  *                                                                          
  * Copyright (c) 2009 Jet Eazy Corp. All rights reserved.        
  *                                                                          
@@ -48,9 +48,9 @@ namespace JetEazy.ImageViewerEx.Interactors
             gx.DrawLine(pen, cx, rect.Top, cx, rect.Bottom);
             gx.DrawLine(pen, rect.Left, cy, rect.Right, cy);
 
-            // ﬂ@—eø…“‘”√
+            //  @ e      
             //  gx.DrawString
-            // Ñù≥ˆƒ„“™µƒ◊÷¥Æ
+            //       “™   ÷¥ 
 
             if (isWorld)
                 viewer.SwitchToWorldCoordinate(gx);

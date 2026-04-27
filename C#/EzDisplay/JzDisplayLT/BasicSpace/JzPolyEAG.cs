@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System .Collections .Generic;
 using System .ComponentModel;
 using System .Drawing;
@@ -263,7 +263,7 @@ namespace WorldOfMoveableObjects
             supervisor = mvr;
         }
         /// <summary>
-        /// ����
+        /// 首件
         /// </summary>
         /// <param name="color"></param>
         public JzPolyEAG(Color color)                       //Added By Victor Tsai
@@ -619,10 +619,10 @@ namespace WorldOfMoveableObjects
                 for (int i = 0; i < VerticesNumber; i++)
                 {
                     nodes [i] = new CoverNode (i, ptVertices [i], 3);
-                    //nodes[i].Color = Color.Red;                         //�~�䪺�p�� By Victor Tsai
+                    //nodes[i].Color = Color.Red;                         //外邊的小圓 By Victor Tsai
                 }
                 nodes [VerticesNumber] = new CoverNode (VerticesNumber, m_center, 1);
-                nodes[VerticesNumber].Color = Color.FromArgb(0, Color.Black);                  //���ߪ���m���� #############################
+                nodes[VerticesNumber].Color = Color.FromArgb(0, Color.Black);                  //中心的位置消失 #############################
                 nodes[VerticesNumber].SetBehaviourCursor(Behaviour.Transparent, Cursors.Default);
             }
             //else
@@ -641,7 +641,7 @@ namespace WorldOfMoveableObjects
                     nodes[k0 + i] = new CoverNode(k0 + i, ptVertices[i], ptVertices[(i + 1) % VerticesNumber], 1);
                     nodes[k0 + i].SetBehaviourCursor(Behaviour.Moveable, Cursors.SizeAll);
 
-                    //nodes[k0 + i].Color = Color.Red;             //���۶����u By Victor Tsai   
+                    //nodes[k0 + i].Color = Color.Red;             //互相間的線 By Victor Tsai   
                 }
             }
             //else

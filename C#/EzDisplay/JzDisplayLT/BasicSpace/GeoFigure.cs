@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System .Collections .Generic;
 using System .ComponentModel;
 using System .Drawing;
@@ -58,10 +58,18 @@ namespace WorldOfMoveableObjects
 
         public int RelateNo = -1;
         public int RelatePosition = -1;
-        public int RelateLevel = -1;        //�Y�o�ӭȤ��� 1�A�h���|��� RelateNo = 1 �N���諸�ʧ@
+
+        /// <summary>
+        /// 若這個值不為 1，則不會實行 RelateNo = 1 就不選的動作
+        /// </summary>
+        public int RelateLevel = -1;
         public string Desc = string.Empty;
         public int LearnCount = 0;
-        public Point OffsetPoint = new Point(); //One Time Offset, After use will reset
+
+        /// <summary>
+        /// One Time Offset, After use will reset
+        /// </summary>
+        public Point OffsetPoint = new Point(); 
 
         public float PenWidth = 2;
         public float FontSize = 10;
@@ -118,7 +126,7 @@ namespace WorldOfMoveableObjects
             bInGroup = false;
             penResize_Independent = new Pen (Color.FromArgb(0, Color.Red), 0);
             penResize_InGroup = new Pen (Color.FromArgb(0, Color.Red), 0);
-            brushAnchor = new SolidBrush (Color .FromArgb(0,Color.Red));        //�N�����I�]���z�� By Victor Tsai
+            brushAnchor = new SolidBrush (Color .FromArgb(0,Color.Red));        //將中心點設為透明 By Victor Tsai
         }
         // -------------------------------------------------        Figure
         public Figure_EAG Figure
@@ -207,7 +215,7 @@ namespace WorldOfMoveableObjects
         {
             int node = 0;
 
-            //�Y�O�p�󵥩�1���A�u��γ�ӧ�A���|�i�JSELECT
+            //若是小於等於1的，只能用單個抓，不會進入SELECT
             if (RelateNo <= 1 && RelateLevel <= 1)
                 return false;
 
@@ -406,7 +414,7 @@ namespace WorldOfMoveableObjects
         }
 
         /// <summary>
-        /// ���w���P�h�~�ت��C��
+        /// 指定不同層外框的顏色
         /// </summary>
         /// <param name="orgpen"></param>
         public void ChangePenColorShape(Pen orgpen)

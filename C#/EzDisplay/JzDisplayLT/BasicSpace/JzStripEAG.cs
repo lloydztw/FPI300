@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System .Collections .Generic;
 using System .ComponentModel;
 using System .Drawing;
@@ -170,7 +170,7 @@ namespace WorldOfMoveableObjects
             supervisor = mvr;
         }
         /// <summary>
-        /// ����
+        /// 首件
         /// </summary>
         /// <param name="color"></param>
         public JzStripEAG(Color color)                       //Added By Victor Tsai
@@ -435,8 +435,8 @@ namespace WorldOfMoveableObjects
                 nodes = new CoverNode[] {  new CoverNode (0, pts [0], pts [1], delta),
                                             new CoverNode (1, pts [2], pts [3], delta * 2, Cursors.SizeAll),
                                             new CoverNode (2, ptC0, ptC1, Convert .ToSingle (m_radius - delta), Cursors .SizeAll),
-                                            new CoverNode (3, ptC0, Convert .ToSingle (m_radius + delta)),    //��������ح������� By Victor Tsai
-                                            new CoverNode (4, ptC1, Convert .ToSingle (m_radius + delta))     //��������ح������� By Victor Tsai
+                                            new CoverNode (3, ptC0, Convert .ToSingle (m_radius + delta)),    //消掉兩個裏面的內圈 By Victor Tsai
+                                            new CoverNode (4, ptC1, Convert .ToSingle (m_radius + delta))     //消掉兩個裏面的內圈 By Victor Tsai
                                             };
             }
 
@@ -447,8 +447,8 @@ namespace WorldOfMoveableObjects
             //    nodes = new CoverNode[] {  new CoverNode (0, ptC0, 0.0, Cursors .SizeAll),
             //                                new CoverNode (1, ptC1, 0.0, Cursors .SizeAll),
             //                                new CoverNode (2, ptC0, ptC1, Convert .ToSingle (m_radius), Cursors .SizeAll),
-            //                                new CoverNode (3, ptC0, 0.0, Cursors .SizeAll),           //��������ح������� By Victor Tsai
-            //                                new CoverNode (4, ptC1, 0.0, Cursors .SizeAll)            //��������ح������� By Victor Tsai
+            //                                new CoverNode (3, ptC0, 0.0, Cursors .SizeAll),           //消掉兩個裏面的內圈 By Victor Tsai
+            //                                new CoverNode (4, ptC1, 0.0, Cursors .SizeAll)            //消掉兩個裏面的內圈 By Victor Tsai
             //                                };
             //}
             cover = new Cover(nodes);
