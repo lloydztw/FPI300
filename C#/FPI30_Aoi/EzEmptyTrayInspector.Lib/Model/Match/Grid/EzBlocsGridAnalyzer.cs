@@ -143,6 +143,8 @@ namespace JetEazy.Match
                         if (padBox != null)
                         {
                             var CV = padBloc.Center - quadCenter;
+                            //CV = CV / CV.NormLength;
+
                             var localPts = padBox.Corners;
                             int bestIdx = 0;
                             double max = 0;
@@ -151,6 +153,8 @@ namespace JetEazy.Match
                                 var dx = localPts[k].X - quadCenter.X;
                                 var dy = localPts[k].Y - quadCenter.Y;
                                 var dotProduct = CV.X * dx + CV.Y * dy;
+                                //dotProduct /= Math.Sqrt(dx * dx + dy * dy);
+
                                 if (max < dotProduct)
                                 {
                                     max = dotProduct;
@@ -187,6 +191,14 @@ namespace JetEazy.Match
 
                 quad2d = new QvQuad2D();
                 quad2d.Corners = Array.ConvertAll(rotRect.Points(), p => new QVector(p.X, p.Y));
+            }
+
+            // 微調誤差 (2-pixels)
+            if (useBoundaryPoints && quad2d != null)
+            {
+                quad2d.Corners[1].X += 1;
+                quad2d.Corners[2].Y += 3;
+                quad2d.Corners[3].Y += 2;
             }
         }
 

@@ -17,8 +17,6 @@ using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
-using LaserAlignDX.AoiModel.AI;
-using LaserAlignDX.OPSpace;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -482,7 +480,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #endregion
 
         #region DRAW_DIM_MEASURE_POINTS_FUNCTIONS
-        void draw_GapMeasurePoints(CvImageViewer viewer, Graphics gxView, XCell activeCell)
+        void draw_GapMeasurePoints_gaps8(CvImageViewer viewer, Graphics gxView, XCell activeCell)
         {
             bool withPadGaps = _xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch &&
                                _xRecipe.InspectParams.optPadEdgeGapsMeasurement &&
@@ -529,6 +527,80 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 if (toShowText)
                     gxView.DrawString($"{i}", _font, isPass ? Brushes.Purple : Brushes.Red, (float)p0.X, (float)p0.Y);
+            }
+        }
+        void draw_GapMeasurePoints_gaps4(CvImageViewer viewer, Graphics gxView, XCell activeCell)
+        {
+            bool withPadGaps = _xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch &&
+                               _xRecipe.InspectParams.optPadEdgeGapsMeasurement &&
+                               _xRecipe.InspectParams.optChipMeasurement;
+
+            if (!withPadGaps)
+                return;
+
+            var chipData = activeCell?.ChipData;
+            if (chipData == null || chipData.IsEmpty())
+                return;
+
+            var gaps = chipData.PadEdgeGaps;
+            if (gaps == null) return;
+
+            var gapResults = gaps?.PassNgResults;
+            if (gapResults == null)
+                return;
+
+            // 順序: LDX(2), LUX(2), LUY(2), RUY(2), RUX(2), RDX(2), RDY(2), LDY(2)
+            var gapMeasurePts = gaps?.GapMeasurePoints;
+            if (gapMeasurePts == null)
+                return;
+
+            using (Brush ngBrush = new SolidBrush(Color.FromArgb(64, Color.OrangeRed)))
+            {
+                for (int e = 0; e < 4; e++)
+                {
+                    int i = e * 4;
+                    if (i + 3 >= gapMeasurePts.Length)
+                        break;
+
+                    int j = i / 2;
+                    bool isPass = (j < gapResults.Length) && gapResults[j];
+
+
+                    if (isPass)
+                    {
+                        var innerP1 = gapMeasurePts[i + 1];
+                        var innerP2 = gapMeasurePts[i + 3];
+                        draw_MeasureLine(viewer, gxView, innerP1, innerP2, Color.Lime);
+                    }
+                    else
+                    {
+                        var q = new QvQuad2D();
+                        Array.Copy(gapMeasurePts, i, q.Corners, 0, 4);
+                        q.SortByCornerTheta();
+
+                        var pts = Array.ConvertAll(q.Corners, c => new PointF((float)c.X, (float)c.Y));
+                        gxView.FillPolygon(ngBrush, pts);
+
+                        var innerP1 = gapMeasurePts[i + 1];
+                        var innerP2 = gapMeasurePts[i + 3];
+                        var outterP1 = gapMeasurePts[i + 0];
+                        var outterP2 = gapMeasurePts[i + 2];
+                        draw_MeasureLine(viewer, gxView, innerP1, innerP2, Color.Red);
+                        //draw_MeasureLine(viewer, gxView, innerP1, outterP1, Color.Yellow);
+                        //draw_MeasureLine(viewer, gxView, innerP2, outterP2, Color.Yellow);
+                    }
+                }
+            }
+        }
+        void draw_GapMeasurePoints(CvImageViewer viewer, Graphics gxView, XCell activeCell)
+        {
+            if (GlobalConfig.OPT_USING_GAPS_4)
+            {
+                draw_GapMeasurePoints_gaps4(viewer, gxView, activeCell);
+            }
+            else
+            {
+                draw_GapMeasurePoints_gaps8(viewer, gxView, activeCell);
             }
         }
         void draw_DimMeasurePoints(CvImageViewer viewer, Graphics gxView, XCell activeCell)
@@ -644,6 +716,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #endregion
 
         #region PRIVATE_HELPER_FUNCTIONS
+#if(OPT_NOT_USED_CODE)
         IEnumerable<QVector> iterMeasurePoints()
         {
             if (_cell != null)
@@ -664,6 +737,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 }
             }
         }
+#endif
         #endregion
     }
 }
