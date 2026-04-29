@@ -69,6 +69,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         // Pad邊隙 spec (mm)
         public readonly DtoSpecValue PadEdgeGapX = new DtoSpecValue(0.375f, 0.127f, 0.127f);
         public readonly DtoSpecValue PadEdgeGapY = new DtoSpecValue(0.300f, 0.127f, 0.127f);
+        public readonly DtoSpecValue PadEdgeGapDiffX = new DtoSpecValue(0f, 0f, 0.127f);
 
         public override void Load(string iniFileName)
         {
@@ -91,6 +92,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             StandardHeight.Load(iniFileName, sectName, "StandardHeight");
             PadEdgeGapX.Load(iniFileName, sectName, "PadEdgeGapX");
             PadEdgeGapY.Load(iniFileName, sectName, "PadEdgeGapY");
+            PadEdgeGapDiffX.Load(iniFileName, sectName, "PadEdgeGapDiffX");
         }
         public override void Save(string iniFileName)
         {
@@ -113,6 +115,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             StandardHeight.Save(iniFileName, sectName, "StandardHeight");
             PadEdgeGapX.Save(iniFileName, sectName, "PadEdgeGapX");
             PadEdgeGapY.Save(iniFileName, sectName, "PadEdgeGapY");
+            PadEdgeGapDiffX.Save(iniFileName, sectName, "PadEdgeGapDiffX");
         }
 
         void normalizeFileName(ref string iniFileName)

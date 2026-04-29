@@ -471,6 +471,7 @@
     <Compile Include="GA.mvc\Model\CoordsTransforms\V33\QMicroChipTransform.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms_ini.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms.cs" />
+    <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\JcetReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3MeasureSpec.cs" />
@@ -520,7 +521,6 @@
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\StringBuilderExt.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\IxReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\PowerTechReportBuilder.cs" />
-    <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\XxxCompanyReportBuilder.cs" />
     <Compile Include="GA.mvc\GaMvcConfig.cs" />
     <Compile Include="GA\BasicSpace\ChipClass.cs" />
     <Compile Include="GA\BasicSpace\CollectResultClass.cs" />
