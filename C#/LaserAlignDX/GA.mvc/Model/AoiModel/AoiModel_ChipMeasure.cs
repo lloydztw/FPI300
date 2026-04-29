@@ -538,7 +538,8 @@ namespace LaserAlignDX.AoiModel.V3
                     {
                         var min = new QVector(_xInspect.PadEdgeGapX_Min, _xInspect.PadEdgeGapY_Min);
                         var max = new QVector(_xInspect.PadEdgeGapX_Max, _xInspect.PadEdgeGapY_Max);
-                        gaps.Check(out ok, min, max);
+                        var maxDiff = _xInspect.PadEdgeX_Diff_Upper;
+                        gaps.Check(out ok, min, max, maxDiff);
                     }
 
                     if (!ok)

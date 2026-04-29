@@ -949,16 +949,28 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                             var gaps = cell?.ChipData?.PadEdgeGaps;
                             if (gaps != null)
                             {
-                                sb.AppendLine();
-                                sb.AppendLine().Append($"LUX = {gaps.LU.X:0.000} mm");
-                                sb.AppendLine().Append($"RUX = {gaps.RU.X:0.000} mm");
-                                sb.AppendLine().Append($"RDX = {gaps.RD.X:0.000} mm");
-                                sb.AppendLine().Append($"LDX = {gaps.LD.X:0.000} mm");
-                                sb.AppendLine();
-                                sb.AppendLine().Append($"LUY = {gaps.LU.Y:0.000} mm");
-                                sb.AppendLine().Append($"RUY = {gaps.RU.Y:0.000} mm");
-                                sb.AppendLine().Append($"RDY = {gaps.RD.Y:0.000} mm");
-                                sb.AppendLine().Append($"LDY = {gaps.LD.Y:0.000} mm");
+                                if (GlobalConfig.OPT_USING_GAPS_4)
+                                {
+                                    sb.AppendLine();
+                                    sb.AppendLine().Append($"邊隙(左) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");
+                                    sb.AppendLine().Append($"邊隙(上) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Top):0.000} mm");
+                                    sb.AppendLine().Append($"邊隙(右) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Right):0.000} mm");
+                                    sb.AppendLine().Append($"邊隙(下) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Bottom):0.000} mm");
+                                    sb.AppendLine().Append($"邊隙差值(左右) = {gaps.GetAveGapDiff():0.000} mm");
+                                }
+                                else
+                                {
+                                    sb.AppendLine();
+                                    sb.AppendLine().Append($"LUX = {gaps.LU.X:0.000} mm");
+                                    sb.AppendLine().Append($"RUX = {gaps.RU.X:0.000} mm");
+                                    sb.AppendLine().Append($"RDX = {gaps.RD.X:0.000} mm");
+                                    sb.AppendLine().Append($"LDX = {gaps.LD.X:0.000} mm");
+                                    sb.AppendLine();
+                                    sb.AppendLine().Append($"LUY = {gaps.LU.Y:0.000} mm");
+                                    sb.AppendLine().Append($"RUY = {gaps.RU.Y:0.000} mm");
+                                    sb.AppendLine().Append($"RDY = {gaps.RD.Y:0.000} mm");
+                                    sb.AppendLine().Append($"LDY = {gaps.LD.Y:0.000} mm");
+                                }
                             }
                         }
                         #endregion

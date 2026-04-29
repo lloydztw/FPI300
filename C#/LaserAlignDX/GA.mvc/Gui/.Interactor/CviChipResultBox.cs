@@ -17,6 +17,7 @@ using JetEazy.ImageViewerEx;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
+using LaserAlignDX.BasicSpace;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -500,11 +501,6 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (gapMeasurePts == null)
                 return;
 
-            //var xInspect = _xRecipe.InspectParams;
-            //var min = new QVector(xInspect.PadEdgeGapX_Min, xInspect.PadEdgeGapY_Min);
-            //var max = new QVector(xInspect.PadEdgeGapX_Max, xInspect.PadEdgeGapY_Max);
-            //var gapResults = gaps.Check(out bool isPass, min, max);
-
             var gapResults = gaps?.PassNgResults;
             if (gapResults == null) 
                 return;
@@ -554,7 +550,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (gapMeasurePts == null)
                 return;
 
-            using (Brush ngBrush = new SolidBrush(Color.FromArgb(64, Color.OrangeRed)))
+            using (Brush ngBrush = new SolidBrush(Color.FromArgb(56, Color.OrangeRed)))
             {
                 for (int e = 0; e < 4; e++)
                 {
@@ -565,8 +561,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     int j = i / 2;
                     bool isPass = (j < gapResults.Length) && gapResults[j];
 
+                    // 左右邊隙差異
+                    bool isGapDiffNG = (e == (int)EdgeBorder.Left || e == (int)EdgeBorder.Right) && gaps.IsGapDiffNG;
 
-                    if (isPass)
+                    if (isPass && !isGapDiffNG)
                     {
                         var innerP1 = gapMeasurePts[i + 1];
                         var innerP2 = gapMeasurePts[i + 3];
@@ -583,11 +581,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                         var innerP1 = gapMeasurePts[i + 1];
                         var innerP2 = gapMeasurePts[i + 3];
-                        var outterP1 = gapMeasurePts[i + 0];
-                        var outterP2 = gapMeasurePts[i + 2];
-                        draw_MeasureLine(viewer, gxView, innerP1, innerP2, Color.Red);
-                        //draw_MeasureLine(viewer, gxView, innerP1, outterP1, Color.Yellow);
-                        //draw_MeasureLine(viewer, gxView, innerP2, outterP2, Color.Yellow);
+                        //var outterP1 = gapMeasurePts[i + 0];
+                        //var outterP2 = gapMeasurePts[i + 2];
+
+                        draw_MeasureLine(viewer, gxView, innerP1, innerP2, isGapDiffNG ? Color.Yellow : Color.Red);
                     }
                 }
             }

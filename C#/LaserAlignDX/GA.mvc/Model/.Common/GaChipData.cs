@@ -16,6 +16,7 @@
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
+using LaserAlignDX.BasicSpace;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
@@ -210,6 +211,35 @@ namespace LaserAlignDX.Model
         /// </summary>
         public QVector LD => _gaps[3];
 
+        /// <summary>
+        /// 邊隙兩兩平均
+        /// </summary>
+        public double GetAveGap(EdgeBorder eb)
+        {
+            switch (eb)
+            {
+                case EdgeBorder.Left:
+                    return (LU.X + LD.X) / 2.0;
+                case EdgeBorder.Right:
+                    return (RU.X + RD.X) / 2.0;
+                case EdgeBorder.Top:
+                    return (LU.Y + RU.Y) / 2.0;
+                case EdgeBorder.Bottom:
+                    return (LD.Y + RD.Y) / 2.0;
+            }
+            return 0;
+        }
+
+        /// <summary>
+        /// 邊隙差異
+        /// </summary>
+        public double GetAveGapDiff(EdgeBorder e1 = EdgeBorder.Left, EdgeBorder e2 = EdgeBorder.Right)
+        {
+            var diff = Math.Abs(GetAveGap(e1) - GetAveGap(e2));
+            return diff;
+        }
+
+        #region 力成版_四角_PAD_中心_到_邊線_的距離
         public double[] S => _S;
         public double S1 { get => _S[0]; set => _S[0] = value; }
         public double S2 { get => _S[1]; set => _S[1] = value; }
@@ -219,6 +249,7 @@ namespace LaserAlignDX.Model
         public double S6 { get => _S[5]; set => _S[5] = value; }
         public double S7 { get => _S[6]; set => _S[6] = value; }
         public double S8 { get => _S[7]; set => _S[7] = value; }
+        #endregion
 
         public IEnumerable<QVector> IterItems()
         {
@@ -235,7 +266,7 @@ namespace LaserAlignDX.Model
         /// </summary>
         public QVector[] GapMeasurePoints { get; set; }
 
-        public bool[] Check(out bool isPass, QVector min, QVector max)
+        public bool[] Check(out bool isPass, QVector min, QVector max, double maxGapDiff)
         {
             isPass = true;
 
@@ -255,6 +286,14 @@ namespace LaserAlignDX.Model
             isPass &= results[i++] = min.Y <= RD.Y && RD.Y <= max.Y;
             isPass &= results[i++] = min.Y <= LD.Y && LD.Y <= max.Y;
 
+            // 檢查 左右邊隙 差值
+            if (maxGapDiff > 0)
+            {
+                IsGapDiffNG = GetAveGapDiff() > maxGapDiff;
+                if (IsGapDiffNG)
+                    isPass = false;
+            }
+
             this.PassNgResults = results;
             return results;
         }
@@ -265,8 +304,15 @@ namespace LaserAlignDX.Model
         public bool[] PassNgResults
         {
             get;
-            set;
+            private set;
         }
+
+        public bool IsGapDiffNG
+        {
+            get; 
+            private set;
+        }
+
         /// <summary>
         /// Runtime Results
         /// </summary>
@@ -281,7 +327,7 @@ namespace LaserAlignDX.Model
                         passCount++;
                 }
             }
-            return passCount >= 8;
+            return passCount >= 8 && !IsGapDiffNG;
         }
     }
 }

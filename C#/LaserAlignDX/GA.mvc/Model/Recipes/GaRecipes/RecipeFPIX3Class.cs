@@ -2064,7 +2064,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
 
-        #region 6_尺寸偏移_SPEC_(兩載台共用)
+        #region 6_邊隙_SPEC_(兩載台共用)
         const string _Cat6 = "6. PAD邊隙規格設定";
 
         [CategoryAttribute(_Cat6), DescriptionAttribute("僅適用於 格點晶粒! (單位 mm)")]
@@ -2133,6 +2133,16 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             set => _spec.PadEdgeGapY.DeltaLower = value;
         }
 
+        [CategoryAttribute(_Cat6), DescriptionAttribute("單位 mm")]
+        [DisplayName("03 PAD邊隙 左右差異 上限")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float PadEdgeX_Diff_Upper
+        {
+            get => _spec.PadEdgeGapDiffX.DeltaUpper;
+            set => _spec.PadEdgeGapDiffX.DeltaUpper = value;
+        }
 
         [Browsable(false)]
         public float PadEdgeGapX_Max
