@@ -15,7 +15,6 @@
 
 using LeTian.JxProps;
 
-
 namespace EzAoiEmptyTrayInspector.Model
 {
     /// <summary>
@@ -26,8 +25,9 @@ namespace EzAoiEmptyTrayInspector.Model
         const string _DESC = "空盤檢測參數設定";
         static int _debugCount = 0;
 
-        public JxTrayVisionSettings VisionSettings = new JxTrayVisionSettings();
         public JxTrayMiscSettings TrayMiscSettings = new JxTrayMiscSettings();
+        public JxTrayVisionSettings VisionSettings = new JxTrayVisionSettings();
+        public JxTraySegGrpSettings TraySegGrpSettings = new JxTraySegGrpSettings();
 
         public JxAoiRecipe()
         {
@@ -40,6 +40,7 @@ namespace EzAoiEmptyTrayInspector.Model
             BindItems(new IProp[] {
                 TrayMiscSettings,
                 VisionSettings,
+                TraySegGrpSettings,
             });
             base.OnBindingSubItems();
         }
@@ -67,6 +68,40 @@ namespace EzAoiEmptyTrayInspector.Model
         public bool IsDebugDumpEnabled()
         {
             return TrayMiscSettings.DebugDump;
+        }
+        #endregion
+
+        public override void Load(string fileName)
+        {
+            base.Load(fileName);
+            //>>> 參數版本升級, 進行必要的遷移處理.
+            migrateBoundBox();
+            //>>> 升級後的參數, 預設在GUI編輯視窗中是隱藏的, 需要使用者手動展開查看.
+            TraySegGrpSettings.AutoHidden();
+        }
+        public override void Save(string fileName)
+        {
+            base.Save(fileName);
+        }
+
+        #region PRIVATE_FUNCTIONS
+        void migrateBoundBox()
+        {
+            var defaultRect = VisionSettings.Match.BoundBox.Value;
+            var segsList = TraySegGrpSettings.SegsList;
+            if (segsList.Count == 0)
+            {
+                var item = new JxTraySegItem(0);
+                item.BoundBox.Value = defaultRect;
+                segsList.Add(item);
+            }
+            else
+            {
+                if (segsList.Count >= 1 && segsList[0].BoundBox.Value == System.Drawing.Rectangle.Empty)
+                {
+                    segsList[0].BoundBox.Value = defaultRect;
+                }
+            }
         }
         #endregion
     }

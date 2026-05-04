@@ -27,7 +27,7 @@ namespace EzAoiEmptyTrayInspector.Model
         public JxEnum<MirrorMode> Mirror = new JxEnum<MirrorMode>("Miror", description: "鏡像");
         public JxRotAngleSettings RotAngle = new JxRotAngleSettings();
         public JxBool Inverse = new JxBool("Inverse", "反相處理", false);
-        public JxInt OutGridBlocThreshold = JxInt.C255("OG Threshold", "異常區塊門限", 0);
+        public JxInt OutGridBlocThreshold = JxInt.C255("OG Threshold", "區塊門限", 0);
         public JxBool FindAllFailBlocs = new JxBool("FindAllBlocs", "明確找出所有異常區塊", true);
         public JxInt OutGridBlocMinSize = new JxInt("OutGridBlocMinSize", "外圍區塊最小邊長 (pixel)", 550);
 

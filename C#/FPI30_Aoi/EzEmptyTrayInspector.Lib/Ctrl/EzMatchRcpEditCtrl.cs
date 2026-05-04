@@ -15,15 +15,19 @@
 
 using AwFramework.Gui;
 using AwFramework.Util;
+using BrightIdeasSoftware;
 using EzAoiEmptyTrayInspector.Gui;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
+using LeTian.JxProps;
 using LeTian.JxProps.Gui;
 using LeTian.JxRecipesTool.Ctrl;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviGoldenBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
@@ -62,6 +66,10 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             get => _recipesMgr?.ActiveRecipe as JxAoiRecipe;
         }
+        JxTraySegGrpSettings _segGrpSettings
+        {
+            get => _activeRecipe?.TraySegGrpSettings;
+        }
         JxTrayVisionSettings _sideSettings
         {
             get => _activeRecipe?.GetSiteSettings((int)ID);
@@ -71,19 +79,23 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             get => _sideSettings?.Match;
         }
         bool _isRcpEdittingMode = false;
+        bool _bypassJxEvents = false;
         #endregion
 
-        #region PRIVATE_GUI_MEMBERS
+        #region PRIVATE_GUI_LINKS
         Form _frmOwner;
         Control _wndRcpHostPanel;
         Control _imgViewerWindow;
         IvImageViewer _imgViewer;
         IvFuncButtonsPanel _funcButtonsPanel;
         Button _btnGolden => _funcButtonsPanel?.btnPickGolden;
-        CviBoundBox _cviBoundBox;
+        #endregion
+
+        #region PRIVATE_INTERACTORS
+        List<CviBoundBox> _cviGroupBoundBoxes;
+        //CviBoundBox _cviBoundBox;
         CviGoldenBox _cviGoldenBox;
         CviFiltersBox _cviFiltersBox;
-        bool _bypassJxEvents = false;
         #endregion
 
         public EzMatchRcpEdittingCtrl(int sideId, IvSingleMatchView view, IvFuncButtonsPanel funcPanel, IRecipesMgrCtrl recipesMgr)
@@ -107,10 +119,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             init_interactors();
             init_event_handlers();
 
-            _frmOwner.BeginInvoke(new Action(() =>
-            {
-                update_rcp_editor_gui_status();
-            }));
+            _frmOwner.BeginInvoke((Action)update_rcp_editor_gui_status);
         }
         public SideID ID
         {
@@ -124,12 +133,10 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             if (_isRcpEdittingMode)
                 move_boxes_to_safe_location(_imgSource);
         }
-
         public bool IsEditting
         {
             get => _isRcpEdittingMode;
         }
-
         internal void AutoCatchGolden()
         {
             if (_isRcpEdittingMode)
@@ -154,8 +161,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             if (_btnGolden != null)
                 _btnGolden.Click += BtnGolden_Click;
             if (_imgViewerWindow!=null)
-                _imgViewerWindow.KeyDown += viewer_KeyDown;
-            _cviBoundBox.OnChanged += (s, e) => update_cvi_boxes_to_recipe();
+                _imgViewerWindow.KeyDown += Viewer_KeyDown;
             #endregion
 
             #region MODEL_EVENT
@@ -165,27 +171,26 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         void connect_recipe_prop_handlers()
         {
+            if (_segGrpSettings != null)
+            {
+                _segGrpSettings.SegsNumber.OnModified += SegsNumber_OnModified;
+            }
+
             if (_sideSettings != null)
             {
-                _sideSettings.RotAngle.OnModified += side_RotAngle_OnModified;
+                _sideSettings.RotAngle.OnModified += Side_RotAngle_OnModified;
             }
         }
 
         private void _recipesMgr_OnRecipeSelectionChanged(object sender, EventArgs e)
         {
-            //_model.SetRecipe(_activeRecipe);
-            //connect_recipe_prop_handlers();
-            //_view.Window.Invalidate();
+            rebuildPropsView();
             updateActiveRecipe();
         }
         private void _recipesMgr_OnRecipeEditting(object sender, EventArgs e)
         {
             if (!_isRcpEdittingMode)
             {
-                //_isRcpEdittingMode = true;
-                //load_golden_box();
-                //update_rcp_editor_gui_status();
-                //refresh(_view.ImageViewer);
                 enterEdittingMode();
             }
         }
@@ -193,10 +198,6 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             if (_isRcpEdittingMode)
             {
-                //_isRcpEdittingMode = false;
-                //update_golden_box();
-                //update_rcp_editor_gui_status();
-                //refresh(_view.ImageViewer);
                 leaveEdittingMode();
             }
 
@@ -211,22 +212,24 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 build_golden_grid_template();
             }
         }
-        private void viewer_KeyDown(object sender, KeyEventArgs e)
+        private void Viewer_KeyDown(object sender, KeyEventArgs e)
         {
             if (_isRcpEdittingMode && e.KeyCode == Keys.F3)
             {
-                move_golden_box_to_default_location();
-                var rect = _imgViewer.GetWorldRect();
-                _cviBoundBox.Box = Rectangle.Round(rect);
-                _imgViewerWindow.Invalidate();
+                autoLayoutCviBoxes();
             }
         }
-        private void side_RotAngle_OnModified(object sender, EventArgs e)
+        private void Side_RotAngle_OnModified(object sender, EventArgs e)
         {
-            if (_bypassJxEvents)
+            if (_bypassJxEvents || !_isRcpEdittingMode)
                 return;
-            if (_isRcpEdittingMode)
-                showFiltersEffect();
+            showFiltersEffect();
+        }
+        private void SegsNumber_OnModified(object sender, EventArgs e)
+        {
+            if (_bypassJxEvents || !_isRcpEdittingMode)
+                return;
+            syncSegGroupsNumber();
         }
 
         private void _model_OnStateChanged(object sender, EventArgs e)
@@ -278,11 +281,48 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _cviFiltersBox.ApplyFilters(ID, _imgSource, _sideSettings.RotAngle, _imgViewerWindow);
             }
         }
+        void syncSegGroupsNumber()
+        {
+            if (_segGrpSettings == null)
+                return;
+
+            bool isChanged = update_group_boxes_to_gui();
+
+            if (isChanged)
+            {
+                update_group_boxes_to_recipe();
+                rebuildPropsView();
+            }
+        }
+        void autoLayoutCviBoxes()
+        {
+            move_golden_box_to_default_location();
+
+            if (_cviGroupBoundBoxes != null && _cviGroupBoundBoxes.Count > 0)
+            {
+                var rect = Rectangle.Round(_imgViewer.GetWorldRect());
+                var H = rect.Height / _cviGroupBoundBoxes.Count;
+                for (int i = 0; i < _cviGroupBoundBoxes.Count; i++)
+                {
+                    var cviSegBox = _cviGroupBoundBoxes[i];
+                    cviSegBox.Box = new Rectangle(rect.X, rect.Y + (int)(i * H), rect.Width, (int)H);
+                }
+            }
+
+            _imgViewerWindow?.Invalidate();
+        }
+        void rebuildPropsView()
+        {
+            var wnd = (_frmOwner as FormAwMain).OpDocker.Window ?? _frmOwner;
+            var view = AppUtil.SearchGui<GwPanePropsViewer>(wnd, null) as IxPropsViewer;
+            _segGrpSettings.AutoHidden();
+            view?.BuildGuiCtrls(_activeRecipe);
+        }
 
         #region CVI_BOX_FUNCTIONS
         void init_interactors()
         {
-            _cviBoundBox = new CviGoldenBox(Brushes.Blue, 1, 3);
+            _cviGroupBoundBoxes = new List<CviBoundBox>();
             _cviGoldenBox = new CviGoldenBox(Brushes.Orange, 1, 3);
             _cviFiltersBox = new CviFiltersBox(Brushes.Lime, 1, 3);
 
@@ -292,14 +332,6 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _cviGoldenBox.Enabled = false;
                 _cviGoldenBox.Visible = false;
 
-                _imgViewer.AddInteractor(_cviBoundBox);
-                _cviBoundBox.Enabled = false;
-                _cviBoundBox.Visible = false;
-
-                //_imgViewer.AddInteractor(_cviGoldenBox);
-                //_cviGoldenBox.Enabled = false;
-                //_cviGoldenBox.Visible = false;
-
                 _imgViewer.AddInteractor(_cviFiltersBox);
                 _cviFiltersBox.Enabled = false;
                 _cviFiltersBox.Visible = false;
@@ -307,16 +339,21 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         void update_cvi_boxes_to_gui()
         {
-            _cviBoundBox.Box = _matchSettings != null ?
-                               _matchSettings.BoundBox.Value :
-                               new Rectangle(0, 0, _imgSource.Width, _imgSource.Height);
+            //var defaultSize = _imgSource != null ? _imgSource.Size : new Size(500, 500);
+            //_cviBoundBox.Box = _matchSettings != null ?
+            //                   _matchSettings.BoundBox.Value :
+            //                   new Rectangle(0, 0, defaultSize.Width, defaultSize.Height);
+            //if (_cviBoundBox.Box == Rectangle.Empty)
+            //{
+            //    _cviBoundBox.Box = new Rectangle(0, 0, defaultSize.Width, defaultSize.Height);
+            //}
 
-            if (_cviBoundBox.Box == Rectangle.Empty)
-                _cviBoundBox.Box = new Rectangle(0, 0, _imgSource.Width, _imgSource.Height);
+            update_group_boxes_to_gui();
 
             _cviGoldenBox.Box = _matchSettings != null ?
                                 _matchSettings.GoldenBox.Value :
                                 Rectangle.Empty;
+
             if (_cviGoldenBox.Box == Rectangle.Empty)
                 move_golden_box_to_default_location();
 
@@ -326,21 +363,136 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             if (_matchSettings == null)
                 return;
+
             _bypassJxEvents = true;
 
             var loc = _cviGoldenBox.Box;
             if (_matchSettings.GoldenBox.Value != loc)
                 _matchSettings.GoldenBox.Value = loc;
 
-            loc = _cviBoundBox.Box;
-            if (_matchSettings.BoundBox.Value != loc)
-                _matchSettings.BoundBox.Value = loc;
+            //loc = _cviBoundBox.Box;
+            //if (_matchSettings.BoundBox.Value != loc)
+            //    _matchSettings.BoundBox.Value = loc;
 
             _bypassJxEvents = false;
+
+            update_group_boxes_to_recipe();
         }
+
+        bool update_group_boxes_to_gui()
+        {
+            bool isNumberChanged = false;
+
+            if (_segGrpSettings == null)
+                return isNumberChanged;
+
+            int targetSegsNum = _segGrpSettings.SegsNumber.Value;
+
+            var jxSegsList = _segGrpSettings?.SegsList;
+            if (jxSegsList == null)
+                return isNumberChanged;
+
+            if (_imgViewerWindow != null)
+                _imgViewerWindow.Enabled = false;
+
+            // 根據需要 生成新的 CviBox
+            for (int i = _cviGroupBoundBoxes.Count; i < targetSegsNum; i++)
+            {
+                var cviSegBox = new CviBoundBox(Brushes.Blue, 1, 3);
+                cviSegBox.OnChanged += (s, e) => update_group_boxes_to_recipe(s);
+                _cviGroupBoundBoxes.Add(cviSegBox);
+                _imgViewer?.AddInteractor(cviSegBox);
+                isNumberChanged = true;
+            }
+
+            // 刪除/隱藏多餘的 CviBox
+            if (targetSegsNum < _cviGroupBoundBoxes.Count)
+            {
+                for (int i = targetSegsNum; i < _cviGroupBoundBoxes.Count; i++)
+                {
+                    var cviSegBox = _cviGroupBoundBoxes[i];
+                    cviSegBox.Visible = false;
+                    cviSegBox.Enabled = false;
+                    _imgViewer?.RemoveInteractor(cviSegBox);
+                }
+                _cviGroupBoundBoxes.RemoveRange(targetSegsNum, _cviGroupBoundBoxes.Count - targetSegsNum);
+                isNumberChanged = true;
+            }
+
+            // 基準矩形
+            var ccRect = _imgViewer != null ? Rectangle.Round(_imgViewer.GetWorldRect()) : new Rectangle(0, 0, 500, 500 * targetSegsNum);
+            int H = ccRect.Height / Math.Max(targetSegsNum, 1);
+
+            // 更新 CviBox
+            for (int i = 0, N = _cviGroupBoundBoxes.Count; i < N; i++)
+            {
+                var rect = new Rectangle(ccRect.X, ccRect.Y + i * H, ccRect.Width, H - 50);
+
+                if (i < jxSegsList.Count)
+                {
+                    var jx = jxSegsList[i];
+                    if (jx != null)
+                    {
+                        if (jx.BoundBox.Value == Rectangle.Empty)
+                            jx.BoundBox.Value = rect;
+                        else
+                            rect = jx.BoundBox.Value;
+                    }
+                }
+
+                var cviSegBox = _cviGroupBoundBoxes[i];
+                cviSegBox.Visible = _isRcpEdittingMode;
+                cviSegBox.Enabled = _isRcpEdittingMode;
+                cviSegBox.Box = rect;
+            }
+
+            if (_imgViewerWindow != null)
+                _imgViewerWindow.Enabled = true;
+
+            if (jxSegsList.Count != _cviGroupBoundBoxes.Count)
+                isNumberChanged = true;
+
+            return isNumberChanged;
+        }
+        void update_group_boxes_to_recipe(object sender = null)
+        {
+            if (_segGrpSettings == null || _cviGroupBoundBoxes == null)
+                return;
+
+            bool flag = _bypassJxEvents;
+            _bypassJxEvents = true;
+
+            // 取得 pitchY
+            decimal pitchY = _activeRecipe.TrayMiscSettings.PitchY.Value;
+
+            // 根據 sender 來決定要更新哪一個 CviBox，還是全部更新
+            int index = -1;
+            if (sender is CviBoundBox cviSegBox)
+                index = _cviGroupBoundBoxes.IndexOf(cviSegBox);
+            int iStart = index >= 0 ? index : 0;
+            int iEnd = index >= 0 ? index + 1 : _cviGroupBoundBoxes.Count;
+
+            // 更新 _segGrpSettings 的 JxTraySegItem
+            for (int i = iStart; i < iEnd; i++)
+            {
+                _segGrpSettings.UpdateSegment(i, _cviGroupBoundBoxes[i].Box, pitchY);
+            }
+
+            // 刪除多餘的 JxTraySegItem
+            int targetSegsNum = _cviGroupBoundBoxes.Count;
+            _segGrpSettings.RemoveSegments(targetSegsNum);
+
+            _bypassJxEvents = flag;
+        }
+
         void move_boxes_to_safe_location(Size boundarySize)
         {
-            foreach (var cviBox in new[] { _cviBoundBox, _cviGoldenBox })
+            var boxes = new List<CviBoundBox>(_cviGroupBoundBoxes)
+            {
+                _cviGoldenBox
+            };
+
+            foreach (var cviBox in boxes)
             {
                 var rect = cviBox.Box;
                 rect.Width = Math.Min(rect.Width, boundarySize.Width - 1);
@@ -370,6 +522,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             if (_imgViewer == null)
                 return;
+
             var boundary = _imgViewer.GetWorldRect();
             int x = (int)boundary.Width / 5;
             int y = (int)boundary.Height / 5;
@@ -451,8 +604,6 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 break;
             }
         }
-
-
         void getRecipeRowsCols(out int rows, out int cols)
         {
             var recipe = _recipesMgr?.ActiveRecipe as JxAoiRecipe;
@@ -495,12 +646,17 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 //setVisible(_btnGolden, _isRcpEdittingMode);
                 setEnable(_btnGolden, _isRcpEdittingMode);
                 _btnGolden.BackColor = _isRcpEdittingMode ? Color.Gold : Color.DarkGray;
-                _cviBoundBox.Visible = _isRcpEdittingMode;
-                _cviBoundBox.Enabled = _isRcpEdittingMode;
+                //_cviBoundBox.Visible = _isRcpEdittingMode;
+                //_cviBoundBox.Enabled = _isRcpEdittingMode;
                 _cviGoldenBox.Visible = _isRcpEdittingMode;
                 _cviGoldenBox.Enabled = _isRcpEdittingMode;
                 _cviFiltersBox.Visible = _isRcpEdittingMode;
                 _cviFiltersBox.Enabled = _isRcpEdittingMode;
+                foreach(var cviSegBox in _cviGroupBoundBoxes)
+                {
+                    cviSegBox.Visible = _isRcpEdittingMode;
+                    cviSegBox.Enabled = _isRcpEdittingMode;
+                }
             }
         }
         void refresh(object c)

@@ -57,10 +57,6 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         JxAppSettings _appSettings => Global.AppSettings;
         #endregion
 
-        #region STATIC_DATA
-        //static List<EzMatchCtrl> _instances = new List<EzMatchCtrl>();
-        #endregion
-
         #region DUMP_PATH_AND_OUTPUT_FILE_NAME
         string GET_DUMP_PATH(int id, string fileName)
         {
@@ -104,13 +100,13 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             get => _recipesMgr?.ActiveRecipe as JxAoiRecipe;
         }
-        JxTrayVisionSettings _sideSettings
+        JxTrayVisionSettings _visionSettings
         {
-            get => _activeRecipe?.GetSiteSettings((int)ID);
+            get => _activeRecipe?.VisionSettings;
         }
         JxTempMatchSettings _matchSettings
         {
-            get => _sideSettings?.Match;
+            get => _visionSettings?.Match;
         }
         JxVisionSource _visionSrc
         {
@@ -280,16 +276,16 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             _model.OnFinalResulted -= _model_OnFinalResulted;
             #endregion
 
-            if (_sideSettings != null)
+            if (_visionSettings != null)
             {
-                _sideSettings.Mirror.OnModified += side_Mirror_OnModified;
+                _visionSettings.Mirror.OnModified += side_Mirror_OnModified;
             }
         }
         void connect_recipe_prop_handlers()
         {
-            if (_sideSettings != null)
+            if (_visionSettings != null)
             {
-                _sideSettings.Mirror.OnModified += side_Mirror_OnModified;
+                _visionSettings.Mirror.OnModified += side_Mirror_OnModified;
             }
         }
 
@@ -455,12 +451,12 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             _bypassJxEvents = true;
 
             if (_largeIMG != null &&
-                _sideSettings != null &&
-                _sideSettings.Mirror != ImageUtil.GetMirrorTag(_largeIMG))
+                _visionSettings != null &&
+                _visionSettings.Mirror != ImageUtil.GetMirrorTag(_largeIMG))
             {
                 _TRACE($"[影像鏡像] 處理中 ...");
                 var tm0 = DateTime.Now;
-                isChanged = ImageUtil.ApplyMirror(_largeIMG, _sideSettings.Mirror, markingDirtyPixel: true);
+                isChanged = ImageUtil.ApplyMirror(_largeIMG, _visionSettings.Mirror, markingDirtyPixel: true);
 
                 var ts = DateTime.Now - tm0;
                 if (isChanged && updateGui)
@@ -497,7 +493,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _largeIMG?.Dispose();
                 _largeIMG = null;
 
-                MirrorMode mirror = _sideSettings != null ? _sideSettings.Mirror.Value : MirrorMode.None;
+                MirrorMode mirror = _visionSettings != null ? _visionSettings.Mirror.Value : MirrorMode.None;
 
                 // 使用 ImageUtil 載入巨大圖檔
                 //>>> _largeIMG = ImageUtil.LoadLargeImage(fileName, mirror);
