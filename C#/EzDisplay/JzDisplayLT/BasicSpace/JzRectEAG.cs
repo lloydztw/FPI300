@@ -1,4 +1,4 @@
-using JzDisplay;
+﻿using JzDisplay;
 using Microsoft.Win32;
 using MoveGraphLibrary;
 using System;
@@ -21,9 +21,6 @@ namespace WorldOfMoveableObjects
             public double Height;
             public double Degree;
             
-            /// <summary>
-            /// �Φr��ƥ� runtime �ƾ�, �O���u����k !!!
-            /// </summary>
             string BackupString = "";
 
             public RectEAGClass()
@@ -194,7 +191,7 @@ namespace WorldOfMoveableObjects
         }
         
         /// <summary>
-        /// ����
+        /// 首件
         /// </summary>
         /// <param name="color"></param>
         public JzRectEAG(Color color)                       //Added By Victor Tsai
@@ -681,9 +678,9 @@ namespace WorldOfMoveableObjects
                     //else
                     //{
                     //if (ShowMode != ShowModeEnum.BORDERSHOW)
-                    //    grfx.DrawPolygon(penUnder_Independent, pts);        //���e�@�Ӷ©�
+                    //    grfx.DrawPolygon(penUnder_Independent, pts);        //先畫一個黑底
 
-                    grfx.DrawPolygon(BorderPen, pts);                   //�A�e�@�Ӯ�l
+                    grfx.DrawPolygon(BorderPen, pts);                   //再畫一個格子
                     //}
                 }
                 else

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System .Collections .Generic;
 using System .ComponentModel;
 using System .Drawing;
@@ -220,7 +220,7 @@ namespace WorldOfMoveableObjects
 
             sector_angle = new double[vals.Length];
             SectorAngles();
-            //bFixSectors = true;                                                 // FixSector �N�O�������u By Victor Tsai 2017/05/11
+            //bFixSectors = true;                                                 // FixSector 就是消除中線 By Victor Tsai 2017/05/11
             //penPartition = new Pen(Color.FromArgb(0, Color.Red), 3);
             //CheckedValues(new double[] { 5 });
             //DefaultColors();
@@ -280,7 +280,7 @@ namespace WorldOfMoveableObjects
             supervisor = mvr;
         }
         /// <summary>
-        /// ����
+        /// 首件
         /// </summary>
         /// <param name="color"></param>
         public JzRingEAG(Color color, Figure_EAG figure)                       //Added By Victor Tsai

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System .Collections .Generic;
 using System .ComponentModel;
 using System .Drawing;
@@ -192,7 +192,7 @@ namespace WorldOfMoveableObjects
             supervisor = mvr;
         }
         /// <summary>
-        /// ����
+        ///     
         /// </summary>
         /// <param name="color"></param>
         public JzIdentityHoleEAG(Color color, Figure_EAG figure)                       //Added By Victor Tsai
