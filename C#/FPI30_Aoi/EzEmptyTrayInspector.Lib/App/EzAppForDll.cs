@@ -37,7 +37,7 @@ using EzAoiEmptyTrayInspector.Gui.Panels;
 
 namespace EzAoiEmptyTrayInspector
 {
-    internal class EzAppForDll : AwFramework.AppBase<RecipeClassT>
+    public class EzAppForDll : AwFramework.AppBase<RecipeClassT>
     {
         #region SINGLETON
         static EzAppForDll _singleton = null;
