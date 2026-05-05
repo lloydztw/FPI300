@@ -1379,6 +1379,12 @@ namespace EzAoiEmptyTrayInspector.Model
         #region PRIVATE_RUN_ALL
         void run_all(IEzImage dummy, Mat imgFullFov, Mat dummy2, string outputFileName)
         {
+            //run_all_000(imgFullFov, outputFileName);
+            run_all_segments(imgFullFov, outputFileName);
+        }
+
+        void run_all_000(Mat imgFullFov, string outputFileName)
+        {
 #if (OPT_DUAL_MATCH)
             _LOG.Info("[一鍵執行] 開始 ... ");
             EzDualMatchResult result = null;
@@ -1553,6 +1559,232 @@ namespace EzAoiEmptyTrayInspector.Model
                 OnFinalResulted?.Invoke(this, new AoiResultEventArgs(_finalResult));
             }
         }
+        void run_all_segments(Mat imgFullFov, string outputFileName)
+        {
+            _LOG.Info("[AOI 空盤檢測] 開始 ... ");
+            AOI_RESULT finalResult = null;
+
+            try
+            {
+                var tm0 = DateTime.Now;
+                var jxVisionSetting = _recipe.VisionSettings;
+                var jxMatchSetting = _recipe.VisionSettings.Match;
+                var jxSegGrpSetting = _recipe.TraySegGrpSettings;
+
+                // (1) check imgFullFov
+                if (imgFullFov == null)
+                    return;
+
+                // (2) Bound Rect
+                var bound = new Rect(0, 0, imgFullFov.Width, imgFullFov.Height);
+
+                // (3) seg ROIs (並 Clip Boundary)
+                var segROIs = new List<Rect>();
+                var segsList = _recipe?.TraySegGrpSettings?.SegsList;
+                if (segsList != null)
+                {
+                    foreach (var seg in segsList)
+                    {
+                        var rcv = JetEazy.Qcvt.CV(seg.BoundBox.Value);
+                        JetEazy.Qcvt.ClipBoundary(ref rcv, ref bound);
+                        if (rcv.Width >= 2 && rcv.Height >= 2)
+                            segROIs.Add(rcv);
+                    }
+                }
+                if (segROIs.Count == 0)
+                    segROIs.Add(bound);
+
+                // (4) Create Masked Working Image
+                Mat imgA = imgFullFov;
+                //>>> imgA (使用 mean color 比較不會受到 offset 計算錯誤之影響)
+                var ogThresh = jxVisionSetting.OutGridBlocThreshold.Value;
+                var maskColor = ogThresh <= 0 ? imgFullFov.Mean() : (_isDarkBkGnd ? new Scalar(ogThresh - 1) : new Scalar(ogThresh + 1));
+                foreach (var roi in segROIs)
+                {
+                    if (roi.Size == bound.Size)
+                        break;
+
+                    if (imgA == imgFullFov)
+                    {
+                        imgA = new Mat(imgFullFov.Size(), imgFullFov.Type());
+                        imgA.SetTo(maskColor);
+                    }
+
+                    imgFullFov[roi].CopyTo(imgA[roi]);
+                }
+
+                // (5) auto inverse
+                auto_inverse(imgA, (Bitmap)jxMatchSetting.GoldenBmp.Value);
+
+                MatchResult mergedMatchResult = null;
+
+                // (6) run Match
+                bool matchingSegmentBySegment = false;
+                // (6.1) 分區多次 Match (尚未完善, 暫不使用!)
+                if (matchingSegmentBySegment)
+                {
+                    // (6.1.1) run segment by segment
+                    var segResults = new List<MatchResult>();
+                    foreach (var roi in segROIs)
+                    {
+                        run_one_segment(imgA, roi, out MatchResult segResult);
+
+                        if (segResult != null)
+                            segResults.Add(segResult);
+                    }
+
+                    // (6.1.2) Merge Seg Results
+                    mergedMatchResult = segResults.Count > 0 ? segResults[0] : null;
+                    if (mergedMatchResult != null)
+                    {
+                        for (int i = 1; i < segResults.Count; i++)
+                            merge_seg_match_results(segResults[i], mergedMatchResult);
+                    }
+                }
+                // (6.2) 全域單次 Match
+                else
+                {
+                    run_match_one(SideID.A, imgA, _dumpPath);
+                    mergedMatchResult = _matchResults[0];
+                }
+
+                // (7) Post finders
+                if (mergedMatchResult != null)
+                {
+                    if (jxVisionSetting.FindAllFailBlocs.Value && jxMatchSetting.UseGrid)
+                    {
+                        run_on_grid_ng_predict(SideID.A, imgA, mergedMatchResult, _dumpPath);
+                        run_off_grid_ng_detect(SideID.A, imgA, mergedMatchResult, _dumpPath, out List<EzBloc> ngBloc);
+                        mergedMatchResult.OutGridBlocs = ngBloc;
+                    }
+                }
+
+                // (8) auto inverse
+                auto_inverse(imgA, (Bitmap)jxMatchSetting.GoldenBmp.Value);
+
+                // (9) Clean UP
+                if (imgA != imgFullFov)
+                    imgA?.Dispose();
+
+                // (10) Final Result
+                var ts = DateTime.Now - tm0;
+
+                finalResult = new AOI_RESULT(mergedMatchResult, ts.TotalSeconds)
+                {
+                    FullRows = _recipe.TrayMiscSettings.FullRows,
+                    FullCols = _recipe.TrayMiscSettings.FullCols,
+                };
+
+                // (11) Dump
+                dump_result_image(outputFileName, imgFullFov, finalResult);
+
+            }
+            catch (Exception ex)
+            {
+                _ERROR(ErrCodes.RUN_ALL_EXCEPTION, ex: ex);
+            }
+            finally
+            {
+                _finalResult = finalResult;
+                changeState("Ready");
+                OnFinalResulted?.Invoke(this, new AoiResultEventArgs(_finalResult));
+            }
+        }
+        void run_one_segment(Mat imgFullFov, Rect segRoi, out MatchResult matchResult)
+        {
+            matchResult = null;
+
+            // (1) run match one
+            bool isFullRoi = segRoi.Size == imgFullFov.Size();
+            var imgA = isFullRoi ? imgFullFov : imgFullFov[segRoi];
+
+            //---------------------------------------------------------------------------------------------------
+            // 注意: run_match_one 會受全域 _recipe.TrayMiscSettings 的 (FullRows, FullCols) 強制導引 影響其結果 !!!
+            //---------------------------------------------------------------------------------------------------
+            run_match_one(SideID.A, imgA, _dumpPath);
+
+            if (_matchResults == null || _matchResults.Length > 0)
+            {
+                matchResult = _matchResults[0];
+                _matchResults[0] = null;        //清空上層的 matchResult，避免被覆蓋
+            }
+
+            // (2) Offset Correction (因為 matchResult 是基於 imgA 的座標系，所以要轉換回 imgFullFov 的座標系)
+            if (!isFullRoi && matchResult != null)
+            {
+                _OFFSET(matchResult, segRoi.X, segRoi.Y);
+            }
+        }
+        void merge_seg_match_results(MatchResult from, MatchResult to, bool includeOG = false)
+        {
+            //--------------------------------------------------
+            // 目前只是簡單合併，沒有處理重疊的情況
+            //--------------------------------------------------
+
+            var newBlocs = new List<EzBloc>();
+
+            //(1) Merge Grid (沿著 Rows 往下添加)
+            if (from.Grid != null)
+            {
+                if (to.Grid == null)
+                {
+                    to.Grid = from.Grid;
+                }
+                else
+                {
+                    int cols = Math.Min(from.Grid.Cols, to.Grid.Cols);
+                    int rows = from.Grid.Rows;
+                    int rowOffset = to.Grid.Rows;
+                    for (int r = 0; r < rows; r++)
+                    {
+                        for (int c = 0; c < cols; c++)
+                        {
+                            var bloc = from.Grid.Get(r, c);
+                            if (bloc != null)
+                            {
+                                to.Grid.Set(rowOffset + r, cols, bloc);
+                                newBlocs.Add(bloc);
+                            }
+                        }
+                    }
+                }
+            }
+
+            //(2) New Blocs
+            if (newBlocs.Count > 0)
+            {
+                if (to.Blocs == null)
+                {
+                    to.Blocs = newBlocs;
+                }
+                else
+                {
+                    foreach (var bloc in newBlocs)
+                    {
+                        if (bloc != null)
+                            to.Blocs.Add(bloc);
+                    }
+                }
+            }
+
+            //(3) OG Blocs
+            if (includeOG && from.OutGridBlocs != null)
+            {
+                if (to.OutGridBlocs == null)
+                {
+                    to.OutGridBlocs = from.OutGridBlocs;
+                }
+                else
+                {
+                    foreach (var ogBloc in from.OutGridBlocs)
+                    {
+                        if (ogBloc != null)
+                            to.OutGridBlocs.Add(ogBloc);
+                    }
+                }
+            }
+        }
+
         void auto_inverse(Mat sceneImg, Bitmap bmpGolden)
         {
             bool inverse = _recipe.VisionSettings.Inverse;
