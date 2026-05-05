@@ -4,6 +4,7 @@
  * Copyright (c) 2025 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
+ *      2026-04-20 配合 新校正板 (陣列圓點 + INK區塊 二合一) (by LeTian Chang)
  *      2025-09-06 重新設計校正架構 (by LeTian Chang)
  * 
  * http://www.jeteazy.com
@@ -31,12 +32,13 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V3.CalibAoiModel;
+using TravellerMINIX6.ProcessSpace;
+using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
 using QCoord = JetEazy.QMath.QVector;
 
-namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
+namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
 {
     public partial class GaCalibCtrl
     {
@@ -57,35 +59,23 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             [Description("載台左下")]
             LeftBottom
         };
-        enum CalibViewEnum : int
-        {
-            [Description("格點 校正板")]
-            BigGridBoardView,
-            [Description("點墨 校正塊")]
-            InkMarksView,
-        };
         #endregion
 
         #region ACTIVE_MODES
         CarrierEnum _activeCarrierID = CarrierEnum.C1;
         SuckerRowEnum _activeSuckerRowID = SuckerRowEnum.S1;
-        CalibViewEnum _activeViewID = CalibViewEnum.BigGridBoardView;
         #endregion
 
         #region GLOBAL_PATH
         internal static string CALIB_TRANSFORMS_FILE => GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE;
-        internal static string CALIB_RECIPE_FILE(CarrierEnum C, params object[] dummyArgs)
+        internal static string CALIB_RECIPE_FILE(CarrierEnum C)
         {
             return GaMvcPaths.CALIB_RECIPE_FILE(C);
         }
-        internal static string CALIB_LAST_IMAGE_FILE(CarrierEnum C, SuckerRowEnum S, int viewID)
+        internal static string CALIB_LAST_IMAGE_FILE(CarrierEnum C, SuckerRowEnum S)
         {
             var path = System.IO.Path.GetDirectoryName(CALIB_RECIPE_FILE(C));
-            string imgFile;
-            if (viewID == (int)CalibViewEnum.BigGridBoardView)
-                imgFile = System.IO.Path.Combine(path, $"jx_calib_BigBoard_image_@{C}.jpg");
-            else
-                imgFile = System.IO.Path.Combine(path, $"jx_calib_InkMarks_image_@{C}#{S}.jpg");
+            string imgFile = System.IO.Path.Combine(path, $"jx_calib_InkMarks_image_@{C}#{S}.jpg");
             return imgFile;
         }
         #endregion
@@ -106,15 +96,15 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         #region GUI_LINKS
         IvCalibToolUI _calibToolUI;
         Control _wndOwner => _calibToolUI.Window;
-        JezTransImageViewPanel _getImgViewPanel(CalibViewEnum vid)
+        JezTransImageViewPanel _getImgViewPanel(object vid = null)
         {
-            return _calibToolUI.ImgViewers[(int)vid];
+            return _calibToolUI.ImgViewers[0];
         }
-        CvMatViewer _getMatViewer(CalibViewEnum vid)
+        CvMatViewer _getMatViewer(object vid = null)
         {
             return _getImgViewPanel(vid)?.MatViewer;
         }
-        bool _isEmptyImage(CalibViewEnum vid)
+        bool _isEmptyImage(object vid = null)
         {
             var matViewer = _getMatViewer(vid);
             if (matViewer == null || matViewer.Image == null)
@@ -127,8 +117,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         RadioButton[] _rdoSuckerRows => _calibToolUI.rdoSuckerRows;
         Button _btnGrabImage => _calibToolUI.btnGrabImage;
         Button _btnLoadImage => _calibToolUI.btnLoadImage;
-        Button _btnRunAutoFetchGrid => _calibToolUI.btnAutoFetchGrid;
-        Button _btnAutoFetchInkMarks => _calibToolUI.btnAutoFetchInkMarks;
+        Button _btnRunAutoFetchAll => _calibToolUI.btnAutoFetchGrid;
         Button _btnBuildCalib => _calibToolUI.btnBuildCalib;
         Button _btnOpenMotorXY => _calibToolUI.btnOpenMotorXY;
 
@@ -174,25 +163,15 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         }
         void initImgViewers()
         {
-            foreach(CalibViewEnum vid in Enum.GetValues(typeof(CalibViewEnum)))
+            var matViewer = _getMatViewer();
+            matViewer.AddInteractor(_cviBigBoundBox);
+            matViewer.AddInteractor(_cviGridResultBox);
+            for (int i = 0, NP = _cviInkMarkBoxes.Length; i < NP; i++)
             {
-                var matViewer = _getMatViewer(vid);
-                if (vid == CalibViewEnum.BigGridBoardView)
-                {
-                    matViewer.AddInteractor(_cviBigBoundBox);
-                    matViewer.AddInteractor(_cviGridResultBox);
-                }
-                else
-                {
-                    matViewer.AddInteractor(_cviBigBoundBox);
-                    for (int i = 0, NP = _cviInkMarkBoxes.Length; i < NP; i++)
-                    {
-                        var box = _cviInkMarkBoxes[i] = new CviCalibPointBox(RectangleF.Empty, Color.Lime) { Visible = false };
-                        box.CrossColor = Color.Green;
-                        box.CrossLength = 500;
-                        matViewer.AddInteractor(box);
-                    }
-                }
+                var box = _cviInkMarkBoxes[i] = new CviCalibPointBox(RectangleF.Empty, Color.Orange) { Visible = false };
+                box.CrossColor = Color.Orange;
+                box.CrossLength = 500;
+                matViewer.AddInteractor(box);
             }
         }
         void connectEventHandlers()
@@ -203,22 +182,17 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             if (_btnCancel != null)
                 _btnCancel.Click += (s, e) => CloseWindow(false);
 
-            _calibToolUI.OnActiveViewChanged += _calibToolUI_OnActiveViewChanged;
-
             if (_rdoCarriers != null)
                 _rdoCarriers[0].CheckedChanged += _rdoSelect_CheckedChanged;
 
             if (_rdoSuckerRows != null)
                 _rdoSuckerRows[0].CheckedChanged += _rdoSelect_CheckedChanged;
 
-            _btnGrabImage.Click += (s, e) => GrabImage();
+            _btnGrabImage.Click += (s, e) => GrabLineScanCameraImage();
             _btnLoadImage.Click += (s, e) => LoadImage();
 
-            if (_btnRunAutoFetchGrid != null)
-                _btnRunAutoFetchGrid.Click += (s, e) => RunAutoFetchBoardGrid();
-
-            if (_btnAutoFetchInkMarks != null)
-                _btnAutoFetchInkMarks.Click += (s, e) => RunAutoFetchInkMarks();
+            if (_btnRunAutoFetchAll != null)
+                _btnRunAutoFetchAll.Click += (s, e) => RunAutoFetchAll();
 
             if (_btnBuildCalib != null)
                 _btnBuildCalib.Click += (s, e) => BuildCommonBaseTransforms();
@@ -232,8 +206,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             _cviBigBoundBox.OnChanged += _cviBigBoundBox_OnChanged;
 
             // ImgViewrs' EventHanlders
-            _getMatViewer(CalibViewEnum.BigGridBoardView).MouseMove += MatViewer1_MouseMove;
-            _getMatViewer(CalibViewEnum.InkMarksView).MouseMove += MatViewer2_MouseMove;
+            _getMatViewer().MouseMove += MatViewer1_MouseMove;
+            _getMatViewer().MouseMove += MatViewer2_MouseMove;
 
             // 自動釋放資源
             _wndOwner.HandleDestroyed += (s, e) => CleanUp();
@@ -244,7 +218,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 _wndOwner.BeginInvoke(new Action(() =>
                 {
                     //>>> updateAllData(false);
-                    SetActiveView(_activeCarrierID, _activeSuckerRowID, _activeViewID, force: true);
+                    SetActiveView(_activeCarrierID, _activeSuckerRowID, force: true);
                     syncFocusMotorCtrl();
                 }));
             };
@@ -252,35 +226,21 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         #endregion
 
         #region EVENT_HANDLERS
-        private void _calibToolUI_OnActiveViewChanged(object sender, EventArgs e)
-        {
-            var vid = (CalibViewEnum)_calibToolUI.ActiveViewID;
-            if (vid != _activeViewID)
-            {
-                SetActiveView(_activeCarrierID, _activeSuckerRowID, vid);
-            }
-        }
+        //private void _calibToolUI_OnActiveViewChanged(object sender, EventArgs e)
+        //{
+        //    var vid = (CalibViewEnum)_calibToolUI.ActiveViewID;
+        //    if (vid != _activeViewID)
+        //    {
+        //        SetActiveView(_activeCarrierID, _activeSuckerRowID);
+        //    }
+        //}
         private void _rdoSelect_CheckedChanged(object sender, System.EventArgs e)
         {
             var C = _rdoCarriers[0].Checked ? CarrierEnum.C1 : CarrierEnum.C2;
             var S = _rdoSuckerRows[0].Checked ? SuckerRowEnum.S1 : SuckerRowEnum.S2;
-            var vid = _activeViewID;
             if (C == _activeCarrierID && S == _activeSuckerRowID)
                 return;
-
-            SetActiveView(C, S, vid);
-
-            //if (Array.IndexOf(_rdoCarriers, sender) >= 0)
-            //{
-            //    updateVisionGridParams(_activeCarrierID, false, toReloadRecipe: true);
-            //}
-            //if (vid == CalibViewEnum.BigGridBoardView)
-            //{
-            //    updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);
-            //    clearCviGridResults();
-            //    _cviGridResultBox.ActiveCarrierID = _activeCarrierID;
-            //    _cviGridResultBox.ActiveSuckerRowID = _activeSuckerRowID;
-            //}
+            SetActiveView(C, S);
         }
         private void _cviBigBoundBox_OnChanged(object sender, EventArgs e)
         {
@@ -304,7 +264,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             int x = e.X;
             int y = e.Y;
 
-            var matViewer = _getMatViewer(CalibViewEnum.InkMarksView);
+            var matViewer = _getMatViewer();
             matViewer.TransCoordToWorld(ref x, ref y);
 
             for (int i = 0; i < N_CALIB_MOTOR_POINTS; i++)
@@ -376,86 +336,63 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         }
         void updatePropertyPanel(bool toModel)
         {
-            var vid = _activeViewID;
-            if (vid == CalibViewEnum.BigGridBoardView)
-            {
-                updateVisionGridParams(toModel);
-            }
-            else
-            {
-                updateVisionInkMarkParams(toModel);
-            }
-        }
-        void updateVisionGridParams(bool toModel)
-        {
             var pgvPanel = _calibToolUI.wndVisionSettingsPanel as GwPanePropsViewer;
             if (pgvPanel == null)
                 return;
 
-            //var carrierID = _activeCarrierID;
-            //var suckerID = _activeSuckerRowID;
-            //var vid = _activeViewID;
-
-            var jxRecipe = getActiveCalibRecipe();   // _jxCalibRecipes[(int)carrierID];
+            var jxRecipe = getActiveCalibRecipe();
             if (jxRecipe == null)
                 return;
 
             if (toModel)
             {
+                // RESERVED
             }
             else
             {
-                var jx = jxRecipe.GridSettings;
-                pgvPanel.BuildGuiCtrls(jx);
+                var suckerID = _activeSuckerRowID;
+                setJxVisible(jxRecipe.InkMarkSettings1, suckerID == SuckerRowEnum.S1);
+                setJxVisible(jxRecipe.InkMarkSettings2, suckerID == SuckerRowEnum.S2);
+                pgvPanel.BuildGuiCtrls(jxRecipe);
                 pgvPanel.ExpandAll();
             }
         }
-        void updateVisionInkMarkParams(bool toModel)
+        void setJxVisible(JxContainer jx, bool visible)
         {
-            var pgvPanel = _calibToolUI.wndVisionSettingsPanel as GwPanePropsViewer;
-            if (pgvPanel == null)
+            if (jx == null) return;
+
+            if (jx.IsHidden() == !visible)
                 return;
 
-            var carrierID = _activeCarrierID;
-            var suckerID = _activeSuckerRowID;
-
-            var jxRecipe = getActiveCalibRecipe(); // _jxCalibRecipes[(int)carrierID];
-            if (jxRecipe == null)
-                return;
-
-            if (toModel)
+            if (visible)
             {
+                var desc = jx.Description?.Replace("隱藏", "")?.Replace("Hidden", "")?.Replace("()", "");
+                jx.Description = desc;
             }
             else
             {
-                if (_activeViewID == CalibViewEnum.InkMarksView)
-                {
-                    var jx = suckerID == SuckerRowEnum.S1 ? jxRecipe.InkMarkSettings1 : jxRecipe.InkMarkSettings2;
-                    pgvPanel.BuildGuiCtrls(jx);
-                    pgvPanel.ExpandAll();
-                }
+                var desc = jx.Description;
+                if (desc == null) desc = "";
+                jx.Description = desc + "(隱藏)";
             }
         }
         void updateGuiStatus()
         {
-            var vid = _activeViewID;
-            var imgPanel = _getImgViewPanel(vid);    // _calibToolUI.ImgViewers[viewID];
-            bool isEmpty = _isEmptyImage(vid);
-            bool isInkMarkMode = vid == CalibViewEnum.InkMarksView;
+            //var imgPanel = _getImgViewPanel(); 
+            //bool isEmpty = _isEmptyImage();
 
             _btnGrabImage.Enabled = !_isRunning;
             _btnLoadImage.Enabled = !_isRunning;
 
-            _btnRunAutoFetchGrid.Visible = !_isRunning && !isInkMarkMode;
-            _btnAutoFetchInkMarks.Visible = !_isRunning && isInkMarkMode;
-            _btnBuildCalib.Visible = !_isRunning && isInkMarkMode;
+            _btnRunAutoFetchAll.Visible = !_isRunning;
+            _btnBuildCalib.Visible = !_isRunning;
 
-            var bkColor = isInkMarkMode ? Color.Black : Color.DimGray;
-            foreach (int col in new[] { 3, 4 })
-            {
-                _dgvCalibPointsListView.SetReadOnly(col, !isInkMarkMode, bkColor);
-            }
-            _dgvCalibPointsListView.Enabled = isInkMarkMode;
+            //var bkColor = isInkMarkMode ? Color.Black : Color.DimGray;
+            //foreach (int col in new[] { 3, 4 })
+            //{
+            //    _dgvCalibPointsListView.SetReadOnly(col, !isInkMarkMode, bkColor);
+            //}
+            //_dgvCalibPointsListView.Enabled = isInkMarkMode;
         }
         #endregion
 
@@ -528,8 +465,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         void updateBoundRectBox(bool toModel)
         {
             var carrierID = _activeCarrierID;
-            var vid = _activeViewID;
-
             var jxRecipe = getActiveCalibRecipe();
             if (jxRecipe == null)
                 return;
@@ -545,7 +480,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             else
             {
                 var rect = jxRect.Value;
-                var matViewer = _getMatViewer(vid);
+                var matViewer = _getMatViewer();
 
                 if (rect == Rectangle.Empty)
                 {
@@ -643,7 +578,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             _cviGridResultBox.Visible = camGrid != null;
 
             if (refresh)
-                _getMatViewer(CalibViewEnum.BigGridBoardView)?.Refresh();
+                _getMatViewer()?.Refresh();
         }
         #endregion
 
@@ -715,7 +650,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             }
 
             if (refresh)
-                _getMatViewer(CalibViewEnum.InkMarksView)?.Refresh();
+                _getMatViewer()?.Refresh();
         }
         #endregion
 
@@ -917,187 +852,20 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         }
         #endregion
 
-        #region OLD_CALIB_KEY_POINT_FUNCTIONS
-#if (false)
-        void updateCalibKeyPoints(CarrierEnum carrierID, SuckerRowEnum suckerRowID, bool toModel)
+        bool SetActiveView(CarrierEnum C, SuckerRowEnum S, object dummy = null, bool force = false)
         {
-            //if (_activeViewID != 0 && toModel)
-            //    return;
-            return;
-
-            var dgv = _dgvCalibPointsListView?.DataGridView;
-            if (dgv == null) return;
-            
-            var transform = _transforms.GetCameraMotorTransform(carrierID, suckerRowID);
-            var trfCalibCorners = transform.GetCalibCornerPoints();
-            var camPts = trfCalibCorners?.GetAll(isSrc: true);
-            var motorPts = trfCalibCorners?.GetAll(isSrc: false);
-
-            if (toModel)
-            {
-                if (transform == null)
-                    return;
-
-                var corners = Enum.GetValues(typeof(CalibCornersEnum));
-                foreach (CalibCornersEnum corner in corners)
-                {
-                    int index = (int)corner;
-                    var camPt = camPts[index];
-                    var motorPt = motorPts[index];
-                    bool isChanged = updateCalibKeyPoints(dgv, index, camPt, motorPt, toModel);
-                    if (isChanged)
-                    {
-                        //transform.setCalibCornerPoints(index, camPt, motorPt);
-                        trfCalibCorners.Set(index, camPt, motorPt);
-                        _isCoordModified = true;
-                    }
-                }
-            }
-            else
-            {
-                dgv.Rows.Clear();
-
-                var corners = Enum.GetValues(typeof(CalibCornersEnum));
-                foreach (CalibCornersEnum corner in corners)
-                {
-                    int rowId = (int)corner;
-                    var camPt = camPts != null ? camPts[rowId] : null;
-                    var motorPt = motorPts != null ? motorPts[rowId] : null;
-
-                    var name = GaUtil.GetEnumDescription(corner);
-                    dgv.Rows.Add(name, 0.0, 0.0, 0.0, 0.0);
-                    dgv.Rows[rowId].Cells[0].Value = GaUtil.GetEnumDescription(corner);
-                    updateCalibKeyPoints(dgv, rowId, camPt, motorPt, toModel);
-                    //updateCalibKeyPointBox(corner, camPt);
-                }
-            }
-        }
-        bool updateCalibKeyPoints(DataGridView dgv, int rowId, QCoord camCoord, QCoord motorCoord, bool toModel)
-        {
-            return false;
-
-            var dgvRow = dgv.Rows[rowId];
-
-            if (toModel)
-            {
-                bool isChanged = false;
-
-                int col = 1;
-                var cx = (double)dgvRow.Cells[col++].Value;
-                var cy = (double)dgvRow.Cells[col++].Value;
-                var mx = (double)dgvRow.Cells[col++].Value;
-                var my = (double)dgvRow.Cells[col++].Value;
-
-                //===================================================
-                // camCoord 由像測自動改變
-                // 在此更新會有數值誤差 !!!
-                //===================================================
-                //if (camCoord.X != cx || camCoord.Y != cy)
-                //{
-                //    camCoord.X = cx;
-                //    camCoord.Y = cy;
-                //    isChanged = true;
-                //}
-
-                if (motorCoord.X != mx || motorCoord.Y != my)
-                {
-                    motorCoord.X = mx;
-                    motorCoord.Y = my;
-                    isChanged = true;
-                }
-
-                return isChanged;
-            }
-            else
-            {
-                int col = 1;
-                dgvRow.Cells[col++].Value = camCoord != null ? camCoord.X : 0.0;
-                dgvRow.Cells[col++].Value = camCoord != null ? camCoord.Y : 0.0;
-                dgvRow.Cells[col++].Value = motorCoord != null ? motorCoord.X : 0.0;
-                dgvRow.Cells[col++].Value = motorCoord != null ? motorCoord.Y : 0.0;
-                return true;
-            }
-        }
-
-        void updateCalibKeyPointBox(CalibCornersEnum corner, QCoord camCoord, bool show = true)
-        {
-            //if (_cviInkMarkBoxes == null)
-            //    return;
-
-            //var box = _cviInkMarkBoxes[(int)corner];
-            //if (box == null)
-            //    return;
-
-            //if (camCoord == null)
-            //{
-            //    box.Visible = false;
-            //    return;
-            //}
-
-            ////var loc = box.Box2D;
-            ////loc.SetCenter((float)camCoord.X, (float)camCoord.Y);
-            ////box.SetBox(loc);
-
-            //box.Quad2D?.SetCenter(camCoord.X, camCoord.Y);
-            //box.Visible = show;
-        }
-        void updateCalibGridBoardPoints(EzBlocsGrid camGrid)
-        {
-            throw new NotImplementedException();
-
-            if (_activeViewID != 0)
-                return;
-
-            if (camGrid == null)
-                return;
-
-            //(1) 取出參數設定的 pitch, rows, cols
-            var jxRecipe = getActiveCalibRecipe();  // _jxCalibRecipes[(int)_activeCarrierID];
-            var traySettings = jxRecipe.GridSettings.EmptyTraySettings;
-            var pitchX = (double)traySettings.PitchX.Value;
-            var pitchY = (double)traySettings.PitchY.Value;
-            var rows = (int)traySettings.FullRows.Value;
-            var cols = (int)traySettings.FullCols.Value;
-
-            bool areAllRowsColsMatched = (rows == camGrid.Rows && cols == camGrid.Cols);
-            if (!areAllRowsColsMatched)
-            {
-                string msg = $"像測的 Rows={camGrid.Rows} Cols={camGrid.Cols} 與\n\r"
-                           + $"參數的 Rows={rows} Cols={cols} 不一致 !";
-                MessageBox.Show(msg, _wndOwner.FindForm().Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-            }
-
-            //(2) 將 校正點位群 更新到 座標轉換 系統 (Model)
-            if (areAllRowsColsMatched)
-            {
-                _transforms.ConfigGlobalCalibPlcGrid(rows, cols, pitchX, pitchY);
-                _transforms.UpdateCalibPoints(_activeCarrierID, _activeSuckerRowID, camGrid);
-            }
-
-            //(3) 更新 GUI
-            updateCalibKeyPoints(_activeCarrierID, _activeSuckerRowID, false);
-
-            //(4) 設定 旗標
-            _isCoordModified = true;
-        }
-#endif
-        #endregion
-
-        bool SetActiveView(CarrierEnum C, SuckerRowEnum S, CalibViewEnum vid, bool force = false)
-        {
-            bool isAnyChanged = _activeCarrierID != C || _activeSuckerRowID != S || _activeViewID != vid;
-            var oldImgFile = CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID, (int)_activeViewID);
-            var newImgFile = CALIB_LAST_IMAGE_FILE(C, S, (int)vid);
-            bool needsToLoadNewImage = _isEmptyImage(vid) || oldImgFile != newImgFile;
+            bool isAnyChanged = _activeCarrierID != C || _activeSuckerRowID != S;
+            var oldImgFile = CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID);
+            var newImgFile = CALIB_LAST_IMAGE_FILE(C, S);
+            bool needsToLoadNewImage = _isEmptyImage() || oldImgFile != newImgFile;
 
             _activeCarrierID = C;
             _activeSuckerRowID = S;
-            _activeViewID = vid;
 
             // Loading Image
             if (needsToLoadNewImage || force)
             {
-                LoadImage(newImgFile, (int)vid);
+                LoadImage(newImgFile);
             }
 
             if (isAnyChanged || force)
@@ -1110,11 +878,11 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 dgvUpdateInkMarks(inkMarks);
                 dgvUpdateMotorCoords(motorCoords);
 
-                bool refresh1 = _activeViewID == CalibViewEnum.BigGridBoardView;
-                updateBoardGridBox(getActiveBoardGridInTrf(), refresh1);
+                //bool refresh1 = _activeViewID == CalibViewEnum.BigGridBoardView;
+                updateBoardGridBox(getActiveBoardGridInTrf(), true);
 
-                bool refresh2 = _activeViewID == CalibViewEnum.InkMarksView;
-                updateInkMarkBoxes(inkMarks, refresh2);
+                //bool refresh2 = _activeViewID == CalibViewEnum.InkMarksView;
+                updateInkMarkBoxes(inkMarks, true);
 
                 updatePropertyPanel(false);
                 updateGuiStatus();
@@ -1122,9 +890,10 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
 
             return needsToLoadNewImage;
         }
-        void TakeOverImage(Bitmap bigBmp, string srcName, CalibViewEnum vid, bool disposeSrc = true)
+        
+        void TakeOverImage(Bitmap bigBmp, string srcName, object vid = null, bool disposeSrc = true)
         {
-            var imgPanel = _getImgViewPanel(vid);
+            var imgPanel = _getImgViewPanel();
             if (imgPanel == null)
                 return;
 
@@ -1142,7 +911,17 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         }
 
         /// <summary>
-        /// 自動抓取 大校正版 的 格位點
+        /// 自動抓取所有校正點
+        /// </summary>
+        bool RunAutoFetchAll(bool dump = false)
+        {
+            bool ok1 = RunAutoFetchBoardGrid(dump);
+            bool ok2 = RunAutoFetchInkMarks(dump);
+            return ok1 && ok2;
+        }
+
+        /// <summary>
+        /// 自動抓取 校正板 的 陣列圓點
         /// </summary>
         bool RunAutoFetchBoardGrid(bool dump = false)
         {
@@ -1157,7 +936,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 updateBoardGridBox(null, refresh: true);
 
                 //(2) image
-                var matViewer = _getMatViewer(CalibViewEnum.BigGridBoardView);
+                var matViewer = _getMatViewer();
                 var fullfovImg = matViewer.Image;
                 if (fullfovImg == null)
                     return false;
@@ -1210,7 +989,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 updateInkMarkBoxes(null, refresh: true);
 
                 //(2) image
-                var matViewer = _getMatViewer(CalibViewEnum.InkMarksView);
+                var matViewer = _getMatViewer();
                 var fullfovImg = matViewer.Image;
                 if (fullfovImg == null)
                     return false;
@@ -1295,30 +1074,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             {
                 VsMessageBox.Warning(GaUtil.GetEnumDescription(err));
                 return false;
-            }
-
-            if (verify)
-            {
-                #region 驗證座標轉換結果
-                var trfCamToMotor = _commonBaseTrf.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
-                var motorPts = Array.ConvertAll(inkMarkPts, camPt => trfCamToMotor.Trans(camPt));
-                var errs = new List<string>();
-                for (int i = 0, NP = motorPts.Length; i < NP; i++)
-                {
-                    var diff = motorPts[i] - userInputMotorCoords[i];
-                    if (diff.NormLength > 0.001)
-                    {
-                        errs.Add($"  馬達點位 [{i}]: 轉換後({motorPts[i].X:F3}, {motorPts[i].Y:F3}) vs 輸入({userInputMotorCoords[i].X:F3}, {userInputMotorCoords[i].Y:F3})");
-                    }
-                }
-                if (errs.Count > 0)
-                {
-                    var errMsg = "以下 馬達點位, 座標轉換 與 User 輸入, 兩者誤差太大:\n\r";
-                    errMsg += string.Join("\n\r", errs);
-                    VsMessageBox.Warning(errMsg);
-                    return false;
-                }
-                #endregion
             }
 
             return true;
@@ -1432,10 +1187,12 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         {
             errDetails = "";
 
+            //(1) 檢查 WorldGrid
             var worldGrid = _commonBaseTrf?.GetWorldGridPoints();
             if (worldGrid == null)
                 return ErrorCodes.NO_RUNTIME_PLC_GRID;
 
+            //(2) 檢查 PitchX, PitchY 的一致性
             var traySettings = getActiveCalibRecipe()?.GridSettings?.EmptyTraySettings;
             if (traySettings != null && worldGrid != null)
             {
@@ -1453,20 +1210,53 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 if (!string.IsNullOrEmpty(err))
                 {
                     errDetails = err;
-                    return ErrorCodes.OK;
+                    return ErrorCodes.CalibErr_pitch_not_consistent;
                 }
             }
+
+            //(3) 驗證 馬達座標轉換 結果
+            #region 驗證座標轉換結果
+            var inkMarks = getActiveInkMarksInRecipe();
+            var inkMarkPts = Array.ConvertAll(inkMarks, m => m.Center);
+            dgvGetUserInputMotorCoords(out var userInputMotorCoords);
+            var trfCamToMotor = _commonBaseTrf.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
+            var motorPts = Array.ConvertAll(inkMarkPts, camPt => trfCamToMotor.Trans(camPt));
+            var errs = new List<string>();
+            for (int i = 0, NP = motorPts.Length; i < NP; i++)
+            {
+                var diff = motorPts[i] - userInputMotorCoords[i];
+                if (diff.NormLength > 0.001)
+                {
+                    errs.Add($"  馬達點位 [{i}]: 轉換後({motorPts[i].X:F3}, {motorPts[i].Y:F3}) vs 輸入({userInputMotorCoords[i].X:F3}, {userInputMotorCoords[i].Y:F3})");
+                }
+            }
+            if (errs.Count > 0)
+            {
+                var errMsg = "以下 馬達點位, 座標轉換 與 User 輸入, 兩者誤差太大:\n\r";
+                errMsg += string.Join("\n\r", errs);
+                VsMessageBox.Warning(errMsg);
+                return ErrorCodes.CalibErr_Motor_Coords_Transform_Build_NG;
+            }
+            #endregion
 
             return ErrorCodes.OK;
         }
 
-        void LoadImage(string fileName = null, int viewID = -1)
+        void OpenMotorWindowXY(QVector directTargetPos = null)
         {
-            var vid = viewID < 0 ? _activeViewID : (CalibViewEnum)viewID;
+            using (var dlg = new FormMotors_CarierSuckerXY())
+            {
+                dlg.OnInkerCoordsUpdated += Dlg_OnInkerCoordsUpdated;
+                dlg.OnQueryInkerCoords += Dlg_OnQueryInkerCoords;
+                dlg.SetJogTargets(_activeCarrierID, _activeSuckerRowID, directTargetPos);
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ShowDialog(_wndOwner);
+            }
+        }
 
-            //var imgViewer = _getImgViewPanel(vid);
-            //if (viewID == 0)
-            //    enableGoldenPicking(false);
+        void LoadImage(string fileName = null)
+        {
+
 
             bool isBrowsing = string.IsNullOrEmpty(fileName);
             if (isBrowsing)
@@ -1482,50 +1272,59 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 var srcName = "[校正] " + System.IO.Path.GetFileName(fileName);
 
                 // 2025-11-20 (搭配點墨)
-                TakeOverImage(bigBmp, srcName, vid, disposeSrc: true);
+                TakeOverImage(bigBmp, srcName, disposeSrc: true);
 
                 // 2025-09-17 (自動存檔)
-                var dstFileName = CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID, (int)vid);
+                var dstFileName = CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID);
                 if (dstFileName != fileName)
                     SaveImage(dstFileName);
 
                 GaUtil.SetCursor(_wndOwner, oldCursor);
+
+                updateBoardGridBox(null, false);
+                updateInkMarkBoxes(null, true);
             }
             else
             {
                 if (!isBrowsing)
                 {
                     // 2025-11-20 (搭配點墨)
-                    TakeOverImage(null, "", vid, disposeSrc: false);
+                    TakeOverImage(null, "", disposeSrc: false);
+                    updateBoardGridBox(null, false);
+                    updateInkMarkBoxes(null, true);
                 }
             }
-
-            //if (vid == CalibViewEnum.BigGridBoardView)
-            //    updateAllCalibKeyPointBoxes();
-            //updateGuiStatus();
         }
         void SaveImage(string fileName)
         {
-            var vid = _activeViewID;
-            var imgPanel = _getImgViewPanel(vid); // _calibToolUI.ImgViewers[viewID];
-
+            var imgPanel = _getImgViewPanel();
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
-
             var img = imgPanel?.Image;
             img?.SaveImage(fileName);
-
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
-        void GrabImage()
+        
+        void GrabLineScanCameraImage()
         {
-            var vid = _activeViewID;
-
-            //var imgPanel = _getImgViewPanel(viewID); //_calibToolUI.ImgViewers[viewID];
-            //if (viewID == 0)
-            //    enableGoldenPicking(false);
-
             updateGuiStatus();
+            var msg = GaUtil.GetEnumDescription(Prompts.Question_ReTrigger_Carrier_LineScan_Camera);
+            bool rescan = VsMessageBox.Question(msg) == DialogResult.OK;
 
+            if (rescan)
+            {
+                //var ps = LineScanProcess.Instance;
+                //ps.Start("USER_TRIGGER");
+                MessageBox.Show("驅動 PLC 重新線掃 : 尚未完成 !");
+                UpdateLineScanCameraImage();
+            }
+            else
+            {
+                UpdateLineScanCameraImage();
+            }
+        }
+        void UpdateLineScanCameraImage()
+        {
+            updateGuiStatus();
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
             var freeBmp = IScanCam.GetFreeImageBitmap();
             if (freeBmp != null)
@@ -1535,27 +1334,16 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 var srcName = "[校正] 線掃相機 擷圖";
 
                 // 2025-11-20 (搭配點墨)
-                TakeOverImage(bigBmp, srcName, vid, disposeSrc: true);
+                TakeOverImage(bigBmp, srcName, disposeSrc: true);
 
                 // 2025-09-17 (自動存檔)
-                SaveImage(CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID, (int)vid));
+                SaveImage(CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID));
+
+                updateBoardGridBox(null, false);
+                updateInkMarkBoxes(null, true);
             }
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
-
-        void OpenMotorWindowXY(QVector directTargetPos = null)
-        {
-            using (var dlg = new FormMotors_CarierSuckerXY())
-            {
-                dlg.OnInkerCoordsUpdated += Dlg_OnInkerCoordsUpdated;
-                dlg.OnQueryInkerCoords += Dlg_OnQueryInkerCoords;
-                dlg.SetJogTargets(_activeCarrierID, _activeSuckerRowID, directTargetPos);
-                dlg.StartPosition = FormStartPosition.CenterParent;
-                dlg.ShowDialog(_wndOwner);
-            }
-        }
-
-
 
         void LoadSettings()
         {

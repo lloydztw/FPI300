@@ -13,12 +13,11 @@
  */
 #endregion
 
-using LaserAlignDX.Mvc.Ctrl;
 using System;
 using System.Windows.Forms;
+using GaCalibCtrl = LaserAlignDX.Mvc.Ctrl.Calib.V25.GaCalibCtrl;
 
-
-namespace LaserAlignDX.Mvc.Gui
+namespace LaserAlignDX.Mvc.Gui.Calib.V25
 {
     public partial class FormCalibrationTool : Form, IvCalibToolUI
     {

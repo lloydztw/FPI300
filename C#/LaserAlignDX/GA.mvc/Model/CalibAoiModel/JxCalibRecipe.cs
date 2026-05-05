@@ -14,15 +14,12 @@
 #endregion
 
 
-using AForge.Imaging.Filters;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.QMath;
-using JetEazy.QvMath;
 using LeTian.JxProps;
 using System;
 using System.Drawing;
-using System.Windows.Documents;
 using JxPointF = LeTian.JxProps.JxBase<System.Drawing.PointF>;
 using JxRect = LeTian.JxProps.JxBase<System.Drawing.Rectangle>;
 

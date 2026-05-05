@@ -24,6 +24,7 @@ using LaserAlignDX.AoiModel.Calib;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
+using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.JxProps;
 using LeTian.JxProps.Gui;
 using System;
@@ -31,14 +32,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V3.CalibAoiModel;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
 using QCoord = JetEazy.QMath.QVector;
+using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V25.CalibAoiModel;
 
-namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
+namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
 {
-    public partial class GaCalibCtrl
+    public class GaCalibCtrl
     {
         #region CONSTANTS
         static int N_CALIB_MOTOR_POINTS => TravellerTransformFactory.N_CALIB_MOTOR_POINTS;
@@ -90,15 +91,16 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         }
         #endregion
 
-        #region GLOBAL_CAMERA_MESS
+        #region GLOBAL_MESS
         IxLineScanCam IScanCam
         {
             get { return Traveller106.Universal.IxLineScan; }
         }
+        ITravellerTransforms _commonBaseTrf => TravellerTransformFactory.CommonBase;
+        RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         #endregion
 
         #region CALIB_MODEL
-        ITravellerTransforms _commonBaseTrf => TravellerTransformFactory.CommonBase;
         ICalibAoiModel _calibModel => GaMvcConfig.SysModel.CalibAoiModel;
         JxCalibRecipe[] _jxCalibRecipes = new JxCalibRecipe[N_CARRIERS_NUMBER];
         #endregion
@@ -121,7 +123,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 return true;
             return false;
         }
-
         GvCalibPointsDataGridView _dgvCalibPointsListView => _calibToolUI.dgvCalibPointsListView;
         RadioButton[] _rdoCarriers => _calibToolUI.rdoCarriers;
         RadioButton[] _rdoSuckerRows => _calibToolUI.rdoSuckerRows;
@@ -130,8 +131,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         Button _btnRunAutoFetchGrid => _calibToolUI.btnAutoFetchGrid;
         Button _btnAutoFetchInkMarks => _calibToolUI.btnAutoFetchInkMarks;
         Button _btnBuildCalib => _calibToolUI.btnBuildCalib;
-        Button _btnOpenMotorXY => _calibToolUI.btnOpenMotorXY;
-
         Button _btnCancel => _calibToolUI.btnCancel;
         Button _btnOK => _calibToolUI.btnOK;
         #endregion
@@ -160,8 +159,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
 
             LoadSettings();
             connectEventHandlers();
-            
-            attachFocusMotorCtrl();
 
             _isCoordModified = false;
         }
@@ -223,12 +220,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             if (_btnBuildCalib != null)
                 _btnBuildCalib.Click += (s, e) => BuildCommonBaseTransforms();
 
-            // Motors
-            if (_btnOpenMotorXY != null)
-                _btnOpenMotorXY.Click += (s, e) => OpenMotorWindowXY();
-
-            // Interactors
             _cviGridResultBox.OnRequestDumpBindaryImage += (s, e) => RunAutoFetchBoardGrid(dump: true);
+
             _cviBigBoundBox.OnChanged += _cviBigBoundBox_OnChanged;
 
             // ImgViewrs' EventHanlders
@@ -245,7 +238,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 {
                     //>>> updateAllData(false);
                     SetActiveView(_activeCarrierID, _activeSuckerRowID, _activeViewID, force: true);
-                    syncFocusMotorCtrl();
                 }));
             };
         }
@@ -322,49 +314,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
 
             _dgvCalibPointsListView.SelectedIndex = -1;
         }
-        private void Dgv_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
-        {
-#if(OPT_REPLACED_BY_MOTOR_JOG_TOOL)
-            if (_activeViewID == CalibViewEnum.InkMarksView)
-            {
-                if (e.RowIndex >= 0 && e.ColumnIndex == 0)
-                {
-                    dgvSyncCurrentMotorCoordsToUserInput(e.RowIndex);
-                }
-            }
-#endif
-        }
-        private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (true) // if(_activeViewID == CalibViewEnum.InkMarksView)
-            {
-                if (e.ColumnIndex == 0 && e.RowIndex >= 0 && e.RowIndex < 4)
-                {
-                    dgvGetUserInputMotorCoords(out var motorCoords);
-                    var targetCoord = motorCoords[e.RowIndex];
-                    MoveMotorXY(targetCoord);
-                }
-            }
-        }
-        private void Dlg_OnInkerCoordsUpdated(object sender, InkerCoordsEventArgs e)
-        {
-            int cornerId = e.CornerID;
-            if (cornerId >= 0)
-            {
-                dgvSyncCurrentMotorCoordsToUserInput(cornerId, e.MotorCoord);
-            }
-        }
-        private void Dlg_OnQueryInkerCoords(object sender, InkerCoordsEventArgs e)
-        {
-            e.MotorCoord = null;
-            int cornerId = e.CornerID;
-            if (cornerId >= 0)
-            {
-                dgvGetUserInputMotorCoords(out var motorCoords);
-                if (motorCoords != null && motorCoords.Length > cornerId)
-                    e.MotorCoord = motorCoords[cornerId];
-            }
-        }
         #endregion
 
         #region PRIVATE_UPDATE_FUNCTIONS
@@ -372,7 +321,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         {
             dgvUpdateAllCalibKeyPoints(toModel);
             updatePropertyPanel(toModel);
-            //updateFocusMotorPos(toModel);
         }
         void updatePropertyPanel(bool toModel)
         {
@@ -450,7 +398,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             _btnAutoFetchInkMarks.Visible = !_isRunning && isInkMarkMode;
             _btnBuildCalib.Visible = !_isRunning && isInkMarkMode;
 
-            var bkColor = isInkMarkMode ? Color.Black : Color.DimGray;
+            var bkColor = isInkMarkMode ? Color.Black : Color.Gray;
             foreach (int col in new[] { 3, 4 })
             {
                 _dgvCalibPointsListView.SetReadOnly(col, !isInkMarkMode, bkColor);
@@ -756,8 +704,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 }
             };
 
-            //dgv.CellContentDoubleClick += Dgv_CellContentDoubleClick;
-            dgv.CellContentClick += Dgv_CellContentClick;
         }
         void dgvUpdateInkMarks(EzBloc[] inkMarks)
         {
@@ -833,30 +779,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             {
                 VsMessageBox.Warning(ex.Message);
                 motorCoords = null;
-            }
-        }
-        void dgvSyncCurrentMotorCoordsToUserInput(int rowIndex, QVector motorCoords = null)
-        {
-            var dgv = _dgvCalibPointsListView?.DataGridView;
-            if (rowIndex < 0 || rowIndex >= dgv.Rows.Count)
-                return;
-
-            var currentMotorPos = motorCoords == null ?
-                                    QueryCurrentMotorXY() :
-                                    motorCoords;
-
-            var dgvRow = dgv.Rows[rowIndex];
-            var targetName = dgvRow.Cells[0].Value;
-            var msg = GaUtil.GetEnumDescription(Prompts.Question_Update_Motor_Coord_To_Calib);
-            msg += $"\n\r\n\r(X= {currentMotorPos.X:0.000}, Y= {currentMotorPos.Y:0.000})";
-            msg += $"\n\r\n\rTo 【{targetName}】";
-            //>> bool ok = MessageBox.Show(msg, "Calibration", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
-            bool ok = VsMessageBox.Question(msg) == DialogResult.OK;
-
-            if (ok)
-            {
-                dgvRow.Cells[3].Value = currentMotorPos.X;
-                dgvRow.Cells[4].Value = currentMotorPos.Y;
             }
         }
         void dgvUpdateAllCalibKeyPoints(bool toModel)
@@ -1175,7 +1097,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                 if (ok && dump)
                 {
                     GaUtil.SetCursor(_wndOwner, oldCursor);
-                    VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib\\BoardGrid");
+                    VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib");
                 }
                 #endregion
 
@@ -1255,7 +1177,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         /// <summary>
         /// 將 User 輸入的馬達座標值 記入 CommmonBaseTrf
         /// </summary>
-        bool UpdateUserInputMotorCoordsToTrf(bool verify = true)
+        bool UpdateUserInputMotorCoordsToTrf(bool verify = false)
         {
             var dgv = _dgvCalibPointsListView?.DataGridView;
             if (dgv == null)
@@ -1543,20 +1465,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
 
-        void OpenMotorWindowXY(QVector directTargetPos = null)
-        {
-            using (var dlg = new FormMotors_CarierSuckerXY())
-            {
-                dlg.OnInkerCoordsUpdated += Dlg_OnInkerCoordsUpdated;
-                dlg.OnQueryInkerCoords += Dlg_OnQueryInkerCoords;
-                dlg.SetJogTargets(_activeCarrierID, _activeSuckerRowID, directTargetPos);
-                dlg.StartPosition = FormStartPosition.CenterParent;
-                dlg.ShowDialog(_wndOwner);
-            }
-        }
-
-
-
         void LoadSettings()
         {
             // (1) Load VISION recipe Files
@@ -1622,114 +1530,5 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
             //由上層負責調用 Dispose()
             //frm?.Dispose();
         }
-    }
-
-
-    partial class GaCalibCtrl
-    {
-        #region XY_MOTOR_MESS
-        IAxis _activeMotorX => Traveller106.Universal.GetMotorX(_activeSuckerRowID);
-        IAxis _activeMotorY => Traveller106.Universal.GetMotorY(_activeCarrierID);
-        QVector QueryCurrentMotorXY()
-        {
-            var motorX = _activeMotorX;
-            var motorY = _activeMotorY;
-            double x = motorX != null ? motorX.GetPos() : 0.0;
-            double y = motorY != null ? motorY.GetPos() : 0.0;
-            return new QVector2(x, y);
-        }
-        void MoveMotorXY(QVector targetPos)
-        {
-            if (targetPos == null) return;
-
-            var motorNames = new[]
-            {
-                $"X ({GaUtil.GetEnumDescription(_activeSuckerRowID)})",
-                $"Y ({GaUtil.GetEnumDescription(_activeCarrierID)})",
-            };
-            var motors = new[]
-            {
-                _activeMotorX,
-                _activeMotorY,
-            };
-
-            int N = Math.Min(motors.Length, motorNames.Length);
-            var errs = new List<string>();
-
-            #region CHECK_MOTOR_EMPTY
-            for (int i = 0; i < N; i++)
-            {
-                if (motors[i] == null)
-                    errs.Add(motorNames[i] + " is null.");
-            }
-            if (errs.Count > 0)
-            {
-                var warnings = GaUtil.GetEnumDescription(Prompts.Warning_No_Motor);
-                warnings += "\n\r\n\r" + string.Join("\n\r", errs);
-                VsMessageBox.Warning(warnings);
-                return;
-            }
-            #endregion
-
-            #region CHECK_MOTOR_BUSY
-            for (int i = 0; i < N; i++)
-            {
-                if (!motors[i].IsOK)
-                    errs.Add(motorNames[i] + (motors[i].IsError ? " Error!" : " Busy."));
-            }
-            if (errs.Count > 0)
-            {
-                var warnings = GaUtil.GetEnumDescription(Prompts.Warning_Motor_Busy);
-                warnings += "\n\r\n\r" + string.Join("\n\r", errs);
-                VsMessageBox.Warning(warnings);
-                return;
-            }
-            #endregion
-
-            var currentPos = QueryCurrentMotorXY();
-            var delta = targetPos - currentPos;
-            if (GaBasicMotorUtil.IsTinyDelta(delta.X) && GaBasicMotorUtil.IsTinyDelta(delta.Y))
-                return;
-
-            #region PROMPTS
-            var msg = GaUtil.GetEnumDescription(Prompts.Question_Motor_GoTo_Pos);
-            msg += $"\n\r\n\r{motorNames[0]} To {targetPos.X:0.000}";
-            msg += $"\n\r\n\r{motorNames[1]} To {targetPos.Y:0.000}";
-            if (VsMessageBox.Question(msg) != DialogResult.OK)
-                return;
-            #endregion
-
-            //// Y 較長先移動
-            //// X 次之
-            //_activeMotorY?.Go(targetPos.Y, 0);
-            //_activeMotorX?.Go(targetPos.X, 0);
-
-            OpenMotorWindowXY(targetPos);
-        }
-        #endregion
-
-        #region FOCUS_MOTOR_JOG
-        GaMotorZCtrl _focusMotorCtrl = null;
-        void attachFocusMotorCtrl()
-        {
-            // 只允許 attach 一次
-            if (_focusMotorCtrl != null)
-                return;
-
-            var view = _calibToolUI.wndFocusMotorGoPanel;
-
-            _focusMotorCtrl = new GaMotorZCtrl();
-            _focusMotorCtrl.Attach(view);
-            _focusMotorCtrl.SetDataSrc(ZPosDataSrc.Calib);
-            _focusMotorCtrl.OnPosDataSrcModified += (s, e) =>
-            {
-                _isCoordModified = true;
-            };
-        }
-        void syncFocusMotorCtrl()
-        {
-            _focusMotorCtrl?.UpdatePosHolderToGui();
-        }
-        #endregion
     }
 }

@@ -43,6 +43,6 @@ namespace LaserAlignDX.Mvc.Gui
         Button btnCancel { get; }
         Button btnOK { get; }
 
-        void UpdateCoordsRef(QVector camPt, QVector worldPtSucker1, QVector worldPtSucker2);
+        void UpdateCoordsRef(QVector camPt, QVector motorPtSucker1, QVector motorPtSucker2);
     }
 }

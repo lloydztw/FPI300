@@ -20,15 +20,13 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
-using LaserAlignDX.AoiModel.Calib;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-
-namespace LaserAlignDX.AoiModel
+namespace LaserAlignDX.AoiModel.Calib.V25
 {
     public class CalibAoiModel : ICalibAoiModel
     {
@@ -74,6 +72,8 @@ namespace LaserAlignDX.AoiModel
                     Cv2.Threshold(imgCrop, imgCrop, 0, 255, ThresholdTypes.Otsu);
                 else
                     Cv2.Threshold(imgCrop, imgCrop, thres, 255, ThresholdTypes.Binary);
+                
+                _DUMP(imgCrop, "BoardGrid", $"binary_{carrierID}", ".jpg");
 
                 var finder = new EzBlobFinder
                 {
@@ -87,6 +87,9 @@ namespace LaserAlignDX.AoiModel
                 var builder = new EzBlocsGridBuilder();
                 var grid = builder.Build(blocs, targetRows: rows, targetCols: cols);
                 grid?.Offset(roi.X, roi.Y);
+
+                _DUMP_DOTS_PLATE_IMAGE(fullfovImg, grid, "d:\\paso.log", carrierID);
+
                 return grid;
             }
         }
@@ -437,7 +440,7 @@ namespace LaserAlignDX.AoiModel
                     RefineCentroidLocations(matchResult, ezImage, recipe);
                 }
 
-                _DUMP_DOTS_PLATE_IMAGE(ezImage.Image as Mat, matchResult, $"d:\\paso.log\\calib_dots_plate_{carrierID}.jpg");
+                _DUMP_DOTS_PLATE_IMAGE(ezImage.Image as Mat, matchResult?.Grid, "d:\\paso.log", carrierID);
 
                 return matchResult;
             }
@@ -757,49 +760,69 @@ namespace LaserAlignDX.AoiModel
                 img.SaveImage(file);
             }
         }
-        void _DUMP(Mat img, string subFolder, string tag)
+        void _DUMP(Mat img, string subFolder, string tag, string ext = ".png")
         {
             if (OPT_DUMP && img != null)
             {
                 string path = $"d:\\paso.log\\Calib\\{subFolder}";
                 JetEazy.IO.QxPathUtility.InitDirectory(path);
-                string file = System.IO.Path.Combine(path, $"{subFolder}{tag}.png");
+                string file = System.IO.Path.Combine(path, $"{subFolder}{tag}{ext}");
                 img.SaveImage(file);
             }
         }
-        void _DUMP_DOTS_PLATE_IMAGE(Mat srcFullfovImg, MatchResult matchResult, string fileName)
+        void _DUMP_DOTS_PLATE_IMAGE(Mat srcFullfovImg, EzBlocsGrid grid, string folder, CarrierEnum C)
         {
-            return;
+#if (OPT_RESERVED)
+            string fileName = System.IO.Path.Combine(folder, $"calib_dots_plate_{C}.jpg");
 
-            //int radius = 250;
+            int radius = 200;
+            int extraCornerSize = 800;
+            int blendDiv = 4;
+            //blendDiv = 8;
 
             //var grid = matchResult?.Grid;
-            //if (grid == null || _jxRecipe == null || srcFullfovImg == null)
-            //    return;
+            if (grid == null || srcFullfovImg == null)
+                return;
 
-            //int rows = grid.Rows;
-            //int cols = grid.Cols;
+            int rows = grid.Rows;
+            int cols = grid.Cols;
 
-            //using(Mat img = srcFullfovImg / 4)
-            //{
-            //    for (int r = 0; r < rows; r++)
-            //    {
-            //        for (int c = 0; c < cols; c++)
-            //        {
-            //            var bloc = grid.Get(r, c);
-            //            if (bloc == null)
-            //                continue;
+            using (Mat img = srcFullfovImg / blendDiv)
+            {
+                for (int r = 0; r < rows; r++)
+                {
+                    for (int c = 0; c < cols; c++)
+                    {
+                        var bloc = grid.Get(r, c);
+                        if (bloc == null)
+                            continue;
 
-            //            var cc = bloc.Center;
-            //            Cv2.Circle(img, (int)cc.X, (int)cc.Y, radius, Scalar.White, -1);
-            //        }
-            //    }
+                        var cc = bloc.Center;
+                        Cv2.Circle(img, (int)cc.X, (int)cc.Y, radius, Scalar.White, -1);
+                    }
+                }
 
-            //    img.SaveImage(fileName);
-            //}
+                if (extraCornerSize > 0)
+                {
+                    var r = rows - 1;
+                    var c = cols - 1;
+                    var C0 = grid[0, 0].Center * 2.0 - grid[1, 1].Center;
+                    var C1 = grid[0, c].Center * 2.0 - grid[1, c - 1].Center;
+                    var C2 = grid[r, c].Center * 2.0 - grid[r - 1, c - 1].Center;
+                    var C3 = grid[r, 0].Center * 2.0 - grid[r - 1, 1].Center;
+                    foreach (var cc in new[] { C0, C1, C2, C3 })
+                    {
+                        var rect = Qcvt.CvCreateCenterRect((int)cc.X, (int)cc.Y, extraCornerSize, extraCornerSize);
+                        Cv2.Rectangle(img, rect, Scalar.White, -1);
+                    }
+                }
 
-            //var file2 = System.IO.Path.ChangeExtension(fileName, "_empty.jpg");
-            //srcFullfovImg.SaveImage(file2);
+                img.SaveImage(fileName);
+            }
+
+            var file2 = System.IO.Path.ChangeExtension(fileName, "_empty.jpg");
+            srcFullfovImg.SaveImage(file2);
+#endif
         }
         #endregion
     }

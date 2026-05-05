@@ -2,11 +2,9 @@
 using JetEazy.BasicSpace;
 using JetEazy.Interface;
 using LaserAlignDX.UISpace;
-using LaserAlignDX.UISpace.UIMVC;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-
 
 namespace LaserAlignDX.Mvc.Ctrl.Abs
 {

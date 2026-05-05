@@ -22,7 +22,7 @@ namespace LaserAlignDX
         [Description("共用座標系統 建置完成.")]
         Info_CommonBase_Trf_Successed,
 
-        [Description("不支援此功能.")]
-        Warn_the_function_is_not_supported,
+        [Description("不支援此功能!")]
+        Warning_the_function_is_not_supported,
     }
 }

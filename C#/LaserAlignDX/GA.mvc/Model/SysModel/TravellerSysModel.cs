@@ -32,7 +32,6 @@ using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
 using EmptyTrayAoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
 
-
 namespace LaserAlignDX.Mvc.Model
 {
     public partial class TravellerSysModel : ITravelerModel
@@ -102,11 +101,7 @@ namespace LaserAlignDX.Mvc.Model
             get
             {
                 if (_calibModel == null)
-                {
-                    //_calibModel = new CalibAoiModel(EmptyTrayAoiModel);
-                    //_calibModel = new CalibAoiModel();
                     _calibModel = GaMvcConfig.CreateCalibAoiModel();
-                }
                 return _calibModel;
             }
         }
@@ -148,6 +143,7 @@ namespace LaserAlignDX.Mvc.Model
             return _xRecipe;
         }
 
+        #region OLD_CODE
         void __ApplyRecipe_000(params object[] args)
         {
 #if (OPT_REMARK_2026_0308)
@@ -206,6 +202,7 @@ namespace LaserAlignDX.Mvc.Model
             buildRegionCellsArray(transformsModel, ActiveCarrierID, runtimeCamGrid, false);          //@ ApplyRecipe
 #endif
         }
+        #endregion
 
         public void ApplyRecipe(params object[] args)
         {

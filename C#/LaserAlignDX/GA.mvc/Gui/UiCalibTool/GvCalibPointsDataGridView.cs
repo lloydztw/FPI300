@@ -23,6 +23,8 @@ namespace LaserAlignDX.Mvc.Gui
 {
     public partial class GvCalibPointsDataGridView : UserControl
     {
+        readonly Color MOTOR_COORD_FORE_COLOR = Color.White;
+
         public event EventHandler SelectedIndexChanged;
 
         #region PRIVATE_DATA
@@ -155,9 +157,9 @@ namespace LaserAlignDX.Mvc.Gui
                     column.ValueType = typeof(double);
                     column.DefaultCellStyle.Format = "0.000";
                     column.DefaultCellStyle.BackColor = Color.Black;
-                    column.DefaultCellStyle.ForeColor = Color.Lime;
+                    column.DefaultCellStyle.ForeColor = MOTOR_COORD_FORE_COLOR;
                     column.DefaultCellStyle.SelectionBackColor = Color.Black;
-                    column.DefaultCellStyle.SelectionForeColor = Color.Lime;
+                    column.DefaultCellStyle.SelectionForeColor = MOTOR_COORD_FORE_COLOR;
                     column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
                     column.DefaultCellStyle.Padding = new Padding(0, 0, 2, 0);
                     column.DefaultCellStyle.Font = new Font(this.Font, FontStyle.Bold);

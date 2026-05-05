@@ -1,6 +1,4 @@
-﻿using LaserAlignDX.FormSpace.FPI30Form;
-
-namespace LaserAlignDX.Mvc.Gui
+﻿namespace LaserAlignDX.Mvc.Gui.Calib.V25
 {
     partial class FormCalibrationTool
     {

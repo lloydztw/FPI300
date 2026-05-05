@@ -366,7 +366,7 @@
     <Compile Include="App\Prompts.cs" />
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
-    <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />
+    <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v25.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
@@ -394,11 +394,11 @@
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v3.cs">
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v25.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v3.Designer.cs">
-      <DependentUpon>FormCalibrationTool_v3.cs</DependentUpon>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v25.Designer.cs">
+      <DependentUpon>FormCalibrationTool_v25.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\IvFlyCamViewUI.cs" />
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.cs">
@@ -459,7 +459,7 @@
     <Compile Include="GA.mvc\.Enums\InspectReason.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellsDataCollection.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellX3Class.cs" />
-    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v3.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v25.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\JxCalibRecipe.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\Support\QRegistable.cs" />
@@ -703,8 +703,8 @@
     <EmbeddedResource Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.resx">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v3.resx">
-      <DependentUpon>FormCalibrationTool_v3.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v25.resx">
+      <DependentUpon>FormCalibrationTool_v25.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\GvCalibPointsDataGridView.resx">
       <DependentUpon>GvCalibPointsDataGridView.cs</DependentUpon>

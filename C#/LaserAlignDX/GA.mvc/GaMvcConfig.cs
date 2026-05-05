@@ -31,9 +31,12 @@ using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 #if (OPT_CALIB_V5)
 using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V5.FormCalibrationTool;
 using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
+#elif (OPT_CALIB_V3)
+using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V3.FormCalibrationTool;
+using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V3.CalibAoiModel;
 #else
-using FormCalibrationTool = LaserAlignDX.Mvc.Gui.FormCalibrationTool;
-using CalibAoiModel = LaserAlignDX.AoiModel.CalibAoiModel;
+using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V25.FormCalibrationTool;
+using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V25.CalibAoiModel;
 #endif
 
 

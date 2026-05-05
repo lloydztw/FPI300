@@ -1560,7 +1560,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.TemplateMatch)
             {
                 var msg = GaUtil.GetEnumDescription(MatchAlgorithmEnum.TemplateMatch) + "\n\r" 
-                        + GaUtil.GetEnumDescription(Prompts.Warn_the_function_is_not_supported);
+                        + GaUtil.GetEnumDescription(Prompts.Warning_the_function_is_not_supported);
                 VsMessageBox.Warning(msg);
                 return;
             }

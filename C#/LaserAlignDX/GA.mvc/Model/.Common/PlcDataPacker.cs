@@ -358,6 +358,7 @@ namespace LaserAlignDX.Model
 
             return ok;
         }
+        
         private static StringBuilder _TRACE_BEGIN(string header)
         {
             // 實機跑線版本: 不執行 _TRACE
