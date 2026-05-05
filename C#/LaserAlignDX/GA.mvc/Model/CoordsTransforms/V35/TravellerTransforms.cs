@@ -1,9 +1,10 @@
 ﻿#region AUTHOR
 /*
  * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
+ *      2026-04-02 V35 使用 QxCoordsTransform (by LeTian Chang)
  *      2025-08-13 初稿 (by LeTian Chang)
  * 
  * http://www.jeteazy.com
@@ -23,7 +24,7 @@ using System;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
 
-namespace LaserAlignDX.Model.Coords.V33
+namespace LaserAlignDX.Model.Coords.V35
 {
     /// <summary>
     /// Traveller106 專案 的 所有座標系
@@ -58,14 +59,17 @@ namespace LaserAlignDX.Model.Coords.V33
         /// <summary>
         /// 各種 座標轉換 集合
         /// </summary>
-        QTransform[] _transforms = new QTransform[]
+        ITransform[] _transforms = new ITransform[]
         {
-            new QTransform("C1_P", "pix", "mm"),        // 線掃相機C1 <--> world
-            new QTransform("C1_M1S1", "pix", "mm"),     // 線掃相機C1 <--> motors (sucker 1)
-            new QTransform("C1_M1S2", "pix", "mm"),     // 線掃相機C1 <--> motors (sucker 2)
-            new QTransform("C2_P", "pix", "mm"),        // 線掃相機C2 <--> world
-            new QTransform("C2_M2S1", "pix", "mm"),     // 線掃相機C2 <--> motors (sucker 1)
-            new QTransform("C2_M2S2", "pix", "mm"),     // 線掃相機C2 <--> motors (sucker 2)
+            new QxCoordsTransform("C1_P", "pix", "mm"),         // 線掃相機C1 <--> world
+            //new QTransform("C1_P", "pix", "mm"),                // 線掃相機C1 <--> world
+            new QTransform("C1_M1S1", "pix", "mm"),             // 線掃相機C1 <--> motors (sucker 1)
+            new QTransform("C1_M1S2", "pix", "mm"),             // 線掃相機C1 <--> motors (sucker 2)
+
+            new QxCoordsTransform("C2_P", "pix", "mm"),         // 線掃相機C2 <--> world
+            //new QTransform("C2_P", "pix", "mm"),                // 線掃相機C2 <--> world
+            new QTransform("C2_M2S1", "pix", "mm"),             // 線掃相機C2 <--> motors (sucker 1)
+            new QTransform("C2_M2S2", "pix", "mm"),             // 線掃相機C2 <--> motors (sucker 2)
         };
         int getIndex(CarrierEnum C, SuckerRowEnum S)
         {
@@ -146,11 +150,7 @@ namespace LaserAlignDX.Model.Coords.V33
         {
             return _worldGrid;
         }
-        public double CameraWorkDist
-        {
-            get;
-            set;
-        }
+        public double CameraWorkDist { get; set; }
 
         #region 校正時期_函式群
         public IWorldGridPoints ConfigWorldGridPoints(int rows, int cols, double pitchX, double pitchY)
@@ -484,10 +484,10 @@ namespace LaserAlignDX.Model.Coords.V33
         #region 跑線時期_函式群
 
         public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId,
-                                                out QVector camCoord,
-                                                out QVector worldCoord,
-                                                out QVector s1MotorCoord,
-                                                out QVector s2MotorCoord)
+                                                    out QVector camCoord,
+                                                    out QVector worldCoord,
+                                                    out QVector s1MotorCoord,
+                                                    out QVector s2MotorCoord)
         {
             #region DEFAULT_VALUES
             ErrorCodes errCode;
@@ -513,28 +513,33 @@ namespace LaserAlignDX.Model.Coords.V33
             var transCM2 = this.GetCameraMotorTransform(C, SuckerRowEnum.S2);
             var transCP = this.GetCameraPhysicTransform(C);
 
-            //(4.1) 計算 (使用 馬達座標)
-            if (OPT_CALIB_GRID_USING_MOTOR_COORD)
+            //-----------------------------------------------------------------------------
+            // REV_2026-03-31 
+            //-----------------------------------------------------------------------------
+
+            //(4) 計算 (使用 Camera To Motor 座標轉換)
+            bool isCalculated = false;
+            if (false)   //>>> || OPT_CALIB_GRID_USING_MOTOR_COORD)
             {
                 //(4.1) 檢查 Runtime CamGrid
-                //var runtimeCamGrid = C == CarrierEnum.C1 ? _runtimeCamGridC1 : _runtimeCamGridC2;
                 var runtimeCamGrid = _calibCamGrids[(int)C];
                 (errCode, errMsg) = checkCameraGrid(C, runtimeCamGrid);
                 if (errCode != ErrorCodes.OK)
                     return (errCode, errMsg);
 
                 camCoord = runtimeCamGrid.Get(rowId, colId)?.Center;
-                if (camCoord == null)
-                    camCoord = new QVector(0, 0);
-
-                s1MotorCoord = transCM1.Trans(camCoord);
-                s2MotorCoord = transCM2.Trans(camCoord);
-                worldCoord = transCP.Trans(camCoord);
+                if (camCoord != null)
+                {
+                    s1MotorCoord = transCM1.Trans(camCoord);
+                    s2MotorCoord = transCM2.Trans(camCoord);
+                    worldCoord = transCP.Trans(camCoord);
+                    isCalculated = true;
+                }
             }
-            //(4.2) 使用 World Coords
-            else
+            //(5) 計算 (使用 World To Camera To Motor 座標轉換)
+            if (!isCalculated)
             {
-                // (r,c) -> World
+                // (row, col) -> World
                 worldCoord = _worldGrid.Get(rowId, colId);
                 // World -> Camera
                 camCoord = transCP.InvTrans(worldCoord);
@@ -551,7 +556,7 @@ namespace LaserAlignDX.Model.Coords.V33
 
         public (ErrorCodes, string) GetCoordsRef(CarrierEnum C, out QVector camCoord, out QVector s1MotorCoord, out QVector s2MotorCoord)
         {
-            // 取出 (row=0, col=0) 格點, 當 PLC 參考點
+            // 取出 (row=0, col=0) 格位, 當 PLC 參考點
             return GetNodeCoords(C, 0, 0, out camCoord, out var _, out s1MotorCoord, out s2MotorCoord);
         }
 
@@ -684,7 +689,7 @@ namespace LaserAlignDX.Model.Coords.V33
         /// 計算 載台 C, 馬達吸嘴中心 對其吸到 camPt 所需要的補償量
         /// </summary>
         /// <returns>(馬達補償量, 世界座標差值)</returns>
-        public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
+        public (QVector, QVector) CalcPlcCompensation_000(CarrierEnum C, QVector camPt, int rowId, int colId)
         {
             // 根據 (rowId, colId) 取得 載台C 格位節點 之 以下座標:
             //      world_target 格點的 世界座標
@@ -711,6 +716,60 @@ namespace LaserAlignDX.Model.Coords.V33
 
             // WorldDetla
             var worldDelta = world_current - world_target;
+
+            return (motorDelta, worldDelta);
+        }
+
+        /// <summary>
+        /// 根據 像測點 camPt 與 目標格點 (rowId, colID), 
+        /// 計算 載台 C, 馬達吸嘴中心 對其吸到 camPt 所需要的補償量
+        /// </summary>
+        /// <returns>(馬達補償量, 世界座標差值)</returns>
+        public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
+        {
+            ErrorCodes err;
+            string errMsg;
+
+            //(1) 取得 馬達 左上角 (row=0, col=0) 點位 的 參考座標 (這個也是 PC 會寫給 PLC 的參考座標)
+            (err, errMsg) = GetNodeCoords(C, 0, 0, out var _, out var _, out var s1_org, out var s2_org);
+
+            var pitchX = _worldGrid.PitchX;
+            var pitchY = _worldGrid.PitchY;
+            var pitchVect = new QVector(pitchX * colId, pitchY * rowId);
+
+            //(2) PLC 天真的推算 (rowId, colID) 格位中心 所在的 馬達座標 (德龍預想值)
+            var s1_naive = s1_org + pitchVect;
+            var s2_naive = s2_org + pitchVect;
+
+            //(3) 根據 (rowId, colId) 取得 載台C 格位中心 之 以下座標:
+            ////      world_node 格位中心的 世界座標
+            ////      s1_node    格位中心的 吸嘴1 馬達座標
+            ////      s2_node    格位中心的 吸嘴2 馬達座標
+            (err, errMsg) = GetNodeCoords(C, rowId, colId, out var _, out var world_node, out var s1_node, out var s2_node);
+            if (err != ErrorCodes.OK)
+            {
+                return (new QVector(0, 0), new QVector(0, 0));
+            }
+
+            var transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
+            var transCM2 = GetCameraMotorTransform(C, SuckerRowEnum.S2);
+            var transCP = GetCameraPhysicTransform(C);
+
+            //(4) 由 像測點 推算 對應 馬達座標值
+            var s1_current = transCM1.Trans(camPt);
+            var s2_current = transCM2.Trans(camPt);
+
+            //(5) 由 像測點 推算 對應 世界座標值
+            var world_current = transCP.Trans(camPt);
+
+            //(6) 【德龍補償量】 == 量測現值 - 德龍預想值
+            //// var naiveDelta = s1_node - s1_naive;
+            //// var motorDelta = s1_current - s1_node;
+            //// motorDelta = motorDelta + naiveDelta;
+            var motorDelta = s1_current - s1_naive;
+
+            //(7) WorldDetla (調試用)
+            var worldDelta = world_current - world_node;
 
             return (motorDelta, worldDelta);
         }

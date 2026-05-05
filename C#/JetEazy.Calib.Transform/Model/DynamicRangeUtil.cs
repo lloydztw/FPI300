@@ -23,6 +23,19 @@ namespace JetEazy.Transform
 {
     public class DynamicRangeUtil
     {
+        public static Point2f[] Normalize2f(QVector[] coords, DynamicRange[] ranges)
+        {
+            var pts = Array.ConvertAll(coords, (c) =>
+            {
+                var pt = new Point2f()
+                {
+                    X = (float)ranges[0].Normalize(c.X),
+                    Y = (float)ranges[1].Normalize(c.Y)
+                };
+                return pt;
+            });
+            return pts;
+        }
         public static Point2d[] Normalize(QVector[] coords, DynamicRange[] ranges)
         {
             var pts = Array.ConvertAll(coords, (c) =>

@@ -18,8 +18,7 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using System;
 
-
-namespace LaserAlignDX.Model.Coords.V33
+namespace LaserAlignDX.Model.Coords.V36
 {
     partial class TravellerTransforms
     {
@@ -46,7 +45,6 @@ namespace LaserAlignDX.Model.Coords.V33
         void SaveIni(string iniFileName)
         {
             //_LOG.Info($"寫入 [校正參數 (Trf)] @ [{Name}] : {iniFileName}");
-
             _worldGrid.Save(iniFileName, "GlobalCalibPlcGrid");
 
             foreach (var trf in _transforms)

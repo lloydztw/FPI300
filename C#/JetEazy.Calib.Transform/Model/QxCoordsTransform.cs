@@ -1,10 +1,10 @@
-#region AUTHOR
+﻿#region AUTHOR
 /*
  * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
- *      2025-09-08 �睊 (by LeTian Chang)
+ *      2026-04-02 優化 (by LeTian Chang)
  * 
  * http://www.jeteazy.com
  * https://github.com/lloydztw
@@ -14,20 +14,23 @@
 #endregion
 
 using JetEazy.QMath;
+using JetEazy.Transform.Support;
 using OpenCvSharp;
 using System;
-using System.Collections.Generic;
 
 
-namespace JetEazy.CoordsTransform
+namespace JetEazy.Transform
 {
-    public partial class QxCoordsTransform : ITransform
+    /// <summary>
+    /// 透視投影座標轉換
+    /// <br/> 多點校正: 使用 多節點區域 GetPerspectiveTransform 建構 線性轉換矩陣群
+    /// <br/> 座標轉換: 使用 PerspectiveTransform 進行計算
+    /// </summary>
+    public partial class QxCoordsTransform : ITransform, ICalibCornerPoints, ICalibGridPoints
     {
         #region CONFIG
         const int N_DIMS = 2;
         MatType MAT_TYPE = MatType.CV_64FC1;
-        private double SCALE_OF_WORLD => 1.0;
-        private double SCALE_OF_VIEW => 1.0;
         #endregion
 
         #region PRIVATE_DATA
@@ -36,20 +39,25 @@ namespace JetEazy.CoordsTransform
         private int m_id;
         #endregion
 
-        #region PRIVATE_DATA
-        private int _zoneRows = 2;
-        private int _zoneCols = 2;
+        #region PRIVATE_KERNEL_DATA
         private QVector[,] _dstPoints;
         private QVector[,] _srcPoints;
-        private Mat[,] _mats;           // World to View
-        private Mat[,] _matsInv;        // View to World
+        private Mat[,] _mats;           // SRC to DST
+        private Mat[,] _matsInv;        // DST to SRC
+        private string _srcUnit;
+        private string _dstUnit;
         #endregion
 
-        public QxCoordsTransform(string name = null)
+        public QxCoordsTransform(string name, string srcUnit, string dstUnit)
         {
             m_id = m_iCount++;
-            m_name = name;
-            initZonePoints();
+            m_name = name ?? "";
+            _srcUnit = srcUnit;
+            _dstUnit = dstUnit;
+            initZonePointsAndMatrices();
+        }
+        public QxCoordsTransform(string name) : this(name, "pix", "mm")
+        {
         }
         public QxCoordsTransform(QxCoordsTransform src)
         {
@@ -73,309 +81,382 @@ namespace JetEazy.CoordsTransform
         #region CLONE_AND_COPY
         public void CopyFrom(QxCoordsTransform src)
         {
-            if (src == null)
+            //NOTE: 尚未驗證過 !!!
+            if (src == null || src._zoneRows < 2 || src._zoneCols < 2)
             {
-                initZonePoints();
+                initZonePointsAndMatrices();
                 return;
             }
 
-            //SCALE_OF_WORLD = src.SCALE_OF_WORLD;
-            //SCALE_OF_VIEW = src.SCALE_OF_VIEW;
-
-            _zoneRows = src._zoneRows;
-            _zoneCols = src._zoneCols;
-
-            initZonePoints();
-
-            for (int i = 0; i < _zoneRows; i++)
+            #region COPY_SRC_DST_POINTS
+            int rows = src._zoneRows;
+            int cols = src._zoneCols;
+            _srcPoints = new QVector[rows, cols];
+            _dstPoints = new QVector[rows, cols];
+            for (int i = 0; i < rows; i++)
             {
-                for (int j = 0; j < _zoneCols; j++)
+                for (int j = 0; j < cols; j++)
                 {
-                    _dstPoints[i, j] = new QVector(src._dstPoints[i, j]);
                     _srcPoints[i, j] = new QVector(src._srcPoints[i, j]);
+                    _dstPoints[i, j] = new QVector(src._dstPoints[i, j]);
                 }
             }
+            syncZoneDimensions();
+            rebuildZoneManagers();
+            #endregion
 
-            for (int i = 0; i < _zoneRows - 1; i++)
+            #region COPY_MATRICES
+            disposeMatrice();
+            initMatrice(true);
+
+            for (int i = 0; i < rows - 1; i++)
             {
-                for (int j = 0; j < _zoneCols - 1; j++)
+                for (int j = 0; j < cols - 1; j++)
                 {
-                    if (src._mats[i, j] != null)
+                    var srcMat = src._mats[i, j];
+                    if (srcMat != null)
                     {
-                        //JetEazy.QUtilities.QUtility.SafeDisposeObject(_mats[i, j]);
                         _mats[i, j]?.Dispose();
-                        _mats[i, j] = src._mats[i, j].Clone();
+                        _mats[i, j] = srcMat.Clone();
                     }
-                    if (src._matsInv[i, j] != null)
+                    var srcMatInv = src._matsInv[i, j];
+                    if (srcMatInv != null)
                     {
-                        //JetEazy.QUtilities.QUtility.SafeDisposeObject(_matsInv[i, j]);
                         _matsInv[i, j]?.Dispose();
-                        _matsInv[i, j] = src._matsInv[i, j].Clone();
+                        _matsInv[i, j] = srcMatInv.Clone();
                     }
                 }
             }
+            #endregion
         }
-#if (false)
-        public IxCoordTransform Clone()
-        {
-            QxCoordsTransform obj = new QxCoordsTransform(this);
-            return obj;
-        }
-        object ICloneable.Clone()
-        {
-            return new QxCoordsTransform(this);
-        }
-        public override string ToString()
-        {
-            if (m_name != null)
-                return m_name;
-            string str = base.ToString();
-            return str;
-        }
-#endif
         #endregion
 
-        public void GetCalibrationPoints(out QVector[,] srcPoints, out QVector[,] dstPoints)
+        public ICalibCornerPoints GetCalibCornerPoints()
         {
-            dstPoints = new QVector[_zoneRows, _zoneCols];
-            srcPoints = new QVector[_zoneRows, _zoneCols];
-            try
-            {
-                for (int i = 0; i < _zoneRows; i++)
-                {
-                    for (int j = 0; j < _zoneCols; j++)
-                    {
-                        dstPoints[i, j] = new QVector(_dstPoints[i, j]);
-                        srcPoints[i, j] = new QVector(_srcPoints[i, j]);
-                    }
-                }
-                _roundToHalfPixels(_srcPoints);
-            }
-            catch (Exception ex)
-            {
-                _ERROR(ex, "GetCalibrationPoints");
-            }
+            return this;
         }
-        public void SetCalibrationPoints(QVector[,] srcPoints, QVector[,] dstPoints)
+        public ICalibGridPoints GetCalibGridPoints()
         {
-            _zoneRows = Math.Min(srcPoints.GetUpperBound(0), dstPoints.GetUpperBound(0)) + 1;
-            _zoneCols = Math.Min(srcPoints.GetUpperBound(1), dstPoints.GetUpperBound(1)) + 1;
+            return this;
+        }
 
-            initZonePoints();
-            _roundToHalfPixels(srcPoints);
-
-            for (int i = 0; i < _zoneRows; i++)
+        #region ROW_COL_INDEXING_FUNCTIONS
+        void getRowsCols(object[,] src, out int rows, out int cols)
+        {
+            //rows = v.GetUpperBound(0) + 1;
+            //cols = v.GetUpperBound(1) + 1;
+            rows = src.GetLength(0);
+            cols = src.GetLength(1);
+        }
+        bool getCornerRowCol(object[,] src, int index, out int r, out int c)
+        {
+            getRowsCols(src, out int rows, out int cols);
+            int R = rows - 1;
+            int C = cols - 1;
+            switch (index)
             {
-                for (int j = 0; j < _zoneCols; j++)
+                case 0: r = 0; c = 0; break;    // 左上
+                case 1: r = 0; c = C; break;    // 右上
+                case 2: r = R; c = C; break;    // 左下
+                case 3: r = R; c = 0; break;    // 右下
+                default:
+                    throw new Exception("Invalide Corner Index !!!");
+                    return false;
+            }
+            return true;
+        }
+        #endregion
+
+        #region CALIB_CORNER_POINTS
+        int ICalibCornerPoints.Counts => 4;
+        QVector[] ICalibCornerPoints.GetAll(bool isSrc)
+        {
+            var pts = isSrc ? _srcPoints : _dstPoints;
+            //getRowsCols(pts, out int rows, out int cols);
+            int r = _zoneRows - 1;
+            int c = _zoneCols - 1;
+            return new QVector[]
+            {
+                new QVector(pts[0,0]),          //左上
+                new QVector(pts[0,c]),          //右下
+                new QVector(pts[r,c]),          //右下
+                new QVector(pts[r,0]),          //左下
+            };
+        }
+        void ICalibCornerPoints.Get(int cornerIndex, out QVector src, out QVector dst)
+        {
+            getCornerRowCol(_srcPoints, cornerIndex, out int r, out int c);
+            src = new QVector(_srcPoints[r, c]);
+            dst = new QVector(_dstPoints[r, c]);
+        }
+        void ICalibCornerPoints.Set(int cornerIndex, QVector src, QVector dst)
+        {
+            getCornerRowCol(_srcPoints, cornerIndex, out int r, out int c);
+            _srcPoints[r, c] = src;
+            _dstPoints[r, c] = dst;
+
+            //syncZoneDimensions();
+            rebuildZoneManagers();
+            SrcDynamicRanges(reset: true);
+            DstDynamicRanges(reset: true);
+        }
+        #endregion
+
+        #region CALIB_GRID_POINTS
+        int ICalibGridPoints.Rows => _srcPoints.GetLength(0);
+        int ICalibGridPoints.Cols => _srcPoints.GetLength(1);
+        void ICalibGridPoints.SetAll(QVector[,] srcPoints, QVector[,] dstPoints)
+        {
+            checkPointsCondition(srcPoints, dstPoints);
+
+            getRowsCols(srcPoints, out int rows, out int cols);
+            _srcPoints = new QVector[rows, cols];
+            _dstPoints = new QVector[rows, cols];
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
                 {
-                    _dstPoints[i, j] = dstPoints[i, j];
-                    _srcPoints[i, j] = srcPoints[i, j];
+                    var src = srcPoints[r, c];
+                    var dst = dstPoints[r, c];
+                    bool ok = src != null && dst != null;
+                    _srcPoints[r, c] = ok ? new QVector(src) : null;    // new QVector(srcPoints[r, c]);
+                    _dstPoints[r, c] = ok ? new QVector(dst) : null;    // new QVector(dstPoints[r, c]);
                 }
             }
+
+            syncZoneDimensions();
+            rebuildZoneManagers();
+
+            SrcDynamicRanges(reset: true);
+            DstDynamicRanges(reset: true);
         }
+        void ICalibGridPoints.Update(int row, int col, QVector src, QVector dst)
+        {
+            getRowsCols(_srcPoints, out int rows, out int cols);
+            _srcPoints[row, col] = src;
+            _dstPoints[row, col] = dst;
+
+            //syncZoneDimensions();
+            rebuildZoneManagers();
+            SrcDynamicRanges(reset: true);
+            DstDynamicRanges(reset: true);
+        }
+        void ICalibGridPoints.Get(int row, int col, out QVector src, out QVector dst)
+        {
+            src = new QVector(_srcPoints[row, col]);
+            dst = new QVector(_dstPoints[row, col]);
+        }
+        #endregion
+
+        #region PRIVATE_FUNCTIONS
+        void checkPointsCondition(QVector[,] srcPoints, QVector[,] dstPoints)
+        {
+            getRowsCols(srcPoints, out int rows, out int cols);
+            getRowsCols(srcPoints, out int rows2, out int cols2);
+            if (rows != rows2 || cols != cols2)
+                throw new Exception("校正點位數量 必須一致!");
+            if (rows < 2 || cols < 2)
+                throw new ArgumentException($"校正點數 必須大於 2x2 點!");
+        }
+        #endregion
 
         public bool Build()
         {
-            //	vx0 = |m11 m12 m13 m14|  [1 wx0 wy0 wxy0]t
-            //	vx1 = |m11 m12 m13 m14|  [1 wx1 wy1 wxy1]t
-            //	vx2 = |m11 m12 m13 m14|  [1 wx2 wy2 wxy2]t
-            //	vx3 = |m11 m12 m13 m14|  [1 wx3 wy3 wxy3]t
-
-            //	vy0 = |m21 m22 m23 m24|  [1 x0 y0 xy0]t
-            //	vy1 = |m21 m22 m23 m24|  [1 x1 y1 xy1]t
-            //	vy2 = |m21 m22 m23 m24|  [1 x2 y2 xy2]t
-            //	vy3 = |m21 m22 m23 m24|  [1 x3 y3 xy3]t
-
-            //	| 1 wx0 wy0 wxy0 | m11 |   | vx0 |
-            //	| 1 wx1 wy1 wxy1 | m12 |   | vx1 |
-            //	| 1 wx2 wy2 wxy2 | m13 | = | vx2 | 
-            //	| 1 wx3 wy3 wxy3 | m14 |   | vx3 |
-
-            //	| 1 wx0 wy0 wxy0 | m21 |   | vy0 |
-            //	| 1 wx1 wy1 wxy1 | m22 |   | vy1 |
-            //	| 1 wx2 wy2 wxy2 | m23 | = | vy2 | 
-            //	| 1 wx3 wy3 wxy3 | m24 |   | vy3 |
-
             try
             {
+                // 1. 強制重置 Dynamic Range，確保計算範圍包含所有新點位
+                SrcDynamicRanges(reset: true);
+                DstDynamicRanges(reset: true);
+
+                // 2. 檢查點位有效性
+                checkPointsCondition(_srcPoints, _dstPoints);
+                syncZoneDimensions();
+
+                // 3. 預先跑 正規化數據, 讓系統抓到 整體的 dynamic range，
+                var dummy1 = DynamicRangeUtil.Normalize(_srcPoints, SrcDynamicRanges());
+                var dummy2 = DynamicRangeUtil.Normalize(_dstPoints, DstDynamicRanges());
+
+                disposeMatrice();
+                initMatrice(false);
+
                 for (int i = 0; i < _zoneRows - 1; i++)
                 {
                     for (int j = 0; j < _zoneCols - 1; j++)
                     {
-                        var ptsV = new QVector[] {
+                        var srcNodes = new QVector[] {
                             _srcPoints[i, j],
                             _srcPoints[i, j+1],
                             _srcPoints[i+1, j+1],
                             _srcPoints[i+1, j]
                         };
 
-                        var ptsW = new QVector[] {
+                        var dstNodes = new QVector[] {
                             _dstPoints[i, j],
                             _dstPoints[i, j+1],
                             _dstPoints[i+1, j+1],
                             _dstPoints[i+1, j]
                         };
 
+                        var srcPts = DynamicRangeUtil.Normalize2f(srcNodes, SrcDynamicRanges());
+                        var dstPts = DynamicRangeUtil.Normalize2f(dstNodes, DstDynamicRanges());
+
                         _mats[i, j]?.Dispose();
                         _matsInv[i, j]?.Dispose();
 
-                        _buildMatrix(out _mats[i, j], ptsV, ptsW);   // World To View
-                        _buildMatrix(out _matsInv[i, j], ptsW, ptsV);   // View To World
+                        _mats[i, j] = Cv2.GetPerspectiveTransform(srcPts, dstPts);
+                        _matsInv[i, j] = Cv2.GetPerspectiveTransform(dstPts, srcPts);
                     }
                 }
 
+                rebuildZoneManagers();
                 _verifyNodePoints();
                 return true;
             }
             catch (Exception ex)
             {
                 _ERROR(ex, "Build");
-                throw ex;
-                return false;
+                throw;
             }
         }
         public bool CheckBuildCondition(out double det, out double det2)
         {
-            throw new NotImplementedException();
+            det = double.MaxValue;
+            det2 = double.MaxValue;
+            bool isAllOk = true;
+
+            for (int r = 0; r < _zoneRows - 1; r++)
+            {
+                for (int c = 0; c < _zoneCols - 1; c++)
+                {
+                    // 計算正向與逆向矩陣的行列式，確保矩陣非奇異 (Non-singular)
+                    double d1 = (_mats[r, c] == null || _mats[r, c].Empty()) ? 0.0 : _mats[r, c].Determinant();
+                    double d2 = (_matsInv[r, c] == null || _matsInv[r, c].Empty()) ? 0.0 : _matsInv[r, c].Determinant();
+
+                    det = Math.Min(det, Math.Abs(d1));
+                    det2 = Math.Min(det2, Math.Abs(d2));
+
+                    if (Math.Abs(d1) < 1e-9 || Math.Abs(d2) < 1e-9) 
+                        isAllOk = false;
+                }
+            }
+            return isAllOk && (_mats != null);
         }
 
         public QVector Trans(QVector pt)
         {
-            return null;
+            if (pt == null) return null;
+
+            try
+            {
+                // 1. 尋找點所在的 View 網格區域 (r, c)
+                _getSrcZone(out int r, out int c, pt);
+
+                // 2. 取得 正向轉換 (View to World) 矩陣
+                var matrix = _mats?[r, c];
+                if (matrix == null)
+                    return pt;
+
+                // 3. 參考 QTransform 流程：Normalize -> Transform -> DeNormalize
+                var srcRanges = SrcDynamicRanges();
+                var dstRanges = DstDynamicRanges();
+
+                // 4. 正規化 src (view) 座標
+                var srcPts = Normalize(new[] { pt }, srcRanges);
+
+                // 5. 執行透視轉換 (使用 OpenCV)
+                var dstPts = Cv2.PerspectiveTransform(srcPts, matrix);
+
+                // 6. 反正規化回 dst (world) 座標
+                var rets = DeNormalize(dstPts, dstRanges);
+                return rets[0];
+            }
+            catch (Exception ex)
+            {
+                _ERROR(ex, "Trans");
+                return pt;
+            }
         }
         public QVector InvTrans(QVector pt)
         {
-            return null;
-        }
+            if (pt == null) return null;
 
-        public QVector ToWorld(QVector pt)
-        {
-            return pt;
-        }
-        public QVector ToLocal(QVector pt)
-        {
-            return pt;
-        }
-
-        public void Load(string fileName)
-        {
-            //string ext = System.IO.Path.GetExtension(fileName);
-            //if (string.Compare(ext, ".bin", true) == 0 || string.Compare(ext, ".jdb", true) == 0)
-            //{
-            //    try
-            //    {
-            //        LoadBin(fileName);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        //JetEazy.LoggerClass.Instance.WriteException(ex);
-            //        _LOG(ex);
-            //        System.Diagnostics.Trace.WriteLine("CxCamCoordTransform.LoadBin : Exception = " + ex.Message);
-            //    }
-            //}
-            //else
-            //{
-            //    //> LoadBin(fileName + ".bin");
-            //    LoadIni(fileName);
-            //}
-        }
-        public void Save(string fileName)
-        {
-            //string ext = System.IO.Path.GetExtension(fileName);
-            //if (string.Compare(ext, ".bin", true) == 0 || string.Compare(ext, ".jdb", true) == 0)
-            //{
-            //    SaveBin(fileName);
-            //}
-            //else
-            //{
-            //    SaveIni(fileName);
-            //    //> SaveBin(fileName + ".bin");
-            //    //> LoadBin(fileName + ".bin");
-            //}
-        }
-
-        public void LoadIni(string strIniFileName)
-        {
-            m_name = System.IO.Path.GetFileName(strIniFileName);
-
-            string str = null;
-
-#if(OPT_USING_BI_LINEAR)
-            JetEazy.Win32.Win32Ini.Load(ref str, strIniFileName, "Scale", "World");
-            if (!string.IsNullOrEmpty(str)) double.TryParse(str, out SCALE_OF_WORLD);
-            JetEazy.Win32.Win32Ini.Load(ref str, strIniFileName, "Scale", "View");
-            if (!string.IsNullOrEmpty(str)) double.TryParse(str, out SCALE_OF_VIEW);
-#endif
-
-            JetEazy.Win32.Win32Ini.Load(ref _zoneRows, strIniFileName, "Dimensions", "Rows");
-            JetEazy.Win32.Win32Ini.Load(ref _zoneCols, strIniFileName, "Dimensions", "Cols");
-
-            bool bEmptyMatrix = false;
-            if (_zoneRows < 2) { _zoneRows = 2; bEmptyMatrix = true; }
-            if (_zoneCols < 2) { _zoneCols = 2; bEmptyMatrix = true; }
-
-            initZonePoints();
-
-            if (!bEmptyMatrix)
+            try
             {
-                _load(_mats, strIniFileName, "MATRIX");
-                _load(_matsInv, strIniFileName, "MATRIX_V2W");
+                // 1. 尋找點所在的 dst (world) 網格區域 (r, c)
+                _getDstZone(out int r, out int c, pt);
+
+                // 2. 取得 逆向轉換 (World to View) 矩陣
+                var matInv = _matsInv?[r, c];
+                if (matInv == null)
+                    return pt;
+
+                // 3. 參考 QTransform 流程：Normalize -> Transform -> DeNormalize
+                var srcRanges = SrcDynamicRanges();
+                var dstRanges = DstDynamicRanges();
+
+                // 4. 正規化 dst (world) 座標
+                var dstPts = Normalize(new[] { pt }, dstRanges);
+
+                // 5. 執行透視轉換 (使用 OpenCV)
+                var srcPts = Cv2.PerspectiveTransform(dstPts, matInv);
+
+                // 6. 反正規化回 src (view) 座標
+                var rets = DeNormalize(srcPts, srcRanges);
+                return rets[0];
             }
-
-            _load(_srcPoints, strIniFileName, "ViewPoints");
-            _load(_dstPoints, strIniFileName, "WorldPoints");
-        }
-        public void SaveIni(string strIniFileName)
-        {
-            JetEazy.Win32.Win32Ini.Save(SCALE_OF_WORLD, strIniFileName, "Scale", "World");
-            JetEazy.Win32.Win32Ini.Save(SCALE_OF_VIEW, strIniFileName, "Scale", "View");
-            JetEazy.Win32.Win32Ini.Save(_zoneRows, strIniFileName, "Dimensions", "Rows");
-            JetEazy.Win32.Win32Ini.Save(_zoneCols, strIniFileName, "Dimensions", "Cols");
-
-            _save(_mats, strIniFileName, "MATRIX");
-            _save(_matsInv, strIniFileName, "MATRIX_V2W");
-            _save(_srcPoints, strIniFileName, "ViewPoints");
-            _save(_dstPoints, strIniFileName, "WorldPoints");
+            catch (Exception ex)
+            {
+                _ERROR(ex, "InvTrans");
+                return pt;
+            }
         }
 
-
-        #region PRIVATE_FUNCTIONS
-
-        private void initZonePoints()
+        #region PRIVATE_MAT_FUNCTIONS
+        private void initZonePointsAndMatrices()
         {
             if (_zoneRows < 2 || _zoneCols < 2)
-                throw new Exception("Rows or Cols is too small.");
-
-            _srcPoints = new QVector[_zoneRows, _zoneCols];
-            _dstPoints = new QVector[_zoneRows, _zoneCols];
-
-            for (int r = 0; r < _zoneRows; r++)
             {
-                for (int c = 0; c < _zoneCols; c++)
+                _zoneRows = _zoneCols = 2;
+                _srcPoints = new QVector[2, 2];
+                _dstPoints = new QVector[2, 2];
+                for (int r = 0; r < _zoneRows; r++)
                 {
-                    _srcPoints[r, c] = new QVector2(r, c) * 0.01;
-                    _dstPoints[r, c] = new QVector2(r, c) * 0.01;
+                    for (int c = 0; c < _zoneCols; c++)
+                    {
+                        _srcPoints[r, c] = new QVector2(c, r) * 0.1;    // adjust fill a small point
+                        _dstPoints[r, c] = new QVector2(c, r) * 0.1;    // adjust fill a small point
+                    }
                 }
+
+                syncZoneDimensions();
+                rebuildZoneManagers();
             }
 
             disposeMatrice();
-            initMatrice();
+            initMatrice(true);
         }
-        private void initMatrice()
+        private void initMatrice(bool setEyes = true)
         {
+            int rows = _zoneRows;
+            int cols = _zoneCols;
+
             System.Diagnostics.Trace.Assert(MAT_TYPE == MatType.CV_64FC1);
+            System.Diagnostics.Trace.Assert(rows >= 2 && cols >= 2);
 
-            _mats = new Mat[_zoneRows - 1, _zoneCols - 1];
-            _matsInv = new Mat[_zoneRows - 1, _zoneCols - 1];
+            _mats = new Mat[rows - 1, cols - 1];
+            _matsInv = new Mat[rows - 1, cols - 1];
 
-            for (int i = 0; i < _zoneRows - 1; i++)
+            if (setEyes)
             {
-                for (int j = 0; j < _zoneCols - 1; j++)
+                for (int i = 0; i < rows - 1; i++)
                 {
-                    if (_mats[i, j] == null)
-                        _mats[i, j] = Mat.Eye(3, 3, MAT_TYPE);
-                    if (_matsInv[i, j] == null)
-                        _matsInv[i, j] = Mat.Eye(3, 3, MAT_TYPE);
+                    for (int j = 0; j < cols - 1; j++)
+                    {
+                        if (_mats[i, j] == null)
+                            _mats[i, j] = Mat.Eye(3, 3, MAT_TYPE);
+                        if (_matsInv[i, j] == null)
+                            _matsInv[i, j] = Mat.Eye(3, 3, MAT_TYPE);
+                    }
                 }
             }
         }
@@ -402,121 +483,173 @@ namespace JetEazy.CoordsTransform
                 }
             }
         }
+        #endregion
 
-        private void _buildMatrix(out Mat matT, QVector[] ptsV, QVector[] ptsW)
+        #region PRIVATE_PERCISE_CHECK_FUNCTIONS
+        private void _roundToHalfPixels(QVector[,] vv)
         {
-#if (OPT_USING_BI_LINEAR)
-            //	vx0 = |m11 m12 m13 m14|  w[1 x0 y0 xy0]t
-            //	vx1 = |m11 m12 m13 m14|  w[1 x1 y1 xy1]t
-            //	vx2 = |m11 m12 m13 m14|  w[1 x2 y2 xy2]t
-            //	vx3 = |m11 m12 m13 m14|  w[1 x3 y3 xy3]t
-
-            //	vy0 = |m21 m22 m23 m24|  w[1 x0 y0 xy0]t
-            //	vy1 = |m21 m22 m23 m24|  w[1 x1 y1 xy1]t
-            //	vy2 = |m21 m22 m23 m24|  w[1 x2 y2 xy2]t
-            //	vy3 = |m21 m22 m23 m24|  w[1 x3 y3 xy3]t
-
-            //	w| 1 x0 y0 xy0 | m11 |   | vx0 |
-            //	w| 1 x1 y1 xy1 | m12 |   | vx1 |
-            //	w| 1 x2 y2 xy2 | m13 | = | vx2 | 
-            //	w| 1 x3 y3 xy3 | m14 |   | vx3 |
-
-            //	w| 1 x0 y0 xy0 | m21 |   | vy0 |
-            //	w| 1 x1 y1 xy1 | m22 |   | vy1 |
-            //	w| 1 x2 y2 xy2 | m23 | = | vy2 | 
-            //	w| 1 x3 y3 xy3 | m24 |   | vy3 |
-
-            Mat mat1XY = new Mat(4, 4, MAT_TYPE);
-            Mat matVX = new Mat(4, 1, MAT_TYPE);
-            Mat matVY = new Mat(4, 1, MAT_TYPE);
-
-            for (int i = 0; i < 4; i++)
-            {
-                double vx = ptsV[i].x;
-                double vy = ptsV[i].y;
-                double wx = ptsW[i].x;
-                double wy = ptsW[i].y;
-
-                //mat1XY[i, 0] = 1;
-                //mat1XY[i, 1] = wx;
-                //mat1XY[i, 2] = wy;
-                //mat1XY[i, 3] = wx * wy;
-
-                //matVX[i] = vx;
-                //matVY[i] = vy;
-
-                mat1XY.Set(i, 0, 1f);
-                mat1XY.Set(i, 1, (float)wx);
-                mat1XY.Set(i, 2, (float)wy);
-                mat1XY.Set(i, 3, (float)(wx * wy));
-
-                matVX.Set(i, (float)vx);
-                matVY.Set(i, (float)vy);
-            }
-
-            Mat matInv = new Mat(4, 4, MAT_TYPE);
-
-            //mat1XY.Invert(matInv, InvertMethod.Normal);
-            Cv2.Invert(mat1XY, matInv, DecompTypes.LU);
-
-            Mat mat1R = matInv * matVX;
-            Mat mat2R = matInv * matVY;
-
-            matT = new Mat(2, 4, MAT_TYPE);
-            for (int j = 0; j < 4; j++)
-            {
-                //matT[0, j] = mat1R[j];
-                //matT[1, j] = mat2R[j];
-                matT.Set(0, j, mat1R.Get<float>(j));
-                matT.Set(1, j, mat2R.Get<float>(j));
-            }
-
-            JetEazy.QUtilities.QUtility.SafeDisposeObject(mat1XY);
-            JetEazy.QUtilities.QUtility.SafeDisposeObject(matVX);
-            JetEazy.QUtilities.QUtility.SafeDisposeObject(matVY);
-            JetEazy.QUtilities.QUtility.SafeDisposeObject(matInv);
-            JetEazy.QUtilities.QUtility.SafeDisposeObject(mat1R);
-            JetEazy.QUtilities.QUtility.SafeDisposeObject(mat2R);
-#else
-            int len = Math.Min(ptsV.Length, ptsW.Length);
-            Point2f[] src = new Point2f[len];
-            Point2f[] dst = new Point2f[len];
-            for (int i = 0; i < len; i++)
-            {
-                src[i] = new Point2f((float)ptsW[i].x, (float)ptsW[i].y);
-                dst[i] = new Point2f((float)ptsV[i].x, (float)ptsV[i].y);
-            }
-            matT = Cv2.GetPerspectiveTransform(src, dst);
-
-            ////var xs = src[0].X;
-            ////var ys = src[0].Y;
-            ////var xd = dst[0].X;
-            ////var yd = dst[0].Y;
-            ////var vs = new Mat(3, 1, MAT_TYPE);
-            ////vs[0, 0] = xs;
-            ////vs[1, 0] = ys;
-            ////vs[2, 0] = 1;
-            ////var vd = matT * vs;
-            ////var x = vd[0, 0];
-            ////var y = vd[1, 0];
-            ////var t = vd[2, 0];
-            ////x /= t;
-            ////y /= t;
-            ////var deltaX = Math.Abs(x - xd);
-            ////var deltaY = Math.Abs(y - yd);
-            ////System.Diagnostics.Trace.WriteLine(string.Format("deltaXY=({0:0.00}, {1:0.00})", deltaX, deltaY));
-#endif
+            //NOTE: 在大多數現代高精度系統中，不建議開啟此功能!
         }
-
-        private void _getWorldZone(out int iRow, out int iCol, QVector pointWorld)
+        private void _verifyNodePoints()
         {
-            _getZone(out iRow, out iCol, pointWorld, _dstPoints);
+            for (int row = 0; row < _zoneRows; row++)
+            {
+                for (int col = 0; col < _zoneCols; col++)
+                {
+                    var srcNodePt = _srcPoints[row, col];
+                    var dstNodePt = _dstPoints[row, col];
+
+                    try
+                    {
+                        _getSrcZone(out int rv, out int cv, srcNodePt);
+                        _getDstZone(out int rw, out int cw, dstNodePt);
+
+                        var dstPt = Trans(srcNodePt);
+                        var srcPt = InvTrans(dstPt);
+
+                        var delta = srcPt - srcNodePt;
+                        if (delta.x > 0.25 || delta.y > 0.25)
+                        {
+                            _LOG.Error(
+                                    $"[{row},{col}] Delta=({delta.x:0.00}, {delta.y:0.00})" +
+                                    $"@ SrcNode=({srcNodePt.x:0.0}, {srcNodePt.y:0.0}) " +
+                                    $"@ DstNode=({dstNodePt.x:0.000}, {dstNodePt.y:0.000}) "
+                                );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        //JetEazy.LoggerClass.Instance.WriteException(ex);
+                        _ERROR(ex, "_verifyNodePoints");
+                    }
+                }
+            }
         }
-        private void _getViewZone(out int iRow, out int iCol, QVector pointView)
+        #endregion
+
+        public void Load(string fileName)
+        {
+            // 只載入 src/dst 點位
+            LoadIni(fileName);
+
+            syncZoneDimensions();
+            rebuildZoneManagers();
+            initMatrice(true);
+        }
+        public void Save(string fileName)
+        {
+            // 只保存 src/dst 點位
+            SaveIni(fileName);
+        }
+    }
+
+    partial class QxCoordsTransform
+    {
+        #region PRIVATE_ZONE_MGR_DATA
+        private int _zoneRows = 0;
+        private int _zoneCols = 0;
+        private ZoneManager _srcZoneManager;
+        private ZoneManager _dstZoneManager;
+        #endregion
+
+
+
+        #region PRIVATE_NODE_RETRIEVAL_FUNCTIONS
+        private QVector[] _getGridNodes(QVector[,] gridPoints, int rowID, int colID)
+        {
+            var nodes = new QVector[4];
+            nodes[0] = _getGridNode(gridPoints, rowID, colID);
+            nodes[1] = _getGridNode(gridPoints, rowID, colID + 1);
+            nodes[2] = _getGridNode(gridPoints, rowID + 1, colID + 1);
+            nodes[3] = _getGridNode(gridPoints, rowID + 1, colID);
+            return nodes;
+        }
+        private QVector _getGridNode(QVector[,] gridPoints, int rowID, int colID)
+        {
+            QVector node;
+            if (rowID < 0 || colID < 0 || rowID >= _zoneRows || colID >= _zoneCols)
+            {
+                int r = Math.Min(Math.Max(rowID, 0), _zoneRows - 1);
+                int c = Math.Min(Math.Max(colID, 0), _zoneCols - 1);
+                node = new QVector(gridPoints[r, c]);
+
+                if (rowID >= _zoneRows)
+                    node.x = double.MaxValue / 2;
+                if (rowID < 0)
+                    node.x = double.MinValue / 2;
+
+                if (colID >= _zoneCols)
+                    node.y = double.MaxValue / 2;
+                if (colID < 0)
+                    node.y = double.MinValue / 2;
+            }
+            else
+            {
+                node = new QVector(gridPoints[rowID, colID]);
+            }
+            return node;
+        }
+        #endregion
+
+        #region PRIVATE_ZONE_FUNCTIONS
+        private void syncZoneDimensions()
+        {
+            int rows = _srcPoints != null ? _srcPoints.GetLength(0) : 0;
+            int cols = _srcPoints != null ? _srcPoints.GetLength(1) : 0;
+            if (_dstPoints != null)
+            {
+                rows = Math.Min(rows, _dstPoints.GetLength(0));
+                cols = Math.Min(cols, _dstPoints.GetLength(1));
+            }
+            _zoneRows = rows;
+            _zoneCols = cols;
+        }
+        private void rebuildZoneManagers()
+        {
+            _srcZoneManager = new ZoneManager(_zoneRows, _zoneCols, _srcPoints);
+            _dstZoneManager = new ZoneManager(_zoneRows, _zoneCols, _dstPoints);
+        }
+        private bool _getSrcZone(out int r, out int c, QVector vs)
+        {
+            // 使用 ZoneManager 進行高效搜尋
+            return _srcZoneManager.FindZone(vs, out r, out c, (pt, row, col) => _inZone(pt, row, col, isSrc: true));
+        }
+        private bool _getDstZone(out int r, out int c, QVector vd)
+        {
+            return _dstZoneManager.FindZone(vd, out r, out c, (pt, row, col) => _inZone(pt, row, col, isSrc: false));
+        }
+        private bool _inZone(QVector pt, int r, int c, bool isSrc)
+        {
+            // 取得該區域的四個頂點
+            var pts = _getGridNodes(isSrc ? _srcPoints : _dstPoints, r, c);
+            bool inside = false;
+            int j = pts.Length - 1;
+
+            for (int i = 0; i < pts.Length; i++)
+            {
+                // 判斷射線是否穿過 pts[i] 與 pts[j] 組成的邊
+                if (((pts[i].y > pt.y) != (pts[j].y > pt.y)) &&
+                    (pt.x < (pts[j].x - pts[i].x) * (pt.y - pts[i].y) / (pts[j].y - pts[i].y) + pts[i].x))
+                {
+                    inside = !inside; // 找到一個交點，反轉狀態
+                }
+                j = i;
+            }
+            return inside;
+        }
+        #endregion
+
+        #region PRIVATE_ZONEL_FUNCTIONS_OLD
+#if (false)
+        private void __getDstZone(out int iRow, out int iCol, QVector pointInDstZone)
+        {
+            __getZone(out iRow, out iCol, pointInDstZone, _dstPoints);
+        }
+        private void __getSrcZone(out int iRow, out int iCol, QVector pointInSrcZone)
         {
             var gridPoints = _srcPoints;
 
-            _getZone(out iRow, out iCol, pointView, gridPoints);
+            __getZone(out iRow, out iCol, pointInSrcZone, gridPoints);
 
             int[] delta = new int[] { 0, -1, 1 };
             int rowE1 = _zoneRows - 1;
@@ -535,7 +668,7 @@ namespace JetEazy.CoordsTransform
                         continue;
 
                     var nodes = _getGridNodes(gridPoints, r, c);
-                    if (_inZone(pointView, nodes))
+                    if (__inZone(pointInSrcZone, nodes))
                     {
                         iRow = r;
                         iCol = c;
@@ -544,7 +677,7 @@ namespace JetEazy.CoordsTransform
                 }
             }
         }
-        private void _getZone(out int rowID, out int colID, QVector ptT, QVector[,] gridPoints)
+        private void __getZone(out int rowID, out int colID, QVector ptT, QVector[,] gridPoints)
         {
 #if (true)
             int rowE = _zoneRows;
@@ -611,41 +744,7 @@ namespace JetEazy.CoordsTransform
                 }
 #endif
         }
-        private QVector[] _getGridNodes(QVector[,] gridPoints, int rowID, int colID)
-        {
-            var nodes = new QVector[4];
-            nodes[0] = _getGridNode(gridPoints, rowID, colID);
-            nodes[1] = _getGridNode(gridPoints, rowID, colID + 1);
-            nodes[2] = _getGridNode(gridPoints, rowID + 1, colID + 1);
-            nodes[3] = _getGridNode(gridPoints, rowID + 1, colID);
-            return nodes;
-        }
-        private QVector _getGridNode(QVector[,] gridPoints, int rowID, int colID)
-        {
-            QVector node;
-            if (rowID < 0 || colID < 0 || rowID >= _zoneRows || colID >= _zoneCols)
-            {
-                int r = Math.Min(Math.Max(rowID, 0), _zoneRows - 1);
-                int c = Math.Min(Math.Max(colID, 0), _zoneCols - 1);
-                node = new QVector(gridPoints[r, c]);
-
-                if (rowID >= _zoneRows)
-                    node.x = double.MaxValue / 2;
-                if (rowID < 0)
-                    node.x = double.MinValue / 2;
-
-                if (colID >= _zoneCols)
-                    node.y = double.MaxValue / 2;
-                if (colID < 0)
-                    node.y = double.MinValue / 2;
-            }
-            else
-            {
-                node = new QVector(gridPoints[rowID, colID]);
-            }
-            return node;
-        }
-        private bool _inZone(QVector P, QVector[] V)
+        private bool __inZone(QVector P, QVector[] V)
         {
             int n = V.Length;
 
@@ -669,187 +768,17 @@ namespace JetEazy.CoordsTransform
 
             return (cn & 1) != 0;    // 0 if even (out), and 1 if  odd (in)
         }
-
-        private double _autoScale(QVector[,] vv)
-        {
-#if (OPT_USING_BI_LINEAR)
-            return 1;
-
-            double s = double.MinValue;
-            foreach (QVector v in vv)
-            {
-                s = Math.Max(s, Math.Abs(v[0]));
-                s = Math.Max(s, Math.Abs(v[1]));
-            }
-
-            if (s < 10.0)
-                return 1.0;
-
-            double pow = Math.Log10(s);
-            pow = Math.Truncate(pow);
-            s = Math.Pow(10.0, pow);
-
-            ////// double n = Math.Round(s / 10.0);
-            ////// s = n * 10.0;
-
-            return s;
-#else
-            return 1;
 #endif
-        }
-
-        private void _load(QVector[,] pts, string strIniFileName, string strAppName)
-        {
-            for (int i = 0; i < _zoneRows; i++)
-            {
-                for (int j = 0; j < _zoneCols; j++)
-                {
-                    QVector v = new QVector(2);
-                    double x = 0;
-                    double y = 0;
-                    _loadItem(ref x, strIniFileName, strAppName, "X", i, j);
-                    _loadItem(ref y, strIniFileName, strAppName, "Y", i, j);
-                    v.x = x;
-                    v.y = y;
-                    pts[i, j] = v;
-                }
-            }
-        }
-        private void _save(QVector[,] pts, string strIniFileName, string strAppName)
-        {
-            for (int i = 0; i < _zoneRows; i++)
-            {
-                for (int j = 0; j < _zoneCols; j++)
-                {
-                    double x = pts[i, j].x;
-                    double y = pts[i, j].y;
-                    _saveItem(x, strIniFileName, strAppName, "X", i, j);
-                    _saveItem(y, strIniFileName, strAppName, "Y", i, j);
-                }
-            }
-        }
-
-        private void _load(Mat[,] mx, string strIniFileName, string strAppName)
-        {
-            for (int i = 0; i < _zoneRows - 1; i++)
-            {
-                for (int j = 0; j < _zoneCols - 1; j++)
-                {
-                    _load(mx[i, j], strIniFileName, strAppName + "_" + i + "_" + j);
-                }
-            }
-        }
-        private void _save(Mat[,] mx, string strIniFileName, string strAppName)
-        {
-            for (int i = 0; i < _zoneRows - 1; i++)
-            {
-                for (int j = 0; j < _zoneCols - 1; j++)
-                {
-                    _save(mx[i, j], strIniFileName, strAppName + "_" + i + "_" + j);
-                }
-            }
-        }
-        private void _load(Mat mx, string strIniFileName, string strAppName)
-        {
-            int iRows = mx.Rows;
-            int iCols = mx.Cols;
-            for (int i = 0; i < iRows; i++)
-            {
-                for (int j = 0; j < iCols; j++)
-                {
-                    double value = 0;
-                    _loadItem(ref value, strIniFileName, strAppName, "M", i, j);
-                    //mx[i, j] = value;
-                    mx.At<float>(i, j) = (float)value;
-                }
-            }
-        }
-        private void _save(Mat mx, string strIniFileName, string strAppName)
-        {
-            int iRows = mx.Rows;
-            int iCols = mx.Cols;
-            for (int i = 0; i < iRows; i++)
-            {
-                for (int j = 0; j < iCols; j++)
-                {
-                    //double value = mx[i, j];
-                    double value = mx.At<float>(i, j);
-                    _saveItem(value, strIniFileName, strAppName, "M", i, j);
-                }
-            }
-        }
-
-        private void _loadItem(ref double value, string strIniFileName, string strAppName, string strKey, int iRow, int iCol)
-        {
-            string strKeyA = strKey + "_" + iRow + "_" + iCol;
-            string strValue = "";
-            JetEazy.Win32.Win32Ini.Load(ref strValue, strIniFileName, strAppName, strKeyA);
-            double.TryParse(strValue, out value);
-        }
-        private void _saveItem<T>(T value, string strIniFileName, string strAppName, string strKey, int iRow, int iCol)
-        {
-            string strKeyA = strKey + "_" + iRow + "_" + iCol;
-            string strValue = value.ToString();
-            JetEazy.Win32.Win32Ini.Save(strValue, strIniFileName, strAppName, strKeyA);
-        }
-
         #endregion
 
-        private void _roundToHalfPixels(QVector[,] vv)
+        public void GetSrcZone(out int row, out int col, QVector srcPt)
         {
-            //////foreach (QVector v in vv)
-            //////{
-            //////    _roundToHalfPixels(v);
-            //////}
+            _getSrcZone(out row, out col, srcPt);
         }
-        private void _roundToHalfPixels(QVector v)
+        public void GetDstZone(out int row, out int col, QVector dstPt)
         {
-            //////v.x = Math.Round(v.x, 1);
-            //////v.y = Math.Round(v.y, 1);
+            _getDstZone(out row, out col, dstPt);
         }
-        private void _verifyNodePoints()
-        {
-            for (int row = 0; row < _zoneRows; row++)
-            {
-                for (int col = 0; col < _zoneCols; col++)
-                {
-                    int rv, cv, rw, cw;
-                    var vs = _srcPoints[row, col];
-                    var ws = _dstPoints[row, col];
-
-                    try
-                    {
-                        _getViewZone(out rv, out cv, vs);
-                        _getWorldZone(out rw, out cw, ws);
-                        var w = ToWorld(vs);
-                        var v = ToLocal(w);
-                        var delta = v - vs;
-                        if (delta.x > 0.25 || delta.y > 0.25)
-                        {
-                            System.Diagnostics.Trace.WriteLine("DEBUG");
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        //JetEazy.LoggerClass.Instance.WriteException(ex);
-                        _ERROR(ex, "_verifyNodePoints");
-                    }
-                }
-            }
-        }
-
-        public void GetViewZone(out int row, out int col, QVector ptViewA)
-        {
-            var pt = ptViewA / SCALE_OF_VIEW;
-            _getViewZone(out row, out col, pt);
-        }
-        public void GetWorldZone(out int row, out int col, QVector ptWorldA)
-        {
-            var pt = ptWorldA / SCALE_OF_WORLD;
-            _getWorldZone(out row, out col, pt);
-        }
-
-
     }
 
     partial class QxCoordsTransform
@@ -857,7 +786,8 @@ namespace JetEazy.CoordsTransform
         #region PRIVATE_DYNAMIC_RANGE_FUNCTIONS
         private DynamicRange[] _srcRanges;
         private DynamicRange[] _dstRanges;
-        DynamicRange[] SrcDynamicRanges(bool reset = false)
+#if (OLD)
+        DynamicRange[] __SrcDynamicRanges(bool reset = false)
         {
             if (reset)
             {
@@ -869,7 +799,7 @@ namespace JetEazy.CoordsTransform
             }
             return _srcRanges;
         }
-        DynamicRange[] DstDynamiceRanges(bool reset = false)
+        DynamicRange[] __DstDynamicRanges(bool reset = false)
         {
             if (reset)
             {
@@ -881,7 +811,7 @@ namespace JetEazy.CoordsTransform
             }
             return _dstRanges;
         }
-        DynamicRange[] createRanges(IEnumerable<QVector> coords)
+        DynamicRange[] __createRanges(IEnumerable<QVector> coords)
         {
             QVector v_min = new QVector();  //double.MaxValue, double.MaxValue);
             QVector v_max = new QVector();  //double.MinValue, double.MinValue);
@@ -909,6 +839,75 @@ namespace JetEazy.CoordsTransform
 
             return ranges;
         }
+#endif
+        /// <summary>
+        /// 取得來源端(View)的動態範圍，若為空則根據 _srcPoints 自動建立
+        /// </summary>
+        DynamicRange[] SrcDynamicRanges(bool reset = false)
+        {
+            if (reset)
+            {
+                _srcRanges = null;
+                return null;
+            }
+            // 仿照 QTransform: 自動根據當前點位建立 Range
+            if (_srcRanges == null && _srcPoints != null)
+            {
+                _srcRanges = createRanges(_srcPoints);
+            }
+            return _srcRanges;
+        }
+        /// <summary>
+        /// 取得目標端(World)的動態範圍，若為空則根據 _dstPoints 自動建立
+        /// </summary>
+        DynamicRange[] DstDynamicRanges(bool reset = false)
+        {
+            if (reset)
+            {
+                _dstRanges = null;
+                return null;
+            }
+            // 仿照 QTransform: 自動根據當前點位建立 Range
+            if (_dstRanges == null && _dstPoints != null)
+            {
+                _dstRanges = createRanges(_dstPoints);
+            }
+            return _dstRanges;
+        }
+        /// <summary>
+        /// 遍歷二維網格點位，找出 X, Y 的最大與最小值以建立正規化範圍
+        /// </summary>
+        DynamicRange[] createRanges(QVector[,] coords)
+        {
+            if (coords == null) return null;
+
+            // 初始化極值
+            double minX = double.MaxValue, maxX = double.MinValue;
+            double minY = double.MaxValue, maxY = double.MinValue;
+
+            // 遍歷二維陣列中的所有點
+            foreach (var coord in coords)
+            {
+                if (coord == null) continue;
+
+                // 仿照 QTransform 使用索引或屬性存取
+                minX = Math.Min(minX, coord.x);
+                maxX = Math.Max(maxX, coord.x);
+                minY = Math.Min(minY, coord.y);
+                maxY = Math.Max(maxY, coord.y);
+            }
+
+            // 建議在 createRanges 加入的保護邏輯
+            if (maxX <= minX) maxX = minX + 1;
+            if (maxY <= minY) maxY = minY + 1;
+
+            // 建立二維範圍陣列 (N_DIMS = 2)
+            return new DynamicRange[]
+            {
+                new DynamicRange(minX, maxX),
+                new DynamicRange(minY, maxY)
+            };
+        }
         #endregion
 
         public static Point2d[] Normalize(QVector[] coords, DynamicRange[] ranges)
@@ -933,13 +932,9 @@ namespace JetEazy.CoordsTransform
             });
             return coords;
         }
-    }
-
-    partial class QxCoordsTransform
-    {
-        public static Action<Exception> ExLogFunc = null;
 
         #region LOG
+        public static Action<Exception> ExLogFunc = null;
         static NLog.Logger _LOG = NLog.LogManager.GetCurrentClassLogger();
         static void _ERROR(Exception ex, string tag)
         {

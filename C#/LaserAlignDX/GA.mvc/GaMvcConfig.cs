@@ -25,11 +25,16 @@ using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
 
-//using FormCalibrationTool = LaserAlignDX.FormSpace.FPI30Form.frmCalibration;
-//using FormRcpEditorTool = LaserAlignDX.FormSpace.frmFPIRecipe;
-using FormCalibrationTool = LaserAlignDX.Mvc.Gui.FormCalibrationTool;
 using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
+
+#if (OPT_CALIB_V5)
+using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V5.FormCalibrationTool;
+using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
+#else
+using FormCalibrationTool = LaserAlignDX.Mvc.Gui.FormCalibrationTool;
+using CalibAoiModel = LaserAlignDX.AoiModel.CalibAoiModel;
+#endif
 
 
 namespace LaserAlignDX
@@ -42,7 +47,6 @@ namespace LaserAlignDX
     public static class GaMvcConfig
     {
         #region CONFIG
-        public static bool OPT_USE_LETIAN_CALIB = true;
         public static int TOTAL_FLY_FRAMES_COUNT => 4;
         #endregion
 
@@ -64,11 +68,14 @@ namespace LaserAlignDX
                 return _sysModel;
             }
         }
-        private static IProcessRunFPI InstanceAoiModel()
+        public static IProcessRunFPI InstanceAoiModel()
         {
-            // AoiModel 使用 V27
-            //return AoiModel.V27.ProcessRunFPIClass.Instance;
+            // AoiModel 使用 V3
             return AoiModel.V3.ProcessRunFPIClass.Instance;
+        }
+        public static ICalibAoiModel CreateCalibAoiModel()
+        {
+            return new CalibAoiModel();
         }
         public static IxReportBuilder CreateReportBuilder()
         {

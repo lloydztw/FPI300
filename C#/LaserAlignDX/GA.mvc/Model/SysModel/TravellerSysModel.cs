@@ -103,8 +103,9 @@ namespace LaserAlignDX.Mvc.Model
             {
                 if (_calibModel == null)
                 {
-                    _calibModel = new CalibAoiModel(EmptyTrayAoiModel);
+                    //_calibModel = new CalibAoiModel(EmptyTrayAoiModel);
                     //_calibModel = new CalibAoiModel();
+                    _calibModel = GaMvcConfig.CreateCalibAoiModel();
                 }
                 return _calibModel;
             }

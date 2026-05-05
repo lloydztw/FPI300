@@ -1,9 +1,32 @@
-﻿using JetEazy.Match;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2026-04-02 Added V35
+ *      2025-08-13 初稿 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.Utils;
 using System;
+
+#if (OPT_TRANSFORM_V35)
+using QMicroChipTransform = LaserAlignDX.Model.Coords.V35.QMicroChipTransform;
+using TravellerTransforms = LaserAlignDX.Model.Coords.V35.TravellerTransforms;
+#else
 using QMicroChipTransform = LaserAlignDX.Model.Coords.V33.QMicroChipTransform;
 using TravellerTransforms = LaserAlignDX.Model.Coords.V33.TravellerTransforms;
+#endif
+
 
 namespace LaserAlignDX.Model.Coords
 {
@@ -63,7 +86,6 @@ namespace LaserAlignDX.Model.Coords
             TravellerTransforms.DisposeAll(name, "$CommonBase$", "C1_Micro", "C2_Micro");
         }
     }
-
 
     partial class TravellerTransformFactory
     {
