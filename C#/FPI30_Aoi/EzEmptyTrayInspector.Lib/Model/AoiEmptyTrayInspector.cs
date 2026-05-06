@@ -710,7 +710,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 bloc.Center = cc;
             }
         }
-        void run_match_one(SideID sideId, Mat srcImg, string dumpPath = null)
+        void run_match_one(SideID sideId, Mat srcImg, string dumpPath = null, bool forceFetch = true)
         {
             MatchResult matchResult = null;
             Exception errEx = null;
@@ -766,7 +766,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
                         // 2025-11-28 新增
                         #region 如果抓不到理想的GRID_再重新抓一次
-                        if (true)
+                        if (forceFetch)
                         {
                             var targetRows = _recipe.TrayMiscSettings.FullRows;
                             var targetCols = _recipe.TrayMiscSettings.FullCols;
@@ -810,6 +810,7 @@ namespace EzAoiEmptyTrayInspector.Model
         }
         void run_match_with_bound_roi(SideID sideId, Mat srcImg, string dumpPath = null)
         {
+#if(false)
             var jxBoundBox = _recipe?.VisionSettings?.Match?.BoundBox;
             if (jxBoundBox == null || jxBoundBox.Value == Rectangle.Empty)
             {
@@ -834,6 +835,8 @@ namespace EzAoiEmptyTrayInspector.Model
             // OFFSET
             var matchResult = GetMatchResult(sideId);
             _OFFSET(matchResult, roi.X, roi.Y);
+#endif
+            run_all(null, srcImg, null, dumpPath);
         }
         void run_match_with_bound_mask(SideID sideId, Mat srcImg, string dumpPath = null)
         {
@@ -1382,7 +1385,6 @@ namespace EzAoiEmptyTrayInspector.Model
             //run_all_000(imgFullFov, outputFileName);
             run_all_segments(imgFullFov, outputFileName);
         }
-
         void run_all_000(Mat imgFullFov, string outputFileName)
         {
 #if (OPT_DUAL_MATCH)
@@ -1559,6 +1561,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 OnFinalResulted?.Invoke(this, new AoiResultEventArgs(_finalResult));
             }
         }
+        
         void run_all_segments(Mat imgFullFov, string outputFileName)
         {
             _LOG.Info("[AOI 空盤檢測] 開始 ... ");
@@ -1619,7 +1622,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 MatchResult mergedMatchResult = null;
 
                 // (6) run Match
-                bool matchingSegmentBySegment = false;
+                bool matchingSegmentBySegment = true;
                 // (6.1) 分區多次 Match (尚未完善, 暫不使用!)
                 if (matchingSegmentBySegment)
                 {
@@ -1627,7 +1630,7 @@ namespace EzAoiEmptyTrayInspector.Model
                     var segResults = new List<MatchResult>();
                     foreach (var roi in segROIs)
                     {
-                        run_one_segment(imgA, roi, out MatchResult segResult);
+                        run_one_segment(imgA, roi, out MatchResult segResult, forceFetch: segROIs.Count == 1);
 
                         if (segResult != null)
                             segResults.Add(segResult);
@@ -1690,7 +1693,7 @@ namespace EzAoiEmptyTrayInspector.Model
                 OnFinalResulted?.Invoke(this, new AoiResultEventArgs(_finalResult));
             }
         }
-        void run_one_segment(Mat imgFullFov, Rect segRoi, out MatchResult matchResult)
+        void run_one_segment(Mat imgFullFov, Rect segRoi, out MatchResult matchResult, bool forceFetch)
         {
             matchResult = null;
 
@@ -1701,7 +1704,7 @@ namespace EzAoiEmptyTrayInspector.Model
             //---------------------------------------------------------------------------------------------------
             // 注意: run_match_one 會受全域 _recipe.TrayMiscSettings 的 (FullRows, FullCols) 強制導引 影響其結果 !!!
             //---------------------------------------------------------------------------------------------------
-            run_match_one(SideID.A, imgA, _dumpPath);
+            run_match_one(SideID.A, imgA, _dumpPath, forceFetch);   //@<<< run_one_segment
 
             if (_matchResults == null || _matchResults.Length > 0)
             {
@@ -1735,14 +1738,26 @@ namespace EzAoiEmptyTrayInspector.Model
                     int cols = Math.Min(from.Grid.Cols, to.Grid.Cols);
                     int rows = from.Grid.Rows;
                     int rowOffset = to.Grid.Rows;
+
                     for (int r = 0; r < rows; r++)
                     {
+                        int rowTo = rowOffset + r;
                         for (int c = 0; c < cols; c++)
                         {
                             var bloc = from.Grid.Get(r, c);
                             if (bloc != null)
                             {
-                                to.Grid.Set(rowOffset + r, cols, bloc);
+                                to.Grid.Set(rowTo, c, bloc);
+
+                                if (bloc.Tag is QuadLinkNode link)
+                                {
+                                    if(r == 0)
+                                    {
+                                        link.Up?.Set(to.Grid.Get(rowOffset - 1, c));
+                                    }
+                                    link.rowCol = new JetEazy.QxCollections.QxRowCol(rowTo, c);
+                                }
+
                                 newBlocs.Add(bloc);
                             }
                         }

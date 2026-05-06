@@ -33,8 +33,25 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         public CviRcpBox(Brush br, int lineWidth, int cornerSize) : base(br, lineWidth, cornerSize)
         {
         }
+        public string Text
+        {
+            get; set;
+        }
 
         #region OVERRIDES
+        public override void OnDraw(CvImageViewer viewer, Graphics gx)
+        {
+            base.OnDraw(viewer, gx);
+            if (!string.IsNullOrEmpty(Text))
+            {
+                var font = viewer.Font;
+                var pt = Box.Location;
+                var offset = (int)Math.Min(Box.Width, Box.Height) / 50;
+                pt.X += (offset / 2);
+                pt.Y += offset;
+                gx.DrawString(Text, font, BoxBrush, pt);
+            }
+        }
         public override bool OnMouseDown(CvImageViewer viewer, MouseEventArgs e)
         {
             bool ret = base.OnMouseDown(viewer, e);

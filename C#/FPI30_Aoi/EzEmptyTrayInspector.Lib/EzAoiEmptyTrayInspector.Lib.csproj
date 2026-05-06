@@ -177,6 +177,12 @@
     <Compile Include="AoiFactory.cs" />
     <Compile Include="Gui\.Interface\IvFuncButtonsPanel.cs" />
     <Compile Include="Gui\.Interface\IvRecipeBriefView.cs" />
+    <Compile Include="Gui\Forms\FormSegOffsetSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Gui\Forms\FormSegOffsetSettings.Designer.cs">
+      <DependentUpon>FormSegOffsetSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Gui\Forms\FormSplash.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -184,6 +190,12 @@
       <DependentUpon>FormSplash.cs</DependentUpon>
     </Compile>
     <Compile Include="Gui\.Interface\IvSingleMatchView.cs" />
+    <Compile Include="Gui\Panels\GwSegOffsetDataGridView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Gui\Panels\GwSegOffsetDataGridView.Designer.cs">
+      <DependentUpon>GwSegOffsetDataGridView.cs</DependentUpon>
+    </Compile>
     <Compile Include="Gui\Panels\GvProductionPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -246,6 +258,7 @@
     <Compile Include="Model\Match\Grid\EzBlocsPool.cs" />
     <Compile Include="Model\Match\Grid\QuadLinkNode.cs" />
     <Compile Include="Model\Match\Bloc\QvQuad2D.cs" />
+    <Compile Include="Model\Recipe\JxTraySegGrpSettings_v1.cs" />
     <Compile Include="Model\Recipe\JxTraySegGrpSettings.cs" />
     <Compile Include="Model\Recipe\Serializer\EzBlocsGridSerializer.cs" />
     <Compile Include="Model\Recipe\JxAoiRecipe.cs" />
@@ -261,8 +274,14 @@
     <Compile Include="Utils\DebugUtil\EzTiming.cs" />
     <Compile Include="Utils\DebugUtil\LtDebug.cs" />
     <Compile Include="Utils\DebugUtil\VxDebugDrawer.cs" />
+    <EmbeddedResource Include="Gui\Forms\FormSegOffsetSettings.resx">
+      <DependentUpon>FormSegOffsetSettings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Gui\Forms\FormSplash.resx">
       <DependentUpon>FormSplash.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Gui\Panels\GwSegOffsetDataGridView.resx">
+      <DependentUpon>GwSegOffsetDataGridView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\Panels\GvProductionPanel.resx">
       <DependentUpon>GvProductionPanel.cs</DependentUpon>
