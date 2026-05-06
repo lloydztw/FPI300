@@ -1,8 +1,10 @@
-﻿using JetEazy.Match;
+﻿using EzAoiEmptyTrayInspector.Model;
+using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.Transform;
 using LaserAlignDX.Mvc.Model;
 using System;
+using System.Collections.Generic;
 
 namespace LaserAlignDX.Model.Coords
 {
@@ -90,7 +92,7 @@ namespace LaserAlignDX.Model.Coords
         /// <summary>
         /// 設定 Camera-To-World 校正格點 (相機座標) (for 多點校正)
         /// </summary>
-        bool SetCalibCamGrid(CarrierEnum C, EzBlocsGrid camGrid);
+        bool SetCalibCamGrid(CarrierEnum C, EzBlocsGrid camGrid, IList<JxTraySegItem> segsList = null);
 
         /// <summary>
         /// 設定 Camera-To-Motor 校正墨點 (順時針四角: 左上, 右上, 右下, 左下)

@@ -34,6 +34,11 @@ namespace LaserAlignDX.Model.Coords.V36
 
             _worldGrid.Load(iniFileName, "GlobalCalibPlcGrid");
 
+            var worldGrid2 = getCarrierWorldGrid(CarrierEnum.C2);
+            worldGrid2.Load(iniFileName, "GlobalCalibPlcGrid2");
+            if (worldGrid2.Rows <= 2 && worldGrid2.Cols <= 2)
+                worldGrid2 = new QWorldGridPointsEx(_worldGrid);
+
             foreach (var trf in _transforms)
             {
                 trf.Load(iniFileName);
@@ -46,6 +51,7 @@ namespace LaserAlignDX.Model.Coords.V36
         {
             //_LOG.Info($"寫入 [校正參數 (Trf)] @ [{Name}] : {iniFileName}");
             _worldGrid.Save(iniFileName, "GlobalCalibPlcGrid");
+            getCarrierWorldGrid(CarrierEnum.C2).Save(iniFileName, "GlobalCalibPlcGrid2");
 
             foreach (var trf in _transforms)
             {
@@ -80,16 +86,23 @@ namespace LaserAlignDX.Model.Coords.V36
             var lines = System.IO.File.ReadAllLines(fileName);
             NGrids = Math.Min(NGrids, lines.Length);
 
-            var GS = new EzBlocsGridSerializer();
+            var gss = new EzBlocsGridSerializer();
             for (int i = 0; i < NGrids; i++)
             {
                 string str = lines[i];
-                GS.Deserialize(str, out _calibCamGrids[i]);
+                gss.Deserialize(str, out _calibCamGrids[i]);
 
                 if (updateToTrf)
                 {
                     var trf = GetCameraPhysicTransform((CarrierEnum)i);
+
                     updateCalibPointsToTrf(trf, _calibCamGrids[i], _worldGrid);
+
+                    if (_calibCamGrids[i].Rows != _worldGrid.Rows || _calibCamGrids[i].Cols != _worldGrid.Cols)
+                    {
+                        string msg = $"{GetType().Name}.loadCalibCamGrids : 舊版 EzBlocsGridSerializer 有漏洞, 會損失 不連續的 Grids !!!";
+                        _LOG.Error(msg);
+                    }
                 }
             }
         }
@@ -98,10 +111,10 @@ namespace LaserAlignDX.Model.Coords.V36
             int NGrids = _calibCamGrids.Length;
             var lines = new string[NGrids];
 
-            var GS = new EzBlocsGridSerializer();
+            var gss = new EzBlocsGridSerializer();
             for (int i = 0; i < NGrids; i++)
             {
-                string str = GS.Serialize(_calibCamGrids[i]);
+                string str = gss.Serialize(_calibCamGrids[i]);
                 lines[i] = str;
             }
 

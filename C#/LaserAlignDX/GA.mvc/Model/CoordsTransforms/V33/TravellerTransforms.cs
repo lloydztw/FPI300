@@ -13,6 +13,7 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.Transform;
@@ -20,8 +21,8 @@ using JetEazy.Utils;
 using LaserAlignDX.Model.Coords.Support;
 using LeTian.AoiLib;
 using System;
+using System.Collections.Generic;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
-
 
 namespace LaserAlignDX.Model.Coords.V33
 {
@@ -167,7 +168,7 @@ namespace LaserAlignDX.Model.Coords.V33
             return _calibCamGrids[(int)C];
         }
 
-        public bool SetCalibCamGrid(CarrierEnum C, EzBlocsGrid camGrid)
+        public bool SetCalibCamGrid(CarrierEnum C, EzBlocsGrid camGrid, IList<JxTraySegItem> segsList = null)
         {
             (var err, var errMsg) = checkCameraGrid(C, camGrid);
             if (err != ErrorCodes.OK)

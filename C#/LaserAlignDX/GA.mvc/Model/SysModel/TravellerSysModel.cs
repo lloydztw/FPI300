@@ -875,13 +875,15 @@ namespace LaserAlignDX.Mvc.Model
             getGridPitchFromRecipe(emptyTrayRecipe, out double pitchX, out double pitchY);
             var rows = emptyTrayRecipe.TrayMiscSettings.FullRows.Value;
             var cols = emptyTrayRecipe.TrayMiscSettings.FullCols.Value;
+            var segsList = emptyTrayRecipe.TraySegGrpSettings.SegsList;
+
             //(3) 檢查 (rows, cols) 一致性
             if (checkCameraGridConsistent(newCamGrid, rows, cols, notify: true) != ErrorCodes.OK)
                 return newTrf;
 
             //(4) [線性遷移] 重新設定 rows, cols, pitchX, pitchY 布局
             var newPitch = new QVector2(pitchX, pitchY);
-            newTrf = TravellerTransformFactory.CreateLinearMigration(name, carrierID, newCamGrid, newPitch);
+            newTrf = TravellerTransformFactory.CreateLinearMigration(name, carrierID, newCamGrid, newPitch, segsList);
 
             return newTrf;
         }

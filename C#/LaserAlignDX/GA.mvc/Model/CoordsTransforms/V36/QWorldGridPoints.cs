@@ -16,6 +16,7 @@
 using JetEazy.QMath;
 using Newtonsoft.Json;
 
+
 namespace LaserAlignDX.Model.Coords.V36
 {
     /// <summary>

@@ -14,19 +14,20 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.Utils;
 using System;
+using System.Collections.Generic;
 
-#if (OPT_TRANSFORM_V35)
-using QMicroChipTransform = LaserAlignDX.Model.Coords.V35.QMicroChipTransform;
-using TravellerTransforms = LaserAlignDX.Model.Coords.V35.TravellerTransforms;
+#if (OPT_TRANSFORM_V36)
+using QMicroChipTransform = LaserAlignDX.Model.Coords.V36.QMicroChipTransform;
+using TravellerTransforms = LaserAlignDX.Model.Coords.V36.TravellerTransforms;
 #else
 using QMicroChipTransform = LaserAlignDX.Model.Coords.V33.QMicroChipTransform;
 using TravellerTransforms = LaserAlignDX.Model.Coords.V33.TravellerTransforms;
 #endif
-
 
 namespace LaserAlignDX.Model.Coords
 {
@@ -87,6 +88,7 @@ namespace LaserAlignDX.Model.Coords
         }
     }
 
+
     partial class TravellerTransformFactory
     {
         #region NLOG
@@ -97,7 +99,7 @@ namespace LaserAlignDX.Model.Coords
         /// 根據 新的相機格點 newCamGrid, 格點節距 newPitch 以 CommonBase 為基礎,
         /// 進行線性遷移 生成新的 座標轉換系統
         /// </summary>
-        public static ITravellerTransforms CreateLinearMigration(string name, CarrierEnum carrierID, EzBlocsGrid newCamGrid, QVector newPitch)
+        public static ITravellerTransforms CreateLinearMigration(string name, CarrierEnum carrierID, EzBlocsGrid newCamGrid, QVector newPitch, IList<JxTraySegItem> segsList)
         {
             if (string.IsNullOrEmpty(name) || newCamGrid == null || newPitch == null)
                 return null;
@@ -118,7 +120,7 @@ namespace LaserAlignDX.Model.Coords
                 newTrf.ConfigWorldGridPoints(newCamGrid.Rows, newCamGrid.Cols, newPitch.X, newPitch.Y);
 
                 //(3) [線性遷移] Camera-World 座標轉換系統 : 重新設定 相機格點
-                newTrf.SetCalibCamGrid(carrierID, newCamGrid);
+                newTrf.SetCalibCamGrid(carrierID, newCamGrid, segsList);
 
                 //(4) [線性遷移] Camera-Motor 座標轉換系統 (使用 commonBaseTrf)
                 foreach (SuckerRowEnum suckerID in Enum.GetValues(typeof(SuckerRowEnum)))
@@ -139,7 +141,7 @@ namespace LaserAlignDX.Model.Coords
                     dstCalib.SetAll(camPts, motorPts);
                 }
 
-                //(6) Build
+                //(5) Build
                 newTrf.BuildAll();
 
                 GaUtil.LOG($"線性遷移 [{name}] [{carrierID}] : 完成");
