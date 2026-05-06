@@ -14,7 +14,7 @@
 #endregion
 
 
-namespace LaserAlignDX.Model.Coords.V35
+namespace LaserAlignDX.Model.Coords.V36
 {
     partial class TravellerTransforms
     {

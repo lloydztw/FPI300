@@ -19,7 +19,6 @@ using JetEazy.OpenCV.Viewer;
 using JetEazy.Transform;
 using OpenCvSharp;
 using System;
-using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 

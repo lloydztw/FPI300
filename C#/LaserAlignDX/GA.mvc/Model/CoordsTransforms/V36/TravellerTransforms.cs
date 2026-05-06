@@ -1,9 +1,10 @@
 ﻿#region AUTHOR
 /*
  * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
+ *      2026-04-02 V35 使用 QxCoordsTransform (by LeTian Chang)
  *      2025-08-13 初稿 (by LeTian Chang)
  * 
  * http://www.jeteazy.com
@@ -24,7 +25,7 @@ using System;
 using System.Collections.Generic;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
-namespace LaserAlignDX.Model.Coords.V33
+namespace LaserAlignDX.Model.Coords.V36
 {
     /// <summary>
     /// Traveller106 專案 的 所有座標系
@@ -48,25 +49,31 @@ namespace LaserAlignDX.Model.Coords.V33
         #endregion
 
         #region PRIVATE_TRANSFORM_MEMBERS
+        static int N_CARRIERS => Enum.GetValues(typeof(CarrierEnum)).Length;
         /// <summary>
         /// 理想世界格點
         /// </summary>
-        IWorldGridPoints _worldGrid = new QWorldGridPoints();
+        IWorldGridPoints _worldGrid => getCarrierWorldGrid(CarrierEnum.C1);
+        /// <summary>
+        /// Calib World Grids
+        /// </summary>
+        QWorldGridPointsEx[] _carrierWorldGrids = new QWorldGridPointsEx[N_CARRIERS];
         /// <summary>
         /// 相機校正點 (大校正板 抓到的 pixel 點位) (用於 CameraToWorld 座標轉換的建立)
         /// </summary>
-        EzBlocsGrid[] _calibCamGrids = new EzBlocsGrid[Enum.GetValues(typeof(CarrierEnum)).Length];
+        EzBlocsGrid[] _calibCamGrids = new EzBlocsGrid[N_CARRIERS];
         /// <summary>
         /// 各種 座標轉換 集合
         /// </summary>
-        QTransform[] _transforms = new QTransform[]
+        ITransform[] _transforms = new ITransform[]
         {
-            new QTransform("C1_P", "pix", "mm"),        // 線掃相機C1 <--> world
-            new QTransform("C1_M1S1", "pix", "mm"),     // 線掃相機C1 <--> motors (sucker 1)
-            new QTransform("C1_M1S2", "pix", "mm"),     // 線掃相機C1 <--> motors (sucker 2)
-            new QTransform("C2_P", "pix", "mm"),        // 線掃相機C2 <--> world
-            new QTransform("C2_M2S1", "pix", "mm"),     // 線掃相機C2 <--> motors (sucker 1)
-            new QTransform("C2_M2S2", "pix", "mm"),     // 線掃相機C2 <--> motors (sucker 2)
+            new QxCoordsTransform("C1_P", "pix", "mm"),         // 線掃相機C1 <--> world
+            new QTransform("C1_M1S1", "pix", "mm"),             // 線掃相機C1 <--> motors (sucker 1)
+            new QTransform("C1_M1S2", "pix", "mm"),             // 線掃相機C1 <--> motors (sucker 2)
+
+            new QxCoordsTransform("C2_P", "pix", "mm"),         // 線掃相機C2 <--> world
+            new QTransform("C2_M2S1", "pix", "mm"),             // 線掃相機C2 <--> motors (sucker 1)
+            new QTransform("C2_M2S2", "pix", "mm"),             // 線掃相機C2 <--> motors (sucker 2)
         };
         int getIndex(CarrierEnum C, SuckerRowEnum S)
         {
@@ -147,20 +154,28 @@ namespace LaserAlignDX.Model.Coords.V33
         {
             return _worldGrid;
         }
-        public double CameraWorkDist
+        public double CameraWorkDist { get; set; }
+
+        QWorldGridPointsEx getCarrierWorldGrid(CarrierEnum C)
         {
-            get;
-            set;
+            var grid = _carrierWorldGrids[(int)C];
+            if (grid == null)
+                _carrierWorldGrids[(int)C] = grid = new QWorldGridPointsEx();
+            return grid;
         }
 
         #region 校正時期_函式群
         public IWorldGridPoints ConfigWorldGridPoints(int rows, int cols, double pitchX, double pitchY)
         {
-            if(_worldGrid == null)
-                _worldGrid = new QWorldGridPoints(rows, cols, pitchX, pitchY);
-            else
-                _worldGrid.Config(rows, cols, pitchX, pitchY);
-            return _worldGrid;
+            //if (_worldGrid == null)
+            //    _worldGrid = new QWorldGridPointsEx(rows, cols, pitchX, pitchY);
+            //else
+            //    _worldGrid.Config(rows, cols, pitchX, pitchY);
+            //return _worldGrid;
+
+            var grid = _worldGrid;
+            grid?.Config(rows, cols, pitchX, pitchY);
+            return grid;
         }
 
         public EzBlocsGrid GetCalibCamGrid(CarrierEnum C)
@@ -168,7 +183,7 @@ namespace LaserAlignDX.Model.Coords.V33
             return _calibCamGrids[(int)C];
         }
 
-        public bool SetCalibCamGrid(CarrierEnum C, EzBlocsGrid camGrid, IList<JxTraySegItem> segsList = null)
+        public bool SetCalibCamGrid(CarrierEnum C, EzBlocsGrid camGrid, IList<JxTraySegItem> segsList)
         {
             (var err, var errMsg) = checkCameraGrid(C, camGrid);
             if (err != ErrorCodes.OK)
@@ -177,25 +192,31 @@ namespace LaserAlignDX.Model.Coords.V33
                 return false;
             }
 
-            var old = _calibCamGrids[(int)C];
+            var oldCamGrid = _calibCamGrids[(int)C];
+            var carrierWorldGrid = getCarrierWorldGrid(C);
 
             try
             {
                 _calibCamGrids[(int)C] = camGrid;
 
-                if (_worldGrid == null)
+                if (carrierWorldGrid == null)
                     return false;
+
+                if (camGrid.Rows != carrierWorldGrid.Rows || camGrid.Cols != carrierWorldGrid.Cols)
+                {
+                    _LOG.Warn($"Rows Cols 不一致 : camGrid({camGrid.Rows}x{camGrid.Cols}) != worldGrid.{C}({carrierWorldGrid.Rows}x{carrierWorldGrid.Cols})");
+                }
 
                 // 更新 CameraToWorld 校正點位
                 var trfCameraToWorld = GetCameraPhysicTransform(C);
-                updateCalibPointsToTrf(trfCameraToWorld, camGrid, _worldGrid);
+                updateCalibPointsToTrf(trfCameraToWorld, camGrid, carrierWorldGrid);
 
                 return true;
             }
             finally
             {
-                if (old != camGrid)
-                    old?.Dispose();
+                if (oldCamGrid != camGrid)
+                    oldCamGrid?.Dispose();
             }
         }
 
@@ -221,85 +242,6 @@ namespace LaserAlignDX.Model.Coords.V33
             return err;
         }
 
-#if (OPT_RESERVED_CODE)
-        /// <summary>
-        /// 更新 全域校正 C座標 (Camera) 格點 (停用)
-        /// </summary>
-        public void UpdateCalibPoints(CarrierEnum C, SuckerRowEnum S, EzBlocsGrid calibCamGrid)
-        {
-            if (calibCamGrid == null)
-                return;
-
-            //(0) Camera Coords 四角點
-            int r = calibCamGrid.Rows - 1;
-            int c = calibCamGrid.Cols - 1;
-            var camCornerPts = new[]
-            {
-                calibCamGrid[0,0].Center,
-                calibCamGrid[0,c].Center,
-                calibCamGrid[r,c].Center,
-                calibCamGrid[r,0].Center,
-            };
-
-
-            //(1) 設定 線掃相機 到 馬達 (Carrier + Sucker) 座標轉換 的 校正點位
-            if (true)
-            {
-                var transCameraToMotor = this.GetCameraMotorTransform(C, S);
-                var trfCorners = (ICalibCornerPoints)transCameraToMotor;
-                var motorPts = trfCorners.GetAll(isSrc: false);
-                for (int i = 0; i < camCornerPts.Length; i++)
-                {
-                    var camCoord = camCornerPts[i];
-                    var motorCoord = motorPts[i];
-                    trfCorners.Set(i, camCoord, motorCoord);
-                }
-            }
-
-            //(2) 全域校正之 plc 格點
-            var calibPlcGrid = _calibPlcGrid;
-
-            //(*) 實驗
-            if (false)
-            {
-                //int r0 = r - camGrid.Rows / 4;
-                int r0 = 3;
-                camCornerPts = new[]
-                {
-                    calibCamGrid[r0,0].Center,
-                    calibCamGrid[r0,c].Center,
-                    calibCamGrid[r,c].Center,
-                    calibCamGrid[r,0].Center,
-                };
-                var phyCornerPts = new[]
-                {
-                    calibPlcGrid[r0,0],
-                    calibPlcGrid[r0,c],
-                    calibPlcGrid[r,c],
-                    calibPlcGrid[r,0]
-                };
-
-                var transCameraToPhysic = this.GetCameraPhysicTransform(C);
-                var trfCorners = (ICalibCornerPoints)transCameraToPhysic;
-                for (int i = 0; i < camCornerPts.Length; i++)
-                {
-                    trfCorners.Set(i, camCornerPts[i], phyCornerPts[i]);
-                }
-                return;
-            }
-
-            //(3) 設定 線掃相機 到 Physical (PLC grid) 座標轉換 的 校正點位
-            if (true)
-            {
-                var camPts = toCalibGrid(calibCamGrid);
-                var plcPts = toCalibGrid(calibPlcGrid);
-                var transCP = this.GetCameraPhysicTransform(C);
-                var trfGridPoints = transCP.GetCalibGridPoints();
-                trfGridPoints.SetAll(camPts, plcPts);
-            }
-        }
-#endif
-
         void updateCalibPointsToTrf(ITransform trfCameraToWorld, EzBlocsGrid camGrid, IWorldGridPoints worldGrid)
         {
             if (trfCameraToWorld == null || camGrid == null || worldGrid == null)
@@ -308,30 +250,34 @@ namespace LaserAlignDX.Model.Coords.V33
             if (camGrid.Rows < 2 || camGrid.Cols < 2)
                 return;
 
-            //var calib = trfCameraToWorld.GetCalibGridPoints();
-            //for (int r = 0, rows = camGrid.Rows; r < rows; r++)
-            //{
-            //    for (int c = 0, cols = camGrid.Cols; c < cols; c++)
-            //    {
-            //        var camPt = camGrid.Get(r, c)?.Center;
-            //        var worldPt = _worldGrid.Get(r, c);
-            //        calib.Update(r, c, camPt, worldPt);
-            //    }
-            //}
-
             var calib = trfCameraToWorld.GetCalibGridPoints();
-            int newRows = camGrid.Rows;
-            int newCols = camGrid.Cols;
+            int newRows = Math.Min(camGrid.Rows, worldGrid.Rows);
+            int newCols = Math.Min(camGrid.Cols, worldGrid.Cols);
+
+            //// Rows Cols 必須一致
+            if (camGrid.Rows != worldGrid.Rows || camGrid.Cols != worldGrid.Cols)
+            {
+                //var pitchX = worldGrid.PitchX;
+                //var pitchY = worldGrid.PitchY;
+                //worldGrid.Config(newRows, newCols, pitchX, pitchY);
+                _LOG.Warn($"Rows Cols 不一致 : camGrid({camGrid.Rows}x{camGrid.Cols}) != worldGrid({worldGrid.Rows}x{worldGrid.Cols})");
+            }
+
             var srcPoints = new QVector[newRows, newCols];
             var dstPoints = new QVector[newRows, newCols];
-            for (int r = 0, rows = camGrid.Rows; r < rows; r++)
+
+            for (int r = 0, rows = newRows; r < rows; r++)
             {
-                for (int c = 0, cols = camGrid.Cols; c < cols; c++)
+                for (int c = 0, cols = newCols; c < cols; c++)
                 {
                     srcPoints[r, c] = camGrid.Get(r, c)?.Center;
                     dstPoints[r, c] = _worldGrid.Get(r, c);
+
+                    // 不能有 null point !!!
+                    System.Diagnostics.Debug.Assert(dstPoints[r, c] != null);
                 }
             }
+
             calib.SetAll(srcPoints, dstPoints);
         }
         #endregion
@@ -482,13 +428,22 @@ namespace LaserAlignDX.Model.Coords.V33
 
     partial class TravellerTransforms
     {
+        #region 外掛不連續區塊
+        public void SetSegments(CarrierEnum C, IList<JxTraySegItem> segsList)
+        {
+            var camGrid = _calibCamGrids[(int)C];
+            //_worldGridEx?.SetSegments(camGrid, segsList);
+            getCarrierWorldGrid(C)?.SetSegments(camGrid, segsList);
+        }
+        #endregion
+
         #region 跑線時期_函式群
 
         public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId,
-                                                out QVector camCoord,
-                                                out QVector worldCoord,
-                                                out QVector s1MotorCoord,
-                                                out QVector s2MotorCoord)
+                                                    out QVector camCoord,
+                                                    out QVector worldCoord,
+                                                    out QVector s1MotorCoord,
+                                                    out QVector s2MotorCoord)
         {
             #region DEFAULT_VALUES
             ErrorCodes errCode;
@@ -514,171 +469,44 @@ namespace LaserAlignDX.Model.Coords.V33
             var transCM2 = this.GetCameraMotorTransform(C, SuckerRowEnum.S2);
             var transCP = this.GetCameraPhysicTransform(C);
 
-            //(4.1) 計算 (使用 馬達座標)
-            if (OPT_CALIB_GRID_USING_MOTOR_COORD)
-            {
-                //(4.1) 檢查 Runtime CamGrid
-                //var runtimeCamGrid = C == CarrierEnum.C1 ? _runtimeCamGridC1 : _runtimeCamGridC2;
-                var runtimeCamGrid = _calibCamGrids[(int)C];
-                (errCode, errMsg) = checkCameraGrid(C, runtimeCamGrid);
-                if (errCode != ErrorCodes.OK)
-                    return (errCode, errMsg);
+            //-----------------------------------------------------------------------------
+            // REV_2026-03-31 
+            //-----------------------------------------------------------------------------
+            bool debugVerify = false;
 
-                camCoord = runtimeCamGrid.Get(rowId, colId)?.Center;
-                if (camCoord == null)
-                    camCoord = new QVector(0, 0);
-
-                s1MotorCoord = transCM1.Trans(camCoord);
-                s2MotorCoord = transCM2.Trans(camCoord);
-                worldCoord = transCP.Trans(camCoord);
-            }
-            //(4.2) 使用 World Coords
-            else
+            //(4) 計算 (使用 World To Camera To Motor 座標轉換)
+            if (true)
             {
-                // (r,c) -> World
+                // (row, col) -> World
                 worldCoord = _worldGrid.Get(rowId, colId);
+
                 // World -> Camera
                 camCoord = transCP.InvTrans(worldCoord);
+
+                // VERIFY
+                if (debugVerify)
+                {
+                    var camCoordRC = _calibCamGrids[(int)C].Get(rowId, colId).Center;
+                    var delta = (camCoordRC - camCoord);
+                    if (delta.NormLength > 0.005)
+                        System.Diagnostics.Debug.WriteLine(delta);
+                }
+
                 // Camera -> Motors1
                 s1MotorCoord = transCM1.Trans(camCoord);
                 // Camera -> Motors2
                 s2MotorCoord = transCM2.Trans(camCoord);
             }
 
-            //(6) Return value
+            //(5) Return value
             return (ErrorCodes.OK, null);
         }
 
-
         public (ErrorCodes, string) GetCoordsRef(CarrierEnum C, out QVector camCoord, out QVector s1MotorCoord, out QVector s2MotorCoord)
         {
-            // 取出 (row=0, col=0) 格點, 當 PLC 參考點
+            // 取出 (row=0, col=0) 格位, 當 PLC 參考點
             return GetNodeCoords(C, 0, 0, out camCoord, out var _, out s1MotorCoord, out s2MotorCoord);
         }
-
-
-#if (OPT_OLD_CODE)
-        /// <summary>
-        /// 計算 PLC 補償量
-        /// </summary>
-        public (QVector, QVector) CalcPlcDetailCompensation(CarrierEnum C, SuckerRowEnum S, QVector camPt, int rowId, int colId)
-        {
-            if (_runtimePlcGrid == null)
-                return (new QVector(0, 0), new QVector(0, 0));
-
-            // P 目標值 (world)
-            var targetWorldPt = _runtimePlcGrid[rowId, colId];
-
-            // 目標值 轉換至 Camera Coords
-            ITransform transCP = GetCameraPhysicTransform(C);
-            var targetCamPt = transCP.InvTrans(targetWorldPt);
-
-            // 目標值 轉換至 Motor Coords
-            ITransform transCM = GetCameraMotorTransform(C, S);
-            var targetMotorPt = transCM.Trans(targetCamPt);
-
-            // 像測現值 轉換至 Motor Coords
-            var motorPt = transCM.Trans(camPt);
-
-            // 像測現值 轉換至 World Coords
-            var curWorldPt = transCP.Trans(camPt);
-
-            // 自我轉換的誤差
-            var err = targetWorldPt - curWorldPt;
-
-            // 補償量
-            var delta = targetMotorPt - motorPt;
-
-            return (delta, err);
-        }
-#endif
-
-#if (OPT_OLD_CODE)
-        /// <summary>
-        /// 計算 PLC 補償量
-        /// </summary>
-        (QVector, QVector) CalcPlcCompensation_000(CarrierEnum C, QVector camPt, int rowId, int colId)
-        {
-            if (_runtimePlcGrid == null)
-                return (new QVector(0, 0), new QVector(0, 0));
-
-            //(1) 目標值 P (World Coords)
-            var targetWorldPt = _runtimePlcGrid[rowId, colId];
-
-            //(2) 目標值 P 轉換至 Camera Coords
-            ITransform transCP = GetCameraPhysicTransform(C);
-            var targetCamPt = transCP.InvTrans(targetWorldPt);
-
-            //(3) 像測現值 轉換至 World Coords
-            var curWorldPt = transCP.Trans(camPt);
-
-            //(4) World Coordinates 的差異
-            var worldError = targetWorldPt - curWorldPt;
-
-            //(5) 目標值 P 轉換至 Motor Coords
-            ITransform transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
-            ITransform transCM2 = GetCameraMotorTransform(C, SuckerRowEnum.S2);
-            var targetMotorPt1 = transCM1.Trans(targetCamPt);
-            var targetMotorPt2 = transCM2.Trans(targetCamPt);
-
-            //(6) 像測現值 轉換至 Motor Coords
-            var motorPt1 = transCM1.Trans(camPt);
-            var motorPt2 = transCM2.Trans(camPt);
-
-            //(7) 馬達補償量
-            var delta1 = targetMotorPt1 - motorPt1;
-            var delta2 = targetMotorPt2 - motorPt2;
-            var motorDelta = (delta1.NormLengthSQ < delta2.NormLengthSQ) ? delta1 : delta2;
-
-            return (motorDelta, worldError);
-        }
-
-        /// <summary>
-        /// 計算 PLC 補償量
-        /// </summary>
-        (QVector, QVector) CalcPlcCompensation_001(CarrierEnum C, QVector camPt, int rowId, int colId)
-        {
-            //(0) Condition
-            if (_runtimePlcGrid == null)
-            {
-                return CalcPlcCompensation_000(C, camPt, rowId, colId);
-            }
-
-            //(1) CamBase and SuckerBase
-            (var err, var errMsg) = GetCoordsRef(C, out var cam_base, out var sucker1_base, out var sucker2_base);
-            if (err != ErrCodes.OK)
-            {
-                return CalcPlcCompensation_000(C, camPt, rowId, colId);
-            }
-
-            //(2) trans Camera To Motor
-            ITransform transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
-            ITransform transCM2 = GetCameraMotorTransform(C, SuckerRowEnum.S2);
-
-            //(3) 目標值 (Motor Coords)
-            var plcGridPoint = _runtimePlcGrid[rowId, colId];
-            var sucker1_motor_target = sucker1_base + plcGridPoint;
-            var sucker2_motor_target = sucker2_base + plcGridPoint;
-
-            //(4) 像測現值 轉換至 Motor Coords
-            var s1_motor_cur = transCM1.Trans(camPt);
-            var s2_motor_cur = transCM2.Trans(camPt);
-
-            //(5) 馬達補償量
-            var delta1 = s1_motor_cur - sucker1_motor_target;
-            var delta2 = s2_motor_cur - sucker2_motor_target;
-
-            //(6) 像測現值 轉換至 World Coords
-            ITransform transCP = GetCameraPhysicTransform(C);
-            var targetWorldPt = plcGridPoint;
-            var curWorldPt = transCP.Trans(camPt);
-
-            //(7) World Diff (參考)
-            var worldErr = targetWorldPt - curWorldPt;
-
-            return (delta1, worldErr);
-        }
-#endif
 
         /// <summary>
         /// 根據 像測點 camPt 與 目標格點 (rowId, colID), 
@@ -687,31 +515,69 @@ namespace LaserAlignDX.Model.Coords.V33
         /// <returns>(馬達補償量, 世界座標差值)</returns>
         public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
         {
-            // 根據 (rowId, colId) 取得 載台C 格位節點 之 以下座標:
-            //      world_target 格點的 世界座標
-            //      s1_target    格點的 吸嘴1 +馬達座標
-            //      s2_target    格點的 吸嘴2 馬達座標
-            (var err, var errMsg) = GetNodeCoords(C, rowId, colId, out var _, out var world_target, out var s1_target, out var s2_target);
-            if (err != ErrorCodes.OK)
+            ErrorCodes err;
+            string errMsg;
+
+            //(1) 取得 馬達 左上角 (row=0, col=0) 點位 的 參考座標 (這個也是 PC 會寫給 PLC 的參考座標)
+            (err, errMsg) = GetNodeCoords(C, 0, 0, out var _, out var _, out var s1_org, out var s2_org);
+
+            var pitchX = _worldGrid.PitchX;
+            var pitchY = _worldGrid.PitchY;
+            var pitchVect = new QVector(pitchX * colId, pitchY * rowId);
+
+            //(2) PLC 天真的推算 (rowId, colID) 格位中心 所在的 馬達座標 (德龍預想值)
+            var s1_naive = s1_org + pitchVect;
+            var s2_naive = s2_org + pitchVect;
+
+            //(2.1) PLC 處理 不連續區段
+            var carrierWorldGrid = getCarrierWorldGrid(C);
+            if (carrierWorldGrid != null && carrierWorldGrid.HasOffsets())
             {
-                return (new QVector(0, 0), new QVector(0, 0));
+                //=========================================================
+                // 目前只處理 row jump (offsetY)
+                //=========================================================
+                double accumOffsetY = 0;
+                for (int row = rowId; row >= 0; row--)
+                {
+                    var offset = carrierWorldGrid.GetSegmentOffset(row, colId);
+                    if (offset != null)
+                        accumOffsetY += offset.Y;
+                }
+                s1_naive.Y += accumOffsetY;
+                s2_naive.Y += accumOffsetY;
             }
 
+            //(3) 根據 (rowId, colId) 取得 載台C 格位中心 之 以下座標:
+            ////      world_node 格位中心的 世界座標
+            ////      s1_node    格位中心的 吸嘴1 馬達座標
+            ////      s2_node    格位中心的 吸嘴2 馬達座標
+            //(err, errMsg) = GetNodeCoords(C, rowId, colId, out var _, out var world_node, out var _, out var _);
+            //if (err != ErrorCodes.OK)
+            //{
+            //    return (new QVector(0, 0), new QVector(0, 0));
+            //}
+            var world_node = _worldGrid?.Get(rowId, colId);
             var transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
             var transCM2 = GetCameraMotorTransform(C, SuckerRowEnum.S2);
             var transCP = GetCameraPhysicTransform(C);
 
-            // 由 像測點 推算 對定馬達值
+            //(4) 由 像測點 推算 對應 馬達座標值
             var s1_current = transCM1.Trans(camPt);
             var s2_current = transCM2.Trans(camPt);
-            // 由 像測點 推算 對應 世界值
+
+            //(5) 由 像測點 推算 對應 世界座標值
             var world_current = transCP.Trans(camPt);
 
-            // 注意: 德龍補償量 == 量測現值 - 目標值
-            var motorDelta = s1_current - s1_target;
+            //(6) 【德龍補償量】 == 量測現值 - 德龍預想值
+            //// var naiveDelta = s1_node - s1_naive;
+            //// var motorDelta = s1_current - s1_node;
+            //// motorDelta = motorDelta + naiveDelta;
+            var motorDelta = s1_current - s1_naive;
+            var motorDelta2 = s2_current - s2_naive;
+            //motorDelta = (motorDelta + motorDelta2) * 0.5;
 
-            // WorldDetla
-            var worldDelta = world_current - world_target;
+            //(7) WorldDetla (調試用)
+            var worldDelta = world_node != null ? world_current - world_node : world_current;
 
             return (motorDelta, worldDelta);
         }

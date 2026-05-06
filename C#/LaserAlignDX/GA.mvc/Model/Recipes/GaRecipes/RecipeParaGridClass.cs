@@ -64,7 +64,7 @@ namespace LaserAlignDX.BasicSpace
 
         //格位間距Y
         [CategoryAttribute(cat0), DescriptionAttribute("單位 mm")]
-        [DisplayName("4.格位間距X")]
+        [DisplayName("4.格位間距Y")]
         [Browsable(true)]
         [ReadOnly(true)]
         public string PitchYStr
