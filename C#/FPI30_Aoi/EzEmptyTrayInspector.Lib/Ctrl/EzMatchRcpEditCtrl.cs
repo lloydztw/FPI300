@@ -15,19 +15,16 @@
 
 using AwFramework.Gui;
 using AwFramework.Util;
-using BrightIdeasSoftware;
 using EzAoiEmptyTrayInspector.Gui;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
-using LeTian.JxProps;
 using LeTian.JxProps.Gui;
 using LeTian.JxRecipesTool.Ctrl;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Threading;
 using System.Windows.Forms;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviGoldenBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
@@ -56,7 +53,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
         #region GLOBAL_DATA
         IxEmptyTrayInspector _model => Global.AoiModel;
-        JxAppSettings _appSettings => Global.AppSettings;
+        //JxAppSettings _appSettings => Global.AppSettings;
         #endregion
 
         #region PRIVATE_RUNTIME_DATA
@@ -93,7 +90,6 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
         #region PRIVATE_INTERACTORS
         List<CviBoundBox> _cviGroupBoundBoxes;
-        //CviBoundBox _cviBoundBox;
         CviGoldenBox _cviGoldenBox;
         CviFiltersBox _cviFiltersBox;
         #endregion
@@ -173,7 +169,8 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             if (_segGrpSettings != null)
             {
-                _segGrpSettings.SegsNumber.OnModified += SegsNumber_OnModified;
+                //_segGrpSettings.SegsNumber.OnModified += SegsNumber_OnModified;
+                _segGrpSettings.SegsNumber.OnButtonClicked += SegsNumber_OnButtonClicked;
             }
 
             if (_sideSettings != null)
@@ -227,9 +224,16 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         }
         private void SegsNumber_OnModified(object sender, EventArgs e)
         {
+            // RESERVED
             if (_bypassJxEvents || !_isRcpEdittingMode)
                 return;
             syncSegGroupsNumber();
+        }
+        private void SegsNumber_OnButtonClicked(object sender, EventArgs e)
+        {
+            if (_bypassJxEvents || !_isRcpEdittingMode)
+                return;
+            openSegDetailSettings();
         }
 
         private void _model_OnStateChanged(object sender, EventArgs e)
@@ -281,6 +285,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _cviFiltersBox.ApplyFilters(ID, _imgSource, _sideSettings.RotAngle, _imgViewerWindow);
             }
         }
+        
         void syncSegGroupsNumber()
         {
             if (_segGrpSettings == null)
@@ -311,12 +316,28 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
             _imgViewerWindow?.Invalidate();
         }
+
         void rebuildPropsView()
         {
+#if (OPT_RESERVED)
             var wnd = (_frmOwner as FormAwMain).OpDocker.Window ?? _frmOwner;
             var view = AppUtil.SearchGui<GwPanePropsViewer>(wnd, null) as IxPropsViewer;
             _segGrpSettings.AutoHidden();
             view?.BuildGuiCtrls(_activeRecipe);
+#endif
+        }
+        void openSegDetailSettings()
+        {
+            using (var dlg = new FormSegOffsetSettings())
+            {
+                dlg.DefaultOffsetY = (double)_activeRecipe.TrayMiscSettings.PitchY.Value;
+                dlg.SegsList = _segGrpSettings.SegsList;
+                if (dlg.ShowDialog(_frmOwner) == DialogResult.OK)
+                {
+                    _segGrpSettings.SegsList = dlg.SegsList;
+                    syncSegGroupsNumber();
+                }
+            }
         }
 
         #region CVI_BOX_FUNCTIONS
@@ -386,7 +407,9 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             if (_segGrpSettings == null)
                 return isNumberChanged;
 
-            int targetSegsNum = _segGrpSettings.SegsNumber.Value;
+            //int targetSegsNum = _segGrpSettings.SegsNumber.Value;
+            if (!int.TryParse(_segGrpSettings.SegsNumber.Value, out int targetSegsNum))
+                targetSegsNum = 1;
 
             var jxSegsList = _segGrpSettings?.SegsList;
             if (jxSegsList == null)
@@ -398,10 +421,16 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             // 根據需要 生成新的 CviBox
             for (int i = _cviGroupBoundBoxes.Count; i < targetSegsNum; i++)
             {
-                var cviSegBox = new CviBoundBox(Brushes.Blue, 1, 3);
+                var brush = i % 2 == 0 ? Brushes.Blue : Brushes.DarkBlue;
+                var cviSegBox = new CviBoundBox(brush, 1, 3)
+                {
+                    Text = $"Seg{i}"
+                };
+
                 cviSegBox.OnChanged += (s, e) => update_group_boxes_to_recipe(s);
                 _cviGroupBoundBoxes.Add(cviSegBox);
                 _imgViewer?.AddInteractor(cviSegBox);
+
                 isNumberChanged = true;
             }
 
@@ -462,17 +491,17 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             bool flag = _bypassJxEvents;
             _bypassJxEvents = true;
 
-            // 取得 pitchY
+            //(1) 取得 pitchY
             decimal pitchY = _activeRecipe.TrayMiscSettings.PitchY.Value;
 
-            // 根據 sender 來決定要更新哪一個 CviBox，還是全部更新
+            //(2) 根據 sender 來決定要更新哪一個 CviBox，還是全部更新
             int index = -1;
             if (sender is CviBoundBox cviSegBox)
                 index = _cviGroupBoundBoxes.IndexOf(cviSegBox);
             int iStart = index >= 0 ? index : 0;
             int iEnd = index >= 0 ? index + 1 : _cviGroupBoundBoxes.Count;
 
-            // 更新 _segGrpSettings 的 JxTraySegItem
+            //(3) 更新 _segGrpSettings 的 JxTraySegItem
             for (int i = iStart; i < iEnd; i++)
             {
                 _segGrpSettings.UpdateSegment(i, _cviGroupBoundBoxes[i].Box, pitchY);

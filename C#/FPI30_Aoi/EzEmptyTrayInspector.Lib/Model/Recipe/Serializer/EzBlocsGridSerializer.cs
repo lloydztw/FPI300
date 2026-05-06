@@ -18,11 +18,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-
 namespace EzAoiEmptyTrayInspector.Model
 {
     public class EzBlocsGridSerializer
     {
+        const string VERSION = "V3";
         const char SEP_HEADER = '#';
         const char SEP_BLOCS = ':';
 
@@ -31,48 +31,92 @@ namespace EzAoiEmptyTrayInspector.Model
             if (grid == null)
                 return "";
 
+            StringBuilder sb = new StringBuilder();
+
             int rows = grid.Rows;
             int cols = grid.Cols;
-            string headStr = $"{rows},{cols}{SEP_HEADER}";
-            return headStr + SerializeBlocs(grid.IterBlocs());
+            var pitch = grid.GetPitch();
+
+            // HEADER
+            sb.Append($"{rows},{cols},{pitch.X:0.000},{pitch.Y:0.000},{VERSION}").Append(SEP_HEADER);
+
+            // BLOCS
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    var bloc = grid.Get(r, c);
+                    if (bloc == null) continue;
+                    sb.Append(Serialize(r, c, bloc)).Append(SEP_BLOCS);
+                }
+            }
+
+            return sb.ToString().TrimEnd(SEP_BLOCS);
         }
         public bool Deserialize(string str, out EzBlocsGrid grid)
         {
             grid = null;
+
             try
             {
                 if (string.IsNullOrEmpty(str))
                     return false;
 
-                int rows = 0;
-                int cols = 0;
-
-                //(1) 嘗試取得 rows, cols
-                var strs = str.Split(SEP_HEADER);
-                if (strs.Length >= 2)
+                while (true)
                 {
-                    var headStrs = strs[0].Split(',');
-                    if (headStrs.Length >= 2)
+                    //(1) HEADER 嘗試取得 rows, cols, pitchX, pitchY, version
+                    var strs = str.Split(SEP_HEADER);
+                    if (strs.Length < 2)
+                        break;
+
+                    var header = strs[0];
+                    var headStrs = header.Split(',');
+                    if (headStrs.Length < 5)
+                        break;
+
+                    var ver = headStrs[4].Trim();
+
+                    if (!int.TryParse(headStrs[0], out int rows) ||
+                        !int.TryParse(headStrs[1], out int cols) ||
+                        !double.TryParse(headStrs[2], out double pitchX) ||
+                        !double.TryParse(headStrs[3], out double pitchY))
+                        break;
+
+                    //if (string.Compare(ver, VERSION) < 0)
+                    //    break;
+
+                    if (rows <= 0 || cols <= 0)
+                        break;
+
+                    //(2) place holder
+                    var blocsHolder = new EzBloc[rows, cols];
+                    EzBloc bloc1 = null;
+
+                    //(3) Deserialize Blocs
+                    var lines = strs[1].Split(SEP_BLOCS);
+                    foreach (var line in lines)
                     {
-                        str = strs[strs.Length - 1];
-                        int.TryParse(headStrs[0], out rows);
-                        int.TryParse(headStrs[1], out cols);
+                        if (Deserialize(line, out int row, out int col, out var bloc) && bloc != null)
+                            blocsHolder[row, col] = bloc1 = bloc;
                     }
-                }
 
-                //(2) 新版的 Deserializer
-                if (rows > 0 && cols > 0)
-                {
-                    str = strs[strs.Length - 1];
-                    DeserializeBlocs(str, out List<EzBloc> blocs);
+                    //(4) Grid Builder
                     var builder = new EzBlocsGridBuilder();
-                    grid = builder.Build(blocs, targetRows: rows, targetCols: cols);
-                    if (grid != null)
-                        return true;
+                    grid = builder.BuildEmptyGrid(new List<EzBloc>() { bloc1 }, 1, 1, new JetEazy.QMath.QVector2(pitchX, pitchY));
+                    for (int r = 0; r < rows; r++)
+                        for (int c = 0; c < cols; c++)
+                            grid.Set(r, c, blocsHolder[r, c]);
+
+                    grid.ColMin = 0;
+                    grid.RowMin = 0;
+                    grid.RebuildRowColTags();
+                    return true;
                 }
 
-                //(3) 使用舊的 Deserializer
-                return DeserializeOld(str, out grid);
+
+                //(5) 使用舊的 Deserializer
+                var ssOld = new V0.EzBlocsGridSerializer();
+                return ssOld.Deserialize(str, out grid);
             }
             catch (Exception ex)
             {
@@ -81,95 +125,40 @@ namespace EzAoiEmptyTrayInspector.Model
             return false;
         }
 
-        bool DeserializeOld(string str, out EzBlocsGrid grid)
+        #region PRIVATE_FUNCTIONS
+        string Serialize(int row, int col, EzBloc bloc)
         {
-            grid = null;
-            try
-            {
-                if (string.IsNullOrEmpty(str))
-                    return false;
-
-                bool ok = DeserializeBlocs(str, out List<EzBloc> blocs);
-                if (!ok)
-                    return false;
-
-                var builder = new EzBlocsGridBuilder();
-                grid = builder.Build(blocs);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine(ex.Message);
-            }
-            return false;
+            if (bloc != null)
+                return $"{row},{col},{bloc.Rect.X},{bloc.Rect.Y},{bloc.Rect.Width},{bloc.Rect.Height},{bloc.Score:0.000}";
+            return "";
         }
-
-        string SerializeBlocs(IEnumerable<EzBloc> blocs)
+        bool Deserialize(string str, out int row, out int col, out EzBloc bloc)
         {
-            int count = 0;
-            var sb = new StringBuilder();
-
-            foreach (var bloc in blocs)
-            {
-                if (bloc != null)
-                {
-                    string str = Serialize(bloc);
-                    sb.Append(str).Append(SEP_BLOCS);
-                    count++;
-                }
-            }
-
-            if (count == 0)
-                return "";
-
-            return sb.ToString().Trim(SEP_BLOCS);
-        }
-        bool DeserializeBlocs(string str, out List<EzBloc> blocs)
-        {
-            blocs = null;
+            bloc = null;
+            row = -1;
+            col = -1;
 
             if (string.IsNullOrEmpty(str))
                 return false;
 
-            blocs = new List<EzBloc>();
-
-            var tokens = str.Split(SEP_BLOCS);
-            foreach (var token in tokens)
-            {
-                if (Deserialize(token, out EzBloc b))
-                    blocs.Add(b);
-            }
-
-            return blocs.Count > 0;
-        }
-
-        public string Serialize(EzBloc bloc)
-        {
-            if (bloc != null)
-                return $"{bloc.Rect.X},{bloc.Rect.Y},{bloc.Rect.Width},{bloc.Rect.Height},{bloc.Score:0.000}";
-            return "";
-        }
-        public bool Deserialize(string str, out EzBloc bloc)
-        {
-            bloc = null;
-            
-            if (string.IsNullOrEmpty(str))
-                return false; 
-            
             var strs = str.Split(',');
-            if (strs.Length < 5)
+            if (strs.Length < 7)
                 return false;
 
             bool ok = true;
-            ok &= int.TryParse(strs[0], out int x);
-            ok &= int.TryParse(strs[1], out int y);
-            ok &= int.TryParse(strs[2], out int w);
-            ok &= int.TryParse(strs[3], out int h);
-            ok &= double.TryParse(strs[4], out double score);
+            int i = 0;
+            ok &= int.TryParse(strs[i++], out row);
+            ok &= int.TryParse(strs[i++], out col);
+            ok &= int.TryParse(strs[i++], out int x);
+            ok &= int.TryParse(strs[i++], out int y);
+            ok &= int.TryParse(strs[i++], out int w);
+            ok &= int.TryParse(strs[i++], out int h);
+            ok &= double.TryParse(strs[i++], out double score);
             if (ok)
                 bloc = new EzBloc(new System.Drawing.Rectangle(x, y, w, h), score);
-
+            ok &= (row >= 0 && col >= 0 && bloc != null);
             return ok;
         }
+        #endregion
     }
 }

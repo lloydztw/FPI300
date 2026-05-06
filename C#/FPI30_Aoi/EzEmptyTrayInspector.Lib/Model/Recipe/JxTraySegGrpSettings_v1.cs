@@ -20,18 +20,14 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 
-namespace EzAoiEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Model.V1
 {
     using JxRect = JxBase<Rectangle>;
 
-    public class JxTraySegGrpSettings : JxContainer
+    public class JxTraySegGrpSettings : JxListContainer<JxTraySegItem>
     {
+        //public JxInt SegsNumber = new JxInt("SegsNumber", "群組數量", 1, new Range(1, 3));
         public JxText SegsNumber = new JxText("SegsNumber", "1", "群組數量", hasDetailButton: true);
-
-        #region INTERNAL_DATA
-        public JxTraySegItemsList _SegsItems = new JxTraySegItemsList();
-        #endregion
-
         public JxTraySegGrpSettings() : this(false)
         {
         }
@@ -44,10 +40,9 @@ namespace EzAoiEmptyTrayInspector.Model
         }
         public override void OnBindingSubItems()
         {
-            //綁定以下成員, 會自動顯示在GUI編輯視窗.
+            // 綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
                 SegsNumber,
-                _SegsItems,
             });
             base.OnBindingSubItems();
             syncSegmentsNumber();
@@ -56,26 +51,73 @@ namespace EzAoiEmptyTrayInspector.Model
         #region PRIVATE_HELPER_FUNCTIONS
         private void initOneItem()
         {
-            int lstCount = _SegsItems.ListCount;
+            var jxList = this;
+            int lstCount = jxList.ListCount;
             if (lstCount == 0)
             {
                 bool flag = Modified;
-                _SegsItems.Add(new JxTraySegItem(0));
-                syncSegItems();
+                jxList.Add(new JxTraySegItem(0));
                 syncSegmentsNumber();
                 Modified = flag;
             }
         }
         private void syncSegmentsNumber()
         {
-            var lstCount = _SegsItems.ListCount.ToString();
+            var lstCount = this.ListCount.ToString();
             if (SegsNumber.Value != lstCount)
                 SegsNumber.Value = lstCount;
         }
         private void syncSegItems()
         {
-            _SegsItems?.SyncAndSort();
-            _DUMP(SegsList);
+            var keyNames = this.GetKeyNames().ToList();
+            keyNames.Remove(SegsNumber.Name);
+
+            var jxList = this.SegsList;
+
+            // 重置ID並保持Modified狀態, 以確保ID與索引一致.
+            for (int id = 0; id < jxList.Count; id++)
+            {
+                var item = jxList[id];
+                bool flag = item.Modified;
+                item.SetID(id);
+                item.Modified = flag;
+            }
+
+            for (int id = 0; id < jxList.Count; id++)
+            {
+                var segItem = jxList[id];
+                segItem.SetHidden(id <= 0);
+
+                string name = segItem.Name;
+                if (keyNames.Contains(name))
+                {
+                    var old = this[name];
+                    if (old != segItem)
+                    {
+                        if (old is JxTraySegItem segItem2)
+                        {
+                            // 將 segItem 複製到 segItem2, 保持Modified狀態, 以確保ID與索引一致.
+                            bool flag = segItem.Modified;
+                            old.CopyFrom(segItem);
+                            segItem2.SetHidden(id <= 0);
+                            segItem2.Modified = flag;
+                            // 保留 segItem2
+                            jxList[id] = segItem2;
+                        }
+                        else
+                        {
+                            this[name] = segItem;
+                        }
+                    }
+                }
+            }
+
+            var segNames = Array.ConvertAll(_DynamicItems_, seg => seg.Name);
+            foreach (var kName in keyNames)
+            {
+                if (!segNames.Contains(kName))
+                    this[kName] = null;
+            }
         }
         #endregion
 
@@ -85,50 +127,27 @@ namespace EzAoiEmptyTrayInspector.Model
             get
             {
                 initOneItem();
-                return _SegsItems;
-            }
-            set
-            {
-                var src = value;
-                if (src != _SegsItems && src != null && src.Count > 0)
-                {
-                    _SegsItems._DynamicItems_ = src.ToArray();
-                    syncSegItems();
-                    syncSegmentsNumber();
-                }
+                return this;
             }
         }
         public void UpdateSegment(int id, Rectangle boundRect, decimal yOffset)
         {
             bool isChanged = false;
 
-            var jxList = _SegsItems;
-
-            JxTraySegItem item;
+            var jxList = this;
 
             if (id >= jxList.ListCount)
+                jxList.Add(new JxTraySegItem(id));
+
+            var item = jxList[id];
+            if (item == null)
             {
-                jxList.Add(item = new JxTraySegItem(id));
+                item = jxList[id] = new JxTraySegItem(id);
                 item.Modified = true;
                 isChanged = true;
-            }
-            else
-            {
-                item = jxList[id];
-                if (item == null)
-                {
-                    item = jxList[id] = new JxTraySegItem(id);
-                    item.Modified = true;
-                    isChanged = true;
-                }
             }
 
-            if (item.BoundBox.Value != boundRect)
-            {
-                item.BoundBox.Value = boundRect;
-                item.Modified = true;
-                isChanged = true;
-            }
+            item.BoundBox.Value = boundRect;
 
             if (id > 0 && item.OffsetY.Value <= 0m && yOffset > 0m && item.OffsetY.Value != yOffset)
             {
@@ -137,26 +156,20 @@ namespace EzAoiEmptyTrayInspector.Model
                 isChanged = true;
             }
 
+            syncSegItems();
 
-            if (isChanged)
-            {
-                syncSegItems();
-                syncSegmentsNumber();
-
+            if(isChanged)
                 Modified = true;
-            }
         }
         public void RemoveSegments(int targetCount)
         {
             bool isChanged = false;
 
-            syncSegItems();
-
-            var jxList = _SegsItems;
+            var jxList = this;
             while (jxList.ListCount > targetCount)
             {
                 int id = jxList.ListCount - 1;
-                //jxList[id].SetHidden(true);
+                jxList[id].SetHidden(true);
                 jxList.RemoveAt(id);
                 isChanged = true;
             }
@@ -168,54 +181,9 @@ namespace EzAoiEmptyTrayInspector.Model
                 Modified = true;
             }
         }
-
-        #region DEBUG_FUNCTIONS
-        void _DUMP(IList<JxTraySegItem> segs)
+        public void AutoHidden()
         {
-            if (segs == null)
-                return;
-
-            System.Diagnostics.Debug.WriteLine($"\n{this.GetType().Name}:");
-            foreach (var seg in segs)
-            {
-                System.Diagnostics.Debug.WriteLine($"{seg} @ {seg.BoundBox.Value} @ {seg.OffsetY.Value:0.000}");
-            }
-        }
-        #endregion
-    }
-
-    public class JxTraySegItemsList : JxListContainer<JxTraySegItem>
-    {
-        public JxTraySegItemsList() : this("SegsList", "群組成員(Hidden)")
-        {
-        }
-        public JxTraySegItemsList(string name, string desc) : base(name, desc)
-        {
-            SyncAndSort();
-        }
-        public override void OnBindingSubItems()
-        {
-            base.OnBindingSubItems();
-            SyncAndSort();
-        }
-        internal void SyncAndSort()
-        {
-            if (!IsHidden())
-            {
-                Description += "(Hidden)";
-            }
-
-            var items = _DynamicItems_;
-            Array.Sort(items, (a, b) => a.GetID() - b.GetID());
-            for (int i = 0; i < items.Length; i++)
-            {
-                items[i].SetID(i);
-            }
-            foreach (var kName in GetKeyNames())
-            {
-                this[kName] = null;
-            }
-            BindItems(items);
+            syncSegItems();
         }
     }
 
