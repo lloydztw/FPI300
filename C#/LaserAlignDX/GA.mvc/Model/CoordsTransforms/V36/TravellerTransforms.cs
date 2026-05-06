@@ -51,11 +51,7 @@ namespace LaserAlignDX.Model.Coords.V36
         #region PRIVATE_TRANSFORM_MEMBERS
         static int N_CARRIERS => Enum.GetValues(typeof(CarrierEnum)).Length;
         /// <summary>
-        /// 理想世界格點
-        /// </summary>
-        IWorldGridPoints _worldGrid => getCarrierWorldGrid(CarrierEnum.C1);
-        /// <summary>
-        /// Calib World Grids
+        /// Carrier World Grids (理想世界格點)
         /// </summary>
         QWorldGridPointsEx[] _carrierWorldGrids = new QWorldGridPointsEx[N_CARRIERS];
         /// <summary>
@@ -152,16 +148,16 @@ namespace LaserAlignDX.Model.Coords.V36
         }
         public IWorldGridPoints GetWorldGridPoints()
         {
-            return _worldGrid;
+            return getCarrierWorldGrid(CarrierEnum.C1);
         }
         public double CameraWorkDist { get; set; }
 
         QWorldGridPointsEx getCarrierWorldGrid(CarrierEnum C)
         {
-            var grid = _carrierWorldGrids[(int)C];
-            if (grid == null)
-                _carrierWorldGrids[(int)C] = grid = new QWorldGridPointsEx();
-            return grid;
+            int idx = (int)C;
+            if (_carrierWorldGrids[idx] == null)
+                _carrierWorldGrids[idx] = new QWorldGridPointsEx();
+            return _carrierWorldGrids[idx];
         }
 
         #region 校正時期_函式群
@@ -173,7 +169,7 @@ namespace LaserAlignDX.Model.Coords.V36
             //    _worldGrid.Config(rows, cols, pitchX, pitchY);
             //return _worldGrid;
 
-            var grid = _worldGrid;
+            var grid = getCarrierWorldGrid(CarrierEnum.C1);
             grid?.Config(rows, cols, pitchX, pitchY);
             return grid;
         }
@@ -185,6 +181,7 @@ namespace LaserAlignDX.Model.Coords.V36
 
         public bool SetCalibCamGrid(CarrierEnum C, EzBlocsGrid camGrid, IList<JxTraySegItem> segsList)
         {
+            //(0) 檢查 相機格點
             (var err, var errMsg) = checkCameraGrid(C, camGrid);
             if (err != ErrorCodes.OK)
             {
@@ -192,13 +189,13 @@ namespace LaserAlignDX.Model.Coords.V36
                 return false;
             }
 
-            var oldCamGrid = _calibCamGrids[(int)C];
-            var carrierWorldGrid = getCarrierWorldGrid(C);
 
+            var oldCamGrid = _calibCamGrids[(int)C];
             try
             {
                 _calibCamGrids[(int)C] = camGrid;
 
+                var carrierWorldGrid = getCarrierWorldGrid(C);
                 if (carrierWorldGrid == null)
                     return false;
 
@@ -207,7 +204,10 @@ namespace LaserAlignDX.Model.Coords.V36
                     _LOG.Warn($"Rows Cols 不一致 : camGrid({camGrid.Rows}x{camGrid.Cols}) != worldGrid.{C}({carrierWorldGrid.Rows}x{carrierWorldGrid.Cols})");
                 }
 
-                // 更新 CameraToWorld 校正點位
+                //(1) 設定不連續區塊
+                carrierWorldGrid.SetSegments(camGrid, segsList);
+
+                //(2) 更新 CameraToWorld 校正點位
                 var trfCameraToWorld = GetCameraPhysicTransform(C);
                 updateCalibPointsToTrf(trfCameraToWorld, camGrid, carrierWorldGrid);
 
@@ -271,7 +271,7 @@ namespace LaserAlignDX.Model.Coords.V36
                 for (int c = 0, cols = newCols; c < cols; c++)
                 {
                     srcPoints[r, c] = camGrid.Get(r, c)?.Center;
-                    dstPoints[r, c] = _worldGrid.Get(r, c);
+                    dstPoints[r, c] = worldGrid.Get(r, c);
 
                     // 不能有 null point !!!
                     System.Diagnostics.Debug.Assert(dstPoints[r, c] != null);
@@ -396,7 +396,7 @@ namespace LaserAlignDX.Model.Coords.V36
                 return (errCode, errMsg);
             }
         }
-        private (ErrorCodes, string) checkWorldGrid()
+        private (ErrorCodes, string) checkWorldGrid(IWorldGridPoints _worldGrid)
         {
             var errCode = ErrorCodes.OK;
             string errMsg = null;
@@ -428,15 +428,6 @@ namespace LaserAlignDX.Model.Coords.V36
 
     partial class TravellerTransforms
     {
-        #region 外掛不連續區塊
-        public void SetSegments(CarrierEnum C, IList<JxTraySegItem> segsList)
-        {
-            var camGrid = _calibCamGrids[(int)C];
-            //_worldGridEx?.SetSegments(camGrid, segsList);
-            getCarrierWorldGrid(C)?.SetSegments(camGrid, segsList);
-        }
-        #endregion
-
         #region 跑線時期_函式群
 
         public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId,
@@ -460,7 +451,7 @@ namespace LaserAlignDX.Model.Coords.V36
                 return (errCode, errMsg);
 
             //(2) 檢查 World Grid
-            (errCode, errMsg) = checkWorldGrid();
+            (errCode, errMsg) = checkWorldGrid(getCarrierWorldGrid(C));
             if (errCode != ErrorCodes.OK)
                 return (errCode, errMsg);
 
@@ -473,6 +464,7 @@ namespace LaserAlignDX.Model.Coords.V36
             // REV_2026-03-31 
             //-----------------------------------------------------------------------------
             bool debugVerify = false;
+            var _worldGrid = getCarrierWorldGrid(C);
 
             //(4) 計算 (使用 World To Camera To Motor 座標轉換)
             if (true)
@@ -521,6 +513,7 @@ namespace LaserAlignDX.Model.Coords.V36
             //(1) 取得 馬達 左上角 (row=0, col=0) 點位 的 參考座標 (這個也是 PC 會寫給 PLC 的參考座標)
             (err, errMsg) = GetNodeCoords(C, 0, 0, out var _, out var _, out var s1_org, out var s2_org);
 
+            var _worldGrid = getCarrierWorldGrid(C);
             var pitchX = _worldGrid.PitchX;
             var pitchY = _worldGrid.PitchY;
             var pitchVect = new QVector(pitchX * colId, pitchY * rowId);

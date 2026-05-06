@@ -31,13 +31,13 @@ namespace LaserAlignDX.Model.Coords.V36
             }
 
             //_LOG.Info($"載入 [校正參數 (Trf)] @ [{Name}] : {iniFileName}");
-
-            _worldGrid.Load(iniFileName, "GlobalCalibPlcGrid");
+            var worldGrid1 = getCarrierWorldGrid(CarrierEnum.C1);
+            worldGrid1.Load(iniFileName, "GlobalCalibPlcGrid");
 
             var worldGrid2 = getCarrierWorldGrid(CarrierEnum.C2);
             worldGrid2.Load(iniFileName, "GlobalCalibPlcGrid2");
             if (worldGrid2.Rows <= 2 && worldGrid2.Cols <= 2)
-                worldGrid2 = new QWorldGridPointsEx(_worldGrid);
+                worldGrid2 = new QWorldGridPointsEx(worldGrid1);
 
             foreach (var trf in _transforms)
             {
@@ -50,7 +50,7 @@ namespace LaserAlignDX.Model.Coords.V36
         void SaveIni(string iniFileName)
         {
             //_LOG.Info($"寫入 [校正參數 (Trf)] @ [{Name}] : {iniFileName}");
-            _worldGrid.Save(iniFileName, "GlobalCalibPlcGrid");
+            getCarrierWorldGrid(CarrierEnum.C1).Save(iniFileName, "GlobalCalibPlcGrid");
             getCarrierWorldGrid(CarrierEnum.C2).Save(iniFileName, "GlobalCalibPlcGrid2");
 
             foreach (var trf in _transforms)
@@ -95,10 +95,11 @@ namespace LaserAlignDX.Model.Coords.V36
                 if (updateToTrf)
                 {
                     var trf = GetCameraPhysicTransform((CarrierEnum)i);
+                    var worldGrid = getCarrierWorldGrid((CarrierEnum)i);
 
-                    updateCalibPointsToTrf(trf, _calibCamGrids[i], _worldGrid);
+                    updateCalibPointsToTrf(trf, _calibCamGrids[i], worldGrid);
 
-                    if (_calibCamGrids[i].Rows != _worldGrid.Rows || _calibCamGrids[i].Cols != _worldGrid.Cols)
+                    if (_calibCamGrids[i].Rows != worldGrid.Rows || _calibCamGrids[i].Cols != worldGrid.Cols)
                     {
                         string msg = $"{GetType().Name}.loadCalibCamGrids : 舊版 EzBlocsGridSerializer 有漏洞, 會損失 不連續的 Grids !!!";
                         _LOG.Error(msg);
