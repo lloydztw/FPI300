@@ -15,7 +15,6 @@
 
 using LeTian.JxProps;
 
-
 namespace EzAoiEmptyTrayInspector.Model
 {
     /// <summary>

@@ -44,7 +44,7 @@
             this.numSegsNumber.Font = new System.Drawing.Font("微軟正黑體", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.numSegsNumber.Location = new System.Drawing.Point(141, 17);
             this.numSegsNumber.Maximum = new decimal(new int[] {
-            5,
+            3,
             0,
             0,
             0});

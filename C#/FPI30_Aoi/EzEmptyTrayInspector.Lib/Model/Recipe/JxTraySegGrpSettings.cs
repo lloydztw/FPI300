@@ -27,7 +27,7 @@ namespace EzAoiEmptyTrayInspector.Model
     public class JxTraySegGrpSettings : JxContainer
     {
         public JxText SegsNumber = new JxText("SegsNumber", "1", "群組數量", hasDetailButton: true);
-        
+
         #region INTERNAL_DATA
         public JxTraySegItemsList _SegsItems = new JxTraySegItemsList();
         #endregion
@@ -167,9 +167,6 @@ namespace EzAoiEmptyTrayInspector.Model
                 syncSegmentsNumber();
                 Modified = true;
             }
-        }
-        public void AutoHidden()
-        {
         }
 
         #region DEBUG_FUNCTIONS

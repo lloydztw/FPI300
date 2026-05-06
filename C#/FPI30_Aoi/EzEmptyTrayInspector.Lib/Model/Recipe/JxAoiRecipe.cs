@@ -33,6 +33,8 @@ namespace EzAoiEmptyTrayInspector.Model
         {
             Description = _DESC;
             System.Diagnostics.Debug.WriteLine($"{GetType().Name} [{Name}] 建構 {++_debugCount}");
+            if (TraySegGrpSettings == null)
+                TraySegGrpSettings = new JxTraySegGrpSettings();
         }
         public override void OnBindingSubItems()
         {
@@ -73,11 +75,10 @@ namespace EzAoiEmptyTrayInspector.Model
 
         public override void Load(string fileName)
         {
-            base.Load(fileName);
+            //>>> 嘗試載入舊格式
+            migrateLoad(fileName);
             //>>> 參數版本升級, 進行必要的遷移處理.
             migrateBoundBox();
-            //>>> 升級後的參數, 預設在GUI編輯視窗中是隱藏的, 需要使用者手動展開查看.
-            TraySegGrpSettings.AutoHidden();
         }
         public override void Save(string fileName)
         {
@@ -85,6 +86,40 @@ namespace EzAoiEmptyTrayInspector.Model
         }
 
         #region PRIVATE_FUNCTIONS
+        void migrateLoad(string fileName)
+        {
+            if (!System.IO.File.Exists(fileName))
+                return;
+
+            try
+            {
+                // 如果是新版本
+                bool isCurrentVersion = System.IO.File.ReadAllText(fileName).Contains(TraySegGrpSettings.GetType().Name);
+                if (isCurrentVersion)
+                {
+                    base.Load(fileName);
+                    return;
+                }
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                using (var old = new V0.JxAoiRecipe())
+                {
+                    old.Load(fileName);
+                    TrayMiscSettings.CopyFrom(old.TrayMiscSettings);
+                    VisionSettings.CopyFrom(old.VisionSettings);
+                    TrayMiscSettings.Modified = false;
+                    VisionSettings.Modified = false;
+                }
+            }
+            catch
+            {
+            }
+        }
         void migrateBoundBox()
         {
             var defaultRect = VisionSettings.Match.BoundBox.Value;
