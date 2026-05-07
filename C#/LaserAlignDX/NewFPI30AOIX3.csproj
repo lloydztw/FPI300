@@ -23,7 +23,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;OPT_CALIB_V5 | OPT_TRANSFORM_V36 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPT_TRANSFORM_V36 | OPT_CALIB_V5 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -34,7 +34,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;OPT_CALIB_V5 | OPT_TRANSFORM_V36 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <DefineConstants>TRACE;OPT_TRANSFORM_V36 | xOPT_CALIB_V5 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -366,6 +366,7 @@
     <Compile Include="App\Prompts.cs" />
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
+    <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v25.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v5.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaBasicMotorUtil.cs" />
@@ -374,6 +375,7 @@
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorSafetyChecker.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorZCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaCommonMotorJogCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl_v25.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
@@ -400,6 +402,12 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v25.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v25.Designer.cs">
+      <DependentUpon>FormCalibrationTool_v25.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v5.cs">
       <SubType>Form</SubType>
@@ -470,6 +478,12 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.Designer.cs">
       <DependentUpon>FormLightControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.Designer.cs">
+      <DependentUpon>FormRecipeEditor_v25.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -504,6 +518,7 @@
     <Compile Include="GA.mvc\.Enums\InspectReason.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellsDataCollection.cs" />
     <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellX3Class.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v25.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v5.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v3.cs" />
     <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
@@ -744,6 +759,9 @@
     <EmbeddedResource Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.resx">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v25.resx">
+      <DependentUpon>FormCalibrationTool_v25.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v5.resx">
       <DependentUpon>FormCalibrationTool_v5.cs</DependentUpon>
     </EmbeddedResource>
@@ -782,6 +800,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.resx">
       <DependentUpon>FormLightControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.resx">
+      <DependentUpon>FormRecipeEditor_v25.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.resx">
       <DependentUpon>FormTemplateEditor.cs</DependentUpon>

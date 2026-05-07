@@ -25,15 +25,20 @@ using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
 
-using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 
 #if (OPT_CALIB_V5)
+using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
 using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V5.FormCalibrationTool;
 using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
-#else
+#elif (OPT_CALIB_V3)
+using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
 using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V3.FormCalibrationTool;
 using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V3.CalibAoiModel;
+#else
+using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V25.FormRecipeEditor;
+using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V25.FormCalibrationTool;
+using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V25.CalibAoiModel;
 #endif
 
 
