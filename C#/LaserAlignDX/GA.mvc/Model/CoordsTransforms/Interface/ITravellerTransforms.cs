@@ -25,7 +25,7 @@ namespace LaserAlignDX.Model.Coords
         /// <summary>
         /// 理想格點 (World) (P座標)
         /// </summary>
-        IWorldGridPoints GetWorldGridPoints();
+        IWorldGridPoints GetWorldGridPoints(CarrierEnum C);
 
         /// <summary>
         /// 相機工作距離 
@@ -37,7 +37,7 @@ namespace LaserAlignDX.Model.Coords
         /// <summary>
         /// 規劃 理想格點 (World) (P座標) 
         /// </summary>
-        IWorldGridPoints ConfigWorldGridPoints(int rows, int cols, double pitchX, double pitchY);
+        void ConfigWorldGridPoints(CarrierEnum C, int rows, int cols, double pitchX, double pitchY);
 
         /// <summary>
         /// 建立 所有座標 轉換公式

@@ -567,7 +567,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
             var cols = (int)traySettings.FullCols.Value;
 
             //(3) 將 大校正板 格點 記入 座標轉換系統
-            _commonBaseTrf.ConfigWorldGridPoints(rows, cols, pitchX, pitchY);
+            _commonBaseTrf.ConfigWorldGridPoints(_activeCarrierID, rows, cols, pitchX, pitchY);
             _commonBaseTrf.SetCalibCamGrid(_activeCarrierID, boardGrid);
 
             //(4) 設定 旗標
@@ -1354,7 +1354,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
         {
             errDetails = "";
 
-            var worldGrid = _commonBaseTrf?.GetWorldGridPoints();
+            var worldGrid = _commonBaseTrf?.GetWorldGridPoints(_activeCarrierID);
             if (worldGrid == null)
                 return ErrorCodes.NO_RUNTIME_PLC_GRID;
 

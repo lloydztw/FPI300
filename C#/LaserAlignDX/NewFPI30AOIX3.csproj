@@ -34,7 +34,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;xOPT_USE_AI | xFX3U | FATEK | OPT_LETIAN_AUTO_LAYOUT | xOPT_BYPASS_DONGLE</DefineConstants>
+    <DefineConstants>TRACE;OPT_TRANSFORM_V36 | xOPT_USE_AI | xFX3U | FATEK | OPT_LETIAN_AUTO_LAYOUT | xOPT_BYPASS_DONGLE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
