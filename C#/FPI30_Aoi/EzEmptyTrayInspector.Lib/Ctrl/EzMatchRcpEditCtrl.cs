@@ -330,8 +330,9 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             using (var dlg = new FormSegOffsetSettings())
             {
-                dlg.DefaultOffsetY = (double)_activeRecipe.TrayMiscSettings.PitchY.Value;
+                dlg.PitchY = (double)_activeRecipe.TrayMiscSettings.PitchY.Value;
                 dlg.SegsList = _segGrpSettings.SegsList;
+
                 if (dlg.ShowDialog(_frmOwner) == DialogResult.OK)
                 {
                     _segGrpSettings.SegsList = dlg.SegsList;

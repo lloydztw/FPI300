@@ -110,13 +110,18 @@ namespace LaserAlignDX.Model.Coords.V36
             //    generateNodes();
             //}
 
+            //------------------------------------------------------------------------------------------
+            // NOTE: 目前只處理 Y
+            //------------------------------------------------------------------------------------------
             _offsets = new QVector[rows, cols];
+
+            double accumOffsetY = 0.0;
 
             for (int id = 1; id < segsList.Count; id++)
             {
                 var seg = segsList[id];
                 var segRect = seg.BoundBox.Value;
-                var segOffset = new QVector2((double)seg.OffsetX.Value, (double)seg.OffsetY.Value);
+                accumOffsetY += (double)seg.OffsetY.Value;
 
                 for (int row = 0; row < rows; row++)
                 {
@@ -124,7 +129,7 @@ namespace LaserAlignDX.Model.Coords.V36
                     {
                         var camBloc = camGrid.Get(row, col);
                         if (camBloc != null && segRect.Contains(camBloc.CenterX, camBloc.CenterY))
-                            _offsets[row, col] = segOffset;
+                            _offsets[row, col] = new QVector2(0, accumOffsetY - PitchY);
                         else
                             _offsets[row, col] = new QVector2(0, 0);
                     }
@@ -133,11 +138,18 @@ namespace LaserAlignDX.Model.Coords.V36
         }
 
         /// <summary>
-        /// 取得不連續區塊的 Offset
+        /// 取得不連續區塊的 Offset (目前只有處理 accumOffsetY)
         /// </summary>
-        public QVector GetSegmentOffset(int row, int col)
+        public QVector GetSegmentAccumOffset(int row, int col)
         {
-            return safeGet(_offsets, row, col);
+            // _offsets 保存值為 accumOffsetY - PitchY
+            var offset = safeGet(_offsets, row, col);
+            if (offset != null)
+            {
+                double accumOffsetY = offset.Y + PitchY;
+                offset = new QVector2(offset.X, accumOffsetY);
+            }
+            return offset;
         }
         #endregion
 

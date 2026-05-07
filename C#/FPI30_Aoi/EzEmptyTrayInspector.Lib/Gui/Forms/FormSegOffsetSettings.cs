@@ -29,7 +29,7 @@ namespace EzAoiEmptyTrayInspector.Gui
         public FormSegOffsetSettings()
         {
             InitializeComponent();
-            DefaultOffsetY = 10.5;
+            PitchY = 10.5;
             Load += FormSegOffsetSettings_Load;
             btnOK.Click += BtnOK_Click;
             btnCancel.Click += BtnCancel_Click;
@@ -39,7 +39,9 @@ namespace EzAoiEmptyTrayInspector.Gui
         private void FormSegOffsetSettings_Load(object sender, System.EventArgs e)
         {
             UpdateSegsList(false);
+            var dgv = gwSegOffsetDataGridView1.DataGridView;
             numSegsNumber.ValueChanged += NumSegsNumber_ValueChanged;
+            dgv.CellValidating += Dgv_CellValidating;
         }
         private void FormSegOffsetSettings_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -60,9 +62,30 @@ namespace EzAoiEmptyTrayInspector.Gui
             this.DialogResult = DialogResult.OK;
             Close();
         }
+        private void Dgv_CellValidating(object sender, DataGridViewCellValidatingEventArgs e)
+        {
+            if (e.ColumnIndex == 1)
+            {
+                //(1) e.FormattedValue 代表使用者剛輸入進去、尚未儲存的內容
+                string dgvStr = e.FormattedValue.ToString();
+
+                //(2) 驗證
+                string errMsg = ParseOffsetY(e.RowIndex, dgvStr, out double offsetY);
+
+                //(3) 警示
+                if (errMsg != null)
+                {
+                    // 3.1 驗證失敗：設定 Cancel 為 true，這會阻止使用者離開目前 Cell
+                    e.Cancel = true;
+
+                    // 3.2 Message Box
+                    MessageBox.Show(errMsg, Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+            }
+        }
         #endregion
 
-        public double DefaultOffsetY
+        public double PitchY
         {
             get;
             set;
@@ -78,6 +101,32 @@ namespace EzAoiEmptyTrayInspector.Gui
         }
 
         #region PRIVATE_FUNCTIONS
+        string ParseOffsetY(int rowIndex, string str, out double value)
+        {
+            string errMsg;
+
+            if (!double.TryParse(str, out value))
+            {
+                value = -1;
+            }
+
+            if (rowIndex == 0 && value != 0)
+            {
+                errMsg = "must be 0.000 !";
+                value = 0;
+            }
+            else if (rowIndex > 0 && value < PitchY)
+            {
+                errMsg = $"must > {PitchY:0.000} !";
+                value = PitchY;
+            }
+            else
+            {
+                errMsg = null;
+            }
+
+            return errMsg;
+        }
         void UpdateDgvRows(int targetSegsNum)
         {
             if (targetSegsNum < 1)
@@ -86,7 +135,7 @@ namespace EzAoiEmptyTrayInspector.Gui
             var dgv = gwSegOffsetDataGridView1.DataGridView;
             for (int r = dgv.Rows.Count; r < targetSegsNum; r++)
             {
-                dgv.Rows.Add($"{r}", DefaultOffsetY);
+                dgv.Rows.Add($"{r}", PitchY);
             }
             while(dgv.Rows.Count > targetSegsNum)
             {
@@ -107,7 +156,8 @@ namespace EzAoiEmptyTrayInspector.Gui
                 for (int i = 0; i < rowsCount; i++)
                 {
                     var dgvRow = dgv.Rows[i];
-                    double.TryParse(dgvRow.Cells[1].Value.ToString(), out double offsetY);
+                    var dgvStr = dgvRow.Cells[1].Value.ToString();
+                    ParseOffsetY(i, dgvStr, out double offsetY);
 
                     JxTraySegItem segItem;
 
