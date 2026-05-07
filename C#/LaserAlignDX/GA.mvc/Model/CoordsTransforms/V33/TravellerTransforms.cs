@@ -143,7 +143,7 @@ namespace LaserAlignDX.Model.Coords.V33
             int index = getIndex(C);
             return _transforms[index];
         }
-        public IWorldGridPoints GetWorldGridPoints()
+        public IWorldGridPoints GetWorldGridPoints(CarrierEnum C)
         {
             return _worldGrid;
         }
@@ -154,13 +154,13 @@ namespace LaserAlignDX.Model.Coords.V33
         }
 
         #region 校正時期_函式群
-        public IWorldGridPoints ConfigWorldGridPoints(int rows, int cols, double pitchX, double pitchY)
+        public void ConfigWorldGridPoints(CarrierEnum C, int rows, int cols, double pitchX, double pitchY)
         {
             if(_worldGrid == null)
                 _worldGrid = new QWorldGridPoints(rows, cols, pitchX, pitchY);
             else
                 _worldGrid.Config(rows, cols, pitchX, pitchY);
-            return _worldGrid;
+            //return _worldGrid;
         }
 
         public EzBlocsGrid GetCalibCamGrid(CarrierEnum C)

@@ -117,7 +117,7 @@ namespace LaserAlignDX.Model.Coords
                 var newTrf = TravellerTransformFactory.Instance(name);
 
                 //(2) [線性遷移] Camera-World 座標轉換系統 : 重新設定 rows, cols, pitchX, pitchY 布局
-                newTrf.ConfigWorldGridPoints(newCamGrid.Rows, newCamGrid.Cols, newPitch.X, newPitch.Y);
+                newTrf.ConfigWorldGridPoints(carrierID, newCamGrid.Rows, newCamGrid.Cols, newPitch.X, newPitch.Y);
 
                 //(3) [線性遷移] Camera-World 座標轉換系統 : 重新設定 相機格點
                 newTrf.SetCalibCamGrid(carrierID, newCamGrid, segsList);

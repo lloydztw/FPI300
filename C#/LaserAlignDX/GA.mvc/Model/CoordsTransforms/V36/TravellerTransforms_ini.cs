@@ -101,8 +101,8 @@ namespace LaserAlignDX.Model.Coords.V36
 
                     if (_calibCamGrids[i].Rows != worldGrid.Rows || _calibCamGrids[i].Cols != worldGrid.Cols)
                     {
-                        string msg = $"{GetType().Name}.loadCalibCamGrids : 舊版 EzBlocsGridSerializer 有漏洞, 會損失 不連續的 Grids !!!";
-                        _LOG.Error(msg);
+                        string msg = $"{GetType().Name}.loadCalibCamGrids {(CarrierEnum)i} : 舊版 EzBlocsGridSerializer 有漏洞, 會損失 不連續的 Grids !!!";
+                        _LOG.Warn(msg);
                     }
                 }
             }
