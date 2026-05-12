@@ -59,10 +59,15 @@ namespace LaserAlignDX.Model.Coords
         (ErrorCodes, string) GetCoordsRef(CarrierEnum C, out QVector camCoord, out QVector s1MotorCoord, out QVector s2MotorCoord);
 
         /// <summary>
+        /// 取出 PLC預期 的 馬達座標
+        /// </summary>
+        (ErrorCodes, string) GetPlcExpectedCoords(CarrierEnum C, int rowId, int colId, out QVector s1MotorCoord, out QVector s2MotorCoord);
+
+        /// <summary>
         /// 計算 PLC 補償量
         /// </summary>
         /// <returns>(馬達補償量, 世界座標差值)</returns>
-        (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId);
+        (QVector, QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId);
 
         #endregion
 

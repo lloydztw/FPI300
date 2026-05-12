@@ -23,7 +23,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;OPT_TRANSFORM_V36 | OPT_CALIB_V5 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPT_TRANSFORM_V36 | OPT_CALIB_V25 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -34,7 +34,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;OPT_TRANSFORM_V36 | xOPT_CALIB_V5 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <DefineConstants>TRACE;OPT_TRANSFORM_V36 | OPT_CALIB_V5 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -385,6 +385,7 @@
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaTemplateEditCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
+    <Compile Include="GA.mvc\Gui\.Interactor\TooltipProvider.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCalibResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviChipResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCellsResultBoxes.cs" />
@@ -498,6 +499,7 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
+    <Compile Include="GA.mvc\Model\.Common\XCellBloc.cs" />
     <Compile Include="GA.mvc\Model\.Common\PlcDataPacker.cs" />
     <Compile Include="GA.mvc\Model\.Common\GaChipData.cs" />
     <Compile Include="GA.mvc\Model\AI\AiDataCropper.cs" />

@@ -556,6 +556,42 @@ namespace LaserAlignDX.Model.Coords.V33
             return GetNodeCoords(C, 0, 0, out camCoord, out var _, out s1MotorCoord, out s2MotorCoord);
         }
 
+        public (ErrorCodes, string) GetPlcExpectedCoords(CarrierEnum C, int rowId, int colId, out QVector s1MotorCoord, out QVector s2MotorCoord)
+        {
+            (var err, var errMsg) = GetNodeCoords(C, 0, 0, out var _, out var _, out var s1_org, out var s2_org);
+
+            //(1) 從 世界座標 設定 取得 pitchX, pitchY
+            var carrierWorldGrid = _worldGrid; // getCarrierWorldGrid(C);
+            var pitchX = carrierWorldGrid.PitchX;
+            var pitchY = carrierWorldGrid.PitchY;
+            var pitchVect = new QVector(pitchX * colId, pitchY * rowId);
+
+            //(2) PLC 預期 (rowId, colID) 格位中心 所在的 馬達座標 (德龍預想值)
+            var s1_naive = s1_org + pitchVect;
+            var s2_naive = s2_org + pitchVect;
+
+            //(3) 處理 不連續區段
+            //if (carrierWorldGrid.HasOffsets())
+            //{
+            //    //=========================================================
+            //    // 目前只處理 row jump (offsetY)
+            //    //=========================================================
+            //    double accumOffsetY = 0;
+            //    for (int row = rowId; row >= 0; row--)
+            //    {
+            //        var offset = carrierWorldGrid.GetSegmentAccumOffset(row, colId);
+            //        if (offset != null)
+            //            accumOffsetY = offset.Y;
+            //    }
+            //    s1_naive.Y += accumOffsetY;
+            //    s2_naive.Y += accumOffsetY;
+            //}
+
+            s1MotorCoord = s1_naive;
+            s2MotorCoord = s2_naive;
+            return (err, errMsg);
+        }
+
 
 #if (OPT_OLD_CODE)
         /// <summary>
@@ -684,8 +720,8 @@ namespace LaserAlignDX.Model.Coords.V33
         /// 根據 像測點 camPt 與 目標格點 (rowId, colID), 
         /// 計算 載台 C, 馬達吸嘴中心 對其吸到 camPt 所需要的補償量
         /// </summary>
-        /// <returns>(馬達補償量, 世界座標差值)</returns>
-        public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
+        /// <returns>(馬達S1補償量, 馬達S2補償量, 世界座標差值)</returns>
+        public (QVector, QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
         {
             // 根據 (rowId, colId) 取得 載台C 格位節點 之 以下座標:
             //      world_target 格點的 世界座標
@@ -694,7 +730,8 @@ namespace LaserAlignDX.Model.Coords.V33
             (var err, var errMsg) = GetNodeCoords(C, rowId, colId, out var _, out var world_target, out var s1_target, out var s2_target);
             if (err != ErrorCodes.OK)
             {
-                return (new QVector(0, 0), new QVector(0, 0));
+                var zero = new QVector2(0, 0);
+                return (zero, zero, zero);
             }
 
             var transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
@@ -708,12 +745,13 @@ namespace LaserAlignDX.Model.Coords.V33
             var world_current = transCP.Trans(camPt);
 
             // 注意: 德龍補償量 == 量測現值 - 目標值
-            var motorDelta = s1_current - s1_target;
+            var motorD1 = s1_current - s1_target;
+            var motorD2 = s2_current - s2_target;
 
             // WorldDetla
             var worldDelta = world_current - world_target;
 
-            return (motorDelta, worldDelta);
+            return (motorD1, motorD2, worldDelta);
         }
 
         #endregion

@@ -22,7 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
-
+using CellBloc = LaserAlignDX.Model.XCellBloc;
 
 namespace LaserAlignDX.AoiModel
 {
@@ -36,43 +36,49 @@ namespace LaserAlignDX.AoiModel
         #endregion
 
         #region INNER_CLASS
-        public class CellBloc : EzBloc
-        {
-            public CellBloc(XCell cell, RectangleF rect) : base(Rectangle.Round(rect), 1)
-            {
-                Cell = cell;
-            }
-            public CellBloc(XCell cell) : base(Rectangle.Empty, 1)
-            {
-                Cell = cell;
+        //public class CellBloc : EzBloc
+        //{
+        //    public CellBloc(XCell cell, RectangleF rect) : base(Rectangle.Round(rect), 1)
+        //    {
+        //        Cell = cell;
+        //    }
+        //    public CellBloc(XCell cell) : base(Rectangle.Empty, 1)
+        //    {
+        //        Cell = cell;
 
-                //var mvdRectF = cell.DrawResultRectF();
-                //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRectF));
-                //Center = new JetEazy.QMath.QVector(mvdRectF.CenterX, mvdRectF.CenterY);
+        //        //var mvdRectF = cell.DrawResultRectF();
+        //        //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRectF));
+        //        //Center = new JetEazy.QMath.QVector(mvdRectF.CenterX, mvdRectF.CenterY);
 
-                var chipQuad2D = cell?.ChipData?.ChipQuad2D;
-                if (chipQuad2D != null)
-                {
-                    Rect = Rectangle.Round(cell.viewRectF);
-                    Center = new QVector(chipQuad2D.Center);
-                }
-                else
-                {
-                    var cc = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
-                    Rect = Rectangle.Round(cell.viewRectF);
-                    Center = new QVector(cc.X, cc.Y);
-                }
-            }
-            public XCell Cell
-            {
-                get; private set;
-            }
-            public bool IsEmpty
-            {
-                //get => string.IsNullOrEmpty(NonEmptyDesc);
-                get => Cell == null || Cell.IsEmptyPlaceHold();
-            }
-        };
+        //        var chipQuad2D = cell?.ChipData?.ChipQuad2D;
+        //        if (chipQuad2D != null)
+        //        {
+        //            Rect = Rectangle.Round(cell.viewRectF);
+        //            Center = new QVector(chipQuad2D.Center);
+        //        }
+        //        else
+        //        {
+        //            var cc = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
+        //            Rect = Rectangle.Round(cell.viewRectF);
+        //            Center = new QVector(cc.X, cc.Y);
+        //        }
+        //    }
+        //    public XCell Cell
+        //    {
+        //        get; private set;
+        //    }
+        //    public bool IsEmpty
+        //    {
+        //        //get => string.IsNullOrEmpty(NonEmptyDesc);
+        //        get => Cell == null || Cell.IsEmptyPlaceHold();
+        //    }
+            
+        //    public string NonEmptyDesc
+        //    {
+        //        get;
+        //        set;
+        //    }
+        //};
         #endregion
 
         #region PRIVATE_DATA_HOLDERS

@@ -146,7 +146,7 @@ namespace LaserAlignDX.Model.Coords.V36
             var offset = safeGet(_offsets, row, col);
             if (offset != null)
             {
-                double accumOffsetY = offset.Y + PitchY;
+                double accumOffsetY = offset.Y > 0 ? offset.Y + PitchY : 0;
                 offset = new QVector2(offset.X, accumOffsetY);
             }
             return offset;

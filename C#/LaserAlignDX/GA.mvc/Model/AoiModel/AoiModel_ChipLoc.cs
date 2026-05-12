@@ -745,7 +745,7 @@ namespace LaserAlignDX.AoiModel.V3
                         {
                             //(6) 根據不同載台, 計算補償量
                             var activeCarrierID = getActiveCarrierID();
-                            (var motorDelta, var worldDelta) = _transformModel.CalcPlcCompensation(activeCarrierID, chipCentroid, cell.CellRow, cell.CellCol);
+                            (var motorDelta, var motorD2, var worldDelta) = _transformModel.CalcPlcCompensation(activeCarrierID, chipCentroid, cell.CellRow, cell.CellCol);
 
                             //(6.1) Angle
                             double angle = _CalcAngle(chipData);

@@ -16,15 +16,13 @@
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.ImageViewerEx;
 using JetEazy.Match;
-using JetEazy.QMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.Model.Coords;
-using LaserAlignDX.Mvc.Model;
+using LaserAlignDX.Mvc.Gui.Tooltips;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace LaserAlignDX.Mvc.Gui
@@ -37,7 +35,7 @@ namespace LaserAlignDX.Mvc.Gui
         ITravellerTransforms _trfModel;
         #endregion
 
-        #region PRIVATE_DATA
+        #region PRIVATE_BLOCS_DATA
         MatchResult _matchResult;
         EzBlocsGrid _grid => _matchResult?.Grid;
         IList<EzBloc> _suckerBlocs => _matchResult?.Blocs;
@@ -49,9 +47,14 @@ namespace LaserAlignDX.Mvc.Gui
         int _debugOption = -1;
         #endregion
 
+        #region TOOL_TIPS
+        TooltipProvider _tooltipProvider = new TooltipProvider();
+        #endregion
+
         public void Attach(ITravellerTransforms trfModel)
         {
             _trfModel = trfModel;
+            _tooltipProvider.Attach(_trfModel);
         }
         public void Reset()
         {
@@ -78,29 +81,50 @@ namespace LaserAlignDX.Mvc.Gui
 
         public bool IsEmptyTrayMode
         {
-            get;
-            set;
+            get => _tooltipProvider != null && _tooltipProvider.IsEmptyTrayMode;
+            set
+            {
+                if (_tooltipProvider != null)
+                    _tooltipProvider.IsEmptyTrayMode = value;
+            }
         }
-        //public ITransform TransCameraToWorld
-        //{
-        //    get; set;
-        //}
+        public override ITransform TransCameraToWorld
+        {
+            get => base.TransCameraToWorld;
+            set
+            {
+                base.TransCameraToWorld = value;
+                if (_tooltipProvider != null)
+                    _tooltipProvider.TransCameraToWorld = value;
+            }
+        }
         public ITransform TransCameraToMotor
         {
-            get; set;
+            get => _tooltipProvider?.TransCameraToMotor;
+            set
+            {
+                if (_tooltipProvider != null)
+                    _tooltipProvider.TransCameraToMotor = value;
+            }
         }
         public ITransform TransCameraToMotor2
         {
-            get; set;
+            get => _tooltipProvider?.TransCameraToMotor2;
+            set
+            {
+                if (_tooltipProvider != null)
+                    _tooltipProvider.TransCameraToMotor2 = value;
+            }
         }
         public CarrierEnum ActiveCarrierID
         {
-            get; set;
+            get => _tooltipProvider!=null ? _tooltipProvider.ActiveCarrierID : CarrierEnum.C1;
+            set
+            {
+                if (_tooltipProvider != null)
+                    _tooltipProvider.ActiveCarrierID = value;
+            }
         }
-        //public SuckerRowEnum ActiveSuckerRowID
-        //{
-        //    get; set;
-        //}
 
         #region OVERRIDES
         public override void OnKeyDown(CvImageViewer viewer, KeyEventArgs e)
@@ -514,48 +538,51 @@ namespace LaserAlignDX.Mvc.Gui
         }
         protected override string composeTooltipText(EzBloc cursor, EzBloc cursor2)
         {
-            if (cursor == null)
-                return "";
+            //if (cursor == null)
+            //    return "";
 
-            var cursorBloc = cursor;
-            var cursorBloc2 = cursor2;
+            //var cursorBloc = cursor;
+            //var cursorBloc2 = cursor2;
 
-            bool showScore = true;
+            //bool showScore = true;
 
-            var sb = new StringBuilder();
+            //var sb = new StringBuilder();
 
-            if (getRowCol(cursorBloc, out int row, out int col))
-                sb.Append("格點: [").AppendValues(row, col).AppendLine("]");
+            //if (getRowCol(cursorBloc, out int row, out int col))
+            //    sb.Append("格點: [").AppendValues(row, col).AppendLine("]");
 
-            appendCameraCoords(sb, cursorBloc, cursorBloc2);
+            //appendCameraCoords(sb, cursorBloc, cursorBloc2);
 
-            if (TransCameraToMotor != null || TransCameraToMotor2 != null)
-            {
-                appendMotorCoords(sb, cursorBloc, cursorBloc2);
-                showScore = false;
-            }
+            //if (TransCameraToMotor != null || TransCameraToMotor2 != null)
+            //{
+            //    appendMotorCoords(sb, cursorBloc, cursorBloc2);
+            //    showScore = false;
+            //}
 
-            if (TransCameraToWorld != null)
-            {
-                appendWorldCoords(sb, cursorBloc, cursorBloc2);
-                showScore = false;
-            }
+            //if (TransCameraToWorld != null)
+            //{
+            //    appendWorldCoords(sb, cursorBloc, cursorBloc2);
+            //    showScore = false;
+            //}
 
-            if (TransCameraToMotor != null && cursorBloc2 == null && row >= 0 && col >= 0)
-            {
-                appendPlcCompensation(sb, cursorBloc, row, col);
-                showScore = false;
-            }
+            //if (TransCameraToMotor != null && cursorBloc2 == null && row >= 0 && col >= 0)
+            //{
+            //    appendPlcCompensation(sb, cursorBloc, row, col);
+            //    showScore = false;
+            //}
 
-            if (showScore || IsEmptyTrayMode)
-            {
-                sb.AppendLine();
-                sb.AppendLine($"Score= {cursorBloc.Score:0.00}");
-                sb.AppendLine($"Size= {cursorBloc.Rect.Width}x{cursorBloc.Rect.Height}");
-            }
-            return sb.ToString();
+            //if (showScore || IsEmptyTrayMode)
+            //{
+            //    sb.AppendLine();
+            //    sb.AppendLine($"Score= {cursorBloc.Score:0.00}");
+            //    sb.AppendLine($"Size= {cursorBloc.Rect.Width}x{cursorBloc.Rect.Height}");
+            //}
+            //return sb.ToString();
+
+            return _tooltipProvider?.ComposeTooltipText(cursor, cursor2);
         }
 
+#if(OPT_OLD)
         void appendCameraCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {
             if (bloc == null)
@@ -651,6 +678,7 @@ namespace LaserAlignDX.Mvc.Gui
             col = rowCol != null ? rowCol.Col : -1;
             return row >= 0 && col >= 0;
         }
+#endif
 
         #region MENU_STRIP_FUNCTIONS
         //Form _frmOwner;
@@ -722,7 +750,7 @@ namespace LaserAlignDX.Mvc.Gui
                     var bloc = _grid[r, c];
                     if (bloc == null) continue;
 
-                    (var motorDelta, var worldDelta) = _trfModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, r, c);
+                    (var motorD1, var motorD2, var worldDelta) = _trfModel.CalcPlcCompensation(ActiveCarrierID, bloc.Center, r, c);
 
                     double err;
                     if (option == 0)

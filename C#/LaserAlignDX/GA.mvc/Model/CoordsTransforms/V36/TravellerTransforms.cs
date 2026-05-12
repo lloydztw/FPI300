@@ -431,11 +431,12 @@ namespace LaserAlignDX.Model.Coords.V36
     {
         #region 跑線時期_函式群
 
-        public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId,
-                                                    out QVector camCoord,
-                                                    out QVector worldCoord,
-                                                    out QVector s1MotorCoord,
-                                                    out QVector s2MotorCoord)
+        public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, 
+                                                int rowId, int colId,
+                                                out QVector camCoord,
+                                                out QVector worldCoord,
+                                                out QVector s1MotorCoord,
+                                                out QVector s2MotorCoord)
         {
             #region DEFAULT_VALUES
             ErrorCodes errCode;
@@ -465,15 +466,15 @@ namespace LaserAlignDX.Model.Coords.V36
             // REV_2026-03-31 
             //-----------------------------------------------------------------------------
             bool debugVerify = false;
-            var _worldGrid = getCarrierWorldGrid(C);
+            var carrierWorldGrid = getCarrierWorldGrid(C);
 
-            //(4) 計算 (使用 World To Camera To Motor 座標轉換)
+            //(4) 計算 (使用 World --> Camera --> Motor 座標轉換)
             if (true)
             {
-                // (row, col) -> World
-                worldCoord = _worldGrid.Get(rowId, colId);
+                // (row, col) --> World
+                worldCoord = carrierWorldGrid.Get(rowId, colId);
 
-                // World -> Camera
+                // World --> Camera
                 camCoord = transCP.InvTrans(worldCoord);
 
                 // VERIFY
@@ -485,9 +486,10 @@ namespace LaserAlignDX.Model.Coords.V36
                         System.Diagnostics.Debug.WriteLine(delta);
                 }
 
-                // Camera -> Motors1
+                // Camera -> MotorS1
                 s1MotorCoord = transCM1.Trans(camCoord);
-                // Camera -> Motors2
+                
+                // Camera -> MotorS2
                 s2MotorCoord = transCM2.Trans(camCoord);
             }
 
@@ -501,29 +503,21 @@ namespace LaserAlignDX.Model.Coords.V36
             return GetNodeCoords(C, 0, 0, out camCoord, out var _, out s1MotorCoord, out s2MotorCoord);
         }
 
-        /// <summary>
-        /// 根據 像測點 camPt 與 目標格點 (rowId, colID), 
-        /// 計算 載台 C, 馬達吸嘴中心 對其吸到 camPt 所需要的補償量
-        /// </summary>
-        /// <returns>(馬達補償量, 世界座標差值)</returns>
-        public (QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
+        public (ErrorCodes, string) GetPlcExpectedCoords(CarrierEnum C, int rowId, int colId, out QVector s1MotorCoord, out QVector s2MotorCoord)
         {
-            ErrorCodes err;
-            string errMsg;
+            (var err, var errMsg) = GetNodeCoords(C, 0, 0, out var _, out var _, out var s1_org, out var s2_org);
 
-            //(1) 取得 馬達 左上角 (row=0, col=0) 點位 的 參考座標 (這個也是 PC 會寫給 PLC 的參考座標)
-            (err, errMsg) = GetNodeCoords(C, 0, 0, out var _, out var _, out var s1_org, out var s2_org);
-
+            //(1) 從 世界座標 設定 取得 pitchX, pitchY
             var carrierWorldGrid = getCarrierWorldGrid(C);
             var pitchX = carrierWorldGrid.PitchX;
             var pitchY = carrierWorldGrid.PitchY;
             var pitchVect = new QVector(pitchX * colId, pitchY * rowId);
 
-            //(2) PLC 天真的推算 (rowId, colID) 格位中心 所在的 馬達座標 (德龍預想值)
+            //(2) PLC 預期 (rowId, colID) 格位中心 所在的 馬達座標 (德龍預想值)
             var s1_naive = s1_org + pitchVect;
             var s2_naive = s2_org + pitchVect;
 
-            //(2.1) PLC 處理 不連續區段
+            //(3) 處理 不連續區段
             if (carrierWorldGrid.HasOffsets())
             {
                 //=========================================================
@@ -540,11 +534,27 @@ namespace LaserAlignDX.Model.Coords.V36
                 s2_naive.Y += accumOffsetY;
             }
 
+            s1MotorCoord = s1_naive;
+            s2MotorCoord = s2_naive;
+            return (err, errMsg);
+        }
+
+        /// <summary>
+        /// 根據 像測點 camPt 與 目標格點 (rowId, colID), 
+        /// 計算 載台 C, 馬達吸嘴中心 對其吸到 camPt 所需要的補償量
+        /// </summary>
+        /// <returns>(馬達補償量, 世界座標差值)</returns>
+        public (QVector, QVector, QVector) CalcPlcCompensation(CarrierEnum C, QVector camPt, int rowId, int colId)
+        {
+            //(1) 取得 PLC 內部預想 (rowId, colId) 座標值
+            (var err, var errMsg) = GetPlcExpectedCoords(C, rowId, colId, out var s1_naive, out var s2_naive);
+
             //(3) 根據 (rowId, colId) 取得 載台C 格位中心 之 以下:
             //      world_node  格位中心的 世界座標
             //      transCM1    Camera To MotorS1
             //      transCM2    Camera To MotorS2
             //      transCP     Camera To World
+            var carrierWorldGrid = getCarrierWorldGrid(C);
             var world_node = carrierWorldGrid?.Get(rowId, colId);
             var transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
             var transCM2 = GetCameraMotorTransform(C, SuckerRowEnum.S2);
@@ -561,14 +571,14 @@ namespace LaserAlignDX.Model.Coords.V36
             //// var naiveDelta = s1_node - s1_naive;
             //// var motorDelta = s1_current - s1_node;
             //// motorDelta = motorDelta + naiveDelta;
-            var motorDelta = s1_current - s1_naive;
-            var motorDelta2 = s2_current - s2_naive;
+            var motorD1 = s1_current - s1_naive;
+            var motorD2 = s2_current - s2_naive;
             //motorDelta = (motorDelta + motorDelta2) * 0.5;
 
             //(7) WorldDetla (調試用)
             var worldDelta = world_node != null ? world_current - world_node : world_current;
 
-            return (motorDelta, worldDelta);
+            return (motorD1, motorD2, worldDelta);
         }
 
         #endregion

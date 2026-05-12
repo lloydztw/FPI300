@@ -21,8 +21,8 @@ using JetEazy.QMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
+using LaserAlignDX.Mvc.Gui.Tooltips;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
 using OpenCvSharp;
@@ -31,8 +31,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
-
+using CellBloc = LaserAlignDX.Model.XCellBloc;
 using Point = System.Drawing.Point;
 using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 using XRecipe = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
@@ -43,43 +42,43 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
     public partial class CviCellsResultBoxes : CviAbsTooltipBox
     {
         #region INNER_CLASS
-        class CellBloc : EzBloc
-        {
-            public CellBloc(XCell cell, RectangleF rect) : base(Rectangle.Round(rect), 1)
-            {
-                Cell = cell;
-            }
-            public CellBloc(XCell cell) : base(Rectangle.Empty, 1)
-            {
-                Cell = cell;
+        //class CellBloc : EzBloc
+        //{
+        //    public CellBloc(XCell cell, RectangleF rect) : base(Rectangle.Round(rect), 1)
+        //    {
+        //        Cell = cell;
+        //    }
+        //    public CellBloc(XCell cell) : base(Rectangle.Empty, 1)
+        //    {
+        //        Cell = cell;
 
-                //var mvdRectF = cell.DrawResultRectF();
-                //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRectF));
-                //Center = new JetEazy.QMath.QVector(mvdRectF.CenterX, mvdRectF.CenterY);
+        //        //var mvdRectF = cell.DrawResultRectF();
+        //        //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRectF));
+        //        //Center = new JetEazy.QMath.QVector(mvdRectF.CenterX, mvdRectF.CenterY);
 
-                var chipQuad2D = cell?.ChipData?.ChipQuad2D;
-                if (chipQuad2D != null)
-                {
-                    Rect = Rectangle.Round(cell.viewRectF);
-                    Center = new QVector(chipQuad2D.Center);
-                }
-                else
-                {
-                    var cc = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
-                    Rect = Rectangle.Round(cell.viewRectF);
-                    Center = new QVector(cc.X, cc.Y);
-                }
-            }
-            public XCell Cell
-            {
-                get; private set;
-            }
-            public string NonEmptyDesc
-            {
-                get; internal set;
-            }
-            public bool IsEmpty => string.IsNullOrEmpty(NonEmptyDesc);
-        };
+        //        var chipQuad2D = cell?.ChipData?.ChipQuad2D;
+        //        if (chipQuad2D != null)
+        //        {
+        //            Rect = Rectangle.Round(cell.viewRectF);
+        //            Center = new QVector(chipQuad2D.Center);
+        //        }
+        //        else
+        //        {
+        //            var cc = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
+        //            Rect = Rectangle.Round(cell.viewRectF);
+        //            Center = new QVector(cc.X, cc.Y);
+        //        }
+        //    }
+        //    public XCell Cell
+        //    {
+        //        get; private set;
+        //    }
+        //    public string NonEmptyDesc
+        //    {
+        //        get; internal set;
+        //    }
+        //    public bool IsEmpty => string.IsNullOrEmpty(NonEmptyDesc);
+        //};
         #endregion
 
         #region GLOBAL_MESS
@@ -551,6 +550,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
     partial class CviCellsResultBoxes
     {
+        #region TOOL_TIPS
+        TooltipProvider _tooltipProvider = new TooltipProvider();
+        #endregion
+
         public bool IsEmptyTrayMode
         {
             get => _mode == ScanInspectMode.NOTRAY;
@@ -676,21 +679,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         protected override string composeTooltipText(EzBloc cursor, EzBloc cursor2)
         {
-            //if (cursor is CellBloc cellBloc)
-            //{
-            //    _cviRegionBox.Quad2D.SetCenter(cellBloc.Center.X, cellBloc.Center.Y);
-            //    _cviRegionBox.Visible = true;
-            //}
-            //else if(cursor is EzBloc bloc &&  bloc.Tag is CellBloc cb)
-            //{
-            //    _cviRegionBox.Quad2D.SetCenter(cb.Center.X, cb.Center.Y);
-            //    _cviRegionBox.Visible = true;
-            //}
-
             syncRegionBox(cursor);
-
-            string txt = composeTooltipTextTrf(cursor, cursor2);
-            return txt;
+            return composeTooltipTextTrf(cursor, cursor2);
         }
         void syncRegionBox(EzBloc cursorBloc)
         {
@@ -708,20 +698,27 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         void initDefaultTrfs()
         {
             if (TransformsModel == null)
+            {
                 TransformsModel = GaMvcConfig.SysModel.TransformsModel;
+                //_tooltipProvider.Attach(TransformsModel);
+                //_tooltipProvider.TransCameraToWorld = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+                //_tooltipProvider.TransCameraToMotor = TransformsModel.GetCameraMotorTransform(ActiveCarrierID, SuckerRowEnum.S1);
+                //_tooltipProvider.TransCameraToMotor2 = TransformsModel.GetCameraMotorTransform(ActiveCarrierID, SuckerRowEnum.S2);
+            }
         }
         string composeTooltipTextTrf(EzBloc cursorBloc, EzBloc cursorBloc2)
         {
+            if (cursorBloc == null)
+                return null;
+
             try
             {
-                if (cursorBloc == null)
-                    return "";
-
                 initDefaultTrfs();
 
-                var cursorCellBloc = cursorBloc as CellBloc;
-                var cellBloc = cursorCellBloc != null ? cursorCellBloc : cursorBloc.Tag as CellBloc;
+                //var cursorCellBloc = cursorBloc as CellBloc;
+                //var cellBloc = cursorCellBloc != null ? cursorCellBloc : cursorBloc.Tag as CellBloc;
 
+                var cellBloc = cursorBloc as CellBloc ?? cursorBloc?.Tag as CellBloc;
                 var cell = cellBloc?.Cell;
                 if (cell == null || !checkResult(cell, out bool isPass, out bool isEmpty))
                     return null;
@@ -729,26 +726,26 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 int row = cell.CellRow;
                 int col = cell.CellCol;
 
-                bool isShowScore = true;
                 var sb = new StringBuilder();
 
                 if (!IsEmptyTrayMode && !isEmpty)
                     appendPassNG(sb, cell);
 
+                bool isShowScore = true;
+
                 sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
 
                 appendCameraCoords(sb, cursorBloc, cursorBloc2);
+                appendWorldCoords(sb, cursorBloc, cursorBloc2);
 
-                if (!IsEmptyTrayMode)
+                if (!IsEmptyTrayMode && TransformsModel != null)
                 {
-                    if (TransformsModel != null)
-                    {
-                        if (cursorCellBloc != null)
-                            appendDetailCoordsInfo(sb, row, col, cursorBloc, cursorBloc2);
-                        else
-                            appendCursorsDistInfo(sb, cursorBloc, cursorBloc2);
-                        isShowScore = false;
-                    }
+                    //if (cellBloc != null)
+                    //    appendDetailCoordsInfo(sb, row, col, cursorBloc, cursorBloc2);
+                    //else
+                    //    appendCursorsDistInfo(sb, cursorBloc, cursorBloc2);
+                    appendMotorCoords(sb, cursorBloc, cursorBloc2, cell);
+                    isShowScore = false;
                 }
 
                 if (isShowScore || IsEmptyTrayMode)
@@ -762,7 +759,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             catch (Exception ex)
             {
-                return "";
+                return null;
             }
         }
         void appendPassNG(StringBuilder sb, XCell cell)
@@ -790,22 +787,206 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (camPt == null)
                 return;
 
-            sb.Append($"相機座標: ({camPt.X:0.0}, {camPt.Y:0.0})").AppendLine();
+            sb.AppendLine($"相機座標 (X,Y) = ({camPt.X:0.0}, {camPt.Y:0.0}) pix");
 
-            if (bloc != null && bloc2 != null && bloc != bloc2)
+            var camPt2 = getCentroid(bloc2);
+            if (camPt2 != null && bloc2 != bloc)
             {
-                var camPt2 = getCentroid(bloc2);
-                if (camPt2 != null)
-                {
-                    var dv = camPt - camPt2;
-                    var dist = dv.NormLength;
-                    sb.AppendLine($"相機座標 dX = {dv.X:0.0} pix");
-                    sb.AppendLine($"相機座標 dY = {dv.Y:0.0} pix");
-                    sb.AppendLine($"相機座標 距離 = {dist:0.0} pix");
-                }
+                var dv = camPt - camPt2;
+                var dist = dv.NormLength;
+                sb.AppendLine($"相機座標 差距 (dX,dY) = ({dv.X:0.0}, {dv.Y:0.0}) pix");
+                sb.AppendLine($"相機座標 距離 = {dist:0.0} pix");
             }
         }
-        void appendDetailCoordsInfo(StringBuilder sb, int row, int col, EzBloc bloc, EzBloc bloc2)
+        void appendWorldCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        {
+            var camPt = getCentroid(bloc);
+            if (camPt == null)
+                return;
+
+            var trfCameraToWorld = TransCameraToWorld;
+            if (trfCameraToWorld == null)
+                return;
+
+            sb.AppendLine();
+
+            var worldCoord = trfCameraToWorld.Trans(camPt);
+            sb.AppendLine($"World座標 (X,Y) = ({worldCoord.X:0.000}, {worldCoord.Y:0.000}) mm");
+
+            var camPt2 = getCentroid(bloc2);
+            if (camPt2 != null && bloc2 != bloc)
+            {
+                var worldCoord2 = trfCameraToWorld.Trans(camPt2);
+                var dv = worldCoord - worldCoord2;
+                double dist = dv.NormLength;
+                sb.AppendLine($"World座標 差值 (dX,dY) = ({dv.X:0.000}, {dv.Y:0.000}) mm");
+                sb.AppendLine($"World座標 距離 = {dist:0.000} mm");
+            }
+        }
+        void appendMotorCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2, XCell cell)
+        {
+            if (bloc == null)
+                return;
+
+            sb.AppendLine();
+
+            var camPt = getCentroid(bloc);
+            var camPt2 = getCentroid(bloc2);
+
+            bool isDistMeasuring = (camPt != null && camPt2 != null && bloc != bloc2);
+            int row = cell != null ? cell.CellRow : -1;
+            int col = cell != null ? cell.CellCol : -1;
+
+            var trfs = new[] { 
+                TransformsModel.GetCameraMotorTransform(ActiveCarrierID, SuckerRowEnum.S1), 
+                TransformsModel.GetCameraMotorTransform(ActiveCarrierID, SuckerRowEnum.S2)
+            };
+
+            foreach (var trfCamToMotor in trfs)
+            {
+                if (trfCamToMotor == null)
+                    continue;
+
+                var trfModel = TransformsModel;
+                var motorName = trfCamToMotor.Name.Contains("S1") ? "S1" : "S2";
+                var motorCoord = trfCamToMotor.Trans(camPt);
+
+                // 當下 相機點位 對應之 馬達座標值
+                sb.AppendLine($"{motorName}馬達座標 (X,Y) = ({motorCoord.X:0.000}, {motorCoord.Y:0.000}) mm");
+
+                // 距離量測模式
+                if (isDistMeasuring)
+                {
+                    var motorCoord2 = trfCamToMotor.Trans(camPt2);
+                    var dv = motorCoord - motorCoord2;
+                    double dist = dv.NormLength;
+                    sb.AppendLine($"{motorName}馬達座標 差距 (dX,dY) = ({dv.X:0.000}, {dv.Y:0.000}) mm");
+                    sb.AppendLine($"{motorName}馬達座標 距離 = {dist:0.000} mm");
+                    sb.AppendLine();
+                }
+                else
+                {
+                    // Expected Motor Coords @ node
+                    if (row >= 0 && col >= 0)
+                    {
+                        //>>> trfModel.GetNodeCoords(ActiveCarrierID, row, col, out var _, out var _, out var motorCoordS1, out var motorCoordS2);
+                        trfModel.GetPlcExpectedCoords(ActiveCarrierID, row, col, out var motorCoordS1, out var motorCoordS2);
+                        var coord = motorName == "S1" ? motorCoordS1 : motorCoordS2;
+                        sb.AppendLine($"{motorName}預想座標 (X,Y) = ({coord.X:0.000}, {coord.Y:0.000}) mm");
+                    }
+                }
+            }
+
+            if (!isDistMeasuring && cell != null)
+            {
+                appendPlcCompensation(sb, camPt, row, col);
+                appendCellResult(sb, cell);
+            }
+        }
+        void appendPlcCompensation(StringBuilder sb, QVector camPt, int row, int col)
+        {
+            var _trfModel = TransformsModel;
+            if (camPt == null || row < 0 || col < 0 || _trfModel == null)
+                return;
+
+            (var motorD1, var motorD2, var worldDelta) = _trfModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
+
+            sb.AppendLine();
+            sb.AppendLine($"PLC 補償量 S1 (ΔX,ΔY) = ({motorD1.X:0.000}, {motorD1.Y:0.000}) mm");
+            sb.AppendLine($"PLC 補償量 S2 (ΔX,ΔY) = ({motorD2.X:0.000}, {motorD2.Y:0.000}) mm");
+
+            //sb.AppendLine($"World 變動量 (ΔX,ΔY) = ({worldDelta.X:0.000}, {worldDelta.Y:0.000}) mm");
+        }
+        void appendCellResult(StringBuilder sb, XCell cell)
+        {
+            if (cell == null)
+                return;
+
+            #region 最後補償量
+            sb.AppendLine();
+            sb.AppendLine($"RunX = {cell.RunX:0.000} mm");
+            sb.AppendLine($"RunY = {cell.RunY:0.000} mm");
+            sb.AppendLine($"Angle = {cell.RunAngle:0.00}°");
+            #endregion
+
+            if (_xRecipe.InspectParams.optTiltDetectEnabled)
+            {
+                #region 傾斜(踩腳)
+                var chipCoords = cell?.ChipData?.ChipCoords;
+                if (chipCoords != null)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine($"傾斜(踩腳)程度 = {chipCoords.TiltRatio:0.000}");
+                }
+                #endregion
+            }
+
+            if (_xRecipe.InspectParams.optChipMeasurement)
+            {
+                #region 尺寸量測結果
+                var cW = _xRecipe.InspectParams.mWidthStand;
+                var cH = _xRecipe.InspectParams.mHeightStand;
+                var dx = Math.Round(cell.RunWidth - cW, 3);
+                var dy = Math.Round(cell.RunHeight - cH, 3);
+                sb.AppendLine().Append($"晶粒.尺寸X = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
+                sb.AppendLine().Append($"晶粒.尺寸Y = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
+                #endregion
+
+                #region 尺寸量測詳細點位
+                var chipDim = cell?.ChipData?.ChipDimension;
+                if (chipDim != null && chipDim.GetPixelSize(out double dpX, out double dpY))
+                {
+                    sb.AppendLine();
+                    sb.AppendLine().Append($"晶粒.尺寸X = {dpX:0.0} pix");
+                    sb.AppendLine().Append($"晶粒.尺寸Y = {dpY:0.0} pix");
+                }
+                #endregion
+
+                #region 晶粒_PAD_跨距
+                var padsGrid = cell?.ChipData?.PadsGrid;
+                if (getChapPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
+                {
+                    sb.AppendLine();
+                    sb.AppendLine().Append($"PAD.跨距.尺寸X = {padSpanW:0.0} pix");
+                    sb.AppendLine().Append($"PAD.跨距.尺寸Y = {padSpanH:0.0} pix");
+                }
+                #endregion
+
+                #region PAD_邊隙
+                if (_withPadGaps)
+                {
+                    var gaps = cell?.ChipData?.PadEdgeGaps;
+                    if (gaps != null)
+                    {
+                        if (GlobalConfig.OPT_USING_GAPS_4)
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine().Append($"邊隙(左) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");
+                            sb.AppendLine().Append($"邊隙(上) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Top):0.000} mm");
+                            sb.AppendLine().Append($"邊隙(右) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Right):0.000} mm");
+                            sb.AppendLine().Append($"邊隙(下) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Bottom):0.000} mm");
+                            sb.AppendLine().Append($"邊隙差值(左右) = {gaps.GetAveGapDiff():0.000} mm");
+                        }
+                        else
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine().Append($"LUX = {gaps.LU.X:0.000} mm");
+                            sb.AppendLine().Append($"RUX = {gaps.RU.X:0.000} mm");
+                            sb.AppendLine().Append($"RDX = {gaps.RD.X:0.000} mm");
+                            sb.AppendLine().Append($"LDX = {gaps.LD.X:0.000} mm");
+                            sb.AppendLine();
+                            sb.AppendLine().Append($"LUY = {gaps.LU.Y:0.000} mm");
+                            sb.AppendLine().Append($"RUY = {gaps.RU.Y:0.000} mm");
+                            sb.AppendLine().Append($"RDY = {gaps.RD.Y:0.000} mm");
+                            sb.AppendLine().Append($"LDY = {gaps.LD.Y:0.000} mm");
+                        }
+                    }
+                }
+                #endregion
+            }
+        }
+
+        void appendDetailCoordsInfo_000(StringBuilder sb, int row, int col, EzBloc bloc, EzBloc bloc2)
         {
             if (TransformsModel == null)
                 return;
@@ -855,7 +1036,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             #region 變動值
             if (camPt != null)
             {
-                (var motorDelta, var motorD2, var worldDelta) = TransformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
+                (var motorD1, var motorD2, var worldDelta) = TransformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
                 if (!_withPadGaps)
                 {
                     sb.AppendLine();
@@ -865,8 +1046,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 if (true || !_withPadGaps)
                 {
                     sb.AppendLine();
-                    sb.AppendLine($"PLC 補償量 ΔX = {motorDelta.X:0.000} mm");
-                    sb.AppendLine($"PLC 補償量 ΔY = {motorDelta.Y:0.000} mm");
+                    sb.AppendLine($"PLC 補償量 ΔX = {motorD1.X:0.000} mm");
+                    sb.AppendLine($"PLC 補償量 ΔY = {motorD1.Y:0.000} mm");
                 }
             }
             #endregion
@@ -978,38 +1159,212 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 }
             }
         }
-        void appendCursorsDistInfo(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        void appendDetailCoordsInfo(StringBuilder sb, int row, int col, EzBloc bloc, EzBloc bloc2)
         {
             if (TransformsModel == null)
                 return;
 
+            (var err, var errMsg) = TransformsModel.GetNodeCoords(ActiveCarrierID, row, col, out var _, out var world_target, out var s1_target, out var s2_target);
+            if (err != Model.ErrorCodes.OK)
+                return;
 
             QVector world_current = null;
+            QVector s1_current = null;
+            QVector s2_current = null;
 
-            var camPt = bloc.Center;
+            var camPt = getCentroid(bloc);
             if (camPt != null)
             {
+                var tranCM1 = TransformsModel.GetCameraMotorTransform(ActiveCarrierID, SuckerRowEnum.S1);
+                var tranCM2 = TransformsModel.GetCameraMotorTransform(ActiveCarrierID, SuckerRowEnum.S2);
                 var tranCP = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+                s1_current = tranCM1.Trans(camPt);
+                s2_current = tranCM2.Trans(camPt);
                 world_current = tranCP.Trans(camPt);
-                sb.AppendLine().Append("Physic 座標(X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
             }
+
+            #region S1_S2_馬達座標
+            if (true || !_withPadGaps)
+            {
+                sb.AppendLine().Append("S1 馬達目標(X,Y) = (").AppendValues((float)s1_target.X, (float)s1_target.Y).Append(") mm");
+                if (camPt != null)
+                    sb.AppendLine().Append("S1 馬達座標(X,Y) = (").AppendValues((float)s1_current.X, (float)s1_current.Y).Append(") mm");
+
+                sb.AppendLine().Append("S2 馬達目標(X,Y) = (").AppendValues((float)s2_target.X, (float)s2_target.Y).Append(") mm");
+                if (camPt != null)
+                    sb.AppendLine().Append("S2 馬達座標(X,Y) = (").AppendValues((float)s2_current.X, (float)s2_current.Y).Append(") mm");
+            }
+            #endregion
+
+            #region WORLD_目標座標
+            if (!_withPadGaps)
+            {
+                //sb.AppendLine();
+                //sb.AppendLine().Append("Physic 目標(X,Y) = (").AppendValues((float)world_target.X, (float)world_target.Y).Append(") mm");
+                //if (camPt != null)
+                //    sb.AppendLine().Append("Physic 座標(X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+            }
+            #endregion
+
+            #region 變動值
+            if (camPt != null)
+            {
+                //(var motorD1, var motorD2, var worldDelta) = TransformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
+                //if (!_withPadGaps)
+                //{
+                //    sb.AppendLine();
+                //    sb.AppendLine($"Physic 變動值 ΔX = {worldDelta.X:0.000} mm");
+                //    sb.AppendLine($"Physic 變動值 ΔY = {worldDelta.Y:0.000} mm");
+                //}
+                //if (true || !_withPadGaps)
+                //{
+                //    sb.AppendLine();
+                //    sb.AppendLine($"PLC 補償量 ΔX = {motorD1.X:0.000} mm");
+                //    sb.AppendLine($"PLC 補償量 ΔY = {motorD1.Y:0.000} mm");
+                //}
+            }
+            #endregion
 
             if (bloc != null && bloc2 != null && bloc != bloc2)
             {
-                var camPt2 = bloc2.Center;
-                if (camPt2 != null)
+                //#region 量測兩點距離
+                //var camPt2 = getCentroid(bloc2);
+                //if (camPt2 != null)
+                //{
+                //    var transCP = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+                //    var world_last = transCP.Trans(camPt2);
+                //    var dv = world_current - world_last;
+                //    double dist = dv.NormLength;
+                //    sb.AppendLine();
+                //    sb.AppendLine($"Physic 座標 DX = {dv.X:0.000} mm");
+                //    sb.AppendLine($"Physic 座標 DY = {dv.Y:0.000} mm");
+                //    sb.AppendLine($"Physic 座標 距離 = {dist:0.000} mm");
+                //}
+                //#endregion
+            }
+            else
+            {
+                var cell = (bloc as CellBloc)?.Cell;
+                if (cell != null)
                 {
-                    var transCP = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
-                    var world_last = transCP.Trans(camPt2);
-                    var dv = world_current - world_last;
-                    double dist = dv.NormLength;
+                    #region 最後補償量
                     sb.AppendLine();
-                    sb.AppendLine($"Physic 座標 DX = {dv.X:0.000} mm");
-                    sb.AppendLine($"Physic 座標 DY = {dv.Y:0.000} mm");
-                    sb.AppendLine($"Physic 座標 距離 = {dist:0.000} mm");
+                    sb.AppendLine($"RunX = {cell.RunX:0.000} mm");
+                    sb.AppendLine($"RunY = {cell.RunY:0.000} mm");
+                    sb.AppendLine($"Angle = {cell.RunAngle:0.00}°");
+                    #endregion
+
+                    if (_xRecipe.InspectParams.optTiltDetectEnabled)
+                    {
+                        #region 傾斜(踩腳)
+                        var chipCoords = cell?.ChipData?.ChipCoords;
+                        if (chipCoords != null)
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine($"傾斜(踩腳)程度 = {chipCoords.TiltRatio:0.000}");
+                        }
+                        #endregion
+                    }
+
+                    if (_xRecipe.InspectParams.optChipMeasurement)
+                    {
+                        #region 尺寸量測結果
+                        var cW = _xRecipe.InspectParams.mWidthStand;
+                        var cH = _xRecipe.InspectParams.mHeightStand;
+                        var dx = Math.Round(cell.RunWidth - cW, 3);
+                        var dy = Math.Round(cell.RunHeight - cH, 3);
+                        sb.AppendLine().Append($"晶粒.尺寸X = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
+                        sb.AppendLine().Append($"晶粒.尺寸Y = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
+                        #endregion
+
+                        #region 尺寸量測詳細點位
+                        var chipDim = cell?.ChipData?.ChipDimension;
+                        if (chipDim != null && chipDim.GetPixelSize(out double dpX, out double dpY))
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine().Append($"晶粒.尺寸X = {dpX:0.0} pix");
+                            sb.AppendLine().Append($"晶粒.尺寸Y = {dpY:0.0} pix");
+                        }
+                        #endregion
+
+                        #region 晶粒_PAD_跨距
+                        var padsGrid = cell?.ChipData?.PadsGrid;
+                        if (getChapPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
+                        {
+                            sb.AppendLine();
+                            sb.AppendLine().Append($"PAD.跨距.尺寸X = {padSpanW:0.0} pix");
+                            sb.AppendLine().Append($"PAD.跨距.尺寸Y = {padSpanH:0.0} pix");
+                        }
+                        #endregion
+
+                        #region PAD_邊隙
+                        if (_withPadGaps)
+                        {
+                            var gaps = cell?.ChipData?.PadEdgeGaps;
+                            if (gaps != null)
+                            {
+                                if (GlobalConfig.OPT_USING_GAPS_4)
+                                {
+                                    sb.AppendLine();
+                                    sb.AppendLine().Append($"邊隙(左) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");
+                                    sb.AppendLine().Append($"邊隙(上) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Top):0.000} mm");
+                                    sb.AppendLine().Append($"邊隙(右) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Right):0.000} mm");
+                                    sb.AppendLine().Append($"邊隙(下) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Bottom):0.000} mm");
+                                    sb.AppendLine().Append($"邊隙差值(左右) = {gaps.GetAveGapDiff():0.000} mm");
+                                }
+                                else
+                                {
+                                    sb.AppendLine();
+                                    sb.AppendLine().Append($"LUX = {gaps.LU.X:0.000} mm");
+                                    sb.AppendLine().Append($"RUX = {gaps.RU.X:0.000} mm");
+                                    sb.AppendLine().Append($"RDX = {gaps.RD.X:0.000} mm");
+                                    sb.AppendLine().Append($"LDX = {gaps.LD.X:0.000} mm");
+                                    sb.AppendLine();
+                                    sb.AppendLine().Append($"LUY = {gaps.LU.Y:0.000} mm");
+                                    sb.AppendLine().Append($"RUY = {gaps.RU.Y:0.000} mm");
+                                    sb.AppendLine().Append($"RDY = {gaps.RD.Y:0.000} mm");
+                                    sb.AppendLine().Append($"LDY = {gaps.LD.Y:0.000} mm");
+                                }
+                            }
+                        }
+                        #endregion
+                    }
                 }
             }
         }
+        void appendCursorsDistInfo(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
+        {
+            //if (TransformsModel == null)
+            //    return;
+
+
+            //QVector world_current = null;
+
+            //var camPt = bloc.Center;
+            //if (camPt != null)
+            //{
+            //    var tranCP = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+            //    world_current = tranCP.Trans(camPt);
+            //    sb.AppendLine().Append("Physic 座標(X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+            //}
+
+            //if (bloc != null && bloc2 != null && bloc != bloc2)
+            //{
+            //    var camPt2 = bloc2.Center;
+            //    if (camPt2 != null)
+            //    {
+            //        var transCP = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
+            //        var world_last = transCP.Trans(camPt2);
+            //        var dv = world_current - world_last;
+            //        double dist = dv.NormLength;
+            //        sb.AppendLine();
+            //        sb.AppendLine($"Physic 座標 DX = {dv.X:0.000} mm");
+            //        sb.AppendLine($"Physic 座標 DY = {dv.Y:0.000} mm");
+            //        sb.AppendLine($"Physic 座標 距離 = {dist:0.000} mm");
+            //    }
+            //}
+        }
+
         static QVector getCentroid(EzBloc bloc)
         {
             var cell = (bloc as CellBloc)?.Cell;
