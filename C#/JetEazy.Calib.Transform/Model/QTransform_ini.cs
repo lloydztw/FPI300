@@ -16,7 +16,6 @@
 using JetEazy.QMath;
 using OpenCvSharp;
 
-
 namespace JetEazy.Transform
 {
     partial class QTransform
@@ -64,6 +63,8 @@ namespace JetEazy.Transform
             // 只須載入 關鍵點資訊，轉換矩陣可由關鍵點計算得出，因此不須保存轉換矩陣資訊
             //_load(trf._mat, iniFileName, sectName + "_MAT");
             //_load(trf._matInv, iniFileName, sectName + "_MAT_INV");
+            
+            LoadIni_PostChain(iniFileName);
         }
         public void SaveIni(string iniFileName, string sectName = null)
         {
@@ -87,6 +88,35 @@ namespace JetEazy.Transform
             // 只須保存 關鍵點資訊，轉換矩陣可由關鍵點計算得出，因此不須保存轉換矩陣資訊
             //_save(trf._mat, iniFileName, sectName + "_MAT");
             //_save(trf._matInv, iniFileName, sectName + "_MAT_INV");
+
+            // PostChain
+            SaveIni_PostChain(iniFileName);
+        }
+
+        void LoadIni_PostChain(string iniFileName)
+        {
+            PostChain?.Dispose();
+            PostChain = null;
+
+            string sectName = $"{Name}_PostChain";
+            int rows = 0;
+            int cols = 0;
+            JetEazy.Win32.Win32Ini.Load(ref rows, iniFileName, sectName, "KP_ROWS");
+            JetEazy.Win32.Win32Ini.Load(ref cols, iniFileName, sectName, "KP_COLS");
+
+            if (rows < 2 || cols < 2)
+                return;
+
+            PostChain = new QTransform(sectName);
+            PostChain.LoadIni(iniFileName, sectName);
+        }
+        void SaveIni_PostChain(string iniFileName)
+        {
+            if (PostChain != null)
+            {
+                PostChain.Name = $"{Name}_PostChain";
+                PostChain.SaveIni(iniFileName, PostChain.Name);
+            }
         }
 
         #region PRIVATE_INI_FILE_FUNCTIONS

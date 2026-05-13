@@ -16,6 +16,7 @@
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.QMath;
+using JetEazy.Transform;
 using System;
 
 namespace LaserAlignDX.Model.Coords.V36

@@ -43,6 +43,10 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
         ITravellerTransforms _trfModel;
         #endregion
 
+        #region PRIVATE_RUNTIME_DATA
+        bool _isFocusOnChip;
+        #endregion
+
         public CarrierEnum ActiveCarrierID
         {
             get; set;
@@ -78,7 +82,6 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
             {
                 var sb = new StringBuilder();
                 bool isShowScore = true;
-
 
                 getRowCol(cursor, out int row, out int col, out XCell cell);
                 checkResult(cell, out bool isPass, out bool isEmpty);
@@ -421,8 +424,8 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
             }
             return false;
         }
-        
-        static QVector getCamCoord(EzBloc bloc)
+
+        QVector getCamCoord(EzBloc bloc)
         {
             var cell = (bloc as XCellBloc)?.Cell;
             if (cell != null)
@@ -440,7 +443,8 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
                     return chipQuad.Center;
             }
 
-            return bloc?.Center;
+            var camPt = bloc?.Center;
+            return camPt;
         }
     }
 }

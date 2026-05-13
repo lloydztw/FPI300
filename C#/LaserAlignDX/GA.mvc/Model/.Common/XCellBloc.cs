@@ -56,11 +56,5 @@ namespace LaserAlignDX.Model
             //get => string.IsNullOrEmpty(NonEmptyDesc);
             get => Cell == null || Cell.IsEmptyPlaceHold();
         }
-
-        public string NonEmptyDesc
-        {
-            get;
-            set;
-        }
     };
 }

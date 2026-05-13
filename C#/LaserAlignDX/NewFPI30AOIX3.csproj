@@ -537,6 +537,7 @@
     <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms_ini.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V36\QMicroChipTransform.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V36\QWorldGridPointsEx.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\TrfMigration.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V36\TravellerTransforms.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V36\TravellerTransforms_ini.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\JcetReportBuilder.cs" />

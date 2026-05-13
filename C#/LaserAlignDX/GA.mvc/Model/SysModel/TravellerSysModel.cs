@@ -883,7 +883,7 @@ namespace LaserAlignDX.Mvc.Model
 
             //(4) [線性遷移] 重新設定 rows, cols, pitchX, pitchY 布局
             var newPitch = new QVector2(pitchX, pitchY);
-            newTrf = TravellerTransformFactory.CreateLinearMigration(name, carrierID, newCamGrid, newPitch, segsList);
+            newTrf = TrfMigration.CreateLinearMigration(name, carrierID, newCamGrid, newPitch, segsList);
 
             return newTrf;
         }

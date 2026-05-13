@@ -36,6 +36,7 @@ using System.Windows.Forms;
 using Point = System.Drawing.Point;
 using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 using XRecipe = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
+using CellBloc = LaserAlignDX.Model.XCellBloc;
 
 
 namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
@@ -43,43 +44,43 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
     public partial class CviCellsResultBoxes : CviAbsTooltipBox
     {
         #region INNER_CLASS
-        class CellBloc : EzBloc
-        {
-            public CellBloc(XCell cell, RectangleF rect) : base(Rectangle.Round(rect), 1)
-            {
-                Cell = cell;
-            }
-            public CellBloc(XCell cell) : base(Rectangle.Empty, 1)
-            {
-                Cell = cell;
+        //class CellBloc : EzBloc
+        //{
+        //    public CellBloc(XCell cell, RectangleF rect) : base(Rectangle.Round(rect), 1)
+        //    {
+        //        Cell = cell;
+        //    }
+        //    public CellBloc(XCell cell) : base(Rectangle.Empty, 1)
+        //    {
+        //        Cell = cell;
 
-                //var mvdRectF = cell.DrawResultRectF();
-                //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRectF));
-                //Center = new JetEazy.QMath.QVector(mvdRectF.CenterX, mvdRectF.CenterY);
+        //        //var mvdRectF = cell.DrawResultRectF();
+        //        //Rect = Rectangle.Round(GaImageUtil.ToRectangleF(mvdRectF));
+        //        //Center = new JetEazy.QMath.QVector(mvdRectF.CenterX, mvdRectF.CenterY);
 
-                var chipQuad2D = cell?.ChipData?.ChipQuad2D;
-                if (chipQuad2D != null)
-                {
-                    Rect = Rectangle.Round(cell.viewRectF);
-                    Center = new QVector(chipQuad2D.Center);
-                }
-                else
-                {
-                    var cc = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
-                    Rect = Rectangle.Round(cell.viewRectF);
-                    Center = new QVector(cc.X, cc.Y);
-                }
-            }
-            public XCell Cell
-            {
-                get; private set;
-            }
-            public string NonEmptyDesc
-            {
-                get; internal set;
-            }
-            public bool IsEmpty => string.IsNullOrEmpty(NonEmptyDesc);
-        };
+        //        var chipQuad2D = cell?.ChipData?.ChipQuad2D;
+        //        if (chipQuad2D != null)
+        //        {
+        //            Rect = Rectangle.Round(cell.viewRectF);
+        //            Center = new QVector(chipQuad2D.Center);
+        //        }
+        //        else
+        //        {
+        //            var cc = JetEazy.Qcvt.CenterF(ref cell.viewRectF);
+        //            Rect = Rectangle.Round(cell.viewRectF);
+        //            Center = new QVector(cc.X, cc.Y);
+        //        }
+        //    }
+        //    public XCell Cell
+        //    {
+        //        get; private set;
+        //    }
+        //    public string NonEmptyDesc
+        //    {
+        //        get; internal set;
+        //    }
+        //    public bool IsEmpty => string.IsNullOrEmpty(NonEmptyDesc);
+        //};
         #endregion
 
         #region GLOBAL_MESS
@@ -317,7 +318,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 //else
                 //    ((IxBlob)bloc).Bin = (int)BIN.NG;
 
-                bloc.NonEmptyDesc = bloc.Cell.GetNoTrayDesc();
+                //bloc.NonEmptyDesc = bloc.Cell.GetNoTrayDesc();
             }
             #endregion
 

@@ -23,6 +23,7 @@ using LaserAlignDX.Model.Coords.Support;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
+using System.Windows.Media.Imaging;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
 namespace LaserAlignDX.Model.Coords.V36
@@ -66,11 +67,13 @@ namespace LaserAlignDX.Model.Coords.V36
             new QxCoordsTransform("C1_P", "pix", "mm"),         // 線掃相機C1 <--> world
             new QTransform("C1_M1S1", "pix", "mm"),             // 線掃相機C1 <--> motors (sucker 1)
             new QTransform("C1_M1S2", "pix", "mm"),             // 線掃相機C1 <--> motors (sucker 2)
-
             new QxCoordsTransform("C2_P", "pix", "mm"),         // 線掃相機C2 <--> world
             new QTransform("C2_M2S1", "pix", "mm"),             // 線掃相機C2 <--> motors (sucker 1)
             new QTransform("C2_M2S2", "pix", "mm"),             // 線掃相機C2 <--> motors (sucker 2)
         };
+        #endregion
+
+        #region INDEX_FUNCTIONS
         int getIndex(CarrierEnum C, SuckerRowEnum S)
         {
             return (int)C * 3 + (int)S + 1;
@@ -88,17 +91,19 @@ namespace LaserAlignDX.Model.Coords.V36
         }
         void IDisposable.Dispose()
         {
-            foreach (var trf in _transforms)
-                trf?.Dispose();
-
-            for (int i = 0, N = _calibCamGrids.Length; i < N; i++)
-            {
-                _calibCamGrids[i]?.Dispose();
-                _calibCamGrids[i] = null;
-            }
-
+            dispose(_transforms);
+            dispose(_calibCamGrids);
             Unregister(this);
         }
+        void dispose(IDisposable[] arr)
+        {
+            for (int i = 0, len = arr.Length; i < len; i++)
+            {
+                arr[i]?.Dispose();
+                arr[i] = null;
+            }
+        }
+        #endregion
 
         /// <summary>
         /// 所有參數共用基礎 的 座標轉換系統
@@ -110,7 +115,6 @@ namespace LaserAlignDX.Model.Coords.V36
                 return Instance("$CommonBase$");
             }
         }
-
         /// <summary>
         /// 個別參數 的 座標轉換系統
         /// </summary>
@@ -129,7 +133,6 @@ namespace LaserAlignDX.Model.Coords.V36
             Register(newObj); // 確保物件已完全就緒才發佈到註冊表
             return newObj;
         }
-        #endregion
 
         public override string Name
         {
@@ -150,7 +153,6 @@ namespace LaserAlignDX.Model.Coords.V36
         {
             return getCarrierWorldGrid(C);
         }
-        public double CameraWorkDist { get; set; }
 
         QWorldGridPointsEx getCarrierWorldGrid(CarrierEnum C)
         {
@@ -230,7 +232,7 @@ namespace LaserAlignDX.Model.Coords.V36
                 _LOG.Error($"SetCalibMotorCoords : err = {err}");
                 return err;
             }
-            
+
             var trfCM = GetCameraMotorTransform(C, S);
             var calib = trfCM.GetCalibCornerPoints();
 
@@ -285,7 +287,7 @@ namespace LaserAlignDX.Model.Coords.V36
 
         public void BuildAll()
         {
-            GaUtil.LOG($"座標系統 [{Name}] 建構 : 開始");
+            GaUtil.LOG($"座標系統 [{Name}] (V36) 建構 : 開始");
             foreach (var trf in _transforms)
             {
                 if (trf == null) continue;
@@ -294,6 +296,14 @@ namespace LaserAlignDX.Model.Coords.V36
                 GaUtil.LOG($"MATRIX_{trf.Name} det1 = {det1:0.000000}");
                 GaUtil.LOG($"MATRIX_{trf.Name} det2 = {det2:0.000000}");
             }
+            //foreach (var trf in _trfCamDistAdjusts)
+            //{
+            //    if (trf == null) continue;
+            //    trf?.Build();
+            //    trf.CheckBuildCondition(out double det1, out double det2);
+            //    GaUtil.LOG($"MATRIX_{trf.Name} det1 = {det1:0.000000}");
+            //    GaUtil.LOG($"MATRIX_{trf.Name} det2 = {det2:0.000000}");
+            //}
             GaUtil.LOG($"座標系統 [{Name}] 建構 : 完成");
         }
         public void Load(string iniFileName)
@@ -426,12 +436,11 @@ namespace LaserAlignDX.Model.Coords.V36
         #endregion
     }
 
-
     partial class TravellerTransforms
     {
         #region 跑線時期_函式群
 
-        public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, 
+        public (ErrorCodes, string) GetNodeCoords(CarrierEnum C,
                                                 int rowId, int colId,
                                                 out QVector camCoord,
                                                 out QVector worldCoord,
@@ -474,10 +483,10 @@ namespace LaserAlignDX.Model.Coords.V36
                 // (row, col) --> World
                 worldCoord = carrierWorldGrid.Get(rowId, colId);
 
-                // World --> Camera
+                // Camera <-- World
                 camCoord = transCP.InvTrans(worldCoord);
 
-                // VERIFY
+                // 驗證
                 if (debugVerify)
                 {
                     var camCoordRC = _calibCamGrids[(int)C].Get(rowId, colId).Center;
@@ -488,7 +497,7 @@ namespace LaserAlignDX.Model.Coords.V36
 
                 // Camera -> MotorS1
                 s1MotorCoord = transCM1.Trans(camCoord);
-                
+
                 // Camera -> MotorS2
                 s2MotorCoord = transCM2.Trans(camCoord);
             }
@@ -549,7 +558,7 @@ namespace LaserAlignDX.Model.Coords.V36
             //(1) 取得 PLC 內部預想 (rowId, colId) 座標值
             (var err, var errMsg) = GetPlcExpectedCoords(C, rowId, colId, out var s1_naive, out var s2_naive);
 
-            //(3) 根據 (rowId, colId) 取得 載台C 格位中心 之 以下:
+            //(2) 根據 (rowId, colId) 取得 載台C 格位中心 之 以下:
             //      world_node  格位中心的 世界座標
             //      transCM1    Camera To MotorS1
             //      transCM2    Camera To MotorS2
@@ -559,7 +568,7 @@ namespace LaserAlignDX.Model.Coords.V36
             var transCM1 = GetCameraMotorTransform(C, SuckerRowEnum.S1);
             var transCM2 = GetCameraMotorTransform(C, SuckerRowEnum.S2);
             var transCP = GetCameraPhysicTransform(C);
-
+            
             //(4) 由 像測點 推算 對應 馬達座標值
             var s1_current = transCM1.Trans(camPt);
             var s2_current = transCM2.Trans(camPt);
@@ -582,5 +591,163 @@ namespace LaserAlignDX.Model.Coords.V36
         }
 
         #endregion
+    }
+
+    partial class TravellerTransforms
+    {
+        /// <summary>
+        /// 保留
+        /// </summary>
+        public double CameraWorkDist { get; set; }
+
+        /// <summary>
+        /// 建立 相機工作高度 座標轉換
+        /// </summary>
+        void BuildWorkDistAdjustment_000(CarrierEnum carrierID, ITravellerTransforms commonBaseTrf)
+        {
+#if (false)
+            var trfModel = this;
+
+            //NOTE: trfModel 是對焦在 (空盤表面)
+            //NOTE: commonBaseTrf 是對焦在 (晶粒表面)
+
+            //(1) 此處 camGrid 是對焦在 空盤表面
+            var camGrid = this.GetCalibCamGrid(carrierID);
+            var R = camGrid.Rows - 1;
+            var C = camGrid.Cols - 1;
+            var camPts = new[]
+            {
+                camGrid[0, 0].Center,
+                camGrid[0, C].Center,
+                camGrid[R, C].Center,
+                camGrid[R, 0].Center,
+            };
+            var carrierWorldGrid = this.GetWorldGridPoints(carrierID);
+            var carrierWorldPts = new[]
+            {
+                carrierWorldGrid.Get(0, 0),
+                carrierWorldGrid.Get(0, C),
+                carrierWorldGrid.Get(R, C),
+                carrierWorldGrid.Get(R, 0),
+            };
+
+            //(2) trfCamToMotor 是對焦在 晶粒表面
+            var base_trfCamWorld = commonBaseTrf.GetCameraPhysicTransform(carrierID);
+            var base_WorldPts = new QVector[4];
+            for (int i = 0; i < 4; i++)
+            {
+                base_WorldPts[i] = base_trfCamWorld.Trans(camPts[i]);
+                //base_CamPts[i] = base_trfCamWorld.Trans(base_WorldPts[i]);
+                //s1_motorPts[i] = base_trfCamToMotorS1.Trans(base_CamPts[i]);
+                //s2_motorPts[i] = base_trfCamToMotorS2.Trans(base_CamPts[i]);
+            }
+
+            //(3) 建立 空盤表面 到 晶粒表面 的 座標轉換
+            var W1 = (base_WorldPts[0] - base_WorldPts[1]).NormLength;
+            var W2 = (base_WorldPts[3] - base_WorldPts[2]).NormLength;
+            var H1 = (base_WorldPts[0] - base_WorldPts[3]).NormLength;
+            var H2 = (base_WorldPts[1] - base_WorldPts[2]).NormLength;
+            var W = (W1 + W2) / 2;
+            var H = (H1 + H2) / 2;
+
+            var pitch = camGrid.GetPitch();
+            var PW1 = (carrierWorldPts[0] - carrierWorldPts[1]).NormLength;
+            var PW2 = (carrierWorldPts[3] - carrierWorldPts[2]).NormLength;
+            var PH1 = (carrierWorldPts[0] - carrierWorldPts[3]).NormLength;
+            var PH2 = (carrierWorldPts[1] - carrierWorldPts[2]).NormLength;
+            var PW = (PW1 + PW2) / 2;
+            var PH = (PH1 + PH2) / 2;
+            System.Diagnostics.Trace.WriteLine($"W = {W:0.000} vs {PW:0.000}");
+            System.Diagnostics.Trace.WriteLine($"H = {H:0.000} vs {PH:0.000}");
+
+            var U = base_WorldPts[1] - base_WorldPts[0];
+            U = U * PW / W;
+            var V = base_WorldPts[3] - base_WorldPts[0];
+            V = V * PH / H;
+            base_WorldPts[1] = base_WorldPts[0] + U;
+            base_WorldPts[3] = base_WorldPts[0] + V;
+            base_WorldPts[2] = base_WorldPts[0] + U + V;
+
+            var adjustCamPts = Array.ConvertAll(base_WorldPts, p => base_trfCamWorld.InvTrans(p));
+
+            //(4) 建立 空盤表面 到 晶粒表面 的 座標轉換
+            var adjustTrf = _trfCamDistAdjusts[(int)carrierID];
+            var adjCalib = adjustTrf.GetCalibCornerPoints();
+            for (int i = 0; i < 4; i++)
+            {
+                adjCalib.Set(i, camPts[i], adjustCamPts[i]);
+            }
+            adjustTrf.Build();
+#endif
+        }
+
+        /// <summary>
+        /// 建立 相機工作高度 座標轉換
+        /// </summary>
+        public void BuildWorkDistAdjustment(CarrierEnum carrierID, ITravellerTransforms commonBaseTrf)
+        {
+            var trfModel = this;
+
+            //NOTE: trfModel 是對焦在 (空盤表面)
+            //NOTE: commonBaseTrf 是對焦在 (晶粒表面)
+
+            //(1) 此處 camGrid 是對焦在 空盤表面
+            var camGrid = this.GetCalibCamGrid(carrierID);
+            var R = camGrid.Rows - 1;
+            var C = camGrid.Cols - 1;
+            var camPts = new[]
+            {
+                camGrid[0, 0].Center,
+                camGrid[0, C].Center,
+                camGrid[R, C].Center,
+                camGrid[R, 0].Center,
+            };
+            var carrierWorldGrid = this.GetWorldGridPoints(carrierID);
+            var carrierWorldPts = new[]
+            {
+                carrierWorldGrid.Get(0, 0),
+                carrierWorldGrid.Get(0, C),
+                carrierWorldGrid.Get(R, C),
+                carrierWorldGrid.Get(R, 0),
+            };
+
+            //(2) trfCamToMotor 是對焦在 晶粒表面
+            //(3) Motors' post scaling
+            var SpanW = (carrierWorldPts[0] - carrierWorldPts[1]).NormLength;
+            var SpanH = (carrierWorldPts[0] - carrierWorldPts[3]).NormLength;
+
+            foreach(SuckerRowEnum sid in Enum.GetValues(typeof(SuckerRowEnum)))
+            {
+                var trfCamToMotor = GetCameraMotorTransform(carrierID, sid) as QTransform;
+                trfCamToMotor.PostChain?.Dispose();
+                trfCamToMotor.PostChain = null;
+
+                var motorPts = Array.ConvertAll(camPts, p => trfCamToMotor.Trans(p));
+
+                var W1 = (motorPts[0] - motorPts[1]).NormLength;
+                var W2 = (motorPts[3] - motorPts[2]).NormLength;
+                var H1 = (motorPts[0] - motorPts[3]).NormLength;
+                var H2 = (motorPts[1] - motorPts[2]).NormLength;
+                //var W = (W1 + W2) / 2;
+                //var H = (H1 + H2) / 2;
+                var U = motorPts[1] - motorPts[0];
+                var V = motorPts[3] - motorPts[0];
+                U = U * SpanW / W1;
+                V = V * SpanH / H1;
+
+                var scaledMotorPts = Array.ConvertAll(motorPts, p => new QVector(p));
+                scaledMotorPts[1] = scaledMotorPts[0] + U;
+                scaledMotorPts[3] = scaledMotorPts[0] + V;
+                scaledMotorPts[2] = scaledMotorPts[0] + U + V;
+
+                var trfAdj = new QTransform($"{trfCamToMotor.Name}_PostChain", "mm", "mm");
+                var calib = trfAdj.GetCalibCornerPoints();
+                for (int i = 0; i < 4; i++)
+                    calib.Set(i, motorPts[i], scaledMotorPts[i]);
+                trfAdj.Build();
+
+                trfCamToMotor.PostChain = trfAdj;
+            }
+        }
     }
 }

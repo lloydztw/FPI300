@@ -39,6 +39,7 @@ namespace JetEazy.Transform
         #region PRIVATE_DATA
         private string _srcUnit;
         private string _dstUnit;
+        private QTransform _postChain;
         #endregion
 
         public QTransform(string name, string srcUnit, string dstUnit)
@@ -59,11 +60,19 @@ namespace JetEazy.Transform
             _mat = null;
             _matInv?.Dispose();
             _matInv = null;
+            PostChain?.Dispose();
+            PostChain = null;
         }
         public string Name
         {
             get;
             set;
+        }
+
+        public QTransform PostChain
+        {
+            get => _postChain;
+            set => _postChain = value;
         }
 
         #region KP_INDEXING_FUNCTIONS
@@ -252,6 +261,10 @@ namespace JetEazy.Transform
             //var ret = Array.ConvertAll(dstPts, pt => new QCoord(pt.X * dstOrder, pt.Y * dstOrder, dstOrder, dstUnit));
 
             var ret = DynamicRangeUtil.DeNormalize(dstPts, dstRanges);
+            
+            if (PostChain != null)
+                ret = Array.ConvertAll(ret, p => PostChain.Trans(p));
+
             return ret;
         }
         public QVector[] InvTrans(QVector[] coords)
