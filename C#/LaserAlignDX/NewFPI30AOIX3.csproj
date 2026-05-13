@@ -23,7 +23,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;OPT_TRANSFORM_V36 | OPT_CALIB_V25 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPT_TRANSFORM_V36 | OPT_CALIB_V4 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -367,6 +367,7 @@
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v25.cs" />
+    <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v4.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v5.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaBasicMotorUtil.cs" />
@@ -409,6 +410,12 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v25.Designer.cs">
       <DependentUpon>FormCalibrationTool_v25.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v4.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v4.Designer.cs">
+      <DependentUpon>FormCalibrationTool_v4.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v5.cs">
       <SubType>Form</SubType>
@@ -659,6 +666,12 @@
     <Compile Include="GA\FormSpace\FPI30Form\FlyOffsetUI.Designer.cs">
       <DependentUpon>FlyOffsetUI.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA\FormSpace\FPI30Form\FormMotor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA\FormSpace\FPI30Form\FormMotor.Designer.cs">
+      <DependentUpon>FormMotor.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA\FormSpace\WX\frmMainDX.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -765,6 +778,9 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v25.resx">
       <DependentUpon>FormCalibrationTool_v25.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v4.resx">
+      <DependentUpon>FormCalibrationTool_v4.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v5.resx">
       <DependentUpon>FormCalibrationTool_v5.cs</DependentUpon>
     </EmbeddedResource>
@@ -830,6 +846,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\FPI30Form\FlyOffsetUI.resx">
       <DependentUpon>FlyOffsetUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA\FormSpace\FPI30Form\FormMotor.resx">
+      <DependentUpon>FormMotor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\WX\frmMainDX.resx">
       <DependentUpon>frmMainDX.cs</DependentUpon>

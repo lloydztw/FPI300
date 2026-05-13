@@ -82,8 +82,8 @@ namespace LaserAlignDX.Mvc.Gui
             var tags = new[] { "左上", "右上", "右下", "左下" };
             for (int i = 0; i < 4; i++)
             {
-                toolTip1.SetToolTip(_cornerMoveButtons[i], $"Move To {tags[i]}");
-                toolTip1.SetToolTip(_cornerSaveButtons[i], $"Update To {tags[i]}");
+                toolTip1.SetToolTip(_cornerMoveButtons[i], $"移動 至 {tags[i]}");
+                toolTip1.SetToolTip(_cornerSaveButtons[i], $"更新馬達座標 至 {tags[i]}");
             }
         }
 

@@ -31,8 +31,12 @@ using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
 using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V5.FormCalibrationTool;
 using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
+#elif (OPT_CALIB_V4)
+using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V25.FormRecipeEditor;
+using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V4.FormCalibrationTool;
+using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
 #elif (OPT_CALIB_V3)
-using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.FormRecipeEditor;
+using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V25.FormRecipeEditor;
 using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V3.FormCalibrationTool;
 using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V3.CalibAoiModel;
 #else
