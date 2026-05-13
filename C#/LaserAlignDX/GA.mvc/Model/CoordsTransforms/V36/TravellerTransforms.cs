@@ -23,7 +23,6 @@ using LaserAlignDX.Model.Coords.Support;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
-using System.Windows.Media.Imaging;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
 namespace LaserAlignDX.Model.Coords.V36

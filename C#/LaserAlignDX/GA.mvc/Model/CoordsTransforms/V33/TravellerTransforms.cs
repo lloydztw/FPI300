@@ -484,17 +484,6 @@ namespace LaserAlignDX.Model.Coords.V33
     {
         #region 跑線時期_函式群
 
-        public bool UseCamDistAdjustment
-        {
-            get;
-            set;
-        }
-
-        public QVector AdjustCamPt(CarrierEnum C, QVector camPt, bool fromCarrierToChipFocus = true)
-        {
-            return camPt;
-        }
-
         public (ErrorCodes, string) GetNodeCoords(CarrierEnum C, int rowId, int colId,
                                                 out QVector camCoord,
                                                 out QVector worldCoord,
