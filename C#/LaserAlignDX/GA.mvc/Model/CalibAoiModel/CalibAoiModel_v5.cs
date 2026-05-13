@@ -26,6 +26,7 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace LaserAlignDX.AoiModel.Calib.V5
 {
@@ -101,13 +102,14 @@ namespace LaserAlignDX.AoiModel.Calib.V5
         /// <br/> 用 EzBloc[] 回傳
         /// <br/> The caller 必須維護 fullfovImg 與 recipe 生命週期 
         /// </summary>
-        public EzBloc[] FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe)
+        public (EzBloc[], EzBloc[]) FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe)
         {
             var inkMarks = new EzBloc[0];
+            var padBlocs = new EzBloc[0];
 
             var jxSettings = suckerID == SuckerRowEnum.S1 ? recipe?.InkMarkSettings1 : recipe?.InkMarkSettings2;
             if (fullfovImg == null || jxSettings == null)
-                return inkMarks;
+                return (inkMarks, padBlocs);
 
             int NP = 4;
 
@@ -135,7 +137,7 @@ namespace LaserAlignDX.AoiModel.Calib.V5
 
                 finder.FindWhiteBlobs(imgBigCrop, out calibChipBlocs);
                 if (calibChipBlocs == null)
-                    return inkMarks;
+                    return (inkMarks, padBlocs);
 
                 if (calibChipBlocs.Count > 1)
                 {
@@ -154,11 +156,12 @@ namespace LaserAlignDX.AoiModel.Calib.V5
                     b?.Offset(roiBound.X, roiBound.Y);
             }
 
-            //(2) Find the ink blocs
+            //(2) Find the ink blocs in each PAD
             var inkBlocs = new List<EzBloc>();
             if (calibChipBlocs.Count > 0)
             {
-                var inkMinSz = Math.Max(2, blockMinSz / 20);
+                var inkVisionSettings = recipe.GridSettings.GridVisionSettings;
+                var inkMinSz = Math.Max(inkVisionSettings.MinSize.Value, 18);
                 foreach (var calibBloc in calibChipBlocs)
                 {
                     var roi = JetEazy.Qcvt.CV(calibBloc.Rect);
@@ -173,7 +176,7 @@ namespace LaserAlignDX.AoiModel.Calib.V5
                         EzBlobFinder finder = new EzBlobFinder
                         {
                             MorphIterations = 0,
-                            OptFillBorder = false,
+                            OptFillBorder = true,
                             MinSize = new OpenCvSharp.Size(inkMinSz, inkMinSz)
                         };
                         finder.FindWhiteBlobs(imgCrop, out var whiteBlobs);
@@ -201,7 +204,7 @@ namespace LaserAlignDX.AoiModel.Calib.V5
                 }
             }
 
-            //(3) Sort the ink blocs
+            //(3) Sort the InkMarks and PadBlocs in corner-4 order
             if (inkBlocs.Count >= NP)
             {
                 var builder = new EzBlocsGridBuilder();
@@ -209,8 +212,16 @@ namespace LaserAlignDX.AoiModel.Calib.V5
                 if (inkGrid != null)
                     inkMarks = inkGrid.GetCornerBlocs();
             }
+            if (calibChipBlocs.Count >= NP)
+            {
+                var builder = new EzBlocsGridBuilder();
+                padBlocs = calibChipBlocs.ToArray();
+                var grid = builder.Build(padBlocs, targetRows: 2, targetCols: 2);
+                if (grid != null)
+                    padBlocs = grid.GetCornerBlocs();
+            }
 
-            return inkMarks;
+            return (inkMarks, padBlocs);
         }
 
         /// <summary>

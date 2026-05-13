@@ -681,6 +681,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
         /// </summary>
         void updateInkMarkBoxes(EzBloc[] inkMarks, bool refresh = false)
         {
+#if (false)
             if (_cviInkMarkBoxes == null)
                 return;
 
@@ -712,6 +713,30 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                         cviBox.Visible = false;
                     }
                 }
+            }
+#endif
+
+            if (_cviInkMarkBoxes == null)
+                return;
+
+            int N = _cviInkMarkBoxes.Length;
+            int NInks = inkMarks != null ? inkMarks.Length : 0;
+
+            for (int i = 0; i < N; i++)
+            {
+                var cviBox = _cviInkMarkBoxes[i];
+                if (cviBox == null) continue;
+
+                var mark = i < NInks ? inkMarks[i] : null;
+                if (mark != null)
+                {
+                    cviBox.SetBox(mark);
+                    cviBox.Color = Color.Orange;
+                    cviBox.Visible = true;
+                    continue;
+                }
+
+                cviBox.Visible = false;
             }
 
             if (refresh)
@@ -1122,6 +1147,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
 
             return needsToLoadNewImage;
         }
+
         void TakeOverImage(Bitmap bigBmp, string srcName, CalibViewEnum vid, bool disposeSrc = true)
         {
             var imgPanel = _getImgViewPanel(vid);
@@ -1216,7 +1242,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V3
                     return false;
 
                 //(1) Run AOI
-                var inkMarks = _calibModel.FetchInkMarks(_activeCarrierID, _activeSuckerRowID, fullfovImg, getActiveCalibRecipe());
+                (var inkMarks, var _) = _calibModel.FetchInkMarks(_activeCarrierID, _activeSuckerRowID, fullfovImg, getActiveCalibRecipe());
 
                 //(2) Update InkMarks to GUI
                 setActiveInkMarksToRecipe(inkMarks);

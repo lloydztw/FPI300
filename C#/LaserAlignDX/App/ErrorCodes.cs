@@ -103,5 +103,8 @@ namespace LaserAlignDX.Mvc.Model
 
         [Description("無法找到 GoldenQuad2D!")]
         WARN_CAN_NOT_FETCH_QUAD_2D,
+
+        [Description("無法自動抓到 INK 定位點!\n\r請確認 參數 是否適配?")]
+        WARN_CAN_NOT_FETCH_INKS,
     }
 }

@@ -115,6 +115,11 @@ namespace LaserAlignDX.Mvc.Gui
             get => _crossColor;
             set => _crossColor = value;
         }
+        public Color Color
+        {
+            get => _color;
+            set => _color = value;
+        }
 
         #region OVERRIDES
         public override void OnDraw(CvImageViewer viewer, Graphics gxView)

@@ -15,6 +15,7 @@
 
 using JetEazy.Match;
 using OpenCvSharp;
+using System;
 using System.Collections.Generic;
 
 
@@ -72,30 +73,37 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 max_h = binaryImg.Height;
             }
 
-            var cc = Cv2.ConnectedComponentsEx(binaryImg);
-            for (int i = 1; i < cc.Blobs.Count; i++)
+            try
             {
-                var ccBlob = cc.Blobs[i];
+                var cc = Cv2.ConnectedComponentsEx(binaryImg);
+                for (int i = 1; i < cc.Blobs.Count; i++)
+                {
+                    var ccBlob = cc.Blobs[i];
 
-                if (ccBlob.Width < min_w || ccBlob.Height < min_h ||
-                    ccBlob.Width > max_w || ccBlob.Height > max_h)
-                    continue;
+                    if (ccBlob.Width < min_w || ccBlob.Height < min_h ||
+                        ccBlob.Width > max_w || ccBlob.Height > max_h)
+                        continue;
 
-                var rect = JetEazy.Qcvt.CC(ccBlob.Rect);
+                    var rect = JetEazy.Qcvt.CC(ccBlob.Rect);
 
-                //// UNSHRINK
-                //if (_shrinkFactor > 1)
-                //{
-                //    rect.X *= _shrinkFactor;
-                //    rect.Y *= _shrinkFactor;
-                //    rect.Width *= _shrinkFactor;
-                //    rect.Height *= _shrinkFactor;
-                //}
+                    //// UNSHRINK
+                    //if (_shrinkFactor > 1)
+                    //{
+                    //    rect.X *= _shrinkFactor;
+                    //    rect.Y *= _shrinkFactor;
+                    //    rect.Width *= _shrinkFactor;
+                    //    rect.Height *= _shrinkFactor;
+                    //}
 
-                var bloc = new EzBloc(rect, 0);
-                bloc.Pixels = ccBlob.Area;
-                bloc.Center = new JetEazy.QMath.QVector(ccBlob.Centroid.X, ccBlob.Centroid.Y); // 保留精度 !
-                keyBlocs.Add(bloc);
+                    var bloc = new EzBloc(rect, 0);
+                    bloc.Pixels = ccBlob.Area;
+                    bloc.Center = new JetEazy.QMath.QVector(ccBlob.Centroid.X, ccBlob.Centroid.Y); // 保留精度 !
+                    keyBlocs.Add(bloc);
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new Exception("異常 @ Cv2.ConnectedComponentsEx : 可能圖形太大, 超出 OpenCV 能力", ex);
             }
 
             return keyBlocs.Count;

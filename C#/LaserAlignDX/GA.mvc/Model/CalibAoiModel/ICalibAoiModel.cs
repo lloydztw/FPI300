@@ -34,7 +34,7 @@ namespace LaserAlignDX.AoiModel
         /// 抓取 墨點  
         /// <br/> The caller 必須維護 fullfovImg 與 recipe 生命週期 
         /// </summary>
-        EzBloc[] FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe);
+        (EzBloc[], EzBloc[]) FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe);
 
         /// <summary>
         /// 保留

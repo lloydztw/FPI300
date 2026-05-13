@@ -99,13 +99,14 @@ namespace LaserAlignDX.AoiModel.Calib.V25
         /// <br/> 用 EzBloc[] 回傳
         /// <br/> The caller 必須維護 fullfovImg 與 recipe 生命週期 
         /// </summary>
-        public EzBloc[] FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe)
+        public (EzBloc[], EzBloc[]) FetchInkMarks(CarrierEnum carrierID, SuckerRowEnum suckerID, Mat fullfovImg, JxCalibRecipe recipe)
         {
             var inkMarks = new EzBloc[0];
+            var padBlocs = new EzBloc[0];
 
             var jxSettings = suckerID == SuckerRowEnum.S1 ? recipe?.InkMarkSettings1 : recipe?.InkMarkSettings2;
             if (fullfovImg == null || jxSettings == null)
-                return inkMarks;
+                return (inkMarks, padBlocs);
 
             int NP = 4;
 
@@ -133,7 +134,7 @@ namespace LaserAlignDX.AoiModel.Calib.V25
 
                 finder.FindWhiteBlobs(imgBigCrop, out calibChipBlocs);
                 if (calibChipBlocs == null)
-                    return inkMarks;
+                    return (inkMarks, padBlocs);
 
                 if (calibChipBlocs.Count > 1)
                 {
@@ -156,6 +157,7 @@ namespace LaserAlignDX.AoiModel.Calib.V25
             var inkBlocs = new List<EzBloc>();
             if (calibChipBlocs.Count > 0)
             {
+                padBlocs = calibChipBlocs.ToArray();
                 var inkMinSz = Math.Max(2, blockMinSz / 20);
                 foreach (var calibBloc in calibChipBlocs)
                 {
@@ -208,7 +210,7 @@ namespace LaserAlignDX.AoiModel.Calib.V25
                     inkMarks = inkGrid.GetCornerBlocs();
             }
 
-            return inkMarks;
+            return (inkMarks, padBlocs);
         }
 
         /// <summary>

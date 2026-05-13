@@ -22,6 +22,7 @@ using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.AoiModel.Calib;
+using LaserAlignDX.GA.FormSpace;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
@@ -32,7 +33,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using TravellerMINIX6.ProcessSpace;
 using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviCalibPointBox = LaserAlignDX.Mvc.Gui.CviRotRectBox;
@@ -269,10 +269,10 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
 
             for (int i = 0; i < N_CALIB_MOTOR_POINTS; i++)
             {
-                var box = _cviInkMarkBoxes[i];
-                if (box == null) continue;
+                var quad = _cviInkMarkBoxes[i]?.Quad2D;
+                if (quad == null) continue;
 
-                var rect = box.Quad2D.BoundaryRect;
+                var rect = quad.BoundaryRect;
                 if (rect.Contains(x, y))
                 {
                     _dgvCalibPointsListView.SelectedIndex = i;
@@ -614,43 +614,64 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
         /// <summary>
         /// 將 inkMarks 更新到 GUI
         /// </summary>
-        void updateInkMarkBoxes(EzBloc[] inkMarks, bool refresh = false)
+        void updateInkMarkBoxes(EzBloc[] inkMarks, EzBloc[] padBlocs, bool refresh = false)
         {
             if (_cviInkMarkBoxes == null)
                 return;
 
-            if (inkMarks == null)
-            {
-                foreach (var box in _cviInkMarkBoxes)
-                {
-                    if (box != null)
-                        box.Visible = false;
-                }
-            }
-            else
-            {
-                int idx = 0;
-                var NP = Math.Min(inkMarks.Length, _cviInkMarkBoxes.Length);
+            int N = _cviInkMarkBoxes.Length;
+            int NInks = inkMarks != null ? inkMarks.Length : 0;
+            int NPads = padBlocs != null ? padBlocs.Length : 0;
 
-                foreach (var cviBox in _cviInkMarkBoxes)
-                {
-                    var mark = inkMarks[idx++];
-                    if (cviBox == null) continue;
+            for (int i = 0; i < N; i++)
+            {
+                var cviBox = _cviInkMarkBoxes[i];
+                if (cviBox == null) continue;
 
-                    if (mark != null && idx <= NP)
-                    {
-                        cviBox.SetBox(mark);
-                        cviBox.Visible = true;
-                    }
-                    else
-                    {
-                        cviBox.Visible = false;
-                    }
+                var mark = i < NInks ? inkMarks[i] : null;
+                if (mark != null)
+                {
+                    cviBox.SetBox(mark);
+                    cviBox.Color = Color.Orange;
+                    cviBox.Visible = true;
+                    continue;
                 }
+
+                var pad = i < NPads ? padBlocs[i] : null;
+                if(pad !=null)
+                {
+                    cviBox.SetBox(pad);
+                    cviBox.Color = Color.Red;
+                    cviBox.Visible = true;
+                    continue;
+                }
+
+                cviBox.Visible = false;
             }
 
             if (refresh)
                 _getMatViewer()?.Refresh();
+        }
+        /// <summary>
+        /// 如果找不到 inkMark, 就用 padBloc 暫代.
+        /// </summary>
+        EzBloc[] makePseudoInkMarks(EzBloc[] inkMarks, EzBloc[] padBlocs)
+        {
+            // 如果找不到 inkMark, 就用 padBloc 暫代.
+            var NI = inkMarks != null ? inkMarks.Length : 0;
+            var NP = padBlocs != null ? padBlocs.Length : 0;
+            var N = Math.Max(NI, NP);
+
+            var pseudoMarks = new EzBloc[N];
+            for (int i = 0; i < N; i++)
+            {
+                var mark = i < NI ? inkMarks[i] : null;
+                if (mark == null && i < NP)
+                    mark = padBlocs[i];         // 如果找不到 inkMark, 就用 padBloc 暫代.
+                pseudoMarks[i] = mark;
+            }
+
+            return pseudoMarks;
         }
         #endregion
 
@@ -882,7 +903,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                 updateBoardGridBox(getActiveBoardGridInTrf(), true);
 
                 //bool refresh2 = _activeViewID == CalibViewEnum.InkMarksView;
-                updateInkMarkBoxes(inkMarks, true);
+                updateInkMarkBoxes(inkMarks, null, true);
 
                 updatePropertyPanel(false);
                 updateGuiStatus();
@@ -915,9 +936,9 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
         /// </summary>
         bool RunAutoFetchAll(bool dump = false)
         {
-            bool ok1 = RunAutoFetchBoardGrid(dump);
-            bool ok2 = RunAutoFetchInkMarks(dump);
-            return ok1 && ok2;
+            bool ok = RunAutoFetchBoardGrid(dump);
+            ok = ok && RunAutoFetchInkMarks(dump);
+            return ok;
         }
 
         /// <summary>
@@ -986,7 +1007,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                 CalibAoiModel.OPT_DUMP = dump;
 
                 //(1) clear interactors
-                updateInkMarkBoxes(null, refresh: true);
+                updateInkMarkBoxes(null, null, refresh: true);
 
                 //(2) image
                 var matViewer = _getMatViewer();
@@ -995,28 +1016,32 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                     return false;
 
                 //(1) Run AOI
-                var inkMarks = _calibModel.FetchInkMarks(_activeCarrierID, _activeSuckerRowID, fullfovImg, getActiveCalibRecipe());
+                (var inkMarks, var padBlocs) = _calibModel.FetchInkMarks(_activeCarrierID, _activeSuckerRowID, fullfovImg, getActiveCalibRecipe());
+                var pseudoInkMarks = makePseudoInkMarks(inkMarks, padBlocs);
 
                 //(2) Update InkMarks to GUI
-                setActiveInkMarksToRecipe(inkMarks);
-                updateInkMarkBoxes(inkMarks, refresh: true);
-                dgvUpdateInkMarks(inkMarks);
+                setActiveInkMarksToRecipe(pseudoInkMarks);
+                updateInkMarkBoxes(inkMarks, padBlocs, refresh: true);
+                dgvUpdateInkMarks(pseudoInkMarks);
 
                 //(3) MessageBoxe
                 #region MESSAGE_BOX
                 GaUtil.SetCursor(_wndOwner, oldCursor);
-                if (inkMarks == null)
+                if (inkMarks == null || inkMarks.Length < 4)
                 {
-                    string msg = "無法自動抓到 四角定位點!\n\r請確認 參數 是否適配?";
-                    MessageBox.Show(msg, "Calib", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    string msg = GaUtil.GetEnumDescription(ErrorCodes.WARN_CAN_NOT_FETCH_INKS);
+                    //MessageBox.Show(msg, "Calib", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    VsMessageBox.Warning(msg);
                 }
                 else if (dump)
                 {
-                    VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib");
+                    //string msg = "已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib";
+                    string msg = GaUtil.GetEnumDescription(Prompts.Info_Save_Binary_Image_OK) + "\n\r@ d:\\paso.log\\Calib";
+                    VsMessageBox.Info(msg);
                 }
                 #endregion
 
-                return inkMarks != null;
+                return (inkMarks != null && inkMarks.Length >= 4);
             }
             catch (Exception ex)
             {
@@ -1244,6 +1269,14 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
 
         void OpenMotorWindowXY(QVector directTargetPos = null)
         {
+#if (OPT_CALIB_V4)
+            using (var dlg = new FormMotor())
+            {
+                dlg.StartPosition = FormStartPosition.CenterParent;
+                dlg.ShowDialog(_wndOwner);
+            }
+            return;
+#endif
             using (var dlg = new FormMotors_CarierSuckerXY())
             {
                 dlg.OnInkerCoordsUpdated += Dlg_OnInkerCoordsUpdated;
@@ -1256,8 +1289,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
 
         void LoadImage(string fileName = null)
         {
-
-
             bool isBrowsing = string.IsNullOrEmpty(fileName);
             if (isBrowsing)
                 fileName = GaUtil.BrowseImageFile();
@@ -1282,7 +1313,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                 GaUtil.SetCursor(_wndOwner, oldCursor);
 
                 updateBoardGridBox(null, false);
-                updateInkMarkBoxes(null, true);
+                updateInkMarkBoxes(null, null, true);
             }
             else
             {
@@ -1291,7 +1322,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                     // 2025-11-20 (搭配點墨)
                     TakeOverImage(null, "", disposeSrc: false);
                     updateBoardGridBox(null, false);
-                    updateInkMarkBoxes(null, true);
+                    updateInkMarkBoxes(null, null, true);
                 }
             }
         }
@@ -1340,7 +1371,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                 SaveImage(CALIB_LAST_IMAGE_FILE(_activeCarrierID, _activeSuckerRowID));
 
                 updateBoardGridBox(null, false);
-                updateInkMarkBoxes(null, true);
+                updateInkMarkBoxes(null, null, true);
             }
             GaUtil.SetCursor(_wndOwner, oldCursor);
         }
@@ -1500,11 +1531,16 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
         GaMotorZCtrl _focusMotorCtrl = null;
         void attachFocusMotorCtrl()
         {
+            var view = _calibToolUI.wndFocusMotorGoPanel;
+
+#if (OPT_CALIB_V4)
+            view.Visible = false;
+            return;
+#endif
+
             // 只允許 attach 一次
             if (_focusMotorCtrl != null)
                 return;
-
-            var view = _calibToolUI.wndFocusMotorGoPanel;
 
             _focusMotorCtrl = new GaMotorZCtrl();
             _focusMotorCtrl.Attach(view);

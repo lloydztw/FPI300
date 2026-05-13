@@ -48,5 +48,8 @@ namespace LaserAlignDX
 
         [Description("Inker 在下位時, 禁止移動 馬達 XY!")]
         Warning_MotorXY_Disabled_By_Inker_Down,
+
+        [Description("已成功保存二值化圖檔")]
+        Info_Save_Binary_Image_OK,
     }
 }
