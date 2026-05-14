@@ -129,10 +129,7 @@ namespace Traveller106
             //}
             #endregion
 
-            // 先使用小SIZE 躲在 Banner 後面
             this.StartPosition = FormStartPosition.CenterScreen;
-            this.Size = new Size(200, 100);
-
             this.Load += MainForm_Load;
             this.FormClosed += MainForm_FormClosed;
             this.SizeChanged += MainForm_SizeChanged;
