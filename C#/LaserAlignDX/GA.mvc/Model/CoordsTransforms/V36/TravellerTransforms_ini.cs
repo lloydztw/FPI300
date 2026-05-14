@@ -90,16 +90,21 @@ namespace LaserAlignDX.Model.Coords.V36
             for (int i = 0; i < NGrids; i++)
             {
                 string str = lines[i];
-                gss.Deserialize(str, out _calibCamGrids[i]);
+                gss.Deserialize(str, out var calibCamGrid);
+                if (calibCamGrid == null && i > 0 && _calibCamGrids[i - 1] != null)
+                {
+                    str = gss.Serialize(_calibCamGrids[i - 1]);
+                    gss.Deserialize(str, out calibCamGrid);
+                }
+                _calibCamGrids[i] = calibCamGrid;
 
-                if (updateToTrf)
+                if (updateToTrf && calibCamGrid != null)
                 {
                     var trf = GetCameraPhysicTransform((CarrierEnum)i);
                     var worldGrid = getCarrierWorldGrid((CarrierEnum)i);
+                    updateCalibPointsToTrf(trf, calibCamGrid, worldGrid);
 
-                    updateCalibPointsToTrf(trf, _calibCamGrids[i], worldGrid);
-
-                    if (_calibCamGrids[i].Rows != worldGrid.Rows || _calibCamGrids[i].Cols != worldGrid.Cols)
+                    if (calibCamGrid.Rows != worldGrid.Rows || calibCamGrid.Cols != worldGrid.Cols)
                     {
                         string msg = $"{GetType().Name}.loadCalibCamGrids {(CarrierEnum)i} : 舊版 EzBlocsGridSerializer 有漏洞, 會損失 不連續的 Grids !!!";
                         _LOG.Warn(msg);

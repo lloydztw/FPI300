@@ -1,10 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using Traveller106;
 
@@ -12,52 +6,53 @@ namespace Eazy_Project_III.FormSpace
 {
     public partial class BannerForm : Form
     {
-        Label lblVersionDate;
+        #region GUI_LINKS
+        public Label lblVersionDate => label1;
+        public ProgressBar ProBar => progressBar1;
+        #endregion
 
-        // progressBar1
-        ProgressBar ProBar;
-        public BannerForm()
+        #region SINGLETON
+        static BannerForm _instance;
+        #endregion
+
+        protected BannerForm()
         {
             InitializeComponent();
-            this.Load += new EventHandler(BannerForm_Load);
-            this.Activated += new EventHandler(BannerForm_Activated);
-            ProBar = progressBar1;
             ProBar.Visible = false;
-        }
-        public BannerForm(out ProgressBar proBar)
-        {
-            InitializeComponent();
-          
-            this.Load += new EventHandler(BannerForm_Load);
-            this.Activated += new EventHandler(BannerForm_Activated);
-            ProBar = progressBar1;
-            proBar = ProBar;
-            ProBar.Visible = false;
-            ProBar.Visible = true;
-        }
-        void BannerForm_Load(object sender, EventArgs e)
-        {
-            Initial();
-            //this.TopMost = true;
-            //dumpBkgndImage();
+            lblVersionDate.Text = Universal.VersionDate + "  " + Universal.OPTION;
+            //Load += (s, e) => dumpBkgndImage();
         }
 
-        void Initial()
+        public static bool IsShowing()
         {
-            lblVersionDate = label1;
-            //if (!Universal.IsDebug)
-          //  this.TopMost = true;
+            return _instance != null;
+        }
+        public static Form ShowBanner()
+        {
+            if (_instance == null)
+            {
+                _instance = new BannerForm
+                {
+                    StartPosition = FormStartPosition.CenterScreen,
+                    TopMost = true,
+                };
+                _instance.Show();
+                _instance.Refresh();
+            }
+            return _instance;
+        }
+        public static void CloseBanner()
+        {
+            _instance?.Close();
+            _instance?.Dispose();
+            _instance = null;
         }
 
-        void BannerForm_Activated(object sender, EventArgs e)
-        {
-            lblVersionDate.Text = Universal.VersionDate +"  " + Universal.OPTION;
-            this.Refresh();
-        }
-
+        #region PRIVATE_FUNCTIONS
         void dumpBkgndImage()
         {
-            this.BackgroundImage.Save("d:\\banner.png");
+            this.BackgroundImage.Save("d:\\paso.log\\banner.png");
         }
+        #endregion
     }
 }

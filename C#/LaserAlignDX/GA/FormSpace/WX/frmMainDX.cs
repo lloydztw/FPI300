@@ -6,6 +6,7 @@ using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
 using JetEazy.FormSpace;
 using JetEazy.UISpace;
+using JetEazy.Utils;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace;
 using NeedleX.ProcessSpace;
@@ -38,23 +39,23 @@ namespace Traveller106
             }
         }
 
-        BannerForm BANNERFORM;
-        JetEazy.FormSpace.VsMessageBox vsMessageBox = null;
+        #region GUI_LINKS
+        EssUI ESSUI => essUI1;
+        RunUI RUNUI => runUI1;
+        RcpUI RCPUI => rcpUI1;
+        IniUI SETUPUI => iniUI1;
+        CtrlUI CTRLUI => ctrlUI1;
+        MainControlUI MAINUI => mainControlUI1;
+        #endregion
 
-        EssUI ESSUI;
-        RunUI RUNUI;
-        RcpUI RCPUI;
-        IniUI SETUPUI;
-        CtrlUI CTRLUI;
-
-        MainControlUI MAINUI;
-
+        #region TIMER
         Timer mMainTick;
         //JzTimes mImageTime = new JzTimes();
-
         //string MoveString = "";
         //bool IsLiveCapturing = true;
+        #endregion
 
+        #region DB
         AccDBClass ACCDB
         {
             get
@@ -83,7 +84,6 @@ namespace Traveller106
                 return Universal.RUNDB;
             }
         }
-
         RCPItemClass RCPItemNow
         {
             get
@@ -91,7 +91,9 @@ namespace Traveller106
                 return RCPDB.RCPItemNow;
             }
         }
+        #endregion
 
+        #region MACHINE
         MachineCollectionClass MACHINECollection
         {
             get
@@ -99,34 +101,37 @@ namespace Traveller106
                 return Universal.MACHINECollection;
             }
         }
-        //protected MainX1MachineClass MACHINE
-        //{
-        //    get { return (MainX1MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
-        //}
         protected MainFPIX3MachineClass MACHINE
         {
             get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
         }
+        #endregion
 
-
+        #region RECIPE
         protected RecipeFPIX3Class xRecipe
         {
             get { return RecipeFPIX3Class.Instance; }
         }
+        #endregion
 
         public frmMainDX()
         {
             InitializeComponent();
 
+            #region RESERVED_CODE
             //if (!_getMxComponent())
             //{
             //    //LogClass.Instance.Log("Mx加载错误");
-
             //    MessageBox.Show("初始化错误", "Initial MxComponent", MessageBoxButtons.OK, MessageBoxIcon.Error);
             //    //this.Close();
             //    Application.Exit();
             //    return;
             //}
+            #endregion
+
+            // 先使用小SIZE 躲在 Banner 後面
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.Size = new Size(200, 100);
 
             this.Load += MainForm_Load;
             this.FormClosed += MainForm_FormClosed;
@@ -135,8 +140,15 @@ namespace Traveller106
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            this.Cursor = Cursors.AppStarting;
+            //(0) Banner
+            var frmBanner = BannerForm.ShowBanner();
+            GaUtil.SetCursor(frmBanner, Cursors.AppStarting);
+            GaUtil.SetCursor(this, Cursors.AppStarting);
 
+            //(0.1) MYDECODE
+            JetEazy.Universal.MYDECODE = Universal.MAINPATH + @"\WORK\";
+
+            //(1) 初始化 JzDisplay
             //---------------------------------------------------------------------
             // 注意:
             //  使用 dispUI = new DispUI() 動態生成
@@ -146,46 +158,31 @@ namespace Traveller106
             //---------------------------------------------------------------------
             JzDisplay.UISpace.DispUI dispUI = new JzDisplay.UISpace.DispUI();
             this.Controls.Add(dispUI); // Gaara 原來的代碼, 少寫此行 !!!!!
-
-            string path = Universal.MAINPATH + @"\WORK\";
-            JetEazy.Universal.MYDECODE = path;
             bool bOK = dispUI.DispUIload(this);
+            
+            //(2) 初始化 本專案
+            bOK &= Init();
+
+            //(3) 初始化 異常
             if (!bOK)
             {
-                //LogClass.Instance.Log("Mx加载错误");
-
+                BannerForm.CloseBanner();
+                //>>> LogClass.Instance.Log("Mx加载错误");
                 MessageBox.Show("初始化错误", "Initial Lic", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //this.Close();
                 Application.Exit();
                 return;
             }
 
-            BANNERFORM = new BannerForm();
-            BANNERFORM.Show();
-            BANNERFORM.Refresh();
+            #region NOT_USED_CODE
+            //>>> 沒有用到 Universal.MainFormLocation
+            //>>> Universal.MainFormLocation = new Point(this.Location.X, this.Location.Y);
+            #endregion
 
-            Init();
-
-            BANNERFORM.Close();
-            BANNERFORM.Dispose();
-
-            Universal.MainFormLocation = new Point(this.Location.X, this.Location.Y);
-
-            //this.Text = $"{ToChangeLanguage("字符视觉检测")} Ver" + Application.ProductVersion;
-            //this.Text = $"{ToChangeLanguage("字符视觉检测")} Ver" + Universal.VersionDate;
+            //(4) 設定視窗標題
             this.Text = $"{ToChangeLanguage("FPI30-Studio")} (Ver {Application.ProductVersion}) " + Universal.VersionDate;
 
-            LanguageExClass.Instance.EnumControls(this);
-
-#if OPT_LETIAN_AUTO_LAYOUT
-            // To fit into my screen for debug.
-            this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.WindowState = FormWindowState.Maximized;
-#endif
-
+            //(5) 輸出 LOG
             _show_simulation_info_to_log();
-
-            //this.Cursor = Cursors.Default;
         }
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -215,7 +212,7 @@ namespace Traveller106
             _auto_layout();
         }
 
-        void Init()
+        bool Init()
         {
             switch (VERSION)
             {
@@ -247,16 +244,16 @@ namespace Traveller106
             INI.Instance.Initial();
             bool bOK = Universal.Initial(0);
             if (!bOK)
-            {
-                Environment.Exit(0);
-            }
+                return false;
 
+#if (false)
             ESSUI = essUI1;
             RUNUI = runUI1;
             RCPUI = rcpUI1;
             SETUPUI = iniUI1;
             CTRLUI = ctrlUI1;
             MAINUI = mainControlUI1;
+#endif
 
             RUNUI.Location = new Point(1212, 237);
             RCPUI.Location = RUNUI.Location;
@@ -274,8 +271,8 @@ namespace Traveller106
 
             mMainTick = new Timer();
             mMainTick.Interval = 20;
-            mMainTick.Enabled = true;
             mMainTick.Tick += MMainTick_Tick;
+            BeginInvoke((Action)mMainTick.Start);
 
             CTRLUI.SetEnable(false);
             MAINUI.SetEnable(false);
@@ -321,10 +318,18 @@ namespace Traveller106
                 X6_HANDLE_CLIENT.TriggerAction += X6_HANDLE_CLIENT_TriggerAction;
             }
 
-#if !OPT_LETIAN_AUTO_LAYOUT
-            // 很慢
+            return true;
+        }
+        void PostCloseBanner()
+        {
+            // 轉換語系 (很慢)
             LanguageExClass.Instance.EnumControls(this);
-#endif
+            // To Maximize the window size.
+            this.FormBorderStyle = FormBorderStyle.Sizable;
+            this.WindowState = FormWindowState.Maximized;
+            // Close Banner
+            BannerForm.CloseBanner();
+            GaUtil.SetCursor(this, Cursors.Default);
         }
 
         #region MAIN_X1_LASER_TCP
@@ -773,6 +778,7 @@ namespace Traveller106
         #endregion
 
         #endregion
+
         void InitialESSUI()
         {
             ESSUI.Initial(ESSDB, ACCDB, Universal.UIPATH, INI.Instance.LANGUAGE, Universal.VERSION, Universal.OPTION, 200);
@@ -799,7 +805,7 @@ namespace Traveller106
             SETUPUI.TriggerAction += new IniUI.TriggerHandler(SETUPUI_TriggerAction);
             SETUPUI.TriggerStringAction += SETUPUI_TriggerStringAction;
         }
-        private void SETUPUI_TriggerStringAction(string statusstr)
+        void SETUPUI_TriggerStringAction(string statusstr)
         {
             //MoveString = statusstr;
         }
@@ -817,7 +823,7 @@ namespace Traveller106
         }
 
         #region EVENT_HANDLERS
-        private void MAINUI_OnChangeState(object sender, MainUiStateEventArgs e)
+        void MAINUI_OnChangeState(object sender, MainUiStateEventArgs e)
         {
             if (e == null)
                 return;
@@ -833,6 +839,7 @@ namespace Traveller106
                     CTRLUI.Enabled = true;
                     mainControlUI1.SetEnableState(true);
                     break;
+
                 case MainS1State.S1_RUNNING:
                 case MainS1State.S1_RESETING:
                     ESSUI.Enabled = false;
@@ -840,22 +847,28 @@ namespace Traveller106
                     CTRLUI.Enabled = false;
                     mainControlUI1.SetEnableState(false);
                     break;
+
                 case MainS1State.LS_START:
                     RUNUI.StartTime();
                     break;
+
                 case MainS1State.LS_STOP:
                     RUNUI.StopTime();
                     break;
+
                 case MainS1State.M_PASS:
                     RUNUI.StartShinnig(true);
                     break;
+
                 case MainS1State.M_NG:
                     RUNUI.StartShinnig(false);
                     break;
+
                 case MainS1State.M_SHOWCODE:
                     if (tag != null)
                         RUNUI.SetProductBarcode((string)tag);
                     break;
+
                 case MainS1State.M_SHOWRESULT:
                     if (tag != null)
                         RUNUI.SetDuriation((string)tag);
@@ -867,7 +880,6 @@ namespace Traveller106
             switch (status)
             {
                 case ESSStatusEnum.EXIT:
-
                     if (CTRLUI != null)
                     {
                         CTRLUI.MyDispose();
@@ -880,31 +892,25 @@ namespace Traveller106
                         X6_LASER_CLIENT.DisConnectServer();
 
                     MAINUI.Close();
-
                     //LETIAN: 原代碼有誤: 此處不會被調用到 !!!
                     //Universal.Close();
-
                     this.Close();
-
                     break;
+
                 case ESSStatusEnum.RUN:
                 case ESSStatusEnum.RECIPE:
                 case ESSStatusEnum.SETUP:
-
                     RUNUI.Visible = status == ESSStatusEnum.RUN;
                     RCPUI.Visible = status == ESSStatusEnum.RECIPE;
                     SETUPUI.Visible = status == ESSStatusEnum.SETUP;
                     //USERLOTUI.Visible = status == ESSStatusEnum.RUN;
-
                     //CTRLUI.Visible = (status == ESSStatusEnum.SETUP);
                     //CTRLALLREGIONUI.Visible = (status == ESSStatusEnum.RECIPE && Universal.OPT == OptionEnum.AUTO && INI.MistDebugging);
-
                     break;
-                case ESSStatusEnum.LOGIN:
 
+                case ESSStatusEnum.LOGIN:
                     //picResult.Visible = false;
                     //btnOK.Visible = false;
-
                     if (ACCDB.AccNow.IsAllowSetupINI)
                     {
                         //MAINUI.Enabled = true;
@@ -912,21 +918,18 @@ namespace Traveller106
                         MAINUI.SetEnable(true);
                         RUNUI.SetEnable(true);
                     }
-
                     break;
-                case ESSStatusEnum.LOGOUT:
 
+                case ESSStatusEnum.LOGOUT:
                     //picResult.Visible = false;
                     //btnOK.Visible = false;
-
                     //MAINUI.Enabled = false;
                     CTRLUI.SetEnable(false);
                     MAINUI.SetEnable(false);
                     RUNUI.SetEnable(false);
-
                     break;
-                case ESSStatusEnum.RESET:
 
+                case ESSStatusEnum.RESET:
                     //if (MessageBox.Show("是否要將所有馬達歸位?", "SYS", MessageBoxButtons.YesNo) == System.Windows.Forms.DialogResult.Yes)
                     //    RESULT.StartResetMotorProcess();
 
@@ -935,7 +938,6 @@ namespace Traveller106
                     //    MessageBox.Show("請移開光機. ");
                     //    return;
                     //}
-
 
                     //if (RESULT.IsResetProcessOn)
                     //{
@@ -947,44 +949,43 @@ namespace Traveller106
                     //        return;
 
                     //RESULT.StartResetProcess();
-
                     break;
+
                 case ESSStatusEnum.RECIPESELECTED:
+                    using (var vsMessageBox = new VsMessageBox($"切换参数中请稍后...", false))
+                    {
+                        vsMessageBox.Show();
+                        vsMessageBox.Refresh();
 
-                    vsMessageBox = new VsMessageBox($"切换参数中请稍后...", false);
-                    vsMessageBox.Show();
-                    vsMessageBox.Refresh();
+                        //RCPDB.GetRCPItem(ESSDB.LastRecipeIndex);
+                        RCPDB.Indicator = ESSDB.LastRecipeIndex;
 
-                    //RCPDB.GetRCPItem(ESSDB.LastRecipeIndex);
-                    RCPDB.Indicator = ESSDB.LastRecipeIndex;
+                        //RecipeCHClass.Instance.ChangeIndex(ESSDB.LastRecipeIndex);
+                        //RecipeTrayClass.Instance.ChangeIndex(ESSDB.LastRecipeIndex);
+                        //VisionTrayClass.Instance.ChangeIndex(ESSDB.LastRecipeIndex);
+                        //RecipeNeedleClass.Instance.ChangeIndex(ESSDB.LastRecipeIndex);
+                        xRecipe.ChangeIndex(ESSDB.LastRecipeIndex);
+                        xRecipe.Load();
+                        //ViewPreload();
+                        RCPUI.ChangeRecipe(true);
+                        //ESSDB.RecipeChange(RCPItemNow.Index);
+                        //RESULT.InitialBMPResult();
+                        //DisplayStatus = DisplayStatusEnum.LIVE;
+                        RUNUI.SetDuriation("");
+                        MAINUI.ChangeRecipe();
 
-                    //RecipeCHClass.Instance.ChangeIndex(ESSDB.LastRecipeIndex);
-                    //RecipeTrayClass.Instance.ChangeIndex(ESSDB.LastRecipeIndex);
-                    //VisionTrayClass.Instance.ChangeIndex(ESSDB.LastRecipeIndex);
-                    //RecipeNeedleClass.Instance.ChangeIndex(ESSDB.LastRecipeIndex);
-                    xRecipe.ChangeIndex(ESSDB.LastRecipeIndex);
-                    xRecipe.Load();
-                    //ViewPreload();
-                    RCPUI.ChangeRecipe(true);
-                    //ESSDB.RecipeChange(RCPItemNow.Index);
-                    //RESULT.InitialBMPResult();
-                    //DisplayStatus = DisplayStatusEnum.LIVE;
-                    RUNUI.SetDuriation("");
-                    MAINUI.ChangeRecipe();
+                        //int ialone = (int)RecipeCHClass.Instance.PMode;// myUserSelectFormX1.Mode;
 
-                    //int ialone = (int)RecipeCHClass.Instance.PMode;// myUserSelectFormX1.Mode;
+                        //if (ialone == 1)
+                        //{
+                        //    VsMSG.Instance.Tishi("切換到 重工模式 完成");
+                        //}
 
-                    //if (ialone == 1)
-                    //{
-                    //    VsMSG.Instance.Tishi("切換到 重工模式 完成");
-                    //}
-
-                    vsMessageBox.Close();
-                    vsMessageBox.Dispose();
-
+                        vsMessageBox.Close();
+                    }
                     break;
-                case ESSStatusEnum.FASTCAL:
 
+                case ESSStatusEnum.FASTCAL:
                     //if (!PhotoMainProcess.IsOn)
                     //    PhotoMainProcess.Start();
 
@@ -1000,7 +1001,6 @@ namespace Traveller106
                     //    RUNUI.GetOPBarcode(),
                     //    Universal.IsDebug,
                     //    RUNUI.GetProductBarcode());
-
                     break;
             }
         }
@@ -1085,7 +1085,6 @@ namespace Traveller106
                     break;
             }
         }
-        //DetailForm DETAILFRM;
         void RCPUI_TriggerActionForSetupDetail(RCPStatusEnum status, int setupindex)
         {
             switch (status)
@@ -1160,12 +1159,15 @@ namespace Traveller106
         }
         #endregion
 
+        #region SCAN_TIME_AND_TIME_TICK
         //主程序扫描时间
         JzTimes JzMainScanTime = new JzTimes();
         int JzScanTimeMS = 0;
-
         private void MMainTick_Tick(object sender, EventArgs e)
         {
+            if (BannerForm.IsShowing())
+                PostCloseBanner();
+
             JzScanTimeMS = JzMainScanTime.msDuriation;
             JzMainScanTime.Cut();
 
@@ -1190,7 +1192,7 @@ namespace Traveller106
                 //RUNUI.SetStripID(MACHINE.PLCIO.sStripID);
             }
 
-#if OPT_STATION_S2
+#if (OPT_STATION_S2)
              ESSUI.ShowPLC_RxTime(Universal.VersionDate + "_" +
                                  Universal.OPTION.ToString() + "B " +
                                  JzScanTimeMS.ToString() + "ms " +
@@ -1203,7 +1205,9 @@ namespace Traveller106
 #endif
 
         }
+        #endregion
 
+        #region PRIVATE_FUNCTIONS
         [DllImport("User32.dll", EntryPoint = "FindWindow")]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
         bool _getMxComponent()
@@ -1278,7 +1282,6 @@ namespace Traveller106
             if (WindowState == FormWindowState.Minimized)
                 return;
 
-#if OPT_LETIAN_AUTO_LAYOUT
             //@LETIAN: 自動調整 layout
             int panelWidth = 235;
             var rcc = ClientRectangle;
@@ -1303,7 +1306,6 @@ namespace Traveller106
             iniUI1.Top = runUI1.Top;
             ctrlUI1.Top = runUI1.Bottom;
             ctrlUI1.Height = rcc.Bottom - ctrlUI1.Top;
-#endif
         }
         private string ToChangeLanguage(string eText)
         {
@@ -1311,6 +1313,7 @@ namespace Traveller106
             //retStr = LanguageExClass.Instance.GetLanguageText(eText);
             return retStr;
         }
+        #endregion
 
         protected void _LOG(string msg, params object[] args)
         {

@@ -22,7 +22,6 @@ using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.AoiModel.Calib;
-using LaserAlignDX.GA.FormSpace;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
@@ -1270,7 +1269,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
         void OpenMotorWindowXY(QVector directTargetPos = null)
         {
 #if (OPT_CALIB_V4)
-            using (var dlg = new FormMotor())
+            using (var dlg = new GA.FormSpace.FormMotor())
             {
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ShowDialog(_wndOwner);

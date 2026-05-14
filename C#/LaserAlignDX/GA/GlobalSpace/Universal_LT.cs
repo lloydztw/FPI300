@@ -179,7 +179,9 @@ namespace Traveller106
         static int LanguageIndex = 0;
 
         public static string InitialErrorString = "";
-        public static System.Drawing.Point MainFormLocation = new System.Drawing.Point(0, 0);
+
+        // public static System.Drawing.Point MainFormLocation = new System.Drawing.Point(0, 0);
+
         /// <summary>
         /// 离线模式自动登入账户admin
         /// </summary>
