@@ -1,4 +1,5 @@
-﻿namespace LaserAlignDX
+﻿
+namespace LaserAlignDX
 {
     public class GlobalConfig
     {

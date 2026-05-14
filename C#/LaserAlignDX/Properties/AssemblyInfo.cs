@@ -35,5 +35,3 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyVersion("3.3.5.1")]
 [assembly: AssemblyFileVersion("3.3.5.1")]
-
-// 之前的紀錄 放置在 ReadMe_History.md
