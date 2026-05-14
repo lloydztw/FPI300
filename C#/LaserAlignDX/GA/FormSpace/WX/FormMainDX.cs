@@ -22,7 +22,7 @@ using VsCommon.ControlSpace.MachineSpace;
 
 namespace Traveller106
 {
-    public partial class frmMainDX : Form
+    public partial class FormMainDX : Form
     {
         JetEazy.VersionEnum VERSION
         {
@@ -114,7 +114,7 @@ namespace Traveller106
         }
         #endregion
 
-        public frmMainDX()
+        public FormMainDX()
         {
             InitializeComponent();
 
@@ -141,8 +141,7 @@ namespace Traveller106
         private void MainForm_Load(object sender, EventArgs e)
         {
             //(0) Banner
-            var frmBanner = BannerForm.ShowBanner();
-            GaUtil.SetCursor(frmBanner, Cursors.AppStarting);
+            BannerForm.ShowBanner();
             GaUtil.SetCursor(this, Cursors.AppStarting);
 
             //(0.1) MYDECODE

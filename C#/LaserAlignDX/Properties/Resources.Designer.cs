@@ -83,6 +83,16 @@ namespace LaserAlignDX.Properties {
         /// <summary>
         ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
         /// </summary>
+        internal static System.Drawing.Bitmap banner_traveller_106 {
+            get {
+                object obj = ResourceManager.GetObject("banner_traveller_106", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
         internal static System.Drawing.Bitmap CommonPanel {
             get {
                 object obj = ResourceManager.GetObject("CommonPanel", resourceCulture);

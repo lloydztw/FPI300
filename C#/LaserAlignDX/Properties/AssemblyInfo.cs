@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // 有关程序集的一般信息由以下
 // 控制。更改这些特性值可修改
 // 与程序集关联的信息。
-[assembly: AssemblyTitle("LaserAlignDX")]
+[assembly: AssemblyTitle("Traveller 106 (FPI30)")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("LaserAlignDX")]
+[assembly: AssemblyCompany("JetEazy System")]
+[assembly: AssemblyProduct("Traveller 106 (FPI30)")]
 [assembly: AssemblyCopyright("Copyright © 2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

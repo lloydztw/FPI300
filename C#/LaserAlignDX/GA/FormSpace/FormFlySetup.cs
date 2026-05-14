@@ -1,5 +1,4 @@
 ﻿using Eazy_Project_III;
-using FreeImageAPI;
 using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
 using JetEazy.ImageViewerEx.Interactors;

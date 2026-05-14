@@ -106,10 +106,18 @@ namespace Common.RecipeSpace
         {
             m_index = eindex;
 
-            if (!System.IO.Directory.Exists(m_path + "\\" + m_index.ToString("00000")))
-                System.IO.Directory.CreateDirectory(m_path + "\\" + m_index.ToString("00000"));
+            if (string.IsNullOrEmpty(m_path) || string.IsNullOrEmpty(m_name))
+            {
+                return;
+            }
+            else
+            {
+                string path = System.IO.Path.Combine(m_path, m_index.ToString("00000"));
+                if (!System.IO.Directory.Exists(path))
+                    System.IO.Directory.CreateDirectory(path);
+                INIFILE = System.IO.Path.Combine(path, m_name);
+            }
 
-            INIFILE = m_path + "\\" + m_index.ToString("00000") + "\\" + m_name;
             //Load(eCancel);
         }
         public virtual void Load(bool eCancel = false)

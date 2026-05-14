@@ -1,6 +1,6 @@
 ﻿namespace Traveller106
 {
-    partial class frmMainDX
+    partial class FormMainDX
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMainDX));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormMainDX));
             this.essUI1 = new JetEazy.UISpace.EssUI();
             this.rcpUI1 = new PhotoMachine.UISpace.RcpUI();
             this.iniUI1 = new PhotoMachine.UISpace.IniUI();
