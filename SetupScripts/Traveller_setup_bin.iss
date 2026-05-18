@@ -16,7 +16,7 @@ DefaultGroupName=JetEazy FPI30
 Compression=lzma
 SolidCompression=yes
 OutputDir=.\bin
-OutputBaseFileName=Traveller_Setup_3.3.5.1_20260518
+OutputBaseFileName=Traveller_Setup_3.3.5.1_with_omron_2026_0518
 
 [Files]
 ; BIN & DLL
@@ -25,8 +25,12 @@ Source: "..\bin\Debug\Traveller.Data.Packer.exe";                               
 Source: "..\bin\Debug\*.dll";                                                     DestDir: "{app}\_BIN_";         Flags: ignoreversion
 Source: "..\bin\Debug\NLog.config";                                               DestDir: "{app}\_BIN_";         Flags: ignoreversion
 Source: "..\C#\FPI30_Aoi\bin\Debug\EzAoiEmptyTrayInspector.App.exe";              DestDir: "{app}\_BIN_";         Flags: ignoreversion
-Source: "..\C#\Dlls\ja\*.dll";                                                    DestDir: "{app}\_BIN_\ja";      Flags: ignoreversion
+;Source: "..\C#\Dlls\ja\*.dll";                                                    DestDir: "{app}\_BIN_\ja";      Flags: ignoreversion
 Source: "..\bin\Debug\dll\x64\*.dll";                                             DestDir: "{app}\_BIN_\dll\x64"; Flags: ignoreversion
+
+; Omron dlls and exe
+Source: "..\C#\Dlls\Omron\*.*"; DestDir: "{app}\_BIN_";                           Flags: ignoreversion
+Source: "..\C#\Dlls\Omron\ja\*.*"; DestDir: "{app}\_BIN_\ja";                     Flags: ignoreversion  
 
 ; INI & DB 
 ; (these files must be kept existing even after uninstall!)

@@ -57,13 +57,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="CIPCompolet64">
-      <HintPath>..\Dlls\Cip\CIPCompolet64.dll</HintPath>
+      <HintPath>..\Dlls\Omron\CIPCompolet64.dll</HintPath>
     </Reference>
     <Reference Include="CIPCompoletProxyLib">
-      <HintPath>..\Dlls\Cip\CIPCompoletProxyLib.dll</HintPath>
+      <HintPath>..\Dlls\Omron\CIPCompoletProxyLib.dll</HintPath>
     </Reference>
     <Reference Include="CIPCompoletProxyServer">
-      <HintPath>..\Dlls\Cip\CIPCompoletProxyServer.exe</HintPath>
+      <HintPath>..\Dlls\Omron\CIPCompoletProxyServer.exe</HintPath>
     </Reference>
     <Reference Include="CLIDelegate">
       <HintPath>..\DLLS\CLIDelegate.dll</HintPath>
