@@ -45,6 +45,7 @@ namespace Eazy_Project_III.FormSpace
         {
             if (_instance == null)
             {
+#if(OPT_THREAD_VERSION)
                 Thread bannerThread = new Thread(() =>
                 {
                     _instance = new BannerForm
@@ -59,6 +60,12 @@ namespace Eazy_Project_III.FormSpace
                 bannerThread.SetApartmentState(ApartmentState.STA); // 必須是 STA
                 bannerThread.IsBackground = true;
                 bannerThread.Start();
+#else
+                _instance = new BannerForm();
+                _instance.TopMost = true;
+                _instance.Show();
+                _instance.Refresh();
+#endif
             }
         }
         public static void CloseBanner()

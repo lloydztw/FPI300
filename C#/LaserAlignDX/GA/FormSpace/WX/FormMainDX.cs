@@ -9,6 +9,7 @@ using JetEazy.UISpace;
 using JetEazy.Utils;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace;
+using LeTian.AoiLib;
 using NeedleX.ProcessSpace;
 using PhotoMachine.UISpace;
 using System;
@@ -38,6 +39,10 @@ namespace Traveller106
                 return Universal.OPTION;
             }
         }
+
+        #region NLOG
+        NLog.Logger _NLOG => LtDebug.LOG;
+        #endregion
 
         #region GUI_LINKS
         EssUI ESSUI => essUI1;
@@ -155,7 +160,8 @@ namespace Traveller106
             JzDisplay.UISpace.DispUI dispUI = new JzDisplay.UISpace.DispUI();
             this.Controls.Add(dispUI); // Gaara 原來的代碼, 少寫此行 !!!!!
             bool bOK = dispUI.DispUIload(this);
-            
+            _TRACE("[初始化] JzDisplay");
+
             //(2) 初始化 本專案
             bOK &= Init();
 
@@ -210,6 +216,8 @@ namespace Traveller106
 
         bool Init()
         {
+            _TRACE($"[初始化] {GetType().Name}.Init");
+
             switch (VERSION)
             {
                 case VersionEnum.PROJECT:
@@ -236,11 +244,15 @@ namespace Traveller106
                     break;
             }
 
+            _TRACE("[初始化] INI.Instance");
             CommonLogClass.Instance.LogPath = Universal.LOG_TXT_PATH;
             INI.Instance.Initial();
+
+            _TRACE("[初始化] Universal.Initial");
             bool bOK = Universal.Initial(0);
             if (!bOK)
                 return false;
+
 
 #if (false)
             ESSUI = essUI1;
@@ -257,21 +269,31 @@ namespace Traveller106
             //USERLOTUI.Location = CTRLUI.Location;
             //CTRLALLREGIONUI.Location = CTRLUI.Location;
 
+            _TRACE("[初始化] InitialESSUI");
             InitialESSUI();
+            _TRACE("[初始化] InitialRCPUI");
             InitialRCPUI();
+            _TRACE("[初始化] InitialSETUPUI");
             InitialSETUPUI();
+            _TRACE("[初始化] InitialCTRLUI");
             InitialCTRLUI();
+            _TRACE("[初始化] InitialMAINUI");
             InitialMAINUI();
             //InitialRESULT();
+            _TRACE("[初始化] InitialRUNUI");
             InitialRUNUI();
 
+            _TRACE("[初始化] mMainTick");
             mMainTick = new Timer();
             mMainTick.Interval = 20;
             mMainTick.Tick += MMainTick_Tick;
             BeginInvoke((Action)mMainTick.Start);
 
+            _TRACE("[初始化] CTRLUI.SetEnable");
             CTRLUI.SetEnable(false);
+            _TRACE("[初始化] MAINUI.SetEnable");
             MAINUI.SetEnable(false);
+            _TRACE("[初始化] RUNUI.SetEnable");
             RUNUI.SetEnable(false);
 
             if (Universal.IsAutoLogin)
@@ -307,10 +329,13 @@ namespace Traveller106
 
             if (X6_LASER_CLIENT != null)
             {
+                _TRACE("[初始化] X6_LASER_CLIENT.TriggerAction");
                 X6_LASER_CLIENT.TriggerAction += X6_LASER_CLIENT_TriggerAction;
             }
+
             if (X6_HANDLE_CLIENT != null)
             {
+                _TRACE("[初始化] X6_HANDLE_CLIENT.TriggerAction");
                 X6_HANDLE_CLIENT.TriggerAction += X6_HANDLE_CLIENT_TriggerAction;
             }
 
@@ -1343,6 +1368,11 @@ namespace Traveller106
 #endif
             //msg = Name + ", " + msg;
             //GdxGlobal.LOG.Log(msg, args);
+        }
+
+        private void _TRACE(string msg)
+        {
+            _NLOG.Info(msg);
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using JetEazy;
 using JetEazy.BasicSpace;
+using JetEazy.Machine;
+using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using System.Threading;
@@ -11,21 +13,36 @@ namespace LaserAlignDX.UISpace.CtrlSpace
 {
     public partial class MainFPIX3Ctrl : UserControl, IoPanelUI
     {
+        #region NLOG
+        NLog.Logger _NLOG => LtDebug.LOG;
+        #endregion
+
+        #region KERNEL_DATA
         VersionEnum VERSION;
         OptionEnum OPTION;
-        JzTransparentPanel tpnlCover;
-        JzTimes myTime;
         MainFPIX3MachineClass MACHINE;
-        Label lblCalibration;
-        JzTimes myTimeForHeart;
+        #endregion
 
+        #region TIMERS
+        JzTimes myTime;
+        JzTimes myTimeForHeart;
+        #endregion
+
+        #region PLC_POLLING_THREAD
         System.Threading.Thread m_ThreadPlc = null;
         bool m_ThRunning = false;
+        #endregion
 
+#if (OPT_X6_LASER_CLIENT)
         ClientSocket X6_LASER_CLIENT
         {
             get { return Traveller106.Universal.X6_LASER_CLIENT; }
         }
+#endif
+
+        #region GUI
+        JzTransparentPanel tpnlCover;
+        Label lblCalibration;
 
         //VsLight m_Light
         //{
@@ -58,9 +75,12 @@ namespace LaserAlignDX.UISpace.CtrlSpace
         Button btnSIMData;
         Button btnReady;
         Button btnCalib;
+        #endregion
 
         public MainFPIX3Ctrl()
         {
+            _TRACE($"{GetType().Name}.Ctor() ++");
+
             InitializeComponent();
             InitUI();
 
@@ -68,6 +88,8 @@ namespace LaserAlignDX.UISpace.CtrlSpace
             {
                 HandleDestroyed += (s, e) => MyDispose();
             }
+
+            _TRACE($"{GetType().Name}.Ctor() --");
         }
         void InitUI()
         {
@@ -107,6 +129,8 @@ namespace LaserAlignDX.UISpace.CtrlSpace
 
         public void Initial(VersionEnum version, OptionEnum option, MainFPIX3MachineClass machine)
         {
+            _TRACE($"{GetType().Name}.Initial( {machine} )");
+
             VERSION = version;
             OPTION = option;
             MACHINE = machine;
@@ -171,6 +195,7 @@ namespace LaserAlignDX.UISpace.CtrlSpace
                 m_ThreadPlc = new System.Threading.Thread(new System.Threading.ThreadStart(PlcTick));
                 m_ThreadPlc.IsBackground = true;
                 m_ThreadPlc.Start();
+                _TRACE($"{GetType().Name}: the PLC thread created !");
             }
         }
 
@@ -247,6 +272,8 @@ namespace LaserAlignDX.UISpace.CtrlSpace
 
         public void SetEnable(bool isendable)
         {
+            _TRACE($"{GetType().Name}.SetEnable({isendable})");
+
             tpnlCover.Visible = !isendable;
 
             Color fillcolor = SystemColors.Control;
@@ -519,18 +546,21 @@ namespace LaserAlignDX.UISpace.CtrlSpace
             {
                 m_ThreadPlc.Abort();
                 m_ThreadPlc = null;
+                _TRACE($"{GetType().Name}.MyDispose()");
             }
         }
 
         private void _reConnectServer()
         {
+#if (OPT_X6_LASER_CLIENT)
             X6_LASER_CLIENT.Host = INI.Instance.tcp_ip;
             X6_LASER_CLIENT.Port = INI.Instance.tcp_port;
             int iret = X6_LASER_CLIENT.ReConnectServer();
             m_ReConnecting = false;
+#endif
         }
 
-#if(OPT_OLD_CODE)
+#if (OPT_OLD_CODE)
         frmMSR mFromMSR = null;
         private void LblCalibration_DoubleClick(object sender, EventArgs e)
         {
@@ -544,6 +574,11 @@ namespace LaserAlignDX.UISpace.CtrlSpace
             string retStr = eText;
             retStr = LanguageExClass.Instance.GetLanguageText(eText);
             return retStr;
+        }
+
+        private void _TRACE(string msg)
+        {
+            _NLOG.Info(msg);
         }
     }
 }
