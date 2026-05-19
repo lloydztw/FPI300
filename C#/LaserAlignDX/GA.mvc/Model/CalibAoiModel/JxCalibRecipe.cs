@@ -17,6 +17,7 @@
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.QMath;
+using LaserAlignDX.Model;
 using LeTian.JxProps;
 using System;
 using System.Drawing;
@@ -152,12 +153,14 @@ namespace LaserAlignDX.AoiModel.Calib
         public void GetInkMarks(out EzBloc[] blocs)
         {
             MarksStorage.GetInkMarks(out blocs);
+            PixRounder.RoundPix(blocs);
         }
         /// <summary>
         /// 順時針四角: 左上, 右上, 右下, 左下 
         /// </summary>
         public void SetInkMarks(EzBloc[] blocs)
         {
+            PixRounder.RoundPix(blocs);
             MarksStorage.SetInkMarks(blocs);
         }
         /// <summary>

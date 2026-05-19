@@ -33,7 +33,7 @@ namespace Eazy_Project_III.FormSpace
         protected BannerForm()
         {
             InitializeComponent();
-            lblVersionDate.Text = Universal.VersionDate + "  " + Universal.OPTION;
+            lblVersionDate.Text = Universal.VersionDate + $" (ver {Application.ProductVersion})"; // + Universal.OPTION;
             Load += (s, e) => startAnimation();
         }
 
@@ -53,6 +53,7 @@ namespace Eazy_Project_III.FormSpace
                         StartPosition = FormStartPosition.CenterScreen,
                         TopMost = true,
                     };
+                    _instance.ProBar.Visible = true;
                     // 關鍵：使用 Application.Run 啟動該執行緒的專屬訊息循環
                     Application.Run(_instance);
                 });
@@ -63,6 +64,7 @@ namespace Eazy_Project_III.FormSpace
 #else
                 _instance = new BannerForm();
                 _instance.TopMost = true;
+                _instance.ProBar.Visible = false;
                 _instance.Show();
                 _instance.Refresh();
 #endif
@@ -92,7 +94,6 @@ namespace Eazy_Project_III.FormSpace
             ProBar.Style = ProgressBarStyle.Marquee; // 設定為跑馬燈
             ProBar.MarqueeAnimationSpeed = 30;       // 數值越小跑越快
             ProBar.Maximum = 100;
-            ProBar.Visible = true;
             this.Cursor = Cursors.AppStarting;
             this.Refresh();
         }

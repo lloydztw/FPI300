@@ -499,6 +499,7 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
+    <Compile Include="GA.mvc\Model\.Common\PixRounder.cs" />
     <Compile Include="GA.mvc\Model\.Common\XCellBloc.cs" />
     <Compile Include="GA.mvc\Model\.Common\PlcDataPacker.cs" />
     <Compile Include="GA.mvc\Model\.Common\GaChipData.cs" />

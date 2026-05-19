@@ -179,11 +179,13 @@ namespace JetEazy.FormSpace
                 return dlg.ShowDialog();
             }
         }
-        public static DialogResult Question(string message)
+        public static DialogResult Question(string message, Color? bkColor = null)
         {
             using (var dlg = new VsMessageBox())
             {
                 dlg.init(message, MessageBoxIcon.Question);
+                if (bkColor != null)
+                    dlg.panel1.BackColor = bkColor.Value;
                 return dlg.ShowDialog();
             }
         }

@@ -21,6 +21,7 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
+using LaserAlignDX.Model;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using System;
@@ -221,6 +222,9 @@ namespace LaserAlignDX.AoiModel.Calib.V5
                     padBlocs = grid.GetCornerBlocs();
             }
 
+            //(4) RoundPix
+            PixRounder.RoundPix(inkMarks);
+            PixRounder.RoundPix(padBlocs);
             return (inkMarks, padBlocs);
         }
 
@@ -761,6 +765,36 @@ namespace LaserAlignDX.AoiModel.Calib.V5
             #endregion
         }
         #endregion
+
+        void roundPix(IEnumerable<EzBloc> blocs)
+        {
+            foreach (var b in blocs)
+            {
+                if (b != null)
+                {
+                    roundPix(b.Center);
+                }
+            }
+        }
+        void roundPix(IEnumerable<QVector> pts)
+        {
+            foreach(var p in pts)
+            {
+                roundPix(p);
+            }
+        }
+        void roundPix(QVector v)
+        {
+            if (v != null)
+            {
+                for (int i = 0; i < v.Length; i++)
+                    v[i] = roundPix(v[i]);
+            }
+        }
+        double roundPix(double px)
+        {
+            return Math.Round(px, 2);
+        }
 
         #region DUMP_FUNCTIONS
         void _DUMP(Mat img, string tag, int row, int col)

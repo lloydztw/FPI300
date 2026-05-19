@@ -22,6 +22,7 @@ using JetEazy.QMath;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.AoiModel.Calib;
+using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
@@ -44,6 +45,9 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
         #region CONSTANTS
         static int N_CALIB_MOTOR_POINTS => TravellerTransformFactory.N_CALIB_MOTOR_POINTS;
         static int N_CARRIERS_NUMBER => Enum.GetValues(typeof(CarrierEnum)).Length;
+        static double TRANS_TOLERANCE => 0.003;
+        static double PITCH_TOLERANCE => 0.002;
+        static int PIXEL_TOLERANCE => 1;
         #endregion
 
         #region ENUM
@@ -1074,21 +1078,11 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             if (verify)
             {
                 #region 驗證參數數據
-                var errs = new List<string>();
-                for (int i = 0, NP = inkMarkPts.Length; i < NP; i++)
+                bool ok = VerifyGuiInkPoints(inkMarkPts, out string errMsg);
+                if (!ok)
                 {
-                    var diff = inkMarkPts[i] - _cviInkMarkBoxes[i].Quad2D.Center;
-                    if(diff.NormLength > 0.001)
-                    {
-                        errs.Add($"  墨點 [{i}]: 參數({inkMarkPts[i].X:F3}, {inkMarkPts[i].Y:F3}) vs GUI({_cviInkMarkBoxes[i].Quad2D.Center.X:F3}, {_cviInkMarkBoxes[i].Quad2D.Center.Y:F3})");
-                    }
-                }
-                if(errs.Count > 0)
-                {
-                    var errMsg = "以下 墨點, 參數 與 GUI, 兩者誤差太大:\n\r";
-                    errMsg += string.Join("\n\r", errs);
-                    VsMessageBox.Warning(errMsg);
-                    return false;
+                    if(!WarningToContinue(errMsg))
+                        return false;
                 }
                 #endregion
             }
@@ -1145,9 +1139,9 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                 err = VerifyCommonBaseTrf(out errDetails);
                 if (err != ErrorCodes.OK)
                 {
-                    var msg = GaUtil.GetEnumDescription(err) + "\n\r" + errDetails;
-                    VsMessageBox.Warning(msg);
-                    return;
+                    var errMsg = GaUtil.GetEnumDescription(err) + "\n\r\n\r" + errDetails;
+                    if (!WarningToContinue(errMsg))
+                        return;
                 }
 
                 //(7) 成功訊息
@@ -1171,6 +1165,28 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             }
         }
 
+        bool VerifyGuiInkPoints(QVector[] inkMarkPts, out string errMsg)
+        {
+            var errs = new List<string>();
+            for (int i = 0, NP = inkMarkPts.Length; i < NP; i++)
+            {
+                var diff = inkMarkPts[i] - _cviInkMarkBoxes[i].Quad2D.Center;
+                if (diff.NormLength > PIXEL_TOLERANCE)
+                {
+                    errs.Add($"  墨點 [{i}]: 參數({inkMarkPts[i].X:F1}, {inkMarkPts[i].Y:F1}) vs GUI({_cviInkMarkBoxes[i].Quad2D.Center.X:F1}, {_cviInkMarkBoxes[i].Quad2D.Center.Y:F1})");
+                }
+            }
+
+            if (errs.Count > 0)
+            {
+                errMsg = $"以下 墨點, 參數 與 GUI, 兩者誤差超過 {PIXEL_TOLERANCE} Pixels:\n\r\n\r";
+                errMsg += string.Join("\n\r", errs);
+                return false;
+            }
+
+            errMsg = null;
+            return true;
+        }
         ErrorCodes VerifyBoardGrid(EzBlocsGrid boardGrid, out string errDetails)
         {
             errDetails = "";
@@ -1226,14 +1242,15 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                 double plcPitchX = Math.Round(worldGrid.PitchX, 3);
                 double plcPitchY = Math.Round(worldGrid.PitchY, 3);
 
-                if (rcpPitchX != plcPitchX)
-                    err += $"\n\r參數 PitchX={rcpPitchX}  vs  共用座標系統 PitchX={plcPitchX}";
-                if (rcpPitchY != plcPitchY)
-                    err += $"\n\r參數 PitchY={rcpPitchY}  vs  共用座標系統 PitchY={plcPitchY}";
+                if (Math.Abs(rcpPitchX - plcPitchX) > PITCH_TOLERANCE)
+                    err += $"\n\r參數 PitchX={rcpPitchX:F3}  vs  共用座標系統 PitchX={plcPitchX:F3}";
+
+                if (Math.Abs(rcpPitchY - plcPitchY) > PITCH_TOLERANCE)
+                    err += $"\n\r參數 PitchY={rcpPitchY:F3}  vs  共用座標系統 PitchY={plcPitchY:F3}";
 
                 if (!string.IsNullOrEmpty(err))
                 {
-                    errDetails = err;
+                    errDetails = err + $"\n\r差異超過 {PITCH_TOLERANCE:F3} mm";
                     return ErrorCodes.CalibErr_pitch_not_consistent;
                 }
             }
@@ -1249,21 +1266,31 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             for (int i = 0, NP = motorPts.Length; i < NP; i++)
             {
                 var diff = motorPts[i] - userInputMotorCoords[i];
-                if (diff.NormLength > 0.001)
+                if (diff.NormLength > TRANS_TOLERANCE)
                 {
-                    errs.Add($"  馬達點位 [{i}]: 轉換後({motorPts[i].X:F3}, {motorPts[i].Y:F3}) vs 輸入({userInputMotorCoords[i].X:F3}, {userInputMotorCoords[i].Y:F3})");
+                    errs.Add($" 馬達點位[{i}]: 轉換後({motorPts[i].X:F3}, {motorPts[i].Y:F3}) vs 輸入({userInputMotorCoords[i].X:F3}, {userInputMotorCoords[i].Y:F3})");
                 }
             }
             if (errs.Count > 0)
             {
-                var errMsg = "以下 馬達點位, 座標轉換 與 User 輸入, 兩者誤差太大:\n\r";
+                var errMsg = $"以下馬達點位, 座標轉換與User輸入,誤差超過 {TRANS_TOLERANCE:F3} mm:\n\r";
                 errMsg += string.Join("\n\r", errs);
-                VsMessageBox.Warning(errMsg);
                 return ErrorCodes.CalibErr_Motor_Coords_Transform_Build_NG;
             }
             #endregion
 
             return ErrorCodes.OK;
+        }
+        bool WarningToContinue(string errMsg)
+        {
+            if (string.IsNullOrEmpty(errMsg))
+                return true;
+
+            //var ret = VsMessageBox.Question(errMsg + "\n\r\n\r是否繼續?", Color.HotPink);
+            //return ret == DialogResult.OK;
+
+            var ret = MessageBox.Show(errMsg + "\n\r\n\r是否繼續?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+            return ret == DialogResult.Yes;
         }
 
         void OpenMotorWindowXY(QVector directTargetPos = null)

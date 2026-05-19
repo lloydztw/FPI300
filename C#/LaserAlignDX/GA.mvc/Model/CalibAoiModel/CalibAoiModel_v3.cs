@@ -20,6 +20,7 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
+using LaserAlignDX.Model;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using System;
@@ -210,6 +211,9 @@ namespace LaserAlignDX.AoiModel.Calib.V3
                     inkMarks = inkGrid.GetCornerBlocs();
             }
 
+            //(4) RoundPix
+            PixRounder.RoundPix(inkMarks);
+            PixRounder.RoundPix(padBlocs);
             return (inkMarks, padBlocs);
         }
 
