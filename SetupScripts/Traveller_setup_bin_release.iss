@@ -6,7 +6,7 @@
 [Setup]
 AppPublisher=JetEazy System Co., Ltd.
 AppPublisherURL=http://www.jeteazy.com
-AppVersion=3.3.5.1
+AppVersion=3.3.5.2
 AppCopyright=Copyright (C) 2025 JetEazy System Co., Ltd.
 ;WizardImageFile=JetEazySetup.bmp
 
@@ -16,7 +16,7 @@ DefaultGroupName=JetEazy FPI30
 Compression=lzma
 SolidCompression=yes
 OutputDir=.\bin
-OutputBaseFileName=Traveller_Setup_3.3.5.1_release
+OutputBaseFileName=Traveller_Setup_3.3.5.2_release
 
 [Files]
 ; BIN & DLL
@@ -25,8 +25,13 @@ Source: "..\bin\Release\Traveller.Data.Packer.exe";                             
 Source: "..\bin\Release\*.dll";                                                     DestDir: "{app}\_BIN_";         Flags: ignoreversion
 Source: "..\bin\Release\NLog.config";                                               DestDir: "{app}\_BIN_";         Flags: ignoreversion
 Source: "..\C#\FPI30_Aoi\bin\Release\EzAoiEmptyTrayInspector.App.exe";              DestDir: "{app}\_BIN_";         Flags: ignoreversion
-Source: "..\C#\Dlls\ja\*.dll";                                                      DestDir: "{app}\_BIN_\ja";      Flags: ignoreversion
+;Source: "..\C#\Dlls\ja\*.dll";                                                    DestDir: "{app}\_BIN_\ja";      Flags: ignoreversion
 Source: "..\bin\Release\dll\x64\*.dll";                                             DestDir: "{app}\_BIN_\dll\x64"; Flags: ignoreversion
+
+; Omron dlls and exe
+Source: "..\C#\Dlls\Omron\*.*";     DestDir: "{app}\_BIN_";                        Flags: ignoreversion
+Source: "..\C#\Dlls\Omron\ja\*.*";  DestDir: "{app}\_BIN_\ja";                     Flags: ignoreversion
+Source: ".\*.cmd";                  DestDir: "{app}\_BIN_";                        Flags: ignoreversion  
 
 ; INI & DB 
 ; (these files must be kept existing even after uninstall!)

@@ -699,6 +699,13 @@
     <Compile Include="LT\LtAoiFactory.cs" />
     <Compile Include="GA\Utils\GaImageUtil.cs" />
     <Compile Include="GA\Utils\GaUtil.cs" />
+    <Compile Include="LT\UnitTest\Gui\FormOmronPlcViewer.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LT\UnitTest\Gui\FormOmronPlcViewer.Designer.cs">
+      <DependentUpon>FormOmronPlcViewer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="LT\UnitTest\UnitTest_OmronPlc.cs" />
     <Compile Include="LT\UnitTest\UnitTest_Base.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -842,6 +849,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\WX\FormMainDX.resx">
       <DependentUpon>FormMainDX.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="LT\UnitTest\Gui\FormOmronPlcViewer.resx">
+      <DependentUpon>FormOmronPlcViewer.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

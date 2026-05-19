@@ -48,53 +48,56 @@ namespace JetEazy.ControlSpace.MotionSpace
             IsNoUseMotor = true;
             // 模擬 1mm = 1000 脈波數 (定位精度 0.001 mm)
             ONEMMSTEP = 1000;
+
+            INIFILE = path + "\\Motion" + (int)MOTIONNAME + ".INI";
+            LoadData();
         }
 
         public override void LoadData()
         {
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISHOME] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISHOME.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISONSITE] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISONSITE.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISREACHUPPERLIMIT] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISREACHUPPERLIMIT.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISREACHLOWERLIMIT] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISREACHLOWERLIMIT.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISSVON] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISSVON.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISBREAK] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISBREAK.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISERROR] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISERROR.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISREACHHOME] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISREACHHOME.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISHOME] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISHOME.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISONSITE] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISONSITE.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISREACHUPPERLIMIT] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISREACHUPPERLIMIT.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISREACHLOWERLIMIT] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISREACHLOWERLIMIT.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISSVON] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISSVON.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISBREAK] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISBREAK.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISERROR] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISERROR.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_ISREACHHOME] = new AddressClass(ReadINIValue("Status Address", MotionAddressEnum.ADR_ISREACHHOME.ToString(), "", INIFILE));
 
 
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_GO] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_GO.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_HOME] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_HOME.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_FORWARD] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_FORWARD.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_BACKWARD] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_BACKWARD.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_SVON] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_SVON.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_BREAK] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_BREAK.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_RESET] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_RESET.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_GO] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_GO.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_HOME] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_HOME.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_FORWARD] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_FORWARD.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_BACKWARD] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_BACKWARD.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_SVON] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_SVON.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_BREAK] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_BREAK.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_RESET] = new AddressClass(ReadINIValue("Operation Address", MotionAddressEnum.ADR_RESET.ToString(), "", INIFILE));
 
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_GOSPEED] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_GOSPEED.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_MANUALSPEED] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_MANUALSPEED.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_HOMESLOWSPEED] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_HOMESLOWSPEED.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_HOMEHIGHSPEED] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_HOMEHIGHSPEED.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONNOW] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_STEPPOSITIONNOW.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONSET] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_STEPPOSITIONSET.ToString(), "", INIFILE));
-            //ADDRESSARRAY[(int)MotionAddressEnum.ADR_RULERSTEPPOSITIONNOW] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_RULERSTEPPOSITIONNOW.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_GOSPEED] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_GOSPEED.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_MANUALSPEED] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_MANUALSPEED.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_HOMESLOWSPEED] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_HOMESLOWSPEED.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_HOMEHIGHSPEED] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_HOMEHIGHSPEED.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONNOW] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_STEPPOSITIONNOW.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_STEPPOSITIONSET] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_STEPPOSITIONSET.ToString(), "", INIFILE));
+            ADDRESSARRAY[(int)MotionAddressEnum.ADR_RULERSTEPPOSITIONNOW] = new AddressClass(ReadINIValue("Data Address", MotionAddressEnum.ADR_RULERSTEPPOSITIONNOW.ToString(), "", INIFILE));
 
-            //MOTIONTYPE = (MotionTypeEnum)Enum.Parse(typeof(MotionTypeEnum), ReadINIValue("Parameters", MotionAddressEnum.MOTIONTYPE.ToString(), MOTIONTYPE.ToString(), INIFILE), false);
-            //ONEMMSTEP = int.Parse(ReadINIValue("Parameters", MotionAddressEnum.ONEMMSTEP.ToString(), ONEMMSTEP.ToString(), INIFILE));
-            //RULERONEMMSTEP = int.Parse(ReadINIValue("Parameters", MotionAddressEnum.RULERONEMMSTEP.ToString(), RULERONEMMSTEP.ToString(), INIFILE));
-            //MANUALSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.MANUALSPEED.ToString(), MANUALSPEED.ToString(), INIFILE));
-            //MANUALSLOWSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.MANUALSLOWSPEED.ToString(), MANUALSLOWSPEED.ToString(), INIFILE));
-            //GOSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.GOSPEED.ToString(), GOSPEED.ToString(), INIFILE));
-            //GOSLOWSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.GOSLOWSPEED.ToString(), GOSLOWSPEED.ToString(), INIFILE));
-            //HOMEHIGHSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.HOMEHIGHSPEED.ToString(), HOMEHIGHSPEED.ToString(), INIFILE));
-            //HOMESLOWSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.HOMESLOWSPEED.ToString(), HOMESLOWSPEED.ToString(), INIFILE));
-            //RATIO = int.Parse(ReadINIValue("Parameters", MotionAddressEnum.RATIO.ToString(), RATIO.ToString(), INIFILE));
-            //READYPOSITION = float.Parse(ReadINIValue("Parameters", MotionAddressEnum.READYPOSITION.ToString(), READYPOSITION.ToString(), INIFILE));
-            //SOFTUPPERBOUND = float.Parse(ReadINIValue("Parameters", MotionAddressEnum.SOFTUPPERBOUND.ToString(), SOFTUPPERBOUND.ToString(), INIFILE));
-            //SOFTLOWERBOUND = float.Parse(ReadINIValue("Parameters", MotionAddressEnum.SOFTLOWERBOUND.ToString(), SOFTLOWERBOUND.ToString(), INIFILE));
+            MOTIONTYPE = (MotionTypeEnum)Enum.Parse(typeof(MotionTypeEnum), ReadINIValue("Parameters", MotionAddressEnum.MOTIONTYPE.ToString(), MOTIONTYPE.ToString(), INIFILE), false);
+            ONEMMSTEP = int.Parse(ReadINIValue("Parameters", MotionAddressEnum.ONEMMSTEP.ToString(), ONEMMSTEP.ToString(), INIFILE));
+            RULERONEMMSTEP = int.Parse(ReadINIValue("Parameters", MotionAddressEnum.RULERONEMMSTEP.ToString(), RULERONEMMSTEP.ToString(), INIFILE));
+            MANUALSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.MANUALSPEED.ToString(), MANUALSPEED.ToString(), INIFILE));
+            MANUALSLOWSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.MANUALSLOWSPEED.ToString(), MANUALSLOWSPEED.ToString(), INIFILE));
+            GOSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.GOSPEED.ToString(), GOSPEED.ToString(), INIFILE));
+            GOSLOWSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.GOSLOWSPEED.ToString(), GOSLOWSPEED.ToString(), INIFILE));
+            HOMEHIGHSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.HOMEHIGHSPEED.ToString(), HOMEHIGHSPEED.ToString(), INIFILE));
+            HOMESLOWSPEED = double.Parse(ReadINIValue("Parameters", MotionAddressEnum.HOMESLOWSPEED.ToString(), HOMESLOWSPEED.ToString(), INIFILE));
+            RATIO = int.Parse(ReadINIValue("Parameters", MotionAddressEnum.RATIO.ToString(), RATIO.ToString(), INIFILE));
+            READYPOSITION = float.Parse(ReadINIValue("Parameters", MotionAddressEnum.READYPOSITION.ToString(), READYPOSITION.ToString(), INIFILE));
+            SOFTUPPERBOUND = float.Parse(ReadINIValue("Parameters", MotionAddressEnum.SOFTUPPERBOUND.ToString(), SOFTUPPERBOUND.ToString(), INIFILE));
+            SOFTLOWERBOUND = float.Parse(ReadINIValue("Parameters", MotionAddressEnum.SOFTLOWERBOUND.ToString(), SOFTLOWERBOUND.ToString(), INIFILE));
 
-            //MOTIONALIAS = ReadINIValue("Parameters", "MOTIONALIAS", MOTIONNAME.ToString(), INIFILE);
-            //MOTIONUNIT = ReadINIValue("Parameters", "MOTIONUNIT", MOTIONUNIT.ToString(), INIFILE);
-            
+            MOTIONALIAS = ReadINIValue("Parameters", "MOTIONALIAS", MOTIONNAME.ToString(), INIFILE);
+            MOTIONUNIT = ReadINIValue("Parameters", "MOTIONUNIT", MOTIONUNIT.ToString(), INIFILE);
+
             base.LoadData();
         }
         public override void SaveData()

@@ -230,7 +230,7 @@ namespace Traveller106
         /// 馬達 誤差小於 0.5 um 就忽略不處理
         /// </summary>
         public const double MOTOR_TINY_DELTA = 0.5e-3;
-        public const int TOTAL_MOTORS_NUMBER = 10;
+        public static int TOTAL_MOTORS_NUMBER => GlobalConfig.TOTAL_MOTORS_NUMBER;
 
         public static PLCMotionClass GetMotor(int axisID)
         {
