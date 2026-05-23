@@ -722,6 +722,9 @@ namespace JzDisplay.OPSpace
         /// </summary>
         public void ReplaceDisplayImage(Bitmap bmp) //取代顯示的圖形，不動畫面及畫出的框
         {
+            if (bmp == null)
+                return;
+
             if (bmpOrg != null && bmpOrg.Width == 1)
             {
                 ReplaceDisplayImage(bmp, IsResetMover: false);

@@ -34,7 +34,6 @@ namespace Eazy_Project_III.FormSpace
         {
             InitializeComponent();
             lblVersionDate.Text = Universal.VersionDate + $" (ver {Application.ProductVersion})"; // + Universal.OPTION;
-            Load += (s, e) => startAnimation();
         }
 
         public static bool IsShowing()
@@ -45,7 +44,7 @@ namespace Eazy_Project_III.FormSpace
         {
             if (_instance == null)
             {
-#if(OPT_THREAD_VERSION)
+#if(OPT_THREAD_BANNER)
                 Thread bannerThread = new Thread(() =>
                 {
                     _instance = new BannerForm
@@ -53,7 +52,8 @@ namespace Eazy_Project_III.FormSpace
                         StartPosition = FormStartPosition.CenterScreen,
                         TopMost = true,
                     };
-                    _instance.ProBar.Visible = true;
+                    _instance.Load += (s,e) => _instance.startAnimation();
+
                     // 關鍵：使用 Application.Run 啟動該執行緒的專屬訊息循環
                     Application.Run(_instance);
                 });
@@ -65,8 +65,10 @@ namespace Eazy_Project_III.FormSpace
                 _instance = new BannerForm();
                 _instance.TopMost = true;
                 _instance.ProBar.Visible = false;
+                _instance.Cursor = Cursors.WaitCursor;
                 _instance.Show();
                 _instance.Refresh();
+                Application.UseWaitCursor = true;
 #endif
             }
         }
@@ -77,11 +79,12 @@ namespace Eazy_Project_III.FormSpace
                 // 跨執行緒關閉視窗的正確做法
                 if (_instance.InvokeRequired)
                 {
-                    _instance.Invoke(new MethodInvoker(() => _instance.Close()));
+                    _instance.Invoke(new MethodInvoker(() => CloseBanner()));
                 }
                 else
                 {
                     _instance.Close();
+                    Application.UseWaitCursor = false;
                 }
                 _instance = null;
             }
@@ -94,7 +97,8 @@ namespace Eazy_Project_III.FormSpace
             ProBar.Style = ProgressBarStyle.Marquee; // 設定為跑馬燈
             ProBar.MarqueeAnimationSpeed = 30;       // 數值越小跑越快
             ProBar.Maximum = 100;
-            this.Cursor = Cursors.AppStarting;
+            ProBar.Visible = true;
+            this.Cursor = Cursors.WaitCursor;
             this.Refresh();
         }
         void dumpBkgndImage()

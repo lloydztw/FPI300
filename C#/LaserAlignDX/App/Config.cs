@@ -3,7 +3,7 @@ namespace LaserAlignDX
 {
     public class GlobalConfig
     {
-        public static bool IsSim => true;
+        public static bool IsSim => false;
 
         public static string VersionDate => "2026-05-19";
 
