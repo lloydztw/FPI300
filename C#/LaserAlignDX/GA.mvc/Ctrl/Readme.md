@@ -33,7 +33,7 @@
 			\FromTemplateEditor
 			\IvTemplateEditorUI
 
-## 2025-09-23 加入 GaPleFlyCameraCtrl
+## 2025-09-23 加入 GaPlcFlyCameraCtrl
 	Ctrl\PlcFlyCamCtrl
 			\GaPlcFlyCameraCtrl_v35
 			\GaAutoDisableZoomCtrl

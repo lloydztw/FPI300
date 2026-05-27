@@ -159,3 +159,4 @@ $RECYCLE.BIN/
 .DS_Store
 
 _NCrunch*
+/C#/.github/copilot-instructions.md
