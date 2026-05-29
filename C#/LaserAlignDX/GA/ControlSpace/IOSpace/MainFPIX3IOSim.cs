@@ -431,7 +431,7 @@ namespace VsCommon.ControlSpace.IOSpace
         /// <summary>
         /// 取得 吸嘴排的安全高度Z (PLC 配方設定)
         /// </summary>
-        public double GetSafeZ(SuckerRowEnum suckerID)
+        public double GetSafeZ(SuckerRowEnum suckerID, int idx = 0)
         {
             return 12.892414;
         }

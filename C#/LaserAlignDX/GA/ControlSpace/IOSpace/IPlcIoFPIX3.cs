@@ -124,7 +124,7 @@ namespace VsCommon.ControlSpace.IOSpace
         /// <summary>
         /// 取得 吸嘴排的安全高度Z (PLC 配方設定)
         /// </summary>
-        double GetSafeZ(SuckerRowEnum suckerID);
+        double GetSafeZ(SuckerRowEnum suckerID, int idx = 0);
         /// <summary>
         /// 取得 飛拍相機的對焦高度Z (PLC 配方設定)
         /// </summary>

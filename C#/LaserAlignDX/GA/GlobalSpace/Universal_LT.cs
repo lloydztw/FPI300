@@ -246,11 +246,10 @@ namespace Traveller106
             // 軸4: 挑揀 X2軸
             // 軸5: 線掃 Z軸
 
-            // 軸6: Inker_S1 (暫時安排)
-            // 軸7: Inker_S2 (暫時安排)
+            // 軸6: FlyCam_Y (暫時安排)
+            // 軸7: FlyCam_Z (暫時安排)
 
-            // 軸8: FlyCam_Y (暫時安排)
-            // 軸9: FlyCam_Z (暫時安排)
+            //轴8~轴15 Z1~Z8 
 
             return plcMotions[axisID];
         }
@@ -270,10 +269,12 @@ namespace Traveller106
         }
         public static PLCMotionClass GetInkerMotor(SuckerRowEnum suckerID)
         {
-            // GAARA_NEEDS_TO_IMPLEMENT
-            // 軸6: Inker_S1 (暫時安排)
-            // 軸7: Inker_S2 (暫時安排)
-            int axisID = suckerID == SuckerRowEnum.S1 ? 6 : 7;
+            return GetInkerMotor(suckerID, 0);
+        }
+        public static PLCMotionClass GetInkerMotor(SuckerRowEnum suckerID, int idx = 0)
+        {
+            //轴8~轴15 Z1~Z8 
+            int axisID = suckerID == SuckerRowEnum.S1 ? 8 + idx : 12 + idx;
             return GetMotor(axisID);
         }
         public static PLCMotionClass GetBigScanCameraFocusMotor()
@@ -285,13 +286,13 @@ namespace Traveller106
         public static PLCMotionClass GetFlyCameraY()
         {
             // GAARA_NEEDS_TO_IMPLEMENT
-            int axisID = 8;
+            int axisID = 6;
             return GetMotor(axisID);
         }
         public static PLCMotionClass GetFlyCameraZ()
         {
             // GAARA_NEEDS_TO_IMPLEMENT
-            int axisID = 9;
+            int axisID = 7;
             return GetMotor(axisID);
         }
 

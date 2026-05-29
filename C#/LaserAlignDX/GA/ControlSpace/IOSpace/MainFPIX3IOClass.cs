@@ -529,17 +529,52 @@ namespace VsCommon.ControlSpace.IOSpace
         public bool VacuumSucker1
         {
             // GAARA_NEEDS_TO_IMPLEMENT
-            get => false;   //throw new NotImplementedException("等待萬子實作");
-            set { }      //throw new NotImplementedException("等待萬子實作");
+            get
+            {
+                //真空0~7  目前读取第一个吸嘴的真空状态
+                int addressIndex = 0;
+                AddressClass address = getCipAdress_NoPrefix($"Vacuum[{addressIndex}].bVacOk");
+                return PLC[address.SiteNo].ReadVari(address.Address0).ToLower() == "true";
+            }
+            set
+            {
+                //真空0~7  目前读取第一个吸嘴的真空状态，写入时默认控制第一个吸嘴
+
+                int addressIndex = 0;
+                //吸真空控制
+                AddressClass address = getCipAdress_NoPrefix($"Vacuum[{addressIndex}].bVacControl");
+                PLC[address.SiteNo].WriteVari(address.Address0, (value ? "true" : "false"));
+
+                //破真空控制
+                AddressClass address1 = getCipAdress_NoPrefix($"Vacuum[{addressIndex}].bAirControl");
+                PLC[address1.SiteNo].WriteVari(address1.Address0, (!value ? "true" : "false"));
+
+            }      //throw new NotImplementedException("等待萬子實作");
         }
         /// <summary>
         /// 取得 吸嘴排的安全高度Z (PLC 配方設定)
         /// </summary>
-        public double GetSafeZ(SuckerRowEnum suckerID)
+        public double GetSafeZ(SuckerRowEnum suckerID, int idx = 0)
         {
+            //AxisPos 16~31 对应吸嘴Z轴位置 R轴位置  顺序是 Z1 R1 Z2 R2 Z3 R3 Z4 R4...
             // GAARA_NEEDS_TO_IMPLEMENT
             //throw new NotImplementedException("等待萬子實作");
-            return 0;
+            int addressIndex = 16 + idx * 2;
+            switch (suckerID)
+            {
+                case SuckerRowEnum.S1:
+                    addressIndex = 16 + idx * 2;
+                    break;
+                case SuckerRowEnum.S2:
+                    addressIndex = 24 + idx * 2;
+                    break;
+            }
+            AddressClass address = getCipAdress_NoPrefix($"AxisPos[{addressIndex}].Pos[0]");
+            double pos = 0;
+            string str = PLC[address.SiteNo].ReadVari(address.Address0).ToLower();
+            double.TryParse(str, out pos);
+
+            return pos;
         }
         /// <summary>
         /// 取得 飛拍相機的對焦高度Z (PLC 配方設定)
@@ -548,7 +583,16 @@ namespace VsCommon.ControlSpace.IOSpace
         {
             // GAARA_NEEDS_TO_IMPLEMENT
             //throw new NotImplementedException("等待萬子實作");
-            return 0;
+            //飞拍1
+            AddressClass address = getCipAdress_NoPrefix("AxisPos[12].Pos[0]");
+
+            //飞拍2
+            //address = getCipAdress_NoPrefix("AxisPos[12].Pos[1]");
+
+            double pos = 0;
+            string str = PLC[address.SiteNo].ReadVari(address.Address0).ToLower();
+            double.TryParse(str, out pos);
+            return pos;
         }
         /// <summary>
         /// 取得 Sucker1 (或 Sucker2) 的 飛拍相機 觸發位置 (PLC 配方設定)
@@ -557,6 +601,27 @@ namespace VsCommon.ControlSpace.IOSpace
         {
             // GAARA_NEEDS_TO_IMPLEMENT
             //throw new NotImplementedException("等待萬子實作");
+
+            AddressClass address = getCipAdress_NoPrefix("AxisPos[3].Pos[0]");//X1Y1飞拍1载台1
+            //address = getCipAdress_NoPrefix("AxisPos[3].Pos[1]");//X1Y2飞拍1载台2
+
+            //address = getCipAdress_NoPrefix("AxisPos[4].Pos[0]");//X2Y1飞拍2载台1
+            //address = getCipAdress_NoPrefix("AxisPos[4].Pos[1]");//X2Y2飞拍2载台2
+
+            switch (suckerID)
+            {
+                case SuckerRowEnum.S1:
+                    address = getCipAdress_NoPrefix("AxisPos[3].Pos[0]");
+                    break;
+                case SuckerRowEnum.S2:
+                    address = getCipAdress_NoPrefix("AxisPos[4].Pos[0]");
+                    break;
+            }
+
+            double pos = 0;
+            string str = PLC[address.SiteNo].ReadVari(address.Address0).ToLower();
+            double.TryParse(str, out pos);
+
             return 0;
         }
         /// <summary>
@@ -566,12 +631,26 @@ namespace VsCommon.ControlSpace.IOSpace
         {
             // GAARA_NEEDS_TO_IMPLEMENT
             //throw new NotImplementedException("等待萬子實作");
-            return 0;
+            //飞拍1
+            AddressClass address = getCipAdress_NoPrefix("AxisPos[5].Pos[0]");
+
+            //飞拍2
+            //address = getCipAdress_NoPrefix("AxisPos[5].Pos[1]");
+
+            double pos = 0;
+            string str = PLC[address.SiteNo].ReadVari(address.Address0).ToLower();
+            double.TryParse(str, out pos);
+            return pos;
         }
 
         AddressClass getCipAdress(string eAdrStr)
         {
             AddressClass address = new AddressClass($"0:Gvl_PhotoPC.{eAdrStr}");
+            return address;
+        }
+        AddressClass getCipAdress_NoPrefix(string eAdrStr)
+        {
+            AddressClass address = new AddressClass($"0:{eAdrStr}");
             return address;
         }
     }
