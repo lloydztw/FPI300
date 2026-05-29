@@ -16,7 +16,10 @@
 using JetEazy.Match;
 using JetEazy.QvMath;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using MoveGraphLibrary;
+using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using RecipeParams = LaserAlignDX.OPSpace.RecipeSpace.InspectX3ParaClass;
 
 namespace LaserAlignDX.AoiModel
@@ -156,10 +159,29 @@ namespace LaserAlignDX.AoiModel
         }
         public bool Train(Bitmap bmpTemplate)
         {
-            bool ok = true;
-            foreach(var matcher in _matchers)
-                ok &= matcher.Train(bmpTemplate);
-            return ok;
+            //bool ok = true;
+            //foreach(var matcher in _matchers)
+            //    ok &= matcher.Train(bmpTemplate);
+            //return ok;
+
+            //---------------------------------------------
+            // 暫時使用 Parallel.For 來加速 Train 的時間.
+            //---------------------------------------------
+            int N = _matchers.Length;
+            bool[] oks = new bool[N];
+            Bitmap[] bmps = new Bitmap[N];
+            for (int i = 0; i < N; i++)
+                bmps[i] = (Bitmap)bmpTemplate.Clone();
+
+            Parallel.For(0, N, i =>
+            {
+                oks[i] = _matchers[i].Train(bmps[i]);
+            });
+
+            foreach(var bmp in bmps)
+                bmp.Dispose();
+
+            return Array.TrueForAll(oks, ok => ok);
         }
         public Size TemplateSize
         {

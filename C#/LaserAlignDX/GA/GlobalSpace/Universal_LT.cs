@@ -267,11 +267,7 @@ namespace Traveller106
             int axisID = carrierID == CarrierEnum.C1 ? 0 : 1;
             return GetMotor(axisID);
         }
-        public static PLCMotionClass GetInkerMotor(SuckerRowEnum suckerID)
-        {
-            return GetInkerMotor(suckerID, 0);
-        }
-        public static PLCMotionClass GetInkerMotor(SuckerRowEnum suckerID, int idx = 0)
+        public static PLCMotionClass GetSuckerMotor(SuckerRowEnum suckerID, int idx = 0)
         {
             //轴8~轴15 Z1~Z8 
             int axisID = suckerID == SuckerRowEnum.S1 ? 8 + idx : 12 + idx;

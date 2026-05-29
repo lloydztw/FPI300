@@ -97,11 +97,11 @@ namespace LaserAlignDX.Mvc.Ctrl
                     break;
                 case ZPosDataSrc.InkerS1:
                     _posHolder = new ZPosHolder_Inker_S1();
-                    _motor = Universal.GetInkerMotor(SuckerRowEnum.S1);
+                    _motor = Universal.GetSuckerMotor(SuckerRowEnum.S1);
                     break;
                 case ZPosDataSrc.InkerS2:
                     _posHolder = new ZPosHolder_Inker_S2 ();
-                    _motor = Universal.GetInkerMotor(SuckerRowEnum.S2);
+                    _motor = Universal.GetSuckerMotor(SuckerRowEnum.S2);
                     break;
                 case ZPosDataSrc.FlyCamFocusZ:
                     _posHolder = new ZPosHolder_FlyCamFocusZ();

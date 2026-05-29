@@ -528,7 +528,6 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public bool VacuumSucker1
         {
-            // GAARA_NEEDS_TO_IMPLEMENT
             get
             {
                 //真空0~7  目前读取第一个吸嘴的真空状态
@@ -557,8 +556,6 @@ namespace VsCommon.ControlSpace.IOSpace
         public double GetSafeZ(SuckerRowEnum suckerID, int idx = 0)
         {
             //AxisPos 16~31 对应吸嘴Z轴位置 R轴位置  顺序是 Z1 R1 Z2 R2 Z3 R3 Z4 R4...
-            // GAARA_NEEDS_TO_IMPLEMENT
-            //throw new NotImplementedException("等待萬子實作");
             int addressIndex = 16 + idx * 2;
             switch (suckerID)
             {
@@ -581,8 +578,6 @@ namespace VsCommon.ControlSpace.IOSpace
         /// </summary>
         public double GetFlyCamFocusZ()
         {
-            // GAARA_NEEDS_TO_IMPLEMENT
-            //throw new NotImplementedException("等待萬子實作");
             //飞拍1
             AddressClass address = getCipAdress_NoPrefix("AxisPos[12].Pos[0]");
 

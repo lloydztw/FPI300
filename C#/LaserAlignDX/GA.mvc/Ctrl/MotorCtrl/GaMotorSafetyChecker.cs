@@ -17,6 +17,8 @@ using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel.Calib;
 using System;
+using System.Collections.Generic;
+using VsCommon.ControlSpace.MachineSpace;
 using Universal = Traveller106.Universal;
 
 namespace LaserAlignDX.Mvc.Ctrl
@@ -25,31 +27,23 @@ namespace LaserAlignDX.Mvc.Ctrl
     {
         public event EventHandler OnPosChanged;
 
-        #region PRIVATE_KERNEL_DATA
-        IAxis[] _motorSuckers;
-        #endregion
+        const int N_MOTORS_PER_ROW = 4;
 
         #region RUNTIME_DATA
-        double[] _suckerSafeZs;
-        double[] _suckerCurrentZs;
+        Dictionary<SuckerRowEnum, double[]> _suckerCurrentZs = new Dictionary<SuckerRowEnum, double[]>();
+        Dictionary<SuckerRowEnum, double[]> _suckerSafeZs = new Dictionary<SuckerRowEnum, double[]>();
         #endregion
 
         public GaMotorSafetyChecker()
         {
-            _motorSuckers = new IAxis[]
+            var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
+            foreach (SuckerRowEnum S in Enum.GetValues(typeof(SuckerRowEnum)))
             {
-                Universal.GetInkerMotor(SuckerRowEnum.S1),
-                Universal.GetInkerMotor(SuckerRowEnum.S2),
-            };
-
-            var plc = GaBasicMotorUtil.PLCIO;
-            _suckerSafeZs = new double[]
-            {
-                plc!=null ? plc.GetSafeZ(SuckerRowEnum.S1) : 0,
-                plc!=null ? plc.GetSafeZ(SuckerRowEnum.S2) : 0,
-            };
-
-            _suckerCurrentZs = new double[_motorSuckers.Length];
+                _suckerCurrentZs.Add(S, new double[N_MOTORS_PER_ROW]);
+                _suckerSafeZs.Add(S, new double[N_MOTORS_PER_ROW]);
+                for (int idx = 0; idx < N_MOTORS_PER_ROW; idx++)
+                    _suckerSafeZs[S][idx] = plcIO.GetSafeZ(S, idx);
+            }
         }
 
         public void Tick()
@@ -60,7 +54,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
 
         /// <summary>
-        /// 是否 全部都在 安全位置
+        /// 是否 全部吸嘴 都在 安全位置
         /// </summary>
         /// <returns></returns>
         public bool IsAllSafe()
@@ -68,61 +62,75 @@ namespace LaserAlignDX.Mvc.Ctrl
             return IsAboveSafePos(SuckerRowEnum.S1) && IsAboveSafePos(SuckerRowEnum.S2);
         }
         /// <summary>
-        /// 是否 高於(或等於) Safe Pos
+        /// 是否 全部吸嘴 高於(或等於) Safe Pos
         /// </summary>
         public bool IsAboveSafePos(SuckerRowEnum S)
         {
-            int i = (int)(S - SuckerRowEnum.S1);
-            if (_suckerCurrentZs[i] <= _suckerSafeZs[i])
-                return true;
-            else
-                return GaBasicMotorUtil.AreProximityEqual(_suckerCurrentZs[i], _suckerSafeZs[i]);
+            bool allSafe = true;
+            for (int i = 0; i < N_MOTORS_PER_ROW; i++)
+            {
+                var currentZ = _suckerCurrentZs[S][i];
+                var safeZ = _suckerSafeZs[S][i];
+                bool isSafe = (currentZ <= safeZ) || GaBasicMotorUtil.AreProximityEqual(currentZ, safeZ);
+                if (!isSafe)
+                    allSafe = false;
+            }
+            return !allSafe;
         }
         /// <summary>
-        /// 是否 剛好在 Safe Pos
+        /// 是否 點墨吸嘴 剛好在 Safe Pos
         /// </summary>
         public bool IsAtSafePos(SuckerRowEnum S)
         {
-            int i = (int)(S - SuckerRowEnum.S1);
-            return GaBasicMotorUtil.AreProximityEqual(_suckerCurrentZs[i], _suckerSafeZs[i]);
+            int idx = 0;
+            return GaBasicMotorUtil.AreProximityEqual(_suckerCurrentZs[S][idx], _suckerSafeZs[S][idx]);
+
         }
         /// <summary>
-        /// 是否 剛好在 下壓位置
+        /// 是否 點墨吸嘴 剛好在 下壓位置
         /// </summary>
         public bool IsAtDownPos(SuckerRowEnum S)
         {
-            int i = (int)(S - SuckerRowEnum.S1);
-            return GaBasicMotorUtil.AreProximityEqual(_suckerCurrentZs[i], getDownPosFromRecipe(S));
+            int idx = 0;
+            return GaBasicMotorUtil.AreProximityEqual(_suckerCurrentZs[S][idx], getDownPosFromRecipe(S));
         }
-        
+
         /// <summary>
-        /// 下壓
+        /// 下壓 (點墨吸嘴)
         /// </summary>
         public void MoveDown(SuckerRowEnum S, bool silent = false)
         {
-            int i = (int)(S - SuckerRowEnum.S1);
-            var motor = _motorSuckers[i];
+            int idx = 0;
+            var motor = Universal.GetSuckerMotor(S, idx);
             double pos = getDownPosFromRecipe(S);
             string name = $"Z ({GaUtil.GetEnumDescription(S)})";
             GaBasicMotorUtil.PromptMoveTo(motor, pos, name, silent);
         }
         /// <summary>
-        /// 回升
+        /// 回升 (所有吸嘴)
         /// </summary>
         public void MoveUp(SuckerRowEnum S, bool silent = false, bool mustDo = false)
         {
-            int i = (int)(S - SuckerRowEnum.S1);
-            var motor = _motorSuckers[i];
-            double pos = _suckerSafeZs[i];
-            string name = $"Z ({GaUtil.GetEnumDescription(S)})";
-            GaBasicMotorUtil.PromptMoveTo(motor, pos, name, silent, mustDo);
+            for (int idx = 0; idx < N_MOTORS_PER_ROW; idx++)
+            {
+                var motor = Universal.GetSuckerMotor(S, idx);
+                double pos = _suckerSafeZs[S][idx];
+                string name = $"Z ({GaUtil.GetEnumDescription(S)})";
+                GaBasicMotorUtil.PromptMoveTo(motor, pos, name, silent, mustDo);
+            }
         }
 
+        /// <summary>
+        /// 取得 點墨吸嘴 的安全位置
+        /// </summary>
         public double GetSafePos(SuckerRowEnum S)
         {
-            int i = (int)(S - SuckerRowEnum.S1);
-            return _suckerSafeZs[i];
+            int idx = 0;
+            return _suckerSafeZs[S][idx];
         }
+        /// <summary>
+        /// 取得 點墨吸嘴 的下壓位置
+        /// </summary>
         public double GetDownZ(SuckerRowEnum S)
         { 
             return getDownPosFromRecipe(S);
@@ -132,19 +140,20 @@ namespace LaserAlignDX.Mvc.Ctrl
         bool pollingMotorsPos()
         {
             bool isAnyChanged = false;
-
-            int N = _motorSuckers.Length;
-            for (int i = 0; i < N; i++)
+            foreach (SuckerRowEnum S in Enum.GetValues(typeof(SuckerRowEnum)))
             {
-                var motor = _motorSuckers[i];
-                var z = motor.GetPos();
+                for (int i = 0; i < N_MOTORS_PER_ROW; i++)
+                {
+                    var motor = Universal.GetSuckerMotor(S, i);
+                    var currentZ = motor.GetPos();
 
-                if (!GaBasicMotorUtil.AreProximityEqual(z, _suckerCurrentZs[i]))
-                    isAnyChanged = true;
+                    if (!GaBasicMotorUtil.AreProximityEqual(currentZ, _suckerCurrentZs[S][i]))
+                        isAnyChanged = true;
 
-                _suckerCurrentZs[i] = z;
+                    _suckerCurrentZs[S][i] = currentZ; 
+
+                }
             }
-
             return isAnyChanged;
         }
         double getDownPosFromRecipe(SuckerRowEnum S)
