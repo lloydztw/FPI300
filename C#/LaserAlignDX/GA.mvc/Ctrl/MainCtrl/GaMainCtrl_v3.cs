@@ -245,6 +245,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             else
             {
                 VsMessageBox.Warning(e.Message);
+
+                // 2026-06-06 LETIAN: 檢查定位結果是否為全空盤! 
+                _frmAoiProgressing?.Close();
+                _frmAoiProgressing?.Dispose();
+                _frmAoiProgressing = null;
+                MACHINE.PLCIO.bSoftwareReady = false;
             }
         }
         private void OnAoiProcess_Started(object sender, ProcessEventArgs e)

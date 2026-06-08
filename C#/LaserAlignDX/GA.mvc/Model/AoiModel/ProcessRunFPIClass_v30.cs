@@ -384,6 +384,20 @@ namespace LaserAlignDX.AoiModel.V3
                 _aoiChipLoc.PostMarkAmbiguousBlocs();
 
                 bool pass = _CheckChipsTotalPass();
+
+                // 2026-06-06 LETIAN: 檢查定位結果是否為全空盤!
+                if(xScanInspectMode == ScanInspectMode.MEASUREAOI)
+                {
+                    if (_CheckIfAllEmpty())
+                    {
+                        markRunEnd(false);
+                        var errCode = ErrorCodes.ERR_CHIP_LOC_ALL_EMPTY;
+                        string errMsg = GaUtil.GetEnumDescription(errCode);
+                        fire_AoiError(errCode, errMsg);
+                        return;
+                    }
+                }
+
                 markRunEnd(pass);
                 fire_AoiEnd();
             }
@@ -459,6 +473,21 @@ namespace LaserAlignDX.AoiModel.V3
                 isPass = ngCount == 0;
             }
             return isPass;
+        }
+        private bool _CheckIfAllEmpty()
+        {
+            // 2026-06-06 LETIAN: 檢查定位結果是否為全空盤!
+            bool allEmpty = true;
+            var plcCodes = GetSingleResult();
+            foreach (var code in plcCodes)
+            {
+                if (code != (int)PlcResultCode.NG_EMPTY)
+                {
+                    allEmpty = false;
+                    break;
+                }
+            }
+            return allEmpty;
         }
         #endregion
 
