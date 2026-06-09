@@ -32,10 +32,10 @@ namespace Traveller106
         public static int N_THREADS => LaserAlignDX.GlobalConfig.N_THREADS;
 
         public static bool IsNoUseCCD => LaserAlignDX.GlobalConfig.IsSim;
-        public static bool IsNoUseIO = IsNoUseCCD;
-        public static bool IsNoUseMotor = IsNoUseIO;
-        public static bool IsSilentMode = IsNoUseIO;
-        public static bool IsAutoLogin = IsNoUseCCD;
+        public static bool IsNoUseIO => IsNoUseCCD;
+        public static bool IsNoUseMotor => IsNoUseIO;
+        public static bool IsSilentMode => IsNoUseIO;
+        public static bool IsAutoLogin => IsNoUseCCD;
 
         public static string VersionDate => LaserAlignDX.GlobalConfig.VersionDate;
         public const VersionEnum VERSION = VersionEnum.LASER;

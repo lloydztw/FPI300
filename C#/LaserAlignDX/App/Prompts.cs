@@ -7,6 +7,9 @@ namespace LaserAlignDX
     /// </summary>
     public enum Prompts : int
     {
+        [Description("程序已經啟動, 請勿多開！")]
+        ReEntry,
+
         [Description("請先登入 擁有修改參數權限 的 帳號!")]
         No_Privilege,
 

@@ -6,31 +6,33 @@
 [Setup]
 AppPublisher=JetEazy System Co., Ltd.
 AppPublisherURL=http://www.jeteazy.com
-AppVersion=3.3.5.5
-AppCopyright=Copyright (C) 2025 JetEazy System Co., Ltd.
+AppVersion=3.3.5.6
+AppCopyright=Copyright (C) 2026 JetEazy System Co., Ltd.
 ;WizardImageFile=JetEazySetup.bmp
 
-AppName=Traveller_Patch
+AppName=Traveller_106
 DefaultDirName=D:\AUTOMATION\Eazy FPI30
 DefaultGroupName=JetEazy FPI30
 Compression=lzma
 SolidCompression=yes
 OutputDir=.\bin
-OutputBaseFileName=Traveller_Setup_3.3.5.5
+OutputBaseFileName=Traveller_Setup_3.3.5.6
 
 [Files]
 ; BIN & DLL
 Source: "..\bin\Debug\FPI30AOIX3.exe";                                            DestDir: "{app}\_BIN_";         Flags: ignoreversion
+Source: "..\bin\Debug\Traveller.Sim.exe";                                         DestDir: "{app}\_BIN_";         Flags: ignoreversion
 Source: "..\bin\Debug\Traveller.Data.Packer.exe";                                 DestDir: "{app}\_BIN_";         Flags: ignoreversion
 Source: "..\bin\Debug\*.dll";                                                     DestDir: "{app}\_BIN_";         Flags: ignoreversion
 Source: "..\bin\Debug\NLog.config";                                               DestDir: "{app}\_BIN_";         Flags: ignoreversion
 Source: "..\C#\FPI30_Aoi\bin\Debug\EzAoiEmptyTrayInspector.App.exe";              DestDir: "{app}\_BIN_";         Flags: ignoreversion
-;Source: "..\C#\Dlls\ja\*.dll";                                                    DestDir: "{app}\_BIN_\ja";      Flags: ignoreversion
 Source: "..\bin\Debug\dll\x64\*.dll";                                             DestDir: "{app}\_BIN_\dll\x64"; Flags: ignoreversion
 
 ; Omron dlls and exe
 Source: "..\C#\Dlls\Omron\*.*";     DestDir: "{app}\_BIN_";                        Flags: ignoreversion
 Source: "..\C#\Dlls\Omron\ja\*.*";  DestDir: "{app}\_BIN_\ja";                     Flags: ignoreversion
+
+; *.cmd
 Source: ".\*.cmd";                  DestDir: "{app}\_BIN_";                        Flags: ignoreversion  
 
 ; INI & DB 
@@ -45,8 +47,9 @@ Source: "..\SettingsFiles\LASER-MAIN_FPIX3\*.*"; \
 Name: "{app}\_V03_\LASER-MAIN_FPIX3";           Flags: uninsneveruninstall
 
 [Icons]
-Name: "{commondesktop}\Travller106 主程式";      Filename: "{app}\_BIN_\FPI30AOIX3.exe";                WorkingDir: "{app}\_BIN_"
-Name: "{group}\Travller106 主程式";              Filename: "{app}\_BIN_\FPI30AOIX3.exe";                WorkingDir: "{app}\_BIN_"
-Name: "{group}\Travller106 參數打包程式";        Filename: "{app}\_BIN_\Traveller.Data.Packer.exe";     WorkingDir: "{app}\_BIN_"
+Name: "{commondesktop}\Traveller106 主程式";      Filename: "{app}\_BIN_\FPI30AOIX3.exe";                WorkingDir: "{app}\_BIN_"
+Name: "{group}\Traveller106 主程式";              Filename: "{app}\_BIN_\FPI30AOIX3.exe";                WorkingDir: "{app}\_BIN_"
+Name: "{group}\Traveller106 離線模擬 程式";       Filename: "{app}\_BIN_\Traveller.Sim.exe";             WorkingDir: "{app}\_BIN_"
+Name: "{group}\Traveller106 參數打包 程式";       Filename: "{app}\_BIN_\Traveller.Data.Packer.exe";     WorkingDir: "{app}\_BIN_"
 
 [Code]

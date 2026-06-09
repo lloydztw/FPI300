@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JetEazy.Utils;
+using System;
 using System.Diagnostics;
 using System.Windows.Forms;
 using Traveller106;
@@ -17,25 +18,29 @@ namespace LaserAlignDX
             Application.SetCompatibleTextRenderingDefault(false);
             LtAoiFactory.Migrate();
 
-            // 只跑單元測試
-            if (run_unit_tests(args))
+            // 解析引數 (args)
+            bool go = parse_args(args);
+            if (!go)
                 return;
 
             if (AppInstance())
             {
-                MessageBox.Show("程序已启动，请勿多开！！！", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                var msg = GaUtil.GetEnumDescription(Prompts.ReEntry);
+                MessageBox.Show(msg, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             Form frm = new Traveller106.FormMainDX();
 
+            #region DEBUG_CODE
             //frm.Load += (s, e) => GaMvcConfig.OpenCalibrationTool();
             //frm.Load += (s, e) => GaMvcConfig.OpenTamplateEditor(Model.Coords.CarrierEnum.C2);
+            #endregion
 
             Application.Run(frm);
         }
 
-        public static bool AppInstance()
+        static bool AppInstance()
         {
             Process[] MyProcesses = Process.GetProcesses();
             int i = 0;
@@ -48,22 +53,30 @@ namespace LaserAlignDX
             }
             return (i > 1) ? true : false;
         }
-
-        static bool run_unit_tests(params string[] args)
+        static bool parse_args(params string[] args)
         {
+            bool go = true;
+
+            if (Array.IndexOf(args, "SIM") >= 0)
+            {
+                GlobalConfig.IsSim = true;
+            }
+
             if (Array.IndexOf(args, "TEST") >= 0)
             {
                 if (Array.IndexOf(args, "OMRON") >= 0)
                 {
                     run_unit_test_omron();
-                    return true;
+                    go = false;
                 }
                 else
                 {
-                    return run_unit_test_others();
+                    if (run_unit_test_others())
+                        go = false;
                 }
             }
-            return false;
+
+            return go;
         }
         static void run_unit_test_omron()
         {

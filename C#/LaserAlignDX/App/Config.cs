@@ -3,7 +3,10 @@ namespace LaserAlignDX
 {
     public class GlobalConfig
     {
-        public static bool IsSim => false;
+        /// <summary>
+        /// 默認值是 false, 由主程式的 args 引數 來決定是否啟用 SIM 模式
+        /// </summary>
+        public static bool IsSim { get; set; } = false;
 
         public static string VersionDate => "2026-06-08";
 

@@ -642,6 +642,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             InspectParams.Save();
             FlyAoiParams.Save();
+
+            // 強制刪除多餘的檔案
+            DeleteRedundentFiles(INIFILE);
         }
         public override void ChangeIndex(int eindex)
         {
@@ -1429,6 +1432,43 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 rotatedPoint.Y + pivotPoint.Y);
 
             return finalPoint;
+        }
+        #endregion
+
+        #region REDUNDENT_FILES_刪除冗余文件
+        public static void DeleteRedundentFiles(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+                return;
+
+            if (System.IO.File.Exists(filePath))
+                filePath = System.IO.Path.GetDirectoryName(filePath);
+
+            if (!System.IO.Directory.Exists(filePath))
+                return;
+
+            foreach (var fname in IterRedundentFiles())
+            {
+                string fileName = System.IO.Path.Combine(filePath, fname);
+                if (System.IO.File.Exists(fileName))
+                {
+                    try
+                    {
+                        System.IO.File.Delete(fileName);
+                    }
+                    catch
+                    {
+                    }
+                }
+            }
+        }
+        public static IEnumerable<string> IterRedundentFiles()
+        {
+            yield return "bmpprintNoTraytemplate.bmp";
+            yield return "orgNoTray.bmp";
+            //yield return "camGrid_C1.txt";
+            //yield return "camGrid_C2.txt";
+            //yield return "NoTray_default_info.ini";
         }
         #endregion
     }
