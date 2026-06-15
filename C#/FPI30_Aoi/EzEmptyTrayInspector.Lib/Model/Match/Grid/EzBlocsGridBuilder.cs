@@ -25,7 +25,7 @@ namespace JetEazy.Match
 {
     public class EzBlocsGridBuilder
     {
-        public EzBlocsGrid Build(IList<EzBloc> blocs, Comparison<EzBlocsGrid> comparer = null, int targetRows = 0, int targetCols = 0, bool resetOwner = false)
+        public EzBlocsGrid Build(IList<EzBloc> blocs, Comparison<EzBlocsGrid> comparer = null, int targetRows = 0, int targetCols = 0, bool resetOwner = false, SizeF? targetPitch = null)
         {
             if (blocs == null)
                 return null;
@@ -39,10 +39,31 @@ namespace JetEazy.Match
                 defaultPitch.Width = bound.Width / targetCols;
                 defaultPitch.Height = bound.Height / targetRows;
             }
+            if(targetPitch != null && targetPitch.HasValue)
+            {
+                defaultPitch = targetPitch.Value;
+            }
 
             var pitch = search_best_pitches(blocs, defaultPitch);
+
+
+            #region 如果沒找到_PITCH，就放大搜尋範圍再試一次 
+            for (int trial = 0; trial < 2; trial++)
+            {
+                if (pitch.X > 0 && pitch.Y > 0)
+                    break;
+                if (pitch.X <= 0)
+                    defaultPitch.Width = (int)(defaultPitch.Width * 1.25);
+                if (pitch.Y <= 0)
+                    defaultPitch.Height = (int)(defaultPitch.Height * 1.25);
+                pitch = search_best_pitches(blocs, defaultPitch);
+            }
+            #endregion
+
+            #region 如果還是沒找到_PITCH，就直接用邊界寬高當作_PITCH
             if (pitch.X <= 0) pitch.X = bound.Width;
             if (pitch.Y <= 0) pitch.Y = bound.Height;
+            #endregion
 
             var locaBuilder = new LocalGridBuilder();
             var localMaps = new List<EzBlocsGrid>();

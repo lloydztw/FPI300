@@ -529,8 +529,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             var dw = W - ww;
             var dh = H - hh;
 
-            // 重新抓取 goldenQuad2D
-            if (_goldenQuad2D == null)
+            // 強制 重新抓取 goldenQuad2D
+            if (true)  // if( _goldenQuad2D == null)
             {
                 try
                 {

@@ -19,6 +19,7 @@ using JetEazy.QxCollections;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using SizeF = System.Drawing.SizeF;
 using System.Linq;
 using CvSize = OpenCvSharp.Size;
 using EzAoiBase = EzAoiEmptyTrayInspector.Model.Aoi.EzAoiBase;
@@ -35,6 +36,7 @@ namespace LeTian.AoiLib
 
         #region BLOB_FILTER_PARAMETERS
         EzBlobFinder _blobFinder = new EzBlobFinder();
+        bool _optFillOffBorder = true;
         #endregion
 
         public EzPadsGridFinder(int shrink = 1)
@@ -42,6 +44,7 @@ namespace LeTian.AoiLib
             _shrinkFactor = Math.Max(shrink, 1);
         }
 
+        #region PUBLIC_RUNTIME_DATA
         /// <summary>
         /// Runtime Parameter
         /// </summary>
@@ -53,20 +56,30 @@ namespace LeTian.AoiLib
         {
             get; set;
         }
+        private System.Drawing.SizeF? getGoldenGridPitch()
+        {
+            var p = GoldenGrid?.GetPitch();
+            if (p != null)
+                return new SizeF((float)p.X, (float)p.Y);
+            return null;
+        }
+        #endregion
 
         /// <summary>
         /// Runtime Parameter
         /// </summary>
         public int PadThreshold
         {
-            get; set;
+            get; 
+            set;
         }
         /// <summary>
         /// Runtime Parameter
         /// </summary>
         public int DistTransThreshold
         {
-            get; set;
+            get; 
+            set;
         }
 
         /// <summary>
@@ -151,6 +164,7 @@ namespace LeTian.AoiLib
         {
             findWhiteKeyPoints(img, out _blocs, useInnerFilter: useInnerFilter);
 
+            #region RESERVED_CODE
             //// 以中心點排序 (沒啥幫助)
             if (false)
             {
@@ -167,10 +181,12 @@ namespace LeTian.AoiLib
                     return dd1 - dd2;
                 });
             }
+            #endregion
 
             var builder = new EzBlocsGridBuilder();
             
             Comparison<EzBlocsGrid> comparison = null;
+
             if (GoldenGrid != null)
             {
                 var analyzer = new EzBlocsGridAnalyzer();
@@ -191,12 +207,14 @@ namespace LeTian.AoiLib
                 });
             }
 
-            gridPoints = builder.Build(_blocs, comparison);
+            gridPoints = builder.Build(_blocs, comparison, targetPitch: getGoldenGridPitch());
 
             if (gridPoints != null)
             {
                 gridPoints.RowMin = 0;
                 gridPoints.ColMin = 0;
+
+                System.Diagnostics.Debug.WriteLine($"Grids = {gridPoints.Rows} x {gridPoints.Cols}");
             }
         }
         void findWhiteKeyPoints(Mat image, out List<EzBloc> keyBlocs, bool useInnerFilter = true, Mat imgDebugOutput = null)
@@ -214,6 +232,7 @@ namespace LeTian.AoiLib
                 binaryImg = new Mat();
                 gc.Add(binaryImg);
 
+                #region RESERVED_CODE
                 //applyPadsFilter(image, binaryImg);      //@<<< findWhiteKeyPoints
                 //if (_shrinkFactor < 8)
                 //{
@@ -230,12 +249,29 @@ namespace LeTian.AoiLib
                 //{
                 //    binaryImg.CopyTo(imgDebugOutput);
                 //}
+                #endregion
 
                 applyAllFilters(image, binaryImg);      //@<<< findWhiteKeyPoints
             }
             else
             {
-                binaryImg = image;
+                if (_optFillOffBorder)
+                {
+                    binaryImg = new Mat();
+                    gc.Add(binaryImg);
+                }
+                else
+                {
+                    binaryImg = image;
+                }
+            }
+
+            // 填充邊界外的區域為黑色，以避免被誤認為 blob
+            if (_optFillOffBorder)
+            {
+                var rect = new Rect(0, 0, binaryImg.Width, binaryImg.Height);
+                binaryImg.Rectangle(rect, Scalar.White);
+                Cv2.FloodFill(binaryImg, new Point(0, 0), Scalar.Black);
             }
 
             getBlobFilterMinMaxSize(image, out int min_w, out int min_h, out int max_w, out int max_h);
@@ -377,7 +413,7 @@ namespace LeTian.AoiLib
             _DUMP_VISUAL(imgDebug, blocsR, true, Scalar.Pink, "Rotated BLOCs {0:0}", angle);
 
             var builder = new EzBlocsGridBuilder();
-            grid2 = builder.Build(blocsR);
+            grid2 = builder.Build(blocsR, targetPitch: getGoldenGridPitch());
          
             if (grid2 != null)
                 rotateBlocs(grid2.IterBlocs(), -angle, center, grid2);
