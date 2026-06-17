@@ -428,6 +428,18 @@
     <Compile Include="GA.mvc\Gui\UiCalibTool\UserControl1.Designer.cs">
       <DependentUpon>UserControl1.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiFlyCamSetup\FlyOffsetUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiFlyCamSetup\FlyOffsetUI.Designer.cs">
+      <DependentUpon>FlyOffsetUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiFlyCamSetup\FormFlySetup_V1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiFlyCamSetup\FormFlySetup_V1.Designer.cs">
+      <DependentUpon>FormFlySetup_V1.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\IvFlyCamViewUI.cs" />
     <Compile Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.cs">
       <SubType>UserControl</SubType>
@@ -636,35 +648,11 @@
     <Compile Include="GA\FormSpace\BannerForm.designer.cs">
       <DependentUpon>BannerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA\FormSpace\FormFlySetup.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\FormFlySetup.Designer.cs">
-      <DependentUpon>FormFlySetup.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA\FormSpace\FormProgressing.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GA\FormSpace\FormProgressing.designer.cs">
       <DependentUpon>FormProgressing.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\FPI30Form\CalibrationUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\FPI30Form\CalibrationUI.Designer.cs">
-      <DependentUpon>CalibrationUI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\FPI30Form\FlyOffsetUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\FPI30Form\FlyOffsetUI.Designer.cs">
-      <DependentUpon>FlyOffsetUI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\FPI30Form\FormMotor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\FPI30Form\FormMotor.Designer.cs">
-      <DependentUpon>FormMotor.cs</DependentUpon>
     </Compile>
     <Compile Include="GA\FormSpace\WX\FormMainDX.cs">
       <SubType>Form</SubType>
@@ -794,6 +782,12 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiChipCellsViewer\JezChipCellsViewPanel.resx">
       <DependentUpon>JezChipCellsViewPanel.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiFlyCamSetup\FlyOffsetUI.resx">
+      <DependentUpon>FlyOffsetUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiFlyCamSetup\FormFlySetup_V1.resx">
+      <DependentUpon>FormFlySetup_V1.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiFlyCamViewer\JezFlyViewPanel.resx">
       <DependentUpon>JezFlyViewPanel.cs</DependentUpon>
     </EmbeddedResource>
@@ -833,20 +827,8 @@
     <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">
       <DependentUpon>BannerForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\FormFlySetup.resx">
-      <DependentUpon>FormFlySetup.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\FormProgressing.resx">
       <DependentUpon>FormProgressing.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\FPI30Form\CalibrationUI.resx">
-      <DependentUpon>CalibrationUI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\FPI30Form\FlyOffsetUI.resx">
-      <DependentUpon>FlyOffsetUI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\FPI30Form\FormMotor.resx">
-      <DependentUpon>FormMotor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA\FormSpace\WX\FormMainDX.resx">
       <DependentUpon>FormMainDX.cs</DependentUpon>
@@ -955,9 +937,7 @@
     <None Include="Resources\next.png" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="GA\RunSpace\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)
