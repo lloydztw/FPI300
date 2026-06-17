@@ -287,26 +287,37 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
         }
         private void Dgv_CellContentDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
-#if(OPT_REPLACED_BY_MOTOR_JOG_TOOL)
-            if (_activeViewID == CalibViewEnum.InkMarksView)
+#if (OPT_REPLACED_BY_MOTOR_JOG_TOOL || true)
+            if (e.ColumnIndex >= 3)
             {
-                if (e.RowIndex >= 0 && e.ColumnIndex == 0)
+                var cornerID = e.RowIndex;
+                if (cornerID >= 0 && cornerID < 4)
                 {
-                    dgvSyncCurrentMotorCoordsToUserInput(e.RowIndex);
+                    dgvSyncCurrentMotorCoordsToUserInput(cornerID);
                 }
             }
 #endif
         }
         private void Dgv_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            if (true) // if(_activeViewID == CalibViewEnum.InkMarksView)
+            if (e.ColumnIndex == 0)
             {
-                if (e.ColumnIndex == 0 && e.RowIndex >= 0 && e.RowIndex < 4)
+                var cornerID = e.RowIndex;
+                if (cornerID >= 0 && cornerID < 4)
                 {
                     dgvGetUserInputMotorCoords(out var motorCoords);
-                    var targetCoord = motorCoords[e.RowIndex];
+                    var targetCoord = motorCoords[cornerID];
                     MoveMotorXY(targetCoord);
                 }
+            }
+        }
+        private void Dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            // 排除標題列
+            if (e.RowIndex >= 0)
+            {
+                _isCoordModified = true;
+                //保留: UpdateUserInputMotorCoordsToTrf(false);
             }
         }
         private void Dlg_OnInkerCoordsUpdated(object sender, InkerCoordsEventArgs e)
@@ -687,7 +698,6 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             var transform = _commonBaseTrf.GetCameraMotorTransform(_activeCarrierID, _activeSuckerRowID);
             var trfCalibCorners = transform.GetCalibCornerPoints();
             var motorPts = trfCalibCorners?.GetAll(isSrc: false);
-            //var camPts = trfCalibCorners?.GetAll(isSrc: true);
             return motorPts;
         }
         #endregion
@@ -706,18 +716,11 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                 dgv.Rows.Add(name, "", "", "", "");
             }
 
-            dgv.CellValueChanged += (s, e) =>
-            {
-                // 排除標題列
-                if (e.RowIndex >= 0)
-                {
-                    _isCoordModified = true;
-                }
-            };
-
-            //dgv.CellContentDoubleClick += Dgv_CellContentDoubleClick;
+            dgv.CellContentDoubleClick += Dgv_CellContentDoubleClick;
             dgv.CellContentClick += Dgv_CellContentClick;
+            dgv.CellValueChanged += Dgv_CellValueChanged;
         }
+
         void dgvUpdateInkMarks(EzBloc[] inkMarks)
         {
             var dgv = _dgvCalibPointsListView?.DataGridView;
@@ -1071,9 +1074,10 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                 return false;
             }
 
+            dgvGetUserInputMotorCoords(out var userInputMotorCoords);
+
             var inkMarks = getActiveInkMarksInRecipe();
             var inkMarkPts = Array.ConvertAll(inkMarks, im => im.Center);
-            dgvGetUserInputMotorCoords(out var userInputMotorCoords);
 
             if (verify)
             {
@@ -1081,7 +1085,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
                 bool ok = VerifyGuiInkPoints(inkMarkPts, out string errMsg);
                 if (!ok)
                 {
-                    if(!WarningToContinue(errMsg))
+                    if (!WarningToContinue(errMsg))
                         return false;
                 }
                 #endregion

@@ -135,6 +135,7 @@ namespace LaserAlignDX
 
             using (var dlg = new FormCalibrationTool())
             {
+                dlg.WindowState = FormWindowState.Maximized;
                 dlg.ShowDialog();
             }
 
