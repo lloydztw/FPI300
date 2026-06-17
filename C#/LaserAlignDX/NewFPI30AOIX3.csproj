@@ -398,11 +398,29 @@
     <Compile Include="GA.mvc\Gui\.Interactor\CviTransCoordInfo.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\IvDrawItem.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_abs.cs" />
+    <Compile Include="GA.mvc\Gui\MainSpace\FormMainDX.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\MainSpace\FormMainDX.Designer.cs">
+      <DependentUpon>FormMainDX.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.Designer.cs">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiBanner\BannerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiBanner\BannerForm.designer.cs">
+      <DependentUpon>BannerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiBanner\FormProgressing.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiBanner\FormProgressing.designer.cs">
+      <DependentUpon>FormProgressing.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v25.cs">
       <SubType>Form</SubType>
@@ -642,24 +660,6 @@
     <Compile Include="GA\ControlSpace\MachineSpace\MiniX6MachineClass.cs" />
     <Compile Include="GA\ControlSpace\MachineSpace\NeedleMachineClass.cs" />
     <Compile Include="GA\ControlSpace\MachineSpace\YzBaseMachineClass.cs" />
-    <Compile Include="GA\FormSpace\BannerForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\BannerForm.designer.cs">
-      <DependentUpon>BannerForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\FormProgressing.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\FormProgressing.designer.cs">
-      <DependentUpon>FormProgressing.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\FormSpace\WX\FormMainDX.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA\FormSpace\WX\FormMainDX.Designer.cs">
-      <DependentUpon>FormMainDX.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA\GlobalSpace\Enums.cs" />
     <Compile Include="GA\GlobalSpace\INI.cs" />
     <Compile Include="GA\GlobalSpace\Universal_lt.cs" />
@@ -761,8 +761,17 @@
       <DependentUpon>PosUI.cs</DependentUpon>
     </Compile>
     <Compile Include="LT\UnitTest\UnitTest_ChipMatcher.cs" />
+    <EmbeddedResource Include="GA.mvc\Gui\MainSpace\FormMainDX.resx">
+      <DependentUpon>FormMainDX.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\MainSpace\MainX3UI_lt.resx">
       <DependentUpon>MainX3UI_lt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiBanner\BannerForm.resx">
+      <DependentUpon>BannerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiBanner\FormProgressing.resx">
+      <DependentUpon>FormProgressing.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiCalibTool\FormCalibrationTool_v25.resx">
       <DependentUpon>FormCalibrationTool_v25.cs</DependentUpon>
@@ -823,15 +832,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.resx">
       <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\BannerForm.resx">
-      <DependentUpon>BannerForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\FormProgressing.resx">
-      <DependentUpon>FormProgressing.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\FormSpace\WX\FormMainDX.resx">
-      <DependentUpon>FormMainDX.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LT\UnitTest\Gui\FormOmronPlcViewer.resx">
       <DependentUpon>FormOmronPlcViewer.cs</DependentUpon>
