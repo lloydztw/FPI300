@@ -18,6 +18,10 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 
+#if (OPT_TRACE_OMRON_ADDRESS)
+    using AddressClass = JetEazy.ControlSpace.AddressClass;
+#endif
+
 
 namespace VsCommon.ControlSpace.IOSpace
 {
@@ -58,21 +62,23 @@ namespace VsCommon.ControlSpace.IOSpace
 
         //const string m_Format = "0.000";
 
-        //public enum ADRMainFPIX3 : int
-        //{
-        //    COUNT = 10,
+#if (OPT_TRACE_OMRON_ADDRESS)
+        public enum ADRMainFPIX3 : int
+        {
+            COUNT = 10,
 
-        //    ADR_Heart = 0,
-        //    ADR_LineScanRecipe = 1,
-        //    ADR_SoftwareReady = 2,
-        //    ADR_LineScanStart = 3,
-        //    ADR_LineScanReady = 4,
-        //    ADR_LineScanDone = 5,
-        //    ADR_LineScanResult = 6,
-        //    ADR_QRUsed = 7,
-        //    ADR_QRJusgeUsed = 8,
-        //    ADR_ScanStatus = 9,
-        //}
+            ADR_Heart = 0,
+            ADR_LineScanRecipe = 1,
+            ADR_SoftwareReady = 2,
+            ADR_LineScanStart = 3,
+            ADR_LineScanReady = 4,
+            ADR_LineScanDone = 5,
+            ADR_LineScanResult = 6,
+            ADR_QRUsed = 7,
+            ADR_QRJusgeUsed = 8,
+            ADR_ScanStatus = 9,
+        }
+#endif
 
         private bool _simSoftwareReady = false;
         private int _simProductionRunCount = 0;
@@ -85,26 +91,30 @@ namespace VsCommon.ControlSpace.IOSpace
 
         public void Initial(string path, JetEazy.ControlSpace.PLCSpace.VsCommPLC[] plc)
         {
-            //ADDRESSARRAY = new AddressClass[(int)ADRMainFPIX3.COUNT];
-            //PLC = plc;
-            //INIFILE = path + "\\IO.INI";
-            //LoadData();
+#if (OPT_TRACE_OMRON_ADDRESS)
+            ADDRESSARRAY = new AddressClass[(int)ADRMainFPIX3.COUNT];
+            PLC = plc;
+            INIFILE = path + "\\IO.INI";
+            LoadData();
+#endif
             ResetPlc();
         }
         public override void LoadData()
         {
-            //ADDRESSARRAY[(int)ADRMainFPIX3.ADR_Heart] = new AddressClass(ReadINIValue("Operation Address", "Heart", "", INIFILE));
-            //ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanRecipe] = new AddressClass(ReadINIValue("Operation Address", "LineScanRecipe", "", INIFILE));
-            //ADDRESSARRAY[(int)ADRMainFPIX3.ADR_SoftwareReady] = new AddressClass(ReadINIValue("Operation Address", "SoftwareReady", "", INIFILE));
+#if (OPT_TRACE_OMRON_ADDRESS)
+            ADDRESSARRAY[(int)ADRMainFPIX3.ADR_Heart] = new AddressClass(ReadINIValue("Operation Address", "Heart", "", INIFILE));
+            ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanRecipe] = new AddressClass(ReadINIValue("Operation Address", "LineScanRecipe", "", INIFILE));
+            ADDRESSARRAY[(int)ADRMainFPIX3.ADR_SoftwareReady] = new AddressClass(ReadINIValue("Operation Address", "SoftwareReady", "", INIFILE));
 
-            //ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanStart] = new AddressClass(ReadINIValue("Operation Address", "LineScanStart", "", INIFILE));
-            //ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanReady] = new AddressClass(ReadINIValue("Operation Address", "LineScanReady", "", INIFILE));
-            //ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanDone] = new AddressClass(ReadINIValue("Operation Address", "LineScanDone", "", INIFILE));
-            //ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanResult] = new AddressClass(ReadINIValue("Operation Address", "LineScanResult", "", INIFILE));
-            //ADDRESSARRAY[(int)ADRMainFPIX3.ADR_QRUsed] = new AddressClass(ReadINIValue("Operation Address", "ADR_QRUsed", "0:Gvl_PhotoPC.bQRUsed", INIFILE));
+            ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanStart] = new AddressClass(ReadINIValue("Operation Address", "LineScanStart", "", INIFILE));
+            ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanReady] = new AddressClass(ReadINIValue("Operation Address", "LineScanReady", "", INIFILE));
+            ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanDone] = new AddressClass(ReadINIValue("Operation Address", "LineScanDone", "", INIFILE));
+            ADDRESSARRAY[(int)ADRMainFPIX3.ADR_LineScanResult] = new AddressClass(ReadINIValue("Operation Address", "LineScanResult", "", INIFILE));
+            ADDRESSARRAY[(int)ADRMainFPIX3.ADR_QRUsed] = new AddressClass(ReadINIValue("Operation Address", "ADR_QRUsed", "0:Gvl_PhotoPC.bQRUsed", INIFILE));
 
-            //ADDRESSARRAY[(int)ADRMainFPIX3.ADR_QRJusgeUsed] = new AddressClass(ReadINIValue("Operation Address", "ADR_QRJusgeUsed", "0:Gvl_PhotoPC.bQRJudgeUsed", INIFILE));
-            //ADDRESSARRAY[(int)ADRMainFPIX3.ADR_ScanStatus] = new AddressClass(ReadINIValue("Operation Address", "ADR_ScanStatus", "0:Gvl_PhotoPC.iScanStatus", INIFILE));
+            ADDRESSARRAY[(int)ADRMainFPIX3.ADR_QRJusgeUsed] = new AddressClass(ReadINIValue("Operation Address", "ADR_QRJusgeUsed", "0:Gvl_PhotoPC.bQRJudgeUsed", INIFILE));
+            ADDRESSARRAY[(int)ADRMainFPIX3.ADR_ScanStatus] = new AddressClass(ReadINIValue("Operation Address", "ADR_ScanStatus", "0:Gvl_PhotoPC.iScanStatus", INIFILE));
+#endif
         }
         public override void SaveData()
         {
