@@ -291,6 +291,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             SaveAllParams(force: false);
             persistLineBorderIndentExt(true);
+            VxDebugDrawer.DestroyAllWindows();
         }
         private void RdoBoxSelector_CheckedChanged(object sender, EventArgs e)
         {
@@ -639,7 +640,10 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void TrainGoldenChipTemplate(bool silentSuccess = false)
         {
-            int err = _xRecipe.PrintTempTrain();
+            VxDebugDrawer.DestroyAllWindows();
+
+            int err = _xRecipe.PrintTempTrain(!silentSuccess);
+
             if (err != 0)
             {
                 VsMessageBox.Warning("匹配模板 創建失敗!");
@@ -899,7 +903,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
 
                 if (calcGoldenDim)
+                {
+                    // NOTE: 這裡會影響 PAD型晶粒的 Golden Template "GRID" !!! 
                     aoiCalcGoldenChipDimension(edgeLines);
+                }
             }
         }
         void persistLineBorderIndentExt(bool save)
@@ -1208,6 +1215,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return mvdLine != null;
             }
         }
+
+        /// <summary>
+        /// 注意: 這裡會影響 PAD型晶粒的 Golden Template "GRID" !!! 
+        /// </summary>
         void aoiCalcGoldenChipDimension(List<EzLSD.LineSegment> lines)
         {
             var aoiModel = _sysModel?.AoiModel;

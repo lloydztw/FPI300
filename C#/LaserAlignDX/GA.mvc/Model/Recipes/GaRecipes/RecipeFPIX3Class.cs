@@ -820,7 +820,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 return new Size(1, 1);
             }
         }
-        public int PrintTempTrain()
+        public int PrintTempTrain(bool showGoldenVisualizedFeature = false)
         {
 #if (OPT_OLD)
             mvdprinttemp_Find.bmpObj_Image?.Dispose();
@@ -837,6 +837,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             // LETIAN: Revised for multithread
             mvdprinttemp_Find.SetRecipeParams(this.InspectParams);
             bool bOK = mvdprinttemp_Find.Train(this.bmpDefectTemplate);
+            
+            mvdprinttemp_Find.ShowGoldenVisualDebug(showGoldenVisualizedFeature);
+
             return (bOK ? 0 : -1);
         }
         public int PrintTempRun(Bitmap ebmpInput)

@@ -208,5 +208,10 @@ namespace JetEazy.Match
             };
             return corners;
         }
+
+        public override string ToString()
+        {
+            return $"Grid [{Rows}x{Cols}]";
+        }
     }
 }

@@ -65,7 +65,7 @@ namespace Eazy_Project_III.FormSpace
                 _instance = new BannerForm();
                 _instance.TopMost = true;
                 _instance.ProBar.Visible = false;
-                _instance.Cursor = Cursors.WaitCursor;
+                _instance.Cursor = Cursors.AppStarting;
                 _instance.Show();
                 _instance.Refresh();
                 Application.UseWaitCursor = true;

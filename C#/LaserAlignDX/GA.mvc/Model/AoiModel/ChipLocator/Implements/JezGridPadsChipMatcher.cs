@@ -149,6 +149,13 @@ namespace LaserAlignDX.AoiModel
             return _resultChipInfo;
         }
 
+        /// <summary>
+        /// 調試用
+        /// </summary>
+        public void ShowGoldenVisualDebug(bool show)
+        {
+            _ezChipMatcher?.ShowGoldenVisualDebug(show);
+        }
 
         #region PRIVATE_HELPER_FUNCTIONS
         QvQuad2D _GetContourQuad2D(EzBlocsGrid grid)

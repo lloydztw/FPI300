@@ -62,9 +62,6 @@ namespace LaserAlignDX.Mvc.Gui
                 _isModified = false;
             }
         }
-
-
-
         public void SetSrcImage(Bitmap srcBmp, bool disposeSrc)
         {
             if (srcBmp == null)

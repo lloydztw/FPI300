@@ -19,10 +19,10 @@ using JetEazy.QxCollections;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
-using SizeF = System.Drawing.SizeF;
 using System.Linq;
 using CvSize = OpenCvSharp.Size;
 using EzAoiBase = EzAoiEmptyTrayInspector.Model.Aoi.EzAoiBase;
+using SizeF = System.Drawing.SizeF;
 
 namespace LeTian.AoiLib
 {
@@ -162,7 +162,7 @@ namespace LeTian.AoiLib
         }
         void findWhiteRigidGrid(Mat img, out EzBlocsGrid gridPoints, bool useInnerFilter = true)
         {
-            findWhiteKeyPoints(img, out _blocs, useInnerFilter: useInnerFilter);
+            findWhiteKeyPoints(img, out var blocs, useInnerFilter: useInnerFilter);
 
             #region RESERVED_CODE
             //// 以中心點排序 (沒啥幫助)
@@ -170,7 +170,7 @@ namespace LeTian.AoiLib
             {
                 int cx = img.Width / 2;
                 int cy = img.Height / 2;
-                _blocs?.Sort((b1, b2) =>
+                blocs?.Sort((b1, b2) =>
                 {
                     int dx1 = b1.CenterX - cx;
                     int dy1 = b1.CenterY - cy;
@@ -183,10 +183,19 @@ namespace LeTian.AoiLib
             }
             #endregion
 
-            var builder = new EzBlocsGridBuilder();
-            
-            Comparison<EzBlocsGrid> comparison = null;
+            #region DUMP_BLOCS
+            //using(var canvas = img.CvtColor(ColorConversionCodes.GRAY2BGR))
+            //{
+            //    foreach(EzBloc b in _blocs)
+            //    {
+            //        var rc = JetEazy.Qcvt.CV(b.Rect);
+            //        canvas.Rectangle(rc, Scalar.Lime);
+            //    }
+            //    canvas.SaveImage("d:\\paso.log\\canvas.png");
+            //}
+            #endregion
 
+            Comparison<EzBlocsGrid> comparison = null;
             if (GoldenGrid != null)
             {
                 var analyzer = new EzBlocsGridAnalyzer();
@@ -206,16 +215,21 @@ namespace LeTian.AoiLib
                     return b.ActualCount - a.ActualCount;
                 });
             }
+            var goldenPitch = getGoldenGridPitch();
+            bool toClearOwner = GoldenGrid == null;
 
-            gridPoints = builder.Build(_blocs, comparison, targetPitch: getGoldenGridPitch());
+            // 注意: EzBlocsGridBuilder.Build 有時候會失效
+            var builder = new EzBlocsGridBuilder();
+            gridPoints = builder.Build(blocs, comparison, 0, 0, toClearOwner, goldenPitch);
 
             if (gridPoints != null)
             {
                 gridPoints.RowMin = 0;
                 gridPoints.ColMin = 0;
-
                 System.Diagnostics.Debug.WriteLine($"Grids = {gridPoints.Rows} x {gridPoints.Cols}");
             }
+
+            _blocs = blocs;
         }
         void findWhiteKeyPoints(Mat image, out List<EzBloc> keyBlocs, bool useInnerFilter = true, Mat imgDebugOutput = null)
         {

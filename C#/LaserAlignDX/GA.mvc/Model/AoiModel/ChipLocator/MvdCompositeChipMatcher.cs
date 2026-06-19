@@ -16,6 +16,7 @@
 using JetEazy.Match;
 using JetEazy.QvMath;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LeTian.AoiLib;
 using MoveGraphLibrary;
 using System;
 using System.Drawing;
@@ -173,12 +174,19 @@ namespace LaserAlignDX.AoiModel
             for (int i = 0; i < N; i++)
                 bmps[i] = (Bitmap)bmpTemplate.Clone();
 
+#if (OPT_DEBUG_ONE_BY_ONE)
+            for (int i = 0; i < N; i++)
+            {
+                oks[i] = _matchers[i].Train(bmps[i]);
+            }
+#else
             Parallel.For(0, N, i =>
             {
                 oks[i] = _matchers[i].Train(bmps[i]);
             });
+#endif
 
-            foreach(var bmp in bmps)
+            foreach (var bmp in bmps)
                 bmp.Dispose();
 
             return Array.TrueForAll(oks, ok => ok);
@@ -216,6 +224,12 @@ namespace LaserAlignDX.AoiModel
         public object GetResultDetails()
         {
             return _matchers[0]?.GetResultDetails();
+        }
+
+        public void ShowGoldenVisualDebug(bool show)
+        {
+            if (_matchers.Length > 0)
+                _matchers[0]?.ShowGoldenVisualDebug(show);
         }
     }
 }

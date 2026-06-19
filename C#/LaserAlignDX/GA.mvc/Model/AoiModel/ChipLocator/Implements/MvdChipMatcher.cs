@@ -210,6 +210,13 @@ namespace LaserAlignDX.AoiModel
             return null;
         }
 
+        /// <summary>
+        /// 調試用
+        /// </summary>
+        public void ShowGoldenVisualDebug(bool show)
+        {
+        }
+
         #region PRIVATE_HIK_FUNCTIONS
 
 #if NO_USED_CODE

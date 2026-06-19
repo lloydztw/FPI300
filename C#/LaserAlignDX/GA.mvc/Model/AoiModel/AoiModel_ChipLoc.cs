@@ -32,7 +32,6 @@ using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media.Animation;
 using Traveller106;
 using _TM = LeTian.AoiLib.LtDebug;
 
@@ -672,6 +671,11 @@ namespace LaserAlignDX.AoiModel.V3
             prepareChipMatcher(threadIdx, out IMvdTemplateMatcher chipMatcher);
             //var fullFovSize = cellsGroup.FullFovRect.Size;
             //var debugSB = new StringBuilder();
+
+            if (EzPadsGridFinder.VISUAL_DEBUG)
+            {
+                chipMatcher.ShowGoldenVisualDebug();
+            }
 
             foreach (var gaCell in cellsGroup)
             {

@@ -84,13 +84,14 @@
             this.tbLayoutSubM.Controls.Add(this.label1, 0, 0);
             this.tbLayoutSubM.Controls.Add(this.propertyGrid1, 0, 1);
             this.tbLayoutSubM.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbLayoutSubM.Location = new System.Drawing.Point(505, 3);
+            this.tbLayoutSubM.Location = new System.Drawing.Point(567, 4);
+            this.tbLayoutSubM.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.tbLayoutSubM.Name = "tbLayoutSubM";
             this.tbLayoutSubM.RowCount = 2;
-            this.tbLayoutSubM.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 38F));
+            this.tbLayoutSubM.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 46F));
             this.tbLayoutSubM.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tbLayoutSubM.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tbLayoutSubM.Size = new System.Drawing.Size(488, 475);
+            this.tbLayoutSubM.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 24F));
+            this.tbLayoutSubM.Size = new System.Drawing.Size(552, 569);
             this.tbLayoutSubM.TabIndex = 73;
             // 
             // label1
@@ -100,8 +101,8 @@
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.Location = new System.Drawing.Point(3, 0);
             this.label1.Name = "label1";
-            this.label1.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
-            this.label1.Size = new System.Drawing.Size(482, 38);
+            this.label1.Padding = new System.Windows.Forms.Padding(9, 0, 0, 0);
+            this.label1.Size = new System.Drawing.Size(546, 46);
             this.label1.TabIndex = 8;
             this.label1.Text = "像測參數設定";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -110,10 +111,10 @@
             // 
             this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.propertyGrid1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.propertyGrid1.Location = new System.Drawing.Point(4, 42);
-            this.propertyGrid1.Margin = new System.Windows.Forms.Padding(4);
+            this.propertyGrid1.Location = new System.Drawing.Point(4, 51);
+            this.propertyGrid1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(480, 429);
+            this.propertyGrid1.Size = new System.Drawing.Size(544, 513);
             this.propertyGrid1.TabIndex = 0;
             // 
             // rtbCodeContent
@@ -123,10 +124,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.rtbCodeContent.BackColor = System.Drawing.Color.Ivory;
             this.rtbCodeContent.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtbCodeContent.Location = new System.Drawing.Point(22, 33);
+            this.rtbCodeContent.Location = new System.Drawing.Point(25, 40);
+            this.rtbCodeContent.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.rtbCodeContent.Name = "rtbCodeContent";
             this.rtbCodeContent.ReadOnly = true;
-            this.rtbCodeContent.Size = new System.Drawing.Size(286, 83);
+            this.rtbCodeContent.Size = new System.Drawing.Size(321, 99);
             this.rtbCodeContent.TabIndex = 52;
             this.rtbCodeContent.Text = "";
             // 
@@ -148,37 +150,37 @@
             this.tbLayoutA.RowCount = 1;
             this.tbLayoutA.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tbLayoutA.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tbLayoutA.Size = new System.Drawing.Size(1262, 444);
+            this.tbLayoutA.Size = new System.Drawing.Size(1420, 533);
             this.tbLayoutA.TabIndex = 1;
             // 
             // DS1
             // 
             this.DS1.Cursor = System.Windows.Forms.Cursors.Default;
             this.DS1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DS1.Location = new System.Drawing.Point(6, 5);
-            this.DS1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.DS1.Location = new System.Drawing.Point(7, 6);
+            this.DS1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.DS1.Name = "DS1";
-            this.DS1.Size = new System.Drawing.Size(410, 434);
+            this.DS1.Size = new System.Drawing.Size(460, 521);
             this.DS1.TabIndex = 0;
             // 
             // DS2
             // 
             this.DS2.Cursor = System.Windows.Forms.Cursors.Default;
             this.DS2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DS2.Location = new System.Drawing.Point(426, 5);
-            this.DS2.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.DS2.Location = new System.Drawing.Point(479, 6);
+            this.DS2.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.DS2.Name = "DS2";
-            this.DS2.Size = new System.Drawing.Size(410, 434);
+            this.DS2.Size = new System.Drawing.Size(460, 521);
             this.DS2.TabIndex = 1;
             // 
             // DS3
             // 
             this.DS3.Cursor = System.Windows.Forms.Cursors.Default;
             this.DS3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.DS3.Location = new System.Drawing.Point(846, 5);
-            this.DS3.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
+            this.DS3.Location = new System.Drawing.Point(951, 6);
+            this.DS3.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
             this.DS3.Name = "DS3";
-            this.DS3.Size = new System.Drawing.Size(410, 434);
+            this.DS3.Size = new System.Drawing.Size(462, 521);
             this.DS3.TabIndex = 2;
             // 
             // groupBox2
@@ -193,10 +195,11 @@
             this.groupBox2.Controls.Add(this.btnAutoLineBorders);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox2.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox2.Location = new System.Drawing.Point(8, 183);
-            this.groupBox2.Margin = new System.Windows.Forms.Padding(8);
+            this.groupBox2.Location = new System.Drawing.Point(9, 220);
+            this.groupBox2.Margin = new System.Windows.Forms.Padding(9, 10, 9, 10);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(478, 140);
+            this.groupBox2.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.groupBox2.Size = new System.Drawing.Size(537, 167);
             this.groupBox2.TabIndex = 75;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "自動框選 邊線";
@@ -206,10 +209,10 @@
             this.btnBuildMircoTrf.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnBuildMircoTrf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnBuildMircoTrf.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnBuildMircoTrf.Location = new System.Drawing.Point(327, 77);
-            this.btnBuildMircoTrf.Margin = new System.Windows.Forms.Padding(4);
+            this.btnBuildMircoTrf.Location = new System.Drawing.Point(367, 92);
+            this.btnBuildMircoTrf.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnBuildMircoTrf.Name = "btnBuildMircoTrf";
-            this.btnBuildMircoTrf.Size = new System.Drawing.Size(116, 46);
+            this.btnBuildMircoTrf.Size = new System.Drawing.Size(130, 55);
             this.btnBuildMircoTrf.TabIndex = 74;
             this.btnBuildMircoTrf.Text = "精算尺寸";
             this.btnBuildMircoTrf.UseVisualStyleBackColor = false;
@@ -217,23 +220,24 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(50, 97);
+            this.label2.Location = new System.Drawing.Point(56, 116);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(96, 20);
+            this.label2.Size = new System.Drawing.Size(115, 24);
             this.label2.TabIndex = 73;
             this.label2.Text = "跨度比例 (%)";
             // 
             // numSpanRatio
             // 
             this.numSpanRatio.DecimalPlaces = 1;
-            this.numSpanRatio.Location = new System.Drawing.Point(168, 94);
+            this.numSpanRatio.Location = new System.Drawing.Point(189, 113);
+            this.numSpanRatio.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.numSpanRatio.Minimum = new decimal(new int[] {
             50,
             0,
             0,
             0});
             this.numSpanRatio.Name = "numSpanRatio";
-            this.numSpanRatio.Size = new System.Drawing.Size(123, 27);
+            this.numSpanRatio.Size = new System.Drawing.Size(138, 30);
             this.numSpanRatio.TabIndex = 72;
             this.numSpanRatio.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numSpanRatio.Value = new decimal(new int[] {
@@ -245,15 +249,16 @@
             // labelA
             // 
             this.labelA.AutoSize = true;
-            this.labelA.Location = new System.Drawing.Point(50, 31);
+            this.labelA.Location = new System.Drawing.Point(56, 37);
             this.labelA.Name = "labelA";
-            this.labelA.Size = new System.Drawing.Size(95, 20);
+            this.labelA.Size = new System.Drawing.Size(112, 24);
             this.labelA.TabIndex = 71;
             this.labelA.Text = "內緣 (pixels)";
             // 
             // numBorderIndent
             // 
-            this.numBorderIndent.Location = new System.Drawing.Point(168, 28);
+            this.numBorderIndent.Location = new System.Drawing.Point(189, 34);
+            this.numBorderIndent.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.numBorderIndent.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -265,7 +270,7 @@
             0,
             0});
             this.numBorderIndent.Name = "numBorderIndent";
-            this.numBorderIndent.Size = new System.Drawing.Size(123, 27);
+            this.numBorderIndent.Size = new System.Drawing.Size(138, 30);
             this.numBorderIndent.TabIndex = 70;
             this.numBorderIndent.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numBorderIndent.Value = new decimal(new int[] {
@@ -277,15 +282,16 @@
             // labelB
             // 
             this.labelB.AutoSize = true;
-            this.labelB.Location = new System.Drawing.Point(50, 64);
+            this.labelB.Location = new System.Drawing.Point(56, 77);
             this.labelB.Name = "labelB";
-            this.labelB.Size = new System.Drawing.Size(95, 20);
+            this.labelB.Size = new System.Drawing.Size(112, 24);
             this.labelB.TabIndex = 69;
             this.labelB.Text = "外緣 (pixels)";
             // 
             // numBorderSize
             // 
-            this.numBorderSize.Location = new System.Drawing.Point(168, 61);
+            this.numBorderSize.Location = new System.Drawing.Point(189, 73);
+            this.numBorderSize.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.numBorderSize.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -297,7 +303,7 @@
             0,
             0});
             this.numBorderSize.Name = "numBorderSize";
-            this.numBorderSize.Size = new System.Drawing.Size(123, 27);
+            this.numBorderSize.Size = new System.Drawing.Size(138, 30);
             this.numBorderSize.TabIndex = 68;
             this.numBorderSize.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numBorderSize.Value = new decimal(new int[] {
@@ -311,10 +317,10 @@
             this.btnAutoLineBorders.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnAutoLineBorders.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnAutoLineBorders.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnAutoLineBorders.Location = new System.Drawing.Point(327, 25);
-            this.btnAutoLineBorders.Margin = new System.Windows.Forms.Padding(4);
+            this.btnAutoLineBorders.Location = new System.Drawing.Point(367, 30);
+            this.btnAutoLineBorders.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnAutoLineBorders.Name = "btnAutoLineBorders";
-            this.btnAutoLineBorders.Size = new System.Drawing.Size(116, 46);
+            this.btnAutoLineBorders.Size = new System.Drawing.Size(130, 55);
             this.btnAutoLineBorders.TabIndex = 49;
             this.btnAutoLineBorders.Text = "一鍵框選";
             this.btnAutoLineBorders.UseVisualStyleBackColor = false;
@@ -329,15 +335,15 @@
             this.tbLayoutSubL.Controls.Add(this.groupBox2, 0, 2);
             this.tbLayoutSubL.Controls.Add(this.groupBox1, 0, 1);
             this.tbLayoutSubL.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbLayoutSubL.Location = new System.Drawing.Point(7, 5);
-            this.tbLayoutSubL.Margin = new System.Windows.Forms.Padding(5, 5, 1, 5);
+            this.tbLayoutSubL.Location = new System.Drawing.Point(8, 6);
+            this.tbLayoutSubL.Margin = new System.Windows.Forms.Padding(6, 6, 1, 6);
             this.tbLayoutSubL.Name = "tbLayoutSubL";
             this.tbLayoutSubL.RowCount = 4;
-            this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 36F));
+            this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 43F));
             this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 32F));
             this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 36F));
             this.tbLayoutSubL.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 32F));
-            this.tbLayoutSubL.Size = new System.Drawing.Size(494, 471);
+            this.tbLayoutSubL.Size = new System.Drawing.Size(555, 565);
             this.tbLayoutSubL.TabIndex = 76;
             // 
             // lblActiveCarrierID
@@ -349,8 +355,8 @@
             this.lblActiveCarrierID.Location = new System.Drawing.Point(0, 0);
             this.lblActiveCarrierID.Margin = new System.Windows.Forms.Padding(0);
             this.lblActiveCarrierID.Name = "lblActiveCarrierID";
-            this.lblActiveCarrierID.Padding = new System.Windows.Forms.Padding(18, 0, 0, 0);
-            this.lblActiveCarrierID.Size = new System.Drawing.Size(494, 36);
+            this.lblActiveCarrierID.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
+            this.lblActiveCarrierID.Size = new System.Drawing.Size(555, 43);
             this.lblActiveCarrierID.TabIndex = 77;
             this.lblActiveCarrierID.Text = "載台 1";
             this.lblActiveCarrierID.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -361,11 +367,11 @@
             this.groupBox3.Controls.Add(this.rtbCodeContent);
             this.groupBox3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox3.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox3.Location = new System.Drawing.Point(8, 339);
-            this.groupBox3.Margin = new System.Windows.Forms.Padding(8);
+            this.groupBox3.Location = new System.Drawing.Point(9, 407);
+            this.groupBox3.Margin = new System.Windows.Forms.Padding(9, 10, 9, 10);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Padding = new System.Windows.Forms.Padding(12, 3, 3, 18);
-            this.groupBox3.Size = new System.Drawing.Size(478, 124);
+            this.groupBox3.Padding = new System.Windows.Forms.Padding(14, 4, 3, 22);
+            this.groupBox3.Size = new System.Drawing.Size(537, 148);
             this.groupBox3.TabIndex = 76;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "測試掃碼";
@@ -375,10 +381,10 @@
             this.btnTryQrCode.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnTryQrCode.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnTryQrCode.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnTryQrCode.Location = new System.Drawing.Point(327, 60);
-            this.btnTryQrCode.Margin = new System.Windows.Forms.Padding(4);
+            this.btnTryQrCode.Location = new System.Drawing.Point(367, 72);
+            this.btnTryQrCode.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnTryQrCode.Name = "btnTryQrCode";
-            this.btnTryQrCode.Size = new System.Drawing.Size(116, 46);
+            this.btnTryQrCode.Size = new System.Drawing.Size(130, 55);
             this.btnTryQrCode.TabIndex = 49;
             this.btnTryQrCode.Text = "掃碼";
             this.btnTryQrCode.UseVisualStyleBackColor = false;
@@ -391,10 +397,11 @@
             this.groupBox1.Controls.Add(this.btnPickGolden);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(8, 44);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(8);
+            this.groupBox1.Location = new System.Drawing.Point(9, 53);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(9, 10, 9, 10);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(478, 123);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.groupBox1.Size = new System.Drawing.Size(537, 147);
             this.groupBox1.TabIndex = 74;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "框選區塊";
@@ -402,10 +409,10 @@
             // radioButtonLn
             // 
             this.radioButtonLn.AutoSize = true;
-            this.radioButtonLn.Location = new System.Drawing.Point(67, 61);
-            this.radioButtonLn.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonLn.Location = new System.Drawing.Point(75, 73);
+            this.radioButtonLn.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.radioButtonLn.Name = "radioButtonLn";
-            this.radioButtonLn.Size = new System.Drawing.Size(124, 24);
+            this.radioButtonLn.Size = new System.Drawing.Size(148, 28);
             this.radioButtonLn.TabIndex = 65;
             this.radioButtonLn.TabStop = true;
             this.radioButtonLn.Text = "邊線 檢測範圍";
@@ -415,10 +422,10 @@
             // 
             this.radioButtonG.AutoSize = true;
             this.radioButtonG.Checked = true;
-            this.radioButtonG.Location = new System.Drawing.Point(67, 29);
-            this.radioButtonG.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonG.Location = new System.Drawing.Point(75, 35);
+            this.radioButtonG.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.radioButtonG.Name = "radioButtonG";
-            this.radioButtonG.Size = new System.Drawing.Size(124, 24);
+            this.radioButtonG.Size = new System.Drawing.Size(148, 28);
             this.radioButtonG.TabIndex = 62;
             this.radioButtonG.TabStop = true;
             this.radioButtonG.Text = "晶粒 匹配模板";
@@ -427,10 +434,10 @@
             // radioButtonQr
             // 
             this.radioButtonQr.AutoSize = true;
-            this.radioButtonQr.Location = new System.Drawing.Point(67, 93);
-            this.radioButtonQr.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonQr.Location = new System.Drawing.Point(75, 112);
+            this.radioButtonQr.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.radioButtonQr.Name = "radioButtonQr";
-            this.radioButtonQr.Size = new System.Drawing.Size(109, 24);
+            this.radioButtonQr.Size = new System.Drawing.Size(130, 28);
             this.radioButtonQr.TabIndex = 63;
             this.radioButtonQr.TabStop = true;
             this.radioButtonQr.Text = "二維碼 範圍";
@@ -441,10 +448,10 @@
             this.btnPickGolden.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnPickGolden.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnPickGolden.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnPickGolden.Location = new System.Drawing.Point(327, 49);
-            this.btnPickGolden.Margin = new System.Windows.Forms.Padding(4);
+            this.btnPickGolden.Location = new System.Drawing.Point(367, 59);
+            this.btnPickGolden.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnPickGolden.Name = "btnPickGolden";
-            this.btnPickGolden.Size = new System.Drawing.Size(116, 46);
+            this.btnPickGolden.Size = new System.Drawing.Size(130, 55);
             this.btnPickGolden.TabIndex = 49;
             this.btnPickGolden.Text = "擷取模板";
             this.btnPickGolden.UseVisualStyleBackColor = false;
@@ -453,20 +460,20 @@
             // 
             this.tbLayoutB.BackColor = System.Drawing.Color.LightSteelBlue;
             this.tbLayoutB.ColumnCount = 3;
-            this.tbLayoutB.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 500F));
+            this.tbLayoutB.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 562F));
             this.tbLayoutB.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tbLayoutB.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tbLayoutB.Controls.Add(this.tbLayoutSubR, 2, 0);
             this.tbLayoutB.Controls.Add(this.tbLayoutSubM, 1, 0);
             this.tbLayoutB.Controls.Add(this.tbLayoutSubL, 0, 0);
             this.tbLayoutB.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.tbLayoutB.Location = new System.Drawing.Point(0, 493);
+            this.tbLayoutB.Location = new System.Drawing.Point(0, 591);
             this.tbLayoutB.Margin = new System.Windows.Forms.Padding(0);
             this.tbLayoutB.Name = "tbLayoutB";
-            this.tbLayoutB.Padding = new System.Windows.Forms.Padding(2, 0, 2, 3);
+            this.tbLayoutB.Padding = new System.Windows.Forms.Padding(2, 0, 2, 4);
             this.tbLayoutB.RowCount = 1;
             this.tbLayoutB.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tbLayoutB.Size = new System.Drawing.Size(1262, 484);
+            this.tbLayoutB.Size = new System.Drawing.Size(1420, 581);
             this.tbLayoutB.TabIndex = 1;
             // 
             // tbLayoutSubR
@@ -479,10 +486,10 @@
             this.tbLayoutSubR.Controls.Add(this.btnSave);
             this.tbLayoutSubR.Controls.Add(this.btnTrain);
             this.tbLayoutSubR.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tbLayoutSubR.Location = new System.Drawing.Point(1000, 4);
-            this.tbLayoutSubR.Margin = new System.Windows.Forms.Padding(4);
+            this.tbLayoutSubR.Location = new System.Drawing.Point(1126, 5);
+            this.tbLayoutSubR.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.tbLayoutSubR.Name = "tbLayoutSubR";
-            this.tbLayoutSubR.Size = new System.Drawing.Size(256, 473);
+            this.tbLayoutSubR.Size = new System.Drawing.Size(288, 567);
             this.tbLayoutSubR.TabIndex = 77;
             // 
             // btnCancel
@@ -490,10 +497,10 @@
             this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCancel.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(41, 391);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
+            this.btnCancel.Location = new System.Drawing.Point(46, 469);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(172, 52);
+            this.btnCancel.Size = new System.Drawing.Size(194, 62);
             this.btnCancel.TabIndex = 73;
             this.btnCancel.Text = "取消 修改";
             this.btnCancel.UseVisualStyleBackColor = false;
@@ -504,10 +511,10 @@
             this.btnDefectDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnDefectDelete.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnDefectDelete.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDefectDelete.Location = new System.Drawing.Point(41, 94);
-            this.btnDefectDelete.Margin = new System.Windows.Forms.Padding(4);
+            this.btnDefectDelete.Location = new System.Drawing.Point(46, 113);
+            this.btnDefectDelete.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnDefectDelete.Name = "btnDefectDelete";
-            this.btnDefectDelete.Size = new System.Drawing.Size(172, 52);
+            this.btnDefectDelete.Size = new System.Drawing.Size(194, 62);
             this.btnDefectDelete.TabIndex = 72;
             this.btnDefectDelete.Text = "缺陷區域 刪除";
             this.btnDefectDelete.UseVisualStyleBackColor = false;
@@ -517,10 +524,10 @@
             this.btnDefectClear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnDefectClear.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnDefectClear.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDefectClear.Location = new System.Drawing.Point(41, 154);
-            this.btnDefectClear.Margin = new System.Windows.Forms.Padding(4);
+            this.btnDefectClear.Location = new System.Drawing.Point(46, 185);
+            this.btnDefectClear.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnDefectClear.Name = "btnDefectClear";
-            this.btnDefectClear.Size = new System.Drawing.Size(172, 52);
+            this.btnDefectClear.Size = new System.Drawing.Size(194, 62);
             this.btnDefectClear.TabIndex = 71;
             this.btnDefectClear.Text = "缺陷區域 清空";
             this.btnDefectClear.UseVisualStyleBackColor = false;
@@ -530,10 +537,10 @@
             this.btnDefectAdd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnDefectAdd.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnDefectAdd.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnDefectAdd.Location = new System.Drawing.Point(41, 34);
-            this.btnDefectAdd.Margin = new System.Windows.Forms.Padding(4);
+            this.btnDefectAdd.Location = new System.Drawing.Point(46, 41);
+            this.btnDefectAdd.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnDefectAdd.Name = "btnDefectAdd";
-            this.btnDefectAdd.Size = new System.Drawing.Size(172, 52);
+            this.btnDefectAdd.Size = new System.Drawing.Size(194, 62);
             this.btnDefectAdd.TabIndex = 70;
             this.btnDefectAdd.Text = "缺陷區域 添加";
             this.btnDefectAdd.UseVisualStyleBackColor = false;
@@ -543,23 +550,23 @@
             this.btnSave.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnSave.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnSave.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSave.Location = new System.Drawing.Point(41, 331);
-            this.btnSave.Margin = new System.Windows.Forms.Padding(4);
+            this.btnSave.Location = new System.Drawing.Point(46, 397);
+            this.btnSave.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(172, 52);
+            this.btnSave.Size = new System.Drawing.Size(194, 62);
             this.btnSave.TabIndex = 69;
             this.btnSave.Text = "保存 參數";
             this.btnSave.UseVisualStyleBackColor = false;
             // 
             // btnTrain
             // 
-            this.btnTrain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnTrain.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnTrain.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnTrain.Font = new System.Drawing.Font("Microsoft YaHei UI", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnTrain.Location = new System.Drawing.Point(41, 271);
-            this.btnTrain.Margin = new System.Windows.Forms.Padding(4);
+            this.btnTrain.Location = new System.Drawing.Point(46, 325);
+            this.btnTrain.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.btnTrain.Name = "btnTrain";
-            this.btnTrain.Size = new System.Drawing.Size(172, 52);
+            this.btnTrain.Size = new System.Drawing.Size(194, 62);
             this.btnTrain.TabIndex = 68;
             this.btnTrain.Text = "訓練 模板";
             this.btnTrain.UseVisualStyleBackColor = false;
@@ -567,13 +574,13 @@
             // 
             // FormTemplateEditor
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1262, 977);
+            this.ClientSize = new System.Drawing.Size(1420, 1172);
             this.Controls.Add(this.tbLayoutB);
             this.Controls.Add(this.tbLayoutA);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.MinimizeBox = false;
             this.Name = "FormTemplateEditor";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

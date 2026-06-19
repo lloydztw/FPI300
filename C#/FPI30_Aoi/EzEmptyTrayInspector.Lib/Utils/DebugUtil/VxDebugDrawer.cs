@@ -24,7 +24,6 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using CvSize = OpenCvSharp.Size;
-using CvPoint = OpenCvSharp.Point;
 
 
 namespace LeTian.AoiLib
@@ -484,6 +483,7 @@ namespace LeTian.AoiLib
                         W = (int)(H * ratio);
                 }
                 frm.Size = new System.Drawing.Size(W, H + 32);
+                frm.TopMost = true;
                 frm.Show();
             }
         }

@@ -281,31 +281,34 @@ namespace LaserAlignDX.AoiModel.V3
 
         public ErrorCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi)
         {
-            //(1) 晶粒定位
-            //      chipData.Roi = cellRoi;
-            //      chipData.ChipBox2D = chipBox2D;
-            //      chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
-            //      chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
-            bool ok = _aoiChipLoc.LocateOneChip(regionBmp, ref regionRoi, out var chipData);
-            if (!ok || chipData == null)
-                return ErrorCodes.ERR_NO_CHIP_LOCATION;
-
-            //(2) 檢查 PadsGrid
-            if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch && chipData.PadsGrid == null)
+            using (var workBmp = (Bitmap)regionBmp.Clone())
             {
-                return ErrorCodes.ERR_NO_CHIP_PADS;
+                //(1) 晶粒定位
+                //      chipData.Roi = cellRoi;
+                //      chipData.ChipBox2D = chipBox2D;
+                //      chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
+                //      chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
+                bool ok = _aoiChipLoc.LocateOneChip(workBmp, ref regionRoi, out var chipData);
+                if (!ok || chipData == null)
+                    return ErrorCodes.ERR_NO_CHIP_LOCATION;
+
+                //(2) 檢查 PadsGrid
+                if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch && chipData.PadsGrid == null)
+                {
+                    return ErrorCodes.ERR_NO_CHIP_PADS;
+                }
+
+                //(3) 建立 Micro Transform
+                var carrierID = getActiveCarrierID();
+                var microTrf = _sysModel.GetMicroTransform(carrierID);
+                var err = microTrf.BuildMicroTransform(targetSize, lines, chipData);
+
+                //(4) 保存參數
+                if (err == ErrorCodes.OK)
+                    microTrf.Save(null);
+
+                return err;
             }
-
-            //(3) 建立 Micro Transform
-            var carrierID = getActiveCarrierID();
-            var microTrf = _sysModel.GetMicroTransform(carrierID);
-            var err = microTrf.BuildMicroTransform(targetSize, lines, chipData);
-
-            //(4) 保存參數
-            if (err == ErrorCodes.OK)
-                microTrf.Save(null);
-
-            return err;
         }
         public bool TryRunOneChip(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
         {

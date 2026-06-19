@@ -13,7 +13,6 @@
  */
 #endregion
 
-
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QvMath;
@@ -23,10 +22,8 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Threading;
 using CvSize = OpenCvSharp.Size;
 using EzAoiBase = EzAoiEmptyTrayInspector.Model.Aoi.EzAoiBase;
-
 
 namespace LeTian.AoiLib
 {
@@ -83,6 +80,18 @@ namespace LeTian.AoiLib
             analyzeGoldenTemplate(imgGolden);
         }
 
+        /// <summary>
+        /// 調試用
+        /// </summary>
+        public void ShowGoldenVisualDebug(bool show = true)
+        {
+            if (!show || _goldenImg == null || _goldenRigidBody == null || _goldenGrid == null)
+                return;
+
+            string title = $"GOLDEN [{_goldenGrid.Rows},{_goldenGrid.Cols}]";
+            VxDebugDrawer.Draw(_goldenImg, (QvBox2D)null, _goldenGrid, _goldenRigidBody.KeyRow, _goldenRigidBody.KeyCol, Scalar.Lime, title);
+        }
+
         public bool LargeAngleEnabled
         {
             get;
@@ -98,7 +107,6 @@ namespace LeTian.AoiLib
             get => _padsFinder.DistTransThreshold;
             set => _padsFinder.DistTransThreshold = value;
         }
-
 
         public RigidBody FindBestMatch(Bitmap bmpScene, string debugDumpFile = null)
         {
@@ -455,6 +463,7 @@ namespace LeTian.AoiLib
         #endregion
 
         #region PRIVATE_HELPER_FUNCTIONS
+#if (OPT_RESERVED)
         void convert(IxGridMap<EzBloc> grid, out EzBlocsGrid grid2)
         {
             if (grid == null)
@@ -470,6 +479,7 @@ namespace LeTian.AoiLib
             var builder = new EzBlocsGridBuilder();
             grid2 = builder.Build(blocs);
         }
+#endif
         IEnumerable<EzBloc> iterBlocs(IxGridMap<EzBloc> grid)
         {
             if (grid != null)

@@ -69,5 +69,10 @@ namespace LaserAlignDX.AoiModel
         ///// 結果 (即將廢除)
         ///// </summary>
         //List<xFindResult> xResults { get; }
+
+        /// <summary>
+        /// 顯示 Golden Template 特徵圖
+        /// </summary>
+        void ShowGoldenVisualDebug(bool show = true);
     }
 }
