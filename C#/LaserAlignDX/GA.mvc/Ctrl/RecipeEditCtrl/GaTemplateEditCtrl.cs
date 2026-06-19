@@ -228,6 +228,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             initDispUIs();
             initInteractors();
+            btnTrainTemplate.Visible = true;
         }
         void connectEventHandlers()
         {

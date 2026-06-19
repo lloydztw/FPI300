@@ -386,15 +386,18 @@ namespace LaserAlignDX.AoiModel.V3
                 bool pass = _CheckChipsTotalPass();
 
                 // 2026-06-06 LETIAN: 檢查定位結果是否為全空盤!
-                if(xScanInspectMode == ScanInspectMode.MEASUREAOI)
+                if (xScanInspectMode == ScanInspectMode.MEASUREAOI)
                 {
                     if (_CheckIfAllEmpty())
                     {
-                        markRunEnd(false);
                         var errCode = ErrorCodes.ERR_CHIP_LOC_ALL_EMPTY;
                         string errMsg = GaUtil.GetEnumDescription(errCode);
-                        fire_AoiError(errCode, errMsg);
-                        return;
+                        bool cancel = fire_AoiError(errCode, errMsg, true);
+                        if (cancel)
+                        {
+                            markRunEnd(false);
+                            return;
+                        }
                     }
                 }
 

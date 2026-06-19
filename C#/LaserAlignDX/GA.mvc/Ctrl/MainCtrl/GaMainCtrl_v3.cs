@@ -240,16 +240,29 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             if (_wndOwner.InvokeRequired)
             {
-                _wndOwner.BeginInvoke((EventHandler<ProcessEventArgs>)SysModel_OnError, sender, e);
+                //_wndOwner.BeginInvoke((EventHandler<ProcessEventArgs>)SysModel_OnError, sender, e);
+                _wndOwner.Invoke((EventHandler<ProcessEventArgs>)SysModel_OnError, sender, e);
             }
             else
             {
-                VsMessageBox.Warning(e.Message);
-
-                // 2026-06-06 LETIAN: 檢查定位結果是否為全空盤! 
                 _frmAoiProgressing?.Close();
                 _frmAoiProgressing?.Dispose();
                 _frmAoiProgressing = null;
+
+                if (GlobalConfig.IsSim)
+                {
+                    var ret = VsMessageBox.Question(e.Message + "\n\r\n\r是否 繼續 跑模擬?", Color.LightYellow);
+                    if(ret == DialogResult.OK)
+                    {
+                        e.Cancel = false;
+                        return;
+                    }
+                }
+                else
+                {
+                    VsMessageBox.Warning(e.Message);
+                }
+                
                 MACHINE.PLCIO.bSoftwareReady = false;
             }
         }
