@@ -24,7 +24,7 @@ using System.Collections.Generic;
 namespace EzAoiEmptyTray.UnitTest
 {
     [TestClass]
-    public class UnitTest0_EzBlocsGridBuildere
+    public class UnitTest0_EzBlocsGridBuilder
     {
         [TestMethod]
         [DataRow(9,8, @"d:\paso.log\GridBuilder\blocs_NG_Grid.json")]
