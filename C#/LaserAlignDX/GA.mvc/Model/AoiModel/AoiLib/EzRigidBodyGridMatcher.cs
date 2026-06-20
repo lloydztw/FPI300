@@ -81,9 +81,9 @@ namespace LeTian.AoiLib
         }
 
         /// <summary>
-        /// 調試用
+        /// 顯示 Golden Template 特徵圖 (調試用)
         /// </summary>
-        public void ShowGoldenVisualDebug(bool show = true)
+        public void ShowGoldenGridVisualizer(bool show = true)
         {
             if (!show || _goldenImg == null || _goldenRigidBody == null || _goldenGrid == null)
                 return;

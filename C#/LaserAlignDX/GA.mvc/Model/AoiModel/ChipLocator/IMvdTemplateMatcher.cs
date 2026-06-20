@@ -41,7 +41,7 @@ namespace LaserAlignDX.AoiModel
         QvQuad2D GoldenQuad2D { get; }
 
         /// <summary>
-        /// 訓練
+        /// 訓練 (設定模板 golden template 並分析其特徵)
         /// </summary>
         bool Train(Bitmap bmpTemplate);
 
@@ -71,8 +71,8 @@ namespace LaserAlignDX.AoiModel
         //List<xFindResult> xResults { get; }
 
         /// <summary>
-        /// 顯示 Golden Template 特徵圖
+        /// 顯示 Golden Template 特徵圖 (調試用)
         /// </summary>
-        void ShowGoldenVisualDebug(bool show = true);
+        void ShowGoldenTemplateVisualizer(bool show = true);
     }
 }

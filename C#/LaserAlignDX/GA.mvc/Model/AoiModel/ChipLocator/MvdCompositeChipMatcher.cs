@@ -226,10 +226,10 @@ namespace LaserAlignDX.AoiModel
             return _matchers[0]?.GetResultDetails();
         }
 
-        public void ShowGoldenVisualDebug(bool show)
+        public void ShowGoldenTemplateVisualizer(bool show)
         {
             if (_matchers.Length > 0)
-                _matchers[0]?.ShowGoldenVisualDebug(show);
+                _matchers[0]?.ShowGoldenTemplateVisualizer(show);
         }
     }
 }

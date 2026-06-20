@@ -674,7 +674,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             if (EzPadsGridFinder.VISUAL_DEBUG)
             {
-                chipMatcher.ShowGoldenVisualDebug();
+                chipMatcher.ShowGoldenTemplateVisualizer();
             }
 
             foreach (var gaCell in cellsGroup)

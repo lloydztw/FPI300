@@ -29,24 +29,17 @@ namespace LaserAlignDX.AoiModel
     /// </summary>
     public class JezGridPadsChipMatcher : IMvdTemplateMatcher
     {
-        #region PRIVATE_MVD_VisionDesigner_Members
+        #region LETIAN_RIGID_BODY_GRID_MATCHER
         EzRigidBodyGridMatcher _ezChipMatcher = new EzRigidBodyGridMatcher();
         #endregion
 
         #region PRIVATE_RUNTIME_DATA
-        //bool _isMvdParamsChanged = false;
         EzRigidBodyGridMatcher.RigidBody _resultChipInfo;
         #endregion
 
         #region RECIPE_PARAMS
         RecipeParams _recipeParams;
-        //public float xMvdAngle { get; set; } = 5;
-        //public int xMvdMaxOcc { get; set; } = 1;
-        //public float xMvdTolerance { get; set; } = 0.5f;
-        //public PointF xMvdFixed { get; set; } = new PointF(-1, -1);
-        //public int xMaxOverlap { get; set; } = 80;
         #endregion
-
 
         ~JezGridPadsChipMatcher()
         {
@@ -65,14 +58,14 @@ namespace LaserAlignDX.AoiModel
         }
 
         /// <summary>
-        /// MVD 訓練 (對外統一接口 !)
-        /// (1) 不要跟別的專案混雜在一起, 不要暴露一大堆 HikTrain2, HikTrain3 這些雜亂的函式!
-        /// (2) 如果眾多專案有共同的部分, 請用抽出 Interface 或 Abstract Class
+        /// 分析模板圖片 (Golden Template)
+        /// 為了相容 Gaara 使用 MVD 訓練之接口函式
         /// </summary>
         /// <param name="bmpTemplate">由 caller 維護其生命週期</param>
         public bool Train(Bitmap bmpTemplate)
         {
             this.TemplateSize = bmpTemplate.Size;
+
             _ezChipMatcher.SetGoldenTemplate(bmpTemplate);
 
             var rig = _ezChipMatcher.GetGoldenBody();
@@ -150,11 +143,11 @@ namespace LaserAlignDX.AoiModel
         }
 
         /// <summary>
-        /// 調試用
+        /// 顯示 Golden Template 特徵圖 (調試用)
         /// </summary>
-        public void ShowGoldenVisualDebug(bool show)
+        public void ShowGoldenTemplateVisualizer(bool show)
         {
-            _ezChipMatcher?.ShowGoldenVisualDebug(show);
+            _ezChipMatcher?.ShowGoldenGridVisualizer(show);
         }
 
         #region PRIVATE_HELPER_FUNCTIONS
@@ -165,7 +158,6 @@ namespace LaserAlignDX.AoiModel
             return quad2D;
         }
         #endregion
-
 
         #region OLD_CODE
 #if (OPT_OLD_CODE)

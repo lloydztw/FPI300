@@ -838,7 +838,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             mvdprinttemp_Find.SetRecipeParams(this.InspectParams);
             bool bOK = mvdprinttemp_Find.Train(this.bmpDefectTemplate);
             
-            mvdprinttemp_Find.ShowGoldenVisualDebug(showGoldenVisualizedFeature);
+            mvdprinttemp_Find.ShowGoldenTemplateVisualizer(showGoldenVisualizedFeature);
 
             return (bOK ? 0 : -1);
         }
