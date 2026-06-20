@@ -6,11 +6,13 @@
 
 	
 ## 資料夾
-
-	 <proj_root>
+	<solution_root>
 		│
-		└── View										(Gui 元件)
-			  ├─ .Inteface
-			  ├─ .Widgets
-			  ├─ Panels
-			  └─ Wrappers
+		├── EzMotor.Gui						(本專案)
+		│	└── View						(Gui 元件)
+		│		  ├─ .Inteface
+		│		  ├─ .Widgets
+		│		  ├─ Panels
+		│		  └─ Wrappers
+		│
+		└── 其他庫 ...

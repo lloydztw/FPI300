@@ -1,4 +1,2 @@
-# 絃浪代 APP
-
-- 块方: 繰篈瓜郎 
+# 絃浪代 AOI 甅ン (EzAoiEmptyTrayInspector.Lib) ぇ代刚
 
