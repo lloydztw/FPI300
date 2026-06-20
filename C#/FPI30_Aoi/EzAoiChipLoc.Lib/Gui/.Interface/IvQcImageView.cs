@@ -15,16 +15,14 @@
 
 using AwFramework;
 using JetEazy.ImageViewerEx;
-using JetEazy.OpenCV.Viewer;
-
 
 namespace EzAoiChipLocQC.Gui
 {
-    public interface IvCommonImageView : IView
+    public interface IvQcImageView : IView
     {
-        CvzQuickImageViewPanel quickImageViewPanel { get; }
         IvImageViewer ImageViewer { get; }
 
+        //CvzQuickImageViewPanel quickImageViewPanel { get; }
         //Button btnOpenFile { get; }
         //Button btnRunMatch { get; }
         //Button btnResetClear { get; }

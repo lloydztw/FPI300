@@ -40,7 +40,7 @@ namespace EzAoiChipLocQC
         #endregion
 
         #region PRIVATE_DATA
-        EzMatchCtrl _matchCtrl;
+        EzQcChipMatchCtrl _matchCtrl;
         #endregion
 
         public static EzAppForDll Instance
@@ -65,7 +65,7 @@ namespace EzAoiChipLocQC
             ConfigSplash<FormSplash>();
         }
 
-        internal EzMatchCtrl MatchCtrl
+        internal EzQcChipMatchCtrl MatchCtrl
         {
             get => _matchCtrl;
         }
@@ -164,7 +164,7 @@ namespace EzAoiChipLocQC
             // 取得 客體視窗 (位於 主要客戶區 視窗內)
             var wndMajorClientPanel = awMain.ClientDocker.FindPanel<MajorClientPanelClassT>();
             var camPanel = wndMajorClientPanel.CameraPanel;
-            var matchCtrl = new EzMatchCtrl(camPanel, funcButtonsPanel, lblPassFail, base.recipesMgrCtrl);
+            var matchCtrl = new EzQcChipMatchCtrl(camPanel, funcButtonsPanel, lblPassFail, base.recipesMgrCtrl);
 
             matchCtrl.PostInit();
             _matchCtrl = matchCtrl;

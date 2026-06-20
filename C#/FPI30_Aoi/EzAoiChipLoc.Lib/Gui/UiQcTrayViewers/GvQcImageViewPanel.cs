@@ -19,55 +19,41 @@ using JetEazy.OpenCV.Viewer;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-
+using CvzQuickImageViewPanel = JetEazy.OpenCV.Viewer.Develop.CvzQuickImageViewPanel;
 
 namespace EzAoiChipLocQC.Gui.Panels
 {
-    public partial class GvCommonImageViewPanel : UserControl, IvCommonImageView
+    public partial class GvQcImageViewPanel : UserControl, IvQcImageView
     {
         #region PRIVATE_DATA
         string _srcName = "";
         #endregion
 
-        public GvCommonImageViewPanel()
+        public GvQcImageViewPanel()
         {
             InitializeComponent();
-            if (!DesignMode)
-                cvMatViewer1.Attach(lblCoordInfo, lblBlinker);
-        }
-        
-        public int ViewID
-        {
-            get;
-            internal set;
+            //if (!DesignMode)
+            //    cvMatViewer.Attach(lblCoordInfo, lblBlinker);
         }
 
-        //Form IView.frmOwner => FindForm();
+        #region GUI_LINKS
         Control IView.Window => this;
-        CvzQuickImageViewPanel IvCommonImageView.quickImageViewPanel => null;
-        IvImageViewer IvCommonImageView.ImageViewer => cvMatViewer1;
+        CvzQuickImageViewPanel quickImageViewPanel => cvzQuickImageViewPanel1;
+        CvMatViewer cvMatViewer => quickImageViewPanel.MatViewer;
+        IvImageViewer IvQcImageView.ImageViewer => cvMatViewer;
+        #endregion
 
-        //Button IvSingleMatchView.btnOpenFile => btnOpen;
-        //Button IvSingleMatchView.btnRunMatch => btnMatch;
-        //Button IvSingleMatchView.btnResetClear => btnClear;
-        //Button IvSingleMatchView.btnPickGolden => btnCatchGolden;
-        //Button IvSingleMatchView.btnCombine => btnCombine;
-
-        void IvCommonImageView.UpdateImageSrcName(string srcName)
+        void IvQcImageView.UpdateImageSrcName(string srcName)
         {
-            //_srcName = srcName != null ? System.IO.Path.GetFileName(srcName) : "";
-            //lblTitle.Text = _srcName;
-            //lblTitle.ForeColor = Color.White;
-            //lblTitle.Refresh();
             if (srcName == null)
                 srcName = "";
             updateTitleText(_srcName = srcName, Color.White);
         }
-        void IvCommonImageView.UpdateStatusInfo(string msg)
+        void IvQcImageView.UpdateStatusInfo(string msg)
         {
             updateTitleText(msg, Color.White);
         }
-        void IvCommonImageView.UpdateRunState(object state)
+        void IvQcImageView.UpdateRunState(object state)
         {
             if (state != null)
             {
@@ -87,7 +73,6 @@ namespace EzAoiChipLocQC.Gui.Panels
                 }
             }
         }
-
         void updateTitleText(string txt, Color color)
         {
             if (InvokeRequired)
@@ -96,9 +81,7 @@ namespace EzAoiChipLocQC.Gui.Panels
             }
             else
             {
-                lblTitle.Text = txt;
-                lblTitle.ForeColor = color;
-                lblTitle.Refresh();
+                quickImageViewPanel.UpdateTitleBarText(txt, color);
             }
         }
     }

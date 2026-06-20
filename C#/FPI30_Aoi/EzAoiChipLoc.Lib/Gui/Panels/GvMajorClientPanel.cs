@@ -35,7 +35,7 @@ namespace EzAoiChipLocQC.Gui.Panels
 
         public Control Window => this;
         public IvQcTrayView QcTrayView => this.gvQcTrayViewPanel1;
-        public IvCommonImageView CameraPanel => this.gvSingleMatchViewPanel2;
+        public IvQcImageView CameraPanel => this.gvSingleMatchViewPanel2;
 
         #region PRIVATE_DATA
         void loadSplitterX()

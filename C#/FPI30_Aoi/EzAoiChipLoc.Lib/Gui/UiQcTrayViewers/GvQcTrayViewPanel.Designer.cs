@@ -45,7 +45,7 @@ namespace EzAoiChipLocQC.Gui.Panels
             this.cvzQuickImageViewPanel1.OptAutoPersistLastFile = false;
             this.cvzQuickImageViewPanel1.OptCoordInfoVisible = true;
             this.cvzQuickImageViewPanel1.OptTitleBarVisible = true;
-            this.cvzQuickImageViewPanel1.Size = new System.Drawing.Size(649, 364);
+            this.cvzQuickImageViewPanel1.Size = new System.Drawing.Size(500, 800);
             this.cvzQuickImageViewPanel1.TabIndex = 0;
             this.cvzQuickImageViewPanel1.ViewID = 0;
             // 
@@ -56,7 +56,7 @@ namespace EzAoiChipLocQC.Gui.Panels
             this.Controls.Add(this.cvzQuickImageViewPanel1);
             this.Margin = new System.Windows.Forms.Padding(0);
             this.Name = "GvQcTrayViewPanel";
-            this.Size = new System.Drawing.Size(649, 364);
+            this.Size = new System.Drawing.Size(500, 800);
             this.ResumeLayout(false);
 
         }

@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
-            this.gvSingleMatchViewPanel2 = new EzAoiChipLocQC.Gui.Panels.GvCommonImageViewPanel();
+            this.gvSingleMatchViewPanel2 = new EzAoiChipLocQC.Gui.Panels.GvQcImageViewPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -167,7 +167,7 @@
         #endregion
 
         private System.Windows.Forms.SplitContainer splitContainer1;
-        private GvCommonImageViewPanel gvSingleMatchViewPanel2;
+        private GvQcImageViewPanel gvSingleMatchViewPanel2;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;

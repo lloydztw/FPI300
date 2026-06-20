@@ -175,15 +175,15 @@
     <Compile Include="App\Settings\JxAppSettings.cs" />
     <Compile Include="Ctrl\BaseUtil.cs" />
     <Compile Include="Ctrl\EzQcTrayCtrl.cs" />
-    <Compile Include="Ctrl\EzMatchCtrl.cs" />
+    <Compile Include="Ctrl\EzQcChipMatchCtrl.cs" />
     <Compile Include="Ctrl\EzRcpContraintCtrl.cs" />
-    <Compile Include="Ctrl\EzMatchRcpEditCtrl.cs" />
+    <Compile Include="Ctrl\EzQcChipMatchRcpEditCtrl.cs" />
     <Compile Include="Ctrl\Interactor\CviRcpBox.cs" />
     <Compile Include="Ctrl\Interactor\CviFiltersBox.cs" />
     <Compile Include="Ctrl\Interactor\CviMatchResultBoxEt.cs" />
     <Compile Include="AoiFactory.cs" />
-    <Compile Include="Gui\UiQcTrayViewer\Config.cs" />
-    <Compile Include="Gui\UiQcTrayViewer\CviQcTrayPlaceHoldsBox.cs" />
+    <Compile Include="Gui\UiQcTrayViewers\Config.cs" />
+    <Compile Include="Gui\UiQcTrayViewers\CviQcTrayPlaceHoldsBox.cs" />
     <Compile Include="Gui\.Interactors\CviRotRectBox.cs" />
     <Compile Include="Gui\.Interactors\IvDrawItem.cs" />
     <Compile Include="Gui\.Interface\IvQcTrayView.cs" />
@@ -201,7 +201,7 @@
     <Compile Include="Gui\Forms\FormSplash.designer.cs">
       <DependentUpon>FormSplash.cs</DependentUpon>
     </Compile>
-    <Compile Include="Gui\.Interface\IvCommonImageView.cs" />
+    <Compile Include="Gui\.Interface\IvQcImageView.cs" />
     <Compile Include="Gui\Panels\GvMajorClientPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -232,11 +232,11 @@
     <Compile Include="Gui\UiQuickImageViewers\CvzQuickImageViewPanel.Designer.cs">
       <DependentUpon>CvzQuickImageViewPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Gui\UiQuickImageViewers\GvCommonImageViewPanel.cs">
+    <Compile Include="Gui\UiQcTrayViewers\GvQcImageViewPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Gui\UiQuickImageViewers\GvCommonImageViewPanel.Designer.cs">
-      <DependentUpon>GvCommonImageViewPanel.cs</DependentUpon>
+    <Compile Include="Gui\UiQcTrayViewers\GvQcImageViewPanel.Designer.cs">
+      <DependentUpon>GvQcImageViewPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="Gui\Panels\GwPropsViewerExtension.cs" />
     <Compile Include="Gui\Panels\GwRecipeInfo.cs">
@@ -257,10 +257,10 @@
     <Compile Include="Gui\Panels\GwIoPanel.Designer.cs">
       <DependentUpon>GwIoPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="Gui\UiQcTrayViewer\GvQcTrayViewPanel.cs">
+    <Compile Include="Gui\UiQcTrayViewers\GvQcTrayViewPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Gui\UiQcTrayViewer\GvQcTrayViewPanel.Designer.cs">
+    <Compile Include="Gui\UiQcTrayViewers\GvQcTrayViewPanel.Designer.cs">
       <DependentUpon>GvQcTrayViewPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\Enum\Scores.cs" />
@@ -326,8 +326,8 @@
     <EmbeddedResource Include="Gui\UiQuickImageViewers\CvzQuickImageViewPanel.resx">
       <DependentUpon>CvzQuickImageViewPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Gui\UiQuickImageViewers\GvCommonImageViewPanel.resx">
-      <DependentUpon>GvCommonImageViewPanel.cs</DependentUpon>
+    <EmbeddedResource Include="Gui\UiQcTrayViewers\GvQcImageViewPanel.resx">
+      <DependentUpon>GvQcImageViewPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Gui\Panels\GwRecipeInfo.resx">
       <DependentUpon>GwRecipeInfo.cs</DependentUpon>
@@ -338,7 +338,7 @@
     <EmbeddedResource Include="Gui\Panels\GwIoPanel.resx">
       <DependentUpon>GwIoPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Gui\UiQcTrayViewer\GvQcTrayViewPanel.resx">
+    <EmbeddedResource Include="Gui\UiQcTrayViewers\GvQcTrayViewPanel.resx">
       <DependentUpon>GvQcTrayViewPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">

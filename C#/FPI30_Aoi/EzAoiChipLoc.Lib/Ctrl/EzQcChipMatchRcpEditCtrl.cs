@@ -20,7 +20,6 @@ using EzAoiChipLocQC.Model;
 using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
-using LeTian.JxProps.Gui;
 using LeTian.JxRecipesTool.Ctrl;
 using System;
 using System.Collections.Generic;
@@ -29,10 +28,9 @@ using System.Windows.Forms;
 using CviBoundBox = EzAoiChipLocQC.Ctrl.CviRcpBox;
 using CviGoldenBox = EzAoiChipLocQC.Ctrl.CviRcpBox;
 
-
 namespace EzAoiChipLocQC.Ctrl
 {
-    internal class EzMatchRcpEdittingCtrl : BaseUtil
+    internal class EzQcChipMatchRcpEdittingCtrl : BaseUtil
     {
         #region NLOG
         //// NOTE:
@@ -94,7 +92,7 @@ namespace EzAoiChipLocQC.Ctrl
         CviFiltersBox _cviFiltersBox;
         #endregion
 
-        public EzMatchRcpEdittingCtrl(int sideId, IvCommonImageView view, IvFuncButtonsPanel funcPanel, IRecipesMgrCtrl recipesMgr)
+        public EzQcChipMatchRcpEdittingCtrl(int sideId, IvQcImageView view, IvFuncButtonsPanel funcPanel, IRecipesMgrCtrl recipesMgr)
         {
             ID = (SideID)sideId;
 

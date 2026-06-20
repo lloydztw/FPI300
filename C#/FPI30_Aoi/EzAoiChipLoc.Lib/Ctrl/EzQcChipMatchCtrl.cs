@@ -30,7 +30,7 @@ using GvImageViewerClassT = JetEazy.OpenCV.Viewer.CvMatViewer;
 
 namespace EzAoiChipLocQC.Ctrl
 {
-    internal class EzMatchCtrl : BaseUtil, IDisposable
+    internal class EzQcChipMatchCtrl : BaseUtil, IDisposable
     {
         public event EventHandler OnInitDone;
 
@@ -123,17 +123,17 @@ namespace EzAoiChipLocQC.Ctrl
         #region PRIVATE_GUI_MEMBERS
         Form _frmOwner;
         Control _lblPassFail;
-        IvCommonImageView _view;
+        IvQcImageView _view;
         IvFuncButtonsPanel _funcButtonsPanel;
         CviMatchResultBox _cviMatchResultBox;
         bool _bypassJxEvents = false;
         #endregion
 
         #region OTHER_CTRLS
-        EzMatchRcpEdittingCtrl _rcpEditCtrl;
+        EzQcChipMatchRcpEdittingCtrl _rcpEditCtrl;
         #endregion
 
-        public EzMatchCtrl(IvCommonImageView view, IvFuncButtonsPanel funcButtonsPanel, Control lblPassFail, IRecipesMgrCtrl recipesMgr)
+        public EzQcChipMatchCtrl(IvQcImageView view, IvFuncButtonsPanel funcButtonsPanel, Control lblPassFail, IRecipesMgrCtrl recipesMgr)
         {
             ID = SideID.A;
 
@@ -164,7 +164,7 @@ namespace EzAoiChipLocQC.Ctrl
                 _frmOwner.Refresh();
                 //_model.SetRecipe(_activeRecipe);
                 //LoadImage(_imgSourceFile?.Value);
-                _rcpEditCtrl = new EzMatchRcpEdittingCtrl((int)ID, _view, _funcButtonsPanel, _recipesMgr);
+                _rcpEditCtrl = new EzQcChipMatchRcpEdittingCtrl((int)ID, _view, _funcButtonsPanel, _recipesMgr);
                 _rcpEditCtrl.AttachImageSource(_largeIMG);
             }));
         }

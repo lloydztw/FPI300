@@ -71,6 +71,7 @@ namespace JetEazy.OpenCV.Viewer.Develop
         #endregion
 
         #region PRIVATE_GUI_MEMBERS
+        ContextMenuStrip _contextMenuStrip = null;
         ToolTip toolTip = new ToolTip();
         bool _isTitleBarVisible = true;
         bool _isCoordInfoVisible = true;
@@ -93,8 +94,9 @@ namespace JetEazy.OpenCV.Viewer.Develop
 
             if (!DesignMode)
             {
-                btnOpen.Click += BtnOpen_Click;
                 HandleCreated += Panel_HandleCreated;
+                btnOpen.Click += BtnOpen_Click;
+                picIcon.Click += PicIcon_Click;
             }
         }
         void Panel_HandleCreated(object sender, EventArgs e)
@@ -104,6 +106,19 @@ namespace JetEazy.OpenCV.Viewer.Develop
             {
                 frm.Load += (s2, e2) => loadIniAsync();
                 frm.FormClosed += (s3, e3) => saveIni();
+            }
+        }
+        void PicIcon_Click(object sender, EventArgs e)
+        {
+            if (_contextMenuStrip != null)
+            {
+                // 取得滑鼠在螢幕上的當前位置
+                var screenPos = Cursor.Position;
+
+                // 顯示 ContextMenuStrip
+                // Show() 方法的第一個參數是關聯的控制項 (這裡就是 picBox)
+                // 第二個參數是相對於螢幕的座標
+                _contextMenuStrip.Show(screenPos);
             }
         }
         async void BtnOpen_Click(object sender, EventArgs e)
@@ -400,6 +415,11 @@ namespace JetEazy.OpenCV.Viewer.Develop
             }
         }
         #endregion
+
+        public void AttachPopupMenu(ContextMenuStrip contextMenuStrip)
+        {
+            _contextMenuStrip = contextMenuStrip;
+        }
 
         #region PRIVATE_LAYOUT_FUNCTIONS
         void _updatePanelsLayout()
