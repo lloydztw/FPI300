@@ -42,7 +42,7 @@
             this.cvzQuickImageViewPanel1.Location = new System.Drawing.Point(0, 0);
             this.cvzQuickImageViewPanel1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.cvzQuickImageViewPanel1.Name = "cvzQuickImageViewPanel1";
-            this.cvzQuickImageViewPanel1.OptAutoPersistLastFile = false;
+            this.cvzQuickImageViewPanel1.OptAutoPersistLastFile = true;
             this.cvzQuickImageViewPanel1.OptCoordInfoVisible = true;
             this.cvzQuickImageViewPanel1.OptTitleBarVisible = true;
             this.cvzQuickImageViewPanel1.Size = new System.Drawing.Size(1000, 800);

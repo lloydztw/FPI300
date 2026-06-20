@@ -41,7 +41,7 @@ namespace EzAoiChipLocQC
             if (appSettings == null)
                 return;
 
-            var imgFile = appSettings?.VisionSrc0?.ImgFile?.Value;
+            var imgFile = appSettings?.MiscSysSettings?.VisionSrc0?.ImgFile?.Value;
             if (string.IsNullOrEmpty(imgFile) || !System.IO.File.Exists(imgFile))
                 return;
 

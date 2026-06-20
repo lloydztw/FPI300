@@ -28,6 +28,8 @@ using SetupPanelClassT = EzAoiChipLocQC.Gui.Panels.GvDummySetupPanel;
 using RecipeClassT = EzAoiChipLocQC.Model.JxQcRecipe;
 using AppSettingsClassT = EzAoiChipLocQC.JxAppSettings;
 using RESOURCES = EzAoiChipLocQC.Properties.Resources;
+using EzComm;
+using System;
 #endregion
 
 
@@ -75,6 +77,17 @@ namespace EzAoiChipLocQC
         /// </summary>
         protected override void OnBuild_CustomizedModel(Form frmMain)
         {
+            var appSettings = Global.AppSettings;
+
+            //(1) Machine
+            var machine = Global.Machine;
+            string ip = appSettings.PlcIpAddress.Address.Value;
+            int port = (int)appSettings.PlcIpAddress.Port.Value;
+            var ipSettings = new EzTcpIpSettings(ip, port);
+            ipSettings.IsSim = Global.IsSim;
+            machine.Init(ipSettings);
+
+            //(2) Model
             var model = Global.AoiModel;
             var recipe = base.recipesMgrCtrl?.ActiveRecipe as RecipeClassT;
             model.SetRecipe(recipe);
@@ -173,13 +186,14 @@ namespace EzAoiChipLocQC
             var qcTrayView = wndMajorClientPanel.QcTrayView;
             new EzQcTrayCtrl(qcTrayView, base.recipesMgrCtrl);
 
+            // Random SIM IO
+            //var wndProductionPanel = awMain.ClientDocker.FindPanel<ProductionPanelClassT>();
+            var sim = new EzIoSimulation();
+            var ioView = wndProductionPanel.IoViewer;
+            sim.Init(frmMain, ioView);
+
             // 主視窗 關閉 事件
-            awMain.FormClosed += (s, e) =>
-            {
-                Global.Dispose();
-                _singleton = null;
-                _matchCtrl = null;
-            };
+            awMain.FormClosed += (s, e) => CleanUp();
         }
 
         /// <summary>
@@ -189,6 +203,18 @@ namespace EzAoiChipLocQC
         {
             // 加掛 額外的客製化啟始程序
             EzRcpContraintCtrl.Instance.Constraint(frmMain);
+
+            //// 開始自動 scan PLC
+            //Global.Machine?.PLC?.AutoScan?.Start();
+
+
+        }
+
+        private void CleanUp()
+        {
+            Global.Dispose();
+            _singleton = null;
+            _matchCtrl = null;
         }
     }
 }

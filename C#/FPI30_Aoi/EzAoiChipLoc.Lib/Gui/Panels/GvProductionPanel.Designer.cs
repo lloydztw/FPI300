@@ -43,7 +43,7 @@
             this.lblUserName = new System.Windows.Forms.Label();
             this.gwRecipeInfo1 = new EzAoiChipLocQC.Gui.Panels.GwRecipeInfo();
             this.lblPassFail = new System.Windows.Forms.Label();
-            this.gwLogPanel1 = new EzAoiChipLocQC.Gui.Panels.GwIoPanel();
+            this.gwIoPanel1 = new EzAoiChipLocQC.Gui.Panels.GwIoPanel();
             this.panel3.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -84,7 +84,7 @@
             this.tableLayoutPanel1.Controls.Add(this.gwRecipeInfo1, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.panel3, 0, 4);
             this.tableLayoutPanel1.Controls.Add(this.lblPassFail, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.gwLogPanel1, 0, 5);
+            this.tableLayoutPanel1.Controls.Add(this.gwIoPanel1, 0, 5);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
@@ -243,15 +243,15 @@
             // 
             // gwLogPanel1
             // 
-            this.gwLogPanel1.BackColor = System.Drawing.Color.Transparent;
-            this.gwLogPanel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.gwLogPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gwLogPanel1.Location = new System.Drawing.Point(1, 685);
-            this.gwLogPanel1.Margin = new System.Windows.Forms.Padding(1);
-            this.gwLogPanel1.Name = "gwLogPanel1";
-            this.gwLogPanel1.Padding = new System.Windows.Forms.Padding(22, 10, 22, 10);
-            this.gwLogPanel1.Size = new System.Drawing.Size(568, 416);
-            this.gwLogPanel1.TabIndex = 311;
+            this.gwIoPanel1.BackColor = System.Drawing.Color.Transparent;
+            this.gwIoPanel1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.gwIoPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gwIoPanel1.Location = new System.Drawing.Point(1, 685);
+            this.gwIoPanel1.Margin = new System.Windows.Forms.Padding(1);
+            this.gwIoPanel1.Name = "gwLogPanel1";
+            this.gwIoPanel1.Padding = new System.Windows.Forms.Padding(22, 10, 22, 10);
+            this.gwIoPanel1.Size = new System.Drawing.Size(568, 416);
+            this.gwIoPanel1.TabIndex = 311;
             // 
             // GvProductionPanel
             // 
@@ -279,7 +279,7 @@
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private GwRecipeInfo gwRecipeInfo1;
         public System.Windows.Forms.Label lblPassFail;
-        private GwIoPanel gwLogPanel1;
+        private GwIoPanel gwIoPanel1;
         public System.Windows.Forms.Button btnLogin;
         public System.Windows.Forms.Label lblUserName;
         private System.Windows.Forms.Panel panel1;

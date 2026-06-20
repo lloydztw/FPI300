@@ -14,6 +14,7 @@
 #endregion
 
 using AwFramework;
+using EzIO.Gui;
 using System.Windows.Forms;
 
 namespace EzAoiChipLocQC.Gui.Panels
@@ -42,7 +43,7 @@ namespace EzAoiChipLocQC.Gui.Panels
             panel1.BackgroundImage = this.BackgroundImage;
             panel2.BackgroundImage = this.BackgroundImage;
             panel3.BackgroundImage = this.BackgroundImage;
-            gwLogPanel1.BackgroundImage = this.BackgroundImage;
+            gwIoPanel1.BackgroundImage = this.BackgroundImage;
             gwRecipeInfo1.BackgroundImage = this.BackgroundImage;
         }
         void _autoLayout()
@@ -101,5 +102,6 @@ namespace EzAoiChipLocQC.Gui.Panels
         Control IView.Window => this;
         public IvRecipeBriefView RecipeBriefView => gwRecipeInfo1;
         public IvFuncButtonsPanel FuncButtonsPanel => gwFuncButtonsPanel1;
+        public IoPointsView IoViewer => gwIoPanel1.IoViewer;
     }
 }

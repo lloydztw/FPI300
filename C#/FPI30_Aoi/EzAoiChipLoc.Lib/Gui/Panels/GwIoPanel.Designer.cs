@@ -104,7 +104,7 @@
             this.gvIoPointsSimpleView1.CellRows = 1;
             this.gvIoPointsSimpleView1.CellsActiveBackColor = System.Drawing.Color.Lime;
             this.gvIoPointsSimpleView1.CellsActiveForeColor = System.Drawing.Color.Black;
-            this.gvIoPointsSimpleView1.CellsBackColor = System.Drawing.Color.DimGray;
+            this.gvIoPointsSimpleView1.CellsBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.gvIoPointsSimpleView1.CellsForeColor = System.Drawing.Color.White;
             this.gvIoPointsSimpleView1.CellsInvertedBackColor = System.Drawing.Color.Red;
             this.gvIoPointsSimpleView1.CellsInvertedForeColor = System.Drawing.Color.White;

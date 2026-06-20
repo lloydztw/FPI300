@@ -13,8 +13,10 @@
  */
 #endregion
 
+using System;
 using System.Windows.Forms;
 using AwFramework;
+using EzIO.Gui;
 
 namespace EzAoiChipLocQC.Gui.Panels
 {
@@ -24,16 +26,35 @@ namespace EzAoiChipLocQC.Gui.Panels
         {
             InitializeComponent();
 
-            //btnClear.Visible = false;
-            //btnClear.Click += (s, e) =>
+            //HandleCreated += (s, e) =>
             //{
-            //    // 貌似被 NLOG 占用, 無法清除 !!!
-            //    // richTextBox1.Text = "";
-            //    //richTextBox11.Clear();
+            //    new Action(() =>
+            //    {
+            //        System.Threading.Thread.Sleep(3000);
+            //        this.BeginInvoke((Action)bindIoPoints);
+            //    }).BeginInvoke(null, null);
             //};
         }
 
-        //Form IView.frmOwner => FindForm();
         Control IView.Window => this;
+        public IoPointsView IoViewer => gvIoPointsSimpleView1;
+
+        void bindIoPoints()
+        {
+            //var machine = Global.Machine;
+            //var plc = Global.Machine?.PLC;
+            //if (plc == null)
+            //    return;
+
+            //var ioMem = plc.IoMem;
+            //var ioPoints = plc.IoMem.GetAllPoints();
+            //var autoScan = plc.AutoScan;
+
+            //// 只顯示 1-Bit 的 點位 
+            //ioPoints.RemoveAll(p => p.Address.Bits != 1);
+            //this.gvIoPointsSimpleView1.Attach(ioPoints, autoScan);
+
+            //autoScan.Start();
+        }
     }
 }

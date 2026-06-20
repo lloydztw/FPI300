@@ -188,9 +188,9 @@
     <Content Include="icon33.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EzAoiChipLoc.Lib\EzAoiChipLocQC.Lib.csproj">
+    <ProjectReference Include="..\EzAoiChipLoc.Lib\EzAoiChipLocQC.Aoi.csproj">
       <Project>{d158ac66-9b9e-4ac7-88ae-7a827b829eab}</Project>
-      <Name>EzAoiChipLocQC.Lib</Name>
+      <Name>EzAoiChipLocQC.Aoi</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

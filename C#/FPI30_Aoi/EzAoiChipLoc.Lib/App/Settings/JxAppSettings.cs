@@ -14,6 +14,7 @@
 #endregion
 
 using LeTian.JxProps;
+using Newtonsoft.Json;
 
 namespace EzAoiChipLocQC
 {
@@ -23,31 +24,20 @@ namespace EzAoiChipLocQC
     public class JxAppSettings : JxContainer
     {
         public JxBool LoginEnabled = new JxBool("Login Enabled", description: "使用登入帳號");
-        public JxBool OutputResultImageFile = new JxBool("Output Result Image", description: "生成檢測結果圖檔");
-        public JxPathFile OutputDataPath = new JxPathFile("Output Data Path", Global.APP_PATH.DumpPath, description: "輸出資料夾", isPathOnly: true);
-        public JxVisionSource VisionSrc0 = new JxVisionSource(0);
-        public JxVisionSource VisionSrc1 = new JxVisionSource(1);
-        public JxVisionSource GetVisionSrc(int id)
-        {
-            if (id == 0) return VisionSrc0;
-            else if (id == 1) return VisionSrc1;
-            else return null;
-        }
+        public JxPlcIpAddress PlcIpAddress = new JxPlcIpAddress();
+        public JxMiscSysSettings MiscSysSettings = new JxMiscSysSettings();
 
         public JxAppSettings() : base("AppSetings", "APP系統設定")
         {
             LoginEnabled.Value = true;
         }
-
         public override void OnBindingSubItems()
         {
             //綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
+                PlcIpAddress,
+                MiscSysSettings,
                 LoginEnabled,
-                OutputResultImageFile,
-                OutputDataPath,
-                VisionSrc0,
-                VisionSrc1,
             });
             base.OnBindingSubItems();
         }
@@ -58,8 +48,58 @@ namespace EzAoiChipLocQC
                 fileName = Global.APP_PATH.IniFile;
             return fileName;
         }
+
+        #region HELPERS
+        [JsonIgnore]
+        public JxBool OutputImageEnabled => MiscSysSettings.OutputImageEnabled;
+        [JsonIgnore]
+        public JxPathFile OutputDataPath => MiscSysSettings.OutputDataPath;
+        public JxVisionSource GetVisionSrc(int id = 0)
+        {
+            return MiscSysSettings.VisionSrc0;
+        }
+        #endregion
     }
 
+    public class JxPlcIpAddress : JxContainer
+    {
+        public JxText Address = new JxText("IP Address", "127.0.0.1", "網址");
+        public JxNumber Port = new JxNumber("Port", "通道", 8080);
+
+        public JxPlcIpAddress() : base("PLC IP Address", "PLC 網址設定")
+        {
+        }
+        public override void OnBindingSubItems()
+        {
+            //綁定以下成員, 會自動顯示在GUI編輯視窗.
+            BindItems(new IProp[] {
+                Address,
+                Port,
+            });
+            base.OnBindingSubItems();
+        }
+    }
+
+    public class JxMiscSysSettings : JxContainer
+    {
+        public JxBool OutputImageEnabled = new JxBool("Output Image Enabled", description: "生成檢測結果圖檔");
+        public JxPathFile OutputDataPath = new JxPathFile("Output Data Path", Global.APP_PATH.DumpPath, description: "輸出資料夾", isPathOnly: true);
+        public JxVisionSource VisionSrc0 = new JxVisionSource(0);
+
+        public JxMiscSysSettings() : base("Misc Settings", "其他檔案設定")
+        {
+        }
+        public override void OnBindingSubItems()
+        {
+            //綁定以下成員, 會自動顯示在GUI編輯視窗.
+            BindItems(new IProp[] {
+                OutputImageEnabled,
+                OutputDataPath,
+                VisionSrc0,
+            });
+            base.OnBindingSubItems();
+        }
+    }
 
     public class JxVisionSource : JxContainer
     {
@@ -71,7 +111,6 @@ namespace EzAoiChipLocQC
         public JxVisionSource()
         {
         }
-
         public override void OnBindingSubItems()
         {
             //綁定以下成員, 會自動顯示在GUI編輯視窗.

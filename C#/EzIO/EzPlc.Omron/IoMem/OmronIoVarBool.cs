@@ -61,7 +61,7 @@ namespace EzPlc.Omron
                 bool on = Inverted ? data == 0 : data != 0;
                 base.WriteVar(_address, on, priority);
 
-                if (OPT_WRITE_THROUGH)
+                if (OPT_WRITE_THROUGH || _omron.IsSim)
                 {
                     // 使用 Write-Through 策略寫入 cache.
                     Thread.VolatileWrite(ref _cacheI32, (int)data);

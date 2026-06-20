@@ -74,7 +74,7 @@ namespace EzAoiChipLocQC.Ctrl
         string DUMP_PATH => GET_DUMP_PATH((int)ID, _imgSourceFile?.Value);
         string GET_OUTPUT_IMAGE_FILE_NAME(bool checkDir = true)
         {
-            if (!_appSettings.OutputResultImageFile)
+            if (!_appSettings.OutputImageEnabled)
                 return null;
 
             string path = _appSettings.OutputDataPath;
@@ -692,7 +692,7 @@ namespace EzAoiChipLocQC.Ctrl
                 _rcpEditCtrl.AutoCatchGolden();
             }
 
-            string outputFile = (_appSettings?.OutputResultImageFile) ? GET_OUTPUT_IMAGE_FILE_NAME() : null;
+            string outputFile = (_appSettings?.OutputImageEnabled) ? GET_OUTPUT_IMAGE_FILE_NAME() : null;
             _model.RunAll(_largeIMG, outputFile: outputFile, wait: false);
         }
 
