@@ -16,8 +16,6 @@
 using JetEazy.Match;
 using JetEazy.QvMath;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LeTian.AoiLib;
-using MoveGraphLibrary;
 using System;
 using System.Drawing;
 using System.Threading.Tasks;
@@ -178,6 +176,7 @@ namespace LaserAlignDX.AoiModel
             for (int i = 0; i < N; i++)
             {
                 oks[i] = _matchers[i].Train(bmps[i]);
+                System.Diagnostics.Trace.WriteLine($"[循序慢速] 訓練模板 Train({i}) = {oks[i]}");
             }
 #else
             Parallel.For(0, N, i =>
