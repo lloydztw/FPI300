@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{ACECE51A-180A-4118-BAB5-31C7B47A76DF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TestDemo_Data</RootNamespace>
+    <AssemblyName>TestDemo_Data</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="JetEazy.QUtility">
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.QUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EzGlueDispenser\EzGlueDispenserIoS3.cs" />
+    <Compile Include="EzGlueDispenser\S3_IoPointEnum.cs" />
+    <Compile Include="EzGlueDispenser\S3_IoTable.cs" />
+    <Compile Include="EzTraveller106\.Enum\CarrierEnum.cs" />
+    <Compile Include="EzTraveller106\.Enum\FPIX3_IoPointEnum_C.cs" />
+    <Compile Include="EzTraveller106\.Enum\FPIX3_IoPointEnum_A.cs" />
+    <Compile Include="EzTraveller106\FPIX3_IO\FPIX3_IO_variables.cs" />
+    <Compile Include="EzTraveller106\FPIX3_IO\FPIX3_IO_points.cs" />
+    <Compile Include="EzTraveller106\Gaara\IPlcIoFPIX3.cs" />
+    <Compile Include="EzTraveller106\FPIX3_IO\FPIX3_IO.cs" />
+    <Compile Include="EzTraveller106\Gaara\MainFPIX3IOClass.cs" />
+    <Compile Include="Presso\PressoModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EzComm\EzComm.csproj">
+      <Project>{b3852a17-895a-4159-bf52-5bdf236d5dc4}</Project>
+      <Name>EzComm</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EzIO.Mem\EzIO.Mem.csproj">
+      <Project>{4d13995f-1121-4bb5-a299-8a73b10e6cac}</Project>
+      <Name>EzIO.Mem</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EzPlc.Fatek\EzPlc.Fatek.csproj">
+      <Project>{2a4ed33d-e507-41cf-a7f0-b4bcf0db91f0}</Project>
+      <Name>EzPlc.Fatek</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EzPlc.Hcfa\EzPlc.Hcfa.csproj">
+      <Project>{e47cc153-5394-47d6-b166-60031625d23b}</Project>
+      <Name>EzPlc.Hcfa</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EzPlc.Omron\EzPlc.Omron.csproj">
+      <Project>{597a46a7-a579-453a-a423-b3748d001833}</Project>
+      <Name>EzPlc.Omron</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="EzTraveller106\Readme.md" />
+    <None Include="Readme.md" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
