@@ -15,16 +15,22 @@
 
 using EzIO.Device;
 using EzIO.Mem;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace EzAoiChipLocQC.Drivers.IO
 {
     public interface IPlcAtm20
     {
+        IoMemory IoMem { get; }
         IoDevice Device { get; }
         IAutoScan AutoScan { get; }
-        IoMemory IoMem { get; }
+        IEnumerable<IoPoint> IterIoPoints(bool forGuiDisplay = true);
 
+        /// <summary>
+        /// 重置
+        /// </summary>
+        /// <param name="resetRecipeNum"></param>
         void ResetPlc(bool resetRecipeNum = false);
 
         /// <summary>

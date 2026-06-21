@@ -188,12 +188,19 @@
     <Content Include="icon33.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EzAoiChipLoc.Aoi\EzAoiChipLocQC.Aoi.csproj">
+    <ProjectReference Include="..\EzAoiChipLoc.Drivers\EzAoiChipLocQC.Drivers.csproj">
+      <Project>{6c82054b-565d-4bce-a1c1-4d0e255617cf}</Project>
+      <Name>EzAoiChipLocQC.Drivers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EzAoiChipLoc.Machine\EzAoiChipLocQC.Machine.csproj">
+      <Project>{3674234e-0f91-4ae5-abce-c4af31086c63}</Project>
+      <Name>EzAoiChipLocQC.Machine</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EzAoiChipLoc.Vision\EzAoiChipLocQC.Vision.csproj">
       <Project>{d158ac66-9b9e-4ac7-88ae-7a827b829eab}</Project>
-      <Name>EzAoiChipLocQC.Aoi</Name>
+      <Name>EzAoiChipLocQC.Vision</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

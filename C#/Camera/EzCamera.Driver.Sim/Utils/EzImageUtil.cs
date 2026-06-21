@@ -20,7 +20,6 @@ using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
 
 namespace EzCamera.Driver.Sim
 {

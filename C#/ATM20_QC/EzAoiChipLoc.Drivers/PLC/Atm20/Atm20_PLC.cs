@@ -2,6 +2,7 @@
 using EzIO.Device;
 using EzIO.Mem;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using PLC_IO = EzAoiChipLocQC.Drivers.IO.Atm20_IO;
 
@@ -68,9 +69,30 @@ namespace EzAoiChipLocQC.Drivers.IO
         }
         #endregion
 
+        public IoMemory IoMem => _IO?.IoMem;
         public IoDevice Device => _IO?.Device;
         public IAutoScan AutoScan => _IO?.AutoScan;
-        public IoMemory IoMem => _IO?.IoMem;
+        public IEnumerable<IoPoint> IterIoPoints(bool forGuiDisplay)
+        {
+            var ioPoints = this.IoMem?.GetAllPoints();
+            if (ioPoints == null)
+            {
+                yield break;
+            }
+            else
+            {
+                if (forGuiDisplay)
+                {
+                    // 只顯示 1-Bit 的 點位 
+                    ioPoints.RemoveAll(p => p.Address.Bits != 1);
+                    // 不顯示馬達軸態
+                    ioPoints.RemoveAll(p => p.Description != null && p.Description.Contains("軸"));
+                }
+
+                foreach (var ioPoint in ioPoints)
+                    yield return ioPoint;
+            }
+        }
 
         public void ResetPlc(bool resetRecipeNum = false)
         {

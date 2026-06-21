@@ -13,24 +13,23 @@
  */
 #endregion
 
-using EzAoiChipLocQC.Machine;
-using EzCamera.Driver.Sim;
-using EzCamera.Interface;
+using EzAoiChipLocQC.Drivers.IO;
+using EzComm;
+using JetEazy.Drivers;
+using JetEazy.Drivers.Light;
 
 namespace EzAoiChipLocQC.Drivers
 {
     public static class Factory
     {
-        public static ITravellerQcMachine InstanceMachine()
+        public static IPlcAtm20 OpenPLC(EzTcpIpSettings settings)
         {
-            return Traveller_Atm20_Machine.Instance;
+            return null;
         }
-
-        public static IEzCamera OpenCamera(string iniFileName)
+        public static ILightDriver OpenLight(string iniFile, bool isSim)
         {
-            var factory = new EzSimCameraFactory();
-            var camera = factory.LoadCamera(0);
-            return camera;
+            var light = new EzLightSim();
+            return light;
         }
     }
 }

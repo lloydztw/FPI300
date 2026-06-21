@@ -183,8 +183,6 @@
     <Compile Include="Light\ILightDriver.cs" />
     <Compile Include="Light\Gaara\GaLightClass.cs" />
     <Compile Include="Light\Sim\EzLightSim.cs" />
-    <Compile Include="Machine\Traveller_Atm20_Machine.cs" />
-    <Compile Include="Machine\ITravellerQcMachine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
