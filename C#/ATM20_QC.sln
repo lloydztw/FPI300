@@ -83,6 +83,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzPlc.Fatek", "EzIO\EzPlc.F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzCameras.Manager", "Camera\EzCameras.Manager\EzCameras.Manager.csproj", "{A2020C3A-A127-4BD3-BFBD-F111CB5DC412}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EzCamera.Driver.Base", "Camera\EzCamera.Driver.Base\EzCamera.Driver.Base.csproj", "{76E5047F-6EC8-45C6-A233-243318775BCB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -405,6 +407,18 @@ Global
 		{A2020C3A-A127-4BD3-BFBD-F111CB5DC412}.Release|x64.Build.0 = Release|Any CPU
 		{A2020C3A-A127-4BD3-BFBD-F111CB5DC412}.Release|x86.ActiveCfg = Release|Any CPU
 		{A2020C3A-A127-4BD3-BFBD-F111CB5DC412}.Release|x86.Build.0 = Release|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Debug|x64.Build.0 = Debug|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Debug|x86.Build.0 = Debug|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Release|x64.ActiveCfg = Release|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Release|x64.Build.0 = Release|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Release|x86.ActiveCfg = Release|Any CPU
+		{76E5047F-6EC8-45C6-A233-243318775BCB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -445,6 +459,7 @@ Global
 		{993D55DA-5CAC-4830-8D62-D7DBC3D6AD85} = {8D6C0580-0BFF-4426-B99B-81BC50A077D7}
 		{2A4ED33D-E507-41CF-A7F0-B4BCF0DB91F0} = {D26E6784-F85C-497B-B0A3-927D8C1F255F}
 		{A2020C3A-A127-4BD3-BFBD-F111CB5DC412} = {8D6C0580-0BFF-4426-B99B-81BC50A077D7}
+		{76E5047F-6EC8-45C6-A233-243318775BCB} = {8D6C0580-0BFF-4426-B99B-81BC50A077D7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {16A4E0AE-933A-4384-AC0A-76DE7CE40914}

@@ -83,6 +83,12 @@ namespace JetEazy.OpenCV.Viewer.Develop
             initGui();
         }
 
+        public int ImageBits
+        {
+            get;
+            set;
+        } = 0;
+
         #region PRIVATE_EVENT_HANDLERS
         void initGui()
         {
@@ -96,7 +102,7 @@ namespace JetEazy.OpenCV.Viewer.Develop
             {
                 HandleCreated += Panel_HandleCreated;
                 btnOpen.Click += BtnOpen_Click;
-                picIcon.Click += PicIcon_Click;
+                picIcon.MouseClick += PicIcon_MouseClick;
             }
         }
         void Panel_HandleCreated(object sender, EventArgs e)
@@ -108,7 +114,7 @@ namespace JetEazy.OpenCV.Viewer.Develop
                 frm.FormClosed += (s3, e3) => saveIni();
             }
         }
-        void PicIcon_Click(object sender, EventArgs e)
+        void PicIcon_MouseClick(object sender, MouseEventArgs e)
         {
             if (_contextMenuStrip != null)
             {
@@ -221,11 +227,11 @@ namespace JetEazy.OpenCV.Viewer.Develop
         }
         public bool Attach(Mat src)
         {
-            bool ok= cvMatViewer1.Attach(src);
+            bool ok = cvMatViewer1.Attach(src);
             if (ok)
             {
                 updateImageSrcName("[Image]");
-            } 
+            }
             return ok;
         }
         public bool CopyFrom(Mat src)
@@ -239,14 +245,14 @@ namespace JetEazy.OpenCV.Viewer.Develop
         }
         public bool LoadImage(string fileName)
         {
-            var imgQ = _loadImage(fileName);
+            var imgQ = _loadImage(fileName, bits: this.ImageBits);
             return imgQ?.Image != null;
         }
         #endregion
 
         #region PRIVATE_LOAD_FUNCTIONS
         Func<string, IEzImage> _externLoadFunc;
-        IEzImage _loadImage(string fileName, bool skipFirstMsg = false)
+        IEzImage _loadImage(string fileName, bool skipFirstMsg = false, int bits = 0)
         {
             try
             {
@@ -266,7 +272,7 @@ namespace JetEazy.OpenCV.Viewer.Develop
                 {
                     if (imgQ == null)
                         imgQ = new EzQuickImage();
-                    imgQ.Load(fileName);
+                    imgQ.Load(fileName, bits);
                 }
                 Invoke(new Action<IEzImage>((im) => cvMatViewer1.SetSource(im)), imgQ);
 
@@ -320,7 +326,7 @@ namespace JetEazy.OpenCV.Viewer.Develop
         {
             // 使用 Task.Run 將同步操作轉換為異步
             updateStatusInfo(Status.Loading, fileName);
-            return await Task.Run(() => _loadImage(fileName, skipFirstMsg: true));
+            return await Task.Run(() => _loadImage(fileName, skipFirstMsg: true, bits: this.ImageBits));
         }
         public async Task<IEzImage> BrowseFile(string lastFileName = null, string filter = null, string ext = null)
         {

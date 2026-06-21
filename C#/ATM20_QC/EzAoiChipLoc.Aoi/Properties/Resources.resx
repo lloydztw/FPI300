@@ -124,11 +124,14 @@
   <data name="JetEazy_logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\JetEazy_logo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="App_logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\App_logo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="file_png_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\file_png_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="CommonPageB" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\CommonPageB.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="grid_3x3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\grid_3x3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="cat_amir_small_small" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\cat_amir_small_small.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -139,10 +142,10 @@
   <data name="CommonPanel" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\CommonPanel.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="App_logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\App_logo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="CommonPageB" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CommonPageB.bmp;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="grid_3x3" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\grid_3x3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="file_bmp_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\file_bmp_icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

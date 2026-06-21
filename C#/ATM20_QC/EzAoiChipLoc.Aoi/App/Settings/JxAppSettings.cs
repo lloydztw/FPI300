@@ -26,7 +26,7 @@ namespace EzAoiChipLocQC
     public class JxAppSettings : JxContainer
     {
         public JxBool LoginEnabled = new JxBool("Login Enabled", description: "使用登入帳號");
-        public JxLocalCameraConfig CameraQC = new JxLocalCameraConfig("Camera_QC", "QC 相機組態");
+        public JxLocalCameraConfig CameraQC = new JxLocalCameraConfig("Camera_QC", "QC 相機組態 (Hidden)");
         public JxPlcSettings PlcIpAddress = new JxPlcSettings();
         public JxMiscSysSettings MiscSysSettings = new JxMiscSysSettings();
 

@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.gvQcTrayViewPanel1 = new EzAoiChipLocQC.Gui.Panels.GvQcTrayViewPanel();
             this.gvSingleMatchViewPanel2 = new EzAoiChipLocQC.Gui.Panels.GvQcImageViewPanel();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.gvQcTrayViewPanel1 = new EzAoiChipLocQC.Gui.Panels.GvQcTrayViewPanel();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -66,6 +66,16 @@
             this.splitContainer1.SplitterDistance = 558;
             this.splitContainer1.SplitterWidth = 3;
             this.splitContainer1.TabIndex = 0;
+            // 
+            // gvQcTrayViewPanel1
+            // 
+            this.gvQcTrayViewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gvQcTrayViewPanel1.Location = new System.Drawing.Point(0, 0);
+            this.gvQcTrayViewPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.gvQcTrayViewPanel1.Name = "gvQcTrayViewPanel1";
+            this.gvQcTrayViewPanel1.Size = new System.Drawing.Size(558, 762);
+            this.gvQcTrayViewPanel1.TabIndex = 0;
+            this.gvQcTrayViewPanel1.Title = "QC Tray View";
             // 
             // gvSingleMatchViewPanel2
             // 
@@ -126,6 +136,7 @@
             // 
             // richTextBox1
             // 
+            this.richTextBox1.BackColor = System.Drawing.SystemColors.Info;
             this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.richTextBox1.Location = new System.Drawing.Point(4, 27);
             this.richTextBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -133,15 +144,6 @@
             this.richTextBox1.Size = new System.Drawing.Size(1208, 720);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = "";
-            // 
-            // gvQcTrayViewPanel1
-            // 
-            this.gvQcTrayViewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gvQcTrayViewPanel1.Location = new System.Drawing.Point(0, 0);
-            this.gvQcTrayViewPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.gvQcTrayViewPanel1.Name = "gvQcTrayViewPanel1";
-            this.gvQcTrayViewPanel1.Size = new System.Drawing.Size(558, 762);
-            this.gvQcTrayViewPanel1.TabIndex = 0;
             // 
             // GvMajorClientPanel
             // 

@@ -99,6 +99,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.AwFramework.dll</HintPath>
     </Reference>
+    <Reference Include="LeTian.JXImageViewer">
+      <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.JXImageViewer.dll</HintPath>
+    </Reference>
     <Reference Include="LeTian.JxProps, Version=1.0.3.17587, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.JxProps.dll</HintPath>
@@ -141,6 +144,7 @@
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
     </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -184,6 +188,7 @@
     <Compile Include="Ctrl\Interactor\CviFiltersBox.cs" />
     <Compile Include="Ctrl\Interactor\CviMatchResultBoxEt.cs" />
     <Compile Include="AoiFactory.cs" />
+    <Compile Include="Gui\UiQcTrayViewers\ControlExtensions.cs" />
     <Compile Include="Gui\UiQcTrayViewers\Config.cs" />
     <Compile Include="Gui\UiQcTrayViewers\CviQcTrayPlaceHoldsBox.cs" />
     <Compile Include="Gui\.Interactors\CviRotRectBox.cs" />
@@ -378,6 +383,7 @@
     <None Include="Resources\CommonPageB.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\file_bmp_icon.png" />
     <None Include="Resources\CommonPanel.jpg" />
     <None Include="ReadMe.md" />
     <None Include="Resources\App_logo.png" />
