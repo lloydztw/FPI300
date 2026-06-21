@@ -13,15 +13,14 @@
  */
 #endregion
 
-using EzAoiChipLocQC.Machine;
-
-namespace EzAoiChipLocQC.Drivers
+namespace JetEazy.Drivers.Light
 {
-    public class DevFactory
+    public static class Factory
     {
-        public static ITravellerQcMachine InstanceMachine()
+        public static ILightDriver InstanceLightDriver(string iniFileName, bool isSim)
         {
-            return Traveller_Atm20_Machine.Instance;
+            var light = new EzLightSim();
+            return light;
         }
     }
 }

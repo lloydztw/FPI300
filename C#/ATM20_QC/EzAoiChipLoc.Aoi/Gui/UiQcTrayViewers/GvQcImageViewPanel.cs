@@ -32,8 +32,7 @@ namespace EzAoiChipLocQC.Gui.Panels
         public GvQcImageViewPanel()
         {
             InitializeComponent();
-            //if (!DesignMode)
-            //    cvMatViewer.Attach(lblCoordInfo, lblBlinker);
+            quickImageViewPanel.btnOpen.Visible = false;
         }
 
         #region GUI_LINKS

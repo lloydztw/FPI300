@@ -2,6 +2,7 @@
 using EzAoiChipLocQC.Ctrl;
 using EzAoiChipLocQC.Machine;
 using EzAoiChipLocQC.Model;
+using EzCamera.Manager;
 
 namespace EzAoiChipLocQC
 {
@@ -11,9 +12,12 @@ namespace EzAoiChipLocQC
 
         public const bool IsSim = true;
 
-        public static AppPath APP_PATH = new AppPath(@"D:\AUTOMATION\Eazy FPI30\Aoi.ATM20");
+        public static readonly AppPath APP_PATH = new AppPath(@"D:\AUTOMATION\Eazy FPI30\Aoi.ATM20");
 
-        public static readonly JxAppSettings AppSettings = new JxAppSettings();
+        public static JxAppSettings AppSettings
+        {
+            get => EzAppForDll.Instance.appSettings as JxAppSettings;
+        }
 
         public static IxChipLocator AoiModel
         {
@@ -22,17 +26,17 @@ namespace EzAoiChipLocQC
 
         public static ITravellerQcMachine Machine
         {
-            get => EzAoiChipLocQC.Drivers.DevFactory.InstanceMachine();
+            get => EzAoiChipLocQC.Drivers.Factory.InstanceMachine();
         }
 
         public static void Dispose()
         {
-            if (AppSettings.Modified)
-                AppSettings.Save(null);
-
             EzRcpContraintCtrl.Instance.CleanGarbages();
             var model = AoiModel;
             model?.Dispose();
+
+            // 強制關掉所有相機
+            AppCamerasManager.DisposeAll();
         }
     }
 }

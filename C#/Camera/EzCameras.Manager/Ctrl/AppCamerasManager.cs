@@ -15,7 +15,6 @@ using EzCamera.Interface;
 using System;
 using System.Windows.Forms;
 
-
 namespace EzCamera.Manager
 {
     public partial class AppCamerasManager

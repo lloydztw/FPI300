@@ -13,8 +13,10 @@
  */
 #endregion
 
+using EzCamera.Interface;
+using EzCamera.Manager;
 using LeTian.JxProps;
-using Newtonsoft.Json;
+using System.Runtime.InteropServices;
 
 namespace EzAoiChipLocQC
 {
@@ -24,17 +26,18 @@ namespace EzAoiChipLocQC
     public class JxAppSettings : JxContainer
     {
         public JxBool LoginEnabled = new JxBool("Login Enabled", description: "使用登入帳號");
-        public JxPlcIpAddress PlcIpAddress = new JxPlcIpAddress();
+        public JxLocalCameraConfig CameraQC = new JxLocalCameraConfig("Camera_QC", "QC 相機組態");
+        public JxPlcSettings PlcIpAddress = new JxPlcSettings();
         public JxMiscSysSettings MiscSysSettings = new JxMiscSysSettings();
 
         public JxAppSettings() : base("AppSetings", "APP系統設定")
         {
-            LoginEnabled.Value = true;
         }
         public override void OnBindingSubItems()
         {
             //綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
+                CameraQC,
                 PlcIpAddress,
                 MiscSysSettings,
                 LoginEnabled,
@@ -50,10 +53,6 @@ namespace EzAoiChipLocQC
         }
 
         #region HELPERS
-        [JsonIgnore]
-        public JxBool OutputImageEnabled => MiscSysSettings.OutputImageEnabled;
-        [JsonIgnore]
-        public JxPathFile OutputDataPath => MiscSysSettings.OutputDataPath;
         public JxVisionSource GetVisionSrc(int id = 0)
         {
             return MiscSysSettings.VisionSrc0;
@@ -61,12 +60,12 @@ namespace EzAoiChipLocQC
         #endregion
     }
 
-    public class JxPlcIpAddress : JxContainer
+    public class JxPlcSettings : JxContainer
     {
         public JxText Address = new JxText("IP Address", "127.0.0.1", "網址");
-        public JxNumber Port = new JxNumber("Port", "通道", 8080);
+        public JxInt Port = new JxInt("Port", "通道", 8080);
 
-        public JxPlcIpAddress() : base("PLC IP Address", "PLC 網址設定")
+        public JxPlcSettings() : base("PLC", "PLC 網址設定")
         {
         }
         public override void OnBindingSubItems()

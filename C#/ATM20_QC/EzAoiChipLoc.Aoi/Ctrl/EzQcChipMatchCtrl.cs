@@ -55,6 +55,7 @@ namespace EzAoiChipLocQC.Ctrl
         #region GLOBAL_DATA
         IxChipLocator _model => Global.AoiModel;
         JxAppSettings _appSettings => Global.AppSettings;
+        JxMiscSysSettings _sysSettings => _appSettings?.MiscSysSettings;
         #endregion
 
         #region DUMP_PATH_AND_OUTPUT_FILE_NAME
@@ -74,14 +75,14 @@ namespace EzAoiChipLocQC.Ctrl
         string DUMP_PATH => GET_DUMP_PATH((int)ID, _imgSourceFile?.Value);
         string GET_OUTPUT_IMAGE_FILE_NAME(bool checkDir = true)
         {
-            if (!_appSettings.OutputImageEnabled)
+            if (!_sysSettings.OutputImageEnabled)
                 return null;
 
-            string path = _appSettings.OutputDataPath;
+            string path = _sysSettings.OutputDataPath;
             if (string.IsNullOrEmpty(path))
             {
                 path = Global.APP_PATH.DumpPath;
-                _appSettings.OutputDataPath.Value = path;
+                _sysSettings.OutputDataPath.Value = path;
             }
 
             if (checkDir)
@@ -692,7 +693,7 @@ namespace EzAoiChipLocQC.Ctrl
                 _rcpEditCtrl.AutoCatchGolden();
             }
 
-            string outputFile = (_appSettings?.OutputImageEnabled) ? GET_OUTPUT_IMAGE_FILE_NAME() : null;
+            string outputFile = (_sysSettings?.OutputImageEnabled) ? GET_OUTPUT_IMAGE_FILE_NAME() : null;
             _model.RunAll(_largeIMG, outputFile: outputFile, wait: false);
         }
 

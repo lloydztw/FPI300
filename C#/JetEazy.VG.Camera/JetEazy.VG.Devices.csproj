@@ -162,7 +162,7 @@
     <Compile Include="ControlSpace\MotionSpace\PLCMotionClass_Sim.cs" />
     <Compile Include="ControlSpace\MotionSpace\PLCMotionClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\CipCompoletClass.cs" />
-    <Compile Include="ControlSpace\PLCSpace\CstLightClass.cs" />
+    <Compile Include="ControlSpace\Light\CstLightClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\EzBarcodeM3DHelper.cs" />
     <Compile Include="ControlSpace\PLCSpace\Mitsubishi_FX3UClass.cs" />
     <Compile Include="ControlSpace\PLCSpace\ModbusTcpFromNNModbus4.cs" />

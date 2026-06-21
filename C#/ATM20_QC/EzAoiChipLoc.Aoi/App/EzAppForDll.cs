@@ -77,7 +77,7 @@ namespace EzAoiChipLocQC
         /// </summary>
         protected override void OnBuild_CustomizedModel(Form frmMain)
         {
-            var appSettings = Global.AppSettings;
+            var appSettings = this.appSettings as AppSettingsClassT;
 
             //(1) Machine
             var machine = Global.Machine;

@@ -5,10 +5,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D158AC66-9B9E-4AC7-88AE-7A827B829EAB}</ProjectGuid>
+    <ProjectGuid>{6C82054B-565D-4BCE-A1C1-4D0E255617CF}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>EzAoiChipLocQC</RootNamespace>
-    <AssemblyName>EzAoiChipLocQC.Aoi</AssemblyName>
+    <RootNamespace>EzAoiChipLocQC.Drivers</RootNamespace>
+    <AssemblyName>EzAoiChipLocQC.Drivers</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -170,194 +170,38 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App\EzAppForDll.cs" />
-    <Compile Include="App\Global\Global.cs" />
-    <Compile Include="App\Settings\JxAppSettings.cs" />
-    <Compile Include="Ctrl\BaseUtil.cs" />
-    <Compile Include="Ctrl\EzQcTrayCtrl.cs" />
-    <Compile Include="Ctrl\EzQcChipMatchCtrl.cs" />
-    <Compile Include="Ctrl\EzRcpContraintCtrl.cs" />
-    <Compile Include="Ctrl\EzQcChipMatchRcpEditCtrl.cs" />
-    <Compile Include="Ctrl\EzIoSimCtrl.cs" />
-    <Compile Include="Ctrl\Interactor\CviRcpBox.cs" />
-    <Compile Include="Ctrl\Interactor\CviFiltersBox.cs" />
-    <Compile Include="Ctrl\Interactor\CviMatchResultBoxEt.cs" />
-    <Compile Include="AoiFactory.cs" />
-    <Compile Include="Gui\UiQcTrayViewers\Config.cs" />
-    <Compile Include="Gui\UiQcTrayViewers\CviQcTrayPlaceHoldsBox.cs" />
-    <Compile Include="Gui\.Interactors\CviRotRectBox.cs" />
-    <Compile Include="Gui\.Interactors\IvDrawItem.cs" />
-    <Compile Include="Gui\.Interface\IvQcTrayView.cs" />
-    <Compile Include="Gui\.Interface\IvFuncButtonsPanel.cs" />
-    <Compile Include="Gui\.Interface\IvRecipeBriefView.cs" />
-    <Compile Include="Gui\Forms\FormSegOffsetSettings.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Gui\Forms\FormSegOffsetSettings.Designer.cs">
-      <DependentUpon>FormSegOffsetSettings.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\Forms\FormSplash.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Gui\Forms\FormSplash.designer.cs">
-      <DependentUpon>FormSplash.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\.Interface\IvQcImageView.cs" />
-    <Compile Include="Gui\Panels\GvMajorClientPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\Panels\GvMajorClientPanel.Designer.cs">
-      <DependentUpon>GvMajorClientPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\Panels\GwSegOffsetDataGridView.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\Panels\GwSegOffsetDataGridView.Designer.cs">
-      <DependentUpon>GwSegOffsetDataGridView.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\Panels\GvProductionPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\Panels\GvProductionPanel.Designer.cs">
-      <DependentUpon>GvProductionPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\Panels\GvDummySetupPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\Panels\GvDummySetupPanel.Designer.cs">
-      <DependentUpon>GvDummySetupPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\UiQuickImageViewers\CvzQuickImageViewPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\UiQuickImageViewers\CvzQuickImageViewPanel.Designer.cs">
-      <DependentUpon>CvzQuickImageViewPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\UiQcTrayViewers\GvQcImageViewPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\UiQcTrayViewers\GvQcImageViewPanel.Designer.cs">
-      <DependentUpon>GvQcImageViewPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\Panels\GwPropsViewerExtension.cs" />
-    <Compile Include="Gui\Panels\GwRecipeInfo.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\Panels\GwRecipeInfo.Designer.cs">
-      <DependentUpon>GwRecipeInfo.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\Panels\GwFuncButtonsPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\Panels\GwFuncButtonsPanel.Designer.cs">
-      <DependentUpon>GwFuncButtonsPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\Panels\GwIoPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\Panels\GwIoPanel.Designer.cs">
-      <DependentUpon>GwIoPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Gui\UiQcTrayViewers\GvQcTrayViewPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Gui\UiQcTrayViewers\GvQcTrayViewPanel.Designer.cs">
-      <DependentUpon>GvQcTrayViewPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Model\Aoi\Enum\Scores.cs" />
-    <Compile Include="Model\IxCommonModel.cs" />
-    <Compile Include="Model\Aoi\IxChipLocator.cs" />
-    <Compile Include="Model\Aoi\Enum\ErrCodes.cs" />
-    <Compile Include="Model\Aoi\Enum\SideID.cs" />
-    <Compile Include="Model\Aoi\EventArgs\MatchEventArgs.cs" />
-    <Compile Include="Model\Aoi\EventArgs\ProgressEventArgs.cs" />
-    <Compile Include="Model\Aoi\AoiEmptyTrayInspector.cs" />
-    <Compile Include="Model\Aoi\Match\Bloc\EzBlocs.cs" />
-    <Compile Include="Model\Aoi\Match\Bloc\EzBlocs2.cs" />
-    <Compile Include="Model\Aoi\Match\EzAoiBase.cs" />
-    <Compile Include="Model\Aoi\Match\EzAoiBaseUtil.cs" />
-    <Compile Include="Model\Aoi\Match\EzOnGridNgBlocsPredictor.cs" />
-    <Compile Include="Model\Aoi\Match\EzBlobFinder.cs" />
-    <Compile Include="Model\Aoi\Match\EzRotAngleFinder.cs" />
-    <Compile Include="Model\Aoi\Match\EzOutGridNgBlocsDetector.cs" />
-    <Compile Include="Model\Aoi\Match\EzTemplateMatcher.cs" />
-    <Compile Include="Model\Aoi\Match\Grid\EzBlocsGrid.cs" />
-    <Compile Include="Model\Aoi\Match\Grid\EzBlocsGridAnalyzer.cs" />
-    <Compile Include="Model\Aoi\Match\Grid\EzBlocsGridBuilder.cs" />
-    <Compile Include="Model\Aoi\Match\Grid\EzBlocsGridSlice.cs" />
-    <Compile Include="Model\Aoi\Match\Grid\EzBlocsGridInterpo.cs" />
-    <Compile Include="Model\Aoi\Match\Grid\EzBlocsPool.cs" />
-    <Compile Include="Model\Aoi\Match\Grid\QuadLinkNode.cs" />
-    <Compile Include="Model\Aoi\Match\Bloc\QvQuad2D.cs" />
-    <Compile Include="Model\Recipes\JzLightSettings.cs" />
-    <Compile Include="Model\Recipes\JxTraySegGrpSettings.cs" />
-    <Compile Include="Model\Recipes\Serializer\EzBlocsGridSerializer.cs" />
-    <Compile Include="Model\Recipes\Serializer\Migrations\EzBlocsGridSerializer_v0.cs" />
-    <Compile Include="Model\Recipes\JxQcRecipe.cs" />
-    <Compile Include="Model\Recipes\JxRotAngleSettings.cs" />
-    <Compile Include="Model\Recipes\JxTrayDimSettings.cs" />
-    <Compile Include="Model\Recipes\JxQcVisionSettings.cs" />
-    <Compile Include="Model\Recipes\JxTempMatchSettings.cs" />
-    <Compile Include="Model\Aoi\Results\EzChipLocResult.cs" />
-    <Compile Include="Model\Aoi\Results\ResultDebugger.cs" />
-    <Compile Include="Model\Aoi\Results\MatchResult.cs" />
-    <Compile Include="Model\Aoi\Utils\ImageUtil.cs" />
+    <Compile Include="Factory.cs" />
+    <Compile Include="Light\Factory.cs" />
+    <Compile Include="PLC\.Enum\Atm20_IoPointEnum.cs" />
+    <Compile Include="PLC\.Enum\Atm20_IoPointEnum_C.cs" />
+    <Compile Include="PLC\Atm20\Atm20_IO.cs" />
+    <Compile Include="PLC\Atm20\Atm20_IO_points.cs" />
+    <Compile Include="PLC\Atm20\Atm20_IO_variables.cs" />
+    <Compile Include="PLC\Atm20\Atm20_PLC.cs" />
+    <Compile Include="PLC\IPlcAtm20Sim.cs" />
+    <Compile Include="PLC\IPlcAtm20.cs" />
+    <Compile Include="Light\ILightDriver.cs" />
+    <Compile Include="Light\Gaara\GaLightClass.cs" />
+    <Compile Include="Light\Sim\EzLightSim.cs" />
+    <Compile Include="Machine\Traveller_Atm20_Machine.cs" />
+    <Compile Include="Machine\ITravellerQcMachine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include=".Utils\DebugUtil\EzTiming.cs" />
-    <Compile Include=".Utils\DebugUtil\LtDebug.cs" />
-    <Compile Include=".Utils\DebugUtil\VxDebugDrawer.cs" />
-    <EmbeddedResource Include="Gui\Forms\FormSegOffsetSettings.resx">
-      <DependentUpon>FormSegOffsetSettings.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Forms\FormSplash.resx">
-      <DependentUpon>FormSplash.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Panels\GvMajorClientPanel.resx">
-      <DependentUpon>GvMajorClientPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Panels\GwSegOffsetDataGridView.resx">
-      <DependentUpon>GwSegOffsetDataGridView.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Panels\GvProductionPanel.resx">
-      <DependentUpon>GvProductionPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Panels\GvDummySetupPanel.resx">
-      <DependentUpon>GvDummySetupPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\UiQuickImageViewers\CvzQuickImageViewPanel.resx">
-      <DependentUpon>CvzQuickImageViewPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\UiQcTrayViewers\GvQcImageViewPanel.resx">
-      <DependentUpon>GvQcImageViewPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Panels\GwRecipeInfo.resx">
-      <DependentUpon>GwRecipeInfo.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Panels\GwFuncButtonsPanel.resx">
-      <DependentUpon>GwFuncButtonsPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\Panels\GwIoPanel.resx">
-      <DependentUpon>GwIoPanel.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Gui\UiQcTrayViewers\GvQcTrayViewPanel.resx">
-      <DependentUpon>GvQcTrayViewPanel.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <None Include="Model\Aoi\Match\ReadMe.md" />
+    <None Include="PLC\Readme.md" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -368,27 +212,21 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\camera.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\cat_amir_small_small.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\CommonPageB.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\CommonPanel.jpg" />
     <None Include="ReadMe.md" />
-    <None Include="Resources\App_logo.png" />
-    <Content Include="Resources\camera.ico" />
     <Content Include="icon33.ico" />
-    <None Include="Resources\file_png_icon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Gui\UiChipCellsViewer\" />
-    <Folder Include="Model\SysModel\" />
+    <Folder Include="Resources\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Camera\EzCamera.Driver.Sim\EzCamera.Driver.Sim.csproj">
+      <Project>{f5f4b801-fecf-4f47-8892-c3329b9eb398}</Project>
+      <Name>EzCamera.Driver.Sim</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Camera\EzCamera.Interface\EzCamera.Interface.csproj">
+      <Project>{F96B37ED-EC59-4EAE-9199-C1D5809C70FE}</Project>
+      <Name>EzCamera.Interface</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\EzIO\EzComm\EzComm.csproj">
       <Project>{b3852a17-895a-4159-bf52-5bdf236d5dc4}</Project>
       <Name>EzComm</Name>
@@ -408,10 +246,6 @@
     <ProjectReference Include="..\..\JetEazy.Calib.Transform\JetEazy.Transform.csproj">
       <Project>{a39132cc-9e48-4e8c-90c1-d4a39dbe1933}</Project>
       <Name>JetEazy.Transform</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\EzAoiChipLoc.Drivers\EzAoiChipLocQC.Drivers.csproj">
-      <Project>{6c82054b-565d-4bce-a1c1-4d0e255617cf}</Project>
-      <Name>EzAoiChipLocQC.Drivers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
