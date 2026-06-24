@@ -101,7 +101,7 @@ namespace JetEazy.Match
                     localMaps.Sort((a, b) => { return b.ActualCount - a.ActualCount; });
 
                 // DUMP
-                EzBlocsStorage.SaveToFile($"d:\\paso.log\\GridBuilder\\blocs_NG_{localMaps[0]}.json", blocs);
+                //>>> EzBlocsStorage.SaveToFile($"d:\\paso.log\\GridBuilder\\blocs_NG_{localMaps[0]}.json", blocs);
             }
 
             var globalGrid = new EzBlocsGrid(bound, pitch, localMaps[0]);
