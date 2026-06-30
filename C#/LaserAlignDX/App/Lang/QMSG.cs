@@ -23,14 +23,14 @@ namespace LaserAlignDX
 {
     public partial class QMSG
     {
-        #region LANGUAGE
+        public static string TITLE => GlobalConfig.TITLE;
         static string LANG_PATH => GlobalConfig.APP_ROOT_PATH + "\\Ini\\language";
+
+        #region LANGUAGE
         static QxLang _lang = QxLang.Instance("prompts", LANG_PATH);
         static QxLang _langGui = QxLang.Instance("gui", LANG_PATH);
         //static QMsgStateTranslator _stateTranslator = new QMsgStateTranslator();
         #endregion
-
-        public static string TITLE => GlobalConfig.TITLE;
 
         public static QxLang Lang(string langPack = "prompts")
         {
@@ -81,7 +81,7 @@ namespace LaserAlignDX
             var lang = Lang(langPack);
             return lang.Translate(text);
         }
-        public static string Text(Prompts prompt, params string[] args)
+        public static string Text(Enum prompt, params string[] args)
         {
             //>>> var _lang = QxLang.Instance("prompts");
             //>>> string msg = _lang.Translate("STR", (int)prompt, prompt);
