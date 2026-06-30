@@ -1,4 +1,5 @@
 ﻿using AwFramework;
+using EzAoiEmptyTrayInspector.Lang;
 using System.Windows.Forms;
 
 namespace EzAoiEmptyTrayInspector.Gui.Panels
@@ -8,11 +9,18 @@ namespace EzAoiEmptyTrayInspector.Gui.Panels
         public GwFuncButtonsPanel()
         {
             InitializeComponent();
-            toolTip1.SetToolTip(btnRunAll, "檢測空盤");
-            toolTip1.SetToolTip(btnOpenFile, "讀取圖檔");
-            toolTip1.SetToolTip(btnSnapshot, "擷取影像");
-            toolTip1.SetToolTip(btnResetClear, "清除 & 重置");
-            toolTip1.SetToolTip(btnPickGolden, "擷取吸嘴樣本");
+
+            if (!DesignMode)
+            {
+                HandleCreated += (s, e) =>
+                {
+                    toolTip1.SetToolTip(btnRunAll, btnRunAll.Text = QMSG.Text("檢測"));
+                    toolTip1.SetToolTip(btnOpenFile, btnOpenFile.Text = QMSG.Text("讀取圖檔"));
+                    toolTip1.SetToolTip(btnSnapshot, btnSnapshot.Text = QMSG.Text("擷取影像"));
+                    toolTip1.SetToolTip(btnResetClear, btnResetClear.Text = QMSG.Text("清除"));
+                    toolTip1.SetToolTip(btnPickGolden, btnPickGolden.Text = QMSG.Text("擷取樣本"));
+                };
+            }
         }
 
         Control IView.Window => this;

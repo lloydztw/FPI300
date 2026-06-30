@@ -66,9 +66,6 @@
     <Reference Include="JetEazy.ImageViewerEx">
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.ImageViewerEx.dll</HintPath>
     </Reference>
-    <Reference Include="JetEazy.Lang">
-      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.Lang.dll</HintPath>
-    </Reference>
     <Reference Include="JetEazy.OpenCv3, Version=4.5.0.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.OpenCv3.dll</HintPath>
@@ -166,6 +163,9 @@
   <ItemGroup>
     <Compile Include="App\EzAppForDll.cs" />
     <Compile Include="App\Global\Global.cs" />
+    <Compile Include="Model\Enum\Prompts.cs" />
+    <Compile Include="App\Lang\QMSG.cs" />
+    <Compile Include="App\Lang\QMsgBox.cs" />
     <Compile Include="App\Settings\JxAppSettings.cs" />
     <Compile Include="Ctrl\BaseUtil.cs" />
     <Compile Include="Ctrl\EzMatchCtrl.cs" />
@@ -345,7 +345,12 @@
     <Content Include="icon33.ico" />
     <None Include="Resources\file_png_icon.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\JetEazy.Lang\JetEazy.Lang.csproj">
+      <Project>{d2029ee2-ea98-4335-80a6-1e190ec88313}</Project>
+      <Name>JetEazy.Lang</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

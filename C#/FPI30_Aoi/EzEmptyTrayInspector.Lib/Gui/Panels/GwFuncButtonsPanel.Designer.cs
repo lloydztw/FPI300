@@ -56,12 +56,12 @@
             this.tblButtonsGroup.Controls.Add(this.btnSnapshot, 2, 0);
             this.tblButtonsGroup.Controls.Add(this.btnOpenFile, 1, 0);
             this.tblButtonsGroup.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tblButtonsGroup.Location = new System.Drawing.Point(20, 10);
+            this.tblButtonsGroup.Location = new System.Drawing.Point(8, 12);
             this.tblButtonsGroup.Margin = new System.Windows.Forms.Padding(0);
             this.tblButtonsGroup.Name = "tblButtonsGroup";
             this.tblButtonsGroup.RowCount = 1;
             this.tblButtonsGroup.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tblButtonsGroup.Size = new System.Drawing.Size(549, 51);
+            this.tblButtonsGroup.Size = new System.Drawing.Size(647, 61);
             this.tblButtonsGroup.TabIndex = 20;
             // 
             // btnRunAll
@@ -74,7 +74,7 @@
             this.btnRunAll.Location = new System.Drawing.Point(1, 1);
             this.btnRunAll.Margin = new System.Windows.Forms.Padding(1);
             this.btnRunAll.Name = "btnRunAll";
-            this.btnRunAll.Size = new System.Drawing.Size(107, 49);
+            this.btnRunAll.Size = new System.Drawing.Size(127, 59);
             this.btnRunAll.TabIndex = 23;
             this.btnRunAll.TabStop = false;
             this.btnRunAll.Text = "檢測";
@@ -88,13 +88,13 @@
             this.btnPickGolden.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnPickGolden.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnPickGolden.ImageKey = "PickGolden";
-            this.btnPickGolden.Location = new System.Drawing.Point(437, 1);
+            this.btnPickGolden.Location = new System.Drawing.Point(517, 1);
             this.btnPickGolden.Margin = new System.Windows.Forms.Padding(1);
             this.btnPickGolden.Name = "btnPickGolden";
-            this.btnPickGolden.Size = new System.Drawing.Size(111, 49);
+            this.btnPickGolden.Size = new System.Drawing.Size(129, 59);
             this.btnPickGolden.TabIndex = 22;
             this.btnPickGolden.TabStop = false;
-            this.btnPickGolden.Text = "擷取\r\n樣本";
+            this.btnPickGolden.Text = "擷取\n樣本";
             this.btnPickGolden.UseVisualStyleBackColor = false;
             // 
             // btnResetClear
@@ -104,10 +104,10 @@
             this.btnResetClear.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnResetClear.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnResetClear.ImageKey = "Reset";
-            this.btnResetClear.Location = new System.Drawing.Point(328, 1);
+            this.btnResetClear.Location = new System.Drawing.Point(388, 1);
             this.btnResetClear.Margin = new System.Windows.Forms.Padding(1);
             this.btnResetClear.Name = "btnResetClear";
-            this.btnResetClear.Size = new System.Drawing.Size(107, 49);
+            this.btnResetClear.Size = new System.Drawing.Size(127, 59);
             this.btnResetClear.TabIndex = 21;
             this.btnResetClear.TabStop = false;
             this.btnResetClear.Text = "清除";
@@ -120,10 +120,10 @@
             this.btnSnapshot.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnSnapshot.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnSnapshot.ImageKey = "Scan";
-            this.btnSnapshot.Location = new System.Drawing.Point(219, 1);
+            this.btnSnapshot.Location = new System.Drawing.Point(259, 1);
             this.btnSnapshot.Margin = new System.Windows.Forms.Padding(1);
             this.btnSnapshot.Name = "btnSnapshot";
-            this.btnSnapshot.Size = new System.Drawing.Size(107, 49);
+            this.btnSnapshot.Size = new System.Drawing.Size(127, 59);
             this.btnSnapshot.TabIndex = 20;
             this.btnSnapshot.TabStop = false;
             this.btnSnapshot.Text = "取像";
@@ -136,13 +136,13 @@
             this.btnOpenFile.Font = new System.Drawing.Font("微軟正黑體", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.btnOpenFile.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnOpenFile.ImageKey = "OpenFile";
-            this.btnOpenFile.Location = new System.Drawing.Point(110, 1);
+            this.btnOpenFile.Location = new System.Drawing.Point(130, 1);
             this.btnOpenFile.Margin = new System.Windows.Forms.Padding(1);
             this.btnOpenFile.Name = "btnOpenFile";
-            this.btnOpenFile.Size = new System.Drawing.Size(107, 49);
+            this.btnOpenFile.Size = new System.Drawing.Size(127, 59);
             this.btnOpenFile.TabIndex = 19;
             this.btnOpenFile.TabStop = false;
-            this.btnOpenFile.Text = "加載\r\n圖片";
+            this.btnOpenFile.Text = "加載圖片";
             this.btnOpenFile.UseVisualStyleBackColor = false;
             // 
             // imageList1
@@ -157,14 +157,15 @@
             // 
             // GwFuncButtonsPanel
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.Controls.Add(this.tblButtonsGroup);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "GwFuncButtonsPanel";
-            this.Padding = new System.Windows.Forms.Padding(20, 10, 20, 10);
-            this.Size = new System.Drawing.Size(589, 71);
+            this.Padding = new System.Windows.Forms.Padding(8, 12, 8, 12);
+            this.Size = new System.Drawing.Size(663, 85);
             this.tblButtonsGroup.ResumeLayout(false);
             this.ResumeLayout(false);
 

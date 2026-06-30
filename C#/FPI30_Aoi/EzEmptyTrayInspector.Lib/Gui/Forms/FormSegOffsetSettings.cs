@@ -13,6 +13,7 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Lang;
 using EzAoiEmptyTrayInspector.Model;
 using System;
 using System.Collections.Generic;
@@ -29,10 +30,14 @@ namespace EzAoiEmptyTrayInspector.Gui
         public FormSegOffsetSettings()
         {
             InitializeComponent();
-            PitchY = 10.5;
-            Load += FormSegOffsetSettings_Load;
-            btnOK.Click += BtnOK_Click;
-            btnCancel.Click += BtnCancel_Click;
+
+            if (!DesignMode)
+            {
+                PitchY = 10.5;
+                Load += FormSegOffsetSettings_Load;
+                btnOK.Click += BtnOK_Click;
+                btnCancel.Click += BtnCancel_Click;
+            }
         }
 
         #region EVENT_HANDLERS
@@ -42,6 +47,8 @@ namespace EzAoiEmptyTrayInspector.Gui
             var dgv = gwSegOffsetDataGridView1.DataGridView;
             numSegsNumber.ValueChanged += NumSegsNumber_ValueChanged;
             dgv.CellValidating += Dgv_CellValidating;
+            //QMSG.Dump(this);
+            QMSG.Translate(this);
         }
         private void FormSegOffsetSettings_FormClosed(object sender, FormClosedEventArgs e)
         {

@@ -98,7 +98,7 @@ namespace EzAoiEmptyTrayInspector.Gui.Panels
 
             var headers = new string[]
             {
-                "編號",
+                "Idx",
                 //"Offset X",
                 "Offset Y",
             };

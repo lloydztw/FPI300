@@ -32,6 +32,7 @@ using RecipeClassT = EzAoiEmptyTrayInspector.Model.JxAoiRecipe;
 using AppSettingsClassT = EzAoiEmptyTrayInspector.JxAppSettings;
 using RESOURCES = EzAoiEmptyTrayInspector.Properties.Resources;
 using EzAoiEmptyTrayInspector.Gui.Panels;
+using EzAoiEmptyTrayInspector.Lang;
 #endregion
 
 
@@ -190,6 +191,9 @@ namespace EzAoiEmptyTrayInspector
         {
             // 加掛 額外的客製化啟始程序
             EzRcpContraintCtrl.Instance.Constraint(frmMain);
+
+            //QMSG.Dump(frmMain, 100);
+            //QMSG.Translate(frmMain, 100);
         }
     }
 }

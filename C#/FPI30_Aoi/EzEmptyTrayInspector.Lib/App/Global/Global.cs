@@ -6,7 +6,7 @@ namespace EzAoiEmptyTrayInspector
 {
     internal class Global
     {
-        public const string TITLE = "FPI30 AOI 空盤檢測";
+        public const string TITLE = "FPI30 AOI EmptyTray";
 
         public static AppPath APP_PATH = new AppPath(@"D:\AUTOMATION\Eazy FPI30\Aoi");
 
