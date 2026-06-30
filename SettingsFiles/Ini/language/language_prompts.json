@@ -1,0 +1,197 @@
+﻿{
+"__HEADER__" : ["English", "正體中文", "简体中文", "Tiếng Việt"],
+
+"No_privilege" : ["No privilege!", "權限不足!", "", "Không đủ quyền"],
+
+"KeyParams_Json_Imported" : [
+    "KeyParams Json Imported.", 
+    "已匯入關鍵參數檔(json).", 
+    "", 
+    "Tệp tham số chính (json) đã được nhập"
+],
+
+"Empty_lot_data_fields" : [
+    "Empty data fields!", 
+    "批號, 序號, 參數名稱 不能為空白!", 
+    "", 
+    "Số lô, số sê-ri, tên thông số không được để trống!"
+],
+
+"Wrong_recipe_params" : [
+    "Wrong recipe params!", 
+    "請檢查參數的 保壓時間 與 壓力值 是否已正確設定!", 
+    "", 
+    "Vui lòng kiểm tra xem các thông số về thời gian dừng và giá trị áp suất đã được cài đặt chính xác chưa!"
+],
+
+"Run_count_exceeded" : [ 
+    "Run count exceeded! \n\rPlease check press heads. \n\rThen login again!", 
+    "壓合已超過設定次數. \n\r請檢查壓頭磨耗情況後, \n\r重新登入!", 
+    "", 
+    "Số lần nhấn đã vượt quá thời gian đã đặt. \n\rVui lòng kiểm tra độ mòn của mũi thử, \n\r và đăng nhập lại!"
+] ,
+
+"MaxRunCount" : ["MaxRunCount", "最大壓合次數", "", "số lần tối đa"],
+
+"RunCount" : ["RunCount", "目前次數", "", "chạy đếm"],
+
+"Fixture_moving" : ["Fixture moving!", "注意: 機台即將移動!", "", "Lưu ý: Máy sắp di chuyển!"],
+
+"Protection_saturated" : [
+    "Protection settings are saturated. \n\r\t They are adjusted to relative safe upper limit (in red color)!", 
+    "注意:\n\r\t有些設定值,轉換後已經超過整數範圍, \n\r\t被自動調整到相對安全上限(紅色字)!", 
+    "", 
+    "Lưu ý:\n\r\tMột số giá trị đã đặt đã vượt quá phạm vi số nguyên sau khi chuyển đổi,\n\r\t sẽ tự động được điều chỉnh theo giới hạn trên an toàn tương đối (chữ màu đỏ)!"
+],
+
+"No_big_cylinder_or_big_motor" : [
+    "There is no big cylinder (nor big motor.)", 
+    "提示: 此機組態, 無 大氣缸 (或 大馬達).", 
+    "", 
+    "Lời khuyên: Cấu hình máy này, không có xi lanh lớn (hoặc động cơ lớn)."
+],
+
+"Make_sure_loadcells_returned" : [
+    "Make sure all loadcells returned", 
+    "請確認 傳感器之馬達軸, 都已經歸位!\n\r\n\r然後再按一次.", 
+    "", 
+    "Vui lòng xác nhận rằng trục động cơ của cảm biến đã được đặt lại!\n\r\n\rSau đó nhấn lại."
+],
+
+"Make_sure_axis_Y_in_pos" : [
+    "Make sure axis Y in pos", 
+    "請確認 Y軸平台, 已經到位!\n\r\n\r然後再按一次.", 
+    "", 
+    "Vui lòng xác nhận rằng bệ trục Y đã ở đúng vị trí!\n\r\n\rSau đó nhấn lại."
+],
+
+"Move_motors_out_of_limits" : [
+    "Move motors out of limits", 
+    "請先把馬達移離'極限'位置, 再離開.", 
+    "", 
+    "Vui lòng di chuyển động cơ ra khỏi vị trí 'giới hạn' trước khi rời đi"
+],
+
+"Loadcells_in_danger_zone" : [
+    "Loadcells in danger zone", 
+    "注意: 傳感器探針'在'危險區域裡面! \n\r\n\r 是否確定要移動馬達?", 
+    "", 
+    "Chú ý:Đầu dò cảm biến đang 'ở' vùng nguy hiểm!\n\r\n\r Có chắc là bạn muốn di chuyển động cơ không?"
+],
+
+"Loadcells_into_danger_zone" : [
+    "Loadcells into danger zone", 
+    "注意: 傳感器探針'即將進入'危險區域! \n\r\n\r 是否確定要移動馬達?", 
+    "", 
+    "Chú ý: Đầu dò cảm biến 'sắp đi vào' vùng nguy hiểm!\r\n\r Có chắc là bạn muốn di chuyển động cơ không?"
+],
+
+"Dangerous_moving" : [
+    "Dangerous moving", 
+    "注意: 此為危險區域移動! \n\r\n\r 是否確定要移動馬達?", 
+    "", 
+    "Lưu ý: Đây là một di chuyển khu vực nguy hiểm!\r\n\r Có chắc là bạn muốn di chuyển động cơ không?"
+] ,
+
+"Change_settings" : [
+    "Change settings", 
+    "是否確定要改變設定值?", 
+    "", 
+    "Bạn có chắc chắn muốn thay đổi giá trị cài đặt không?"
+],
+
+"Proceed_home_again" : [
+    "Proceed home again", 
+    "大平板升起後, 請再按一次 Home.", 
+    "", 
+    "Sau khi máy tính bảng lớn được nâng lên, vui lòng nhấn lại trang chủ."
+],
+
+"Servo_on_homing_again" : [
+    "Servo on homing again", 
+    "Servo-On 被變動過, 馬達 即將再重新 Home 一次!", 
+    "", 
+    "Servo-Bật Đã được thay đổi, động cơ quay lại về trang chủ"
+],
+
+"Delete_recipe" : ["Delete recipe", "是否確定要刪除參數?", "", "Bạn có chắc chắn muốn xóa tham số?"] ,
+
+"Invalid_recipe_name" : ["Invalid recipe name", "參數名稱有誤!", "", "Tên tham số sai!"] ,
+
+"Wait_safe_before_exit" : [
+    "Wait safe before exit", 
+    "請按 STOP 讓機台回到 Ready 安全狀態, 才能離開本程式.", 
+    "", 
+    "Vui lòng nhấn dừng để đưa máy về trạng thái sẵn sàng an toàn trước khi rời khỏi chương trình này."
+],
+
+"Needs_auto_zero" : [
+    "Needs auto zero", 
+    "請先執行 傳感器 'Auto-Zero' 歸零!", 
+    "", 
+    "Vui lòng thực hiện cảm biến 'Auto-Zero' trước!"
+],
+
+"About_to_auto_zero" : [
+    "About to auto zero", 
+    "即將進行歸零, 請確認 傳感器 已無負載!", 
+    "", 
+    "Nó sắp đặt lại về 0, vui lòng đảm bảo rằng cảm biến không có tải!"
+],
+
+"Abnormal_loadcell_calibration" : [
+    "Abnormal loadcell calibration: The following register must greater then 0! \n\r\n\rPlease check the load cells' wiring.",
+    "校驗結果異常: 以下 PLC暫存器數值 必須大於零! \n\r請確認校驗時, 傳感器 接線極性是否正確!", 
+    "", 
+    "Kết quả xác minh là bất thường: các giá trị thanh ghi PLC sau đây phải lớn hơn 0! \n\rVui lòng xác nhận xem cực của dây cảm biến có đúng trong quá trình hiệu chuẩn hay không!"
+],
+
+
+"__OTHERS__" : ["Remark", "不用翻譯"],
+
+"無預壓" : ["NoPrePress", "無預壓", "", "Không tải trước"] ,
+"大" : ["Big", "大", "", "Lớn"],
+"小" : ["Small", "小", "", "Nhỏ"],
+
+"最大壓合次數" : ["Max run count", "最大壓合次數", "", "Số lần tối đa"] ,
+"目前次數" : ["Run count", "目前次數", "", "Thời điểm hiện tại"],
+"哈希值" : ["Hash", "哈希值", "哈希值", "Hash"],
+"序號" : ["Serial No", "序號", "序号", "Số seri"],
+
+"速度上限" : ["Speed Limit", "速度上限", " ", "Tốc độ giới hạn"],
+"軸" : ["Axis", "軸", "", "Trục"],
+"步進" : ["StepMotor", "步進", "", "Bước"],
+"馬達" : ["Motor", "馬達", "", "Động cơ"],
+"大平板" : ["BigPlatform", "大平板", "", "Lớn bằng phẳng"],
+"大馬達" : ["BigMotor", "大馬達", "", "động cơ điện lớn"],
+"大氣缸" : ["BigCylinder", "大氣缸", "", "Xi lanh lớn"],
+"小氣缸" : ["SmallCylinder", "小氣缸", "", "Xi lanh nhỏ"],
+"垂直氣缸" : ["Vert.Cylinders", "垂直氣缸", "", "Trụ đứng"],
+"垂直氣缸A" : ["Vert.Cylinder A", "垂直氣缸A", "", "Xi lanh đứng A"],
+"垂直氣缸B" : ["Vert.Cylinder B", "垂直氣缸B", "", "Xi lanh đứng B"],
+"大小產品氣缸" : ["Prod.Cylinders", "大小產品氣缸", "", "Kích thước xi lanh sản phẩm"],
+"Y軸平台" : ["Y.Platform", "Y軸平台", "", "Bệ trục"],
+
+"左後" : ["LeftBack", "左後", "左后", "Phía sau bên trái"],
+"右前" : ["RightFront", "右前", "右前", "Phía trước bên phải"],
+"UP" : ["Up", "上升", "", "Lên"],
+"DOWN" : ["Down", "下降", "", "Xuống"],
+
+"關鍵參數文件檔" : [
+	"Select KeyParams Json (for H0)",
+	"關鍵參數文件檔(json) (for H0)",
+	"",
+	"Tập tin tham số chính"
+],
+
+"初始化" : ["Init", "初始化", "", "Khởi tạo"],
+"異常" : ["Error", "異常", "", "Bất thường"],
+"無法執行此模式" : [
+	"can not run with this mode", 
+	"無法執行此模式", 
+	"", 
+	"không thể thực hiện chế độ này"
+],
+
+"__END__" : ["Remark", "不用翻譯"]
+}
