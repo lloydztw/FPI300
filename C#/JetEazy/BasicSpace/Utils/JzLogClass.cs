@@ -23,18 +23,24 @@ namespace JetEazy.BasicSpace
         /// <param name="text">显示文本</param>  
         public void LogAppend(Color color, string text)
         {
-            if (richTextBoxRemote == null)
-                return;
-            if (richTextBoxRemote.TextLength >= 20000)
-                richTextBoxRemote.Text = "";
+            try
+            {
+                if (richTextBoxRemote == null)
+                    return;
+                if (richTextBoxRemote.TextLength >= 20000)
+                    richTextBoxRemote.Text = "";
 
-            //richTextBoxRemote.AppendText("/n");
-            richTextBoxRemote.SelectionColor = color;
-            richTextBoxRemote.AppendText(text + Environment.NewLine);
+                //richTextBoxRemote.AppendText("/n");
+                richTextBoxRemote.SelectionColor = color;
+                richTextBoxRemote.AppendText(text + Environment.NewLine);
 
-            richTextBoxRemote.SelectionStart = richTextBoxRemote.TextLength;
-            richTextBoxRemote.ScrollToCaret();
+                richTextBoxRemote.SelectionStart = richTextBoxRemote.TextLength;
+                richTextBoxRemote.ScrollToCaret();
+            }
+            catch
+            {
 
+            }
         }
         /// <summary>  
         /// 显示错误日志  

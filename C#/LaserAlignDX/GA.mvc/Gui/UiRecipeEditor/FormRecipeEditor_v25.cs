@@ -37,6 +37,10 @@ namespace LaserAlignDX.Mvc.Gui.V25
             
             var ctrl = new GaRecipeEditCtrl();
             ctrl.Attach(this);
+
+            //Load += (s, e) => QMSG.Dump(this, 2000);
+            Load += (s, e) => QMSG.Translate(this);
+            this.WindowState = FormWindowState.Maximized;
         }
 
         void initDataGridView()
@@ -46,15 +50,16 @@ namespace LaserAlignDX.Mvc.Gui.V25
             while (dgv.Rows.Count > 2)
                 dgv.Rows.RemoveAt(dgv.Rows.Count - 1);
 
-            dgv.Rows[0].Cells[0].Value = "吸嘴1";
-            dgv.Rows[1].Cells[0].Value = "吸嘴2";
+            dgv.Rows[0].Cells[0].Value = QMSG.Text("吸嘴1", "gui");
+            dgv.Rows[1].Cells[0].Value = QMSG.Text("吸嘴2", "gui");
 
-            int col = dgv.Columns.Count - 2;
-            foreach (string coordName in new[] { "World X", "World Y" })
+            int COLS = dgv.Columns.Count;
+            for(int c = 0; c < COLS; c++)
+                dgv.Columns[c].HeaderText = QMSG.Text(dgv.Columns[c].HeaderText, "gui");
+
+            for(int c = COLS-2; c < COLS; c++)
             {
-                //dgv.Columns[col].HeaderText = coordName;
-                dgv.Columns[col].ReadOnly = true;
-                col++;
+                dgv.Columns[c].ReadOnly = true;
             }
 
             dgv.Columns[0].DefaultCellStyle.SelectionBackColor = dgv.DefaultCellStyle.BackColor;

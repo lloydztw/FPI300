@@ -102,13 +102,13 @@ namespace PhotoMachine.UISpace
             txtName = textBox1rcp;
             txtVersion = textBox2Rcp;
 
-            lblModifyDateTime = label4rcp;
+            lblModifyDateTime = lblRcp4;
 
-            btnAdd = button1rcp;
-            btnModify = button2rcp;
-            btnOK = button4rcp;
-            btnCancel = button6rcp;
-            btnDetial = button3rcp;
+            btnAdd = btnRcpAdd;
+            btnModify = btnRcpEdit;
+            btnOK = btnRcpOK;
+            btnCancel = btnRcpCancel;
+            btnDetial = btnRcpDetails;
 
             btnAdd.Tag = TagEnum.ADD;
             btnModify.Tag = TagEnum.MODIFY;
@@ -122,7 +122,7 @@ namespace PhotoMachine.UISpace
             btnOK.Click += new EventHandler(btn_Click);
             btnCancel.Click += new EventHandler(btn_Click);
             btnDetial.Click += new EventHandler(btn_Click);
-            btnDel.Click += BtnDel_Click;
+            btnRcpDel.Click += BtnDel_Click;
             
             //SizeChanged += RcpUI_SizeChanged;
 
@@ -134,8 +134,8 @@ namespace PhotoMachine.UISpace
             FillDisplay(true);
             DBStatus = DBStatusEnum.NONE;
 
-            //HandleCreated += (s, e) => LtAoiFactory.RcpCheckActive();
-            BeginInvoke(new Action(() => LtAoiFactory.RcpCheckActive()));
+            BeginInvoke(new Action(() => LtAoiFactory.RcpCheckActive()));            
+            //BeginInvoke(new Action(() => QMSG.Dump(this)));
         }
 
         private void BtnDel_Click(object sender, EventArgs e)
@@ -375,7 +375,7 @@ namespace PhotoMachine.UISpace
 
                         btnAdd.Visible = false;
                         btnModify.Visible = false;
-                        btnDel.Visible = false;
+                        btnRcpDel.Visible = false;
 
                         btnOK.Visible = true;
                         btnCancel.Visible = true;
@@ -386,7 +386,7 @@ namespace PhotoMachine.UISpace
 
                         btnAdd.Visible = true;
                         btnModify.Visible = true;
-                        btnDel.Visible = true;
+                        btnRcpDel.Visible = true;
 
                         btnOK.Visible = false;
                         btnCancel.Visible = false;
@@ -489,7 +489,7 @@ namespace PhotoMachine.UISpace
             int x = pad * 2;
 
             //var ctrls = new Control[] { btnAdd, btnModify, btnCancel };
-            var ctrls = new Control[] { button1rcp, button2rcp,btnDel };
+            var ctrls = new Control[] { btnRcpAdd, btnRcpEdit,btnRcpDel };
             foreach (var c in ctrls)
             {
                 c.Top = rcc.Bottom - c.Height - pad * 2;
@@ -498,25 +498,25 @@ namespace PhotoMachine.UISpace
                 x += w + pad;
             }
             // btnOK
-            button4rcp.Location = button2rcp.Location;
-            button4rcp.Size = button2rcp.Size;
+            btnRcpOK.Location = btnRcpEdit.Location;
+            btnRcpOK.Size = btnRcpEdit.Size;
 
             // btnCancel
-            button6rcp.Location = btnDel.Location;
-            button6rcp.Size = btnDel.Size;
+            btnRcpCancel.Location = btnRcpDel.Location;
+            btnRcpCancel.Size = btnRcpDel.Size;
 
             // lblModifyDateTime
-            label4rcp.Top = button4rcp.Top - label4rcp.Height - pad;
-            label4rcp.Left = groupBox1rcp.Left;
-            label4rcp.Width = rcc.Width - label4rcp.Left * 2;
+            lblRcp4.Top = btnRcpOK.Top - lblRcp4.Height - pad;
+            lblRcp4.Left = groupBox1rcp.Left;
+            lblRcp4.Width = rcc.Width - lblRcp4.Left * 2;
             // groupBox1
-            groupBox1rcp.Height = (label4rcp.Top - pad * 2) - groupBox1rcp.Top;
+            groupBox1rcp.Height = (lblRcp4.Top - pad * 2) - groupBox1rcp.Top;
             // richbox1
-            richTextBox1rcp.Height = richTextBox1rcp.Bottom - button3rcp.Bottom - pad * 2;
+            richTextBox1rcp.Height = richTextBox1rcp.Bottom - btnRcpDetails.Bottom - pad * 2;
             // btnDetail
             rcc = groupBox1rcp.ClientRectangle;
-            button3rcp.Left = rcc.Right - button3rcp.Width - pad * 5;
-            textBox2Rcp.Width = button3rcp.Right - textBox2Rcp.Left;
+            btnRcpDetails.Left = rcc.Right - btnRcpDetails.Width - pad * 5;
+            textBox2Rcp.Width = btnRcpDetails.Right - textBox2Rcp.Left;
 #endif
         }
         #endregion

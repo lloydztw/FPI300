@@ -1,153 +1,189 @@
-﻿using JetEazy;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2026-06-29 在沒有更改邏輯的狀況下, 使用 #region #endregion
+ *                 重新收納整理 萬子 散亂放置的代碼 
+ *                 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
-using JetEazy.EzImage;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX;
-using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
 using TravellerMINIX6.ProcessSpace;
-using VsCommon.ControlSpace.MachineSpace;
-
-//using Mist.OPSpace;
-//using Mist.DBSpace;
-//using PhotoMachine.ControlSpace;
+using VsCommon.ControlSpace.IOSpace;
 
 namespace PhotoMachine.UISpace
 {
     public partial class RunUI : UserControl
     {
+        #region Constants
         const int ShinningDuriation = 50;
         const int ShiningTimes = 2;
+        #endregion
 
-        bool IsResultPass = false;
+        #region GUI_LINKS
+        Label lblBigPass => label4;
+        Label lblDuriation => label2;
 
-        //RESULTClass RESULT;
-        //UseIOClass USEIO;
+        TextBox txtOPBarcode => textBox1;
+        TextBox txtProductBarcode => textBox3;
+        TextBox txtResult => textBox2;
 
-        public bool IsSaveRaw
+        CheckBox chkIsSaveRaw => checkBox1;
+        CheckBox chkIsSaveNGRaw => checkBox2;
+        CheckBox chkIsSaveDebug => checkBox3;
+
+        TextBox txtLotID => txtLotData1;
+        TextBox txtStripID => txtLotData2;
+        Button btnSoftwareReady => button5;
+        Button btnSingleSnap => button6;
+
+        Button btnSingleTest => button1;
+        Button btnSaveImage => button2;
+        Button btnSingleOfflineTest => button3;
+        Button btnClearDataZero => button4;
+
+        //Button btnAutoManual => button7;
+        #endregion
+
+        #region HARDWARE_DEVICE
+        IxLineScanCam IScanCam
         {
-            get
-            {
-                return chkIsSaveRaw.Checked;
-            }
+            get { return Traveller106.Universal.IxLineScan; }
         }
-        public bool IsSaveNGRaw
+        IPlcIoFPIX3 _plcIO
         {
-            get
-            {
-                return chkIsSaveNGRaw.Checked;
-            }
+            //get => GaMvcConfig.InstancePLC("RUNUI");
+            get => null;
         }
-        public bool IsSaveDebug
-        {
-            get
-            {
-                return chkIsSaveDebug.Checked;
-            }
-        }
+        #endregion
 
-        int m_Start = -1;
-        Timer m_CalTimer;
-        Label lblBigPass;
-
-        protected RecipeFPIX3Class xRecipe
-        {
-            get { return RecipeFPIX3Class.Instance; }
-        }
-
+        #region DB
         RCPDBClass RCPDB
         {
-            get
-            {
-                return Traveller106.Universal.RCPDB;
-            }
+            get { return Traveller106.Universal.RCPDB; }
         }
+        #endregion
 
-        protected MainFPIX3MachineClass MACHINE
-        {
-            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
-        }
-
-        TextBox txtProductBarcode;
-        TextBox txtOPBarcode;
-        Label lblDuriation;
-        TextBox txtResult;
-
-        CheckBox chkIsSaveDebug;
-        CheckBox chkIsSaveRaw;
-        CheckBox chkIsSaveNGRaw;
-
-        Button btnSingleSnap;
-        Button btnSingleTest;
-        Button btnSaveImage;
-        Button btnSingleOfflineTest;
-        Button btnClearDataZero;
-        Button btnSoftwareReady;
-        Button btnAutoManual;
-
-        JzToolsClass JzTools = new JzToolsClass();
-
+        #region Processes & Threads
         BaseProcess m_SingleProcess
         {
             get { return LineScanSingleProcess.Instance; }
         }
 
-        //Language Setup
-        JzLanguageClass myLanguage = new JzLanguageClass();
+        ProcessClass _shinningProcess = new ProcessClass();
+        #endregion
 
-        protected IxLineScanCam IScanCam
-        {
-            get { return Traveller106.Universal.IxLineScan; }
-        }
+        #region State & Run Data Variables
+        bool IsResultPass = false;
+        int m_Start = -1;
+        Timer m_CalTimer;
+        int ShinigCount = 0;
+        DateTime m_dtStart = DateTime.Now;
+        #endregion
 
+        #region Environment, Config & Language Settings
         string UIPath = "";
         int LanguageIndex = 0;
-
         VersionEnum VER = VersionEnum.STEROPES;
         OptionEnum OPT = OptionEnum.MAIN;
+
+        JzToolsClass JzTools = new JzToolsClass();
+        JzLanguageClass myLanguage = new JzLanguageClass();
+        #endregion
+
+        #region Properties
+        public bool IsSaveRaw
+        {
+            get { return chkIsSaveRaw.Checked; }
+        }
+        public bool IsSaveNGRaw
+        {
+            get { return chkIsSaveNGRaw.Checked; }
+        }
+        public bool IsSaveDebug
+        {
+            get { return chkIsSaveDebug.Checked; }
+        }
+
+        public bool SetBarcodeEnable
+        {
+            set
+            {
+                txtProductBarcode.Enabled = value;
+                txtOPBarcode.Enabled = value;
+
+                if (value)
+                {
+                    txtOPBarcode.Text = "";
+                    txtOPBarcode.Focus();
+                }
+            }
+        }
+        public string SetBarcodeString
+        {
+            set
+            {
+                txtOPBarcode.Text = value;
+                txtOPBarcode.Focus();
+            }
+        }
+        public bool IsShinning
+        {
+            get { return _shinningProcess.IsOn; }
+        }
+        #endregion
 
         public RunUI()
         {
             InitializeComponent();
-            Initial();
+
+            if (!DesignMode)
+                initGui();
         }
-        void Initial()
+
+        void initGui()
         {
-            lblBigPass = label4;
-            lblDuriation = label2;
+            txtLotID.ReadOnly = true;
+            txtStripID.ReadOnly = true;
 
-            txtOPBarcode = textBox1;
-            txtProductBarcode = textBox3;
-            txtResult = textBox2;
-
-            chkIsSaveRaw = checkBox1;
-            chkIsSaveNGRaw = checkBox2;
-            chkIsSaveDebug = checkBox3;
+            //var injection = GaMvcConfig.UxInjection;
+            //if (injection != null)
+            //{
+            //    injection.AttachOpUI(btnSoftwareReady, txtLotID, txtStripID);
+            //}
+            //else
+            {
+                btnSoftwareReady.Click += BtnSoftwareReady_Click;
+            }
 
             chkIsSaveRaw.Visible = false;
             chkIsSaveNGRaw.Visible = false;
             chkIsSaveDebug.Visible = false;
 
-            btnSingleSnap = button6;
-            btnSingleTest = button1;
-            btnSaveImage = button2;
-            btnSingleOfflineTest = button3;
-            btnClearDataZero = button4;
-            btnSoftwareReady = button5;
-            //btnAutoManual = button7;
-
+            // 事件繫結保持不變
             btnSingleSnap.Click += BtnSingleSnap_Click;
             btnSingleTest.Click += BtnSingleTest_Click;
             btnSaveImage.Click += BtnSaveImage_Click;
             btnSingleOfflineTest.Click += BtnSingleOfflineTest_Click;
             btnClearDataZero.Click += BtnClearDataZero_Click;
-            btnSoftwareReady.Click += BtnSoftwareReady_Click;
             //btnAutoManual.Click += BtnAutoManual_Click;
 
             txtProductBarcode.KeyDown += new KeyEventHandler(txtProductBarcode_KeyDown);
@@ -155,11 +191,31 @@ namespace PhotoMachine.UISpace
             SizeChanged += RunUI_SizeChanged;
 
             InitializeDataGridView();
-
-            txtLotNo.ReadOnly = true;
-            txtStripID.ReadOnly = true;
         }
 
+        public void Initial(string uipath, int langindex, VersionEnum ver, OptionEnum opt)
+        {
+            UIPath = uipath;
+            LanguageIndex = langindex;
+            VER = ver;
+            OPT = opt;
+
+            m_CalTimer = new Timer();
+            m_CalTimer.Interval = 1000;
+            m_CalTimer.Enabled = true;
+            m_CalTimer.Tick += M_CalTimer_Tick;
+
+            SetDuriation("0 s");
+
+            if (!DesignMode)
+            {
+                var model = GaMvcConfig.SysModel?.AoiModel;
+                if (model != null)
+                    model.OnLotDataChanged += AoiModel_OnLotDataChanged;
+            }
+        }
+
+        #region Control Event Handlers
         private void AoiModel_OnLotDataChanged(object sender, EventArgs e)
         {
             UpdateLotData();
@@ -167,26 +223,24 @@ namespace PhotoMachine.UISpace
 
         private void BtnAutoManual_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void BtnSoftwareReady_Click(object sender, EventArgs e)
         {
-            var plcIO = MACHINE?.PLCIO;
+            //if (GaMvcConfig.UxInjection != null)
+            //    return;
+
+            var plcIO = _plcIO; // MACHINE?.PLCIO;
             if (plcIO == null) return;
 
             bool bReady = !plcIO.bSoftwareReady;    // Toggle bSoftwareReady
 
-            //>>> plcIO.bScanStart = false;
             plcIO.bSoftwareReady = bReady;
             plcIO.bFlyReady = bReady;
 
-            if (bReady)                             
+            if (bReady)
             {
-                //plcIO.bScanStart = false;
-                //plcIO.bScanReady = false;
-                //plcIO.bScanDone = false;
-                //plcIO.iRecipeNum = 0;
                 plcIO.ResetPlc(resetRecipeNum: true);
                 OnTrigger(RunStatusEnum.CHANGERECIPE);
             }
@@ -194,80 +248,17 @@ namespace PhotoMachine.UISpace
 
         private void BtnClearDataZero_Click(object sender, EventArgs e)
         {
-            //dgvDataReset();
-            //xRecipe.ResetZero();
             SetDuriation("0 s");
-        }
-
-        private void InitializeDataGridView()
-        {
-            dgv.AllowUserToAddRows = false;
-            dgv.AllowUserToDeleteRows = false;
-            dgv.ReadOnly = true;
-            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-            dgv.RowHeadersVisible = false;
-
-            dgv.Columns["col1"].SortMode = DataGridViewColumnSortMode.NotSortable;
-            dgv.Columns["col2"].SortMode = DataGridViewColumnSortMode.NotSortable;
-
-            // 初始化数据
-            dgv.Rows.Add("PASS数", 0);
-            dgv.Rows.Add("NG数", 0);
-            //dgv.Rows.Add("印字偏移", 0);
-            //dgv.Rows.Add("印字缺失", 0);
-            //dgv.Rows.Add("2D读取错误", 0);
-            //dgv.Rows.Add("2D比对错误", 0);
-            //dgv.Rows.Add("2D重复", 0);
-            //dgv.Rows.Add("芯片数", 0);
-            dgv.Rows.Add("良率", 0);
-
-            //int i = 0;
-            //foreach (DataGridViewRow row in dgv.Rows)
-            //{
-            //    row.DefaultCellStyle.BackColor = categoryColors[i];
-            //    i++;
-            //}
-        }
-
-        //// 定义不同错误类别的颜色
-        //Color[] categoryColors =
-        //{
-        //    Color.Lime,     // PASS
-        //    Color.Red,      // 印字错误
-        //    Color.Violet,     // 印字偏移
-        //    Color.Red, // 印字缺失
-        //    Color.Fuchsia,    // 2D读取错误
-        //    Color.Orange,   // 2D比对错误
-        //    Color.LightPink,       // 2D重复
-        //    Color.Gray,       // 芯片数
-        //    Color.LightBlue,       // 良率
-        //};
-        void _updateDgvData()
-        {
-            //int i = 0;
-            //while (i < xRecipe.AnalyzeDatas.Length - 1)
-            //{
-            //    dgv.Rows[i].Cells[1].Value = xRecipe.AnalyzeDatas[i];
-            //    i++;
-            //}
-            //dgv.Rows[i].Cells[1].Value = $"{xRecipe.AnalyzeDatas[i].ToString("0.00")} %";
-        }
-        void dgvDataReset()
-        {
-            int i = 0;
-            while (i < dgv.RowCount)
-            {
-                dgv.Rows[i].Cells[1].Value = 0;
-                i++;
-            }
         }
 
         private void BtnSingleOfflineTest_Click(object sender, EventArgs e)
         {
+#if (OPT_ABANDONED)
             if (!m_SingleProcess.IsOn)
                 m_SingleProcess.Start("OfflineTest");
             else
                 m_SingleProcess.Stop();
+#endif
         }
 
         private void BtnSaveImage_Click(object sender, EventArgs e)
@@ -283,7 +274,6 @@ namespace PhotoMachine.UISpace
             }
             else
             {
-                // 注意: IScanCam.GetFreeImageBitmap() 所取得的 FreeBitmap 由 Camera Driver 自行維持其生命周期 
                 var cameraFreeBmp = IScanCam.GetFreeImageBitmap();
                 srcBmp = cameraFreeBmp?.ToBitmap();
                 isOffLine = false;
@@ -299,7 +289,7 @@ namespace PhotoMachine.UISpace
 
                     GaImageUtil.SaveBigImage(dstFilename, srcBmp);
                     string msg = isOffLine ? "離線圖檔 已經另存至:" : "相機圖檔 已經保存至:";
-                    VsMessageBox.Info(ToChangeLanguage(msg) + Environment.NewLine + dstFilename);
+                    VsMessageBox.Info(msg + Environment.NewLine + dstFilename);
 
                     GaUtil.SetCursor(this, oldCur);
                 }
@@ -309,10 +299,12 @@ namespace PhotoMachine.UISpace
 
         private void BtnSingleSnap_Click(object sender, EventArgs e)
         {
+#if(OPT_ABANDONED)
             if (!m_SingleProcess.IsOn)
                 m_SingleProcess.Start("Snap");
             else
                 m_SingleProcess.Stop();
+#endif
         }
 
         private void BtnSingleTest_Click(object sender, EventArgs e)
@@ -329,17 +321,6 @@ namespace PhotoMachine.UISpace
             {
                 SetDuriation(ConvertToString(DateTime.Now.Subtract(m_dtStart)));
             }
-        
-        }
-        public string ConvertToString(TimeSpan tp)
-        {
-            string Str = "";
-
-            Str += tp.Hours.ToString("00") + ":";
-            Str += tp.Minutes.ToString("00") + ":";
-            Str += tp.Seconds.ToString("00");
-
-            return Str;
         }
 
         void txtProductBarcode_KeyDown(object sender, KeyEventArgs e)
@@ -358,80 +339,42 @@ namespace PhotoMachine.UISpace
                 OnTrigger(RunStatusEnum.STARTRUN);
             }
         }
+        #endregion
 
-        public bool SetBarcodeEnable
+        #region DataGridView Operations
+        private void InitializeDataGridView()
         {
-            set
-            {
-                txtProductBarcode.Enabled = value;
-                txtOPBarcode.Enabled = value;
+            dgv.AllowUserToAddRows = false;
+            dgv.AllowUserToDeleteRows = false;
+            dgv.ReadOnly = true;
+            dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dgv.RowHeadersVisible = false;
 
-                if (value)
-                {
-                    txtOPBarcode.Text = "";
-                    txtOPBarcode.Focus();
-                }
-            }
+            dgv.Columns["col1"].SortMode = DataGridViewColumnSortMode.NotSortable;
+            dgv.Columns["col2"].SortMode = DataGridViewColumnSortMode.NotSortable;
 
-        }
-        public string SetBarcodeString
-        {
-            set
-            {
-                txtOPBarcode.Text = value;
-                txtOPBarcode.Focus();
-            }
+            dgv.Rows.Add("PASS数", 0);
+            dgv.Rows.Add("NG数", 0);
+            dgv.Rows.Add("良率", 0);
         }
 
-        //public void Initial(string uipath,
-        //    int langindex,
-        //    VersionEnum ver,
-        //    OptionEnum opt,
-        //    RESULTClass result,
-        //    UseIOClass useio)
-        //{
-        //    UIPath = uipath;
-        //    LanguageIndex = langindex;
-        //    VER = ver;
-        //    OPT = opt;
-        //    RESULT = result;
-
-        //    USEIO = useio;
-
-        //}
-
-        public void Initial(string uipath,
-            int langindex,
-            VersionEnum ver,
-            OptionEnum opt)
-            //RESULTClass result,
-            //UseIOClass useio)
+        void _updateDgvData()
         {
-            UIPath = uipath;
-            LanguageIndex = langindex;
-            VER = ver;
-            OPT = opt;
-            //RESULT = result;
-
-            //USEIO = useio;
-
-            m_CalTimer = new Timer();
-            m_CalTimer.Interval = 1000;
-            m_CalTimer.Enabled = true;
-            m_CalTimer.Tick += M_CalTimer_Tick;
-
-            //SetLotID(xRecipe.xLotNoStr);
-            SetDuriation("0 s");
-
-
-            if (!DesignMode)
-            {
-                var model = GaMvcConfig.SysModel?.AoiModel;
-                if (model != null)
-                    model.OnLotDataChanged += AoiModel_OnLotDataChanged;
-            }
+            // 預留邏輯
         }
 
+        void dgvDataReset()
+        {
+            int i = 0;
+            while (i < dgv.RowCount)
+            {
+                dgv.Rows[i].Cells[1].Value = 0;
+                i++;
+            }
+        }
+        #endregion
+
+        #region Business Logic Methods (Barcode, Lot, Timer)
         public string GetProductBarcode()
         {
             return txtProductBarcode.Text.Trim();
@@ -444,30 +387,14 @@ namespace PhotoMachine.UISpace
         {
             panel1.Enabled = isendable;
         }
-
-        public void StartShinnig(bool ispass)
-        {
-            IsResultPass = ispass;
-            ShinningProcess.Start();
-        }
         public void SetDuriation(string inputstr)
         {
             lblDuriation.Text = inputstr;
-
-            //dgv.Rows[0].Cells[1].Value = xRecipe.PassCount;
-            //dgv.Rows[1].Cells[1].Value = xRecipe.NGCount;
-
-            //if (xRecipe.PassCount + xRecipe.NGCount > 0)
-            //    dgv.Rows[2].Cells[1].Value = (xRecipe.PassCount * 1.0 / (xRecipe.PassCount + xRecipe.NGCount) * 100).ToString("0.00") + " %";
-            //else
-            //    dgv.Rows[2].Cells[1].Value = 0;
         }
-        DateTime m_dtStart = DateTime.Now;
         public void StartTime()
         {
             m_dtStart = DateTime.Now;
             m_Start = 1;
-
             SetProductBarcode("");
         }
         public void StopTime()
@@ -479,15 +406,6 @@ namespace PhotoMachine.UISpace
             txtProductBarcode.Text = eBarcode;
             txtProductBarcode.Focus();
         }
-
-        //public void SetLotID(string eLot)
-        //{
-        //    //txtLotNo.Text = eLot;
-        //}
-        //public void SetStripID(string eStrip)
-        //{
-        //    //txtStripID.Text = eStrip;
-        //}
         void UpdateLotData()
         {
             if (InvokeRequired)
@@ -496,36 +414,39 @@ namespace PhotoMachine.UISpace
             }
             else
             {
-                var plcIO = MACHINE?.PLCIO;
+                var plcIO = _plcIO; //  MACHINE?.PLCIO;
                 if (plcIO != null)
                 {
                     txtStripID.Text = plcIO.sStripID;
-                    txtLotNo.Text = plcIO.sLotID;
+                    txtLotID.Text = plcIO.sLotID;
                 }
             }
         }
-
-        #region SHINING_MESS
-        public bool IsShinning
+        public string ConvertToString(TimeSpan tp)
         {
-            get
-            {
-                return ShinningProcess.IsOn;
-            }
+            string Str = "";
+            Str += tp.Hours.ToString("00") + ":";
+            Str += tp.Minutes.ToString("00") + ":";
+            Str += tp.Seconds.ToString("00");
+            return Str;
         }
-        int ShinigCount = 0;
-        ProcessClass ShinningProcess = new ProcessClass();
-        public void ShinningTick()
+        #endregion
+
+        #region UI Shinnig Engine
+        public void StartShinnig(bool ispass)
         {
-            ProcessClass Process = ShinningProcess;
+            IsResultPass = ispass;
+            _shinningProcess.Start();
+        }
+        void ShinningTick()
+        {
+            ProcessClass Process = _shinningProcess;
 
             if (Process.IsOn)
             {
                 switch (Process.ID)
                 {
                     case 5:
-
-                        //lblBigPass.Visible = IsPass;
                         if (ShinigCount == 0)
                         {
                             Process.TimeUnit = TimeUnitEnum.ms;
@@ -535,12 +456,6 @@ namespace PhotoMachine.UISpace
                         if (ShinigCount == 0 || Process.IsTimeup)
                         {
                             lblBigPass.ForeColor = (IsResultPass ? Color.Lime : Color.Red);
-
-                            //if (IsResultPass)
-                            //    ShineGreen();
-                            //else
-                            //    ShineRed();
-
                             lblBigPass.Refresh();
 
                             Process.ID = 10;
@@ -551,22 +466,14 @@ namespace PhotoMachine.UISpace
                         if (Process.IsTimeup)
                         {
                             lblBigPass.ForeColor = (IsResultPass ? Color.Green : Color.DarkRed);
-
-                            //ShineNothing();
-
                             lblBigPass.Refresh();
 
                             ShinigCount++;
 
                             if (ShinigCount > ShiningTimes)
                             {
-
                                 ShinigCount = 0;
-                                //OnTrigger((IsPass ? StatusEnum.CALPASS : StatusEnum.CALNG));
-
-                                //OnTrigger(StatusEnum.CALEND);
                                 OnTrigger(RunStatusEnum.SHINNIGEND);
-
                                 Process.Stop();
                             }
                             else
@@ -576,26 +483,9 @@ namespace PhotoMachine.UISpace
                 }
             }
         }
-        //void ShineGreen()
-        //{
-        //    USEIO.LEDGreen = true;
-        //    USEIO.LEDRed = false;
-        //    USEIO.LEDYellow = false;
-        //}
-        //void ShineRed()
-        //{
-        //    USEIO.LEDGreen = false;
-        //    USEIO.LEDRed = true;
-        //    USEIO.LEDYellow = false;
-        //}
-        //void ShineNothing()
-        //{
-        //    USEIO.LEDGreen = false;
-        //    USEIO.LEDRed = false;
-        //    USEIO.LEDYellow = false;
-        //}
         #endregion
 
+        #region Main Form Tick Loop
         public void Tick()
         {
             ShinningTick();
@@ -604,43 +494,44 @@ namespace PhotoMachine.UISpace
             btnSingleTest.BackColor = (m_SingleProcess.IsOn && m_SingleProcess.RelateString == "Test" ? Color.Red : Color.FromArgb(192, 255, 192));
             btnSingleOfflineTest.BackColor = (m_SingleProcess.IsOn && m_SingleProcess.RelateString == "OfflineTest" ? Color.Red : Color.FromArgb(192, 255, 192));
 
-            // 在此又 Polling PLC 了 !!!
-            // polling PLC 必須要集中管理.
-            var plcIO = MACHINE?.PLCIO;
-            if (plcIO != null)
+            //if (GaMvcConfig.UxInjection == null)
             {
-                bool bScanStart = plcIO.bScanStart;
-                bool bSoftwareReady = plcIO.bSoftwareReady;
-                
-                btnSoftwareReady.BackColor = bSoftwareReady ? Color.Green : Color.FromArgb(192, 255, 192);
-                btnSoftwareReady.ForeColor = bSoftwareReady ? Color.Yellow : Color.Black;
+                var plcIO = _plcIO; // MACHINE?.PLCIO;
+                if (plcIO != null)
+                {
+                    bool bScanStart = plcIO.bScanStart;
+                    bool bSoftwareReady = plcIO.bSoftwareReady;
 
-                if (bSoftwareReady)
-                {
-                    if (plcIO.sRecipeName != RCPDB.RCPItemNow.Name)
-                    {
-                        plcIO.iRecipeNum = 0;
-                        OnTrigger(RunStatusEnum.CHANGERECIPE);
-                    }
-                }
+                    btnSoftwareReady.BackColor = bSoftwareReady ? Color.Green : Color.FromArgb(192, 255, 192);
+                    btnSoftwareReady.ForeColor = bSoftwareReady ? Color.Yellow : Color.Black;
 
-                if (bScanStart)
-                {
-                    if (txtStripID.Tag == null)
+                    if (bSoftwareReady)
                     {
-                        txtStripID.Tag = "bScanStart";
-                        //txtStripID.Text = plcIO.sStripID;
-                        //txtLotNo.Text = plcIO.sLotID;
-                        UpdateLotData();
+                        if (plcIO.sRecipeName != RCPDB.RCPItemNow.Name)
+                        {
+                            plcIO.iRecipeNum = 0;
+                            OnTrigger(RunStatusEnum.CHANGERECIPE);
+                        }
                     }
-                }
-                else
-                {
-                    txtStripID.Tag = null;
+
+                    if (bScanStart)
+                    {
+                        if (txtStripID.Tag == null)
+                        {
+                            txtStripID.Tag = "bScanStart";
+                            UpdateLotData();
+                        }
+                    }
+                    else
+                    {
+                        txtStripID.Tag = null;
+                    }
                 }
             }
         }
+        #endregion
 
+        #region Result Output & File Operations
         public void ClearResult()
         {
             IsResultPass = false;
@@ -650,13 +541,11 @@ namespace PhotoMachine.UISpace
         {
             txtResult.AppendText(str + Environment.NewLine);
         }
-
         public void SetResultText(string str)
         {
             txtResult.Text = str;
             txtResult.Refresh();
         }
-
         public void SaveResultLog(string filepath)
         {
             JzTools.SaveData(txtResult.Text, filepath);
@@ -664,10 +553,7 @@ namespace PhotoMachine.UISpace
         public string SaveFilePicker(string DefaultPath, string DefaultName)
         {
             string retStr = "";
-
             SaveFileDialog dlg = new SaveFileDialog();
-
-            //dlg.Filter = "BMP Files (*.bmp)|*.BMP|" + "All files (*.*)|*.*";
             dlg.Filter = DefaultPath;
             dlg.FileName = DefaultName;
 
@@ -677,7 +563,9 @@ namespace PhotoMachine.UISpace
             }
             return retStr;
         }
+        #endregion
 
+        #region Custom Events & Triggers
         public delegate void TriggerHandler(RunStatusEnum Status);
         public event TriggerHandler TriggerAction;
         public void OnTrigger(RunStatusEnum Status)
@@ -707,7 +595,7 @@ namespace PhotoMachine.UISpace
                 RunAction(Status, opstring);
             }
         }
-
+        #endregion
 
         #region AUTO_LAYOUT
         void RunUI_SizeChanged(object sender, EventArgs e)
@@ -723,8 +611,6 @@ namespace PhotoMachine.UISpace
         void _auto_layout()
         {
 #if OPT_LETIAN_AUTO_LAYOUT
-
-
             foreach (var c in new Control[] { groupBox2, textBox1, textBox2, textBox3, label4, button1, button2, button6 })
             {
                 var rcc = c.Parent.ClientRectangle;
@@ -735,11 +621,13 @@ namespace PhotoMachine.UISpace
         }
         #endregion
 
-        private string ToChangeLanguage(string eText)
-        {
-            string retStr = eText;
-            retStr = LanguageExClass.Instance.GetLanguageText(eText);
-            return retStr;
-        }
+        #region Localization
+        //private string ToChangeLanguage(string eText)
+        //{
+        //    string retStr = eText;
+        //    retStr = LanguageExClass.Instance.GetLanguageText(eText);
+        //    return retStr;
+        //}
+        #endregion
     }
 }

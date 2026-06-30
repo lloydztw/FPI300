@@ -274,7 +274,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             //_editorUI.lblActiveCarrierID.Text = GaUtil.GetEnumDescription(_carrierID) + " 晶粒模板設定";
             _editorUI.Window.FindForm().FormClosing += GaTemplateEditCtrl_FormClosing;
 
-            updateSubTitle();
+            _editorUI.Window.BeginInvoke((Action)updateSubTitle);
             updateDispUI(DS1, _xBmpGoldenRegionTemplate);
             updateDispUI(DS2, _xBmpGoldenChipTemplate);
 
@@ -408,7 +408,6 @@ namespace LaserAlignDX.Mvc.Ctrl
                 refreshDispUI(DS1);
                 refreshDispUI(DS3);
                 updateLineSegmentBoxes(_opSelector == OpSelector.LineBorders);
-                
             }
         }
         void BuildGoldenChipTemplate()
@@ -820,9 +819,13 @@ namespace LaserAlignDX.Mvc.Ctrl
         void updateSubTitle()
         {
             string subTitle = GaUtil.GetEnumDescription(_carrierID);
+            subTitle = QMSG.Text(subTitle, "gui");
+
             int idx = (int)_opSelector;
+            
             if (0 <= idx && idx < _editorUI.rdoBoxSelectors.Length)
                 subTitle += " : " + _editorUI.rdoBoxSelectors[idx].Text;
+
             _editorUI.lblActiveCarrierID.Text = subTitle;
         }
         void updateGoldenBoxes(bool toRecipe)

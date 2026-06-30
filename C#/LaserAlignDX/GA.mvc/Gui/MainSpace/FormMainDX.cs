@@ -5,8 +5,11 @@ using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
 using JetEazy.FormSpace;
+using JetEazy.Lang;
 using JetEazy.UISpace;
 using JetEazy.Utils;
+using LaserAlignDX;
+//using JzDisplay;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace;
 using LeTian.AoiLib;
@@ -19,7 +22,6 @@ using System.Windows.Forms;
 using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
-
 
 namespace Traveller106
 {
@@ -138,14 +140,25 @@ namespace Traveller106
             this.Load += MainForm_Load;
             this.FormClosed += MainForm_FormClosed;
             this.SizeChanged += MainForm_SizeChanged;
+
+            RUNUI.btnLanguage.Click += BtnLanguage_Click;
         }
 
+        private void BtnLanguage_Click(object sender, EventArgs e)
+        {
+            using (var dlg = new JetEazy.Lang.GUI.FormLanguageSelector(QMSG.Lang()))
+            {
+                if (dlg.ShowDialog() == DialogResult.OK)
+                    QMSG.Translate(this);
+            }
+        }
         private void MainForm_Load(object sender, EventArgs e)
         {
             //(0) Banner
             BannerForm.ShowBanner();
             GaUtil.SetCursor(this, Cursors.AppStarting);
 
+#if (false)
             //(0.1) MYDECODE
             JetEazy.Universal.MYDECODE = Universal.MAINPATH + @"\WORK\";
 
@@ -161,9 +174,10 @@ namespace Traveller106
             this.Controls.Add(dispUI); // Gaara 原來的代碼, 少寫此行 !!!!!
             bool bOK = dispUI.DispUIload(this);
             _TRACE("[初始化] JzDisplay");
+#endif
 
             //(2) 初始化 本專案
-            bOK &= Init();
+            bool bOK = Init();
 
             //(3) 初始化 異常
             if (!bOK)
@@ -181,10 +195,13 @@ namespace Traveller106
             #endregion
 
             //(4) 設定視窗標題
-            this.Text = $"{ToChangeLanguage("FPI30-Studio")} (Ver {Application.ProductVersion}) " + Universal.VersionDate;
+            this.Text = $"{GlobalConfig.TITLE} (Ver {Application.ProductVersion}) " + Universal.VersionDate;
 
             //(5) 輸出 LOG
             _show_simulation_info_to_log();
+
+            //(6) 語系
+            _post_translate();
         }
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
@@ -1231,6 +1248,7 @@ namespace Traveller106
         #region PRIVATE_FUNCTIONS
         [DllImport("User32.dll", EntryPoint = "FindWindow")]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+#if(false)
         bool _getMxComponent()
         {
 
@@ -1285,7 +1303,7 @@ namespace Traveller106
 
             return ret;
         }
-
+#endif
         private void _show_simulation_info_to_log()
         {
             if (Universal.IsNoUseIO)
@@ -1328,11 +1346,19 @@ namespace Traveller106
             ctrlUI1.Top = runUI1.Bottom;
             ctrlUI1.Height = rcc.Bottom - ctrlUI1.Top;
         }
-        private string ToChangeLanguage(string eText)
+        private void _post_translate()
         {
-            string retStr = eText;
-            //retStr = LanguageExClass.Instance.GetLanguageText(eText);
-            return retStr;
+            QMSG.Translate(this, 3000);
+            QMSG.Lang("gui").LanguageChanged += (s, e) =>
+            {
+                QMSG.Translate(SETUPUI, 100);
+            };
+
+            //new Action(() => {
+            //    System.Threading.Thread.Sleep(3000);
+            //    BeginInvoke(new Action(() => QMSG.Translate(this)));
+            //    BeginInvoke(new Action(() => QMSG.Translate(SETUPUI)));
+            //}).BeginInvoke(null, null);
         }
         #endregion
 

@@ -29,175 +29,190 @@
         private void InitializeComponent()
         {
             this.textBox2Rcp = new System.Windows.Forms.TextBox();
-            this.label2rcp = new System.Windows.Forms.Label();
+            this.lblRcp2 = new System.Windows.Forms.Label();
             this.textBox1rcp = new System.Windows.Forms.TextBox();
-            this.label1rcp = new System.Windows.Forms.Label();
-            this.label4rcp = new System.Windows.Forms.Label();
+            this.lblRcp1 = new System.Windows.Forms.Label();
+            this.lblRcp4 = new System.Windows.Forms.Label();
             this.groupBox1rcp = new System.Windows.Forms.GroupBox();
-            this.label3rcp = new System.Windows.Forms.Label();
+            this.lblRcp3 = new System.Windows.Forms.Label();
             this.richTextBox1rcp = new System.Windows.Forms.RichTextBox();
-            this.button3rcp = new System.Windows.Forms.Button();
-            this.button1rcp = new System.Windows.Forms.Button();
-            this.button6rcp = new System.Windows.Forms.Button();
-            this.button4rcp = new System.Windows.Forms.Button();
-            this.button2rcp = new System.Windows.Forms.Button();
-            this.btnDel = new System.Windows.Forms.Button();
+            this.btnRcpDetails = new System.Windows.Forms.Button();
+            this.btnRcpAdd = new System.Windows.Forms.Button();
+            this.btnRcpCancel = new System.Windows.Forms.Button();
+            this.btnRcpOK = new System.Windows.Forms.Button();
+            this.btnRcpEdit = new System.Windows.Forms.Button();
+            this.btnRcpDel = new System.Windows.Forms.Button();
             this.groupBox1rcp.SuspendLayout();
             this.SuspendLayout();
             // 
             // textBox2Rcp
             // 
-            this.textBox2Rcp.Location = new System.Drawing.Point(165, 30);
+            this.textBox2Rcp.Location = new System.Drawing.Point(248, 45);
+            this.textBox2Rcp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox2Rcp.Name = "textBox2Rcp";
-            this.textBox2Rcp.Size = new System.Drawing.Size(51, 21);
+            this.textBox2Rcp.Size = new System.Drawing.Size(74, 29);
             this.textBox2Rcp.TabIndex = 7;
             this.textBox2Rcp.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // label2rcp
+            // lblRcp2
             // 
-            this.label2rcp.AutoSize = true;
-            this.label2rcp.Location = new System.Drawing.Point(168, 15);
-            this.label2rcp.Name = "label2rcp";
-            this.label2rcp.Size = new System.Drawing.Size(29, 12);
-            this.label2rcp.TabIndex = 6;
-            this.label2rcp.Text = "版本";
+            this.lblRcp2.AutoSize = true;
+            this.lblRcp2.Location = new System.Drawing.Point(252, 22);
+            this.lblRcp2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblRcp2.Name = "lblRcp2";
+            this.lblRcp2.Size = new System.Drawing.Size(44, 18);
+            this.lblRcp2.TabIndex = 6;
+            this.lblRcp2.Text = "版本";
             // 
             // textBox1rcp
             // 
-            this.textBox1rcp.Location = new System.Drawing.Point(5, 30);
+            this.textBox1rcp.Location = new System.Drawing.Point(8, 45);
+            this.textBox1rcp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBox1rcp.Name = "textBox1rcp";
-            this.textBox1rcp.Size = new System.Drawing.Size(156, 21);
+            this.textBox1rcp.Size = new System.Drawing.Size(232, 29);
             this.textBox1rcp.TabIndex = 5;
             this.textBox1rcp.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
-            // label1rcp
+            // lblRcp1
             // 
-            this.label1rcp.AutoSize = true;
-            this.label1rcp.Location = new System.Drawing.Point(5, 15);
-            this.label1rcp.Name = "label1rcp";
-            this.label1rcp.Size = new System.Drawing.Size(53, 12);
-            this.label1rcp.TabIndex = 4;
-            this.label1rcp.Text = "參數編號";
+            this.lblRcp1.AutoSize = true;
+            this.lblRcp1.Location = new System.Drawing.Point(5, 22);
+            this.lblRcp1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblRcp1.Name = "lblRcp1";
+            this.lblRcp1.Size = new System.Drawing.Size(80, 18);
+            this.lblRcp1.TabIndex = 4;
+            this.lblRcp1.Text = "參數編號";
             // 
-            // label4rcp
+            // lblRcp4
             // 
-            this.label4rcp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.label4rcp.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label4rcp.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
-            this.label4rcp.Location = new System.Drawing.Point(2, 301);
-            this.label4rcp.Name = "label4rcp";
-            this.label4rcp.Size = new System.Drawing.Size(223, 65);
-            this.label4rcp.TabIndex = 38;
-            this.label4rcp.Text = "8888/88/88 88/88";
-            this.label4rcp.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblRcp4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.lblRcp4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblRcp4.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F);
+            this.lblRcp4.Location = new System.Drawing.Point(3, 452);
+            this.lblRcp4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblRcp4.Name = "lblRcp4";
+            this.lblRcp4.Size = new System.Drawing.Size(334, 96);
+            this.lblRcp4.TabIndex = 38;
+            this.lblRcp4.Text = "8888/88/88 88/88";
+            this.lblRcp4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // groupBox1rcp
             // 
-            this.groupBox1rcp.Controls.Add(this.label3rcp);
+            this.groupBox1rcp.Controls.Add(this.lblRcp3);
             this.groupBox1rcp.Controls.Add(this.richTextBox1rcp);
-            this.groupBox1rcp.Controls.Add(this.button3rcp);
-            this.groupBox1rcp.Controls.Add(this.label1rcp);
+            this.groupBox1rcp.Controls.Add(this.btnRcpDetails);
+            this.groupBox1rcp.Controls.Add(this.lblRcp1);
             this.groupBox1rcp.Controls.Add(this.textBox1rcp);
-            this.groupBox1rcp.Controls.Add(this.label2rcp);
+            this.groupBox1rcp.Controls.Add(this.lblRcp2);
             this.groupBox1rcp.Controls.Add(this.textBox2Rcp);
-            this.groupBox1rcp.Location = new System.Drawing.Point(2, 2);
+            this.groupBox1rcp.Location = new System.Drawing.Point(3, 3);
+            this.groupBox1rcp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1rcp.Name = "groupBox1rcp";
-            this.groupBox1rcp.Size = new System.Drawing.Size(224, 296);
+            this.groupBox1rcp.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1rcp.Size = new System.Drawing.Size(336, 444);
             this.groupBox1rcp.TabIndex = 39;
             this.groupBox1rcp.TabStop = false;
-            this.groupBox1rcp.Text = "參數資料";
             // 
-            // label3rcp
+            // lblRcp3
             // 
-            this.label3rcp.AutoSize = true;
-            this.label3rcp.Location = new System.Drawing.Point(6, 63);
-            this.label3rcp.Name = "label3rcp";
-            this.label3rcp.Size = new System.Drawing.Size(29, 12);
-            this.label3rcp.TabIndex = 45;
-            this.label3rcp.Text = "备注";
+            this.lblRcp3.AutoSize = true;
+            this.lblRcp3.Location = new System.Drawing.Point(9, 95);
+            this.lblRcp3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblRcp3.Name = "lblRcp3";
+            this.lblRcp3.Size = new System.Drawing.Size(44, 18);
+            this.lblRcp3.TabIndex = 45;
+            this.lblRcp3.Text = "备注";
             // 
             // richTextBox1rcp
             // 
-            this.richTextBox1rcp.Location = new System.Drawing.Point(5, 88);
+            this.richTextBox1rcp.Location = new System.Drawing.Point(8, 132);
+            this.richTextBox1rcp.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.richTextBox1rcp.Name = "richTextBox1rcp";
-            this.richTextBox1rcp.Size = new System.Drawing.Size(211, 202);
+            this.richTextBox1rcp.Size = new System.Drawing.Size(314, 301);
             this.richTextBox1rcp.TabIndex = 44;
             this.richTextBox1rcp.Text = "";
             // 
-            // button3rcp
+            // btnRcpDetails
             // 
-            this.button3rcp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.button3rcp.Location = new System.Drawing.Point(79, 57);
-            this.button3rcp.Name = "button3rcp";
-            this.button3rcp.Size = new System.Drawing.Size(137, 25);
-            this.button3rcp.TabIndex = 43;
-            this.button3rcp.Text = "详细设定";
-            this.button3rcp.UseVisualStyleBackColor = false;
+            this.btnRcpDetails.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnRcpDetails.Location = new System.Drawing.Point(118, 86);
+            this.btnRcpDetails.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnRcpDetails.Name = "btnRcpDetails";
+            this.btnRcpDetails.Size = new System.Drawing.Size(206, 38);
+            this.btnRcpDetails.TabIndex = 43;
+            this.btnRcpDetails.Text = "详细设定";
+            this.btnRcpDetails.UseVisualStyleBackColor = false;
             // 
-            // button1rcp
+            // btnRcpAdd
             // 
-            this.button1rcp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.button1rcp.Location = new System.Drawing.Point(2, 369);
-            this.button1rcp.Name = "button1rcp";
-            this.button1rcp.Size = new System.Drawing.Size(76, 45);
-            this.button1rcp.TabIndex = 42;
-            this.button1rcp.Text = "新增";
-            this.button1rcp.UseVisualStyleBackColor = false;
+            this.btnRcpAdd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnRcpAdd.Location = new System.Drawing.Point(3, 554);
+            this.btnRcpAdd.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnRcpAdd.Name = "btnRcpAdd";
+            this.btnRcpAdd.Size = new System.Drawing.Size(114, 68);
+            this.btnRcpAdd.TabIndex = 42;
+            this.btnRcpAdd.Text = "新增";
+            this.btnRcpAdd.UseVisualStyleBackColor = false;
             // 
-            // button6rcp
+            // btnRcpCancel
             // 
-            this.button6rcp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
-            this.button6rcp.Location = new System.Drawing.Point(149, 369);
-            this.button6rcp.Name = "button6rcp";
-            this.button6rcp.Size = new System.Drawing.Size(76, 45);
-            this.button6rcp.TabIndex = 41;
-            this.button6rcp.Text = "取消";
-            this.button6rcp.UseVisualStyleBackColor = false;
+            this.btnRcpCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
+            this.btnRcpCancel.Location = new System.Drawing.Point(224, 554);
+            this.btnRcpCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnRcpCancel.Name = "btnRcpCancel";
+            this.btnRcpCancel.Size = new System.Drawing.Size(114, 68);
+            this.btnRcpCancel.TabIndex = 41;
+            this.btnRcpCancel.Text = "取消";
+            this.btnRcpCancel.UseVisualStyleBackColor = false;
             // 
-            // button4rcp
+            // btnRcpOK
             // 
-            this.button4rcp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.button4rcp.Location = new System.Drawing.Point(71, 369);
-            this.button4rcp.Name = "button4rcp";
-            this.button4rcp.Size = new System.Drawing.Size(76, 45);
-            this.button4rcp.TabIndex = 40;
-            this.button4rcp.Text = "確定";
-            this.button4rcp.UseVisualStyleBackColor = false;
+            this.btnRcpOK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnRcpOK.Location = new System.Drawing.Point(106, 554);
+            this.btnRcpOK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnRcpOK.Name = "btnRcpOK";
+            this.btnRcpOK.Size = new System.Drawing.Size(114, 68);
+            this.btnRcpOK.TabIndex = 40;
+            this.btnRcpOK.Text = "確定";
+            this.btnRcpOK.UseVisualStyleBackColor = false;
             // 
-            // button2rcp
+            // btnRcpEdit
             // 
-            this.button2rcp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.button2rcp.Location = new System.Drawing.Point(77, 369);
-            this.button2rcp.Name = "button2rcp";
-            this.button2rcp.Size = new System.Drawing.Size(76, 45);
-            this.button2rcp.TabIndex = 43;
-            this.button2rcp.Text = "修改";
-            this.button2rcp.UseVisualStyleBackColor = false;
+            this.btnRcpEdit.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnRcpEdit.Location = new System.Drawing.Point(116, 554);
+            this.btnRcpEdit.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnRcpEdit.Name = "btnRcpEdit";
+            this.btnRcpEdit.Size = new System.Drawing.Size(114, 68);
+            this.btnRcpEdit.TabIndex = 43;
+            this.btnRcpEdit.Text = "修改";
+            this.btnRcpEdit.UseVisualStyleBackColor = false;
             // 
-            // btnDel
+            // btnRcpDel
             // 
-            this.btnDel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.btnDel.Location = new System.Drawing.Point(153, 366);
-            this.btnDel.Name = "btnDel";
-            this.btnDel.Size = new System.Drawing.Size(76, 45);
-            this.btnDel.TabIndex = 44;
-            this.btnDel.Text = "删除";
-            this.btnDel.UseVisualStyleBackColor = false;
+            this.btnRcpDel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnRcpDel.Location = new System.Drawing.Point(230, 554);
+            this.btnRcpDel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnRcpDel.Name = "btnRcpDel";
+            this.btnRcpDel.Size = new System.Drawing.Size(114, 68);
+            this.btnRcpDel.TabIndex = 44;
+            this.btnRcpDel.Text = "删除";
+            this.btnRcpDel.UseVisualStyleBackColor = false;
             // 
             // RcpUI
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Controls.Add(this.btnDel);
-            this.Controls.Add(this.button2rcp);
-            this.Controls.Add(this.button1rcp);
-            this.Controls.Add(this.button6rcp);
-            this.Controls.Add(this.button4rcp);
+            this.Controls.Add(this.btnRcpAdd);
             this.Controls.Add(this.groupBox1rcp);
-            this.Controls.Add(this.label4rcp);
+            this.Controls.Add(this.lblRcp4);
+            this.Controls.Add(this.btnRcpDel);
+            this.Controls.Add(this.btnRcpEdit);
+            this.Controls.Add(this.btnRcpCancel);
+            this.Controls.Add(this.btnRcpOK);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "RcpUI";
-            this.Size = new System.Drawing.Size(228, 417);
+            this.Size = new System.Drawing.Size(342, 626);
             this.groupBox1rcp.ResumeLayout(false);
             this.groupBox1rcp.PerformLayout();
             this.ResumeLayout(false);
@@ -207,19 +222,19 @@
         #endregion
 
         private System.Windows.Forms.TextBox textBox2Rcp;
-        private System.Windows.Forms.Label label2rcp;
+        private System.Windows.Forms.Label lblRcp2;
         private System.Windows.Forms.TextBox textBox1rcp;
-        private System.Windows.Forms.Label label1rcp;
-        private System.Windows.Forms.Label label4rcp;
+        private System.Windows.Forms.Label lblRcp1;
+        private System.Windows.Forms.Label lblRcp4;
         private System.Windows.Forms.GroupBox groupBox1rcp;
-        private System.Windows.Forms.Button button1rcp;
-        private System.Windows.Forms.Button button6rcp;
-        private System.Windows.Forms.Button button4rcp;
-        private System.Windows.Forms.Button button2rcp;
-        private System.Windows.Forms.Label label3rcp;
+        private System.Windows.Forms.Button btnRcpAdd;
+        private System.Windows.Forms.Button btnRcpCancel;
+        private System.Windows.Forms.Button btnRcpOK;
+        private System.Windows.Forms.Button btnRcpEdit;
+        private System.Windows.Forms.Label lblRcp3;
         private System.Windows.Forms.RichTextBox richTextBox1rcp;
-        private System.Windows.Forms.Button button3rcp;
-        private System.Windows.Forms.Button btnDel;
+        private System.Windows.Forms.Button btnRcpDetails;
+        private System.Windows.Forms.Button btnRcpDel;
         //private StpUI stpUI1;
     }
 }

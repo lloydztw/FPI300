@@ -93,28 +93,28 @@ namespace LaserAlignDX.UISpace.CtrlSpace
         }
         void InitUI()
         {
-            lblHeart = label4Ctr;
+            lblHeart = ioLabel2;
             //lblLineScanRecipe = label4;
-            lblSoftwareReady = label3Ctr;
-            lblLineScanStart = label1Ctr;
-            lblLineScanReady = label5Ctr;
-            lblLineScanDone = label6Ctr;
-            lblLineScanResult = label7Ctr;
+            lblSoftwareReady = ioLabel1;
+            lblLineScanStart = ioLabel3;
+            lblLineScanReady = ioLabel4;
+            lblLineScanDone = ioLabel5;
+            lblLineScanResult = ioLabel9;
             lblReConnectServer = label9Ctr;
-            lblLineScanAutoCali = label1;
+            lblLineScanAutoCali = ioLabel6;
             //lblLinescanBarcode = label2;
 
             btnReady = button1;
             btnSIMData = button6;
 
-            lblIsUsedBarcode = label1;
-            lblIsUsedJudgeBarcode = label4;
-            lblScanState = label5;
-            lblFlyStart = label6;
-            lblFlyReady = label7;
-            lblFlyDone = label8;
+            lblIsUsedBarcode = ioLabel6;
+            lblIsUsedJudgeBarcode = ioLabel7;
+            lblScanState = ioLabel8;
+            lblFlyStart = ioLabel10;
+            lblFlyReady = ioLabel11;
+            lblFlyDone = ioLabel12;
 
-            btnCalib = button2;
+            btnCalib = btnGlobalCalib;
 
             //btnOn = button6Ctr;
             //btnOff = button1Ctr;
@@ -490,8 +490,10 @@ namespace LaserAlignDX.UISpace.CtrlSpace
                 //lblScanState.BackColor = (MACHINE.PLCIO.bScanDone ? Color.Green : Color.Black);
                 //lblFlyStart.BackColor = (MACHINE.PLCIO.bScanDone ? Color.Green : Color.Black);
 
-                lblScanState.Text = $"{ToChangeLanguage("线扫状态")}{MACHINE.PLCIO.iScanStatus}";
-                lblFlyStart.Text = $"{ToChangeLanguage("飞拍轴")}{MACHINE.PLCIO.iFlyStart}";
+                //lblScanState.Text = $"{ToChangeLanguage("线扫状态")}{MACHINE.PLCIO.iScanStatus}";
+                //lblFlyStart.Text = $"{ToChangeLanguage("飞拍轴")}{MACHINE.PLCIO.iFlyStart}";
+                SetPostfix(lblScanState, MACHINE.PLCIO.iScanStatus);
+                SetPostfix(lblFlyStart, MACHINE.PLCIO.iFlyStart);
 
                 lblFlyReady.BackColor = (MACHINE.PLCIO.bFlyReady ? Color.Green : Color.Black);
                 lblFlyDone.BackColor = (MACHINE.PLCIO.bFlyDone ? Color.Green : Color.Black);
@@ -568,6 +570,19 @@ namespace LaserAlignDX.UISpace.CtrlSpace
             mFromMSR.ShowDialog();
         }
 #endif
+
+        private void SetPostfix(Control c, int value)
+        {
+            if (c.Text.Contains(":"))
+            {
+                var strs = c.Text.Split(':');
+                c.Text = $"{strs[0].Trim()}:{value}";
+            }
+            else
+            {
+                c.Text = $"{c.Text}:{value}";
+            }
+        }
 
         private string ToChangeLanguage(string eText)
         {

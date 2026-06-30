@@ -84,14 +84,14 @@ namespace LaserAlignDX.FormSpace
         //btnOpenFly = button4;
         //btnLightTrigger = button5;
         //btnSpecialCal = button6;
-        Button btnGetLocalImage => button7;
-        Button btnOK => button1;
-        Button btnCancel => button2;
-        Button btnSelectRegion => button3;
-        Button btnOpenFly => button4;
-        Button btnLightTrigger => button5;
-        Button btnSpecialCalc => button6;
-        Button btnCodetest => button8;
+        Button btnGetLocalImage => buttonFly3;
+        //Button btnOK => btnOK;
+        //Button btnCancel => btnCancel;
+        Button btnSelectRegion => buttonFly4;
+        Button btnOpenFly => buttonFly1;
+        Button btnLightTrigger => buttonFly2;
+        Button btnSpecialCalc => buttonFly6;
+        Button btnCodetest => buttonFly5;
         RichTextBox rtbCodeContent => richTextBox1;
 
         FlyOffsetUI flyOffsetUI => flyOffsetUI1;
@@ -99,7 +99,7 @@ namespace LaserAlignDX.FormSpace
         Label lblExpo => label2;
         Label lblGain => label3;
         
-        Button btnOpenMotorJogWindow => button9;
+        Button btnOpenMotorJogWindow => buttonFly9;
 
         TabControl tabMainPages => tabControl2;
         #endregion
@@ -133,6 +133,10 @@ namespace LaserAlignDX.FormSpace
             // 保存原來的顏色
             btnSelectRegion.Tag = btnSelectRegion.BackColor;
             btnOpenFly.Tag = btnOpenFly.BackColor;
+
+            //Load += (s, e) => QMSG.Dump(this);
+            Load += (s, e) => QMSG.Translate(this);
+            this.WindowState = FormWindowState.Maximized;
         }
 
         #region WINDOW_EVENT_HANDLERS

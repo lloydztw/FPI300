@@ -64,7 +64,7 @@ namespace Traveller106
         {
             get
             {
-                string defaultPath = "D:\\AUTOMATION\\Eazy FPI30\\_V03_";
+                string defaultPath = $"{GlobalConfig.APP_ROOT_PATH}\\_V03_";
 
                 if (IsNoUseCCD)
                 {

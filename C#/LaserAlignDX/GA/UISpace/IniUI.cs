@@ -14,6 +14,7 @@ using JetEazy.ControlSpace;
 using Traveller106;
 using VsCommon.ControlSpace;
 using Eazy_Project_III;
+using LaserAlignDX;
 
 namespace PhotoMachine.UISpace
 {
@@ -126,6 +127,8 @@ namespace PhotoMachine.UISpace
             DBStatus = DBStatusEnum.NONE;
 
             FillDisplay();
+
+            //BeginInvoke(new Action(() => QMSG.Dump(this)));
         }
 
         private void PG_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)

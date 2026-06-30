@@ -32,6 +32,10 @@ namespace LaserAlignDX.Mvc.Gui
 
             var ctrl = new GaTemplateEditCtrl();
             ctrl.Attach(this, carrierID);
+
+            //Load += (s, e) => QMSG.Dump(this, 3000);
+            Load += (s, e) => QMSG.Translate(this);
+            this.WindowState = FormWindowState.Maximized;
         }
 
         Control IvTemplateEditorUI.Window => this;
