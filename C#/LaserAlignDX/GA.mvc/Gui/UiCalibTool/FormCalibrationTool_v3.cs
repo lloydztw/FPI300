@@ -42,10 +42,10 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V3
             rdoCalibInkView.CheckedChanged += RdoCalibInkView_CheckedChanged;
 
             SizeChanged += (s, e) => autoLayout();
-            Load += Form_Load;
 
             if (!DesignMode)
             {
+                Load += Form_Load;
                 var ctrl = new GaCalibCtrl();
                 ctrl.Attach(this);
             }

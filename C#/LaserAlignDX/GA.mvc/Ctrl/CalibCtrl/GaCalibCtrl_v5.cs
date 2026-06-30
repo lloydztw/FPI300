@@ -42,6 +42,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
 {
     public partial class GaCalibCtrl
     {
+        static bool OPT_SUPPORT_MOTOR_JOG = false;
+
         #region CONSTANTS
         static int N_CALIB_MOTOR_POINTS => TravellerTransformFactory.N_CALIB_MOTOR_POINTS;
         static int N_CARRIERS_NUMBER => Enum.GetValues(typeof(CarrierEnum)).Length;
@@ -713,12 +715,17 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             foreach (CalibCornersEnum corner in corners)
             {
                 var name = GaUtil.GetEnumDescription(corner);
+                name = QMSG.Text(name);
                 dgv.Rows.Add(name, "", "", "", "");
             }
 
             dgv.CellContentDoubleClick += Dgv_CellContentDoubleClick;
             dgv.CellContentClick += Dgv_CellContentClick;
             dgv.CellValueChanged += Dgv_CellValueChanged;
+
+            int COLS = dgv.Columns.Count;
+            for (int c = 0; c < COLS; c++)
+                dgv.Columns[c].HeaderText = QMSG.Text(dgv.Columns[c].HeaderText, "gui");
         }
 
         void dgvUpdateInkMarks(EzBloc[] inkMarks)
@@ -1299,14 +1306,12 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
 
         void OpenMotorWindowXY(QVector directTargetPos = null)
         {
-#if (OPT_CALIB_V4)
-            using (var dlg = new GA.FormSpace.FormMotor())
+            if(!OPT_SUPPORT_MOTOR_JOG)
             {
-                dlg.StartPosition = FormStartPosition.CenterParent;
-                dlg.ShowDialog(_wndOwner);
+                VsMessageBox.Info("Funtion Reserved!");
+                return;
             }
-            return;
-#endif
+
             using (var dlg = new FormMotors_CarierSuckerXY())
             {
                 dlg.OnInkerCoordsUpdated += Dlg_OnInkerCoordsUpdated;
@@ -1563,10 +1568,17 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
         {
             var view = _calibToolUI.wndFocusMotorGoPanel;
 
-#if (OPT_CALIB_V4)
-            view.Visible = false;
-            return;
-#endif
+            if(!OPT_SUPPORT_MOTOR_JOG)
+            {
+                view.Enabled = false;
+                //int x = view.Left;
+                //int x2 = _btnBuildCalib.Right;
+                //_btnBuildCalib.Left = x;
+                //_btnBuildCalib.Width = x2 - x;
+                //_btnRunAutoFetchAll.Left = x;
+                //_btnRunAutoFetchAll.Width = x2 - x;
+                return;
+            }
 
             // 只允許 attach 一次
             if (_focusMotorCtrl != null)

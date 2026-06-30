@@ -40,11 +40,9 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.rdoCarrier1 = new System.Windows.Forms.RadioButton();
             this.btnOpenMotorXY = new System.Windows.Forms.Button();
             this.tbLayoutMain = new System.Windows.Forms.TableLayoutPanel();
-            this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.tbLayoutDockRight = new System.Windows.Forms.TableLayoutPanel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.gwPanePropsViewer1 = new LeTian.JxProps.Gui.GwPanePropsViewer();
-            this.gvCalibPointsDataGridView1 = new LaserAlignDX.Mvc.Gui.GvCalibPointsDataGridView();
             this.panelB = new System.Windows.Forms.Panel();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
@@ -54,6 +52,8 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.btnGrabImage = new System.Windows.Forms.Button();
             this.btnBuildCalib = new System.Windows.Forms.Button();
             this.btnAutoFetchAll = new System.Windows.Forms.Button();
+            this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
+            this.gvCalibPointsDataGridView1 = new LaserAlignDX.Mvc.Gui.GvCalibPointsDataGridView();
             this.tblayoutTopNav.SuspendLayout();
             this.tableLayoutSuckers.SuspendLayout();
             this.tableLayoutCarriers.SuspendLayout();
@@ -99,7 +99,7 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.tableLayoutSuckers.Name = "tableLayoutSuckers";
             this.tableLayoutSuckers.RowCount = 1;
             this.tableLayoutSuckers.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutSuckers.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 115F));
+            this.tableLayoutSuckers.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 116F));
             this.tableLayoutSuckers.Size = new System.Drawing.Size(566, 116);
             this.tableLayoutSuckers.TabIndex = 40;
             // 
@@ -153,7 +153,7 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.tableLayoutCarriers.Name = "tableLayoutCarriers";
             this.tableLayoutCarriers.RowCount = 1;
             this.tableLayoutCarriers.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutCarriers.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 115F));
+            this.tableLayoutCarriers.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 116F));
             this.tableLayoutCarriers.Size = new System.Drawing.Size(708, 116);
             this.tableLayoutCarriers.TabIndex = 39;
             // 
@@ -226,15 +226,6 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.tbLayoutMain.Size = new System.Drawing.Size(1416, 1050);
             this.tbLayoutMain.TabIndex = 33;
             // 
-            // jezTransImageViewPanel1
-            // 
-            this.jezTransImageViewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jezTransImageViewPanel1.Location = new System.Drawing.Point(0, 0);
-            this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(0);
-            this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
-            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(708, 1050);
-            this.jezTransImageViewPanel1.TabIndex = 33;
-            // 
             // tbLayoutDockRight
             // 
             this.tbLayoutDockRight.BackColor = System.Drawing.Color.WhiteSmoke;
@@ -263,7 +254,7 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.groupBox1.Controls.Add(this.gwPanePropsViewer1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Location = new System.Drawing.Point(4, 354);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(9, 22, 9, 14);
             this.groupBox1.Size = new System.Drawing.Size(700, 596);
@@ -281,18 +272,6 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.gwPanePropsViewer1.Name = "gwPanePropsViewer1";
             this.gwPanePropsViewer1.Size = new System.Drawing.Size(682, 538);
             this.gwPanePropsViewer1.TabIndex = 0;
-            // 
-            // gvCalibPointsDataGridView1
-            // 
-            this.gvCalibPointsDataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gvCalibPointsDataGridView1.Font = new System.Drawing.Font("微软雅黑", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(3, 5);
-            this.gvCalibPointsDataGridView1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
-            this.gvCalibPointsDataGridView1.Name = "gvCalibPointsDataGridView1";
-            this.gvCalibPointsDataGridView1.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
-            this.gvCalibPointsDataGridView1.SelectedIndex = 0;
-            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(702, 203);
-            this.gvCalibPointsDataGridView1.TabIndex = 0;
             // 
             // panelB
             // 
@@ -313,7 +292,7 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnCancel.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCancel.Location = new System.Drawing.Point(525, 14);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(4);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(166, 62);
             this.btnCancel.TabIndex = 24;
@@ -327,7 +306,7 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnOK.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnOK.Location = new System.Drawing.Point(350, 14);
-            this.btnOK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnOK.Margin = new System.Windows.Forms.Padding(4);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(166, 62);
             this.btnOK.TabIndex = 23;
@@ -345,9 +324,9 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.panelBtns.Controls.Add(this.btnAutoFetchAll);
             this.panelBtns.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelBtns.Location = new System.Drawing.Point(4, 217);
-            this.panelBtns.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panelBtns.Margin = new System.Windows.Forms.Padding(4);
             this.panelBtns.Name = "panelBtns";
-            this.panelBtns.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.panelBtns.Padding = new System.Windows.Forms.Padding(4);
             this.panelBtns.Size = new System.Drawing.Size(700, 129);
             this.panelBtns.TabIndex = 28;
             this.panelBtns.Text = "像測操作";
@@ -369,7 +348,7 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.btnLoadImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnLoadImage.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnLoadImage.Location = new System.Drawing.Point(262, 66);
-            this.btnLoadImage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnLoadImage.Margin = new System.Windows.Forms.Padding(4);
             this.btnLoadImage.Name = "btnLoadImage";
             this.btnLoadImage.Size = new System.Drawing.Size(135, 46);
             this.btnLoadImage.TabIndex = 22;
@@ -382,7 +361,7 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.btnGrabImage.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnGrabImage.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnGrabImage.Location = new System.Drawing.Point(262, 13);
-            this.btnGrabImage.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnGrabImage.Margin = new System.Windows.Forms.Padding(4);
             this.btnGrabImage.Name = "btnGrabImage";
             this.btnGrabImage.Size = new System.Drawing.Size(135, 46);
             this.btnGrabImage.TabIndex = 21;
@@ -395,7 +374,7 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.btnBuildCalib.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnBuildCalib.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnBuildCalib.Location = new System.Drawing.Point(550, 13);
-            this.btnBuildCalib.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnBuildCalib.Margin = new System.Windows.Forms.Padding(4);
             this.btnBuildCalib.Name = "btnBuildCalib";
             this.btnBuildCalib.Size = new System.Drawing.Size(135, 99);
             this.btnBuildCalib.TabIndex = 25;
@@ -408,13 +387,34 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.btnAutoFetchAll.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.btnAutoFetchAll.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAutoFetchAll.Location = new System.Drawing.Point(405, 13);
-            this.btnAutoFetchAll.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.btnAutoFetchAll.Margin = new System.Windows.Forms.Padding(4);
             this.btnAutoFetchAll.Name = "btnAutoFetchAll";
             this.btnAutoFetchAll.Size = new System.Drawing.Size(135, 99);
             this.btnAutoFetchAll.TabIndex = 28;
             this.btnAutoFetchAll.Text = "自動抓取\r\n校正點";
             this.btnAutoFetchAll.UseVisualStyleBackColor = false;
             this.btnAutoFetchAll.Visible = false;
+            // 
+            // jezTransImageViewPanel1
+            // 
+            this.jezTransImageViewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jezTransImageViewPanel1.Location = new System.Drawing.Point(0, 0);
+            this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(0);
+            this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
+            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(708, 1050);
+            this.jezTransImageViewPanel1.TabIndex = 33;
+            // 
+            // gvCalibPointsDataGridView1
+            // 
+            this.gvCalibPointsDataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gvCalibPointsDataGridView1.Font = new System.Drawing.Font("微软雅黑", 7.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gvCalibPointsDataGridView1.Location = new System.Drawing.Point(3, 5);
+            this.gvCalibPointsDataGridView1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
+            this.gvCalibPointsDataGridView1.Name = "gvCalibPointsDataGridView1";
+            this.gvCalibPointsDataGridView1.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.gvCalibPointsDataGridView1.SelectedIndex = 0;
+            this.gvCalibPointsDataGridView1.Size = new System.Drawing.Size(702, 203);
+            this.gvCalibPointsDataGridView1.TabIndex = 0;
             // 
             // FormCalibrationTool
             // 
@@ -426,7 +426,7 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             this.Controls.Add(this.tblayoutTopNav);
             this.Font = new System.Drawing.Font("新細明體", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "FormCalibrationTool";
             this.Padding = new System.Windows.Forms.Padding(2, 0, 2, 1);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;

@@ -43,11 +43,11 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             rdoCarrier1.CheckedChanged += RdoCarrier1_CheckedChanged;
             rdoSucker1.CheckedChanged += RdoSucker1_CheckedChanged;
             SizeChanged += (s, e) => autoLayout();
-            Load += Form_Load;
             #endregion
 
             if (!DesignMode)
             {
+                Load += Form_Load;
                 // CONTROL
                 var ctrl = new GaCalibCtrl();
                 ctrl.Attach(this);
@@ -88,6 +88,9 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
         private void Form_Load(object sender, System.EventArgs e)
         {
             gvCalibPointsDataGridView1.SelectedIndex = -1;
+
+            //QMSG.Dump(this);
+            QMSG.Translate(this);
         }
         private void RdoSucker1_CheckedChanged(object sender, System.EventArgs e)
         {
@@ -113,8 +116,6 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
         {
             if (WindowState == FormWindowState.Minimized)
                 return;
-
-            // RESERVED
         }
         #endregion
     }
