@@ -19,12 +19,12 @@ using System;
 using System.Windows.Forms;
 
 using ErrorCodes = EzAoiEmptyTrayInspector.Model.ErrCodes;
-using Prompts = EzAoiEmptyTrayInspector.Model.Prompts;
 
 namespace EzAoiEmptyTrayInspector.Lang
 {
     public partial class QMSG
     {
+        public static string TITLE => Global.TITLE;
         static string LANG_PATH
         {
             get
@@ -39,8 +39,6 @@ namespace EzAoiEmptyTrayInspector.Lang
         static QxLang _langGui = QxLang.Instance("gui", LANG_PATH);
         //static QMsgStateTranslator _stateTranslator = new QMsgStateTranslator();
         #endregion
-
-        public static string TITLE => Global.TITLE;
 
         public static QxLang Lang(string langPack = "prompts")
         {
@@ -91,7 +89,7 @@ namespace EzAoiEmptyTrayInspector.Lang
             var lang = Lang(langPack);
             return lang.Translate(text);
         }
-        public static string Text(Prompts prompt, params string[] args)
+        public static string Text(Enum prompt, params string[] args)
         {
             //>>> var _lang = QxLang.Instance("prompts");
             //>>> string msg = _lang.Translate("STR", (int)prompt, prompt);

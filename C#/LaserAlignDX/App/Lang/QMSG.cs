@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy;
+using JetEazy.AccountMgr;
 using JetEazy.Lang;
 using System;
 using System.Windows.Forms;
@@ -24,7 +25,13 @@ namespace LaserAlignDX
     public partial class QMSG
     {
         public static string TITLE => GlobalConfig.TITLE;
-        static string LANG_PATH => GlobalConfig.APP_ROOT_PATH + "\\Ini\\language";
+        static string LANG_PATH
+        {
+            get
+            {
+                return System.IO.Path.Combine(GlobalConfig.APP_ROOT_PATH, "Ini", "language");
+            }
+        }
 
         #region LANGUAGE
         static QxLang _lang = QxLang.Instance("prompts", LANG_PATH);
