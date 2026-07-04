@@ -3,6 +3,7 @@
 //#define FX3U
 
 using Eazy_Project_III;
+using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.CCDSpace;
@@ -11,6 +12,7 @@ using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.DBSpace;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Lang;
 using JetEazy.OPSpace;
 using JetEazy.PropertyGridSpace;
 using JetEazy.Utils;
@@ -84,7 +86,8 @@ namespace Traveller106
                             settings.rootPath = _sim_root_path;
                             settings.Save();
                         }
-                        VsMessageBox.Info($"[離線版] [使用] {_sim_root_path}");
+                        //VsMessageBox.Info($"[離線版] [使用] {_sim_root_path}");
+                        VsMessageBox.Info(QMSG.Text(LaserAlignDX.Prompts.Info_Simulation) + $" [IniPath] {_sim_root_path}");
                     }
                     return _sim_root_path;
                     #endregion
@@ -389,9 +392,8 @@ namespace Traveller106
 
             if (!ret)
             {
-                //InitialErrorString = myLanguage.Messages("msg1", LanguageIndex);
-                //JetEazy.BasicSpace.VsMSG.Instance.Warning("plc连接错误，请检查。");
-                VsMessageBox.Warning("PLC 连接错误，请检查設定!");
+                //VsMessageBox.Warning("PLC 连接错误，请检查設定!");
+                VsMessageBox.Warning(QMSG.Text(LaserAlignDX.Mvc.Model.ErrorCodes.ERR_PLC_CONNECTION_FAILED));
                 //return false;
             }
 
@@ -399,10 +401,8 @@ namespace Traveller106
 
             if (!ret)
             {
-                //InitialErrorString = myLanguage.Messages("msg1", LanguageIndex);
-                //return false;
-                //JetEazy.BasicSpace.VsMSG.Instance.Warning("CCD连接错误，请检查。");
-                VsMessageBox.Warning("CCD 连接错误，请检查設定!");
+                //VsMessageBox.Warning("CCD 连接错误，请检查設定!");
+                VsMessageBox.Warning(QMSG.Text(LaserAlignDX.Mvc.Model.ErrorCodes.ERR_CAMERA_CONNECTION_FAILED));
             }
 
             //ret &= MyTcpSocketInitial();

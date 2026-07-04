@@ -15,6 +15,7 @@
 
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Lang;
 using JetEazy.Match;
 using JetEazy.OpenCV.Viewer;
 using JetEazy.QMath;
@@ -796,7 +797,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
                 }
                 else
                 {
-                    throw new Exception("Data Grid View 馬達座標格式有誤!");
+                    //throw new Exception("Data Grid View 馬達座標格式有誤!");
+                    throw new Exception(QMSG.Text(ErrorCodes.CalibErr_Motor_Coords_Format_Error));
                 }
             }
             catch (Exception ex)
@@ -1122,7 +1124,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
                 if (ok && dump)
                 {
                     GaUtil.SetCursor(_wndOwner, oldCursor);
-                    VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib");
+                    VsMessageBox.Info(QMSG.Text(Prompts.Info_Save_Binary_Image_OK) + "\n\r\n\r@ d:\\paso.log\\Calib");
                 }
                 #endregion
 
@@ -1131,7 +1133,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
             catch (Exception ex)
             {
                 GaUtil.SetCursor(_wndOwner, oldCursor);
-                VsMessageBox.Warning($"異常: {ex.Message}");
+                VsMessageBox.Warning($"Error: {ex.Message}");
                 return false;
             }
             finally
@@ -1175,12 +1177,14 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
                 GaUtil.SetCursor(_wndOwner, oldCursor);
                 if (inkMarks == null)
                 {
-                    string msg = "無法自動抓到 四角定位點!\n\r請確認 參數 是否適配?";
-                    MessageBox.Show(msg, "Calib", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    //string msg = "無法自動抓到 四角定位點!\n\r請確認 參數 是否適配?";
+                    //MessageBox.Show(msg, "Calib", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    VsMessageBox.Warning(QMSG.Text(ErrorCodes.CalibErr_Can_NOT_Locate_4_Corners));
                 }
                 else if (dump)
                 {
-                    VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib");
+                    //VsMessageBox.Info("已成功保存二值化圖檔\n\r於 d:\\paso.log\\Calib");
+                    VsMessageBox.Info(QMSG.Text(Prompts.Info_Save_Binary_Image_OK) + "\n\r\n\r@ d:\\paso.log\\Calib");
                 }
                 #endregion
 
@@ -1189,7 +1193,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
             catch (Exception ex)
             {
                 GaUtil.SetCursor(_wndOwner, oldCursor);
-                VsMessageBox.Warning($"異常: {ex.Message}");
+                VsMessageBox.Warning($"Error: {ex.Message}");
                 return false;
             }
             finally
@@ -1207,7 +1211,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
             var dgv = _dgvCalibPointsListView?.DataGridView;
             if (dgv == null)
             {
-                VsMessageBox.Warning("GUI (DataGridView == null) 已經不存在!");
+                VsMessageBox.Warning("GUI Error : DataGridView == null !");
                 return false;
             }
 
@@ -1229,8 +1233,9 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
                 }
                 if(errs.Count > 0)
                 {
-                    var errMsg = "以下 墨點, 參數 與 GUI, 兩者誤差太大:\n\r";
-                    errMsg += string.Join("\n\r", errs);
+                    //var errMsg = "以下 墨點, 參數 與 GUI, 兩者誤差太大:\n\r";
+                    var errMsg = QMSG.Text(ErrorCodes.CalibErr_Ink_Marks_Not_Consistent);
+                    errMsg += string.Join("\n\r\n\r", errs);
                     VsMessageBox.Warning(errMsg);
                     return false;
                 }
@@ -1260,8 +1265,9 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
                 }
                 if (errs.Count > 0)
                 {
-                    var errMsg = "以下 馬達點位, 座標轉換 與 User 輸入, 兩者誤差太大:\n\r";
-                    errMsg += string.Join("\n\r", errs);
+                    //var errMsg = "以下 馬達點位, 座標轉換 與 User 輸入, 兩者誤差太大:\n\r";
+                    var errMsg = QMSG.Text(ErrorCodes.CalibErr_Motor_Coords_Not_Consistent);
+                    errMsg += string.Join("\n\r\n\r", errs);
                     VsMessageBox.Warning(errMsg);
                     return false;
                 }
@@ -1294,8 +1300,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
                 var err = VerifyBoardGrid(boardGrid, out string errDetails);
                 if (err != ErrorCodes.OK)
                 {
-                    var msg = GaUtil.GetEnumDescription(err) + "\n\r" + errDetails;
-                    VsMessageBox.Warning(msg);
+                    var errMsg = GaUtil.GetEnumDescription(err) + "\n\r" + errDetails;
+                    VsMessageBox.Warning(errMsg);
                     return;
                 }
 
@@ -1313,8 +1319,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
                 err = VerifyCommonBaseTrf(out errDetails);
                 if (err != ErrorCodes.OK)
                 {
-                    var msg = GaUtil.GetEnumDescription(err) + "\n\r" + errDetails;
-                    VsMessageBox.Warning(msg);
+                    var errMsg = GaUtil.GetEnumDescription(err) + "\n\r" + errDetails;
+                    VsMessageBox.Warning(errMsg);
                     return;
                 }
 
@@ -1331,7 +1337,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Calib.V25
             }
             catch (Exception ex)
             {
-                VsMessageBox.Warning($"異常: {ex.Message}");
+                VsMessageBox.Warning($"Error: {ex.Message}");
             }
             finally
             {

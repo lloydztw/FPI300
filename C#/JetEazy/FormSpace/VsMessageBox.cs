@@ -45,8 +45,8 @@ namespace JetEazy.FormSpace
         protected VsMessageBox()
         {
             InitializeComponent();
-            btnOK.Text = "确定";
-            btnCancel.Text = "取消";
+            btnOK.Text = "OK";
+            btnCancel.Text = "Cancel";
             btnCancel.Click += BtnCancel_Click;
             btnOK.Click += BtnOK_Click;
             Load += VsMessageBox_Load;
@@ -117,7 +117,7 @@ namespace JetEazy.FormSpace
         {
             if (icon == MessageBoxIcon.Warning)
             {
-                this.Text = "警告视窗";
+                this.Text = "WARNING";   //"警告视窗";
                 this.lblMessage.Text = msg;
                 pictureBox1.BackgroundImage = Properties.Resources.exclamation;
                 panel1.BackColor = Color.HotPink;
@@ -127,7 +127,7 @@ namespace JetEazy.FormSpace
             }
             else if (icon == MessageBoxIcon.Information)
             {
-                this.Text = "提示视窗";
+                this.Text = "Information";  // "提示视窗";
                 this.lblMessage.Text = msg;
                 pictureBox1.BackgroundImage = Properties.Resources.information;
                 panel1.BackColor = Color.Ivory;
@@ -136,7 +136,7 @@ namespace JetEazy.FormSpace
             }
             else
             {
-                this.Text = "询问视窗";
+                this.Text = "Question";     // "询问视窗";
                 this.lblMessage.Text = msg;
                 pictureBox1.BackgroundImage = Properties.Resources.question;
                 panel1.BackColor = Color.Ivory;

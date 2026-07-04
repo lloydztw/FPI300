@@ -16,6 +16,7 @@
 
 using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
+using EzAoiEmptyTrayInspector.Lang;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Utils;
@@ -251,8 +252,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                 if (GlobalConfig.IsSim)
                 {
-                    var ret = VsMessageBox.Question(e.Message + "\n\r\n\r是否 繼續 跑模擬?", Color.LightYellow);
-                    if(ret == DialogResult.OK)
+                    var errMsg = e.Message + "\n\r\n\r" + QMSG.Text(Prompts.Question_Continue_To_Run_Simulation);
+                    if (VsMessageBox.Question(errMsg) == DialogResult.OK)
                     {
                         e.Cancel = false;
                         return;

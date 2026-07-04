@@ -1002,7 +1002,7 @@ namespace Traveller106
                     break;
 
                 case ESSStatusEnum.RECIPESELECTED:
-                    using (var vsMessageBox = new VsMessageBox($"切换参数中请稍后...", false))
+                    using (var vsMessageBox = new VsMessageBox(QMSG.Text(Prompts.Info_Recipe_Switching), false))
                     {
                         vsMessageBox.Show();
                         vsMessageBox.Refresh();

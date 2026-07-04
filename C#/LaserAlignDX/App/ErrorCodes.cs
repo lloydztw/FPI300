@@ -25,11 +25,17 @@ namespace LaserAlignDX.Mvc.Model
         [Description("沒有 Aoi Model")]
         NO_AOI_MODEL,
 
+        [Description("Camera 连接错误，请检查設定!")]
+        ERR_CAMERA_CONNECTION_FAILED,
+
+        [Description("PLC 连接错误，请检查設定!")]
+        ERR_PLC_CONNECTION_FAILED,
+
+        [Description("Machine.PlcIO 還沒配置")]
+        NO_PLC_IO,
+
         [Description("沒有線掃圖檔")]
         NO_LINE_SCAN_IMAGE,
-
-        [Description("Machine.PLCIO 還沒配置")]
-        NO_PLC_IO,
 
         [Description("空盤檢測 參數沒建立")]
         NO_EMPTY_TRAY_RECIPE,
@@ -52,6 +58,18 @@ namespace LaserAlignDX.Mvc.Model
         [Description("像測 抓到的 格位點 不一致!")]
         AoiErr_camera_grid_not_consistent,
 
+        [Description("匹配模板創建 成功!")]
+        AoiErr_Template_Creation_OK,
+
+        [Description("匹配模板創建 失敗!")]
+        AoiErr_Template_Creation_Failed,
+
+        [Description("加載 晶粒模板匹配 參數 訓練失敗!\n\r\n\r該參數尚未建立\n\r或未插入 Dongle.")]
+        AoiErr_Template_Train_Failed,
+
+        [Description("加載 飛拍 參數 訓練失敗!\n\r\n\r該參數尚未建立\n\r或未插入 Dongle.")]
+        AoiErr_FlyCam_Train_Failed,
+
         [Description("沒有 共用校正參數")]
         CalibErr_No_Recipe,
 
@@ -64,12 +82,26 @@ namespace LaserAlignDX.Mvc.Model
         [Description("點墨 標定 不完整!")]
         CalibErr_Ink_Marks_Not_Completed,
 
+        [Description("墨點: 參數 與 GUI 兩者誤差太大")]
+        CalibErr_Ink_Marks_Not_Consistent,
+
+        [Description("馬達點位, 座標轉換 與 User 輸入, 兩者誤差太大")]
+        CalibErr_Motor_Coords_Not_Consistent,
+
         [Description("馬達座標 標定 不完整!")]
         CalibErr_Motor_Coords_Not_Completed,
 
         [Description("馬達座標轉換系統 建置不良!")]
         CalibErr_Motor_Coords_Transform_Build_NG,
 
+        [Description("Data Grid View 馬達座標格式有誤!")]
+        CalibErr_Motor_Coords_Format_Error,
+
+        [Description("無法自動抓到 四角定位點!\n\r請確認 參數 是否適配?")]
+        CalibErr_Can_NOT_Locate_4_Corners,
+
+        [Description("參數沒有影像")]
+        RcpErr_NO_IMAGE,
 
         [Description("線掃AOI 運行異常 (可能沒有加密狗)")]
         EXCEPTION_AT_AOI_RUN,

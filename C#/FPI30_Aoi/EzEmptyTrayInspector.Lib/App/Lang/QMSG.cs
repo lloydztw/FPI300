@@ -13,30 +13,28 @@
  */
 #endregion
 
-using JetEazy;
 using JetEazy.Lang;
 using System;
 using System.Windows.Forms;
-
-using ErrorCodes = EzAoiEmptyTrayInspector.Model.ErrCodes;
+using GlobalConfig = EzAoiEmptyTrayInspector.Global;
 
 namespace EzAoiEmptyTrayInspector.Lang
 {
     public partial class QMSG
     {
-        public static string TITLE => Global.TITLE;
+        public static string TITLE => GlobalConfig.TITLE;
         static string LANG_PATH
         {
             get
             {
-                var rootPath = System.IO.Path.GetDirectoryName(Global.APP_PATH.RootPath);
-                return System.IO.Path.Combine(rootPath, "Ini", "language");
+                return System.IO.Path.Combine(GlobalConfig.APP_PATH.RootPath, "Ini", "language");
             }
         }
 
         #region LANGUAGE
         static QxLang _lang = QxLang.Instance("prompts", LANG_PATH);
         static QxLang _langGui = QxLang.Instance("gui", LANG_PATH);
+        static QxLang _langRcp = QxLang.Instance("rcp", LANG_PATH);
         //static QMsgStateTranslator _stateTranslator = new QMsgStateTranslator();
         #endregion
 
@@ -75,15 +73,6 @@ namespace EzAoiEmptyTrayInspector.Lang
             }
         }
 
-        /// <summary>
-        /// 多語系翻譯 (to translate 'model state' to display text)
-        /// </summary>
-        public static string HardTranslate(object state, out bool isRecoveringFromErr)
-        {
-            //return _stateTranslator.Translate(state, out isRecoveringFromErr);
-            isRecoveringFromErr = false;
-            return state?.ToString();
-        }
         public static string Text(string text, string langPack = "prompts")
         {
             var lang = Lang(langPack);
@@ -91,14 +80,17 @@ namespace EzAoiEmptyTrayInspector.Lang
         }
         public static string Text(Enum prompt, params string[] args)
         {
+#if (false)
             //>>> var _lang = QxLang.Instance("prompts");
             //>>> string msg = _lang.Translate("STR", (int)prompt, prompt);
             var msg = _lang.Translate(prompt);
             if (args.Length > 0)
                 msg += SmartTranslate(_lang, args);
             return msg;
+#endif
+            return Text(prompt.ToString(), "prompts");
         }
-        public static string Text(ErrorCodes err, params string[] args)
+        public static string ErrText(QErrorCodes err, params string[] args)
         {
             var _lang = QxLang.Instance("errors");
             string msg = _lang.Translate("ERR", (int)err, err);
@@ -148,6 +140,15 @@ namespace EzAoiEmptyTrayInspector.Lang
         }
         #endregion
 
+        /// <summary>
+        /// 多語系翻譯 (to translate 'model state' to display text)
+        /// </summary>
+        public static string HardTranslate(object state, out bool isRecoveringFromErr)
+        {
+            //return _stateTranslator.Translate(state, out isRecoveringFromErr);
+            isRecoveringFromErr = false;
+            return state?.ToString();
+        }
         public static string MotorDisplayName(int axisID, bool postFix = true)
         {
             //var name = Drivers.HeadConfig.GetAttribName(null, axisID, postFix);
@@ -173,32 +174,32 @@ namespace EzAoiEmptyTrayInspector.Lang
         }
 
         #region PRIVATE_FUNCTIONS
-        static string _TAG(ErrorCodes err)
+        static string _TAG(QErrorCodes err)
         {
             return $"{{%{(int)err}%}}";
         }
         #endregion
 
-        public static string Pack(ErrorCodes err, bool includeDesc = true)
+        public static string Pack(QErrorCodes err, bool includeDesc = true)
         {
             return includeDesc ? JetEazy.QxNums.GetEnumDescription(err) + _TAG(err) : _TAG(err);
         }
-        public static bool UnPack(object arg, out string msg, out ErrorCodes err)
+        public static bool UnPack(object arg, out string msg, out QErrorCodes err)
         {
             if (arg == null)
             {
                 msg = "";
-                err = ErrorCodes.OK;
+                err = QErrorCodes.OK;
                 return false;
             }
             else
             {
                 bool isFound = false;
                 msg = (string)arg.ToString();
-                err = ErrorCodes.OK;
+                err = QErrorCodes.OK;
 
                 // 簡單暴力拆解
-                foreach (ErrorCodes e in Enum.GetValues(typeof(ErrorCodes)))
+                foreach (QErrorCodes e in Enum.GetValues(typeof(QErrorCodes)))
                 {
                     var tag = _TAG(e);
                     if (msg.Contains(tag))
@@ -259,5 +260,13 @@ namespace EzAoiEmptyTrayInspector.Lang
             //return err;
             return src;
         }
+    }
+
+    /// <summary>
+    /// 保留
+    /// </summary>
+    public enum QErrorCodes : int
+    {
+        OK = 0,
     }
 }

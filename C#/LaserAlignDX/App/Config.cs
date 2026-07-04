@@ -12,7 +12,7 @@ namespace LaserAlignDX
         /// </summary>
         public static bool IsSim { get; set; } = false;
 
-        public static string VersionDate => "2026-07-01";
+        public static string VersionDate => "2026-07-04";
 
         public static readonly bool N_THREADS_ENABLED = true;
         public static readonly int N_THREADS = 16;

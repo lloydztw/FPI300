@@ -195,7 +195,8 @@ namespace JetEazy.Lang
         }
         public string Translate(Enum e)
         {
-            return Translate(null, -1, e);
+            //return Translate(null, -1, e);
+            return Translate(e.ToString());
         }
 
         public void Translate(Control gui, bool reload = true)

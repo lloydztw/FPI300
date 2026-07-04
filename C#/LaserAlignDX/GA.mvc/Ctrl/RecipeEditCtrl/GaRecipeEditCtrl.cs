@@ -501,7 +501,8 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             if (srcBmp == null)
             {
-                VsMessageBox.Warning($"參數 @ {carrierID} 沒有影像");
+                //VsMessageBox.Warning($"參數 @ {carrierID} 沒有影像");
+                VsMessageBox.Warning(QMSG.Text(ErrorCodes.RcpErr_NO_IMAGE) + " @" + QMSG.Text(carrierID) + " (bmpOrg)");
                 return;
             }
 
@@ -518,10 +519,10 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             if (ok)
                 //VsMSG.Instance.Warning($"完成保存圖片.\n\r檔名: {dstFileName}", false);
-                VsMessageBox.Info($"完成保存圖片.\n\r檔名: {dstFileName}");
+                VsMessageBox.Info(QMSG.Text(Prompts.Info_Save_Image_OK) + "\n\r\n\r" + dstFileName);
             else
                 //VsMSG.Instance.Warning($"無法保存圖片!\n\r檔名: {dstFileName}", true);
-                VsMessageBox.Warning($"無法保存圖片!\n\r檔名: {dstFileName}");
+                VsMessageBox.Warning(QMSG.Text(Prompts.Info_Save_Image_Failed) + "\n\r\n\r" + dstFileName);
         }
 
         void OpenEmptyTrayInspectWindow()
@@ -671,7 +672,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 if (srcBmp == null)
                 {
                     //VsMSG.Instance.Warning($"參數 @ {carrierID} 沒有影像", true);
-                    VsMessageBox.Warning($"{GaUtil.GetEnumDescription(carrierID)} : 參數沒有 {srcName} 影像!");
+                    VsMessageBox.Warning($"{GaUtil.GetEnumDescription(carrierID)} : No Image @ {srcName}");
                     return;
                 }
 

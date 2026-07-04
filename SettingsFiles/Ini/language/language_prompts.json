@@ -1,197 +1,117 @@
 ﻿{
-"__HEADER__" : ["English", "正體中文", "简体中文", "Tiếng Việt"],
+"__HEADER__" : ["English", "正體中文", "简体中文", "ไทย"],
 
-"No_privilege" : ["No privilege!", "權限不足!", "", "Không đủ quyền"],
+"載台1" : ["Carrier1", "載台1", "", ""],
+"載台2" : ["Carrier2", "載台2", "", ""],
+"C1" : ["Carrier1", "載台1", "", ""],
+"C2" : ["Carrier2", "載台2", "", ""],
+"吸嘴1" : ["Sucker1", "吸嘴1", "", ""],
+"吸嘴2" : ["Sucker2", "吸嘴2", "", ""],
+"S1" : ["Sucker1", "吸嘴1", "", ""],
+"S2" : ["Sucker2", "吸嘴2", "", ""],
 
-"KeyParams_Json_Imported" : [
-    "KeyParams Json Imported.", 
-    "已匯入關鍵參數檔(json).", 
-    "", 
-    "Tệp tham số chính (json) đã được nhập"
-],
+"點位" :  ["Pos", "點位", "", ""],
+"相機 X" : ["Pixel X", "相機 X", "", ""],
+"相機 Y" : ["Pixel Y", "相機 Y", "", ""],
+"吸嘴馬達 X" : ["Motor X", "吸嘴馬達 X", "", ""],
+"載台馬達 Y" : ["Motor Y", "載台馬達 Y", "", ""],
 
-"Empty_lot_data_fields" : [
-    "Empty data fields!", 
-    "批號, 序號, 參數名稱 不能為空白!", 
-    "", 
-    "Số lô, số sê-ri, tên thông số không được để trống!"
-],
+"檢測" : ["Test", "檢測", "", ""],
+"讀取圖檔" : ["Load Image", "讀取圖檔", "", ""],
+"擷取影像" : ["Grap Image", "擷取影像", "", ""],
+"清除" : ["Clear", "清除", "", ""],
+"擷取樣本" : ["Crop Template", "擷取 樣本", "", ""],
 
-"Wrong_recipe_params" : [
-    "Wrong recipe params!", 
-    "請檢查參數的 保壓時間 與 壓力值 是否已正確設定!", 
-    "", 
-    "Vui lòng kiểm tra xem các thông số về thời gian dừng và giá trị áp suất đã được cài đặt chính xác chưa!"
-],
+"載台左上" : ["LT", "載台左上", "", ""],
+"載台右上" : ["RT", "載台右上", "", ""],
+"載台右下" : ["RB", "載台右下", "", ""],
+"載台左下" : ["LB", "載台左下", "", ""],
 
-"Run_count_exceeded" : [ 
-    "Run count exceeded! \n\rPlease check press heads. \n\rThen login again!", 
-    "壓合已超過設定次數. \n\r請檢查壓頭磨耗情況後, \n\r重新登入!", 
-    "", 
-    "Số lần nhấn đã vượt quá thời gian đã đặt. \n\rVui lòng kiểm tra độ mòn của mũi thử, \n\r và đăng nhập lại!"
-] ,
+"__FPI30_提示訊息__" : ["Remark", "不用翻譯","",""],
 
-"MaxRunCount" : ["MaxRunCount", "最大壓合次數", "", "số lần tối đa"],
+"ReEntry" : ["The program is already running, please do not open multiple instances!", "程序已經啟動, 請勿多開！", "", "โปรแกรมกำลังทำงานอยู่แล้ว กรุณาอย่าเปิดซ้ำ!"],
+"No_Privilege" : ["No permission for this action!", "沒有此權限!", "", "ไม่มีสิทธิ์สำหรับดำเนินการนี้!"],
+"Quection_To_Delete_Recipe" : ["Do you want to delete the parameters?", "是否要删除参数？", "", "ต้องการลบพารามิเตอร์หรือไม่?"],
+"Info_Can_NOT_Delete_Recipe" : ["Parameters cannot be deleted!", "参数无法删除!", "", "ไม่สามารถลบพารามิเตอร์ได้!"],
+"Info_Recipe_Already_Existing" : ["Name or version already exists, please check!", "名称或版本已存在,请检查!", "", "มีชื่อหรือเวอร์ชันนี้อยู่แล้ว กรุณาตรวจสอบ!"],
+"Info_Recipe_Saving" : ["Saving parameters, please wait...", "保存参数中请稍后...", "", "กำลังบันทึกพารามิเตอร์ กรุณารอสักครู่..."],
+"Info_Recipe_Switching" : ["Switching parameters, please wait...", "切换参数中请稍后...", "", "กำลังเปลี่ยนพารามิเตอร์ กรุณารอสักครู่..."],
+"Info_Recipe_Rollback" : ["Canceling, please wait...", "取消中请稍后...", "", "กำลังยกเลิก กรุณารอสักครู่..."],
+"Question_ReTrigger_Carrier_LineScan_Camera" : ["Do you want to re-trigger the carrier line scan camera?", "是否 重新驅動 載台線掃相機?", "", "ต้องการเปิดใช้งานกล้องสแกนแบบเส้นของแท่นวางอีกครั้งหรือไม่?"],
+"Question_Write_CoordRefs_To_PLC" : ["Do you want to write the reference coordinate points (CoordRefs) directly to the PLC?", "是否直接把 參考坐標點 (CoordRefs) 寫入PLC?", "", "ต้องการเขียนจุดพิกัดอ้างอิง (CoordRefs) ลงใน PLC โดยตรงหรือไม่?"],
+"Question_To_Migrate_Transforms_Models" : ["Do you want to perform coordinate system linear migration at the same time?", "是否 同時進行 座標系統 線性遷移?", "", "ต้องการดำเนินการย้ายระบบพิกัดเชิงเส้นไปพร้อมกันหรือไม่?"],
+"Info_Write_CoordRefs_To_PLC_OK" : ["Coordinates successfully written to PLC.", "座標成功寫入至 PLC.", "", "เขียนพิกัดลงใน PLC สำเร็จแล้ว"],
+"Info_CommonBase_Trf_Successed" : ["Common coordinate system construction completed.", "共用座標系統 建置完成.", "", "การสร้างระบบพิกัดร่วมเสร็จสมบูรณ์"],
+"Warning_the_function_is_not_supported" : ["This function is not supported!", "不支援此功能!", "", "ไม่รองรับฟังก์ชันนี้!"],
+"Warning_No_Motor" : ["Motor not found!", "找不到馬達!", "", "ไม่พบมอเตอร์!"],
+"Warning_Motor_Busy" : ["Motor is busy...", "馬達忙碌中...", "", "มอเตอร์กำลังทำงาน..."],
+"Question_Update_Motor_Coord_To_Calib" : ["Do you want to use the current motor XY coordinate values?", "是否要採用 目前馬達 XY 座標值?", "", "ต้องการใช้ค่าพิกัด XY ของมอเตอร์ปัจจุบันหรือไม่?"],
+"Question_Motor_Home" : ["Are you sure you want to return the motor to HOME?", "是否確定要將 馬達 回 HOME?", "", "คุณแน่ใจหรือไม่ว่าต้องการให้มอเตอร์กลับไปยังตำแหน่ง HOME?"],
+"Question_Motor_GoTo_Pos" : ["Are you sure you want to move the motor to the position?", "是否確定要 移動馬達 至定位?", "", "คุณแน่ใจหรือไม่ว่าต้องการเคลื่อนมอร์เตอร์ไปยังตำแหน่ง?"],
+"Info_Motor_GoTo_Pos" : ["The motor is about to move to the position.", "即將 移動馬達 至定位.", "", "มอเตอร์กำลังจะเคลื่อนที่ไปยังตำแหน่ง"],
+"Warning_MotorXY_Disabled_By_Inker_Down" : ["Moving motor XY is prohibited when the Inker is down!", "Inker 在下位時, 禁止移動 馬達 XY!", "", "ห้ามเคลื่อนย้ายมอเตอร์ XY เมื่อ Inker อยู่ที่ตำแหน่งด้านล่าง!"],
+"Info_Save_Binary_Image_OK" : ["Binary image file saved successfully.", "已成功保存二值化圖檔", "", "บันทึกไฟล์ภาพไบนารีสำเร็จแล้ว"],
+"Info_Save_Image_OK" : ["Image file saved successfully.", "圖檔 已成功保存", "", "บันทึกไฟล์ภาพสำเร็จแล้ว"],
+"Info_Save_Image_Failed" : ["Failed to save image file.", "圖檔 無法保存", "", "ไม่สามารถบันทึกไฟล์ภาพได้"],
+"Info_Save_Recipe_OK" : ["Parameters saved successfully.", "參數 已成功保存", "", "บันทึกพารามิเตอร์สำเร็จแล้ว"],
+"Info_Auto_Save_Rcipe_OK" : ["Parameters auto-saved successfully.", "參數 已自動保存", "", "บันทึกพารามิเตอร์อัตโนมัติสำเร็จแล้ว"],
+"Question_Continue_To_Run_Simulation" : ["Do you want to continue running the simulation?", "是否 繼續跑 模擬?", "", "ต้องการดำเนินการจำลองต่อหรือไม่?"],
+"Waring_Software_Ready_Can_NOT_Simulate_Fly_Camera" : ["[Software Ready] Connection activated. Unable to perform on-the-fly camera offline test!", "【軟件準備】 已經啟動連線, 無法進行 飛拍 離線測試!", "", "[ซอฟต์แวร์พร้อม] เปิดใช้งานการเชื่อมต่อแล้ว ไม่สามารถทำการทดสอบออฟไลน์ของกล้องแบบบินถ่ายได้!"],
+"Info_Simulation" : ["[Offline Mode]", "[離線版]", "", "[โหมดออฟไลน์]"],
 
-"RunCount" : ["RunCount", "目前次數", "", "chạy đếm"],
+"__FPI30_錯誤碼__" : ["Remark", "不用翻譯","",""],
 
-"Fixture_moving" : ["Fixture moving!", "注意: 機台即將移動!", "", "Lưu ý: Máy sắp di chuyển!"],
+"NO_AOI_MODEL" : ["No AOI Model", "沒有 Aoi Model", "", "ไม่มีโมเดล AOI"],
+"ERR_CAMERA_CONNECTION_FAILED" : ["Camera connection error, please check the settings!", "Camera 连接错误，请检查設定!", "", "การเชื่อมต่อกล้องผิดพลาด กรุณาตรวจสอบการตั้งค่า!"],
+"ERR_PLC_CONNECTION_FAILED" : ["PLC connection error, please check the settings!", "PLC 连接错误，请检查設定!", "", "การเชื่อมต่อ PLC ผิดพลาด กรุณาตรวจสอบการตั้งค่า!"],
+"NO_PLC_IO" : ["Machine.PlcIO is not configured yet", "Machine.PlcIO 還沒配置", "", "Machine.PlcIO ยังไม่ได้กำหนดค่า"],
+"NO_LINE_SCAN_IMAGE" : ["No line scan image", "沒有線掃圖檔", "", "ไม่มีไฟล์ภาพสแกนแบบเส้น"],
+"NO_EMPTY_TRAY_RECIPE" : ["Empty tray inspection parameters not established", "空盤檢測 參數沒建立", "", "ไม่ได้สร้างพารามิเตอร์การตรวจสอบถาดเปล่า"],
+"NO_RUNTIME_PLC_GRID" : ["Missing PLC Grid\n\r\n\rPlease configure 'Empty Tray Inspection'", "缺少 PLC 格點\n\r\n\r請設定 '空盤檢測'", "", "ขาดกริด PLC\n\r\n\rกรุณาตั้งค่า 'การตรวจสอบถาดเปล่า'"],
+"NO_CAMERA_GRID" : ["Camera Grid parameters not constructed\n\r\n\rPlease execute 'Generate Array'", "參數 格點陣列 (Camera Grid) 沒有建置\n\r\n\r請執行 '生成陣列'", "", "ไม่ได้สร้างพารามิเตอร์อาเรย์กริด (Camera Grid)\n\r\n\rกรุณาดำเนินการ 'สร้างอาเรย์'"],
+"LOW_GRID_ROWS_COLS" : ["Camera Grid row/column count is too small", "格點陣列 (Camera Grid) 行列數太小", "", "จำนวนแถวและคอลัมน์ของอาเรย์กริด (Camera Grid) น้อยเกินไป"],
+"CANNOT_FETCH_GOLDEN_QUAD_2D" : ["Parameter template training failed, unable to create GoldenQuad2D!", "參數 模板訓練失敗, 無法建立 GoldenQuad2D!", "", "การฝึกเทมเพลตพารามิเตอร์ล้มเหลว ไม่สามารถสร้าง GoldenQuad2D ได้!"],
+"AoiErr_can_not_fetch_camera_grid" : ["AOI unable to fetch grid points\n\rPlease check if the full tray rows and columns are configured correctly!", "像測 無法抓到 格位點\n\r請確認 滿盤 行列數 (rows, cols) 是否設定正確!", "", "AOI ไม่สามารถจับจุดกริดได้\n\rกรุณาตรวจสอบว่าตั้งค่าจำนวนแถวและคอลัมน์ (rows, cols) ของถาดเต็มถูกต้องหรือไม่!"],
+"AoiErr_camera_grid_not_consistent" : ["AOI fetched grid points are inconsistent!", "像測 抓到的 格位點 不一致!", "", "จุดกริดที่ AOI จับได้ไม่ตรงกัน!"],
+"AoiErr_Template_Creation_OK" : ["Matching template created successfully!", "匹配模板創建 成功!", "", "สร้างเทมเพลตการจับคู่สำเร็จแล้ว!"],
+"AoiErr_Template_Creation_Failed" : ["Failed to create matching template!", "匹配模板創建 失敗!", "", "สร้างเทมเพลตการจับคู่ล้มเหลว!"],
+"AoiErr_Template_Train_Failed" : ["Loading chip template matching parameter training failed!\n\rThe parameter has not been established\n\ror the Dongle is not inserted.", "加載 晶粒模板匹配 參數 訓練失敗!\n\r該參數尚未建立\n\r或未插入 Dongle.", "", "โหลดพารามิเตอร์การฝึกเทมเพลตชิปล้มเหลว!\n\rพารามิเตอร์นี้ยังไม่ได้สร้าง\n\rหรือไม่ได้เสียบ Dongle"],
+"AoiErr_FlyCam_Train_Failed" : ["Loading on-the-fly camera parameter training failed!\n\rThe parameter has not been established\n\ror the Dongle is not inserted.", "加載 飛拍 參數 訓練失敗!\n\r該參數尚未建立\n\r或未插入 Dongle.", "", "โหลดพารามิเตอร์การฝึกสำหรับการบินถ่ายล้มเหลว!\n\rพารามิเตอร์นี้ยังไม่ได้สร้าง\n\rหรือไม่ได้เสียบ Dongle"],
+"CalibErr_No_Recipe" : ["No common calibration parameters", "沒有 共用校正參數", "", "ไม่มีพารามิเตอร์การคาลิเบรทร่วม"],
+"CalibErr_No_Transform_Model" : ["No coordinate transformation model", "沒有 座標轉換 模型", "", "ไม่มีโมเดลการแปลงพิกัด"],
+"CalibErr_pitch_not_consistent" : ["Pitch is inconsistent!", "節距 (Pitch) 不一致!", "", "ระยะพิตช์ (Pitch) ไม่ตรงกัน!"],
+"CalibErr_Ink_Marks_Not_Completed" : ["Inker calibration is incomplete!", "點墨 標定 不完整!", "", "การคาลิเบรทจุดหมึกไม่สมบูรณ์!"],
+"CalibErr_Ink_Marks_Not_Consistent" : ["Ink mark: The error between the parameters and the GUI is too large", "墨點: 參數 與 GUI 兩者誤差太大", "", "จุดหมึก: ความคลาดเคลื่อนระหว่างพารามิเตอร์และ GUI มีขนาดใหญ่เกินไป"],
+"CalibErr_Motor_Coords_Not_Consistent" : ["The error between the motor coordinate transformation and user input is too large", "馬達點位, 座標轉換 與 User 輸入, 兩者誤差太大", "", "ความคลาดเคลื่อนระหว่างระบบแปลงพิกัดมอเตอร์และข้อมูลที่ผู้ใช้ป้อนมีขนาดใหญ่เกินไป"],
+"CalibErr_Motor_Coords_Not_Completed" : ["Motor coordinate calibration is incomplete!", "馬達座標 標定 不完整!", "", "การคาลิเบรทพิกัดมอเตอร์ไม่สมบูรณ์!"],
+"CalibErr_Motor_Coords_Transform_Build_NG" : ["Motor coordinate transformation system construction failed!", "馬達座標轉換系統 建置不良!", "", "การสร้างระบบแปลงพิกัดมอเตอร์ล้มเหลว (NG)!"],
+"CalibErr_Motor_Coords_Format_Error" : ["Motor coordinate format in Data Grid View is incorrect!", "Data Grid View 馬達座標格式有誤!", "", "รูปแบบพิกัดมอเตอร์ใน Data Grid View ไม่ถูกต้อง!"],
+"CalibErr_Can_NOT_Locate_4_Corners" : ["Unable to automatically fetch 4 corner alignment points!\n\rPlease check if parameters are matched.", "無法自動抓到 四角定位點!\n\r請確認 參數 是否適配?", "", "ไม่สามารถจับจุดตำแหน่งสี่มุมอัตโนมัติได้!\n\rกรุณาตรวจสอบว่าพารามิเตอร์เหมาะสมหรือไม่"],
+"RcpErr_NO_IMAGE" : ["No image in the parameters", "參數沒有影像", "", "ไม่มีรูปภาพในพารามิเตอร์"],
+"EXCEPTION_AT_AOI_RUN" : ["Line scan AOI execution exception (Dongle may be missing)", "線掃AOI 運行異常 (可能沒有加密狗)", "", "เกิดข้อผิดพลาดในการทำงานของ AOI สแกนแบบเส้น (อาจไม่มี Dongle)"],
+"ERR_NO_CHIP_LOCATION" : ["Unable to locate, please establish a chip matching template!", "無法定位, 請建立晶粒匹配模板!", "", "ไม่สามารถระบุตำแหน่งได้ กรุณาสร้างเทมเพลตการจับคู่ชิป!"],
+"ERR_NO_CHIP_PADS" : ["Unable to fetch PADS, please establish a chip matching template!", "無法抓到 PADS, 請建立晶粒匹配模板!", "", "ไม่สามารถจับ PADS ได้ กรุณาสร้างเทมเพลตการจับคู่ชิป!"],
+"ERR_LACK_CHIP_PAD_CORNER" : ["Chip PAD grid corner missing!", "晶粒 PAD 格點缺角!", "", "มุมกริด PAD ของชิปขาดหายไป!"],
+"ERR_WEAK_LINE_CONDITION" : ["Boundary frame condition is poor, please readjust the boundary frame!", "邊線框 條件不佳, 請再調整 邊線框!", "", "เงื่อนไขกรอบเส้นขอบไม่ดี กรุณาปรับกรอบเส้นขอบอีกครั้ง!"],
+"ERR_WEAK_PADS_CONDITION" : ["Chip grid condition is poor, please re-fetch the image!", "晶粒格點 條件不佳, 請再抓取圖像!", "", "เงื่อนไขกริดชิปไม่ดี กรุณาจับภาพใหม่อีกครั้ง!"],
+"ERR_EDGE_DIM_CALCULATION" : ["Chip grid dimension calculation exception!", "晶粒格點 尺寸 計算異常!", "", "คำนวณขนาดกริดชิปผิดปกติ!"],
+"ERR_EDGE_GAP_CALCULATION" : ["Chip grid edge gap calculation exception!", "晶粒格點 邊隙 計算異常!", "", "คำนวณช่องว่างขอบกริดชิปผิดปกติ!"],
+"ERR_TRAY_CONFIG_CONFLICTS" : ["Tray configuration settings are inconsistent!", "盤面參數設定不一致!", "", "การตั้งค่าพารามิเตอร์ถาดไม่ตรงกัน!"],
+"WARN_NO_GOLDN_TEMPLATE_SETUP" : ["Please set up the chip matching golden template first!", "請先設定 晶粒匹配樣本!", "", "กรุณาตั้งค่าเทมเพลตมาตรฐานสำหรับการจับคู่ชิปก่อน!"],
+"WARN_CAN_NOT_FETCH_QUAD_2D" : ["Unable to find GoldenQuad2D!", "無法找到 GoldenQuad2D!", "", "ไม่สามารถค้นหา GoldenQuad2D ได้!"],
+"WARN_CAN_NOT_FETCH_INKS" : ["Unable to automatically fetch INK alignment points!\n\rPlease check if parameters are matched.", "無法自動抓到 INK 定位點!\n\r請確認 參數 是否適配?", "", "ไม่สามารถจับจุดตำแหน่ง INK อัตโนมัติได้!\n\rกรุณาตรวจสอบว่าพารามิเตอร์เหมาะสมหรือไม่"],
+"ERR_CHIP_LOC_ALL_EMPTY" : ["Exception: Alignment result is [All Empty Tray]!\n\rPlease check equipment status and parameter matching.", "異常: 定位結果為【全空盤】!\n\r請檢查設備狀態與參數是否適配.", "", "ผิดปกติ: ผลลัพธ์การระบุตำแหน่งคือ [ถาดเปล่าทั้งหมด]!\n\rกรุณาตรวจสอบสถานะอุปกรณ์และความเหมาะสมของพารามิเตอร์"],
 
-"Protection_saturated" : [
-    "Protection settings are saturated. \n\r\t They are adjusted to relative safe upper limit (in red color)!", 
-    "注意:\n\r\t有些設定值,轉換後已經超過整數範圍, \n\r\t被自動調整到相對安全上限(紅色字)!", 
-    "", 
-    "Lưu ý:\n\r\tMột số giá trị đã đặt đã vượt quá phạm vi số nguyên sau khi chuyển đổi,\n\r\t sẽ tự động được điều chỉnh theo giới hạn trên an toàn tương đối (chữ màu đỏ)!"
-],
+"__空盤檢測訊息__" : ["Remark", "不用翻譯","",""],
 
-"No_big_cylinder_or_big_motor" : [
-    "There is no big cylinder (nor big motor.)", 
-    "提示: 此機組態, 無 大氣缸 (或 大馬達).", 
-    "", 
-    "Lời khuyên: Cấu hình máy này, không có xi lanh lớn (hoặc động cơ lớn)."
-],
-
-"Make_sure_loadcells_returned" : [
-    "Make sure all loadcells returned", 
-    "請確認 傳感器之馬達軸, 都已經歸位!\n\r\n\r然後再按一次.", 
-    "", 
-    "Vui lòng xác nhận rằng trục động cơ của cảm biến đã được đặt lại!\n\r\n\rSau đó nhấn lại."
-],
-
-"Make_sure_axis_Y_in_pos" : [
-    "Make sure axis Y in pos", 
-    "請確認 Y軸平台, 已經到位!\n\r\n\r然後再按一次.", 
-    "", 
-    "Vui lòng xác nhận rằng bệ trục Y đã ở đúng vị trí!\n\r\n\rSau đó nhấn lại."
-],
-
-"Move_motors_out_of_limits" : [
-    "Move motors out of limits", 
-    "請先把馬達移離'極限'位置, 再離開.", 
-    "", 
-    "Vui lòng di chuyển động cơ ra khỏi vị trí 'giới hạn' trước khi rời đi"
-],
-
-"Loadcells_in_danger_zone" : [
-    "Loadcells in danger zone", 
-    "注意: 傳感器探針'在'危險區域裡面! \n\r\n\r 是否確定要移動馬達?", 
-    "", 
-    "Chú ý:Đầu dò cảm biến đang 'ở' vùng nguy hiểm!\n\r\n\r Có chắc là bạn muốn di chuyển động cơ không?"
-],
-
-"Loadcells_into_danger_zone" : [
-    "Loadcells into danger zone", 
-    "注意: 傳感器探針'即將進入'危險區域! \n\r\n\r 是否確定要移動馬達?", 
-    "", 
-    "Chú ý: Đầu dò cảm biến 'sắp đi vào' vùng nguy hiểm!\r\n\r Có chắc là bạn muốn di chuyển động cơ không?"
-],
-
-"Dangerous_moving" : [
-    "Dangerous moving", 
-    "注意: 此為危險區域移動! \n\r\n\r 是否確定要移動馬達?", 
-    "", 
-    "Lưu ý: Đây là một di chuyển khu vực nguy hiểm!\r\n\r Có chắc là bạn muốn di chuyển động cơ không?"
-] ,
-
-"Change_settings" : [
-    "Change settings", 
-    "是否確定要改變設定值?", 
-    "", 
-    "Bạn có chắc chắn muốn thay đổi giá trị cài đặt không?"
-],
-
-"Proceed_home_again" : [
-    "Proceed home again", 
-    "大平板升起後, 請再按一次 Home.", 
-    "", 
-    "Sau khi máy tính bảng lớn được nâng lên, vui lòng nhấn lại trang chủ."
-],
-
-"Servo_on_homing_again" : [
-    "Servo on homing again", 
-    "Servo-On 被變動過, 馬達 即將再重新 Home 一次!", 
-    "", 
-    "Servo-Bật Đã được thay đổi, động cơ quay lại về trang chủ"
-],
-
-"Delete_recipe" : ["Delete recipe", "是否確定要刪除參數?", "", "Bạn có chắc chắn muốn xóa tham số?"] ,
-
-"Invalid_recipe_name" : ["Invalid recipe name", "參數名稱有誤!", "", "Tên tham số sai!"] ,
-
-"Wait_safe_before_exit" : [
-    "Wait safe before exit", 
-    "請按 STOP 讓機台回到 Ready 安全狀態, 才能離開本程式.", 
-    "", 
-    "Vui lòng nhấn dừng để đưa máy về trạng thái sẵn sàng an toàn trước khi rời khỏi chương trình này."
-],
-
-"Needs_auto_zero" : [
-    "Needs auto zero", 
-    "請先執行 傳感器 'Auto-Zero' 歸零!", 
-    "", 
-    "Vui lòng thực hiện cảm biến 'Auto-Zero' trước!"
-],
-
-"About_to_auto_zero" : [
-    "About to auto zero", 
-    "即將進行歸零, 請確認 傳感器 已無負載!", 
-    "", 
-    "Nó sắp đặt lại về 0, vui lòng đảm bảo rằng cảm biến không có tải!"
-],
-
-"Abnormal_loadcell_calibration" : [
-    "Abnormal loadcell calibration: The following register must greater then 0! \n\r\n\rPlease check the load cells' wiring.",
-    "校驗結果異常: 以下 PLC暫存器數值 必須大於零! \n\r請確認校驗時, 傳感器 接線極性是否正確!", 
-    "", 
-    "Kết quả xác minh là bất thường: các giá trị thanh ghi PLC sau đây phải lớn hơn 0! \n\rVui lòng xác nhận xem cực của dây cảm biến có đúng trong quá trình hiệu chuẩn hay không!"
-],
-
-
-"__OTHERS__" : ["Remark", "不用翻譯"],
-
-"無預壓" : ["NoPrePress", "無預壓", "", "Không tải trước"] ,
-"大" : ["Big", "大", "", "Lớn"],
-"小" : ["Small", "小", "", "Nhỏ"],
-
-"最大壓合次數" : ["Max run count", "最大壓合次數", "", "Số lần tối đa"] ,
-"目前次數" : ["Run count", "目前次數", "", "Thời điểm hiện tại"],
-"哈希值" : ["Hash", "哈希值", "哈希值", "Hash"],
-"序號" : ["Serial No", "序號", "序号", "Số seri"],
-
-"速度上限" : ["Speed Limit", "速度上限", " ", "Tốc độ giới hạn"],
-"軸" : ["Axis", "軸", "", "Trục"],
-"步進" : ["StepMotor", "步進", "", "Bước"],
-"馬達" : ["Motor", "馬達", "", "Động cơ"],
-"大平板" : ["BigPlatform", "大平板", "", "Lớn bằng phẳng"],
-"大馬達" : ["BigMotor", "大馬達", "", "động cơ điện lớn"],
-"大氣缸" : ["BigCylinder", "大氣缸", "", "Xi lanh lớn"],
-"小氣缸" : ["SmallCylinder", "小氣缸", "", "Xi lanh nhỏ"],
-"垂直氣缸" : ["Vert.Cylinders", "垂直氣缸", "", "Trụ đứng"],
-"垂直氣缸A" : ["Vert.Cylinder A", "垂直氣缸A", "", "Xi lanh đứng A"],
-"垂直氣缸B" : ["Vert.Cylinder B", "垂直氣缸B", "", "Xi lanh đứng B"],
-"大小產品氣缸" : ["Prod.Cylinders", "大小產品氣缸", "", "Kích thước xi lanh sản phẩm"],
-"Y軸平台" : ["Y.Platform", "Y軸平台", "", "Bệ trục"],
-
-"左後" : ["LeftBack", "左後", "左后", "Phía sau bên trái"],
-"右前" : ["RightFront", "右前", "右前", "Phía trước bên phải"],
-"UP" : ["Up", "上升", "", "Lên"],
-"DOWN" : ["Down", "下降", "", "Xuống"],
-
-"關鍵參數文件檔" : [
-	"Select KeyParams Json (for H0)",
-	"關鍵參數文件檔(json) (for H0)",
-	"",
-	"Tập tin tham số chính"
-],
-
-"初始化" : ["Init", "初始化", "", "Khởi tạo"],
-"異常" : ["Error", "異常", "", "Bất thường"],
-"無法執行此模式" : [
-	"can not run with this mode", 
-	"無法執行此模式", 
-	"", 
-	"không thể thực hiện chế độ này"
-],
+"NO_RECIPE" : ["No parameters configured!", "沒有設定參數!", "", "ไม่ได้ตั้งค่าพารามิเตอร์!"],
+"NO_IMAGE" : ["Image not loaded!", "圖像 沒有載入!", "", "ไม่ได้โหลดรูปภาพ!"],
+"NO_MATCH_GRID" : ["Match could not find grid points!", "Match 找不到格點!", "", "Match ไม่พบจุดกริด!"],
+"MATCH_ERROR" : ["Match exception!", "Match 異常!", "", "การจับคู่ผิดปกติ!"],
+"GRID_ROWS_COLS_ARE_NOT_THE_SAME_AS_USER_INPUT" : ["The sampled grid count does not match the configured FullRows and FullCols values!", "取樣出來的 格點數 與 FullRows, FullCols 設定值 不同!", "", "จำนวนกริดที่สุ่มตัวอย่างได้ ไม่ตรงกับค่า FullRows และ FullCols ที่ตั้งไว้!"],
+"ON_GRID_TEMPLATE_MATCH_ERROR" : ["Grid template matching exception!", "格點樣板比對 異常!", "", "การเปรียบเทียบเทมเพลตกริดผิดปกติ!"],
+"OUT_GRID_NG_BLOCS_DETECT_ERROR" : ["Outer grid defect detection exception!", "格點外圍偵測 異常!", "", "การตรวจจับบล็อกเสียรอบนอกกริดผิดปกติ!"],
+"RUN_ALL_EXCEPTION" : ["One-click execution exception!", "一鍵執行異常!", "", "เกิดข้อผิดพลาดในการรันคำสั่งทั้งหมดในคลิกเดียว!"],
 
 "__END__" : ["Remark", "不用翻譯"]
 }

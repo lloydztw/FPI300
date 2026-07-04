@@ -2,6 +2,7 @@
 using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
 using JetEazy.FormSpace;
+using JetEazy.Lang;
 using LaserAlignDX;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
@@ -146,11 +147,13 @@ namespace PhotoMachine.UISpace
         {
             if (RCPItemNow.Index == 0)
             {
-                VsMessageBox.Warning("系统参数无法删除！");
+                //VsMessageBox.Warning("系统参数无法删除！");
+                VsMessageBox.Warning(QMSG.Text(Prompts.Info_Can_NOT_Delete_Recipe));
                 return;
             }
 
-            if (VsMessageBox.Question("是否要删除参数？") == DialogResult.OK)
+            //if (VsMessageBox.Question("是否要删除参数？") == DialogResult.OK)
+            if (VsMessageBox.Question(QMSG.Text(Prompts.Quection_To_Delete_Recipe)) == DialogResult.OK)
             {
                 int i = 0;
 
@@ -242,14 +245,14 @@ namespace PhotoMachine.UISpace
         }
         void ModifyComplete()
         {
-            vsMessageBox = new VsMessageBox($"保存参数中请稍后...", false);
+            vsMessageBox = new VsMessageBox(QMSG.Text(Prompts.Info_Recipe_Saving), false);
             vsMessageBox.Show();
             vsMessageBox.Refresh();
 
             if (RCPDB.CheckDuplicate(txtName.Text.Trim() + txtVersion.Text.Trim(), RCPItemNow.Index))
             {
-                VsMessageBox.Warning("名称或版本已存在，请检查。");
-                //MessageBox.Show(myLanguage.Messages("msg1", INI.LANGUAGE), "SYS", MessageBoxButtons.OK);
+                //VsMessageBox.Warning("名称或版本已存在，请检查。");
+                VsMessageBox.Warning(QMSG.Text(Prompts.Info_Recipe_Already_Existing));
                 txtName.Focus();
             }
             else
@@ -284,7 +287,7 @@ namespace PhotoMachine.UISpace
         }
         void ModifyCancel()
         {
-            vsMessageBox = new VsMessageBox($"取消中请稍后...", false);
+            vsMessageBox = new VsMessageBox(QMSG.Text(Prompts.Info_Recipe_Rollback), false);
             vsMessageBox.Show();
             vsMessageBox.Refresh();
 

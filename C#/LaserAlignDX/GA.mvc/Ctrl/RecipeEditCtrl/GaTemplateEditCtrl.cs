@@ -647,11 +647,13 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             if (err != 0)
             {
-                VsMessageBox.Warning("匹配模板 創建失敗!");
+                //VsMessageBox.Warning("匹配模板 創建失敗!");
+                VsMessageBox.Warning(QMSG.Text(ErrorCodes.AoiErr_Template_Creation_Failed));
             }
             else if (!silentSuccess)
             {
-                VsMessageBox.Info("匹配模板 創建成功!");
+                //VsMessageBox.Info("匹配模板 創建成功!");
+                VsMessageBox.Info(QMSG.Text(ErrorCodes.AoiErr_Template_Creation_OK));
             }
         }
         void SaveAllParams(bool force)
@@ -699,9 +701,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
 
             if (force)
-                VsMessageBox.Info("參數 保存成功.");
+                //VsMessageBox.Info("參數 保存成功.");
+                VsMessageBox.Info(QMSG.Text(Prompts.Info_Save_Recipe_OK));
             else if (isAnySaved)
-                VsMessageBox.Info("參數 已經自動保存.");
+                //VsMessageBox.Info("參數 已經自動保存.");
+                VsMessageBox.Info(QMSG.Text(Prompts.Info_Auto_Save_Rcipe_OK));
         }
         void CancelAndExit()
         {

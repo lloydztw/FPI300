@@ -10,8 +10,26 @@ namespace LaserAlignDX
         [Description("程序已經啟動, 請勿多開！")]
         ReEntry,
 
-        [Description("請先登入 擁有修改參數權限 的 帳號!")]
+        [Description("沒有此權限!")]
         No_Privilege,
+
+        [Description("是否要删除参数？")]
+        Quection_To_Delete_Recipe,
+
+        [Description("参数无法删除!")]
+        Info_Can_NOT_Delete_Recipe,
+
+        [Description("名称或版本已存在,请检查!")]
+        Info_Recipe_Already_Existing,
+
+        [Description("保存参数中请稍后...")]
+        Info_Recipe_Saving,
+
+        [Description("切换参数中请稍后...")]
+        Info_Recipe_Switching,
+
+        [Description("取消中请稍后...")]
+        Info_Recipe_Rollback,
 
         [Description("是否 重新驅動 載台線掃相機?")]
         Question_ReTrigger_Carrier_LineScan_Camera,
@@ -54,5 +72,26 @@ namespace LaserAlignDX
 
         [Description("已成功保存二值化圖檔")]
         Info_Save_Binary_Image_OK,
+
+        [Description("圖檔 已成功保存")]
+        Info_Save_Image_OK,
+
+        [Description("圖檔 無法保存")]
+        Info_Save_Image_Failed,
+
+        [Description("參數 已成功保存")]
+        Info_Save_Recipe_OK,
+
+        [Description("參數 已自動保存")]
+        Info_Auto_Save_Rcipe_OK,
+
+        [Description("是否 繼續跑 模擬?")]
+        Question_Continue_To_Run_Simulation,
+
+        [Description("【軟件準備】 已經啟動連線, 無法進行 飛拍 離線測試!")]
+        Waring_Software_Ready_Can_NOT_Simulate_Fly_Camera,
+
+        [Description("[離線版]")]
+        Info_Simulation,
     }
 }

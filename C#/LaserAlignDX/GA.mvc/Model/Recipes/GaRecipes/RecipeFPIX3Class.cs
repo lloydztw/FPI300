@@ -1272,16 +1272,21 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             {
                 err = PrintTempTrain();
                 if (err != 0)
-                    VsMessageBox.Warning("加載 (晶粒匹配) 參數 訓練失敗!\n\r該參數尚未建立\n\r或未插入 Dongle.");
+                {
+                    //VsMessageBox.Warning("加載 (晶粒匹配) 參數 訓練失敗!\n\r該參數尚未建立\n\r或未插入 Dongle.");
+                    VsMessageBox.Warning(QMSG.Text(Mvc.Model.ErrorCodes.AoiErr_Template_Train_Failed));
+                }
             }
 
             if (err == 0)
             {
                 err = PrintTempFlyTrain();
                 if (err != 0)
-                    VsMessageBox.Warning("加載 飛拍 參數 訓練失敗!\n\r該參數尚未建立\n\r或未插入 Dongle.");
+                {
+                    //VsMessageBox.Warning("加載 飛拍 參數 訓練失敗!\n\r該參數尚未建立\n\r或未插入 Dongle.");
+                    VsMessageBox.Warning(QMSG.Text(Mvc.Model.ErrorCodes.AoiErr_FlyCam_Train_Failed));
+                }
             }
-
             return err;
         }
 

@@ -6,7 +6,7 @@
 [Setup]
 AppPublisher=JetEazy System Co., Ltd.
 AppPublisherURL=http://www.jeteazy.com
-AppVersion=3.3.5.10
+AppVersion=3.3.7.0
 AppCopyright=Copyright (C) 2026 JetEazy System Co., Ltd.
 ;WizardImageFile=JetEazySetup.bmp
 
@@ -16,7 +16,7 @@ DefaultGroupName=JetEazy FPI30
 Compression=lzma
 SolidCompression=yes
 OutputDir=.\bin
-OutputBaseFileName=Traveller_Setup_3.3.5.10
+OutputBaseFileName=Traveller_Setup_3.3.7.0
 
 [Files]
 ; BIN & DLL
@@ -37,6 +37,7 @@ Source: ".\*.cmd";                  DestDir: "{app}\_BIN_";                     
 
 ; INI & DB 
 ; (these files must be kept existing even after uninstall!)
+Source: "..\SettingsFiles\Ini\language\*.json"; DestDir: "{app}\Ini\language";  Flags: ignoreversion uninsneveruninstall           
 Source: "..\SettingsFiles\LASER-MAIN_FPIX3\*.*"; \
           DestDir: "{app}\_V03_\LASER-MAIN_FPIX3"; \
           Flags: recursesubdirs onlyifdoesntexist uninsneveruninstall      

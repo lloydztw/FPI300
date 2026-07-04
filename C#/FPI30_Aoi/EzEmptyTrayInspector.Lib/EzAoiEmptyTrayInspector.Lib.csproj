@@ -163,8 +163,8 @@
   <ItemGroup>
     <Compile Include="App\EzAppForDll.cs" />
     <Compile Include="App\Global\Global.cs" />
-    <Compile Include="Model\Enum\Prompts.cs" />
     <Compile Include="App\Lang\QMSG.cs" />
+    <Compile Include="Model\Enum\Prompts.cs" />
     <Compile Include="App\Lang\QMsgBox.cs" />
     <Compile Include="App\Settings\JxAppSettings.cs" />
     <Compile Include="Ctrl\BaseUtil.cs" />

@@ -15,6 +15,7 @@
 
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.GA.BasicSpace;
@@ -436,7 +437,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             var plcIO = MACHINE?.PLCIO;
             if (plcIO != null && plcIO.bSoftwareReady)
             {
-                VsMessageBox.Warning("【軟件準備】 已經啟動連線, 無法進行 飛拍 離線測試!");
+                //VsMessageBox.Warning("【軟件準備】 已經啟動連線, 無法進行 飛拍 離線測試!");
+                VsMessageBox.Warning(QMSG.Text(Prompts.Waring_Software_Ready_Can_NOT_Simulate_Fly_Camera));
                 return;
             }
 

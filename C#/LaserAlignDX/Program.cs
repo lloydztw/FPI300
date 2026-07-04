@@ -1,4 +1,5 @@
-﻿using JetEazy.Utils;
+﻿using EzAoiEmptyTrayInspector.Lang;
+using JetEazy.Utils;
 using System;
 using System.Diagnostics;
 using System.Threading;
