@@ -15,6 +15,7 @@
 #endregion
 
 using AX.Gui;
+using JetEazy.Lang;
 using System;
 using System.Windows.Forms;
 using GaCalibCtrl = LaserAlignDX.Mvc.Ctrl.Galib.V5.GaCalibCtrl;

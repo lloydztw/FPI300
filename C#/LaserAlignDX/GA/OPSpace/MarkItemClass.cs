@@ -19,6 +19,7 @@ using MoveGraphLibrary;
 using System.IO;
 using Traveller106;
 using Eazy_Project_III;
+using JetEazy.Lang;
 
 namespace LaserAlignDX.OPSpace
 {

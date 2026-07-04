@@ -17,6 +17,7 @@ using Eazy_Project_III;
 using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.FormSpace;
@@ -347,7 +348,18 @@ namespace LaserAlignDX.Mvc.Ctrl
             //(1) 顯示 RecipeParaGridClass 參數
             if (_rcpEditUI.wndVisionSettingsPanel is PropertyGrid pg)
             {
-                pg.SelectedObject = _xParamGrid;
+                try
+                {
+                    PGTranslator.Register(_xParamGrid);
+                    pg.SelectedObject = _xParamGrid;
+                }
+                catch (Exception ex)
+                {
+                    string errMsg = "Translate(_xParamGrid) Error";
+                    errMsg += "\n\r\n\r" + ex.Message;
+                    errMsg += "\n\n" + ex.StackTrace;
+                    MessageBox.Show(errMsg, GlobalConfig.TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
             }
 
             ////(2) 顯示 jxRecipeComboe

@@ -15,6 +15,7 @@ using Traveller106;
 using VsCommon.ControlSpace;
 using Eazy_Project_III;
 using LaserAlignDX;
+using JetEazy.Lang;
 
 namespace PhotoMachine.UISpace
 {
@@ -28,24 +29,23 @@ namespace PhotoMachine.UISpace
         }
         //AdjUI ADJUI;
 
-        PropertyGrid PG;
+        PropertyGrid propertyGrid;
 
         GroupBox grpSetup;
 
-        Button btnLanguage;
-        
-        TextBox txtMachineName;
-        NumericUpDown numDelayTime;
+        //Button btnLanguage;
+        //TextBox txtMachineName;
+        //NumericUpDown numDelayTime;
 
-        Label lblSavePath;
-        Button btnPathPicker;
+        //Label lblSavePath;
+        //Button btnPathPicker;
 
         Button btnEdit;
         Button btnOK;
         Button btnCancel;
 
         //Language Setup
-        JzLanguageClass myLanguage = new JzLanguageClass();
+        //JzLanguageClass myLanguage = new JzLanguageClass();
 
         JzTransparentPanel tpnlCover;
 
@@ -58,8 +58,8 @@ namespace PhotoMachine.UISpace
 
         //}
 
-        string UIPath = "";
-        int LanguageIndex = 0;
+        //string UIPath = "";
+        //int LanguageIndex = 0;
 
         VersionEnum VER = VersionEnum.STEROPES;
         OptionEnum OPT = OptionEnum.MAIN;
@@ -75,16 +75,17 @@ namespace PhotoMachine.UISpace
             VersionEnum ver,
             OptionEnum opt)
         {
-            UIPath = uipath;
-            LanguageIndex = langindex;
+            //UIPath = uipath;
+            //LanguageIndex = langindex;
+            
             VER = ver;
             OPT = opt;
 
-            myLanguage.Initial(UIPath + "\\IniUI.jdb", LanguageIndex, this);
+            //myLanguage.Initial(UIPath + "\\IniUI.jdb", LanguageIndex, this);
 
             //ADJUI = adjUI1;
 
-            PG = propertyGrid1;
+            propertyGrid = propertyGrid1;
 
             grpSetup = groupBox1;
 
@@ -109,16 +110,16 @@ namespace PhotoMachine.UISpace
 
             tpnlCover = new JzTransparentPanel();
             tpnlCover.BackColor = System.Drawing.Color.Transparent;
-            tpnlCover.Location = new System.Drawing.Point(PG.Location.X, PG.Location.Y);
+            tpnlCover.Location = new System.Drawing.Point(propertyGrid.Location.X, propertyGrid.Location.Y);
             tpnlCover.Name = "panel1";
 
-            PG.PropertyValueChanged += PG_PropertyValueChanged;
+            propertyGrid.PropertyValueChanged += PG_PropertyValueChanged;
 
 
-            if (PG.VerticalScroll.Visible)
-                tpnlCover.Size = new Size(PG.Width - 15, PG.Height);
+            if (propertyGrid.VerticalScroll.Visible)
+                tpnlCover.Size = new Size(propertyGrid.Width - 15, propertyGrid.Height);
             else
-                tpnlCover.Size = new Size(PG.Width, PG.Height);
+                tpnlCover.Size = new Size(propertyGrid.Width, propertyGrid.Height);
 
             tpnlCover.TabIndex = 0;
             grpSetup.Controls.Add(tpnlCover);
@@ -126,14 +127,21 @@ namespace PhotoMachine.UISpace
             
             DBStatus = DBStatusEnum.NONE;
 
-            FillDisplay();
+            // 延後註冊多語系支援
+            BeginInvoke((Action)PostInitLanguage);
+        }
 
-            //BeginInvoke(new Action(() => QMSG.Dump(this)));
+        private void PostInitLanguage()
+        {
+            QMSG.Translate(this);
+            PGTranslator.Register(INI.Instance);
+            updatePropertyGrid();
         }
 
         private void PG_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
         {
-            switch (e.ChangedItem.PropertyDescriptor.Name)
+            var itemName = e.ChangedItem?.PropertyDescriptor?.Name;
+            switch (itemName)
             {
                 case "mLangIndex":
                 //case "ChangeLangIndex":
@@ -181,7 +189,7 @@ namespace PhotoMachine.UISpace
             DBStatus = DBStatusEnum.NONE;
             OnTrigger(INIStatusEnum.EXIT);
             //CCDCollection.SaveCCDLocation();
-            FillDisplay();
+            updatePropertyGrid();
         }
         void ModifyCancel()
         {
@@ -192,7 +200,7 @@ namespace PhotoMachine.UISpace
             //OnTrigger(INIStatusEnum.CHANGELANGUAGE);
             OnTrigger(INIStatusEnum.EXIT);
             //CCDCollection.LoadCCDLocation();
-            FillDisplay();
+            updatePropertyGrid();
         }
 
         
@@ -233,36 +241,14 @@ namespace PhotoMachine.UISpace
 
         #endregion
 
-        public void SetLanguage(int langindex)
+        //public void SetLanguage(int langindex)
+        //{
+        //    //myLanguage.SetControlLanguage(this, langindex);
+        //}
+
+        void updatePropertyGrid()
         {
-            myLanguage.SetControlLanguage(this, langindex);
-        }
-
-        void FillDisplay()
-        {
-            //ADJUI.ResetChks();
-            //PG.SelectedObject = INI.Instance.XPropsConfig;//  INI.Instance;
-            //Traveller106.Universal.MACHINECollection.WriteConfigToPLC();
-            PG.SelectedObject = INI.Instance;
-            //switch (VER)
-            //{
-            //    case VersionEnum.PROJECT:
-
-            //        switch(OPT)
-            //        {
-            //            case OptionEnum.DISPENSINGX1:
-
-            //                writeX1();
-
-            //                break;
-            //            case OptionEnum.DISPENSING:
-
-            //                writeX3();
-            //                break;
-            //        }
-
-            //        break;
-            //}
+            propertyGrid.SelectedObject = INI.Instance;
         }
 
         //MachineCollectionClass MACHINECollection
@@ -381,7 +367,7 @@ namespace PhotoMachine.UISpace
 
         private void btnUpdateData_Click(object sender, EventArgs e)
         {
-            FillDisplay();
+            updatePropertyGrid();
         }
 
 
@@ -418,10 +404,10 @@ namespace PhotoMachine.UISpace
 
             groupBox1.Height = button1.Top - pad * 2 - groupBox1.Top;
 
-            if (tpnlCover != null && PG != null)
+            if (tpnlCover != null && propertyGrid != null)
             {
-                tpnlCover.Location = PG.Location;
-                tpnlCover.Size = new Size(PG.Width - 15, PG.Height);
+                tpnlCover.Location = propertyGrid.Location;
+                tpnlCover.Size = new Size(propertyGrid.Width - 15, propertyGrid.Height);
             }
 #endif
         }

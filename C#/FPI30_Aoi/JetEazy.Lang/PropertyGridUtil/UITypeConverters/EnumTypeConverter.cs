@@ -1,69 +1,98 @@
-﻿using System;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2026-07-04 改版 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 
-namespace JetEazy.Legacy
+namespace JetEazy.Lang
 {
     public class JzEnumConverter : EnumConverter
     {
-        public string FilterName = string.Empty;
+        #region LANGUAGE
+        private QxLang _lang => QxLang.Instance("rcp");
+        private string _T(string text)
+        {
+            var t = _lang?.Translate(text);
+            if (!string.IsNullOrEmpty(t))
+                return t;
+            return text;
+        }
+        #endregion
 
+        public string FilterName = string.Empty;
         private Type _enumType;
+
         /// <summary>Initializing instance</summary>
         /// <param name="type">type Enum</param>
-        ///this is only one function, that you must 
-        ///to change. All another functions for enums 
-        ///you can use by Ctrl+C/Ctrl+V
         public JzEnumConverter(Type type)
             : base(type)
         {
             _enumType = type;
         }
 
-        public override bool CanConvertTo(ITypeDescriptorContext context,
-                Type destType)
+        public override bool CanConvertTo(ITypeDescriptorContext context, Type destType)
         {
             return destType == typeof(string);
         }
 
-        public override object ConvertTo(ITypeDescriptorContext context,
-            CultureInfo culture,
-            object value, Type destType)
+        public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destType)
         {
             if (value == null)
                 return value;
 
             FieldInfo fi = _enumType.GetField(Enum.GetName(_enumType, value));
-            DescriptionAttribute dna =
-              (DescriptionAttribute)Attribute.GetCustomAttribute(
-                fi, typeof(DescriptionAttribute));
+            if (fi == null) return value.ToString();
+
+            DescriptionAttribute dna = (DescriptionAttribute)Attribute.GetCustomAttribute(fi, typeof(DescriptionAttribute));
 
             if (dna != null)
-                return dna.Description;
+            {
+                // 使用 _T(...) 代替 QMSG.Text
+                return _T(dna.Description);
+            }
             else
+            {
                 return value.ToString();
+            }
         }
 
-        public override bool CanConvertFrom(ITypeDescriptorContext context,
-            Type srcType)
+        public override bool CanConvertFrom(ITypeDescriptorContext context, Type srcType)
         {
             return srcType == typeof(string);
         }
-        public override object ConvertFrom(ITypeDescriptorContext context,
-            CultureInfo culture,
-            object value)
+
+        public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
+            string inputStr = value as string;
+            if (string.IsNullOrEmpty(inputStr))
+                return base.ConvertFrom(context, culture, value);
+
             foreach (FieldInfo fi in _enumType.GetFields())
             {
-                DescriptionAttribute dna =
-                  (DescriptionAttribute)Attribute.GetCustomAttribute(
-                    fi, typeof(DescriptionAttribute));
+                DescriptionAttribute dna = (DescriptionAttribute)Attribute.GetCustomAttribute(fi, typeof(DescriptionAttribute));
 
-                if ((dna != null) && ((string)value == dna.Description))
-                    return Enum.Parse(_enumType, fi.Name);
+                if (dna != null)
+                {
+                    // 反查時同樣使用 _T(...) 轉成當前語系進行比對
+                    if (inputStr == _T(dna.Description))
+                        return Enum.Parse(_enumType, fi.Name);
+                }
             }
-            return Enum.Parse(_enumType, (string)value);
+            return Enum.Parse(_enumType, inputStr);
         }
 
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
@@ -77,23 +106,6 @@ namespace JetEazy.Legacy
 
                 filteredValues.Add(v);
             }
-            //if (_enumType == null)
-            //{
-            //    return base.GetStandardValues(context);
-            //}
-
-            //// 获取所有枚举值
-            //Array values = Enum.GetValues(_enumType);
-
-            //// 过滤掉不需要的枚举值
-            //var filteredValues = new System.Collections.ArrayList();
-            //foreach (var value in values)
-            //{
-            //    if (value.ToString() != "Value3") // 隐藏 Value3
-            //    {
-            //        filteredValues.Add(value);
-            //    }
-            //}
 
             return new StandardValuesCollection(filteredValues);
         }
@@ -102,6 +114,17 @@ namespace JetEazy.Legacy
 
     public class EnumTypeConverter : EnumConverter
     {
+        #region LANGUAGE
+        private QxLang _lang => QxLang.Instance("rcp");
+        private string _T(string text)
+        {
+            var t = _lang?.Translate(text);
+            if (!string.IsNullOrEmpty(t))
+                return t;
+            return text;
+        }
+        #endregion
+
         private Type _enumType;
 
         public EnumTypeConverter(Type type) : base(type)
@@ -116,13 +139,23 @@ namespace JetEazy.Legacy
 
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destType)
         {
+            if (value == null)
+                return value;
+
             FieldInfo fi = _enumType.GetField(Enum.GetName(_enumType, value));
+            if (fi == null) return value.ToString();
+
             DescriptionAttribute da = (DescriptionAttribute)Attribute.GetCustomAttribute(fi, typeof(DescriptionAttribute));
 
             if (da != null)
-                return da.Description;
+            {
+                // 使用 _T(...) 代替 QMSG.Text
+                return _T(da.Description);
+            }
             else
+            {
                 return value.ToString();
+            }
         }
 
         public override bool CanConvertFrom(ITypeDescriptorContext context, Type srcType)
@@ -132,14 +165,22 @@ namespace JetEazy.Legacy
 
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
+            string inputStr = value as string;
+            if (string.IsNullOrEmpty(inputStr))
+                return base.ConvertFrom(context, culture, value);
+
             foreach (FieldInfo fi in _enumType.GetFields())
             {
                 DescriptionAttribute da = (DescriptionAttribute)Attribute.GetCustomAttribute(fi, typeof(DescriptionAttribute));
 
-                if ((da != null) && ((string)value == da.Description))
-                    return Enum.Parse(_enumType, fi.Name);
+                if (da != null)
+                {
+                    // 反查時使用 _T(...) 進行多語系匹配
+                    if (inputStr == _T(da.Description))
+                        return Enum.Parse(_enumType, fi.Name);
+                }
             }
-            return Enum.Parse(_enumType, (string)value);
+            return Enum.Parse(_enumType, inputStr);
         }
     }
 
@@ -161,5 +202,4 @@ namespace JetEazy.Legacy
             return false;
         }
     }
-
 }

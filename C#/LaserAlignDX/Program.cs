@@ -1,6 +1,7 @@
 ﻿using JetEazy.Utils;
 using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Windows.Forms;
 using Traveller106;
 
@@ -33,8 +34,7 @@ namespace LaserAlignDX
             Form frm = new Traveller106.FormMainDX();
 
             #region DEBUG_CODE
-            //frm.Load += (s, e) => GaMvcConfig.OpenCalibrationTool();
-            //frm.Load += (s, e) => GaMvcConfig.OpenTamplateEditor(Model.Coords.CarrierEnum.C2);
+            _DEBUG(frm);
             #endregion
 
             Application.Run(frm);
@@ -53,6 +53,7 @@ namespace LaserAlignDX
             }
             return (i > 1) ? true : false;
         }
+        
         static bool parse_args(params string[] args)
         {
             bool go = true;
@@ -93,6 +94,24 @@ namespace LaserAlignDX
             }
             new UnitTest_FP130.Test_ChipMatcher().Run();
             return true;
+        }
+        static void _DEBUG(Form frm)
+        {
+            return;
+
+            frm.Load += (s, e) =>
+            {
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    Thread.Sleep(3000);
+                    frm.BeginInvoke(new Action(() =>
+                    {
+                        //GaMvcConfig.OpenTamplateEditor(Model.Coords.CarrierEnum.C2)
+                        //GaMvcConfig.OpenCalibrationTool();
+                        GaMvcConfig.OpenRecipeEditor();
+                    }));
+                });
+            };
         }
     }
 }

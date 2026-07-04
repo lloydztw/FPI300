@@ -16,6 +16,7 @@
 
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Lang;
 using JetEazy.Match;
 using JetEazy.OpenCV.Viewer;
 using JetEazy.QMath;

@@ -136,12 +136,20 @@ namespace Traveller106
             //}
             #endregion
 
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.Load += MainForm_Load;
-            this.FormClosed += MainForm_FormClosed;
-            this.SizeChanged += MainForm_SizeChanged;
+            //this.StartPosition = FormStartPosition.CenterScreen;
+            //this.Load += MainForm_Load;
+            //this.FormClosed += MainForm_FormClosed;
+            //this.SizeChanged += MainForm_SizeChanged;
 
-            RUNUI.btnLanguage.Click += BtnLanguage_Click;
+            if (!DesignMode)
+            {
+                this.Size = new Size(100, 100);
+                this.StartPosition = FormStartPosition.CenterScreen;
+                this.Load += MainForm_Load;
+                this.FormClosed += MainForm_FormClosed;
+                this.SizeChanged += (s, e) => auto_layout();
+                auto_layout();
+            }
         }
 
         private void BtnLanguage_Click(object sender, EventArgs e)
@@ -198,7 +206,7 @@ namespace Traveller106
             this.Text = $"{GlobalConfig.TITLE} (Ver {Application.ProductVersion}) " + Universal.VersionDate;
 
             //(5) 輸出 LOG
-            _show_simulation_info_to_log();
+            show_simulation_info_to_log();
 
             //(6) 語系
             _post_translate();
@@ -224,11 +232,6 @@ namespace Traveller106
             mMainTick?.Dispose();
             mMainTick = null;
             Universal.Dispose();
-        }
-        private void MainForm_SizeChanged(object sender, EventArgs e)
-        {
-            //@LETIAN
-            _auto_layout();
         }
 
         bool Init()
@@ -360,14 +363,26 @@ namespace Traveller106
         }
         void PostCloseBanner()
         {
-            // 轉換語系 (很慢)
-            LanguageExClass.Instance.EnumControls(this);
             // To Maximize the window size.
             this.FormBorderStyle = FormBorderStyle.Sizable;
             this.WindowState = FormWindowState.Maximized;
+            RUNUI.lblLanguage.Text = QMSG.Lang().CurrentLanguageName;
+            QMSG.Translate(this);
+
             // Close Banner
             BannerForm.CloseBanner();
             GaUtil.SetCursor(this, Cursors.Default);
+        }
+        void OpenLanguageSelector()
+        {
+            using (var dlg = new JetEazy.Lang.GUI.FormLanguageSelector(QMSG.Lang()))
+            {
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    RUNUI.lblLanguage.Text = QMSG.Lang().CurrentLanguageName;
+                    QMSG.Translate(this);
+                }
+            }
         }
 
         #region MAIN_X1_LASER_TCP
@@ -830,6 +845,7 @@ namespace Traveller106
         {
             RUNUI.Initial(Universal.UIPATH, INI.Instance.LANGUAGE, Universal.VERSION, Universal.OPTION);
             RUNUI.TriggerAction += new RunUI.TriggerHandler(RUNUI_TriggerAction);
+            RUNUI.btnLanguage.Click += (s, e) => OpenLanguageSelector();
         }
         void InitialRCPUI()
         {
@@ -1304,7 +1320,7 @@ namespace Traveller106
             return ret;
         }
 #endif
-        private void _show_simulation_info_to_log()
+        private void show_simulation_info_to_log()
         {
             if (Universal.IsNoUseIO)
                 CommonLogClass.Instance.LogMessage("模擬 PLC", Color.OrangeRed);
@@ -1316,10 +1332,12 @@ namespace Traveller106
             //        CommonLogClass.Instance.LogMessage("模擬 Cam" + i, Color.OrangeRed);
             //}
         }
-        private void _auto_layout()
+        private void auto_layout()
         {
             if (WindowState == FormWindowState.Minimized)
                 return;
+
+            SuspendLayout();
 
             //@LETIAN: 自動調整 layout
             int panelWidth = 235;
@@ -1345,6 +1363,8 @@ namespace Traveller106
             iniUI1.Top = runUI1.Top;
             ctrlUI1.Top = runUI1.Bottom;
             ctrlUI1.Height = rcc.Bottom - ctrlUI1.Top;
+
+            ResumeLayout(true);
         }
         private void _post_translate()
         {

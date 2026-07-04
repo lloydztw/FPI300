@@ -18,12 +18,14 @@ using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
 using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Interface;
+using JetEazy.Lang;
 using JetEazy.Utils;
 using JzDisplay;
 using LaserAlignDX.GA.FormSpace.FPI30Form;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
+using OpenCvSharp.ML;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -181,10 +183,23 @@ namespace LaserAlignDX.FormSpace
             DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
 
             IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
-            propertyGrid1.SelectedObject = FlyParaClass.Instance;
+            
+            try
+            {
+                PGTranslator.Register(FlyParaClass.Instance);
+                propertyGrid1.SelectedObject = FlyParaClass.Instance;
+            }
+            catch (Exception ex)
+            {
+                string errMsg = "Translate(FlyParaClass) Error";
+                errMsg += "\n\r\n\r" + ex.Message;
+                errMsg += "\n\n" + ex.StackTrace;
+                MessageBox.Show(errMsg, GlobalConfig.TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+
             propertyGrid1.PropertyValueChanged += PropertyGrid1_PropertyValueChanged;
 
-            this.Text = "飞拍参数设定窗口";
+            this.Text = "Fly Camera Recipe Editor";
 
             LanguageExClass.Instance.EnumControls(this);
 

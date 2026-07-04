@@ -1,5 +1,6 @@
 ﻿using Eazy_Project_III;
 using JetEazy;
+using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System.ComponentModel;

@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.Lang;
 using LaserAlignDX.Mvc.Ctrl;
 using System.Windows.Forms;
 using DispUI = JzDisplay.UISpace.DispUI;

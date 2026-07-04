@@ -1,10 +1,22 @@
-﻿using Newtonsoft.Json;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2026-07-04 改版 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows.Forms;
-//using GlacialComponents.Controls;
-
 
 namespace JetEazy.Lang
 {
@@ -27,6 +39,7 @@ namespace JetEazy.Lang
     {
         public const string DEFAULT_PATH = @"C:\Program Files\Common Files\JetEazy\ini";
         public string PATH = "";
+        static bool OPT_AUTO_DUMP_TEXT = true;
 
         #region PATH_FUNCTION
         private void init_path(string path)
@@ -112,6 +125,10 @@ namespace JetEazy.Lang
                 return _availableLangs[id];
             return "English";
         }
+        public string CurrentLanguageName
+        {
+            get => GetLanguageName(LanguageID);
+        }
         public int LanguageID
         {
             get
@@ -142,13 +159,15 @@ namespace JetEazy.Lang
             {
                 if (_dict == null)
                     _dict = _loadDict();
-
                 result = _lookUp(_dict, str);
             }
 
             if (string.IsNullOrEmpty(result))
             {
-                if (defaultStr != null)
+                if (_dict == null && OPT_AUTO_DUMP_TEXT)
+                    _dumpOne(str);
+
+                if (!string.IsNullOrEmpty(defaultStr))
                     return defaultStr;
                 else
                     return str;
@@ -235,7 +254,8 @@ namespace JetEazy.Lang
                 string fullFileName = System.IO.Path.Combine(PATH, _jsonFile);
                 if (!System.IO.File.Exists(fullFileName))
                     fullFileName = System.IO.Path.Combine(DEFAULT_PATH, _jsonFile);
-
+                if (!System.IO.File.Exists(fullFileName))
+                    return null;
                 string jsonStr = System.IO.File.ReadAllText(fullFileName);
                 var dict = JsonConvert.DeserializeObject<Dictionary<string, string[]>>(jsonStr);
                 return dict;
@@ -378,7 +398,7 @@ namespace JetEazy.Lang
                 if (!string.IsNullOrEmpty(text) && !string.IsNullOrEmpty(gui.Name))
                 {
                     var key = _getKey(prefix, gui);
-                    jsonStr += $"\n\"{key}\" : [\"{text}\"],";
+                    jsonStr += $"\n\"{key}\" : [\"\", \"{text}\", \"\", \"\"],";
                 }
             }
 
@@ -389,6 +409,24 @@ namespace JetEazy.Lang
                 jsonStr = jsonStr.Trim(',') + "\n}";
 
             return jsonStr;
+        }
+        void _dumpOne(string text)
+        {
+            string fname = System.IO.Path.GetFileName(_jsonFile);
+            string dstPath = "d:\\paso.log\\lang";
+            JetEazy.IO.QxPathUtility.InitDirectory(dstPath);
+            string dumpFile = System.IO.Path.Combine(dstPath, fname + ".txt");
+
+            if (System.IO.File.Exists(dumpFile))
+            {
+                var old_lines = System.IO.File.ReadAllLines(dumpFile);
+                foreach (var line in old_lines)
+                    if (line.StartsWith($"\"{text}\""))
+                        return;
+            }
+
+            var lines = new[] { $"\"{text}\" : [\"\", \"{text}\", \"\", \"\"]," };
+            System.IO.File.AppendAllLines(dumpFile, lines);
         }
         #endregion
 

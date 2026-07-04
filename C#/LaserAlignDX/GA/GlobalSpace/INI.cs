@@ -2,6 +2,7 @@
 using Eazy_Project_III;
 using JetEazy;
 using JetEazy.BasicSpace;
+using JetEazy.Lang;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

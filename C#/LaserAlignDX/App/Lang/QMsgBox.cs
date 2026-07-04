@@ -13,9 +13,10 @@
  */
 #endregion
 
+using System;
 using System.Windows.Forms;
 
-namespace LaserAlignDX
+namespace JetEazy.Lang
 {
     /// <summary>
     /// 多語系 MessageBox
@@ -34,7 +35,7 @@ namespace LaserAlignDX
         }
 
         public static DialogResult Show(
-            Prompts prompt,
+            Enum prompt,
             string title = null,
             MessageBoxButtons btn = MessageBoxButtons.OK,
             MessageBoxIcon icon = MessageBoxIcon.Information,
@@ -46,7 +47,7 @@ namespace LaserAlignDX
         }
 
         public static DialogResult Info(
-            Prompts prompt,
+            Enum prompt,
             string title = null,
             MessageBoxButtons btn = MessageBoxButtons.OK,
             params string[] args)
@@ -55,7 +56,7 @@ namespace LaserAlignDX
         }
 
         public static DialogResult Question(
-            Prompts prompt,
+            Enum prompt,
             string title = null,
             MessageBoxButtons btn = MessageBoxButtons.YesNo,
             params string[] args)
@@ -64,7 +65,7 @@ namespace LaserAlignDX
         }
 
         public static DialogResult Warning(
-            Prompts prompt,
+            Enum prompt,
             string title = null,
             MessageBoxButtons btn = MessageBoxButtons.OK,
             params string[] args)
@@ -73,7 +74,7 @@ namespace LaserAlignDX
         }
 
         public static DialogResult Error(
-            Prompts prompt,
+            Enum prompt,
             string title = null,
             MessageBoxButtons btn = MessageBoxButtons.OK,
             params string[] args)

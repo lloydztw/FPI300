@@ -13,14 +13,12 @@
  */
 #endregion
 
-using JetEazy;
-using JetEazy.AccountMgr;
-using JetEazy.Lang;
 using System;
 using System.Windows.Forms;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
+using GlobalConfig = LaserAlignDX.GlobalConfig;
 
-namespace LaserAlignDX
+namespace JetEazy.Lang
 {
     public partial class QMSG
     {
@@ -36,6 +34,7 @@ namespace LaserAlignDX
         #region LANGUAGE
         static QxLang _lang = QxLang.Instance("prompts", LANG_PATH);
         static QxLang _langGui = QxLang.Instance("gui", LANG_PATH);
+        static QxLang _langRcp = QxLang.Instance("rcp", LANG_PATH);
         //static QMsgStateTranslator _stateTranslator = new QMsgStateTranslator();
         #endregion
 

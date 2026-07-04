@@ -14,6 +14,7 @@
 #endregion
 
 using AX.Gui;
+using JetEazy.Lang;
 using JetEazy.QMath;
 using System;
 using System.Drawing;

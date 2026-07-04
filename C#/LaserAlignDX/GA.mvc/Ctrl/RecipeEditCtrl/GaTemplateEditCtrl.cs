@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.FormSpace;
+using JetEazy.Lang;
 using JetEazy.OpenCV;
 using JetEazy.QvMath;
 using JetEazy.Utils;
@@ -26,6 +27,7 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
+using OpenCvSharp.ML;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -456,7 +458,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _editorUI.wndQrCodeResult.Text = text;
             }
         }
-        void AutoLayoutLineBorders_000()
+        void _AutoLayoutLineBorders_000_()
         {
 #if (false)
             if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
@@ -1022,7 +1024,18 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             if (_editorUI.wndVisionSettingsPanel is PropertyGrid pg)
             {
-                pg.SelectedObject = _xInspectX3;
+                try
+                {
+                    PGTranslator.Register(_xInspectX3);
+                    pg.SelectedObject = _xInspectX3;
+                }
+                catch (Exception ex)
+                {
+                    string errMsg = "Translate(_xInspectX3) Error";
+                    errMsg += "\n\r\n\r" + ex.Message;
+                    errMsg += "\n\n" + ex.StackTrace;
+                    MessageBox.Show(errMsg, GlobalConfig.TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
             }
         }
         void updateGuiStatus()

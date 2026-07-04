@@ -58,6 +58,7 @@
             this.col1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.col2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.lblLanguage = new System.Windows.Forms.Label();
             this.groupBox2.SuspendLayout();
             this.panel1.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -268,11 +269,11 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.lblLanguage);
             this.groupBox1.Controls.Add(this.btnLanguage);
             this.groupBox1.Controls.Add(this.button5);
             this.groupBox1.Controls.Add(this.txtLotData2);
             this.groupBox1.Controls.Add(this.label7);
-            this.groupBox1.Controls.Add(this.button4);
             this.groupBox1.Controls.Add(this.txtLotData1);
             this.groupBox1.Controls.Add(this.label6);
             this.groupBox1.Location = new System.Drawing.Point(4, 172);
@@ -289,7 +290,7 @@
             this.btnLanguage.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnLanguage.BackgroundImage")));
             this.btnLanguage.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.btnLanguage.Font = new System.Drawing.Font("微軟正黑體", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnLanguage.Location = new System.Drawing.Point(271, 13);
+            this.btnLanguage.Location = new System.Drawing.Point(271, 3);
             this.btnLanguage.Margin = new System.Windows.Forms.Padding(1);
             this.btnLanguage.Name = "btnLanguage";
             this.btnLanguage.Size = new System.Drawing.Size(50, 50);
@@ -312,7 +313,7 @@
             // 
             this.txtLotData2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.txtLotData2.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.txtLotData2.Location = new System.Drawing.Point(15, 155);
+            this.txtLotData2.Location = new System.Drawing.Point(15, 162);
             this.txtLotData2.Margin = new System.Windows.Forms.Padding(4);
             this.txtLotData2.Name = "txtLotData2";
             this.txtLotData2.ReadOnly = true;
@@ -324,7 +325,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("宋体", 9F);
-            this.label7.Location = new System.Drawing.Point(15, 133);
+            this.label7.Location = new System.Drawing.Point(15, 140);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(71, 18);
@@ -335,7 +336,7 @@
             // 
             this.button4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.button4.Location = new System.Drawing.Point(190, 19);
+            this.button4.Location = new System.Drawing.Point(249, 649);
             this.button4.Margin = new System.Windows.Forms.Padding(4);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(76, 37);
@@ -348,7 +349,7 @@
             // 
             this.txtLotData1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.txtLotData1.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.txtLotData1.Location = new System.Drawing.Point(15, 80);
+            this.txtLotData1.Location = new System.Drawing.Point(15, 87);
             this.txtLotData1.Margin = new System.Windows.Forms.Padding(4);
             this.txtLotData1.Name = "txtLotData1";
             this.txtLotData1.ReadOnly = true;
@@ -360,7 +361,7 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("宋体", 9F);
-            this.label6.Location = new System.Drawing.Point(15, 57);
+            this.label6.Location = new System.Drawing.Point(15, 64);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(53, 18);
@@ -415,6 +416,17 @@
             this.groupBox3.Text = "小黑屋 (目前沒用到的元件)";
             this.groupBox3.Visible = false;
             // 
+            // lblLanguage
+            // 
+            this.lblLanguage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+            this.lblLanguage.Font = new System.Drawing.Font("微軟正黑體", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(136)));
+            this.lblLanguage.Location = new System.Drawing.Point(18, 11);
+            this.lblLanguage.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblLanguage.Name = "lblLanguage";
+            this.lblLanguage.Size = new System.Drawing.Size(248, 34);
+            this.lblLanguage.TabIndex = 230;
+            this.lblLanguage.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // RunUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -424,6 +436,7 @@
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label3);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.groupBox3);
             this.Margin = new System.Windows.Forms.Padding(4);
@@ -472,5 +485,6 @@
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.GroupBox groupBox3;
         public System.Windows.Forms.Button btnLanguage;
+        public System.Windows.Forms.Label lblLanguage;
     }
 }
