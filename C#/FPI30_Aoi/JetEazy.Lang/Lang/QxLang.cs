@@ -37,9 +37,10 @@ namespace JetEazy.Lang
 
     public class QxLang
     {
+        static bool OPT_AUTO_DUMP_TEXT = false;
+
         public const string DEFAULT_PATH = @"C:\Program Files\Common Files\JetEazy\ini";
         public string PATH = "";
-        static bool OPT_AUTO_DUMP_TEXT = true;
 
         #region PATH_FUNCTION
         private void init_path(string path)

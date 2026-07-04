@@ -91,7 +91,27 @@ namespace EzAoiEmptyTrayInspector
 
             return bmp;
         }
+        public static Bitmap CropBmp(Mat largeImg, Rectangle cropRect)
+        {
+            if (largeImg == null)
+                return null;
 
+            Bitmap bmp = null;
+            Mat img = largeImg;
+            if (img != null)
+            {
+                int x1 = cropRect.X;
+                int y1 = cropRect.Y;
+                int x2 = cropRect.Right;
+                int y2 = cropRect.Bottom;
+                bmp = BitmapConverter.ToBitmap(img[y1, y2, x1, x2]);
+            }
+
+            if (bmp != null)
+                SetGrayPalette(bmp);
+
+            return bmp;
+        }
         public static MirrorMode GetMirrorTag(IEzImage largeImg)
         {
             object tag = largeImg?.Tag;
