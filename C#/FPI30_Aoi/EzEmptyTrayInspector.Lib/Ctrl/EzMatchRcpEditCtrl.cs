@@ -16,6 +16,7 @@
 using AwFramework.Gui;
 using AwFramework.Util;
 using EzAoiEmptyTrayInspector.Gui;
+using EzAoiEmptyTrayInspector.Lang;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.EzImage;
@@ -609,14 +610,16 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
                 if (err != ErrCodes.OK)
                 {
-                    var msg = QxNums.GetEnumDescription(err);
+                    //var msg = QxNums.GetEnumDescription(err);
+                    var msg = QMSG.Text(err);
                     if (err == ErrCodes.GRID_ROWS_COLS_ARE_NOT_THE_SAME_AS_USER_INPUT)
                     {
-                        msg += $"\n\r\n\r視覺辨識: rows={suggestRows} , cols={suggestCols}";
+                        msg += $"\n\r\n\rAOI: rows={suggestRows} , cols={suggestCols}";
                         msg += $"\n\r\n\r";
-                        msg += "\n\r是否自動更新參數設定的 (rows, cols)";
-                        msg += "\n\r再自動重新抓取?";
-                        var ret = MessageBox.Show(msg, _frmOwner.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        //msg += "\n\r是否自動更新參數設定的 (rows, cols)";
+                        //msg += "\n\r再自動重新抓取?";
+                        msg += QMSG.Text(Prompts.Question_Update_RowsCols_And_Fetch_Again);
+                        var ret = QMessageBox.Show(msg, _frmOwner.Text, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
                         if (ret == DialogResult.Yes)
                         {
@@ -627,7 +630,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                     }
                     else
                     {
-                        MessageBox.Show(msg, _frmOwner.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        QMessageBox.Show(msg, _frmOwner.Text, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
 

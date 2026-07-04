@@ -633,7 +633,10 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void BuildMicroTransform()
         {
-            if (DialogResult.Yes != MessageBox.Show("是否要重新設定 樣本尺寸?", "參數設定", MessageBoxButtons.YesNo, MessageBoxIcon.Question))
+            //if (DialogResult.Yes != MessageBox.Show("是否要重新設定 樣本尺寸?", "參數設定", MessageBoxButtons.YesNo, MessageBoxIcon.Question))
+            //    return;
+
+            if (VsMessageBox.Question(QMSG.Text(Prompts.Question_To_Rebuild_Template_Dimension)) != DialogResult.Yes)
                 return;
 
             _isPropertyModified = true;
@@ -1035,10 +1038,12 @@ namespace LaserAlignDX.Mvc.Ctrl
                 }
                 catch (Exception ex)
                 {
+                    // 應該不會跑到此處, 有問題需要改正
+                    // EzPropertyGridTranslator.Register
                     string errMsg = "Translate(_xInspectX3) Error";
                     errMsg += "\n\r\n\r" + ex.Message;
                     errMsg += "\n\n" + ex.StackTrace;
-                    MessageBox.Show(errMsg, GlobalConfig.TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    QMessageBox.Show(errMsg, GlobalConfig.TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
             }
         }

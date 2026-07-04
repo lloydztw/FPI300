@@ -16,6 +16,7 @@
 using AwFramework.Util;
 using EzAoiEmptyTrayInspector.Ctrl;
 using EzAoiEmptyTrayInspector.Gui.Panels;
+using EzAoiEmptyTrayInspector.Lang;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
 using System;
@@ -50,7 +51,8 @@ namespace EzAoiEmptyTrayInspector
         {
             if (_frmInstance != null)
             {
-                MessageBox.Show("必須先關掉 Tool!");
+                //MessageBox.Show("必須先關掉 Tool!");
+                QMessageBox.Warning(Prompts.Info_Please_Turn_Off_Tool_To_Continue);
                 return null;
             }
 

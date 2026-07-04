@@ -184,7 +184,8 @@ namespace Traveller106
             {
                 BannerForm.CloseBanner();
                 //>>> LogClass.Instance.Log("Mx加载错误");
-                MessageBox.Show("初始化错误", "Initial Lic", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show("初始化错误", "Initial Lic", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                VsMessageBox.Warning($"Error @ {GetType().Name}.Init() !");
                 Application.Exit();
                 return;
             }

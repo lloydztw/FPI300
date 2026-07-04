@@ -358,7 +358,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                     string errMsg = "Translate(_xParamGrid) Error";
                     errMsg += "\n\r\n\r" + ex.Message;
                     errMsg += "\n\n" + ex.StackTrace;
-                    MessageBox.Show(errMsg, GlobalConfig.TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    QMessageBox.Show(errMsg, GlobalConfig.TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
             }
 
@@ -721,7 +721,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 // Model 內部已經有 NLOG 了
                 // LtDebug.LOG.Error(ex, "[異常] 自動生成陣列");
-                MessageBox.Show(ex.Message + "\r\n\r\n" + ex.StackTrace, "自動生成陣列異常", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //string errTitle = QMSG.Text();
+                QMessageBox.Show(ex.Message + "\r\n\r\n" + ex.StackTrace, "自動生成陣列異常", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw;
             }
             finally

@@ -15,6 +15,7 @@
 #endregion
 
 
+using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
@@ -83,7 +84,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             if (!Traveller106.Universal.IsNoUseCCD)
                 return null;
 
-            var ret = MessageBox.Show("即將進行 循環自測\n\r\n\r是否也要包含 飛拍 模擬?", "離線循環自測", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            //var ret = MessageBox.Show("即將進行 循環自測\n\r\n\r是否也要包含 飛拍 模擬?", "離線循環自測", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            var ret = QMessageBox.Show(JetEazy.Lang.QMSG.Text(Prompts.Question_To_Simulate_With_FlyCam), null, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
             if (DialogResult.Cancel == ret)
                 return null;
 

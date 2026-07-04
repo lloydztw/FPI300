@@ -58,6 +58,11 @@
 "Question_Continue_To_Run_Simulation" : ["Do you want to continue running the simulation?", "是否 繼續跑 模擬?", "", "ต้องการดำเนินการจำลองต่อหรือไม่?"],
 "Waring_Software_Ready_Can_NOT_Simulate_Fly_Camera" : ["[Software Ready] Connection activated. Unable to perform on-the-fly camera offline test!", "【軟件準備】 已經啟動連線, 無法進行 飛拍 離線測試!", "", "[ซอฟต์แวร์พร้อม] เปิดใช้งานการเชื่อมต่อแล้ว ไม่สามารถทำการทดสอบออฟไลน์ของกล้องแบบบินถ่ายได้!"],
 "Info_Simulation" : ["[Offline Mode]", "[離線版]", "", "[โหมดออฟไลน์]"],
+"Question_To_Rebuild_Template_Dimension" : ["Do you want to reset the template dimensions?", "是否 要重新設定 樣本尺寸?", "", "ต้องการตั้งค่าขนาดเทมเพลตใหม่หรือไม่?"],
+"Warning_AOI_Busy" : ["AOI is executing...", "AOI 執行中...", "", "AOI กำลังทำงาน..."],
+"Info_Please_Load_Or_Grab_Image" : ["Please load an image file or grab an image first!", "請先 加載圖檔 或 取像", "", "กรุณาโหลดไฟล์ภาพหรือจับภาพก่อน!"],
+"Info_FlyCam_Angle" : ["On-the-fly camera calculation angle", "飛拍計算角度", "", "มุมการคำนวณของการบินถ่าย"],
+"Waring_Trigger_PLC_To_Start_LineScan_Not_Completed" : ["Trigger PLC to restart line scan: Not completed!", "驅動 PLC 重新線掃 : 尚未完成 !", "", "สั่งงาน PLC ให้เริ่มสแกนแบบเส้นอีกครั้ง: ยังไม่เสร็จสิ้น!"],
 
 "__FPI30_錯誤碼__" : ["Remark", "不用翻譯","",""],
 
@@ -101,6 +106,7 @@
 "WARN_CAN_NOT_FETCH_QUAD_2D" : ["Unable to find GoldenQuad2D!", "無法找到 GoldenQuad2D!", "", "ไม่สามารถค้นหา GoldenQuad2D ได้!"],
 "WARN_CAN_NOT_FETCH_INKS" : ["Unable to automatically fetch INK alignment points!\n\rPlease check if parameters are matched.", "無法自動抓到 INK 定位點!\n\r請確認 參數 是否適配?", "", "ไม่สามารถจับจุดตำแหน่ง INK อัตโนมัติได้!\n\rกรุณาตรวจสอบว่าพารามิเตอร์เหมาะสมหรือไม่"],
 "ERR_CHIP_LOC_ALL_EMPTY" : ["Exception: Alignment result is [All Empty Tray]!\n\rPlease check equipment status and parameter matching.", "異常: 定位結果為【全空盤】!\n\r請檢查設備狀態與參數是否適配.", "", "ผิดปกติ: ผลลัพธ์การระบุตำแหน่งคือ [ถาดเปล่าทั้งหมด]!\n\rกรุณาตรวจสอบสถานะอุปกรณ์และความเหมาะสมของพารามิเตอร์"],
+"ERR_AUTO_GENERATE_ARRAY_EXCEPTION" : ["Auto-generate array exception!", "自動生成陣列異常", "", "เกิดข้อผิดพลาดในการสร้างอาเรย์อัตโนมัติ!"],
 
 "__空盤檢測訊息__" : ["Remark", "不用翻譯","",""],
 
@@ -112,6 +118,11 @@
 "ON_GRID_TEMPLATE_MATCH_ERROR" : ["Grid template matching exception!", "格點樣板比對 異常!", "", "การเปรียบเทียบเทมเพลตกริดผิดปกติ!"],
 "OUT_GRID_NG_BLOCS_DETECT_ERROR" : ["Outer grid defect detection exception!", "格點外圍偵測 異常!", "", "การตรวจจับบล็อกเสียรอบนอกกริดผิดปกติ!"],
 "RUN_ALL_EXCEPTION" : ["One-click execution exception!", "一鍵執行異常!", "", "เกิดข้อผิดพลาดในการรันคำสั่งทั้งหมดในคลิกเดียว!"],
+
+"Question_System_Busy_Force_To_Quit" : ["The system is busy, do you want to force quit?", "系統忙碌中, 是否強制退出?", "", "ระบบกำลังทำงานอยู่ ต้องการบังคับออกหรือไม่?"],
+"Info_Please_Turn_Off_Tool_To_Continue" : ["Please close the Tool first to continue!", "請必須先關掉 Tool!", "", "กรุณาปิด Tool ก่อนเพื่อดำเนินการต่อ!"],
+"Waring_Motor_Coords_Input_Must_Be_Number" : ["Motor coordinate fields can only accept numeric input!", "馬達座標欄位只能輸入數字!", "", "ช่องพิกัดมอเตอร์สามารถป้อนได้เฉพาะตัวเลขเท่านั้น!"],
+"Question_Update_RowsCols_And_Fetch_Again" : ["Do you want to automatically update the parameter settings for (rows, cols)\n\rand then auto-fetch again?", "是否自動更新參數設定的 (rows, cols)\n\r再自動重新抓取?", "", "ต้องการอัปเดตการตั้งค่าพารามิเตอร์ (rows, cols) อัตโนมัติ\n\rแล้วจับภาพใหม่อีกครั้งอัตโนมัติหรือไม่?"],
 
 "__END__" : ["Remark", "不用翻譯"]
 }

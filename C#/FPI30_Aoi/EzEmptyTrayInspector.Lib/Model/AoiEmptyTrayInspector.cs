@@ -13,6 +13,7 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Lang;
 using EzAoiEmptyTrayInspector.Model.Aoi;
 using JetEazy.EzImage;
 using JetEazy.Match;
@@ -133,9 +134,9 @@ namespace EzAoiEmptyTrayInspector.Model
         {
             string msg;
             if (ex == null)
-                msg = $"Error : {JetEazy.QxNums.GetEnumDescription(err)}";
+                msg = $"Error : {QMSG.Text(err)}";
             else
-                msg = $"Error : {JetEazy.QxNums.GetEnumDescription(err)} : {ex.Message}";
+                msg = $"Error : {QMSG.Text(err)} : {ex.Message}";
             changeState(msg, sideId);
         }
         #endregion

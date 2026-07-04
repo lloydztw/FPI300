@@ -20,7 +20,7 @@ namespace Traveller.Sim
                 // 檢查主程式是否存在，避免閃退找不到原因
                 if (!File.Exists(targetExe))
                 {
-                    MessageBox.Show($"找不到主程式：{targetExe}", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"Can not find： {targetExe}", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
 
@@ -40,7 +40,7 @@ namespace Traveller.Sim
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"啟動模擬程式失敗：\n{ex.Message}", "異常錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Simulation Failed To Start：\n\r{ex.Message}", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

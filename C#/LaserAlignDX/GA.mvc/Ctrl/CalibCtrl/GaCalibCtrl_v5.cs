@@ -1301,7 +1301,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             //var ret = VsMessageBox.Question(errMsg + "\n\r\n\r是否繼續?", Color.HotPink);
             //return ret == DialogResult.OK;
 
-            var ret = MessageBox.Show(errMsg + "\n\r\n\r是否繼續?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+            //var ret = MessageBox.Show(errMsg + "\n\r\n\r是否繼續?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
+            var ret = QMessageBox.Show(errMsg + "\n\r\n\rContinue?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Exclamation);
             return ret == DialogResult.Yes;
         }
 
@@ -1381,7 +1382,8 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             {
                 //var ps = LineScanProcess.Instance;
                 //ps.Start("USER_TRIGGER");
-                MessageBox.Show("驅動 PLC 重新線掃 : 尚未完成 !");
+                //MessageBox.Show("驅動 PLC 重新線掃 : 尚未完成 !");
+                VsMessageBox.Warning(QMSG.Text(Prompts.Waring_Trigger_PLC_To_Start_LineScan_Not_Completed));
                 UpdateLineScanCameraImage();
             }
             else

@@ -16,6 +16,7 @@
 using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Lang;
 using JetEazy.Utils;
 using System;
 using System.Windows.Forms;
@@ -79,7 +80,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             catch (Exception ex)
             {
                 var err = "Motor Error:\n\r" + ex.ToString();
-                MessageBox.Show(err, "Motor Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                QMessageBox.Show(err, "Motor Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }

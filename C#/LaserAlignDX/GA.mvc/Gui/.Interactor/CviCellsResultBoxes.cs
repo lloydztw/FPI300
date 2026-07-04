@@ -15,13 +15,13 @@
 
 using JetEazy.FormSpace;
 using JetEazy.ImageViewerEx;
+using JetEazy.Lang;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.Transform;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
@@ -32,11 +32,11 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-
+using CellBloc = LaserAlignDX.Model.XCellBloc;
 using Point = System.Drawing.Point;
+using QMSG = JetEazy.Lang.QMSG;
 using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 using XRecipe = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
-using CellBloc = LaserAlignDX.Model.XCellBloc;
 
 
 namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
@@ -1358,7 +1358,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 }
             }
 
-            MessageBox.Show($"已存入 Region Cell Images 至\n\r{dstPath}", "DEBUG", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            QMessageBox.Show($"【Region Cell】 images are saved to\n\r{dstPath}", "DEBUG", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             GaUtil.SetCursor(viewer, oldCursor);
         }
@@ -1419,11 +1419,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
             catch (System.Exception ex)
             {
-                // 處理可能發生的錯誤
-                // Console.WriteLine("複製到剪貼簿時發生錯誤: " + ex.Message);
-                // 可以在WPF中使用MessageBox或其他方式提示用戶
-                //VsMessageBox.Warning("複製到剪貼簿失敗: " + ex.Message);
-                MessageBox.Show("複製到剪貼簿失敗: " + ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                //MessageBox.Show("複製到剪貼簿失敗: " + ex.Message, "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                string errMsg = QMSG.Text(Prompts.Waring_Copy_To_ClipBoard_Error) + "\n\r\n\r" + ex.Message;
+                VsMessageBox.Warning(errMsg);
             }
         }
         void GenAiData()

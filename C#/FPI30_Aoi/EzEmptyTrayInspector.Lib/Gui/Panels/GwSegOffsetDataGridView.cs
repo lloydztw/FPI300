@@ -13,6 +13,7 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Lang;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -69,7 +70,8 @@ namespace EzAoiEmptyTrayInspector.Gui.Panels
                     _warnedList.Add(code);
 
                     // 顯示警告訊息給使用者
-                    MessageBox.Show("馬達座標欄位只能輸入數字!", "輸入錯誤", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    //MessageBox.Show("馬達座標欄位只能輸入數字!", "輸入錯誤", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    QMessageBox.Warning(Model.Prompts.Waring_Motor_Coords_Input_Must_Be_Number);
                 }
                 else
                 {

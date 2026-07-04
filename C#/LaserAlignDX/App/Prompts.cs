@@ -40,6 +40,9 @@ namespace LaserAlignDX
         [Description("是否 同時進行 座標系統 線性遷移?")]
         Question_To_Migrate_Transforms_Models,
 
+        [Description("是否 要重新設定 樣本尺寸?")]
+        Question_To_Rebuild_Template_Dimension,
+
         [Description("座標成功寫入至 PLC.")]
         Info_Write_CoordRefs_To_PLC_OK,
 
@@ -54,6 +57,15 @@ namespace LaserAlignDX
 
         [Description("馬達忙碌中...")]
         Warning_Motor_Busy,
+
+        [Description("AOI 執行中...")]
+        Warning_AOI_Busy,
+
+        [Description("請先 加載圖檔 或 取像")]
+        Info_Please_Load_Or_Grab_Image,
+
+        [Description("飛拍計算角度")]
+        Info_FlyCam_Angle,
 
         [Description("是否要採用 目前馬達 XY 座標值?")]
         Question_Update_Motor_Coord_To_Calib,
@@ -91,7 +103,16 @@ namespace LaserAlignDX
         [Description("【軟件準備】 已經啟動連線, 無法進行 飛拍 離線測試!")]
         Waring_Software_Ready_Can_NOT_Simulate_Fly_Camera,
 
+        [Description("驅動 PLC 重新線掃 : 尚未完成 !")]
+        Waring_Trigger_PLC_To_Start_LineScan_Not_Completed,
+
         [Description("[離線版]")]
         Info_Simulation,
+
+        [Description("即將進行 循環自測\n\r\n\r是否也要包含 飛拍 模擬?")]
+        Question_To_Simulate_With_FlyCam,
+
+        [Description("複製到剪貼簿失敗")]
+        Waring_Copy_To_ClipBoard_Error,
     }
 }

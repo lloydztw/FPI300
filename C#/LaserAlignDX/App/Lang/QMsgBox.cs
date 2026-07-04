@@ -21,7 +21,7 @@ namespace JetEazy.Lang
     /// <summary>
     /// 多語系 MessageBox
     /// </summary>
-    class QMessageBox
+    public class QMessageBox
     {
         public static DialogResult Show(
             string msg,

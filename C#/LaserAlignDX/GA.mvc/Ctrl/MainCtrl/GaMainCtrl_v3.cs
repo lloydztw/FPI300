@@ -538,7 +538,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             if (IsBusy())
             {
-                MessageBox.Show("AOI 執行中", "AOI", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                //MessageBox.Show("AOI 執行中", "AOI", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                VsMessageBox.Warning(QMSG.Text(Prompts.Warning_AOI_Busy));
                 return true;
             }
             return false;
@@ -547,7 +548,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             if (_lineScanImageHolder.IsEmpty())
             {
-                MessageBox.Show("請先 加載圖檔 或 取像", "AOI", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                //MessageBox.Show("請先 加載圖檔 或 取像", "AOI", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                VsMessageBox.Info(QMSG.Text(Prompts.Info_Please_Load_Or_Grab_Image));
                 return false;
             }
             return true;

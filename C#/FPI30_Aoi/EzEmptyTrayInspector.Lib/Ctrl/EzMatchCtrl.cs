@@ -15,6 +15,7 @@
 
 using AwFramework.Gui;
 using EzAoiEmptyTrayInspector.Gui;
+using EzAoiEmptyTrayInspector.Lang;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.EzImage;
@@ -294,10 +295,12 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             bool ok = _model == null || _model.IsSafeToExit();
             if (!ok)
             {
-                if (MessageBox.Show("系統忙碌中, 是否強制退出?",
-                                    Application.ProductName,
-                                    MessageBoxButtons.YesNo,
-                                    MessageBoxIcon.Question) == DialogResult.Yes)
+                //if (MessageBox.Show("系統忙碌中, 是否強制退出?",
+                //                    Application.ProductName,
+                //                    MessageBoxButtons.YesNo,
+                //                    MessageBoxIcon.Question) == DialogResult.Yes)
+                //    e.Cancel = true;
+                if (QMessageBox.Question(Prompts.Question_System_Busy_Force_To_Quit) != DialogResult.Yes)
                     e.Cancel = true;
             }
         }
@@ -414,8 +417,9 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             //}
             //else
             {
-                var msg = QxNums.GetEnumDescription(err);
-                MessageBox.Show(msg, _frmOwner.Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //var msg = QxNums.GetEnumDescription(err);
+                var msg = QMSG.Text(err);
+                QMessageBox.Show(msg, _frmOwner.Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         void _PROMPT_RELOAD(bool clearAll = false)
@@ -525,7 +529,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _largeIMG = null;
                 attach_image_to_viewer(null);
                 mark_init_done();
-                MessageBox.Show($"[{ID}] {ex.Message}",
+                QMessageBox.Show($"[{ID}] {ex.Message}",
                                 "Error",
                                 MessageBoxButtons.OK,
                                 MessageBoxIcon.Error);
@@ -952,7 +956,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             if (showMsgBox)
             {
                 var icon = result != null && result.IsPass() ? MessageBoxIcon.Information : MessageBoxIcon.Exclamation;
-                MessageBox.Show(msg.Replace(",", "\n\r"), Global.TITLE, MessageBoxButtons.OK, icon);
+                QMessageBox.Show(msg.Replace(",", "\n\r"), Global.TITLE, MessageBoxButtons.OK, icon);
             }
 
             // 3 秒後 狀態自動 顯示 Ready

@@ -194,7 +194,7 @@ namespace LaserAlignDX.FormSpace
                 string errMsg = "Translate(FlyParaClass) Error";
                 errMsg += "\n\r\n\r" + ex.Message;
                 errMsg += "\n\n" + ex.StackTrace;
-                MessageBox.Show(errMsg, GlobalConfig.TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                QMessageBox.Show(errMsg, GlobalConfig.TITLE, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
 
             propertyGrid1.PropertyValueChanged += PropertyGrid1_PropertyValueChanged;
@@ -269,7 +269,8 @@ namespace LaserAlignDX.FormSpace
 
                     update_Display(false);
 
-                    MessageBox.Show($"计算角度:{angle}");
+                    //MessageBox.Show($"计算角度:{angle}");
+                    VsMessageBox.Info($"{QMSG.Text(Prompts.Info_FlyCam_Angle)} : {angle:0.00}");
                 }
 
             }

@@ -90,6 +90,7 @@ namespace Traveller.Data.Packer
             Action<string> funcEnd = new Action<string>((string err) =>
             {
                 string msg;
+
                 if (string.IsNullOrEmpty(err))
                     msg = "數據已經打包到 " + dstPath.Replace(deskTopPath, "[桌面] ")
                         + "\n\r\n\r(如果有安裝 7z, 數據檔案會自動生成 zip 壓縮檔.)";

@@ -86,7 +86,7 @@ namespace EzAoiEmptyTrayInspector.Gui
                     e.Cancel = true;
 
                     // 3.2 Message Box
-                    MessageBox.Show(errMsg, Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    QMessageBox.Show(errMsg, Text, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
             }
         }

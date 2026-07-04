@@ -141,5 +141,8 @@ namespace LaserAlignDX.Mvc.Model
 
         [Description("異常: 定位結果為【全空盤】!\n\r請檢查設備狀態與參數是否適配.")]
         ERR_CHIP_LOC_ALL_EMPTY,
+
+        [Description("自動生成陣列異常")]
+        ERR_AUTO_GENERATE_ARRAY_EXCEPTION,
     }
 }
