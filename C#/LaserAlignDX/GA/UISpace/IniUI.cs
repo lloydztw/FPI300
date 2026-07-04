@@ -134,7 +134,7 @@ namespace PhotoMachine.UISpace
         private void PostInitLanguage()
         {
             QMSG.Translate(this);
-            PGTranslator.Register(INI.Instance);
+            EzPropertyGridTranslator.Register(INI.Instance);
             updatePropertyGrid();
         }
 

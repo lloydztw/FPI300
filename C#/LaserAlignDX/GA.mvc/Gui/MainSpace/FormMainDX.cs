@@ -152,14 +152,6 @@ namespace Traveller106
             }
         }
 
-        private void BtnLanguage_Click(object sender, EventArgs e)
-        {
-            using (var dlg = new JetEazy.Lang.GUI.FormLanguageSelector(QMSG.Lang()))
-            {
-                if (dlg.ShowDialog() == DialogResult.OK)
-                    QMSG.Translate(this);
-            }
-        }
         private void MainForm_Load(object sender, EventArgs e)
         {
             //(0) Banner
@@ -366,8 +358,8 @@ namespace Traveller106
             // To Maximize the window size.
             this.FormBorderStyle = FormBorderStyle.Sizable;
             this.WindowState = FormWindowState.Maximized;
-            RUNUI.lblLanguage.Text = QMSG.Lang().CurrentLanguageName;
             QMSG.Translate(this);
+            BeginInvoke((Action)UpdateCurrentLanguageName);
 
             // Close Banner
             BannerForm.CloseBanner();
@@ -379,10 +371,14 @@ namespace Traveller106
             {
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
-                    RUNUI.lblLanguage.Text = QMSG.Lang().CurrentLanguageName;
                     QMSG.Translate(this);
+                    BeginInvoke((Action)UpdateCurrentLanguageName);
                 }
             }
+        }
+        void UpdateCurrentLanguageName()
+        {
+            RUNUI.lblLanguage.Text = QxLang.Instance("gui").CurrentLanguageName;
         }
 
         #region MAIN_X1_LASER_TCP

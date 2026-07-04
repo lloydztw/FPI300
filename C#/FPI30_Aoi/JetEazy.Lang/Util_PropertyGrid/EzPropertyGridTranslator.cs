@@ -16,12 +16,9 @@
 using System;
 using System.ComponentModel;
 
-using System;
-using System.ComponentModel;
-
 namespace JetEazy.Lang
 {
-    public class PGTranslator : CustomTypeDescriptor
+    public class EzPropertyGridTranslator : CustomTypeDescriptor
     {
         #region LANGUAGE
         private QxLang _lang => QxLang.Instance("rcp");
@@ -36,7 +33,7 @@ namespace JetEazy.Lang
 
         private readonly object _target;
 
-        internal PGTranslator(object target)
+        internal EzPropertyGridTranslator(object target)
         {
             _target = target;
         }
@@ -121,7 +118,7 @@ namespace JetEazy.Lang
         {
             if (instance != null)
             {
-                return new PGTranslator(instance);
+                return new EzPropertyGridTranslator(instance);
             }
             return base.GetTypeDescriptor(objectType, instance);
         }

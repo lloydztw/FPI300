@@ -31,12 +31,12 @@
             this.components = new System.ComponentModel.Container();
             this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.menuLoadImage = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.timBlinker = new System.Windows.Forms.Timer(this.components);
+            this.menuLoadImage = new System.Windows.Forms.ToolStripMenuItem();
             this.menuTestChipInspect = new System.Windows.Forms.ToolStripMenuItem();
             this.menuTestQRCode = new System.Windows.Forms.ToolStripMenuItem();
             this.menuTestEmptyTrayInspect = new System.Windows.Forms.ToolStripMenuItem();
-            this.timBlinker = new System.Windows.Forms.Timer(this.components);
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -44,9 +44,9 @@
             // 
             this.jezTransImageViewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.jezTransImageViewPanel1.Location = new System.Drawing.Point(0, 0);
-            this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
-            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(541, 790);
+            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(609, 948);
             this.jezTransImageViewPanel1.TabIndex = 0;
             // 
             // contextMenuStrip1
@@ -59,49 +59,53 @@
             this.menuTestQRCode,
             this.menuTestEmptyTrayInspect});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(203, 106);
-            // 
-            // menuLoadImage
-            // 
-            this.menuLoadImage.Name = "menuLoadImage";
-            this.menuLoadImage.Size = new System.Drawing.Size(202, 24);
-            this.menuLoadImage.Text = "加載圖檔";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(245, 163);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(199, 6);
-            // 
-            // menuTestChipInspect
-            // 
-            this.menuTestChipInspect.Name = "menuTestChipInspect";
-            this.menuTestChipInspect.Size = new System.Drawing.Size(202, 24);
-            this.menuTestChipInspect.Text = "離線測試 晶粒檢測";
-            // 
-            // menuTestQRCode
-            // 
-            this.menuTestQRCode.Name = "menuTestQRCode";
-            this.menuTestQRCode.Size = new System.Drawing.Size(202, 24);
-            this.menuTestQRCode.Text = "離線測試 QRCode";
-            // 
-            // menuTestEmptyTrayInspect
-            // 
-            this.menuTestEmptyTrayInspect.Name = "menuTestEmptyTrayInspect";
-            this.menuTestEmptyTrayInspect.Size = new System.Drawing.Size(202, 24);
-            this.menuTestEmptyTrayInspect.Text = "離線測試 空盤檢測";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(241, 6);
             // 
             // timBlinker
             // 
             this.timBlinker.Interval = 1000;
             // 
+            // menuLoadImage
+            // 
+            this.menuLoadImage.Image = global::LaserAlignDX.Properties.Resources.file_png_icon;
+            this.menuLoadImage.Name = "menuLoadImage";
+            this.menuLoadImage.Size = new System.Drawing.Size(244, 30);
+            this.menuLoadImage.Text = "加載圖檔";
+            // 
+            // menuTestChipInspect
+            // 
+            this.menuTestChipInspect.Image = global::LaserAlignDX.Properties.Resources.ActiveCarrier;
+            this.menuTestChipInspect.Name = "menuTestChipInspect";
+            this.menuTestChipInspect.Size = new System.Drawing.Size(244, 30);
+            this.menuTestChipInspect.Text = "離線測試 晶粒檢測";
+            // 
+            // menuTestQRCode
+            // 
+            this.menuTestQRCode.Image = global::LaserAlignDX.Properties.Resources.barcode;
+            this.menuTestQRCode.Name = "menuTestQRCode";
+            this.menuTestQRCode.Size = new System.Drawing.Size(244, 30);
+            this.menuTestQRCode.Text = "離線測試 QRCode";
+            // 
+            // menuTestEmptyTrayInspect
+            // 
+            this.menuTestEmptyTrayInspect.Image = global::LaserAlignDX.Properties.Resources.PassiveCarrier;
+            this.menuTestEmptyTrayInspect.Name = "menuTestEmptyTrayInspect";
+            this.menuTestEmptyTrayInspect.Size = new System.Drawing.Size(244, 30);
+            this.menuTestEmptyTrayInspect.Text = "離線測試 空盤檢測";
+            // 
             // JezChipCellsViewPanel
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.jezTransImageViewPanel1);
-            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.Margin = new System.Windows.Forms.Padding(3, 5, 3, 5);
             this.Name = "JezChipCellsViewPanel";
-            this.Size = new System.Drawing.Size(541, 790);
+            this.Size = new System.Drawing.Size(609, 948);
             this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 

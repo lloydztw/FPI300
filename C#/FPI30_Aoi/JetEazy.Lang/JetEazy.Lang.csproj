@@ -55,9 +55,10 @@
     <Compile Include="Lang\JzLangKernel32.cs" />
     <Compile Include="Lang\QxLang.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyGridUtil\PGTranslator.cs" />
-    <Compile Include="PropertyGridUtil\UITypeConverters\EnumTypeConverter.cs" />
-    <Compile Include="PropertyGridUtil\UITypeConverters\NumericUpDownTypeConverter.cs" />
+    <Compile Include="Util_PropertyGrid\EzPropertyGridTranslator.cs" />
+    <Compile Include="Util_PropertyGrid\UITypeConverters\EnumTypeConverter.cs" />
+    <Compile Include="Util_PropertyGrid\UITypeConverters\NumericUpDownTypeConverter.cs" />
+    <Compile Include="Util_ContextMenu\EzContextMenuTranslator.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="GUI\FormLanguageSelector.resx">

@@ -326,7 +326,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V25
             {
                 try
                 {
-                    PGTranslator.Register(_xParamGrid);
+                    EzPropertyGridTranslator.Register(_xParamGrid);
                     pg.SelectedObject = _xParamGrid;
                 }
                 catch(Exception ex)

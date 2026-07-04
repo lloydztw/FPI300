@@ -1026,7 +1026,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 try
                 {
-                    PGTranslator.Register(_xInspectX3);
+                    EzPropertyGridTranslator.Register(_xInspectX3);
                     pg.SelectedObject = _xInspectX3;
                 }
                 catch (Exception ex)

@@ -367,7 +367,6 @@
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v25.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v5.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />
-    <Compile Include="GA.mvc\Ctrl\EzTranslateCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaBasicMotorUtil.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorsFlyCamCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorsXYInkerCtrl.cs" />
@@ -935,6 +934,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="coconut1.ico" />
+    <None Include="Resources\file_png_icon1.png" />
+    <None Include="Resources\barcode.png" />
+    <None Include="Resources\file_bmp_icon.png" />
     <None Include="Resources\CommonPanel.bmp" />
     <None Include="Resources\grid_3x3.png" />
     <None Include="Resources\next.png" />

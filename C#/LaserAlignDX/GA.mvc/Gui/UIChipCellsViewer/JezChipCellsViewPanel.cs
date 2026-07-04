@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.ImageViewerEx;
+using JetEazy.Lang;
 using JetEazy.OpenCV;
 using JetEazy.OpenCV.Viewer;
 using JetEazy.Utils;
@@ -50,7 +51,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
             _resultBox.Visible = false;
             _resultBox.lblSummaryTitle = lblTitle;
             ImgViewer.AddInteractor(_resultBox);
-            
+
             jezTransImageViewPanel1.AttachPopupMenu(contextMenuStrip1);
 
             HandleCreated += (s, e) => update_ActiveGuiStatus();

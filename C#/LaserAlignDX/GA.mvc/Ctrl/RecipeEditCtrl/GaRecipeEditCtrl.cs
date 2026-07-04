@@ -350,7 +350,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 try
                 {
-                    PGTranslator.Register(_xParamGrid);
+                    EzPropertyGridTranslator.Register(_xParamGrid);
                     pg.SelectedObject = _xParamGrid;
                 }
                 catch (Exception ex)

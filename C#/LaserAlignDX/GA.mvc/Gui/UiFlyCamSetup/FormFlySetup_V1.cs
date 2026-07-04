@@ -186,7 +186,7 @@ namespace LaserAlignDX.FormSpace
             
             try
             {
-                PGTranslator.Register(FlyParaClass.Instance);
+                EzPropertyGridTranslator.Register(FlyParaClass.Instance);
                 propertyGrid1.SelectedObject = FlyParaClass.Instance;
             }
             catch (Exception ex)

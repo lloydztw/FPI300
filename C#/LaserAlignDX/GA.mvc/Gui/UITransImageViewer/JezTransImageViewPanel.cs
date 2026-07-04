@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.ImageViewerEx;
+using JetEazy.Lang;
 using JetEazy.OpenCV;
 using JetEazy.OpenCV.Viewer;
 using JetEazy.Transform;
@@ -21,7 +22,6 @@ using OpenCvSharp;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-
 
 namespace LaserAlignDX.Mvc.Gui
 {
@@ -41,6 +41,7 @@ namespace LaserAlignDX.Mvc.Gui
             _cviCoordInfo.Enabled = true;
             _cviCoordInfo.Visible = true;
             picIcon.Click += PicIcon_Click;
+            //HandleCreated += (s, e) => PostInitLaguage();
             HandleDestroyed += (s, e) => cleanUp();
         }
         void cleanUp()
@@ -64,6 +65,8 @@ namespace LaserAlignDX.Mvc.Gui
             {
                 // 取得滑鼠在螢幕上的當前位置
                 var screenPos = Cursor.Position;
+
+                EzContextMenuTranslator.Translate(_contextMenuStrip);
 
                 // 顯示 ContextMenuStrip
                 // Show() 方法的第一個參數是關聯的控制項 (這裡就是 picBox)
@@ -121,6 +124,27 @@ namespace LaserAlignDX.Mvc.Gui
         public void AttachPopupMenu(ContextMenuStrip contextMenuStrip)
         {
             _contextMenuStrip = contextMenuStrip;
+            if (_contextMenuStrip == null)
+                return;
+
+            if (IsHandleCreated)
+            {
+                BeginInvoke((Action)TranslateContextMenu);
+            }
+            else
+            {
+                HandleCreated += (s, e) => TranslateContextMenu();
+            }
+        }
+
+        void PostInitLaguage()
+        {
+            //QxLang.Instance("gui").LanguageChanged += (s, e) => TranslateContextMenu();
+        }
+        void TranslateContextMenu()
+        {
+            //if (_contextMenuStrip != null)
+            //    EzContextMenuTranslator.Translate(_contextMenuStrip);
         }
     }
 }
