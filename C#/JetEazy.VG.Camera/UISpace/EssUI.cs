@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace JetEazy.UISpace
@@ -204,8 +205,16 @@ namespace JetEazy.UISpace
             MAINStatus = ESSStatusEnum.RUN;
 
             _auto_layout();
-        }
 
+            //ThreadPool.QueueUserWorkItem(_ =>
+            //{
+            //    Thread.Sleep(1000);
+            //    this.BeginInvoke(new Action(() =>
+            //    {
+            //        QxLang.Instance("gui").Translate(this);
+            //    }));
+            //});
+        }
 
         void cbo_SelectedIndexChanged(object sender, EventArgs e)
         {

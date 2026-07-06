@@ -129,12 +129,13 @@ namespace PhotoMachine.UISpace
 
             // 延後註冊多語系支援
             BeginInvoke((Action)PostInitLanguage);
+            QMSG.Lang().LanguageChanged += (s, e) => PostInitLanguage();
         }
 
         private void PostInitLanguage()
         {
-            QMSG.Translate(this);
             EzPropertyGridTranslator.Register(INI.Instance);
+            QMSG.Translate(this);
             updatePropertyGrid();
         }
 
