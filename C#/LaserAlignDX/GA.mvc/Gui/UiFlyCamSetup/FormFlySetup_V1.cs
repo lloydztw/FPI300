@@ -539,7 +539,8 @@ namespace LaserAlignDX.FormSpace
         {
             if (_isFlyCameraLiveMode)
             {
-                JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
+                //JetEazy.BasicSpace.VsMSG.Instance.Warning($"请先停止实时画面!");
+                VsMessageBox.Warning(QMSG.Text(Prompts.Waring_Please_Stop_Live_Mode));
                 return false;
             }
             return true;

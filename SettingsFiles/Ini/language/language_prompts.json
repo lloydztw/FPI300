@@ -64,6 +64,9 @@
 "Info_FlyCam_Angle" : ["On-the-fly camera calculation angle", "飛拍計算角度", "", "มุมการคำนวณของการบินถ่าย"],
 "Waring_Trigger_PLC_To_Start_LineScan_Not_Completed" : ["Trigger PLC to restart line scan: Not completed!", "驅動 PLC 重新線掃 : 尚未完成 !", "", "สั่งงาน PLC ให้เริ่มสแกนแบบเส้นอีกครั้ง: ยังไม่เสร็จสิ้น!"],
 
+"Waring_Please_Stop_Live_Mode" : ["Please Stop Live Mode!", "請先停止實時畫面!", "", ""],
+"Question_Send_Sim_Signal_To_PLC" : ["Going to send simulation signal to PLC?", "是否發送模擬數據到PLC?", "", ""],
+
 "__FPI30_錯誤碼__" : ["Remark", "不用翻譯","",""],
 
 "NO_AOI_MODEL" : ["No AOI Model", "沒有 Aoi Model", "", "ไม่มีโมเดล AOI"],

@@ -296,5 +296,16 @@ namespace LaserAlignDX.AoiModel
                 }
             }
         }
+
+        protected string GetDeepExceptionMessage(Exception ex)
+        {
+            var msg = "";
+            while(ex != null)
+            {
+                msg += ex.Message + "\n\r";
+                ex = ex.InnerException;
+            }
+            return msg;
+        }
     }
 }

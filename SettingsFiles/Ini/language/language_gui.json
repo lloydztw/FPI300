@@ -143,5 +143,12 @@
 "__rdoCarrier1" : ["載台 1", "", "", "แท่นวาง 1"],
 "btnOpenMotorXY" : ["MotorXY","軸控XY", "", "ควบคุมแกน XY"],
 
+"是否刪除帳號?" : ["To delete this Account?", "是否刪除帳號?", "", ""],
+"帳號已經存在" : ["The Account already exists!", "帳號已經存在!", "", ""],
+"帳號或密碼錯誤!" : ["The Account or Password is wrong!", "帳號或密碼錯誤!", "", ""],
+"是否要關閉系統?" : ["Going to exit?", "是否要關閉系統?", "", ""],
+"是否要登出帳户?" : ["Going to log out?", "是否要登出帳户?", "", ""],
+"請登出!\n回到跑線正常狀態,\n才能退出程式!" : ["Please log out and back to idle state before Exit!", "請登出!\n回到跑線正常狀態,\n才能退出程式!", "", ""],
+
 "__END__" : ["Remark", "不用翻譯", "", "ไม่ต้องแปล"]
 }

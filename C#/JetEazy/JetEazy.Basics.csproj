@@ -150,5 +150,11 @@
   <ItemGroup>
     <None Include="Resources\warning-sign.png" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FPI30_Aoi\JetEazy.Lang\JetEazy.Lang.csproj">
+      <Project>{d2029ee2-ea98-4335-80a6-1e190ec88313}</Project>
+      <Name>JetEazy.Lang</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

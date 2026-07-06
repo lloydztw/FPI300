@@ -1,5 +1,6 @@
-using JetEazy.BasicSpace;
+锘縰sing JetEazy.BasicSpace;
 using JetEazy.DBSpace;
+using JetEazy.Lang;
 using System;
 using System.Windows.Forms;
 
@@ -17,10 +18,18 @@ namespace JetEazy.FormSpace
             CANCEL,
             EXIT,
         }
-        
-        //Language Setup
+
+        #region LANGUAGE
+        //Language
+        QxLang _lang => QxLang.Instance("gui");
+        string _T(string text, string defaultText = null)
+        {
+            return _lang.Translate(text, defaultText);
+        }
+        //Language Setup (old)
         JzLanguageClass myLanguage = new JzLanguageClass();
-        
+        #endregion
+
         GroupBox grpACCData;
         ComboBox cboACCName;
 
@@ -146,7 +155,8 @@ namespace JetEazy.FormSpace
                     break;
                 case TagEnum.DEL:
                     //if (MessageBox.Show(myLanguage.Messages("msg1", LanguageIndex), "SYS", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    if (JetEazy.BasicSpace.VsMSG.Instance.Question("是否要删除账户？") == DialogResult.OK)
+                    //if (JetEazy.BasicSpace.VsMSG.Instance.Question(" 欠 要删   嘶   ") == DialogResult.OK)
+                    if (VsMessageBox.Question(_T("鏄惁鍒櫎甯宠櫉?")) == DialogResult.OK)
                     {
                         int cboLast = cboACCName.SelectedIndex;
 
@@ -177,8 +187,8 @@ namespace JetEazy.FormSpace
 
                     if (ACCDB.CheckDuplicate(txtName.Text, OperateDataNow.Index))
                     {
-
-                        JetEazy.BasicSpace.VsMSG.Instance.Warning("用户名已被使用。");
+                        //JetEazy.BasicSpace.VsMSG.Instance.Warning(" 没    驯 使 谩 ");
+                        VsMessageBox.Warning(_T("甯宠櫉宸茬稉瀛樺湪!"));
                         //MessageBox.Show(myLanguage.Messages("msg2", LanguageIndex), "SYS", MessageBoxButtons.OK);
                         txtName.Focus();
                         break;

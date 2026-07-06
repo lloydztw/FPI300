@@ -582,8 +582,9 @@ namespace Common
 
         private void LblReload_DoubleClick(object sender, EventArgs e)
         {
-            if (JetEazy.BasicSpace.VsMSG.Instance.Question("是否要载入原始设定？") == DialogResult.OK)
-                //if (MessageBox.Show("是否要載入原始設定?", "SYSTEM", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (VsMessageBox.Question("是否要载入原始设定？") == DialogResult.OK)
+            //if (MessageBox.Show("是否要載入原始設定?", "SYSTEM", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            //if (VsMessageBox.Question(_T("是否要载入原始设定？")) == DialogResult.OK)
             {
                 MOTION.LoadData();
                 FillDisplay();

@@ -112,7 +112,13 @@ namespace LaserAlignDX
         [Description("即將進行 循環自測\n\r\n\r是否也要包含 飛拍 模擬?")]
         Question_To_Simulate_With_FlyCam,
 
-        [Description("複製到剪貼簿失敗")]
+        [Description("複製到剪貼簿失敗!")]
         Waring_Copy_To_ClipBoard_Error,
+
+        [Description("請先停止實時畫面!")]
+        Waring_Please_Stop_Live_Mode,
+
+        [Description("是否發送模擬數據到PLC?")]
+        Question_Send_Sim_Signal_To_PLC,
     }
 }

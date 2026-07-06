@@ -115,8 +115,8 @@ namespace LaserAlignDX.Model.Defects.V3
             catch (Exception ex)
             {
                 // 簡單 throw, 交給上一層處理.
-                System.Diagnostics.Debug.WriteLine(ex.ToString());
-                throw;
+                //System.Diagnostics.Debug.WriteLine(ex.ToString());
+                throw new Exception("MVD : detectDefectBlobs Error!", ex);
             }
         }
 
@@ -308,45 +308,59 @@ namespace LaserAlignDX.Model.Defects.V3
             ////= new VisionDesigner.CMvdRectangleF(cInputImg.Width / 2, cInputImg.Height / 2, cInputImg.Width / 4, cInputImg.Height / 4);
             //cImageMorphToolObj.Run();
 
-            //blob
-            cBlobFindToolObj.InputImage = cImageBinaryToolObj.Result.OutputImage;
-            cBlobFindToolObj.RegionImage = imgMask; // GaImageUtil.BitmapToCMvdImage(bmpMask);
-            cBlobFindToolObj.ROI = mvdRoi;
-            //= new CMvdRectangleF(OutputImage.Width / 2, OutputImage.Height / 2, OutputImage.Width, OutputImage.Height);
-            cBlobFindToolObj.SetRunParam("Polarity", "BrightObject");
+            //----------------------------------------------------------------------------------------------
+            // NOTE: 這裡有時候會異常 (當 cBlobFindToolObj.InputImage 全黑的時候 !!!)
+            //       發現於 2026-07-06
+            //----------------------------------------------------------------------------------------------
+            try
+            {
+                //Blob
+                cBlobFindToolObj.InputImage = cImageBinaryToolObj.Result.OutputImage;
+                cBlobFindToolObj.RegionImage = imgMask; // GaImageUtil.BitmapToCMvdImage(bmpMask);
+                cBlobFindToolObj.ROI = mvdRoi;
+                //= new CMvdRectangleF(OutputImage.Width / 2, OutputImage.Height / 2, OutputImage.Width, OutputImage.Height);
+                cBlobFindToolObj.SetRunParam("Polarity", "BrightObject");
 
-            cBlobFindToolObj.BasicParam.ShowBlobImageStatus = true;
-            cBlobFindToolObj.Run();
-            VisionDesigner.BlobFind.CBlobFindResult cBlobFindRes = cBlobFindToolObj.Result;
+                cBlobFindToolObj.BasicParam.ShowBlobImageStatus = true;
+                cBlobFindToolObj.Run();
+            }
+            catch
+            {
+
+            }
+            
+            VisionDesigner.BlobFind.CBlobFindResult cBlobFindRes = cBlobFindToolObj?.Result;
 
             //cBlobFindToolObj.RegionImage.SaveImage($"{_path}\\{lblName}_Diff2_1.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
-
             //if (cBlobFindRes.BlobImage != null)
             //    cBlobFindRes.BlobImage.SaveImage($"{_path}\\{lblName}_Diff3.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
-
             //Console.WriteLine("Blob Num: {0}", cBlobFindRes.BlobInfo.Count);
             //bool bOK = true;
+
             var blobMvdRectFNGList = new List<CMvdRectangleF>();
 
-            foreach (var item in cBlobFindToolObj.Result.BlobInfo)
+            if (cBlobFindRes != null)
             {
-                //Console.WriteLine("Index: {0}, Angle {1}", item.DomainIndex, item.BoxInfo.Angle);
-                if (item.AreaF > _xInspect.xCharArea)
+                foreach (var item in cBlobFindRes.BlobInfo)
                 {
-                    blobMvdRectFNGList.Add(item.BoxInfo);
+                    //Console.WriteLine("Index: {0}, Angle {1}", item.DomainIndex, item.BoxInfo.Angle);
+                    if (item.AreaF > _xInspect.xCharArea)
+                    {
+                        blobMvdRectFNGList.Add(item.BoxInfo);
+                    }
+                    else if (item.LongAxis > _xInspect.xCharWidth && item.ShortAxis > _xInspect.xCharHeight)
+                    {
+                        blobMvdRectFNGList.Add(item.BoxInfo);
+                    }
+                    //else if (item.LongAxis > xInspectPara.xCharWidth)
+                    //{
+                    //    blobMvdRectFNGList.Add(item.BoxInfo);
+                    //}
+                    //else if (item.ShortAxis > xInspectPara.xCharHeight)
+                    //{
+                    //    blobMvdRectFNGList.Add(item.BoxInfo);
+                    //}
                 }
-                else if (item.LongAxis > _xInspect.xCharWidth && item.ShortAxis > _xInspect.xCharHeight)
-                {
-                    blobMvdRectFNGList.Add(item.BoxInfo);
-                }
-                //else if (item.LongAxis > xInspectPara.xCharWidth)
-                //{
-                //    blobMvdRectFNGList.Add(item.BoxInfo);
-                //}
-                //else if (item.ShortAxis > xInspectPara.xCharHeight)
-                //{
-                //    blobMvdRectFNGList.Add(item.BoxInfo);
-                //}
             }
 
             if (blobMvdRectFNGList.Count > 0)

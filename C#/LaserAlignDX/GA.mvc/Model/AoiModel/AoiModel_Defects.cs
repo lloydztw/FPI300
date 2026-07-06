@@ -93,9 +93,13 @@ namespace LaserAlignDX.AoiModel.V3
                 // 在此無需釋放 巨圖
                 markRunEnd(false);
                 fire_AoiEnd();
+
                 var errCode = ErrorCodes.EXCEPTION_AT_AOI_RUN;
-                string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
+                string errMsg = GaUtil.GetEnumDescription(errCode)
+                                + "\n\r" + GetType().Name
+                                + "\n\r\n\r" + GetDeepExceptionMessage(ex);
                 GaUtil.LOG(errMsg, Color.Red);
+
                 _LOG_ERROR(ex, $"異常 @ {GetType().Name}.Run");
                 fire_AoiError(errCode, errMsg);
             }
@@ -143,7 +147,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             // 暫時強制使用 single thread
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            //usingMultiThread = false;
+            usingMultiThread = false;
 
             #region 準備_CELL_GROUPS
             int N_GROUPS = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;

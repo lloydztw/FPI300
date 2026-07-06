@@ -1,5 +1,6 @@
 ﻿using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
+using JetEazy.Lang;
 using System;
 using System.Windows.Forms;
 
@@ -23,9 +24,16 @@ namespace JetEazy.FormSpace
         string UIPath = "";
         int LanguageIndex = 0;
 
-
-        //Language Setup
+        #region LANGUAGE
+        //Language
+        QxLang _lang => QxLang.Instance("gui");
+        string _T(string text, string defaultText = null)
+        {
+            return _lang.Translate(text, defaultText);
+        }
+        //Language Setup (old)
         JzLanguageClass myLanguage = new JzLanguageClass();
+        #endregion
 
         //VsMessageBox MSGBOX = null;
 
@@ -94,7 +102,8 @@ namespace JetEazy.FormSpace
             else
             {
 
-                VsMSG.Instance.Warning("用户或密码错误，请重试。");
+                //VsMSG.Instance.Warning("用户或密码错误，请重试。");
+                VsMessageBox.Warning(_T("帳號或密碼錯誤!"));
 
                 //MessageBox.Show(myLanguage.Messages("msg1", LanguageIndex), "SYS", MessageBoxButtons.OK);
 

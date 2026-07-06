@@ -243,6 +243,10 @@
     <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FPI30_Aoi\JetEazy.Lang\JetEazy.Lang.csproj">
+      <Project>{D2029EE2-EA98-4335-80A6-1E190EC88313}</Project>
+      <Name>JetEazy.Lang</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JetEazy\JetEazy.Basics.csproj">
       <Project>{a24458c1-b3ac-462a-8b42-dafd1d420e19}</Project>
       <Name>JetEazy.Basics</Name>

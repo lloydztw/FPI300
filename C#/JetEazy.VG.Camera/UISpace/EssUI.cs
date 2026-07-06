@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-
-using JetEazy;
-using JetEazy.FormSpace;
-using JetEazy.BasicSpace;
+﻿using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
-using JetEazy.ControlSpace;
+using JetEazy.FormSpace;
+using JetEazy.Lang;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace JetEazy.UISpace
 {
@@ -49,8 +43,16 @@ namespace JetEazy.UISpace
             CHANGERECIPE,
         }
 
-        //Language Setup
+        #region LANGUAGE
+        //Language
+        QxLang _lang => QxLang.Instance("gui");
+        string _T(string text, string defaultText = null)
+        {
+            return _lang.Translate(text, defaultText);
+        }
+        //Language Setup (old)
         JzLanguageClass myLanguage = new JzLanguageClass();
+        #endregion
 
         public PictureBox picLogo => pictureBox1;
         PictureBox picExit;
@@ -313,11 +315,13 @@ namespace JetEazy.UISpace
 
             if (LOGINStatus != ESSStatusEnum.LOGOUT)
             {
-                JetEazy.BasicSpace.VsMSG.Instance.Warning("請登出!\n回到跑線正常狀態,\n才能退出程式!");
+                //JetEazy.BasicSpace.VsMSG.Instance.Warning("請登出!\n回到跑線正常狀態,\n才能退出程式!");
+                VsMessageBox.Warning(_T("請登出!\n回到跑線正常狀態,\n才能退出程式!"));
                 return;
             }
 
-            if (JetEazy.BasicSpace.VsMSG.Instance.Question("是否要关闭系统？") == DialogResult.OK)
+
+            if (VsMessageBox.Question(_T("是否要關閉系統?")) == DialogResult.OK)
             //if (MessageBox.Show(myLanguage.Messages("msg1", LanguageIndex), "SYS", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 OnTrigger(ESSStatusEnum.EXIT);
@@ -417,8 +421,9 @@ namespace JetEazy.UISpace
         }
         void Logout()
         {
-            if (JetEazy.BasicSpace.VsMSG.Instance.Question("是否要登出账户？") == DialogResult.OK)
+            //if (JetEazy.BasicSpace.VsMSG.Instance.Question("是否要登出账户？") == DialogResult.OK)
             //if (MessageBox.Show(myLanguage.Messages("msg2",LanguageIndex), "SYS", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (VsMessageBox.Question(_T("是否要登出账户?")) == DialogResult.OK)
             {
                 ACCDB.Indicator = -1;
                 LOGINStatus = ESSStatusEnum.LOGOUT;

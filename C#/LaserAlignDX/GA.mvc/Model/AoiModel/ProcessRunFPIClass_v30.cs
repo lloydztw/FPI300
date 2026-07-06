@@ -411,8 +411,12 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 markRunEnd(false);
                 //fire_AoiEnd();
-                var errCode = Mvc.Model.ErrorCodes.EXCEPTION_AT_AOI_RUN;
-                string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
+                //var errCode = Mvc.Model.ErrorCodes.EXCEPTION_AT_AOI_RUN;
+                //string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
+                var errCode = ErrorCodes.EXCEPTION_AT_AOI_RUN;
+                string errMsg = GaUtil.GetEnumDescription(errCode)
+                                + "\n\r" + GetType().Name
+                                + "\n\r\n\r" + GetDeepExceptionMessage(ex);
                 fire_AoiError(errCode, errMsg);
                 _LOG_ERROR(ex, "_RunChipLocAndMeasurement");
             }
@@ -441,8 +445,12 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 markRunEnd(false);
                 //fire_AoiEnd();
-                var errCode = Mvc.Model.ErrorCodes.EXCEPTION_AT_AOI_RUN;
-                string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
+                //var errCode = Mvc.Model.ErrorCodes.EXCEPTION_AT_AOI_RUN;
+                //string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
+                var errCode = ErrorCodes.EXCEPTION_AT_AOI_RUN;
+                string errMsg = GaUtil.GetEnumDescription(errCode)
+                                + "\n\r" + GetType().Name
+                                + "\n\r\n\r" + GetDeepExceptionMessage(ex);
                 fire_AoiError(errCode, errMsg);
                 _LOG_ERROR(ex, "_RunEmptyTray");
             }
