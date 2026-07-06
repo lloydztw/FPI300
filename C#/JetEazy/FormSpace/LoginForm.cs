@@ -2,6 +2,7 @@
 using JetEazy.DBSpace;
 using JetEazy.Lang;
 using System;
+using System.Linq.Expressions;
 using System.Windows.Forms;
 
 namespace JetEazy.FormSpace
@@ -17,21 +18,25 @@ namespace JetEazy.FormSpace
         TextBox txtName;
         TextBox txtPassword;
 
-        Button btnOK;
-        Button btnCancel;
+        //Button btnOK1;
+        //Button btnCancel1;
 
         AccDBClass DataDB;
-        string UIPath = "";
-        int LanguageIndex = 0;
+
 
         #region LANGUAGE
         //Language
-        QxLang _lang => QxLang.Instance("gui");
+        JzLangPackage _lang;
         string _T(string text, string defaultText = null)
         {
             return _lang.Translate(text, defaultText);
         }
+        #endregion
+
+        #region LANGUAGE_OLD
         //Language Setup (old)
+        string UIPath = "";
+        int LanguageIndex = 0;
         JzLanguageClass myLanguage = new JzLanguageClass();
         #endregion
 
@@ -41,12 +46,16 @@ namespace JetEazy.FormSpace
         {
             InitializeComponent();
 
+            _lang = new JzLangPackage("account_mgr", uipath);
+
             DataDB = accdb;
             UIPath = uipath;
             LanguageIndex = langindex;
-
             Initial();
+
+            HandleCreated += (s, e) => _lang.Translate(this);
         }
+        
         void Initial()
         {
             myLanguage.Initial(UIPath + "\\LoginForm.jdb", LanguageIndex, this);
@@ -60,8 +69,8 @@ namespace JetEazy.FormSpace
             txtName.KeyDown += new KeyEventHandler(txt_KeyDown);
             txtPassword.KeyDown += new KeyEventHandler(txt_KeyDown);
             
-            btnOK = button4;
-            btnCancel = button6;
+            //btnOK = btnOK;
+            //btnCancel = btnCancel;
 
             btnOK.Click += new EventHandler(btnOK_Click);
             btnCancel.Click += new EventHandler(btnCancel_Click);
@@ -103,6 +112,7 @@ namespace JetEazy.FormSpace
             {
 
                 //VsMSG.Instance.Warning("用户或密码错误，请重试。");
+                
                 VsMessageBox.Warning(_T("帳號或密碼錯誤!"));
 
                 //MessageBox.Show(myLanguage.Messages("msg1", LanguageIndex), "SYS", MessageBoxButtons.OK);

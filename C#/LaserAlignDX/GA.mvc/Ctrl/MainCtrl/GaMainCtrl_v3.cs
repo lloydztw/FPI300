@@ -606,7 +606,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     float memoryUsagePercentage = systemMemoryCounter.NextValue();
 
                     // 輸出結果 (例如)
-                    _lblMemoryUsage.Text = $"內存使用率: {memoryUsagePercentage:F2}%";
+                    _lblMemoryUsage.Text = $"Memory Usage : {memoryUsagePercentage:F2}%";
 
                     _lblMemoryUsage.ForeColor = memoryUsagePercentage < 95f ? Color.Lime : Color.Red;
                 }

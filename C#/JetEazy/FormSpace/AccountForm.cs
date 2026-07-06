@@ -21,13 +21,17 @@ namespace JetEazy.FormSpace
 
         #region LANGUAGE
         //Language
-        QxLang _lang => QxLang.Instance("gui");
+        JzLangPackage _lang;
         string _T(string text, string defaultText = null)
         {
             return _lang.Translate(text, defaultText);
         }
-        //Language Setup (old)
+        #endregion
+
+        #region LANGUAGE_OLD
         JzLanguageClass myLanguage = new JzLanguageClass();
+        string UIPath = "";
+        int LanguageIndex = 0;
         #endregion
 
         GroupBox grpACCData;
@@ -41,18 +45,17 @@ namespace JetEazy.FormSpace
         CheckBox chkAllowSetupRecipe;
         CheckBox chkAllowUseShopFloor;
 
-        Button btnAdd;
-        Button btnModify;
-        Button btnDelete;
-        Button btnOK;
-        Button btnCancel;
-        Button btnExit;
+        //Button btnAdd1;
+        //Button btnModify1;
+        //Button btnDelete1;
+        //Button btnOK1;
+        //Button btnCancel1;
+        //Button btnExit1;
 
         bool IsNeedToChange;
 
         AccDBClass ACCDB;
-        string UIPath = "";
-        int LanguageIndex = 0;
+
         AccClass OperateDataNow
         {
             get
@@ -66,6 +69,8 @@ namespace JetEazy.FormSpace
 
         public AccountForm(AccDBClass accdb, string uipath, int langindex)
         {
+            _lang = new JzLangPackage("account_mgr", uipath);
+
             ACCDB = accdb;
             UIPath = uipath;
             LanguageIndex = langindex;
@@ -73,6 +78,7 @@ namespace JetEazy.FormSpace
             InitializeComponent();
             Initial();
 
+            HandleCreated += (s, e) => _lang.Translate(this);
         }
         void Initial()
         {
@@ -84,27 +90,27 @@ namespace JetEazy.FormSpace
             txtName = textBox1;
             txtPassword = textBox2;
 
-            chkAllowSetup = checkBox1;
-            chkAllowManageAccount = checkBox2;
-            chkAllowSetupRecipe = checkBox3;
-            chkAllowUseShopFloor = checkBox4;
+            chkAllowSetup = chkAllowSystemSetup;
+            chkAllowManageAccount = chkAllowAccountManagement;
+            chkAllowSetupRecipe = chkAllowRecipeEditting;
+            chkAllowUseShopFloor = chkUseFactorySettings;
             
-            btnAdd = button1;
-            btnAdd.Tag = TagEnum.ADD;
-            btnModify = button2;
+            btnAddAccount = btnAddAccount;
+            btnAddAccount.Tag = TagEnum.ADD;
+            btnModify = btnModify;
             btnModify.Tag = TagEnum.MODIFY;
-            btnDelete = button3;
-            btnDelete.Tag = TagEnum.DEL;
-            btnOK = button4;
+            btnDelAccount = btnDelAccount;
+            btnDelAccount.Tag = TagEnum.DEL;
+            btnOK = btnOK;
             btnOK.Tag = TagEnum.OK;
-            btnCancel = button5;
+            btnCancel = btnCancel;
             btnCancel.Tag = TagEnum.CANCEL;
-            btnExit = button6;
+            btnExit = btnExit;
             btnExit.Tag = TagEnum.EXIT;
             
-            btnAdd.Click += new EventHandler(btn_Click);
+            btnAddAccount.Click += new EventHandler(btn_Click);
             btnModify.Click += new EventHandler(btn_Click);
-            btnDelete.Click += new EventHandler(btn_Click);
+            btnDelAccount.Click += new EventHandler(btn_Click);
             btnOK.Click += new EventHandler(btn_Click);
             btnCancel.Click += new EventHandler(btn_Click);
             btnExit.Click+=new EventHandler(btn_Click);
@@ -127,6 +133,7 @@ namespace JetEazy.FormSpace
 
             LanguageExClass.Instance.EnumControls(this);
 
+            HandleCreated += (s, e) => _lang.Translate(this);
         }
 
         void cboACCName_SelectedIndexChanged(object sender, EventArgs e)
@@ -187,9 +194,8 @@ namespace JetEazy.FormSpace
 
                     if (ACCDB.CheckDuplicate(txtName.Text, OperateDataNow.Index))
                     {
-                        //JetEazy.BasicSpace.VsMSG.Instance.Warning(" û    ѱ ʹ á ");
-                        VsMessageBox.Warning(_T("帳號已經存在!"));
                         //MessageBox.Show(myLanguage.Messages("msg2", LanguageIndex), "SYS", MessageBoxButtons.OK);
+                        VsMessageBox.Warning(_T("帳號重複!"));
                         txtName.Focus();
                         break;
                     }
@@ -275,9 +281,9 @@ namespace JetEazy.FormSpace
                         grpACCData.Enabled = true;
                         cboACCName.Visible = false;
 
-                        btnAdd.Visible = false;
+                        btnAddAccount.Visible = false;
                         btnModify.Visible = false;
-                        btnDelete.Visible = false;
+                        btnDelAccount.Visible = false;
 
                         btnOK.Visible = true;
                         btnCancel.Visible = true;
@@ -289,9 +295,9 @@ namespace JetEazy.FormSpace
                         grpACCData.Enabled = false;
                         cboACCName.Visible = true;
 
-                        btnAdd.Visible = true;
+                        btnAddAccount.Visible = true;
                         btnModify.Visible = true;
-                        btnDelete.Visible = true;
+                        btnDelAccount.Visible = true;
 
                         btnOK.Visible = false;
                         btnCancel.Visible = false;

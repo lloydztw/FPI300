@@ -432,7 +432,7 @@ namespace JetEazy.UISpace
         {
             //if (JetEazy.BasicSpace.VsMSG.Instance.Question("是否要登出账户？") == DialogResult.OK)
             //if (MessageBox.Show(myLanguage.Messages("msg2",LanguageIndex), "SYS", MessageBoxButtons.YesNo) == DialogResult.Yes)
-            if (VsMessageBox.Question(_T("是否要登出账户?")) == DialogResult.OK)
+            if (VsMessageBox.Question(_T("是否要登出帳户?")) == DialogResult.OK)
             {
                 ACCDB.Indicator = -1;
                 LOGINStatus = ESSStatusEnum.LOGOUT;

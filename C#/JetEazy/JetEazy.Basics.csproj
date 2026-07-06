@@ -79,6 +79,7 @@
     <Compile Include="BasicSpace\AoiLib\JzFindObjectClass.cs" />
     <None Include="BasicSpace\Readme.md" />
     <Compile Include="BasicSpace\Utils\JzLangKernel32.cs" />
+    <Compile Include="BasicSpace\Utils\JzLangPackage.cs" />
     <Compile Include="BasicSpace\Utils\JzLanguageDummy.cs" />
     <Compile Include="BasicSpace\Utils\JzLogClass.cs" />
     <Compile Include="BasicSpace\AoiLib\JzPlaneClass.cs" />
