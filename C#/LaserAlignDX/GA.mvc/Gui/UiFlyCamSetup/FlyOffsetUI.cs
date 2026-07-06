@@ -1,16 +1,7 @@
 ﻿using Eazy_Project_III;
+using EzAoiEmptyTrayInspector.Lang;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using OpenCvSharp.Flann;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml.Linq;
 
 namespace LaserAlignDX.GA.FormSpace.FPI30Form
 {
@@ -23,10 +14,15 @@ namespace LaserAlignDX.GA.FormSpace.FPI30Form
         }
 
         StageNumber m_StageNumber = StageNumber.N0;
+        
+        string _tagCompensate;
+        string _tagSucker;
 
         public FlyOffsetUI()
         {
             InitializeComponent();
+            _tagCompensate = QMSG.Text("補償", "gui");
+            _tagSucker = QMSG.Text("吸嘴", "gui");
         }
 
         /// <summary>
@@ -89,9 +85,9 @@ namespace LaserAlignDX.GA.FormSpace.FPI30Form
             dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgv.RowHeadersVisible = false;
 
-            dgv.Columns.Add("col0", "吸嘴");
-            dgv.Columns.Add("col1", "补偿X");
-            dgv.Columns.Add("col2", "补偿Y");
+            dgv.Columns.Add("col0", _tagSucker);            // "吸嘴");
+            dgv.Columns.Add("col1", _tagCompensate + "X");  // "补偿X");
+            dgv.Columns.Add("col2", _tagCompensate + "Y");  // "补偿Y");
 
             dgv.Columns["col0"].SortMode = DataGridViewColumnSortMode.NotSortable;
             dgv.Columns["col1"].SortMode = DataGridViewColumnSortMode.NotSortable;
@@ -102,7 +98,8 @@ namespace LaserAlignDX.GA.FormSpace.FPI30Form
             int i = 0;
             while (i < POINT_COUNT)
             {
-                dgv.Rows.Add($"吸嘴{(i+1).ToString()}", $"吸嘴{i.ToString()}", 0, 0);
+                //dgv.Rows.Add($"吸嘴{(i + 1).ToString()}", $"吸嘴{i.ToString()}", 0, 0);
+                dgv.Rows.Add($"{_tagSucker}{(i + 1)}", $"{_tagSucker}{i}", 0, 0);
 
                 i++;
             }
@@ -110,12 +107,11 @@ namespace LaserAlignDX.GA.FormSpace.FPI30Form
             i = 0;
             while (i < POINT_COUNT)
             {
-                dgv.Rows[i].Cells[0].Value = $"吸嘴{(i + 1).ToString()}";
+                //dgv.Rows[i].Cells[0].Value = $"吸嘴{(i + 1).ToString()}";
+                dgv.Rows[i].Cells[0].Value = $"{_tagSucker}{i + 1}";
 
                 i++;
             }
-
-
         }
     }
 }

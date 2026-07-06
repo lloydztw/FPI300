@@ -68,7 +68,7 @@
             // 
             this.lblLight1.AutoSize = true;
             this.lblLight1.Font = new System.Drawing.Font("Microsoft YaHei UI", 16.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblLight1.Location = new System.Drawing.Point(62, 58);
+            this.lblLight1.Location = new System.Drawing.Point(62, 49);
             this.lblLight1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.lblLight1.Name = "lblLight1";
             this.lblLight1.Size = new System.Drawing.Size(151, 43);
@@ -90,7 +90,7 @@
             // 
             this.cboLightChannels.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cboLightChannels.FormattingEnabled = true;
-            this.cboLightChannels.Location = new System.Drawing.Point(340, 48);
+            this.cboLightChannels.Location = new System.Drawing.Point(340, 51);
             this.cboLightChannels.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.cboLightChannels.Name = "cboLightChannels";
             this.cboLightChannels.Size = new System.Drawing.Size(206, 39);
