@@ -58,6 +58,7 @@
 "Question_Continue_To_Run_Simulation" : ["Do you want to continue running the simulation?", "是否 繼續跑 模擬?", "", "ต้องการดำเนินการจำลองต่อหรือไม่?"],
 "Waring_Software_Ready_Can_NOT_Simulate_Fly_Camera" : ["[Software Ready] Connection activated. Unable to perform on-the-fly camera offline test!", "【軟件準備】 已經啟動連線, 無法進行 飛拍 離線測試!", "", "[ซอฟต์แวร์พร้อม] เปิดใช้งานการเชื่อมต่อแล้ว ไม่สามารถทำการทดสอบออฟไลน์ของกล้องแบบบินถ่ายได้!"],
 "Info_Simulation" : ["[Offline Mode]", "[離線版]", "", "[โหมดออฟไลน์]"],
+"Question_To_Simulate_With_FlyCam" : ["To run simulation with FlyCamera?","即將進行 循環自測\n\r\n\r是否也要包含 飛拍 模擬?","",""],
 "Question_To_Rebuild_Template_Dimension" : ["Do you want to reset the template dimensions?", "是否 要重新設定 樣本尺寸?", "", "ต้องการตั้งค่าขนาดเทมเพลตใหม่หรือไม่?"],
 "Warning_AOI_Busy" : ["AOI is executing...", "AOI 執行中...", "", "AOI กำลังทำงาน..."],
 "Info_Please_Load_Or_Grab_Image" : ["Please load an image file or grab an image first!", "請先 加載圖檔 或 取像", "", "กรุณาโหลดไฟล์ภาพหรือจับภาพก่อน!"],
