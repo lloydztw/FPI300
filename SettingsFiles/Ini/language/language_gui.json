@@ -87,6 +87,9 @@
 "吸嘴馬達 X" : ["Motor X", "吸嘴馬達 X", "", "มอเตอร์หัวดูด X"],
 "載台馬達 Y" : ["Motor Y", "載台馬達 Y", "", "มอเตอร์แท่นวาง Y"],
 
+"吸嘴" : ["Sucker", "吸嘴", "", "หัวดูด"],
+"補償" : ["Compensation", "補償", "", ""],
+
 "FormTemplateEditor" : ["Template Match Editor", "匹配模板設定", "","ตัวแก้ไขการจับคู่เทมเพลต"],
 "btnDefectDelete" : ["Del Defect Area", "缺陷區域 刪除", "","ลบพื้นที่ข้อบกพร่อง"],
 "btnDefectClear" : ["Clear Defect Area", "缺陷區域 清空", "","ล้างพื้นที่ข้อบกพร่อง"],
