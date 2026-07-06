@@ -44,15 +44,13 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
             rdoCarrier1.CheckedChanged += RdoCarrier1_CheckedChanged;
             rdoSucker1.CheckedChanged += RdoSucker1_CheckedChanged;
             SizeChanged += (s, e) => autoLayout();
+            Load += Form_Load;
             #endregion
 
-            if (!DesignMode)
-            {
-                Load += Form_Load;
-                // CONTROL
-                var ctrl = new GaCalibCtrl();
-                ctrl.Attach(this);
-            }
+            // CONTROL
+            var ctrl = new GaCalibCtrl();
+            ctrl.Attach(this);
+            autoLayout();
         }
 
         #region GUI_LINKS
@@ -117,6 +115,37 @@ namespace LaserAlignDX.Mvc.Gui.Calib.V5
         {
             if (WindowState == FormWindowState.Minimized)
                 return;
+            try
+            {
+                SuspendLayout();
+                var ccSize = panelBtns.ClientSize;
+                var wndRef = gvFocusSettingPanel1;
+                var span = ccSize.Width - wndRef.Right;
+                var gap = wndRef.Left;
+                var width = (span - gap) / 3 - gap;
+                var btns = new Control[]
+                {
+                    btnGrabImage,
+                    btnAutoFetchAll,
+                    btnBuildCalib,
+                };
+                int x = wndRef.Right + gap;
+                for(int i = 0; i < btns.Length; i++)
+                {
+                    btns[i].Left = x;
+                    btns[i].Width = width;
+                    x += width + gap;
+                }
+                btnLoadImage.Left = btnGrabImage.Left;
+                btnLoadImage.Width = width;
+            }
+            catch
+            {
+            }
+            finally
+            {
+                ResumeLayout(false);
+            }
         }
         #endregion
     }

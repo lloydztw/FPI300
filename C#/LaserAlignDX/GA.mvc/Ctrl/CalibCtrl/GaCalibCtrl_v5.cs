@@ -1310,7 +1310,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
         {
             if(!OPT_SUPPORT_MOTOR_JOG)
             {
-                VsMessageBox.Info("Funtion Reserved!");
+                VsMessageBox.Info("Function Reserved! (保留!)");
                 return;
             }
 

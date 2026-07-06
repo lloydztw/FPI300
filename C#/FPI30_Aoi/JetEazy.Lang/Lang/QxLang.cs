@@ -168,7 +168,7 @@ namespace JetEazy.Lang
                 if (_dict == null && OPT_AUTO_DUMP_TEXT)
                     _dumpOne(str);
 
-                if (!string.IsNullOrEmpty(defaultStr))
+                if (defaultStr != null)
                     return defaultStr;
                 else
                     return str;

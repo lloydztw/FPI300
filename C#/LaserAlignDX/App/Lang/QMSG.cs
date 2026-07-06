@@ -87,7 +87,11 @@ namespace JetEazy.Lang
                 msg += SmartTranslate(_lang, args);
             return msg;
 #endif
-            return Text(prompt.ToString(), "prompts");
+            var lang = Lang("prompts");
+            var txt = lang.Translate(prompt.ToString(), "");
+            if (string.IsNullOrEmpty(txt))
+                return JetEazy.QxNums.GetEnumDescription(prompt);
+            return txt;
         }
         public static string ErrText(QErrorCodes err, params string[] args)
         {
