@@ -380,6 +380,11 @@ namespace JetEazy.DBSpace
             RCPItemList.RemoveAt(RCPItemList.Count - 1);
             Indicator = FromIndex;
         }
+
+        public bool CheckDuplicate(string name, string ver, int rcpIndex)
+        {
+            return CheckDuplicate(name + ver, rcpIndex);
+        }
         public bool CheckDuplicate(string NameStr, int IndexNow)
         {
             bool ret = false;
