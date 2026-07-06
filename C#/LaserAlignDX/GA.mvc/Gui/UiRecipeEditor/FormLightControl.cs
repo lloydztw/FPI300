@@ -13,12 +13,12 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Lang;
 using JetEazy.ControlSpace.PLCSpace;
 using JetEazy.Utils;
 using System;
 using System.Windows.Forms;
 using Traveller106;
-using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
 namespace LaserAlignDX.Mvc.Gui
@@ -40,9 +40,11 @@ namespace LaserAlignDX.Mvc.Gui
         public FormLightControl()
         {
             InitializeComponent();
+            if (DesignMode)
+                return;
 
             DialogResult = DialogResult.Cancel;
-            btnOK.Click += BtnOK_Click;
+            btnWriteToRecipe.Click += BtnOK_Click;
             FormClosed += FormLightControl_FormClosed;
             Load += FormLightControl_Load;
         }
@@ -65,10 +67,10 @@ namespace LaserAlignDX.Mvc.Gui
         }
         private void FormLightControl_Load(object sender, EventArgs e)
         {
+            QMSG.Translate(this);
             updateAvailableChannels();
             updateSettings(false);
             applyLightsToMachine((int)LightChannel, LightValue);
-
             numLightValue.ValueChanged += NumLightValue_ValueChanged;
             cboLightChannels.SelectedIndexChanged += NumLightValue_ValueChanged;
         }

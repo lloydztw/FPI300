@@ -10,7 +10,8 @@
 "menuTestQRCode" : ["Offline: QRCode Test", "離線測試 QRCode", "", "Offline: QRCode"],
 "menuTestEmptyTrayInspect" : ["Offline: Empty Tray Inspection", "離線測試 空盤檢測", "", "Offline: ตรวจสอบถาดเปล่า"],
 
-"lblFlySerialNumber" : ["Fly ID:", "飛拍序號:", "", "หมายเลขซีเรียลฟลาย ID:"],
+"飛拍序號" : ["Fly ID", "飛拍序號", "", "หมายเลขซีเรียลฟลาย ID"],
+
 "grpIoPoints" : ["IoPoints", "IO點位", "", "จุด IO"],
 "btnGlobalCalib" : ["Calibration", "基準校正", "", "การปรับเทียบมาตรฐาน"],
 
@@ -131,8 +132,16 @@
 "FormCalibrationTool" : ["Calibration", "校正設定", "", "ตั้งค่าการปรับเทียบ"],
 "FormCalibrationTool.tbLayoutMain.tbLayoutDockRight.groupBox1" : ["Recipe Settings", "像測參數", "", "พารามิเตอร์การวัดภาพ"],
 "lblTitleInfo" : ["Info", "說明", "", "คำอธิบาย"],
-"__btnCancel" : ["退出", "", "", "ออก"],
-"__btnOK" : ["保存資料", "", "", "บันทึกข้อมูล"],
+
+"__btnCancel" : ["Quit", "退出", "", "ออก"],
+"__btnOK" : ["SaveData", "保存資料", "", "บันทึกข้อมูล"],
+
+"FormLightControl" : ["Light Control", "光源控制窗", "", "หน้าต่างควบคุมแสงสว่าง"],
+"lblLight1" : ["Channel", "光源通道", "", "ช่องสัญญาณไฟ"],
+"lblLight2" : ["Intensity", "設定值", "", "ค่าที่ตั้งไว้"],
+"lblLight3" : ["Intensity == 0 will turn off the light.", "設定值為 0 可以關閉燈源", "", "การตั้งค่าเป็น 0 จะเป็นการปิดไฟ"],
+"btnWriteToRecipe" : ["Save", "寫回參數檔", "", "บันทึก"],
+
 "FormCalibrationTool.tbLayoutMain.tbLayoutDockRight.panelBtns" : ["Vision", "像測操作", "", "การทำงานด้านวิชัน"],
 "lblAxisName" : ["Focus Z (mm)", "相機 對焦 Z (mm)", "", "โฟกัสกล้อง Z (มม.)"],
 "btnBuildCalib" : ["Calibrate", "執行校正", "", "ดำเนินการปรับเทียบ"],
@@ -143,9 +152,6 @@
 "__rdoCarrier1" : ["載台 1", "", "", "แท่นวาง 1"],
 "btnOpenMotorXY" : ["MotorXY","軸控XY", "", "ควบคุมแกน XY"],
 
-"--是否刪除帳號?" : ["To delete this Account?", "是否刪除帳號?", "", ""],
-"--帳號已經存在" : ["The Account already exists!", "帳號已經存在!", "", ""],
-"--帳號或密碼錯誤!" : ["The Account or Password is wrong!", "帳號或密碼錯誤!", "", ""],
 "是否要關閉系統?" : ["Are you sure to exit?", "是否要關閉系統?", "", ""],
 "是否要登出帳户?" : ["Are you going to log out?", "是否要登出帳户?", "", ""],
 "請登出!\n回到跑線正常狀態,\n才能退出程式!" : ["Please log out and back to idle state before Exit!", "請登出!\n回到跑線正常狀態,\n才能退出程式!", "", ""],

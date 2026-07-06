@@ -122,6 +122,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         Control _wndOwner;
         Control lblSerialNumber;
         IvFlyCamViewUI[] _DispUIs;
+        string _flyCamSnTag;
         #endregion
 
         public void Attach(Control[] DsFlys, Control lblFlyCameraSerialNo)
@@ -132,6 +133,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             lblSerialNumber.DoubleClick += (s, e) => resetOnTheFlyFrameCount();
             FlyCamera.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
             _sysModel.EmptyTrayAoiModel.OnFinalResulted += (s, e) => updateFlyCameraSerialNumber(-1);
+
+            QMSG.Lang("gui").LanguageChanged += (s, e) => updateFlyCameraSerialNumberTag();
+            updateFlyCameraSerialNumberTag();
         }
         public void Tick()
         {
@@ -159,14 +163,22 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             //}
             #endregion
         }
+        void updateFlyCameraSerialNumberTag()
+        {
+            _flyCamSnTag = QMSG.Text("飛拍序號", "gui");
+            lblSerialNumber.Text = _flyCamSnTag;
+        }
         void updateFlyCameraSerialNumber(int serialNumber)
         {
             _wndOwner?.Invoke(new Action(() =>
             {
                 var color = (serialNumber < 0 || Traveller106.Universal.IsOpenFlyForm) ? Color.Transparent : Color.Lime;
-                var text = "飛拍序號";
-                if (serialNumber > 0) text += $" : {serialNumber}";
-                lblSerialNumber.Text = text;
+                //var text = "飛拍序號";
+                //if (serialNumber > 0) text += $" : {serialNumber}";
+                lblSerialNumber.Text =
+                    serialNumber > 0 ?
+                    $"{_flyCamSnTag} : {serialNumber}" :
+                    _flyCamSnTag;
                 lblSerialNumber.BackColor = color;
             }));
         }
