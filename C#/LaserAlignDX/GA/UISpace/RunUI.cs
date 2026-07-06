@@ -28,6 +28,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace.IOSpace;
+using VsCommon.ControlSpace.MachineSpace;
 
 namespace PhotoMachine.UISpace
 {
@@ -70,8 +71,15 @@ namespace PhotoMachine.UISpace
         }
         IPlcIoFPIX3 _plcIO
         {
-            //get => GaMvcConfig.InstancePLC("RUNUI");
-            get => null;
+            get
+            {
+                var plc = MACHINE?.PLCIO;
+                return plc;
+            }
+        }
+        MainFPIX3MachineClass MACHINE
+        {
+            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
         }
         #endregion
 
