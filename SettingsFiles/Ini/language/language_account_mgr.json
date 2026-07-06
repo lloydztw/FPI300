@@ -1,0 +1,151 @@
+﻿{
+"__HEADER__" : ["English", "正體中文", "简体中文", "Tiếng Việt"],
+
+"FormLoginEx" : ["Login", "登入", "","Đăng nhập"],
+"LoginForm" : ["Login", "登入", "","Đăng nhập"],
+
+"btnAccountMgr" : ["Account Mgr", "帳號管理", "","Quản lý tài khoản"],
+
+"lblAccountNameTag" : ["Name", "帳號", "", "Tài khoản"],
+
+"lblPasswordTag" : ["Password", "密碼", "", "Mật khẩu"],
+
+"btnCancel" : ["Cancel", "取消", "", "hủy bỏ"],
+
+"btnOK" : ["OK", "確認", "", "xác nhận"],
+
+"btnExit" : ["Exit", "離開", "", ""],
+
+"FormAccountMgrEx" : ["Account Mgr", "帳號管理", "","Quản lý tài khoản"],
+"AccountForm" : ["Account Mgr", "帳號管理", "","Quản lý tài khoản"],
+
+"chkAllowSystemSetup" : ["System settings", "淮許系統設定", "", "Cho phép cài đặt hệ thống"],
+
+"chkAllowRecipeEditting" : ["Rescipe settings", "准許更改參數", "","Quyền thay đổi thông số"],
+
+"chkAllowAccountManagement" : ["Account settings", "准許帳號管理", "","Cho phép quản lý tài khoản"],
+
+"chkUseFactorySettings" : ["Use Shop Floor", "指定使用工廠系統", "","Cho phép quản lý tài khoản"],
+
+
+"btnChangePicture" : ["Photo", "改圖片", "","Hình ảnh"],
+
+"btnChangePrivileges" : ["Permissions", "改權限", "","Quyền hạn"],
+
+"btnChangePassword" : ["Password", "改密碼", "","Mật khẩu"],
+
+"lblPasswordConfirmTag" : ["Reconfirm", "確認密碼", "","Xác nhận mật khẩu"],
+
+"chkUsingFingerPrint" : ["Use finger print", "使用指紋機", "","Sử dụng máy vân tay"],
+
+"btnAddAccount" : ["New", "新增帳號", "","Thêm tài khoản"],
+
+"btnDelAccount" : ["Delete", "刪除帳號", "","Xóa tài khoản"],
+
+"btnModify" : ["Modify", "修改", "", ""],
+
+"您的權限不足!" : [
+	"Sorry, You do not the proper privilege!",
+	"抱歉, 您的權限不足!",
+	"",
+	"Xin lỗi, quyền của bạn không đủ"
+],
+
+"請輸入相同密碼!" : [
+	"Please input the same password!",
+	"請輸入相同密碼!",
+	"",
+	"Vui lòng nhập cùng một mật khẩu!"
+],
+
+"禁止刪除自己或Admin!" : [
+	"To delete Self or Admin is not allowed!",
+	"禁止刪除自己或Admin!",
+	"",
+	"Cấm tự xóa hoặc Admin xóa!"
+],
+
+"帳號重複!" : [
+	"The account must be different!",
+	"帳號重複!",
+	"",
+	"Sao chép tài khoản!"
+],
+
+"帳號或密碼錯誤!" : [
+	"The account name or password is wrong!",
+	"帳號或密碼錯誤!",
+	"",
+	""
+],
+
+"是否刪除帳號?" : [
+	"Are you sure to delete this account?",
+	"是否刪除帳號?",
+	"",
+	""
+],
+
+"指紋未註冊!" : [
+	"The FP. not enrolled!",
+	"指紋未註冊!",
+	"",
+	"Dấu vân tay chưa được đăng ký!"
+],
+
+"指紋序號" : ["Index", "序號", "", "Số sêri"],
+
+"切換模式" : [ "Switch mode", "切换模式", "", "Chế độ chuyển đổi"],
+
+"密碼" : ["Password", "密碼", "",  "Mật khẩu"],
+
+"指紋機" : [ "FingerPrint", "指紋機", "","máy vân tay"],
+
+"切換模式提示" : [
+	"Do you want to change to '{0}' login mode?\n\r\n\rThe program must be restarted after changing mode!",
+	"是否切換為 '{0}' 登入管理模式?\n\r\n\r程式即將退出, 之後重啟才會生效!",
+	"",
+	"Bạn có muốn chuyển sang '{0}' để đăng nhập vào chế độ quản lý không?\n\r\n\rChương trình sắp thoát và chương trình sẽ có hiệu lực sau khi khởi động lại!"
+],
+
+"FormFpDetection" : ["FP Detection", "指紋偵測", "", "phát hiện dấu vân tay" ],
+
+"btnReTry" : ["ReTry", "重試", "","Thử lại"],
+
+"___runtime.lblStatus" : ["Remark", "不用翻譯"],
+
+"FormFpSettings" : ["FP Settings", "指紋機設定", "", "Cài đặt máy vân tay" ],
+
+"FormFpSettings.groupBox4" : [
+	"Enrolled List",
+	"已註冊指紋序號",
+	"",
+	"Số sê-ri dấu vân tay đã đăng ký"
+],
+
+"___lblStateInfo" : ["Remark", "不用翻譯"],
+
+"FormFpSettings.groupBox3" : ["Functions", "功能", "", "Chức năng" ],
+
+"btnStartEnroll" : ["Enroll", "註冊", "","Đăng ký" ],
+
+"btnImportData" : ["Import", "匯入", "","Nhập khẩu" ],
+
+"btnStopAll" : ["Stop", "停止", "","Dừng lại" ],
+
+"btnExportData" : ["Export", "匯出檔案", "","Xuất tập tin" ],
+
+"btnStartDetection" : ["Identify", "辨識", "","Nhận dạng" ],
+
+"btnDeleteEnroll" : ["Delete", "刪除", "","Xóa bỏ" ],
+
+"FormFpSettings.groupBox1" : ["Com Port", "通訊串口", "", "Cổng nối tiếp giao tiếp"],
+
+"chkShowFingerPrintImage" : ["Show Image", "顯示指紋影像", "", "Hiển thị hình ảnh vân tay"],
+
+"btnConnect" : ["Connect", "連線", "","Đầu nối"],
+
+"chkShowUartLog" : ["Trace", "追蹤通訊數據", "", "Theo dõi dữ liệu truyền thông" ],
+
+"__END__" : ["Remark", "不用翻譯"]
+}
