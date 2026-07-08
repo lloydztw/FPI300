@@ -1,5 +1,5 @@
 ﻿
-# 常見問題:
+# 軟件常見問題:
 
 
 ## 1. 第一次使用, 請執行 Dlls 下面的 通用庫 安裝包 
@@ -28,3 +28,11 @@
 
 - (3.2) 確認 JetEazy.Crt.dll 版本正確, 並位在可取得的路徑
 	   	- 可使用環境變量 設定路徑包含 C:\Program Files\Common Files\JetEazy
+
+
+## 4. 瑕疵檢查 開機後 無法正常 判定
+- To be continued.
+
+
+## 5. 大陣列 Grid Builder
+- To be continued
