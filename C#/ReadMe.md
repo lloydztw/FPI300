@@ -62,3 +62,17 @@
 	- Motor
 		* 透過 PLC 控制馬達
 			<hw_root>\ControlSpace\MotionSpace\ PLCMotionClass.cs
+
+
+# 3. ToDo Lists (待完成事項)
+
+## 3.1 大陣列 Grid Builder 失準
+- To be continued
+
+## 3.2 使用選轉拉框 來框選 Golden
+- To be continued
+
+## 3.3 語言
+- GaUtil.LOG
+- ToChangeLanguage
+- MenuContextStrip
