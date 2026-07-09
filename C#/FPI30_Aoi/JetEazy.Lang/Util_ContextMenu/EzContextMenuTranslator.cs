@@ -21,12 +21,12 @@ namespace JetEazy.Lang
     {
         #region LANGUAGE
         private static QxLang _lang => QxLang.Instance("gui");
-        private static string _T(string text)
+        private static string _T(string text, string defaultText)
         {
-            var t = _lang?.Translate(text);
+            var t = _lang?.Translate(text, defaultText);
             if (!string.IsNullOrEmpty(t))
                 return t;
-            return text;
+            return defaultText;
         }
         #endregion
 
@@ -56,8 +56,8 @@ namespace JetEazy.Lang
             // 1. 翻譯當前項目的文字 (排除分隔線 StripSeparator)
             if (!(item is ToolStripSeparator) && !string.IsNullOrEmpty(item.Name))
             {
-                // 💡 關鍵修正：直接拿控制項的 Name (永遠不會變的唯一 ID) 去反查字典
-                item.Text = _T(item.Name);
+                // 關鍵修正：直接拿控制項的 Name (永遠不會變的唯一 ID) 去反查字典
+                item.Text = _T(item.Name, item.Text);
             }
 
             // 2. 如果這是一個有子選單的項目 (ToolStripMenuItem)，遞迴進去翻譯子項目
