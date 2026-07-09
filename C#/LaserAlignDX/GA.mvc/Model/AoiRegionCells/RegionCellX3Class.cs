@@ -6,11 +6,8 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using VisionDesigner;
 using VisionDesigner.Code2DReader;
-using VisionDesigner.ImageArithmetic;
 using VisionDesigner.PositionFix;
 using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
 
@@ -19,6 +16,9 @@ namespace LaserAlignDX.OPSpace
 {
     public class RegionCellX3Class : IDisposable
     {
+        public static bool DUMP_IMAGE_ENABLED = false;
+        public static string DUMP_IMAGE_PATH = null;
+
         #region MVD_TOOLS
         CPositionFixTool cPositionFixToolObj = null;// new VisionDesigner.PositionFix.CPositionFixTool();
         //CImageArithmeticTool cImageArithmeticToolObj = null;// new CImageArithmeticTool();
@@ -178,7 +178,7 @@ namespace LaserAlignDX.OPSpace
 #endif
         #endregion
 
-        #region FILE_PATH
+        #region IMAGE_FILE_DUMP_SETTINGS
         public bool IsSaveDebugPicture = false;
         public string SaveDebugPath = $"D:\\log\\DebugImage";
         #endregion

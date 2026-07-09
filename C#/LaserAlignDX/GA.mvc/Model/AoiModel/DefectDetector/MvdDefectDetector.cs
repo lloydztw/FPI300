@@ -74,6 +74,37 @@ namespace LaserAlignDX.Model.Defects.V3
 
         public void Init()
         {
+            // 1. 重新載入標準影像
+            _imgTemplate?.Dispose();
+            _imgTemplate = GaImageUtil.BitmapToCMvdImage(_xRecipe.bmpDefectTemplate);
+            if (_imgTemplate == null || _imgTemplate.Width < 16 || _imgTemplate.Height < 16)
+                throw new Exception($"{GetType().Name} _imgTemplate is not set!");
+
+            _imgMask?.Dispose();
+            _imgMask = GaImageUtil.BitmapToCMvdImage(_xRecipe.bmpprintmask);
+            if (_imgMask == null || _imgMask.Width < 16 || _imgMask.Height < 16)
+                throw new Exception($"{GetType().Name} _imgMask is not set!");
+
+            // 2. 關鍵修正：重啟時，強制銷毀舊工具，逼迫海康清空底層 C++ 記憶體快取
+            cImageArithmeticToolObj?.Dispose();
+            cImageArithmeticToolObj = new CImageArithmeticTool();
+
+            cImageBinaryToolObj?.Dispose();
+            cImageBinaryToolObj = new VisionDesigner.ImageBinary.CImageBinaryTool();
+
+            cImageMorphToolObj?.Dispose();
+            cImageMorphToolObj = new VisionDesigner.ImageMorph.CImageMorphTool();
+
+            cBlobFindToolObj?.Dispose();
+            cBlobFindToolObj = new VisionDesigner.BlobFind.CBlobFindTool();
+
+            // 3. 補上原本漏掉的仿射工具，確保它也一起重新初始化
+            cImageAffineTransformToolObj?.Dispose();
+            cImageAffineTransformToolObj = new VisionDesigner.ImageAffineTransform.CImageAffineTransformTool();
+        }
+
+        void Init_000()
+        {
             _imgTemplate?.Dispose();
             _imgTemplate = GaImageUtil.BitmapToCMvdImage(_xRecipe.bmpDefectTemplate);
 
