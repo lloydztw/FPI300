@@ -1164,6 +1164,7 @@ namespace LaserAlignDX.AoiModel.V3
                             GaUtil.SaveData(debugCellCenterStr, fileName);
                         }
 
+#if (OPT_REPLACED_BY_PARENT)
                         //(2) SAVE debug Bmp
                         if (INI.Instance.IsSaveDebugBMP)
                         {
@@ -1179,6 +1180,7 @@ namespace LaserAlignDX.AoiModel.V3
                             string fileName = GetDebugOrgBmpFileName();
                             GaImageUtil.SaveBigImage(fileName, bmpBig);
                         }
+#endif
                     }
                 }
                 catch (Exception ex)

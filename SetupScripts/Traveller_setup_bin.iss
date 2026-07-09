@@ -6,7 +6,7 @@
 [Setup]
 AppPublisher=JetEazy System Co., Ltd.
 AppPublisherURL=http://www.jeteazy.com
-AppVersion=3.3.7.4
+AppVersion=3.3.7.6
 AppCopyright=Copyright (C) 2026 JetEazy System Co., Ltd.
 ;WizardImageFile=JetEazySetup.bmp
 
@@ -16,7 +16,7 @@ DefaultGroupName=JetEazy FPI30
 Compression=lzma
 SolidCompression=yes
 OutputDir=.\bin
-OutputBaseFileName=Traveller_Setup_3.3.7.4
+OutputBaseFileName=Traveller_Setup_3.3.7.6
 
 [Files]
 ; BIN & DLL
@@ -48,9 +48,9 @@ Source: "..\SettingsFiles\LASER-MAIN_FPIX3\*.*"; \
 Name: "{app}\_V03_\LASER-MAIN_FPIX3";           Flags: uninsneveruninstall
 
 [Icons]
-Name: "{commondesktop}\Traveller106 主程式";      Filename: "{app}\_BIN_\FPI30AOIX3.exe";                WorkingDir: "{app}\_BIN_"
-Name: "{group}\Traveller106 主程式";              Filename: "{app}\_BIN_\FPI30AOIX3.exe";                WorkingDir: "{app}\_BIN_"
-Name: "{group}\Traveller106 離線模擬 程式";       Filename: "{app}\_BIN_\Traveller.Sim.exe";             WorkingDir: "{app}\_BIN_"
-Name: "{group}\Traveller106 參數打包 程式";       Filename: "{app}\_BIN_\Traveller.Data.Packer.exe";     WorkingDir: "{app}\_BIN_"
+Name: "{commondesktop}\Traveller106 Main";      Filename: "{app}\_BIN_\FPI30AOIX3.exe";                 WorkingDir: "{app}\_BIN_"
+Name: "{group}\Traveller106 Main";              Filename: "{app}\_BIN_\FPI30AOIX3.exe";                 WorkingDir: "{app}\_BIN_"
+Name: "{group}\Traveller106 SIM";               Filename: "{app}\_BIN_\Traveller.Sim.exe";              WorkingDir: "{app}\_BIN_"
+Name: "{group}\Traveller106 Data Packer";       Filename: "{app}\_BIN_\Traveller.Data.Packer.exe";      WorkingDir: "{app}\_BIN_"
 
 [Code]

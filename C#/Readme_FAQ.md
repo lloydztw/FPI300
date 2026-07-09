@@ -40,3 +40,8 @@
 
 ## 6. 使用選轉拉框 來框選 Golden
 - To be continued
+
+## 7. 語言
+- GaUtil.LOG
+- ToChangeLanguage
+- MenuContextStrip

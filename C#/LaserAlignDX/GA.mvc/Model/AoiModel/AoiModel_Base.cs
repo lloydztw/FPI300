@@ -152,6 +152,7 @@ namespace LaserAlignDX.AoiModel
 
         #region PRIVATE_PATH_FILE_FUNCTIONS
         DateTime _timeTag = DateTime.Now;
+
         /// <summary>
         /// 標定統一的存檔時間
         /// </summary>
@@ -159,32 +160,66 @@ namespace LaserAlignDX.AoiModel
         {
             _timeTag = DateTime.Now;
         }
+
+        /// <summary>
+        /// 帶日期時間尾綴的檔名
+        /// </summary>
         protected string GetLotFileName(string tag, string ext)
         {
             //m_FileName = $"{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg";
             return $"{tag}-{_timeTag:yyyyMMdd_HHmmss}{ext}";
         }
-        protected string GetDebugBmpFileName()
+
+        /// <summary>
+        /// 根據 (StripId, LotId) 生成檔名 於 子資料夾 "LineScanImage"
+        /// </summary>
+        protected string GetDebugBmpFileName(bool pass)
         {
-            return GetDebugImgSaveFileName("LineScanImage", StripId, LotId);
+            string folder = "LineScanImage";
+            if(INI.Instance.UseOkNgDiffImageFolders)
+            {
+                if (!pass) folder += ".NG";
+            }
+            return GetDebugImgSaveFileName(folder, StripId, LotId);
         }
-        protected string GetDebugOrgBmpFileName()
+
+        /// <summary>
+        /// 根據 (StripId, LotId) 生成檔名 於 子資料夾 "LineScanImageOrg"
+        /// </summary>
+        protected string GetDebugOrgBmpFileName(bool pass)
         {
-            return GetDebugImgSaveFileName("LineScanImageOrg", StripId, LotId);
+            string folder = "LineScanImageOrg";
+            if (INI.Instance.UseOkNgDiffImageFolders)
+            {
+                if (!pass) folder += ".NG";
+            }
+            return GetDebugImgSaveFileName(folder, StripId, LotId);
         }
+
+        /// <summary>
+        /// 檔案 INI.Instance.ResultImagePath
+        ///         \ subFolder
+        ///         \ yyyyMMdd
+        ///         \ stripID
+        ///         \ lotID-yyyyMMdd_HHmmss.jpg
+        /// </summary>
         protected string GetDebugImgSaveFileName(string subFolder, string stripID, string lotID, bool autoCreateDir = true)
         {
-            //>>> m_PicResultOrgPath = $"{INI.Instance.ResultImagePath}\\linescanImageOrg\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
-            //>>> m_PicResultOrgPath = $"{INI.Instance.ResultImagePath}\\linescanImageOrg\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
-
             string path = System.IO.Path.Combine(INI.Instance.ResultImagePath, subFolder, _timeTag.ToString("yyyyMMdd"), stripID);
             if (autoCreateDir && !System.IO.Directory.Exists(path))
             {
-                System.IO.Directory.CreateDirectory(path);
+                // 改用 JetEazy.IO.QxPathUtility.InitDirectory 可以 遞迴深層 創建資料夾.
+                // System.IO.Directory.CreateDirectory(path);
+                JetEazy.IO.QxPathUtility.InitDirectory(path);
             }
+
             string file = $"{lotID}-{_timeTag:yyyyMMdd_HHmmss}.jpg";
             return System.IO.Path.Combine(path, file);
         }
+        
+        /// <summary>
+        /// 指向 [LOG_ROOT]\\Images\\[yyyyMMdd] 資料夾
+        /// </summary>
         protected string GetLogPath(string subFolder)
         {
             return System.IO.Path.Combine(Universal.LOG_IMG_PATH, _timeTag.ToString("yyyyMMdd"), subFolder);
@@ -246,7 +281,7 @@ namespace LaserAlignDX.AoiModel
         protected void _LOG_ERROR(Exception ex, string message)
         {
             _NLOG.Error(ex, message);
-            GaUtil.LOG($"[異常] {ex.Message}", Color.Red);
+            GaUtil.LOG($"[Error] {ex.Message}", Color.Red);
         }
         #endregion
 

@@ -689,24 +689,37 @@ namespace Traveller106
 
         //----------------------------------------------------------------------------------------------------
         const string X3_Cat2 = "A02.圖檔保存設定";
+
+        /// <summary>
+        /// 结果图路径
+        /// </summary>
         [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
         [Editor(typeof(SetFilePathPropertyEditor), typeof(UITypeEditor))]
         [DisplayName("01.结果图路径")]
         [Browsable(true)]
         public string ResultImagePath { get; set; } = "D:\\01FPI30ImagePath";
 
+        /// <summary>
+        /// 存储压缩图片
+        /// </summary>
         [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
         [DisplayName("02.存储压缩图片")]
         [Browsable(true)]
         public bool IsSaveDebugBMP { get; set; } = false;
 
+        /// <summary>
+        /// 存储原始图片
+        /// </summary>
         [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
         [DisplayName("03.存储原始图片")]
         [Browsable(true)]
         public bool IsSaveDebugOrgBmp { get; set; } = false;
 
+        /// <summary>
+        /// 结果图质量
+        /// </summary>
         [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
         [DisplayName("04.结果图质量")]
@@ -715,14 +728,20 @@ namespace Traveller106
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100)]
         public long ImageQuality { get; set; } = 10;
 
+        /// <summary>
+        /// 保存单颗测试图
+        /// </summary>
         [CategoryAttribute(X3_Cat2), DescriptionAttribute("true开 false关")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
         [DisplayName("05.保存单颗测试图")]
         [Browsable(true)]
         public bool IsSaveTestImage { get; set; } = false;
 
+        /// <summary>
+        /// 圖檔分存OK/NG不同資料夾
+        /// </summary>
         [CategoryAttribute(X3_Cat2), DescriptionAttribute("true开 false关")]
-        [DisplayName("06.圖檔分存OK/NG")]
+        [DisplayName("06.圖檔分存OK/NG不同資料夾")]
         [Browsable(true)]
         public bool UseOkNgDiffImageFolders { get; set; } = false;
 

@@ -173,6 +173,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// </summary>
         private void AsyncSaveDebugData(Bitmap bmpFullFov)
         {
+#if (OPT_REPLACED_BY_PARENT)
             if (!INI.Instance.IsSaveDebugBMP || bmpFullFov == null)
                 return;
                 
@@ -208,6 +209,7 @@ namespace LaserAlignDX.AoiModel.V3
             },
                 bmpFullFov.Clone()
             );
+#endif
         }
         #endregion
     }

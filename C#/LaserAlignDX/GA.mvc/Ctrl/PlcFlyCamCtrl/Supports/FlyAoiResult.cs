@@ -14,9 +14,11 @@
 #endregion
 
 
+using System;
+
 namespace LaserAlignDX.AoiModel
 {
-    public class FlyID
+    public class FlyID : ICloneable
     {
         public FlyID(int flyStart, int flyIndex)
         {
@@ -59,6 +61,11 @@ namespace LaserAlignDX.AoiModel
                 return showID;
             }
         }
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 
     public class FlyAoiResult
@@ -74,11 +81,12 @@ namespace LaserAlignDX.AoiModel
         public string CodeStr;
     }
 
-    public class FlyLotData
+    public class FlyLotData : ICloneable
     {
         public string StripID;
         public string LotID;
         public string CodeStr = "";
+
         public FlyLotData(string stripID, string lotID)
         {
             StripID = stripID;
@@ -86,6 +94,10 @@ namespace LaserAlignDX.AoiModel
         }
         public FlyLotData() : this("Strip_NONE", "Lot_NONE")
         {
+        }
+        public object Clone()
+        {
+            return MemberwiseClone();
         }
     }
 }

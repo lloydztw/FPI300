@@ -28,6 +28,7 @@ using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using Traveller106;
 using TravellerMINIX6.ProcessSpace;
@@ -515,7 +516,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             {
                 LtDebug.LOG.Error(ex, "flyProcessProXxx");
             }
-            saveFlyCamImage(flyID, bmpFly, _lotData);
+
+            //saveFlyCamImage(flyID, bmpFly, _lotData);
+            AsyncSaveFlyCameraImage(flyID, bmpFly, _lotData);
         }
         void flyProcessPro(FlyID flyID, Bitmap bmpFly)
         {
@@ -891,9 +894,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 m_iFlyOffset[flyIndex * 3 + 2] = 0;
             }
         }
+
+#if (OPT_REPLACED_BY_ASYNC_SAVE_FLY_CAMERA_IMAGE)
         void saveFlyCamImage(FlyID flyID, Bitmap bmpFly, FlyLotData lotData)
         {
-            if (INI.Instance.IsSaveDebugBMP)
+            if (INI.Instance.IsSaveDebugOrgBmp)
             {
                 try
                 {
@@ -909,7 +914,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     if (!Directory.Exists(path))
                         Directory.CreateDirectory(path);
 
-                    string fileName = $"{lotID}-[{flyShowIndex}]-[{code}]-{tm.ToString("yyyyMMddHHmmssfff")}.jpg";
+                    string fileName = $"{lotID}-[{flyShowIndex}]-[{code}]-{tm:yyyyMMdd_HHmmssfff}.jpg";
                     fileName = System.IO.Path.Combine(path, fileName);
 
                     //>>> cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
@@ -921,6 +926,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 }
             }
         }
+#endif
+
         //----------------------------------------------------------------------------
         // 此處函式不牽扯到 GUI, 將來要納入 AOI MODEL
         //----------------------------------------------------------------------------
@@ -944,5 +951,80 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             text = decodeInfo != null ? decodeInfo.Content : "";
         }
 
+        /// <summary>
+        /// 非同步保存 原圖 (caller 負責 bmpFullfov 生命)
+        /// </summary>
+        void AsyncSaveFlyCameraImage(FlyID flyID, Bitmap bmpFly, FlyLotData lotData)
+        {
+            if (bmpFly == null)
+                return;
+
+            if (!INI.Instance.IsSaveDebugBMP && !INI.Instance.IsSaveDebugOrgBmp)
+                return;
+
+            var result = m_iFlyResult!=null && flyID.flyIndex < m_iFlyResult.Length 
+                       ? (PlcFlyResultCode)m_iFlyResult[flyID.flyIndex] 
+                       : PlcFlyResultCode.NG_EMPTY;
+
+            var args = new object[]
+            {
+                flyID,
+                bmpFly.Clone(), 
+                lotData.Clone(),
+                result,
+                DateTime.Now,
+            };
+
+            ThreadPool.QueueUserWorkItem(argv =>
+            {
+                try
+                {
+                    var argvs = (object[])argv;
+                    var cFlyID = (FlyID)argvs[0];
+                    var cLotData = (FlyLotData)argvs[2];
+                    var cResult = (PlcFlyResultCode)argvs[3];
+                    var tm = (DateTime)argvs[4];
+
+                    using (Bitmap bmpBig = (Bitmap)argvs[1])
+                    {
+                        int flyShowIndex = flyID.ShowID;
+                        string stripID = lotData.StripID;
+                        string lotID = lotData.LotID;
+                        string code = lotData.CodeStr;
+
+                        // 2026-07-09 泰國版要求分流保存圖檔
+                        string folder = "flyImage";
+                        if(INI.Instance.UseOkNgDiffImageFolders)
+                        {
+                            bool isPass = cResult == PlcFlyResultCode.OK || cResult == PlcFlyResultCode.NG_EMPTY;
+                            if (!isPass) folder += ".NG";
+                        }
+
+                        string path = System.IO.Path.Combine(INI.Instance.ResultImagePath, folder, tm.ToString("yyyyMMdd"), stripID);
+                        if (!Directory.Exists(path))
+                            JetEazy.IO.QxPathUtility.InitDirectory(path);
+
+                        string fileName = $"{lotID}-[{flyShowIndex}]-[{code}]-{tm:yyyyMMdd_HHmmssfff}.jpg";
+                        fileName = System.IO.Path.Combine(path, fileName);
+
+                        GaImageUtil.SaveBigImage(fileName, bmpFly);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //_LOG($"异常捕获:{ex.Message}", Color.Red);
+                    _LOG_ERROR(ex, $"{GetType().Name}.saveDumpImageAsync");
+                    //GaUtil.LOG()
+                }
+            },
+                args
+            );
+        }
+
+        void _LOG_ERROR(Exception ex, string message)
+        {
+            LtDebug.LOG.Error(ex, message);
+            GaUtil.LOG($"[Error] {ex.Message}", Color.Red);
+        }
     }
 }

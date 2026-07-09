@@ -21,6 +21,7 @@ using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using System.Threading;
+using Traveller106;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 
@@ -369,6 +370,9 @@ namespace LaserAlignDX.AoiModel.V3
                 fire_AoiBegin();
                 markRunStart();
 
+                //(0) 取得線掃巨圖: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
+                Bitmap bmpOrgBig = LineScanCamImageHolder.PeekBitmap();
+
                 // 定位
                 _aoiChipLoc.Run();
                 var cellGroups = _aoiChipLoc.CellGroups;
@@ -387,6 +391,9 @@ namespace LaserAlignDX.AoiModel.V3
                 _aoiChipLoc.PostMarkAmbiguousBlocs();
 
                 bool pass = _CheckChipsTotalPass();
+
+                // 2026-07-09 LETIAN: 泰國要求按照 PASS/NG 分流存檔原圖
+                AsyncSaveOrgImage(bmpOrgBig, pass);
 
                 // 2026-06-06 LETIAN: 檢查定位結果是否為全空盤!
                 if (xScanInspectMode == ScanInspectMode.MEASUREAOI)
@@ -526,5 +533,57 @@ namespace LaserAlignDX.AoiModel.V3
         }
 #endif
         #endregion
+
+        /// <summary>
+        /// 非同步保存 原圖 (caller 負責 bmpFullfov 生命)
+        /// </summary>
+        void AsyncSaveOrgImage(Bitmap bmpFullfov, bool pass)
+        {
+            if (bmpFullfov == null)
+                return;
+
+            if (!INI.Instance.IsSaveDebugBMP && !INI.Instance.IsSaveDebugOrgBmp)
+                return;
+
+            var args = new object[]
+            {
+                bmpFullfov.Clone(),
+                pass
+            };
+
+            ThreadPool.QueueUserWorkItem(argv =>
+            {
+                try
+                {
+                    var argvs = (object[])argv;
+                    var cPass = (bool)argvs[1];
+
+                    using (Bitmap bmpBig = (Bitmap)argvs[0])
+                    {
+                        //(1) 保存壓縮圖檔 (IsSaveDebugBMP)
+                        if (INI.Instance.IsSaveDebugBMP)
+                        {
+                            string fileName = GetDebugBmpFileName(cPass);
+                            GaImageUtil.SaveImageWithQuality(bmpBig, fileName, INI.Instance.ImageQuality);
+                        }
+
+                        //(2) 保存原始圖檔 (IsSaveDebugOrgBmp)
+                        if (INI.Instance.IsSaveDebugOrgBmp)
+                        {
+                            string fileName = GetDebugOrgBmpFileName(cPass);
+                            GaImageUtil.SaveBigImage(fileName, bmpBig);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    //_LOG($"异常捕获:{ex.Message}", Color.Red);
+                    _LOG_ERROR(ex, $"{GetType().Name}.saveDumpImageAsync");
+                }
+            },
+                args
+            );
+        }
+
     }
 }
