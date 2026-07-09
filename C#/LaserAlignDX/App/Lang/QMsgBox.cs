@@ -30,7 +30,7 @@ namespace JetEazy.Lang
             MessageBoxIcon icon = MessageBoxIcon.Information)
         {
             title = title == null ? QMSG.TITLE : QMSG.SmartTranslate("prompts", title);
-            msg = QMSG.SmartTranslate(msg);
+            msg = QMSG.SmartTranslate("prompts", msg);
             return MessageBox.Show(msg, title, btn, icon);
         }
 

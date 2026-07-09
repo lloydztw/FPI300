@@ -722,6 +722,11 @@ namespace Traveller106
         public bool IsSaveTestImage { get; set; } = false;
 
         [CategoryAttribute(X3_Cat2), DescriptionAttribute("true开 false关")]
+        [DisplayName("06.圖檔分存OK/NG")]
+        [Browsable(true)]
+        public bool UseOkNgDiffImageFolders { get; set; } = false;
+
+        [CategoryAttribute(X3_Cat2), DescriptionAttribute("true开 false关")]
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
         [DisplayName("06.保存Strip资料")]
         [Browsable(false)]
@@ -852,10 +857,13 @@ namespace Traveller106
             //CurrentLotName = ReadINIValue("Basic", "CurrentLotName", CurrentLotName.ToString(), INIFILE);
 
             //IsOpenUpload = ReadINIValue("Basic", "IsOpenUpload", (IsOpenUpload ? "1" : "0"), INIFILE) == "1";
+            
             IsSaveStripImage = ReadINIValue("Basic", "IsSaveStripImage", (IsSaveStripImage ? "1" : "0"), INIFILE) == "1";
             IsSaveTestImage = ReadINIValue("Basic", "IsSaveTestImage", (IsSaveTestImage ? "1" : "0"), INIFILE) == "1";
             IsSaveDebugBMP = ReadINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBMP ? "1" : "0"), INIFILE) == "1";
             IsSaveDebugOrgBmp = ReadINIValue("Basic", "IsSaveDebugOrgBmp", (IsSaveDebugOrgBmp ? "1" : "0"), INIFILE) == "1";
+            UseOkNgDiffImageFolders = ReadINIValue("Basic", "UseOkNgDiffImageFolders", (UseOkNgDiffImageFolders ? "1" : "0"), INIFILE) == "1";
+
             //IsOnlyUseLeft = ReadINIValue("Basic", "IsOnlyUseLeft", (IsOnlyUseLeft ? "1" : "0"), INIFILE) == "1";
             //BoundaryValue = int.Parse(ReadINIValue("Basic", "BoundaryValue", BoundaryValue.ToString(), INIFILE));
             //LaserSharePath = ReadINIValue("Basic", "LaserSharePath", LaserSharePath.ToString(), INIFILE);
@@ -964,6 +972,7 @@ namespace Traveller106
             WriteINIValue("Basic", "IsSaveTestImage", (IsSaveTestImage ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBMP ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsSaveDebugOrgBmp", (IsSaveDebugOrgBmp ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "UseOkNgDiffImageFolders", (UseOkNgDiffImageFolders ? "1" : "0"), INIFILE);
 
             //WriteINIValue("Basic", "IsOnlyUseLeft", (IsOnlyUseLeft ? "1" : "0"), INIFILE);
             //WriteINIValue("Basic", "BoundaryValue", BoundaryValue.ToString(), INIFILE);
@@ -1109,6 +1118,7 @@ namespace Traveller106
         {
             m_xprops.Clear();
             string cat0 = "inicat0";
+            AddProperty(cat0, "UseOkNgDiffImageFolders", "UseOkNgDiffImageFolders", UseOkNgDiffImageFolders, "");
             AddProperty(cat0, "IsAutoTestSavePicture", "IsAutoTestSavePicture", IsSaveTestImage, "");
             AddProperty(cat0, "IsSaveResultImage", "IsSaveResultImage", IsSaveStripImage, "");
             AddProperty(cat0, "ResultImagePath", "ResultImagePath", ResultImagePath, "");
@@ -1166,6 +1176,9 @@ namespace Traveller106
                         break;
                     case "IsSaveResultImage":
                         IsSaveStripImage = (bool)xpropItem.Value;
+                        break;
+                    case "UseOkNgDiffImageFolders":
+                        UseOkNgDiffImageFolders = (bool)xpropItem.Value;
                         break;
                     case "ResultImagePath":
                         ResultImagePath = (string)xpropItem.Value;
