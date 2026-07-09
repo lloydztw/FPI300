@@ -88,10 +88,7 @@ namespace LaserAlignDX
         }
         public static IxReportBuilder CreateReportBuilder()
         {
-            // 使用力成報表
-            //return new PowerTechReportBuilder();
-            // 使用長電報表
-            return new JcetReportBuilder();
+            return new XReportBuilderProxy();
         }
 
         // CTRL ----------------------------------------------------

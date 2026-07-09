@@ -67,9 +67,10 @@ namespace LaserAlignDX.AoiModel.V3
             }
             catch (Exception ex)
             {
-                _LOG_ERROR(ex, $"異常 @ {GetType().Name}.Run");
-                markRunEnd(false);
-                fire_AoiEnd();
+                //_LOG_ERROR(ex, $"異常 @ {GetType().Name}.Run");
+                //markRunEnd(false);
+                //fire_AoiEnd();
+                base.HandleAoiException(ex);
             }
         }
 

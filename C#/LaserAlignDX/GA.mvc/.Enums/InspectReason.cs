@@ -30,6 +30,7 @@ namespace LaserAlignDX.OPSpace
 
         [Description("二維碼 比對錯誤")]
         NG_QRCODE_COMPARE,
+
         //[Description("二維碼 比對錯誤")]
         //INS_2DMAPNG = NG_QRCODE_COMPARE,
 

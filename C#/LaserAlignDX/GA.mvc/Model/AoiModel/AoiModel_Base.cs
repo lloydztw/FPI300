@@ -16,7 +16,6 @@
 
 using JetEazy.Utils;
 using LaserAlignDX.Model;
-using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -306,6 +305,21 @@ namespace LaserAlignDX.AoiModel
                 ex = ex.InnerException;
             }
             return msg;
+        }
+
+        protected void HandleAoiException(Exception ex)
+        {
+            markRunEnd(false);
+            fire_AoiEnd();
+
+            var errCode = ErrorCodes.EXCEPTION_AT_AOI_RUN;
+            string errMsg = GaUtil.GetEnumDescription(errCode)
+                            + "\n\r\n\r" + GetType().Name
+                            + "\n\r\n\r" + GetDeepExceptionMessage(ex);
+            GaUtil.LOG(errMsg, Color.Red);
+
+            _LOG_ERROR(ex, $"Error @ {GetType().Name}.Run");
+            fire_AoiError(errCode, errMsg);
         }
     }
 }

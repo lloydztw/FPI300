@@ -38,7 +38,6 @@ using QMSG = JetEazy.Lang.QMSG;
 using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 using XRecipe = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
 
-
 namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 {
     public partial class CviCellsResultBoxes : CviAbsTooltipBox
@@ -773,14 +772,14 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             
             if (cell.IsResultPass())
             {
-                sb.AppendLine("🟢 PASS").AppendLine();
+                sb.AppendLine($"{UnicodeTags.PASS} PASS").AppendLine();
             }
             else
             {
                 foreach (InspectReason ng in cell.IterNgResults())
                 {
                     var ngText = GaUtil.GetEnumDescription(ng);
-                    sb.AppendLine($"⛔️ {ngText}");
+                    sb.AppendLine($"{UnicodeTags.NG} {ngText}");
                 }
                 sb.AppendLine();
             }
@@ -808,6 +807,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void appendDetailCoordsInfo(StringBuilder sb, int row, int col, EzBloc bloc, EzBloc bloc2)
         {
+#if (OPT_QC)
+            appendDetailCoordsInfoQC(sb, row, col, bloc, bloc2);
+            return;
+#endif
+
             if (TransformsModel == null)
                 return;
 
@@ -978,6 +982,52 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     }
                 }
             }
+        }
+        void appendDetailCoordsInfoQC(StringBuilder sb, int row, int col, EzBloc bloc, EzBloc bloc2)
+        {
+            var cell = (bloc as CellBloc)?.Cell;
+            if (cell == null)
+                return;
+
+            //var chipQuad = cell?.ChipData?.ChipQuad2D;
+            //if (chipQuad != null)
+            //{
+            //    sb.AppendLine().Append($"Angle = {chipQuad.Angle:0.0}°");
+            //}
+
+            var qcTransform = TransformsModel?.GetCameraPhysicTransform(CarrierEnum.C1);
+
+            // 區域內世界座標
+            QVector world_current = null;
+            var camPt = getCentroid(bloc);
+            if (camPt != null && qcTransform != null)
+            {
+                world_current = qcTransform.Trans(camPt);
+                sb.AppendLine().Append("Physic (X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+            }
+            if (bloc != null && bloc2 != null && bloc != bloc2 && qcTransform != null)
+            {
+                #region 量測兩點距離
+                var camPt2 = getCentroid(bloc2);
+                if (camPt2 != null)
+                {
+                    var world_last = qcTransform.Trans(camPt2);
+                    var dv = world_current - world_last;
+                    double dist = dv.NormLength;
+                    sb.AppendLine();
+                    sb.AppendLine($"Physic ΔX = {dv.X:0.000} mm");
+                    sb.AppendLine($"Physic ΔY = {dv.Y:0.000} mm");
+                    sb.AppendLine($"Physic Dist = {dist:0.000} mm");
+                }
+                #endregion
+            }
+
+            // 偏位量
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine($"Offset X = {cell.RunX:0.000} mm");
+            sb.AppendLine($"Offset Y = {cell.RunY:0.000} mm");
+            sb.AppendLine($"Rotate Angle = {cell.RunAngle:0.00}°");
         }
         void appendCursorsDistInfo(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
         {

@@ -32,6 +32,78 @@ namespace LaserAlignDX.Model
         static RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         #endregion
 
+        static PlcResultCode GetPlcCode(InspectReason gaCode)
+        {
+            PlcResultCode plcCode;
+
+            switch (gaCode)
+            {
+                // OK
+                case InspectReason.PASS:
+                    plcCode = PlcResultCode.OK;
+                    break;
+
+                // 空料
+                case InspectReason.NG_EMPTY:
+                    plcCode = PlcResultCode.NG_EMPTY;
+                    break;
+
+                // 二維碼 NG
+                case InspectReason.NG_QRCODE_ERR:
+                case InspectReason.NG_QRCODE_COMPARE:
+                    plcCode = PlcResultCode.NG_QRCODE_ERR;       // 4
+                    break;
+
+                // 尺寸量測 NG
+                case InspectReason.NG_CUT:
+                    plcCode = PlcResultCode.NG_CUT;              // 9
+                    break;
+
+                // 邊隙 NG
+                case InspectReason.NG_EDGE_GAP:
+                    plcCode = PlcResultCode.NG_EDGE_GAP;         // 8
+                    break;
+
+                // 其他 NG (都歸類為外觀 NG)
+                default:
+                    plcCode = PlcResultCode.NG_APPEARANCE;       // 2
+                    break;
+            }
+
+            return plcCode;
+        }
+
+        public static PlcResultCode GetPlcCode(RegionCellX3Class cell)
+        {
+            PlcResultCode plcCode;
+
+            if (cell == null)
+                return PlcResultCode.NG_EMPTY;
+
+            //(A) PASS
+            if (cell.IsResultPass())
+            {
+                plcCode = PlcResultCode.OK;                          // 1
+            }
+            //(B) 空格
+            else if (cell.IsEmptyPlaceHold())
+            {
+                plcCode = PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
+            }
+            //(C) 疑似有料之不明區塊
+            else if (cell.IsAmbiguousBloc())
+            {
+                plcCode = PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不吸" 該區塊)
+            }
+            //(D) 其他 NG 結果
+            else
+            {
+                plcCode = GetPlcCode(cell.FinalInspectResult);
+            }
+
+            return plcCode;
+        }
+
         /// <summary>
         /// 单颗的线扫结果(预留300个) PLC用此信号来将每颗产品放到对应的Tray盘
         /// </summary>
@@ -66,52 +138,58 @@ namespace LaserAlignDX.Model
                 }
                 else
                 {
-                    //(A) PASS
-                    if (cell.IsResultPass()) 
-                    {
-                        plcCode = PlcResultCode.OK;                          // 1
-                    }
-                    //(B) 空格
-                    else if (cell.IsEmptyPlaceHold())
-                    {
-                        plcCode = PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
-                    }
-                    //(C) 疑似有料之不明區塊
-                    else if (cell.IsAmbiguousBloc())
-                    {
-                        plcCode = PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不吸" 該區塊)
-                    }
-                    //(D) 其他 結果
-                    else
-                    {
-                        switch (cell.FinalInspectResult)
-                        {
-                            // 二維碼 NG
-                            //case InspectReason.INS_2DERR:
-                            //case InspectReason.INS_2DMAPNG:
-                            case InspectReason.NG_QRCODE_ERR:
-                            case InspectReason.NG_QRCODE_COMPARE:
-                                plcCode = PlcResultCode.NG_QRCODE_ERR;       // 4
-                                break;
+                    #region OLD_CODE
+                    ////(A) PASS
+                    //if (cell.IsResultPass()) 
+                    //{
+                    //    plcCode = PlcResultCode.OK;                          // 1
+                    //}
+                    ////(B) 空格
+                    //else if (cell.IsEmptyPlaceHold())
+                    //{
+                    //    plcCode = PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不" 吸走 該區塊)
+                    //}
+                    ////(C) 疑似有料之不明區塊
+                    //else if (cell.IsAmbiguousBloc())
+                    //{
+                    //    plcCode = PlcResultCode.NG_EMPTY;                    // 3 (回報 NG_EMPTY 讓 PLC "不吸" 該區塊)
+                    //}
+                    ////(D) 其他 結果
+                    //else
+                    //{
+                    //    //switch (cell.FinalInspectResult)
+                    //    //{
+                    //    //    // 二維碼 NG
+                    //    //    //case InspectReason.INS_2DERR:
+                    //    //    //case InspectReason.INS_2DMAPNG:
+                    //    //    case InspectReason.NG_QRCODE_ERR:
+                    //    //    case InspectReason.NG_QRCODE_COMPARE:
+                    //    //        plcCode = PlcResultCode.NG_QRCODE_ERR;       // 4
+                    //    //        break;
 
-                            // 尺寸量測 NG
-                            //case InspectReason.INS_CUTTINGERR:
-                            case InspectReason.NG_CUT:
-                                plcCode = PlcResultCode.NG_CUT;              // 9
-                                break;
+                    //    //    // 尺寸量測 NG
+                    //    //    //case InspectReason.INS_CUTTINGERR:
+                    //    //    case InspectReason.NG_CUT:
+                    //    //        plcCode = PlcResultCode.NG_CUT;              // 9
+                    //    //        break;
 
-                            // 邊隙 NG
-                            //case InspectReason.INS_PADEDGEGAPERR:
-                            case InspectReason.NG_EDGE_GAP:
-                                plcCode = PlcResultCode.NG_EDGE_GAP;         // 8
-                                break;
+                    //    //    // 邊隙 NG
+                    //    //    //case InspectReason.INS_PADEDGEGAPERR:
+                    //    //    case InspectReason.NG_EDGE_GAP:
+                    //    //        plcCode = PlcResultCode.NG_EDGE_GAP;         // 8
+                    //    //        break;
 
-                            // 其他 NG
-                            default:
-                                plcCode = PlcResultCode.NG_APPEARANCE;       // 2
-                                break;
-                        }
-                    }
+                    //    //    // 其他 NG
+                    //    //    default:
+                    //    //        plcCode = PlcResultCode.NG_APPEARANCE;       // 2
+                    //    //        break;
+                    //    //}
+
+                    //    plcCode = GetPlcCode(cell.FinalInspectResult);
+                    //}
+                    #endregion
+
+                    plcCode = GetPlcCode(cell);
                 }
                 #endregion
 

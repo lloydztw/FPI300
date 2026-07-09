@@ -13,7 +13,7 @@
  */
 #endregion
 
-using System.Threading;
+using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
 
@@ -40,7 +40,7 @@ namespace Eazy_Project_III.FormSpace
         {
             return _instance != null;
         }
-        public static void ShowBanner()
+        public static void ShowBanner(Image bannerImage = null)
         {
             if (_instance == null)
             {
@@ -63,6 +63,8 @@ namespace Eazy_Project_III.FormSpace
                 bannerThread.Start();
 #else
                 _instance = new BannerForm();
+                if (bannerImage != null)
+                    _instance.BackgroundImage = bannerImage;
                 _instance.TopMost = true;
                 _instance.ProBar.Visible = false;
                 _instance.Cursor = Cursors.AppStarting;

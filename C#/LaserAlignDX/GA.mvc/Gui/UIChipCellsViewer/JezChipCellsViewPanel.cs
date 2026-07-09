@@ -14,16 +14,12 @@
 #endregion
 
 using JetEazy.ImageViewerEx;
-using JetEazy.Lang;
 using JetEazy.OpenCV;
 using JetEazy.OpenCV.Viewer;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.Model.Coords;
-using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Gui.ChipCellsViewer;
 using OpenCvSharp;
-using OpenCvSharp.Internal.Vectors;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -71,6 +67,10 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         public CvMatViewer MatViewer
         {
             get => jezTransImageViewPanel1.MatViewer;
+        }
+        public ContextMenuStrip GetContextMenuStrip()
+        {
+            return contextMenuStrip1;
         }
 
         Control IvChipCellsViewer.Window => this;
@@ -165,7 +165,7 @@ namespace LaserAlignDX.UISpace.ChipCellsViewer
         void update_ActiveGuiStatus()
         {
             lblBlinker.BackColor = _isActive ? Color.Lime : Color.DimGray;
-            picIcon.BackgroundImage = _isActive ? Properties.Resources.ActiveCarrier : Properties.Resources.PassiveCarrier;
+            picIcon.Image = _isActive ? Properties.Resources.ActiveCarrier : Properties.Resources.PassiveCarrier;
             //blink(_isActive);
         }
         void blink(bool enabled)

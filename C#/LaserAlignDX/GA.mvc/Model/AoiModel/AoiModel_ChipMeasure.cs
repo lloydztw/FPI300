@@ -28,7 +28,6 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Text;
 using System.Threading.Tasks;
 using Traveller106;
@@ -107,6 +106,7 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 // 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
                 // 在此無需釋放 巨圖
+#if (OPT_OLD_CODE)
                 markRunEnd(false);
                 fire_AoiEnd();
                 var errCode = ErrorCodes.EXCEPTION_AT_AOI_RUN;
@@ -116,6 +116,8 @@ namespace LaserAlignDX.AoiModel.V3
                 GaUtil.LOG(errMsg, Color.Red);
                 _LOG_ERROR(ex, $"異常 @ {GetType().Name}.Run");
                 fire_AoiError(errCode, errMsg);
+#endif
+                base.HandleAoiException(ex);
             }
         }
 

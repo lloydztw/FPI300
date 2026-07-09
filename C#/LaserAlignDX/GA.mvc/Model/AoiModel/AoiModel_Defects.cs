@@ -14,7 +14,6 @@
 #endregion
 
 
-using JetEazy.Utils;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
@@ -23,8 +22,7 @@ using System.Drawing;
 using System.Text;
 using System.Threading.Tasks;
 using Traveller106;
-using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
-using MvdDefectDetector = LaserAlignDX.Model.Defects.V3.MvdDefectDetector;
+using MvdDefectDetector = LaserAlignDX.Model.Defects.G1.MvdDefectDetector;
 
 
 namespace LaserAlignDX.AoiModel.V3
@@ -34,6 +32,8 @@ namespace LaserAlignDX.AoiModel.V3
     /// </summary>
     public partial class AoiModel_Defects : AoiModelBase, IDisposable
     {
+        static bool OPT_DEBUG_USE_ONE_THREAD = false;
+
         #region GLOBAL_MESS
         InspectX3ParaClass _xInspect => base._xRecipe.InspectParams;
         #endregion
@@ -91,17 +91,18 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 // 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
                 // 在此無需釋放 巨圖
+#if (OPT_OLD_CODE)
                 markRunEnd(false);
                 fire_AoiEnd();
-
                 var errCode = ErrorCodes.EXCEPTION_AT_AOI_RUN;
                 string errMsg = GaUtil.GetEnumDescription(errCode)
                                 + "\n\r" + GetType().Name
                                 + "\n\r\n\r" + GetDeepExceptionMessage(ex);
                 GaUtil.LOG(errMsg, Color.Red);
-
                 _LOG_ERROR(ex, $"異常 @ {GetType().Name}.Run");
                 fire_AoiError(errCode, errMsg);
+#endif
+                base.HandleAoiException(ex);
             }
         }
 
@@ -147,8 +148,8 @@ namespace LaserAlignDX.AoiModel.V3
 
             // 暫時強制使用 single thread
             bool usingMultiThread = Universal.N_THREADS_ENABLED;
-
-            usingMultiThread = false;
+            if (OPT_DEBUG_USE_ONE_THREAD)
+                usingMultiThread = false;
 
             #region 準備_CELL_GROUPS
             int N_GROUPS = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;

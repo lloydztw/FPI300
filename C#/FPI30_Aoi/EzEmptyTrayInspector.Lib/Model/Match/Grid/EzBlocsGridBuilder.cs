@@ -272,7 +272,7 @@ namespace JetEazy.Match
             }
 
             // 3. DUMP
-            if (true)
+            if (false)
             {
                 runtime_min_pitch.X /= baseSize.Width;
                 runtime_max_pitch.X /= baseSize.Width;

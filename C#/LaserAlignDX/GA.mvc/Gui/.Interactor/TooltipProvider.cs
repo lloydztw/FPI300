@@ -190,6 +190,10 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
         }
         void appendMotorCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2, int row, int col)
         {
+#if(OPT_QC)
+            return;
+#endif
+
             if (bloc == null)
                 return;
 
@@ -253,6 +257,10 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
         }
         void appendPlcCompensation(StringBuilder sb, QVector camPt, int row, int col)
         {
+#if (OPT_QC)
+            return;
+#endif
+
             if (camPt == null || row < 0 || col < 0 || _trfModel == null)
                 return;
 
@@ -266,6 +274,9 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
         }
         void appendCellResult(StringBuilder sb, XCell cell)
         {
+#if (OPT_QC)
+            return;
+#endif
             if (cell == null)
                 return;
 

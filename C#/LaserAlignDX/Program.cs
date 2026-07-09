@@ -59,10 +59,7 @@ namespace LaserAlignDX
         {
             bool go = true;
 
-            if (Array.IndexOf(args, "SIM") >= 0)
-            {
-                GlobalConfig.IsSim = true;
-            }
+            GlobalConfig.ParseArgs(args);
 
             if (Array.IndexOf(args, "TEST") >= 0)
             {

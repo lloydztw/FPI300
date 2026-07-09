@@ -349,14 +349,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
             // 報表
             IxReportBuilder report = GaMvcConfig.CreateReportBuilder();
-            report.GenerateReport(stripId, fileName);
+            report.GenerateReport(stripId, fileName, false);
 
             // LOG
             var logFormatter = new LogTextFormatter();
             string msg = logFormatter.Format(xRecipe.xRegionCells);
             _LOG($"StripID: {stripId}", Color.Black);
             _LOG($"LotID: {lotId}", Color.Black);
-            _LOG($"#数据信息: {msg}", Color.Black);
+            _LOG($"#DATA: {msg}", Color.Black);
         }
 
         #region EVENT_HANDLERS_FOR_PROGRESS_BAR

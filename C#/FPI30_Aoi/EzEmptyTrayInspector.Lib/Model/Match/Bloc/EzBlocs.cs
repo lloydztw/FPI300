@@ -111,6 +111,22 @@ namespace JetEazy.Match
         }
 
         /// <summary>
+        /// 2026-07-07 新增
+        /// </summary>
+        public void AdjustCenter(double cx, double cy)
+        {
+            var oldCenterX = Center.X;
+            var oldCenterY = Center.Y;
+            Center.X = cx;
+            Center.Y = cy;
+            Rect.X = (int)(cx - Rect.Width / 2);
+            Rect.Y = (int)(cy - Rect.Height / 2);
+            double dx = Center.X - oldCenterX;
+            double dy = Center.Y - oldCenterY;
+            Offset(ExtraBox2D, (float)dx, (float)dy);
+        }
+
+        /// <summary>
         /// 2025-10-15 新增
         /// </summary>
         public static void Offset(QvBox2D box, float dx, float dy)

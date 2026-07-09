@@ -31,8 +31,12 @@
 
 
 ## 4. 瑕疵檢查 開機後 無法正常 判定
-- To be continued.
+	- 原因1: 缺角區太大, 超過 參數設定的 瑕疵檢區塊 的 涵蓋範圍, 
+			 軟件設計不佳, 目前暫時以 拉大 瑕疵檢區塊 的 涵蓋範圍 來解決.
 
 
 ## 5. 大陣列 Grid Builder
+- To be continued
+
+## 6. 使用選轉拉框 來框選 Golden
 - To be continued

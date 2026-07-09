@@ -29,10 +29,7 @@ namespace LaserAlignDX
     {
         [Description("OK")]
         OK = 1,
-        
-        [Description("NG")]
-        NG = 2,
-        
+                
         [Description("外觀 NG")]
         NG_APPEARANCE = 2,
         
@@ -45,7 +42,12 @@ namespace LaserAlignDX
         [Description("邊隙 NG (切割偏移)")]
         NG_EDGE_GAP = 8,
         
-        [Description("切割 NG")]
+        [Description("切割 NG (尺寸)")]
         NG_CUT = 9,
+
+        /// <summary>
+        /// 用於飛拍
+        /// </summary>
+        NG = NG_APPEARANCE,
     };
 }

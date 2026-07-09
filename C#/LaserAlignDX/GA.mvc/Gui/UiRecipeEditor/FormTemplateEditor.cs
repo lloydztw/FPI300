@@ -26,6 +26,9 @@ namespace LaserAlignDX.Mvc.Gui
         {
             InitializeComponent();
 
+            if (DesignMode)
+                return;
+
             DispViewers = new[] { DS1, DS2, DS3 };
             rdoBoxSelectors = new[] { radioButtonG, radioButtonLn, radioButtonQr };
             SizeChanged += (s, e) => autoLayout();

@@ -722,7 +722,9 @@ namespace LaserAlignDX.Mvc.Ctrl
                 // Model 內部已經有 NLOG 了
                 // LtDebug.LOG.Error(ex, "[異常] 自動生成陣列");
                 //string errTitle = QMSG.Text();
-                QMessageBox.Show(ex.Message + "\r\n\r\n" + ex.StackTrace, "自動生成陣列異常", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //QMessageBox.Show(ex.Message + "\r\n\r\n" + ex.StackTrace, "自動生成陣列異常", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                string errTitle = QMSG.Text(LaserAlignDX.Mvc.Model.ErrorCodes.ERR_AUTO_GENERATE_ARRAY_EXCEPTION);
+                QMessageBox.Show(ex.Message + "\r\n\r\n" + ex.StackTrace, errTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 throw;
             }
             finally
