@@ -985,7 +985,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     var cResult = (PlcFlyResultCode)argvs[3];
                     var tm = (DateTime)argvs[4];
 
-                    using (Bitmap bmpBig = (Bitmap)argvs[1])
+                    using (Bitmap bmpBigAsync = (Bitmap)argvs[1])
                     {
                         int flyShowIndex = flyID.ShowID;
                         string stripID = lotData.StripID;
@@ -1007,7 +1007,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                         string fileName = $"{lotID}-[{flyShowIndex}]-[{code}]-{tm:yyyyMMdd_HHmmssfff}.jpg";
                         fileName = System.IO.Path.Combine(path, fileName);
 
-                        GaImageUtil.SaveBigImage(fileName, bmpFly);
+                        GaImageUtil.SaveBigImage(fileName, bmpBigAsync);
                     }
                 }
                 catch (Exception ex)
