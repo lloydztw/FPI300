@@ -16,9 +16,9 @@
 
 using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
-using EzAoiEmptyTrayInspector.Lang;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
+using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
@@ -253,7 +253,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 if (GlobalConfig.IsSim)
                 {
                     var errMsg = e.Message + "\n\r\n\r" + QMSG.Text(Prompts.Question_Continue_To_Run_Simulation);
-                    if (VsMessageBox.Question(errMsg) == DialogResult.OK)
+                    if (VsMessageBox.Question(errMsg) == DialogResult.Yes)
                     {
                         e.Cancel = false;
                         return;

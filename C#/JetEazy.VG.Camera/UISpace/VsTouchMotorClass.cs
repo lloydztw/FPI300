@@ -11,6 +11,7 @@ using ComtactAnglePlus.FromCommon;
 using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
+using JetEazy.Lang;
 
 namespace Common
 {
@@ -47,8 +48,6 @@ namespace Common
         VsHandleMotorUI m_MotionHanlePanel;
 
         #region DEFINE
-
-        VsMessageBox m_msg;
 
         Button btnForward;
         Button btnBackward;
@@ -582,9 +581,7 @@ namespace Common
 
         private void LblReload_DoubleClick(object sender, EventArgs e)
         {
-            if (VsMessageBox.Question("是否要载入原始设定？") == DialogResult.OK)
-            //if (MessageBox.Show("是否要載入原始設定?", "SYSTEM", MessageBoxButtons.YesNo) == DialogResult.Yes)
-            //if (VsMessageBox.Question(_T("是否要载入原始设定？")) == DialogResult.OK)
+            if (QMessageBox.Question("是否要载入原始设定？") == DialogResult.Yes)
             {
                 MOTION.LoadData();
                 FillDisplay();
@@ -647,8 +644,11 @@ namespace Common
         }
         void btnGo_Click(object sender, EventArgs e)
         {
-            m_msg = new VsMessageBox("是否确定开始定位？",false);
-            if (DialogResult.Cancel == m_msg.ShowDialog())
+            //m_msg = new VsMessageBox("是否确定开始定位？",false);
+            //if (DialogResult.Cancel == m_msg.ShowDialog())
+            //    return;
+
+            if (QMessageBox.Question("是否确定开始定位？") != DialogResult.Yes)
                 return;
 
             MOTION.Go((float)numGoPosition.Value);
@@ -663,8 +663,11 @@ namespace Common
         }
         void btnHome_Click(object sender, EventArgs e)
         {
-            m_msg = new VsMessageBox("是否确定回原点？",false);
-            if (DialogResult.Cancel == m_msg.ShowDialog())
+            //m_msg = new VsMessageBox("是否确定回原点？",false);
+            //if (DialogResult.Cancel == m_msg.ShowDialog())
+            //    return;
+
+            if (QMessageBox.Question("是否确定回原点？") != DialogResult.Yes)
                 return;
 
             MOTION.Home();

@@ -1,5 +1,5 @@
 ﻿using Eazy_Project_III;
-using EzAoiEmptyTrayInspector.Lang;
+using JetEazy.Lang;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System.Windows.Forms;
 

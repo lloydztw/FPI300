@@ -15,11 +15,10 @@
 
 using AwFramework.Gui;
 using EzAoiEmptyTrayInspector.Gui;
-using EzAoiEmptyTrayInspector.Lang;
 using EzAoiEmptyTrayInspector.Model;
-using JetEazy;
 using JetEazy.EzImage;
 using JetEazy.ImageViewerEx;
+using JetEazy.Lang;
 using LeTian.JxProps;
 using LeTian.JxRecipesTool.Ctrl;
 using System;
@@ -167,6 +166,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 //LoadImage(_imgSourceFile?.Value);
                 _rcpEditCtrl = new EzMatchRcpEdittingCtrl((int)ID, _view, _funcButtonsPanel, _recipesMgr);
                 _rcpEditCtrl.AttachImageSource(_largeIMG);
+                QMSG.Translate(_frmOwner);
             }));
         }
         public void Dispose()

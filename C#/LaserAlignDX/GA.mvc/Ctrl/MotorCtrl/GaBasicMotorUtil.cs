@@ -66,7 +66,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
                 if (mustDo)
                     VsMessageBox.Info(msg);
-                else if (VsMessageBox.Question(msg) != DialogResult.OK)
+                else if (VsMessageBox.Question(msg) != DialogResult.Yes)
                     return false;
 
                 #endregion

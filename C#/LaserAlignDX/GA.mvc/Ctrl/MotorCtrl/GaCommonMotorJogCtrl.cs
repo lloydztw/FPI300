@@ -167,7 +167,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             //if (ret != DialogResult.Yes)
             //    return;
 
-            if (VsMessageBox.Question(msg) != DialogResult.OK)
+            if (VsMessageBox.Question(msg) != DialogResult.Yes)
                 return;
 
             _motor.Home();

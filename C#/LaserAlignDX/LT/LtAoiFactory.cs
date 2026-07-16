@@ -147,7 +147,7 @@ namespace Traveller106
         {
             #region 暫時直接在此調用 GUI 元件
             GaUtil.LOG(message, Color.Red);
-            var msgBox = new VsMessageBox(message, true);
+            var msgBox = VsMessageBox.WarningForm(message);
             msgBox.FormClosed += (s, e) => (s as Form)?.Dispose();
             var frms = Application.OpenForms;
             var frm = frms.Count > 0 ? frms[0] : null;

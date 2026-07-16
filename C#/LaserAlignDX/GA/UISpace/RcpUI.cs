@@ -72,7 +72,7 @@ namespace PhotoMachine.UISpace
             get { return RecipeFPIX3Class.Instance; }
         }
 
-        JetEazy.FormSpace.VsMessageBox vsMessageBox = null;
+        //JetEazy.FormSpace.VsMessageBox vsMessageBox = null;
 
         public RcpUI()
         {
@@ -153,7 +153,7 @@ namespace PhotoMachine.UISpace
             }
 
             //if (VsMessageBox.Question("是否要删除参数？") == DialogResult.OK)
-            if (VsMessageBox.Question(QMSG.Text(Prompts.Quection_To_Delete_Recipe)) == DialogResult.OK)
+            if (VsMessageBox.Question(QMSG.Text(Prompts.Quection_To_Delete_Recipe)) == DialogResult.Yes)
             {
                 int i = 0;
 
@@ -245,7 +245,7 @@ namespace PhotoMachine.UISpace
         }
         void ModifyComplete()
         {
-            vsMessageBox = new VsMessageBox(QMSG.Text(Prompts.Info_Recipe_Saving), false);
+            var vsMessageBox = VsMessageBox.InfoForm(QMSG.Text(Prompts.Info_Recipe_Saving));
             vsMessageBox.Show();
             vsMessageBox.Refresh();
 
@@ -287,7 +287,7 @@ namespace PhotoMachine.UISpace
         }
         void ModifyCancel()
         {
-            vsMessageBox = new VsMessageBox(QMSG.Text(Prompts.Info_Recipe_Rollback), false);
+            var vsMessageBox = VsMessageBox.InfoForm(QMSG.Text(Prompts.Info_Recipe_Rollback));
             vsMessageBox.Show();
             vsMessageBox.Refresh();
 

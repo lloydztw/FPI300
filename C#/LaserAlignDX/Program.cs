@@ -1,4 +1,4 @@
-﻿using EzAoiEmptyTrayInspector.Lang;
+﻿using JetEazy.Lang;
 using JetEazy.Utils;
 using System;
 using System.Diagnostics;
@@ -18,6 +18,12 @@ namespace LaserAlignDX
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            //設定語系 json 檔 的資料夾
+            QMSG.Path = System.IO.Path.Combine(GlobalConfig.APP_ROOT_PATH, "Ini", "language");
+            //通用的 Title
+            QMSG.Title = GlobalConfig.TITLE;
+
             LtAoiFactory.Migrate();
 
             // 解析引數 (args)

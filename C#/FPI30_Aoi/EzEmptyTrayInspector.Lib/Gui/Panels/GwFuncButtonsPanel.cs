@@ -1,5 +1,5 @@
 ﻿using AwFramework;
-using EzAoiEmptyTrayInspector.Lang;
+using JetEazy.Lang;
 using System.Windows.Forms;
 
 namespace EzAoiEmptyTrayInspector.Gui.Panels

@@ -56,6 +56,9 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JetEazy.Lang">
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.Lang.dll</HintPath>
+    </Reference>
     <Reference Include="JetEazy.QUtility, Version=1.0.9.10, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.QUtility.dll</HintPath>
@@ -108,12 +111,7 @@
     <Compile Include="FormSpace\LoginForm.designer.cs">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="FormSpace\VsMessageBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="FormSpace\VsMessageBox.Designer.cs">
-      <DependentUpon>VsMessageBox.cs</DependentUpon>
-    </Compile>
+    <Compile Include="FormSpace\VsMessageBox.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -129,9 +127,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FormSpace\LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="FormSpace\VsMessageBox.resx">
-      <DependentUpon>VsMessageBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -150,12 +145,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\warning-sign.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\FPI30_Aoi\JetEazy.Lang\JetEazy.Lang.csproj">
-      <Project>{d2029ee2-ea98-4335-80a6-1e190ec88313}</Project>
-      <Name>JetEazy.Lang</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

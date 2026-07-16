@@ -13,9 +13,9 @@
  */
 #endregion
 
-using EzAoiEmptyTrayInspector.Lang;
 using EzAoiEmptyTrayInspector.Model.Aoi;
 using JetEazy.EzImage;
+using JetEazy.Lang;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;

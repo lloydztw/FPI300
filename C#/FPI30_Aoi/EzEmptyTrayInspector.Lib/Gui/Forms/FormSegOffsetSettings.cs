@@ -13,8 +13,8 @@
  */
 #endregion
 
-using EzAoiEmptyTrayInspector.Lang;
 using EzAoiEmptyTrayInspector.Model;
+using JetEazy.Lang;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;

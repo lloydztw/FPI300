@@ -203,6 +203,8 @@
   </Target>
   <PropertyGroup>
     <PostBuildEvent>copy $(ProjectDir)NLog.config $(TargetDir)NLog.config
-copy "C:\Program Files\Common Files\JetEazy\JetEazy.Crt.dll" $(TargetDir)JetEazy.Crt.dll</PostBuildEvent>
+copy "C:\Program Files\Common Files\JetEazy\JetEazy.Crt.dll" $(TargetDir)JetEazy.Crt.dll
+exit 0
+</PostBuildEvent>
   </PropertyGroup>
 </Project>

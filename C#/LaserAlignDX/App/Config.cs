@@ -9,7 +9,7 @@ namespace LaserAlignDX
 
         public static string APP_ROOT_PATH => "D:\\AUTOMATION\\Eazy FPI30";
 
-        public static string VersionDate => "2026-07-09";
+        public static string VersionDate => "2026-07-16";
 
         /// <summary>
         /// 默認值是 false, 由主程式的 args 引數 來決定是否啟用 SIM 模式

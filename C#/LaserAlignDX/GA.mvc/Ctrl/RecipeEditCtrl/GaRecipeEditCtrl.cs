@@ -651,7 +651,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             //---------------------------------------------------------------
             // 2026-03-08 針對個別參數 進行 座標轉換系統 線性 遷移
             //---------------------------------------------------------------
-            bool migrate = VsMessageBox.Question(GaUtil.GetEnumDescription(Prompts.Question_To_Migrate_Transforms_Models)) == DialogResult.OK;
+            bool migrate = VsMessageBox.Question(GaUtil.GetEnumDescription(Prompts.Question_To_Migrate_Transforms_Models)) == DialogResult.Yes;
 
             // 鼠標 (忙碌)
             var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);

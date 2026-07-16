@@ -151,6 +151,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.ImageViewerEx.dll</HintPath>
     </Reference>
+    <Reference Include="JetEazy.Lang, Version=1.3.0.3, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.Lang.dll</HintPath>
+    </Reference>
     <Reference Include="JetEazy.OpenCv3, Version=4.8.2.3, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.OpenCv3.dll</HintPath>
@@ -360,8 +364,6 @@
   <ItemGroup>
     <Compile Include="App\Config.cs" />
     <Compile Include="App\Prompts.cs" />
-    <Compile Include="App\Lang\QMSG.cs" />
-    <Compile Include="App\Lang\QMsgBox.cs" />
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v25.cs" />
@@ -913,10 +915,6 @@
     <ProjectReference Include="..\FPI30_Aoi\EzEmptyTrayInspector.Lib\EzAoiEmptyTrayInspector.Lib.csproj">
       <Project>{a1bcdee4-dd9a-43c2-a127-90b727eb0f04}</Project>
       <Name>EzAoiEmptyTrayInspector.Lib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\FPI30_Aoi\JetEazy.Lang\JetEazy.Lang.csproj">
-      <Project>{d2029ee2-ea98-4335-80a6-1e190ec88313}</Project>
-      <Name>JetEazy.Lang</Name>
     </ProjectReference>
     <ProjectReference Include="..\JetEazy.Calib.Transform\JetEazy.Transform.csproj">
       <Project>{a39132cc-9e48-4e8c-90c1-d4a39dbe1933}</Project>

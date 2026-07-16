@@ -315,14 +315,11 @@ namespace JetEazy.UISpace
 
             if (LOGINStatus != ESSStatusEnum.LOGOUT)
             {
-                //JetEazy.BasicSpace.VsMSG.Instance.Warning("請登出!\n回到跑線正常狀態,\n才能退出程式!");
-                VsMessageBox.Warning(_T("請登出!\n回到跑線正常狀態,\n才能退出程式!"));
+                QMessageBox.Warning(_T("請登出!\n回到跑線正常狀態,\n才能退出程式!"), translate: false);
                 return;
             }
 
-
-            if (VsMessageBox.Question(_T("是否要關閉系統?")) == DialogResult.OK)
-            //if (MessageBox.Show(myLanguage.Messages("msg1", LanguageIndex), "SYS", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (QMessageBox.Question(_T("是否要關閉系統?"), translate: false) == DialogResult.Yes)
             {
                 OnTrigger(ESSStatusEnum.EXIT);
             }
@@ -421,9 +418,7 @@ namespace JetEazy.UISpace
         }
         void Logout()
         {
-            //if (JetEazy.BasicSpace.VsMSG.Instance.Question("是否要登出账户？") == DialogResult.OK)
-            //if (MessageBox.Show(myLanguage.Messages("msg2",LanguageIndex), "SYS", MessageBoxButtons.YesNo) == DialogResult.Yes)
-            if (VsMessageBox.Question(_T("是否要登出帳户?")) == DialogResult.OK)
+            if (QMessageBox.Question(_T("是否要登出帳户?"), translate: false) == DialogResult.Yes)
             {
                 ACCDB.Indicator = -1;
                 LOGINStatus = ESSStatusEnum.LOGOUT;

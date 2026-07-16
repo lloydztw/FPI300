@@ -91,6 +91,8 @@ namespace JetEazy.BasicSpace
 
 
     }
+
+#if (false)
     public class VsMSG
     {
         #region SINGLETON
@@ -124,6 +126,7 @@ namespace JetEazy.BasicSpace
             _messageBox.ShowDialog();
         }
     }
+#endif
 
     public class DibToBitmap
     {
@@ -223,6 +226,7 @@ namespace JetEazy.BasicSpace
            int color);
 
     } // class DibToImage
+
     //public class ReportDataClass
     //{
     //    public bool IsOK = false;

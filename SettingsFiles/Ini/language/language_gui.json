@@ -69,13 +69,14 @@
 "btnOpenFlyCamRcpWindow" : ["Fly Camera", "飛拍介面", "", "หน้าจอภาพฟลาย"],
 "btnOpenLightCtrlWindow" : ["Light", "控制燈光", "", "ควบคุมแสงไฟ"],
 "btnOpenEmptyTrayWindow" : ["Empty Tray", "空盤檢測", "", "ตรวจสอบถาดเปล่า"],
-"btnGrabImage" : ["Grab Image","取像", "", "ดึงภาพ"],
+"btnGrabImage" : ["Grab Image", "取像", "", "จับภาพ"],
 "btnCreateCellRegions" : ["Gen. Array", "生成陣列", "", "สร้างอาร์เรย์"],
 "rdoCarrier1" : ["Carrier1", "載台1", "", "แท่นวาง 1"],
 "rdoCarrier2" : ["Carrier2", "載台2", "", "แท่นวาง 2"],
 "btnOpenTemplateMatchWindow" : ["Template", "模板介面", "", "หน้าจอเทมเพลต"],
 "btnPickGoldenRegion" : ["Select Templ.", "框選區域", "", "เลือกพื้นที่เทมเพลต"],
-"btnLoadImage" : ["Load Image", "加載圖片", "", "โหลดรูปภาพ"],
+"btnLoadImage" : ["Load Image", "加載圖片", "", "โหลดไฟล์รูปภาพ"],
+"btnLiveMode" : ["Live Image", "實時影像", "", "ภาพวิดีโอสด"],
 
 "載台1" : ["Carrier1", "載台1", "", "แท่นวาง 1"],
 "載台2" : ["Carrier2", "載台2", "", "แท่นวาง 2"],
@@ -88,7 +89,7 @@
 "載台馬達 Y" : ["Motor Y", "載台馬達 Y", "", "มอเตอร์แท่นวาง Y"],
 
 "吸嘴" : ["Sucker", "吸嘴", "", "หัวดูด"],
-"補償" : ["Compensation", "補償", "", ""],
+"補償" : ["Compensation", "補償", "", "ค่าตอบแทน"],
 
 "FormTemplateEditor" : ["Template Match Editor", "匹配模板設定", "","ตัวแก้ไขการจับคู่เทมเพลต"],
 "btnDefectDelete" : ["Del Defect Area", "缺陷區域 刪除", "","ลบพื้นที่ข้อบกพร่อง"],

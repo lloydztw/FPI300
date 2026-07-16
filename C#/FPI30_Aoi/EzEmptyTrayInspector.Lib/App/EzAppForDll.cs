@@ -32,7 +32,7 @@ using RecipeClassT = EzAoiEmptyTrayInspector.Model.JxAoiRecipe;
 using AppSettingsClassT = EzAoiEmptyTrayInspector.JxAppSettings;
 using RESOURCES = EzAoiEmptyTrayInspector.Properties.Resources;
 using EzAoiEmptyTrayInspector.Gui.Panels;
-using EzAoiEmptyTrayInspector.Lang;
+using JetEazy.Lang;
 #endregion
 
 
@@ -54,6 +54,7 @@ namespace EzAoiEmptyTrayInspector
             {
                 if (_singleton == null)
                     _singleton = new EzAppForDll();
+
                 return _singleton;
             }
         }

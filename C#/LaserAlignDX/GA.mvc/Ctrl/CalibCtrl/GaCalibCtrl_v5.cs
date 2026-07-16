@@ -821,7 +821,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             msg += $"\n\r\n\r(X= {currentMotorPos.X:0.000}, Y= {currentMotorPos.Y:0.000})";
             msg += $"\n\r\n\rTo 【{targetName}】";
             //>> bool ok = MessageBox.Show(msg, "Calibration", MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes;
-            bool ok = VsMessageBox.Question(msg) == DialogResult.OK;
+            bool ok = VsMessageBox.Question(msg) == DialogResult.Yes;
 
             if (ok)
             {
@@ -1376,7 +1376,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
         {
             updateGuiStatus();
             var msg = GaUtil.GetEnumDescription(Prompts.Question_ReTrigger_Carrier_LineScan_Camera);
-            bool rescan = VsMessageBox.Question(msg) == DialogResult.OK;
+            bool rescan = VsMessageBox.Question(msg) == DialogResult.Yes;
 
             if (rescan)
             {
@@ -1552,7 +1552,7 @@ namespace LaserAlignDX.Mvc.Ctrl.Galib.V5
             var msg = GaUtil.GetEnumDescription(Prompts.Question_Motor_GoTo_Pos);
             msg += $"\n\r\n\r{motorNames[0]} To {targetPos.X:0.000}";
             msg += $"\n\r\n\r{motorNames[1]} To {targetPos.Y:0.000}";
-            if (VsMessageBox.Question(msg) != DialogResult.OK)
+            if (VsMessageBox.Question(msg) != DialogResult.Yes)
                 return;
             #endregion
 

@@ -368,7 +368,7 @@ namespace Traveller106
         }
         void OpenLanguageSelector()
         {
-            using (var dlg = new JetEazy.Lang.GUI.FormLanguageSelector(QMSG.Lang()))
+            using (var dlg = new JetEazy.Lang.Gui.FormLanguageSelector(QMSG.Lang()))
             {
                 if (dlg.ShowDialog() == DialogResult.OK)
                 {
@@ -1003,7 +1003,7 @@ namespace Traveller106
                     break;
 
                 case ESSStatusEnum.RECIPESELECTED:
-                    using (var vsMessageBox = new VsMessageBox(QMSG.Text(Prompts.Info_Recipe_Switching), false))
+                    using (var vsMessageBox = VsMessageBox.InfoForm(QMSG.Text(Prompts.Info_Recipe_Switching)))
                     {
                         vsMessageBox.Show();
                         vsMessageBox.Refresh();

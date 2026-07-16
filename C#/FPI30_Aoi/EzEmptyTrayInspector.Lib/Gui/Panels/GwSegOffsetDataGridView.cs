@@ -13,7 +13,7 @@
  */
 #endregion
 
-using EzAoiEmptyTrayInspector.Lang;
+using JetEazy.Lang;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

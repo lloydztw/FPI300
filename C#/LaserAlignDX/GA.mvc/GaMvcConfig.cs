@@ -26,6 +26,8 @@ using System.Windows.Forms;
 using Traveller106;
 
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
+using JetEazy.Lang;
+
 
 #if (OPT_CALIB_V5)
 using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V25.FormRecipeEditor;
@@ -157,7 +159,7 @@ namespace LaserAlignDX
                     new Action(() =>
                     {
                         System.Threading.Thread.Sleep(2000);
-                        PushBitmapToEmptyTrayTool(bmpToShow, $"[參數] {recipeName} (bmpOrg)");
+                        PushBitmapToEmptyTrayTool(bmpToShow, $"[Recipe] {recipeName} (bmpOrg)");
                     }).BeginInvoke(null, null);
                 };
             }

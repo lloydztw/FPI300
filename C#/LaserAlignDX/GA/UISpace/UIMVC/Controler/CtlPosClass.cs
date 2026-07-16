@@ -1,5 +1,6 @@
 ﻿using JetEazy.BasicSpace;
 using JetEazy.Interface;
+using JetEazy.Lang;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -114,7 +115,7 @@ namespace NeedleX.UISpace.UIMVC.Controler
             string offStrMsg = "更新 表第 " + rowindex + " 行？";
             string msg = (true ? offStrMsg : onStrMsg);
 
-            if (VsMSG.Instance.Question(msg) != DialogResult.OK)
+            if (QMessageBox.Question(msg) != DialogResult.Yes)
             {
                 return;
             }
@@ -142,7 +143,7 @@ namespace NeedleX.UISpace.UIMVC.Controler
             string offStrMsg = "删除 表第 " + rowindex + " 行？";
             string msg = (true ? offStrMsg : onStrMsg);
 
-            if (VsMSG.Instance.Question(msg) != DialogResult.OK)
+            if (QMessageBox.Question(msg) != DialogResult.Yes)
             {
                 return;
             }

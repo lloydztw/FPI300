@@ -16,9 +16,9 @@
 using AwFramework.Util;
 using EzAoiEmptyTrayInspector.Ctrl;
 using EzAoiEmptyTrayInspector.Gui.Panels;
-using EzAoiEmptyTrayInspector.Lang;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
+using JetEazy.Lang;
 using System;
 using System.Windows.Forms;
 

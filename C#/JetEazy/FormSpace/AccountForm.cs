@@ -29,9 +29,9 @@ namespace JetEazy.FormSpace
         #endregion
 
         #region LANGUAGE_OLD
-        JzLanguageClass myLanguage = new JzLanguageClass();
+        //JzLanguageClass myLanguage = new JzLanguageClass();
         string UIPath = "";
-        int LanguageIndex = 0;
+        //int LanguageIndex = 0;
         #endregion
 
         GroupBox grpACCData;
@@ -73,7 +73,7 @@ namespace JetEazy.FormSpace
 
             ACCDB = accdb;
             UIPath = uipath;
-            LanguageIndex = langindex;
+            //LanguageIndex = langindex;
 
             InitializeComponent();
             Initial();
@@ -82,7 +82,7 @@ namespace JetEazy.FormSpace
         }
         void Initial()
         {
-            myLanguage.Initial(UIPath + "\\AccountForm.jdb", LanguageIndex, this);
+            //myLanguage.Initial(UIPath + "\\AccountForm.jdb", LanguageIndex, this);
 
             grpACCData = groupBox1;
             cboACCName = comboBox1;
@@ -95,17 +95,17 @@ namespace JetEazy.FormSpace
             chkAllowSetupRecipe = chkAllowRecipeEditting;
             chkAllowUseShopFloor = chkUseFactorySettings;
             
-            btnAddAccount = btnAddAccount;
+            //btnAddAccount = btnAddAccount;
             btnAddAccount.Tag = TagEnum.ADD;
-            btnModify = btnModify;
+            //btnModify = btnModify;
             btnModify.Tag = TagEnum.MODIFY;
-            btnDelAccount = btnDelAccount;
+            //btnDelAccount = btnDelAccount;
             btnDelAccount.Tag = TagEnum.DEL;
-            btnOK = btnOK;
+            //btnOK = btnOK;
             btnOK.Tag = TagEnum.OK;
-            btnCancel = btnCancel;
+            //btnCancel = btnCancel;
             btnCancel.Tag = TagEnum.CANCEL;
-            btnExit = btnExit;
+            //btnExit = btnExit;
             btnExit.Tag = TagEnum.EXIT;
             
             btnAddAccount.Click += new EventHandler(btn_Click);
@@ -161,9 +161,7 @@ namespace JetEazy.FormSpace
                     DBStatus = DBStatusEnum.MODIFY;
                     break;
                 case TagEnum.DEL:
-                    //if (MessageBox.Show(myLanguage.Messages("msg1", LanguageIndex), "SYS", MessageBoxButtons.YesNo) == DialogResult.Yes)
-                    //if (JetEazy.BasicSpace.VsMSG.Instance.Question(" Ƿ Ҫɾ   ˻   ") == DialogResult.OK)
-                    if (VsMessageBox.Question(_T("是否刪除帳號?")) == DialogResult.OK)
+                    if (VsMessageBox.Question(_T("是否刪除帳號?")) == DialogResult.Yes)
                     {
                         int cboLast = cboACCName.SelectedIndex;
 

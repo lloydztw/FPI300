@@ -213,7 +213,7 @@ namespace LaserAlignDX.UISpace.CtrlSpace
         private void BtnSIMData_Click(object sender, EventArgs e)
         {
             //if (DialogResult.OK == VsMSG.Instance.Question($"{ToChangeLanguage("是否发送模拟数据到plc?")}"))
-            if (VsMessageBox.Question(QMSG.Text(Prompts.Question_Send_Sim_Signal_To_PLC)) == DialogResult.OK)
+            if (VsMessageBox.Question(QMSG.Text(Prompts.Question_Send_Sim_Signal_To_PLC)) == DialogResult.Yes)
             {
                 int[] iflyresults = new int[4] { 1, 2, 3, 1 };
                 MACHINE.PLCIO.iFlyResult(iflyresults);

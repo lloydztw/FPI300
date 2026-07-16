@@ -217,7 +217,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                     var motorNameY = _viewY.lblAxisName.Text;
                     msg += $"\n\r\n\r{motorNameX} To {targetPos.X:0.000}";
                     msg += $"\n\r\n\r{motorNameY} To {targetPos.Y:0.000}";
-                    if (VsMessageBox.Question(msg) != DialogResult.OK)
+                    if (VsMessageBox.Question(msg) != DialogResult.Yes)
                         go = false;
                 }
                 #endregion
@@ -269,8 +269,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 var msg = GaUtil.GetEnumDescription(Prompts.Question_Update_Motor_Coord_To_Calib);
                 msg += $"\n\r\n\r(X= {x:0.000}, Y= {y:0.000})";
                 //msg += $"\n\r\n\rTo {targetName}";
-                var ret = VsMessageBox.Question(msg);
-                if (ret != DialogResult.OK)
+                if (VsMessageBox.Question(msg) != DialogResult.Yes)
                     return;
                 #endregion
 

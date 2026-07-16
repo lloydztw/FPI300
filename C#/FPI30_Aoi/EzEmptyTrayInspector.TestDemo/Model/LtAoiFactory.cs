@@ -16,6 +16,7 @@
 
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.EzImage;
+using JetEazy.Lang;
 using System;
 using System.Windows.Forms;
 using AoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
@@ -65,6 +66,7 @@ namespace Traveller106
 
             var frm = AoiFactory.OpenEmptyTrayInspectorTool(owner, recipeName);
             frm?.Show();
+
             return frm;
         }
 

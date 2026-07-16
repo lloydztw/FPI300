@@ -13,12 +13,11 @@
  */
 #endregion
 
-using EzAoiEmptyTrayInspector.Lang;
 using JetEazy.BasicSpace;
+using JetEazy.Lang;
 using LeTian.AoiLib;
 using System;
 using System.Drawing;
-using System.Reflection;
 using System.Windows.Forms;
 
 
