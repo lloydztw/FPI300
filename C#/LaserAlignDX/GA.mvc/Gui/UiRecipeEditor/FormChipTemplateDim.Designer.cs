@@ -31,7 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormChipTemplateDim));
             this.label1 = new System.Windows.Forms.Label();
             this.numChipHeight = new System.Windows.Forms.NumericUpDown();
-            this.btnOK = new System.Windows.Forms.Button();
+            this.btnSaveToRcp = new System.Windows.Forms.Button();
             this.numChipWidth = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.lblInfo = new System.Windows.Forms.RichTextBox();
@@ -43,10 +43,10 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(59, 170);
+            this.label1.Location = new System.Drawing.Point(33, 169);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(90, 27);
+            this.label1.Size = new System.Drawing.Size(123, 27);
             this.label1.TabIndex = 0;
             this.label1.Text = "尺寸X (mm)";
             // 
@@ -59,7 +59,7 @@
             0,
             0,
             131072});
-            this.numChipHeight.Location = new System.Drawing.Point(196, 208);
+            this.numChipHeight.Location = new System.Drawing.Point(208, 208);
             this.numChipHeight.Margin = new System.Windows.Forms.Padding(4);
             this.numChipHeight.Maximum = new decimal(new int[] {
             9999,
@@ -81,18 +81,18 @@
             0,
             196608});
             // 
-            // btnOK
+            // btnSaveToRcp
             // 
-            this.btnOK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
-            this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnOK.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOK.Location = new System.Drawing.Point(464, 167);
-            this.btnOK.Margin = new System.Windows.Forms.Padding(4);
-            this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(156, 74);
-            this.btnOK.TabIndex = 0;
-            this.btnOK.Text = "寫回 參數檔";
-            this.btnOK.UseVisualStyleBackColor = false;
+            this.btnSaveToRcp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
+            this.btnSaveToRcp.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnSaveToRcp.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSaveToRcp.Location = new System.Drawing.Point(436, 167);
+            this.btnSaveToRcp.Margin = new System.Windows.Forms.Padding(4);
+            this.btnSaveToRcp.Name = "btnSaveToRcp";
+            this.btnSaveToRcp.Size = new System.Drawing.Size(224, 74);
+            this.btnSaveToRcp.TabIndex = 0;
+            this.btnSaveToRcp.Text = "寫回 參數檔";
+            this.btnSaveToRcp.UseVisualStyleBackColor = false;
             // 
             // numChipWidth
             // 
@@ -103,7 +103,7 @@
             0,
             0,
             131072});
-            this.numChipWidth.Location = new System.Drawing.Point(196, 167);
+            this.numChipWidth.Location = new System.Drawing.Point(208, 167);
             this.numChipWidth.Margin = new System.Windows.Forms.Padding(4);
             this.numChipWidth.Maximum = new decimal(new int[] {
             9999,
@@ -129,10 +129,10 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(60, 211);
+            this.label2.Location = new System.Drawing.Point(34, 210);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(90, 27);
+            this.label2.Size = new System.Drawing.Size(122, 27);
             this.label2.TabIndex = 39;
             this.label2.Text = "尺寸Y (mm)";
             // 
@@ -158,7 +158,7 @@
             this.Controls.Add(this.lblInfo);
             this.Controls.Add(this.numChipWidth);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.btnOK);
+            this.Controls.Add(this.btnSaveToRcp);
             this.Controls.Add(this.numChipHeight);
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -180,7 +180,7 @@
 
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.NumericUpDown numChipHeight;
-        private System.Windows.Forms.Button btnOK;
+        private System.Windows.Forms.Button btnSaveToRcp;
         private System.Windows.Forms.NumericUpDown numChipWidth;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.RichTextBox lblInfo;

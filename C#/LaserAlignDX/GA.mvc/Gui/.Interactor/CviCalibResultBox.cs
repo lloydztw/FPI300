@@ -15,6 +15,7 @@
 
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.ImageViewerEx;
+using JetEazy.Lang;
 using JetEazy.Match;
 using JetEazy.Transform;
 using JetEazy.Utils;
@@ -692,10 +693,10 @@ namespace LaserAlignDX.Mvc.Gui
                 _wndHost = wnd;
 
                 wnd.HandleDestroyed += (s, e) => disposeMenuStrip();
-                var menu0 = new ToolStripMenuItem("檢視 格位 自我誤差 &X");
-                var menu1 = new ToolStripMenuItem("檢視 格位 自我誤差 &Y");
-                var menu2 = new ToolStripMenuItem("檢視 格位 自我誤差 &Both XY");
-                var menu3 = new ToolStripMenuItem("&Dump 保存 二值化 圖檔");
+                var menu0 = new ToolStripMenuItem(QMSG.T("檢視 格位 自我誤差 &X"));
+                var menu1 = new ToolStripMenuItem(QMSG.T("檢視 格位 自我誤差 &Y"));
+                var menu2 = new ToolStripMenuItem(QMSG.T("檢視 格位 自我誤差 &Both XY"));
+                var menu3 = new ToolStripMenuItem(QMSG.T("&Dump 保存 二值化 圖檔"));
                 menu0.Click += (s, e) => scanSelfErrors(0);
                 menu1.Click += (s, e) => scanSelfErrors(1);
                 menu2.Click += (s, e) => scanSelfErrors(2);

@@ -14,6 +14,7 @@
  */
 #endregion
 
+using JetEazy.Lang;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.Transform;
@@ -22,7 +23,6 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using System;
 using System.Text;
-using VM.Core;
 using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 using XCellBloc = LaserAlignDX.Model.XCellBloc;
 using XRecipe = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
@@ -92,7 +92,7 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
 
                 //(2) 格點(index) : [row, col]
                 string idxTag = cell != null ? $"({cell.Index})" : "";
-                sb.Append("格點").Append(idxTag).Append(" : [").AppendValues(row, col).AppendLine("]");
+                sb.Append(QMSG.T("格點")).Append(idxTag).Append(" : [").AppendValues(row, col).AppendLine("]");
 
                 //(3) Camera Coords
                 appendCameraCoords(sb, cursor, cursor2);
@@ -134,14 +134,14 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
 
             if (cell.IsResultPass())
             {
-                sb.AppendLine("🟢 PASS").AppendLine();
+                sb.AppendLine($"{UnicodeTags.PASS} PASS").AppendLine();
             }
             else
             {
                 foreach (InspectReason ng in cell.IterNgResults())
                 {
                     var ngText = GaUtil.GetEnumDescription(ng);
-                    sb.AppendLine($"⛔️ {ngText}");
+                    sb.AppendLine($"{UnicodeTags.NG} {ngText}");
                 }
                 sb.AppendLine();
             }
@@ -152,15 +152,15 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
             if (camPt == null)
                 return;
 
-            sb.AppendLine($"相機座標 (X,Y) = ({camPt.X:0.0}, {camPt.Y:0.0}) pix");
-
+            var tag = QMSG.T("相機座標");
+            sb.AppendLine($"{tag} (X,Y) = ({camPt.X:0.0}, {camPt.Y:0.0}) pix");
             var camPt2 = getCamCoord(bloc2);
             if (camPt2 != null && bloc2 != bloc)
             {
                 var dv = camPt - camPt2;
                 var dist = dv.NormLength;
-                sb.AppendLine($"相機座標 差距 (dX,dY) = ({dv.X:0.0}, {dv.Y:0.0}) pix");
-                sb.AppendLine($"相機座標 距離 = {dist:0.0} pix");
+                sb.AppendLine($"{tag} Diff (ΔX,ΔY) = ({dv.X:0.0}, {dv.Y:0.0}) pix");
+                sb.AppendLine($"{tag} Dist. = {dist:0.0} pix");
             }
         }
         void appendWorldCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2)
@@ -175,8 +175,9 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
 
             sb.AppendLine();
 
+            var tag = QMSG.T("World 座標");
             var worldCoord = trfCameraToWorld.Trans(camPt);
-            sb.AppendLine($"World座標 (X,Y) = ({worldCoord.X:0.000}, {worldCoord.Y:0.000}) mm");
+            sb.AppendLine($"{tag} (X,Y) = ({worldCoord.X:0.000}, {worldCoord.Y:0.000}) mm");
 
             var camPt2 = getCamCoord(bloc2);
             if (camPt2 != null && bloc2 != bloc)
@@ -184,8 +185,8 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
                 var worldCoord2 = trfCameraToWorld.Trans(camPt2);
                 var dv = worldCoord - worldCoord2;
                 double dist = dv.NormLength;
-                sb.AppendLine($"World座標 差距 (dX,dY) = ({dv.X:0.000}, {dv.Y:0.000}) mm");
-                sb.AppendLine($"World座標 距離 = {dist:0.000} mm");
+                sb.AppendLine($"{tag} Diff (ΔX,ΔY) = ({dv.X:0.000}, {dv.Y:0.000}) mm");
+                sb.AppendLine($"{tag} Dist. = {dist:0.000} mm");
             }
         }
         void appendMotorCoords(StringBuilder sb, EzBloc bloc, EzBloc bloc2, int row, int col)
@@ -220,31 +221,37 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
                     var dv = motorCoord - motorCoord2;
                     double dist = dv.NormLength;
 
+                    var visionTag = QMSG.T("像測");
+                    var motorTag = QMSG.T("馬達座標");
                     sb.AppendLine();
-                    sb.AppendLine($"{SID} 像測 馬達座標 (X,Y) = ({motorCoord.X:0.000}, {motorCoord.Y:0.000}) mm");
-                    sb.AppendLine($"{SID} 像測 馬達座標 差距 (dX,dY) = ({dv.X:0.000}, {dv.Y:0.000}) mm");
-                    sb.AppendLine($"{SID} 像測 馬達座標 距離 = {dist:0.000} mm");
+                    sb.AppendLine($"{SID} {visionTag} {motorTag} (X,Y) = ({motorCoord.X:0.000}, {motorCoord.Y:0.000}) mm");
+                    sb.AppendLine($"{SID} {visionTag} {motorTag} Diff (ΔX,ΔY) = ({dv.X:0.000}, {dv.Y:0.000}) mm");
+                    sb.AppendLine($"{SID} {visionTag} {motorTag} Dist. = {dist:0.000} mm");
                 }
                 else
                 {
                     // 德龍 PLC 預期座標
                     if (trfModel != null && row >= 0 && col >= 0)
                     {
+                        var predict = QMSG.T("預期");
+                        var vision = QMSG.T("像測");
+                        var motorTag = QMSG.T("馬達座標");
+
                         trfModel.GetPlcExpectedCoords(ActiveCarrierID, 0, 0, out var s1_org, out var s2_org);
                         trfModel.GetPlcExpectedCoords(ActiveCarrierID, row, col, out var s1_expected, out var s2_expected);
                         var plc_coord = SID == SuckerRowEnum.S1 ? s1_expected : s2_expected;
                         
                         sb.AppendLine();
-                        sb.AppendLine($"{SID} 預期 馬達座標 (X,Y) = ({plc_coord.X:0.000}, {plc_coord.Y:0.000}) mm");
-                        sb.AppendLine($"{SID} 像測 馬達座標 (X,Y) = ({motorCoord.X:0.000}, {motorCoord.Y:0.000}) mm");
+                        sb.AppendLine($"{SID} {predict} {motorTag} (X,Y) = ({plc_coord.X:0.000}, {plc_coord.Y:0.000}) mm");
+                        sb.AppendLine($"{SID} {vision} {motorTag} (X,Y) = ({motorCoord.X:0.000}, {motorCoord.Y:0.000}) mm");
 
                         trfModel.GetNodeCoords(ActiveCarrierID, 0, 0, out var camOrg, out var _, out var _, out var _);
                         var motorCoord0 = trfCamToMotor.Trans(camOrg);
                         var motor_relative = motorCoord - motorCoord0;
                         var plc_org = SID == SuckerRowEnum.S1 ? s1_org : s2_org;
                         var plc_relative = plc_coord - plc_org;
-                        sb.AppendLine($"{SID} 預期 馬達座標(相對) (X,Y) = ({plc_relative.X:0.000}, {plc_relative.Y:0.000}) mm");
-                        sb.AppendLine($"{SID} 像測 馬達座標(相對) (X,Y) = ({motor_relative.X:0.000}, {motor_relative.Y:0.000}) mm");
+                        sb.AppendLine($"{SID} {predict} {motorTag} (relative) (X,Y) = ({plc_relative.X:0.000}, {plc_relative.Y:0.000}) mm");
+                        sb.AppendLine($"{SID} {vision} {motorTag} (relative) (X,Y) = ({motor_relative.X:0.000}, {motor_relative.Y:0.000}) mm");
                     }
                 }
             }
@@ -266,9 +273,10 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
 
             (var motorD1, var motorD2, var worldDelta) = _trfModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
 
+            var tag = QMSG.T("補償量");
             sb.AppendLine();
-            sb.AppendLine($"PLC 補償量 S1 (ΔX,ΔY) = ({motorD1.X:0.000}, {motorD1.Y:0.000}) mm");
-            sb.AppendLine($"PLC 補償量 S2 (ΔX,ΔY) = ({motorD2.X:0.000}, {motorD2.Y:0.000}) mm");
+            sb.AppendLine($"PLC {tag} S1 (ΔX,ΔY) = ({motorD1.X:0.000}, {motorD1.Y:0.000}) mm");
+            sb.AppendLine($"PLC {tag} S2 (ΔX,ΔY) = ({motorD2.X:0.000}, {motorD2.Y:0.000}) mm");
 
             //sb.AppendLine($"World 變動量 (ΔX,ΔY) = ({worldDelta.X:0.000}, {worldDelta.Y:0.000}) mm");
         }
@@ -294,20 +302,23 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
                 if (chipCoords != null)
                 {
                     sb.AppendLine();
-                    sb.AppendLine($"傾斜(踩腳)程度 = {chipCoords.TiltRatio:0.000}");
+                    sb.AppendLine(QMSG.T("傾斜(踩腳)程度")).Append($" = {chipCoords.TiltRatio:0.000}");
                 }
                 #endregion
             }
 
             if (_xRecipe.InspectParams.optChipMeasurement)
             {
+                var tagX = QMSG.T("晶粒.尺寸X");
+                var tagY = QMSG.T("晶粒.尺寸Y");
+
                 #region 尺寸量測結果
                 var cW = _xRecipe.InspectParams.mWidthStand;
                 var cH = _xRecipe.InspectParams.mHeightStand;
                 var dx = Math.Round(cell.RunWidth - cW, 3);
                 var dy = Math.Round(cell.RunHeight - cH, 3);
-                sb.AppendLine().Append($"晶粒.尺寸X = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
-                sb.AppendLine().Append($"晶粒.尺寸Y = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
+                sb.AppendLine().Append($"{tagX} = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
+                sb.AppendLine().Append($"{tagY} = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
                 #endregion
 
                 #region 尺寸量測詳細點位
@@ -315,18 +326,23 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
                 if (chipDim != null && chipDim.GetPixelSize(out double dpX, out double dpY))
                 {
                     sb.AppendLine();
-                    sb.AppendLine().Append($"晶粒.尺寸X = {dpX:0.0} pix");
-                    sb.AppendLine().Append($"晶粒.尺寸Y = {dpY:0.0} pix");
+                    sb.AppendLine().Append($"{tagX} = {dpX:0.0} pix");
+                    sb.AppendLine().Append($"{tagY} = {dpY:0.0} pix");
                 }
                 #endregion
 
                 #region 晶粒_PAD_跨距
-                var padsGrid = cell?.ChipData?.PadsGrid;
-                if (getChapPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
+                if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch)
                 {
-                    sb.AppendLine();
-                    sb.AppendLine().Append($"PAD.跨距.尺寸X = {padSpanW:0.0} pix");
-                    sb.AppendLine().Append($"PAD.跨距.尺寸Y = {padSpanH:0.0} pix");
+                    var padsGrid = cell?.ChipData?.PadsGrid;
+                    if (getChipPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
+                    {
+                        tagX = QMSG.T("PAD.跨距.尺寸X");
+                        tagY = QMSG.T("PAD.跨距.尺寸Y");
+                        sb.AppendLine();
+                        sb.AppendLine().Append($"{tagX}= {padSpanW:0.0} pix");
+                        sb.AppendLine().Append($"{tagY} = {padSpanH:0.0} pix");
+                    }
                 }
                 #endregion
 
@@ -339,11 +355,16 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
                         if (GlobalConfig.OPT_USING_GAPS_4)
                         {
                             sb.AppendLine();
-                            sb.AppendLine().Append($"邊隙(左) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");
-                            sb.AppendLine().Append($"邊隙(上) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Top):0.000} mm");
-                            sb.AppendLine().Append($"邊隙(右) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Right):0.000} mm");
-                            sb.AppendLine().Append($"邊隙(下) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Bottom):0.000} mm");
-                            sb.AppendLine().Append($"邊隙差值(左右) = {gaps.GetAveGapDiff():0.000} mm");
+                            //sb.AppendLine().Append($"邊隙(左) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");
+                            //sb.AppendLine().Append($"邊隙(上) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Top):0.000} mm");
+                            //sb.AppendLine().Append($"邊隙(右) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Right):0.000} mm");
+                            //sb.AppendLine().Append($"邊隙(下) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Bottom):0.000} mm");
+                            //sb.AppendLine().Append($"邊隙差值(左右) = {gaps.GetAveGapDiff():0.000} mm");
+                            sb.AppendLine().Append(QMSG.T("邊隙(左)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");
+                            sb.AppendLine().Append(QMSG.T("邊隙(上)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Top):0.000} mm");
+                            sb.AppendLine().Append(QMSG.T("邊隙(右)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Right):0.000} mm");
+                            sb.AppendLine().Append(QMSG.T("邊隙(下)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Bottom):0.000} mm");
+                            sb.AppendLine().Append(QMSG.T("邊隙差值(左右)")).Append($" = {gaps.GetAveGapDiff():0.000} mm");
                         }
                         else
                         {
@@ -411,7 +432,7 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
 
             return true;
         }
-        bool getChapPadsSpan(EzBlocsGrid padsGrid, out double spanWidth, out double spanHeight, int digits = 1)
+        bool getChipPadsSpan(EzBlocsGrid padsGrid, out double spanWidth, out double spanHeight, int digits = 1)
         {
             spanWidth = 0;
             spanHeight = 0;

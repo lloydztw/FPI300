@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.FormSpace;
+using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.Mvc.Model;
 using System;
@@ -39,7 +40,7 @@ namespace LaserAlignDX.Mvc.Gui
             InitializeComponent();
 
             DialogResult = DialogResult.Cancel;
-            btnOK.Click += BtnOK_Click;
+            btnSaveToRcp.Click += BtnOK_Click;
             Load += Form_Load;
         }
 
@@ -53,6 +54,7 @@ namespace LaserAlignDX.Mvc.Gui
         {
             updateInfo();
             updateSettings(false);
+            QMSG.Translate(this);
         }
         private void BtnOK_Click(object sender, EventArgs e)
         {
@@ -80,7 +82,7 @@ namespace LaserAlignDX.Mvc.Gui
             var sb = new StringBuilder();
             int row = cell.CellRow;
             int col = cell.CellCol;
-            sb.Append("格點: [").Append(row).Append(",").Append(col).Append("]");
+            sb.Append(QMSG.T("格點")).Append(": [").Append(row).Append(",").Append(col).Append("]");
 
             #region 尺寸量測詳細點位
             var meansurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
@@ -90,15 +92,15 @@ namespace LaserAlignDX.Mvc.Gui
             {
                 var dpX = (meansurePts[0] - meansurePts[2]).NormLength;
                 var dpY = (meansurePts[1] - meansurePts[3]).NormLength;
-                sb.AppendLine().Append($"晶粒.尺寸X = {dpX:0.0} pix");
-                sb.AppendLine().Append($"晶粒.尺寸Y = {dpY:0.0} pix");
+                sb.AppendLine().Append(QMSG.T("晶粒.尺寸X")).Append($" = {dpX:0.0} pix");
+                sb.AppendLine().Append(QMSG.T("晶粒.尺寸Y")).Append($" = {dpY:0.0} pix");
             }
             else
             {
-                sb.AppendLine().AppendLine("沒有 完整邊線, 無法建構 有效量測點位!");
+                sb.AppendLine().AppendLine(QMSG.T("沒有 完整邊線, 無法建構 有效量測點位!"));
                 numChipWidth.Enabled = false;
                 numChipHeight.Enabled = false;
-                btnOK.Enabled = false;
+                btnSaveToRcp.Enabled = false;
             }
             #endregion
 

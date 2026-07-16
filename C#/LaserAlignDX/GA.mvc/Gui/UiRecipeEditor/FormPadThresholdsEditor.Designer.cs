@@ -30,7 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormPadThresholdsEditor));
             this.label1 = new System.Windows.Forms.Label();
-            this.btnOK = new System.Windows.Forms.Button();
+            this.btnSaveToRcp = new System.Windows.Forms.Button();
             this.numBinaryThreshold = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
             this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
@@ -44,25 +44,25 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(488, 70);
+            this.label1.Location = new System.Drawing.Point(488, 71);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(114, 27);
             this.label1.TabIndex = 0;
             this.label1.Text = "Pad 門限值";
             // 
-            // btnOK
+            // btnSaveToRcp
             // 
-            this.btnOK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
-            this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnOK.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOK.Location = new System.Drawing.Point(628, 334);
-            this.btnOK.Margin = new System.Windows.Forms.Padding(4);
-            this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(156, 74);
-            this.btnOK.TabIndex = 0;
-            this.btnOK.Text = "寫回 參數檔";
-            this.btnOK.UseVisualStyleBackColor = false;
+            this.btnSaveToRcp.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(128)))));
+            this.btnSaveToRcp.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnSaveToRcp.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSaveToRcp.Location = new System.Drawing.Point(507, 334);
+            this.btnSaveToRcp.Margin = new System.Windows.Forms.Padding(4);
+            this.btnSaveToRcp.Name = "btnSaveToRcp";
+            this.btnSaveToRcp.Size = new System.Drawing.Size(277, 74);
+            this.btnSaveToRcp.TabIndex = 0;
+            this.btnSaveToRcp.Text = "寫回 參數檔";
+            this.btnSaveToRcp.UseVisualStyleBackColor = false;
             // 
             // numBinaryThreshold
             // 
@@ -83,7 +83,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(488, 109);
+            this.label2.Location = new System.Drawing.Point(488, 112);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(112, 27);
@@ -131,7 +131,7 @@
             this.Controls.Add(this.jezTransImageViewPanel1);
             this.Controls.Add(this.numBinaryThreshold);
             this.Controls.Add(this.label2);
-            this.Controls.Add(this.btnOK);
+            this.Controls.Add(this.btnSaveToRcp);
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4);
@@ -151,7 +151,7 @@
         #endregion
 
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button btnOK;
+        private System.Windows.Forms.Button btnSaveToRcp;
         private System.Windows.Forms.NumericUpDown numBinaryThreshold;
         private System.Windows.Forms.Label label2;
         private JezTransImageViewPanel jezTransImageViewPanel1;

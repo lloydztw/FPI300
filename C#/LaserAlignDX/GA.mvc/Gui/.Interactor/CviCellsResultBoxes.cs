@@ -31,10 +31,10 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
 using CellBloc = LaserAlignDX.Model.XCellBloc;
 using Point = System.Drawing.Point;
 using QMSG = JetEazy.Lang.QMSG;
+using RESOURCE = LaserAlignDX.Properties.Resources;
 using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 using XRecipe = LaserAlignDX.OPSpace.RecipeSpace.RecipeFPIX3Class;
 
@@ -369,9 +369,12 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             if (cells == null)
             {
-                updateTitle("待測中");
+                updateTitle(QMSG.T("待測中"));
                 return;
             }
+
+            string tagEmpty = QMSG.T("空位");
+            string tagAbnormal = QMSG.T("疑似有料");
 
             if (_mode == ScanInspectMode.NOTRAY)
             {
@@ -387,7 +390,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     if (b != null)
                         empty++;
 
-                updateTitle($"疑似有料= {ng}, 空位= {empty}");
+                updateTitle($"{tagAbnormal}= {ng}, {tagEmpty}= {empty}");
             }
             else
             {
@@ -399,8 +402,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 using (var cellsCollection = new RegionCellsDataCollection(cells))
                 {
                     cellsCollection.GetStatistics(out pass, out ng, out empty, out int unknowns);
-                    string msg = $"OK= {pass}, NG= {ng}, 空位= {empty}";
-                    if (unknowns > 0) msg += $", 疑似異物= {unknowns}";
+                    string msg = $"OK= {pass}, NG= {ng}, {tagEmpty}= {empty}";
+                    if (unknowns > 0) msg += $", {tagAbnormal}= {unknowns}";
                     updateTitle(msg);
                 }
             }
@@ -735,7 +738,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 if (!IsEmptyTrayMode && !isEmpty)
                     appendPassNG(sb, cell);
 
-                sb.Append("格點(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
+                sb.Append(QMSG.T("格點")).Append("(").Append(cell.Index).Append(") : [").AppendValues(row, col).AppendLine("]");
 
                 appendCameraCoords(sb, cursorBloc, cursorBloc2);
 
@@ -790,7 +793,8 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (camPt == null)
                 return;
 
-            sb.Append($"相機座標: ({camPt.X:0.0}, {camPt.Y:0.0})").AppendLine();
+            var tag = QMSG.T("相機座標");
+            sb.Append(tag).Append($": ({camPt.X:0.0}, {camPt.Y:0.0})").AppendLine();
 
             if (bloc != null && bloc2 != null && bloc != bloc2)
             {
@@ -799,9 +803,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     var dv = camPt - camPt2;
                     var dist = dv.NormLength;
-                    sb.AppendLine($"相機座標 dX = {dv.X:0.0} pix");
-                    sb.AppendLine($"相機座標 dY = {dv.Y:0.0} pix");
-                    sb.AppendLine($"相機座標 距離 = {dist:0.0} pix");
+                    sb.AppendLine(tag).Append($" ΔX = {dv.X:0.0} pix");
+                    sb.AppendLine(tag).Append($" ΔY = {dv.Y:0.0} pix");
+                    sb.AppendLine(tag).Append($" Dist. = {dist:0.0} pix");
                 }
             }
         }
@@ -837,23 +841,28 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             #region S1_S2_馬達座標
             if (true || !_withPadGaps)
             {
-                sb.AppendLine().Append("S1 馬達目標(X,Y) = (").AppendValues((float)s1_target.X, (float)s1_target.Y).Append(") mm");
-                if (camPt != null)
-                    sb.AppendLine().Append("S1 馬達座標(X,Y) = (").AppendValues((float)s1_current.X, (float)s1_current.Y).Append(") mm");
+                string tag1 = QMSG.T("馬達目標");
+                string tag2 = QMSG.T("馬達座標");
 
-                sb.AppendLine().Append("S2 馬達目標(X,Y) = (").AppendValues((float)s2_target.X, (float)s2_target.Y).Append(") mm");
+                sb.AppendLine().Append($"S1 {tag1} (X,Y) = (").AppendValues((float)s1_target.X, (float)s1_target.Y).Append(") mm");
                 if (camPt != null)
-                    sb.AppendLine().Append("S2 馬達座標(X,Y) = (").AppendValues((float)s2_current.X, (float)s2_current.Y).Append(") mm");
+                    sb.AppendLine().Append($"S1 {tag2} (X,Y) = (").AppendValues((float)s1_current.X, (float)s1_current.Y).Append(") mm");
+
+                sb.AppendLine().Append($"S2 {tag1} (X,Y) = (").AppendValues((float)s2_target.X, (float)s2_target.Y).Append(") mm");
+                if (camPt != null)
+                    sb.AppendLine().Append($"S2 {tag2} (X,Y) = (").AppendValues((float)s2_current.X, (float)s2_current.Y).Append(") mm");
             }
             #endregion
 
             #region WORLD_目標座標
             if (!_withPadGaps)
             {
+                string tag1 = QMSG.T("World 目標");
+                string tag2 = QMSG.T("World 座標");
                 sb.AppendLine();
-                sb.AppendLine().Append("Physic 目標(X,Y) = (").AppendValues((float)world_target.X, (float)world_target.Y).Append(") mm");
+                sb.AppendLine().Append($"{tag1} (X,Y) = (").AppendValues((float)world_target.X, (float)world_target.Y).Append(") mm");
                 if (camPt != null)
-                    sb.AppendLine().Append("Physic 座標(X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+                    sb.AppendLine().Append($"{tag2} (X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
             }
             #endregion
 
@@ -863,15 +872,17 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 (var motorDelta, var motorD2, var worldDelta) = TransformsModel.CalcPlcCompensation(ActiveCarrierID, camPt, row, col);
                 if (!_withPadGaps)
                 {
+                    var tag = QMSG.T("變動值");
                     sb.AppendLine();
-                    sb.AppendLine($"Physic 變動值 ΔX = {worldDelta.X:0.000} mm");
-                    sb.AppendLine($"Physic 變動值 ΔY = {worldDelta.Y:0.000} mm");
+                    sb.AppendLine($"World {tag} ΔX = {worldDelta.X:0.000} mm");
+                    sb.AppendLine($"World {tag} ΔY = {worldDelta.Y:0.000} mm");
                 }
                 if (true || !_withPadGaps)
                 {
+                    var tag = QMSG.T("補償量");
                     sb.AppendLine();
-                    sb.AppendLine($"PLC 補償量 ΔX = {motorDelta.X:0.000} mm");
-                    sb.AppendLine($"PLC 補償量 ΔY = {motorDelta.Y:0.000} mm");
+                    sb.AppendLine($"PLC {tag} ΔX = {motorDelta.X:0.000} mm");
+                    sb.AppendLine($"PLC {tag} ΔY = {motorDelta.Y:0.000} mm");
                 }
             }
             #endregion
@@ -886,10 +897,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     var world_last = transCP.Trans(camPt2);
                     var dv = world_current - world_last;
                     double dist = dv.NormLength;
+                    string tag = QMSG.T("World 座標");
                     sb.AppendLine();
-                    sb.AppendLine($"Physic 座標 DX = {dv.X:0.000} mm");
-                    sb.AppendLine($"Physic 座標 DY = {dv.Y:0.000} mm");
-                    sb.AppendLine($"Physic 座標 距離 = {dist:0.000} mm");
+                    sb.AppendLine($"{tag} ΔX = {dv.X:0.000} mm");
+                    sb.AppendLine($"{tag} ΔY = {dv.Y:0.000} mm");
+                    sb.AppendLine($"{tag} Dist. = {dist:0.000} mm");
                 }
                 #endregion
             }
@@ -912,20 +924,23 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         if (chipCoords != null)
                         {
                             sb.AppendLine();
-                            sb.AppendLine($"傾斜(踩腳)程度 = {chipCoords.TiltRatio:0.000}");
+                            sb.AppendLine(QMSG.T("傾斜(踩腳)程度")).Append($" = {chipCoords.TiltRatio:0.000}");
                         }
                         #endregion
                     }
 
                     if (_xRecipe.InspectParams.optChipMeasurement)
                     {
+                        var tag1 = QMSG.T("晶粒.尺寸X");
+                        var tag2 = QMSG.T("晶粒.尺寸Y");
+
                         #region 尺寸量測結果
                         var cW = _xRecipe.InspectParams.mWidthStand;
                         var cH = _xRecipe.InspectParams.mHeightStand;
                         var dx = Math.Round(cell.RunWidth - cW, 3);
                         var dy = Math.Round(cell.RunHeight - cH, 3);
-                        sb.AppendLine().Append($"晶粒.尺寸X = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
-                        sb.AppendLine().Append($"晶粒.尺寸Y = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
+                        sb.AppendLine().Append($"{tag1} = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
+                        sb.AppendLine().Append($"{tag2} = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
                         #endregion
 
                         #region 尺寸量測詳細點位
@@ -933,18 +948,23 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         if (chipDim != null && chipDim.GetPixelSize(out double dpX, out double dpY))
                         {
                             sb.AppendLine();
-                            sb.AppendLine().Append($"晶粒.尺寸X = {dpX:0.0} pix");
-                            sb.AppendLine().Append($"晶粒.尺寸Y = {dpY:0.0} pix");
+                            sb.AppendLine().Append($"{tag1} = {dpX:0.0} pix");
+                            sb.AppendLine().Append($"{tag2} = {dpY:0.0} pix");
                         }
                         #endregion
 
                         #region 晶粒_PAD_跨距
-                        var padsGrid = cell?.ChipData?.PadsGrid;
-                        if (getChapPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
+                        if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch)
                         {
-                            sb.AppendLine();
-                            sb.AppendLine().Append($"PAD.跨距.尺寸X = {padSpanW:0.0} pix");
-                            sb.AppendLine().Append($"PAD.跨距.尺寸Y = {padSpanH:0.0} pix");
+                            var padsGrid = cell?.ChipData?.PadsGrid;
+                            if (getChapPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
+                            {
+                                tag1 = QMSG.T("PAD.跨距.尺寸X");
+                                tag2 = QMSG.T("PAD.跨距.尺寸Y");
+                                sb.AppendLine();
+                                sb.AppendLine().Append($"{tag1} = {padSpanW:0.0} pix");
+                                sb.AppendLine().Append($"{tag2} = {padSpanH:0.0} pix");
+                            }
                         }
                         #endregion
 
@@ -957,11 +977,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                                 if (GlobalConfig.OPT_USING_GAPS_4)
                                 {
                                     sb.AppendLine();
-                                    sb.AppendLine().Append($"邊隙(左) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");
-                                    sb.AppendLine().Append($"邊隙(上) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Top):0.000} mm");
-                                    sb.AppendLine().Append($"邊隙(右) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Right):0.000} mm");
-                                    sb.AppendLine().Append($"邊隙(下) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Bottom):0.000} mm");
-                                    sb.AppendLine().Append($"邊隙差值(左右) = {gaps.GetAveGapDiff():0.000} mm");
+                                    sb.AppendLine().Append(QMSG.T("邊隙(左)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");
+                                    sb.AppendLine().Append(QMSG.T("邊隙(上)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Top):0.000} mm");
+                                    sb.AppendLine().Append(QMSG.T("邊隙(右)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Right):0.000} mm");
+                                    sb.AppendLine().Append(QMSG.T("邊隙(下)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Bottom):0.000} mm");
+                                    sb.AppendLine().Append(QMSG.T("邊隙差值(左右)")).Append($" = {gaps.GetAveGapDiff():0.000} mm");
                                 }
                                 else
                                 {
@@ -1003,7 +1023,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (camPt != null && qcTransform != null)
             {
                 world_current = qcTransform.Trans(camPt);
-                sb.AppendLine().Append("Physic (X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+                sb.AppendLine().Append("World (X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
             }
             if (bloc != null && bloc2 != null && bloc != bloc2 && qcTransform != null)
             {
@@ -1015,9 +1035,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     var dv = world_current - world_last;
                     double dist = dv.NormLength;
                     sb.AppendLine();
-                    sb.AppendLine($"Physic ΔX = {dv.X:0.000} mm");
-                    sb.AppendLine($"Physic ΔY = {dv.Y:0.000} mm");
-                    sb.AppendLine($"Physic Dist = {dist:0.000} mm");
+                    sb.AppendLine($"World ΔX = {dv.X:0.000} mm");
+                    sb.AppendLine($"World ΔY = {dv.Y:0.000} mm");
+                    sb.AppendLine($"World Dist = {dist:0.000} mm");
                 }
                 #endregion
             }
@@ -1034,7 +1054,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (TransformsModel == null)
                 return;
 
-
+            string tag = QMSG.T("World 座標");
             QVector world_current = null;
 
             var camPt = bloc.Center;
@@ -1042,7 +1062,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             {
                 var tranCP = TransformsModel.GetCameraPhysicTransform(ActiveCarrierID);
                 world_current = tranCP.Trans(camPt);
-                sb.AppendLine().Append("Physic 座標(X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
+                sb.AppendLine().Append($"{tag} (X,Y) = (").AppendValues((float)world_current.X, (float)world_current.Y).Append(") mm");
             }
 
             if (bloc != null && bloc2 != null && bloc != bloc2)
@@ -1055,9 +1075,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     var dv = world_current - world_last;
                     double dist = dv.NormLength;
                     sb.AppendLine();
-                    sb.AppendLine($"Physic 座標 DX = {dv.X:0.000} mm");
-                    sb.AppendLine($"Physic 座標 DY = {dv.Y:0.000} mm");
-                    sb.AppendLine($"Physic 座標 距離 = {dist:0.000} mm");
+                    sb.AppendLine($"{tag} DX = {dv.X:0.000} mm");
+                    sb.AppendLine($"{tag} DY = {dv.Y:0.000} mm");
+                    sb.AppendLine($"{tag} Dist. = {dist:0.000} mm");
                 }
             }
         }
@@ -1092,16 +1112,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 var menuRcps = new[]
                 {
-                    new ToolStripMenuItem("參數: 設定 晶粒 標準尺寸"),
-                    new ToolStripMenuItem("參數: 設定 晶粒 PAD 門限值"),
+                    new ToolStripMenuItem(QMSG.T("參數: 設定 晶粒 標準尺寸"), RESOURCE.recipe_edit),
+                    new ToolStripMenuItem(QMSG.T("參數: 設定 晶粒 PAD 門限值"), RESOURCE.recipe_edit),
                 };
                 var menuDumps = new[]
                 {
                     //new ToolStripMenuItem("Dump 尺寸量測結果 (in row)"),
-                    new ToolStripMenuItem("調試: 複製 單一晶粒 尺寸量測結果"),
-                    new ToolStripMenuItem("調試: 輸出 單一區域 圖像檔案"),
-                    new ToolStripMenuItem("調試: 輸出 所有區域 圖像檔案"),
-                    new ToolStripMenuItem("調試: 顯示 晶粒定位 所有演算圖像"),
+                    new ToolStripMenuItem(QMSG.T("調試: 複製 單一晶粒 尺寸量測結果"), RESOURCE.debug_orange),
+                    new ToolStripMenuItem(QMSG.T("調試: 輸出 單一區域 圖像檔案"), RESOURCE.debug_orange),
+                    new ToolStripMenuItem(QMSG.T("調試: 輸出 所有區域 圖像檔案"), RESOURCE.debug_orange),
+                    new ToolStripMenuItem(QMSG.T("調試: 顯示 晶粒定位 所有演算圖像"), RESOURCE.debug_orange),
                 };
 
                 int i = 0;

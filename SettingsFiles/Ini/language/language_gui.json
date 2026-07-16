@@ -156,6 +156,17 @@
 "__rdoCarrier1" : ["載台 1", "", "", "แท่นวาง 1"],
 "btnOpenMotorXY" : ["MotorXY","軸控XY", "", "ควบคุมแกน XY"],
 
+"FormChipTemplateDim" : ["Chip Dimension", "晶粒樣本尺寸", "", ""],
+"FormChipTemplateDim.label1" : ["Dim. X (mm)", "尺寸X(mm)", "", ""],
+"FormChipTemplateDim.label2" : ["Dim. Y (mm)", "尺寸Y(mm)", "", ""],
+"btnSaveToRcp" : ["Save To Recipe", "寫回 參數檔", "", ""],
+
+"FormPadThresholdsEditor" : ["Chip Pad Threshold Settings", "晶粒 Pad 閥值設定", "", ""],
+"FormPadThresholdsEditor.label0" : ["GridPad-Type Chip", "格點型 晶粒", "", ""],
+"FormPadThresholdsEditor.label1" : ["Pad Threshold", "Pad 門限值", "", ""],
+"FormPadThresholdsEditor.label2" : ["De-Scratch Threshold", "去刮痕閥值", "", ""],
+
+
 "是否要關閉系統?" : ["Are you sure to exit?", "是否要關閉系統?", "", ""],
 "是否要登出帳户?" : ["Are you going to log out?", "是否要登出帳户?", "", ""],
 "請登出!\n回到跑線正常狀態,\n才能退出程式!" : ["Please log out and back to idle state before Exit!", "請登出!\n回到跑線正常狀態,\n才能退出程式!", "", ""],

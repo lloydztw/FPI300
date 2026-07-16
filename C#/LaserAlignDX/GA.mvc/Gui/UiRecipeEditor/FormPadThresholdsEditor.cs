@@ -53,7 +53,7 @@ namespace LaserAlignDX.Mvc.Gui
             {
                 updateSettings(false);
 
-                btnOK.Click += BtnOK_Click;
+                btnSaveToRcp.Click += BtnOK_Click;
                 numBinaryThreshold.ValueChanged += NumBinaryThreshold_ValueChanged;
                 numDistTransThreshold.ValueChanged += NumBinaryThreshold_ValueChanged;
 

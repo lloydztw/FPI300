@@ -27,7 +27,49 @@
 "載台右下" : ["RB", "載台右下", "", ""],
 "載台左下" : ["LB", "載台左下", "", ""],
 
+"參數: 設定 晶粒 標準尺寸" : ["Recipe: Chip Standard Size", "參數: 設定 晶粒 標準尺寸", "", ""],
+"參數: 設定 晶粒 PAD 門限值" : ["Recipe: Chip Pad Threshold", "參數: 設定 晶粒 PAD 門限值", "", ""],
+"調試: 複製 單一晶粒 尺寸量測結果" : ["Debug: Copy One-Chip Dimension Result", "調試: 複製 單一晶粒 尺寸量測結果", "", ""],
+"調試: 輸出 單一區域 圖像檔案" : ["Debug: Output One-Region Image File", "調試: 輸出 單一區域 圖像檔案", "", ""],
+"調試: 輸出 所有區域 圖像檔案" : ["Debug: Output All-Region Image File", "調試: 輸出 所有區域 圖像檔案", "", ""],
+"調試: 顯示 晶粒定位 所有演算圖像" : ["Debug: Show Chip Locating Graphics", "調試: 顯示 晶粒定位 所有演算圖像", "", ""],
+
+"沒有 完整邊線, 無法建構 有效量測點位!" : [
+    "Can NOT build measure points without completed border lines!",
+    "沒有 完整邊線, 無法建構 有效量測點位!",
+    "",
+    ""],
+
+"格點" : ["Cell", "格點", "", ""],
+"相機座標" : ["Camera Coord.", "相機座標", "", ""],
+"World 座標" : ["World Coord.", "World 座標", "", ""],
+"World 目標" : ["World Target", "World 目標", "", ""],
+"馬達座標" : ["Motor Coord.", "馬達座標", "", ""],
+"馬達目標" : ["Motor Target", "馬達目標", "", ""],
+"補償量" : ["Compensation", "補償量", "", ""],
+"變動值" : ["Variation", "變動值", "", ""],
+"像測" : ["Vision", "像測", "", ""],
+"預期" : ["Predict", "預期", "", ""],
+"晶粒.尺寸X" : ["Chip.Dim.X", "晶粒.尺寸X", "", ""],
+"晶粒.尺寸Y" : ["Chip.Dim.Y", "晶粒.尺寸Y", "", ""],
+"PAD.跨距.尺寸X" : ["PAD Pitch X", "PAD.跨距.尺寸X", "", ""],
+"PAD.跨距.尺寸Y" : ["PAD Pitch Y", "PAD.跨距.尺寸Y", "", ""],
+"傾斜(踩腳)程度" : ["Tilt Ratio", "傾斜(踩腳)程度", "", ""],
+"邊隙(左)" : ["", "邊隙(左)", "", ""],
+"邊隙(上)" : ["", "邊隙(上)", "", ""],
+"邊隙(右)" : ["", "邊隙(右)", "", ""],
+"邊隙(下)" : ["", "邊隙(下)", "", ""],
+"邊隙差值(左右)" : ["", "邊隙差值(左右)", "", ""],
+
+"疑似有料" : ["None-Empty", "疑似有料", "", ""],
+"空位" : ["Empty", "空位", "", ""],
+"待測中" : ["Wait for test", "待測中", "", ""],
+
 "__FPI30_提示訊息__" : ["Remark", "不用翻譯","",""],
+
+
+"GridMatch" : ["GridPad-Type Chip Match", "格點型晶粒匹配", "", ""],
+"TemplateMatch" : ["General-Type Chip Match", "一般型晶粒匹配", "", ""],
 
 "ReEntry" : ["The program is already running, please do not open multiple instances!", "程序已經啟動, 請勿多開！", "", "โปรแกรมกำลังทำงานอยู่แล้ว กรุณาอย่าเปิดซ้ำ!"],
 "No_Privilege" : ["No permission for this action!", "沒有此權限!", "", "ไม่มีสิทธิ์สำหรับดำเนินการนี้!"],
@@ -42,7 +84,7 @@
 "Question_To_Migrate_Transforms_Models" : ["Do you want to perform coordinate system linear migration at the same time?", "是否 同時進行 座標系統 線性遷移?", "", "ต้องการดำเนินการย้ายระบบพิกัดเชิงเส้นไปพร้อมกันหรือไม่?"],
 "Info_Write_CoordRefs_To_PLC_OK" : ["Coordinates successfully written to PLC.", "座標成功寫入至 PLC.", "", "เขียนพิกัดลงใน PLC สำเร็จแล้ว"],
 "Info_CommonBase_Trf_Successed" : ["Common coordinate system construction completed.", "共用座標系統 建置完成.", "", "การสร้างระบบพิกัดร่วมเสร็จสมบูรณ์"],
-"Warning_the_function_is_not_supported" : ["This function is not supported!", "不支援此功能!", "", "ไม่รองรับฟังก์ชันนี้!"],
+"Warning_the_function_is_not_supported" : ["does not support this function!", "不支援此功能!", "", "ไม่รองรับฟังก์ชันนี้!"],
 "Warning_No_Motor" : ["Motor not found!", "找不到馬達!", "", "ไม่พบมอเตอร์!"],
 "Warning_Motor_Busy" : ["Motor is busy...", "馬達忙碌中...", "", "มอเตอร์กำลังทำงาน..."],
 "Question_Update_Motor_Coord_To_Calib" : ["Do you want to use the current motor XY coordinate values?", "是否要採用 目前馬達 XY 座標值?", "", "ต้องการใช้ค่าพิกัด XY ของมอเตอร์ปัจจุบันหรือไม่?"],
