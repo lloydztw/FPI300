@@ -16,7 +16,7 @@ DefaultGroupName=JetEazy FPI30
 Compression=lzma
 SolidCompression=yes
 OutputDir=.\bin
-OutputBaseFileName=Traveller_Setup_3.3.7.7
+OutputBaseFileName=Traveller_Setup_3.3.7.7_C
 
 [Files]
 ; BIN & DLL
