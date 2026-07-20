@@ -32,7 +32,7 @@ namespace JzDisplay.UISpace
             InitializeComponent();
 
             picDisplay.Dock = DockStyle.Bottom;
-            this.SizeChanged += DispUI_SizeChanged;
+            this.SizeChanged += (s, e) => autoLayout();
             if (!DesignMode)
                 Initial();
         }
@@ -105,10 +105,6 @@ namespace JzDisplay.UISpace
         }
 
         #region EVENT_HANDLERS
-        private void DispUI_SizeChanged(object sender, EventArgs e)
-        {
-            autoLayout();
-        }
         private void picDisplay_MouseDown(object sender, MouseEventArgs e)
         {
             picDisplay.Focus();
@@ -155,25 +151,35 @@ namespace JzDisplay.UISpace
             if (this.Width == 0 || this.Height == 0)
                 return;
 
-            int h = 23;
-            if (lblInformation != null && lblInformation.Visible)
+            SuspendLayout();
+
+            try
             {
-                lblInformation.Location = new Point(0, 0);
-                lblInformation.Width = this.Width;
-                lblInformation.Height = h;
+                int h = 23;
+                if (lblInformation != null && lblInformation.Visible)
+                {
+                    lblInformation.Location = new Point(0, 0);
+                    lblInformation.Width = this.Width;
+                    lblInformation.Height = h;
+                }
+                else
+                {
+                    h = 0;
+                }
+
+                picDisplay.Location = new Point(0, h);
+                picDisplay.Height = this.Height - h;
+
+                if (picDisplay.Dock == DockStyle.None)
+                {
+                    picDisplay.Width = this.Width;
+                }
             }
-            else
+            catch
             {
-                h = 0;
             }
 
-            picDisplay.Location = new Point(0, h);
-            picDisplay.Height = this.Height - h;
-
-            if (picDisplay.Dock == DockStyle.None)
-            {
-                picDisplay.Width = this.Width;
-            }
+            ResumeLayout(true);
         }
         #endregion
 

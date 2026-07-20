@@ -114,7 +114,7 @@ namespace JetEazy.UISpace
         public EssUI()
         {
             InitializeComponent();
-            SizeChanged += EssUI_SizeChanged;
+            SizeChanged += (s, e) => autoLayout();
         }
 
         public void Initial(EsssDBClass essdb,
@@ -203,7 +203,7 @@ namespace JetEazy.UISpace
             LOGINStatus = ESSStatusEnum.LOGOUT;
             MAINStatus = ESSStatusEnum.RUN;
 
-            _auto_layout();
+            autoLayout();
         }
 
 
@@ -648,83 +648,79 @@ namespace JetEazy.UISpace
         }
 
 
-        #region AUTO_LAYOUT_FUNCTIONS
-        void EssUI_SizeChanged(object sender, EventArgs e)
+        #region AUTO_LAYOUT_FUNCTIONS        
+        void autoLayout()
         {
+            SuspendLayout();
+
             try
             {
-                _auto_layout();
+                if (pictureBox1.Tag == null)
+                {
+                    pictureBox1.BackgroundImageLayout = ImageLayout.Zoom;
+                    pictureBox1.Dock = DockStyle.Top;
+                    using (Bitmap bmp = new Bitmap(pictureBox1.BackgroundImage))
+                    {
+                        pictureBox1.BackColor = bmp.GetPixel(2, 2);
+                    }
+                    pictureBox1.Tag = this;
+                }
+                //
+                var rcc = ClientRectangle;
+                int pad = 0;
+                int w = (rcc.Width - pad * 4) / 3;
+                int x = pad;
+
+                //foreach (var c in new Control[] { btnLogin, lblAccountName, btnAccountManagement })
+                foreach (var c in new Control[] { button2, label3, button3 })
+                {
+                    c.Left = x;
+                    c.Width = w;
+                    x += w + pad;
+                }
+                button1.Location = button2.Location;
+                button1.Size = button2.Size;
+
+                //foreach (var c in new Control[] { lblMainStatus, cboChangeRecipe })
+                foreach (var c in new Control[] { label4, comboBox1 })
+                {
+                    c.Left = pad;
+                    c.Width = rcc.Width - pad * 2;
+                }
+
+                x = pad;
+                //foreach (var c in new Control[] { btnRun, btnRecipe, btnSetup })
+                foreach (var c in new Control[] { button7, button8, button9 })
+                {
+                    c.Left = x;
+                    c.Width = w;
+                    x += w + pad;
+                }
+
+                label1.Left = pad;
+                label1.Width = w;
+
+                //lblDateTime
+                label2.Left = label1.Right + pad;
+                label2.Width = rcc.Width - label2.Left - pad;
+
+                // lblVer
+                pad = 2;
+                label10.Left = pad;
+                label10.Width = rcc.Width - pad * 2;
+                label10.Top = label2.Top - 1 - label10.Height;
+
+                // pic
+                pictureBox1.Height = label10.Top - 1 - pictureBox1.Top;
+
+                //lblPassCount;
+                //lblFailCount;
             }
             catch
             {
-
-            }
-        }
-
-        void _auto_layout()
-        {
-#if OPT_LETIAN_AUTO_LAYOUT
-            if (pictureBox1.Tag == null)
-            {
-                pictureBox1.BackgroundImageLayout = ImageLayout.Zoom;
-                pictureBox1.Dock = DockStyle.Top;
-                using (Bitmap bmp = new Bitmap(pictureBox1.BackgroundImage))
-                {
-                    pictureBox1.BackColor = bmp.GetPixel(2, 2);
-                }
-                pictureBox1.Tag = this;
-            }
-            //
-            var rcc = ClientRectangle;
-            int pad = 0;
-            int w = (rcc.Width - pad * 4) / 3;
-            int x = pad;
-
-            //foreach (var c in new Control[] { btnLogin, lblAccountName, btnAccountManagement })
-            foreach (var c in new Control[] { button2, label3, button3 })
-            {
-                c.Left = x;
-                c.Width = w;
-                x += w + pad;
-            }
-            button1.Location = button2.Location;
-            button1.Size = button2.Size;
-
-            //foreach (var c in new Control[] { lblMainStatus, cboChangeRecipe })
-            foreach (var c in new Control[] { label4, comboBox1})
-            {
-                c.Left = pad;
-                c.Width = rcc.Width - pad * 2;
             }
 
-            x = pad;
-            //foreach (var c in new Control[] { btnRun, btnRecipe, btnSetup })
-            foreach (var c in new Control[] { button7, button8, button9 })
-            {
-                c.Left = x;
-                c.Width = w;
-                x += w + pad;
-            }
-
-            label1.Left = pad;
-            label1.Width = w;
-
-            //lblDateTime
-            label2.Left = label1.Right + pad;
-            label2.Width = rcc.Width - label2.Left - pad;
-
-            // lblVer
-            pad = 2;
-            label10.Left = pad;
-            label10.Width = rcc.Width - pad * 2;
-            label10.Top = label2.Top - 1 - label10.Height;
-
-            // pic
-            pictureBox1.Height = label10.Top - 1 - pictureBox1.Top;
-
-            //lblPassCount;
-            //lblFailCount;
-#endif
+            ResumeLayout(true);
         }
         #endregion
     }

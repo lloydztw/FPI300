@@ -115,6 +115,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         public CviCellsResultBoxes()
         {
             base.OnCursorsChanged += CviCellsResultBoxes_OnCursorsChanged;
+
+            // 簡單 dipose Menu Strip, 讓後續可以重新載入 menu text.
+            QMSG.Lang().LanguageChanged += (s, e) => disposeMenuStrip();
         }
         public void Reset()
         {

@@ -77,7 +77,7 @@ namespace PhotoMachine.UISpace
         public RcpUI()
         {
             InitializeComponent();
-            SizeChanged += RcpUI_SizeChanged;
+            SizeChanged += (s, e) => autoLayout();
         }
 
         public void Initial(string uipath,
@@ -469,58 +469,55 @@ namespace PhotoMachine.UISpace
         //}
 
         #region AUTO_LAYOUT
-        void RcpUI_SizeChanged(object sender, EventArgs e)
+        void autoLayout()
         {
+            SuspendLayout();
+
             try
             {
-                _auto_layout();
+                groupBox1rcp.Dock = DockStyle.Top;
+                richTextBox1rcp.Dock = DockStyle.Bottom;
+
+                var rcc = ClientRectangle;
+                int pad = 3;
+                int w = (rcc.Width - pad * 6) / 3;
+                int x = pad * 2;
+
+                //var ctrls = new Control[] { btnAdd, btnModify, btnCancel };
+                var ctrls = new Control[] { btnRcpAdd, btnRcpEdit, btnRcpDel };
+                foreach (var c in ctrls)
+                {
+                    c.Top = rcc.Bottom - c.Height - pad * 2;
+                    c.Left = x;
+                    c.Width = w;
+                    x += w + pad;
+                }
+                // btnOK
+                btnRcpOK.Location = btnRcpEdit.Location;
+                btnRcpOK.Size = btnRcpEdit.Size;
+
+                // btnCancel
+                btnRcpCancel.Location = btnRcpDel.Location;
+                btnRcpCancel.Size = btnRcpDel.Size;
+
+                // lblModifyDateTime
+                lblRcp4.Top = btnRcpOK.Top - lblRcp4.Height - pad;
+                lblRcp4.Left = groupBox1rcp.Left;
+                lblRcp4.Width = rcc.Width - lblRcp4.Left * 2;
+                // groupBox1
+                groupBox1rcp.Height = (lblRcp4.Top - pad * 2) - groupBox1rcp.Top;
+                // richbox1
+                richTextBox1rcp.Height = richTextBox1rcp.Bottom - btnRcpDetails.Bottom - pad * 2;
+                // btnDetail
+                rcc = groupBox1rcp.ClientRectangle;
+                btnRcpDetails.Left = rcc.Right - btnRcpDetails.Width - pad * 5;
+                textBox2Rcp.Width = btnRcpDetails.Right - textBox2Rcp.Left;
             }
             catch
             {
             }
-        }
-        void _auto_layout()
-        {
-#if OPT_LETIAN_AUTO_LAYOUT
 
-            groupBox1rcp.Dock = DockStyle.Top;
-            richTextBox1rcp.Dock = DockStyle.Bottom;
-
-            var rcc = ClientRectangle;
-            int pad = 3;
-            int w = (rcc.Width - pad * 6) / 3;
-            int x = pad * 2;
-
-            //var ctrls = new Control[] { btnAdd, btnModify, btnCancel };
-            var ctrls = new Control[] { btnRcpAdd, btnRcpEdit,btnRcpDel };
-            foreach (var c in ctrls)
-            {
-                c.Top = rcc.Bottom - c.Height - pad * 2;
-                c.Left = x;
-                c.Width = w;
-                x += w + pad;
-            }
-            // btnOK
-            btnRcpOK.Location = btnRcpEdit.Location;
-            btnRcpOK.Size = btnRcpEdit.Size;
-
-            // btnCancel
-            btnRcpCancel.Location = btnRcpDel.Location;
-            btnRcpCancel.Size = btnRcpDel.Size;
-
-            // lblModifyDateTime
-            lblRcp4.Top = btnRcpOK.Top - lblRcp4.Height - pad;
-            lblRcp4.Left = groupBox1rcp.Left;
-            lblRcp4.Width = rcc.Width - lblRcp4.Left * 2;
-            // groupBox1
-            groupBox1rcp.Height = (lblRcp4.Top - pad * 2) - groupBox1rcp.Top;
-            // richbox1
-            richTextBox1rcp.Height = richTextBox1rcp.Bottom - btnRcpDetails.Bottom - pad * 2;
-            // btnDetail
-            rcc = groupBox1rcp.ClientRectangle;
-            btnRcpDetails.Left = rcc.Right - btnRcpDetails.Width - pad * 5;
-            textBox2Rcp.Width = btnRcpDetails.Right - textBox2Rcp.Left;
-#endif
+            ResumeLayout(true);
         }
         #endregion
     }

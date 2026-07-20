@@ -196,7 +196,7 @@ namespace PhotoMachine.UISpace
 
             txtProductBarcode.KeyDown += new KeyEventHandler(txtProductBarcode_KeyDown);
             txtOPBarcode.KeyDown += new KeyEventHandler(txtBarcode_KeyDown);
-            SizeChanged += RunUI_SizeChanged;
+            SizeChanged += (s, e) => autoLayout();
 
             InitializeDataGridView();
         }
@@ -606,36 +606,25 @@ namespace PhotoMachine.UISpace
         #endregion
 
         #region AUTO_LAYOUT
-        void RunUI_SizeChanged(object sender, EventArgs e)
+        void autoLayout()
         {
+            SuspendLayout();
+            
             try
             {
-                _auto_layout();
+                foreach (var c in new Control[] { groupBox2, textBox1, textBox2, textBox3, label4, button1, button2, button6 })
+                {
+                    var rcc = c.Parent.ClientRectangle;
+                    c.Width = rcc.Width - c.Left * 2;
+                }
+                label2.Width = label4.Right - label2.Left;
             }
             catch
             {
             }
-        }
-        void _auto_layout()
-        {
-#if OPT_LETIAN_AUTO_LAYOUT
-            foreach (var c in new Control[] { groupBox2, textBox1, textBox2, textBox3, label4, button1, button2, button6 })
-            {
-                var rcc = c.Parent.ClientRectangle;
-                c.Width = rcc.Width - c.Left * 2;
-            }
-            label2.Width = label4.Right - label2.Left;
-#endif
-        }
-        #endregion
 
-        #region Localization
-        //private string ToChangeLanguage(string eText)
-        //{
-        //    string retStr = eText;
-        //    retStr = LanguageExClass.Instance.GetLanguageText(eText);
-        //    return retStr;
-        //}
+            ResumeLayout(true);
+        }
         #endregion
     }
 }

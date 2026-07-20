@@ -147,8 +147,8 @@ namespace Traveller106
                 this.StartPosition = FormStartPosition.CenterScreen;
                 this.Load += MainForm_Load;
                 this.FormClosed += MainForm_FormClosed;
-                this.SizeChanged += (s, e) => auto_layout();
-                auto_layout();
+                this.SizeChanged += (s, e) => autoLayout();
+                autoLayout();
             }
         }
 
@@ -1329,7 +1329,7 @@ namespace Traveller106
             //        CommonLogClass.Instance.LogMessage("模擬 Cam" + i, Color.OrangeRed);
             //}
         }
-        private void auto_layout()
+        private void autoLayout()
         {
             if (WindowState == FormWindowState.Minimized)
                 return;

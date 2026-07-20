@@ -67,7 +67,7 @@ namespace PhotoMachine.UISpace
         public IniUI()
         {
             InitializeComponent();
-            SizeChanged += IniUI_SizeChanged;
+            SizeChanged += (s, e) => autoLayout();
         }
 
         public void Initial(string uipath,
@@ -377,40 +377,48 @@ namespace PhotoMachine.UISpace
         {
             try
             {
-                _auto_layout();
+                autoLayout();
             }
             catch
             {
             }
         }
 
-        void _auto_layout()
+        void autoLayout()
         {
-#if OPT_LETIAN_AUTO_LAYOUT
-            groupBox1.Dock = DockStyle.Top;
-            propertyGrid1.Dock = DockStyle.Fill;
+            SuspendLayout();
 
-            var rcc = ClientRectangle;
-            int pad = 1;
-            int w = (rcc.Width - pad * 4) / 3;
-            int x = pad;
-
-            foreach (var c in new Control[] { button1, button4, button6 })
+            try
             {
-                c.Top = rcc.Bottom - c.Height - pad * 2;
-                c.Left = x;
-                c.Width = w;
-                x += w + pad;
+                groupBox1.Dock = DockStyle.Top;
+                propertyGrid1.Dock = DockStyle.Fill;
+
+                var rcc = ClientRectangle;
+                int pad = 1;
+                int w = (rcc.Width - pad * 4) / 3;
+                int x = pad;
+
+                foreach (var c in new Control[] { button1, button4, button6 })
+                {
+                    c.Top = rcc.Bottom - c.Height - pad * 2;
+                    c.Left = x;
+                    c.Width = w;
+                    x += w + pad;
+                }
+
+                groupBox1.Height = button1.Top - pad * 2 - groupBox1.Top;
+
+                if (tpnlCover != null && propertyGrid != null)
+                {
+                    tpnlCover.Location = propertyGrid.Location;
+                    tpnlCover.Size = new Size(propertyGrid.Width - 15, propertyGrid.Height);
+                }
+            }
+            catch
+            {
             }
 
-            groupBox1.Height = button1.Top - pad * 2 - groupBox1.Top;
-
-            if (tpnlCover != null && propertyGrid != null)
-            {
-                tpnlCover.Location = propertyGrid.Location;
-                tpnlCover.Size = new Size(propertyGrid.Width - 15, propertyGrid.Height);
-            }
-#endif
+            ResumeLayout(true);
         }
         #endregion
     }

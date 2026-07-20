@@ -187,7 +187,6 @@
     <None Include="ReadMe.md" />
     <Content Include="icon33.ico" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\EzEmptyTrayInspector.Lib\EzAoiEmptyTrayInspector.Lib.csproj">
       <Project>{a1bcdee4-dd9a-43c2-a127-90b727eb0f04}</Project>

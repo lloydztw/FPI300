@@ -30,7 +30,7 @@ namespace EzCamera.GUI
         public QzCameraViewer()
         {
             InitializeComponent();
-            SizeChanged += Viewer_SizeChanged;
+            SizeChanged += (s, e) => adjustErrorLabelPos();
             lblWarning.DoubleClick += LblWarning_DoubleClick;
         }
 
@@ -135,10 +135,6 @@ namespace EzCamera.GUI
         #endregion
 
         #region ERROR_LABEL_ADJUSTMENT
-        private void Viewer_SizeChanged(object sender, EventArgs e)
-        {
-            adjustErrorLabelPos();
-        }
         private void LblWarning_DoubleClick(object sender, EventArgs e)
         {
             showError(null, null);
@@ -160,10 +156,13 @@ namespace EzCamera.GUI
             var rect = ClientRectangle;
             if (rect.Width == 0 || rect.Height == 0)
                 return;
+
+            SuspendLayout();
             lblWarning.Anchor = System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Top;
             lblWarning.Width = rect.Width - 16;
             lblWarning.Left = (rect.Width - lblWarning.Width) / 2;
             lblWarning.Top = 32;
+            ResumeLayout(true);
         }
         #endregion
 
