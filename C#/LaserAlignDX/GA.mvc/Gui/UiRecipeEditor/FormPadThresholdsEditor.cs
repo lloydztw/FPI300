@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.Mvc.Model;
 using LeTian.AoiLib;
@@ -58,7 +59,7 @@ namespace LaserAlignDX.Mvc.Gui
                 numDistTransThreshold.ValueChanged += NumBinaryThreshold_ValueChanged;
 
                 FormClosed += FormPadThresholdsEditor_FormClosed;
-                Load += (s, e) => tryApplyFilters();
+                Load += FormPadThresholdsEditor_Load;
                 _isModified = false;
             }
         }
@@ -91,6 +92,11 @@ namespace LaserAlignDX.Mvc.Gui
         private void FormPadThresholdsEditor_FormClosed(object sender, FormClosedEventArgs e)
         {
             rollback();
+        }
+        private void FormPadThresholdsEditor_Load(object sender, EventArgs e)
+        {
+            QMSG.Translate(this);
+            tryApplyFilters();
         }
         #endregion
 

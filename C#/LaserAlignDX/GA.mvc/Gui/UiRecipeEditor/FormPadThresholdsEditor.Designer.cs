@@ -33,9 +33,9 @@
             this.btnSaveToRcp = new System.Windows.Forms.Button();
             this.numBinaryThreshold = new System.Windows.Forms.NumericUpDown();
             this.label2 = new System.Windows.Forms.Label();
-            this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.numDistTransThreshold = new System.Windows.Forms.NumericUpDown();
             this.label0 = new System.Windows.Forms.Label();
+            this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             ((System.ComponentModel.ISupportInitialize)(this.numBinaryThreshold)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numDistTransThreshold)).BeginInit();
             this.SuspendLayout();
@@ -44,7 +44,7 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(488, 71);
+            this.label1.Location = new System.Drawing.Point(512, 84);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(114, 27);
@@ -67,7 +67,7 @@
             // numBinaryThreshold
             // 
             this.numBinaryThreshold.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numBinaryThreshold.Location = new System.Drawing.Point(632, 68);
+            this.numBinaryThreshold.Location = new System.Drawing.Point(572, 115);
             this.numBinaryThreshold.Margin = new System.Windows.Forms.Padding(4);
             this.numBinaryThreshold.Maximum = new decimal(new int[] {
             255,
@@ -83,26 +83,17 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(488, 112);
+            this.label2.Location = new System.Drawing.Point(512, 168);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(112, 27);
             this.label2.TabIndex = 39;
             this.label2.Text = "去刮痕閥值";
             // 
-            // jezTransImageViewPanel1
-            // 
-            this.jezTransImageViewPanel1.Dock = System.Windows.Forms.DockStyle.Left;
-            this.jezTransImageViewPanel1.Location = new System.Drawing.Point(8, 8);
-            this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
-            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(447, 424);
-            this.jezTransImageViewPanel1.TabIndex = 40;
-            // 
             // numDistTransThreshold
             // 
             this.numDistTransThreshold.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.numDistTransThreshold.Location = new System.Drawing.Point(632, 109);
+            this.numDistTransThreshold.Location = new System.Drawing.Point(572, 199);
             this.numDistTransThreshold.Margin = new System.Windows.Forms.Padding(4);
             this.numDistTransThreshold.Name = "numDistTransThreshold";
             this.numDistTransThreshold.Size = new System.Drawing.Size(152, 33);
@@ -119,6 +110,15 @@
             this.label0.Size = new System.Drawing.Size(112, 27);
             this.label0.TabIndex = 42;
             this.label0.Text = "格點型晶粒";
+            // 
+            // jezTransImageViewPanel1
+            // 
+            this.jezTransImageViewPanel1.Dock = System.Windows.Forms.DockStyle.Left;
+            this.jezTransImageViewPanel1.Location = new System.Drawing.Point(8, 8);
+            this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
+            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(447, 424);
+            this.jezTransImageViewPanel1.TabIndex = 40;
             // 
             // FormPadThresholdsEditor
             // 
