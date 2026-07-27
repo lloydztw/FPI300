@@ -9,6 +9,7 @@
 "menuTestChipInspect" : ["Offline: Chip Locating", "離線測試 晶粒檢測", "", "Offline: ตรวจสอบชิป"],
 "menuTestQRCode" : ["Offline: QRCode Test", "離線測試 QRCode", "", "Offline: QRCode"],
 "menuTestEmptyTrayInspect" : ["Offline: Empty Tray Inspection", "離線測試 空盤檢測", "", "Offline: ตรวจสอบถาดเปล่า"],
+"menuClearResults" : ["Clear Results", "清除檢測結果", "", "ล้างผลการตรวจสอบ"],
 
 "飛拍序號" : ["Fly ID", "飛拍序號", "", "หมายเลขซีเรียลฟลาย ID"],
 

@@ -935,6 +935,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="coconut1.ico" />
+    <None Include="Resources\undo.png" />
     <None Include="Resources\file_png_icon1.png" />
     <None Include="Resources\barcode.png" />
     <None Include="Resources\file_bmp_icon.png" />

@@ -28,8 +28,12 @@ namespace LaserAlignDX.Mvc.Gui
     public partial class JezTransImageViewPanel : UserControl
     {
         #region PRIVATE_DATA
-        CviTransCoordInfo _cviCoordInfo = new CviTransCoordInfo();
+        /// <summary>
+        /// ContextMenuStrip 的語系轉換, 放在 PicIcon_Click 處理.
+        /// 利用 JetEazy.Lang.EzContextMenuTranslator.Translate(_contextMenuStrip);
+        /// </summary>
         ContextMenuStrip _contextMenuStrip = null;
+        CviTransCoordInfo _cviCoordInfo = new CviTransCoordInfo();
         #endregion
 
         public JezTransImageViewPanel()
@@ -66,6 +70,7 @@ namespace LaserAlignDX.Mvc.Gui
                 // 取得滑鼠在螢幕上的當前位置
                 var screenPos = Cursor.Position;
 
+                // 多語系轉換
                 EzContextMenuTranslator.Translate(_contextMenuStrip);
 
                 // 顯示 ContextMenuStrip
@@ -127,6 +132,10 @@ namespace LaserAlignDX.Mvc.Gui
             if (_contextMenuStrip == null)
                 return;
 
+            // ContextMenuStrip 的語系轉換, 放在 PicIcon_Click 處理.
+            // 利用 JetEazy.Lang.EzContextMenuTranslator.Translate(_contextMenuStrip);
+
+#if (OPT_RESERVED)
             if (IsHandleCreated)
             {
                 BeginInvoke((Action)TranslateContextMenu);
@@ -135,8 +144,10 @@ namespace LaserAlignDX.Mvc.Gui
             {
                 HandleCreated += (s, e) => TranslateContextMenu();
             }
+#endif
         }
 
+#if (OPT_RESERVED)
         void PostInitLaguage()
         {
             //QxLang.Instance("gui").LanguageChanged += (s, e) => TranslateContextMenu();
@@ -146,5 +157,6 @@ namespace LaserAlignDX.Mvc.Gui
             //if (_contextMenuStrip != null)
             //    EzContextMenuTranslator.Translate(_contextMenuStrip);
         }
+#endif
     }
 }

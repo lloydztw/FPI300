@@ -419,14 +419,17 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 ccvPanel.menuTestChipInspect.Click += MenuTestChipInspect_Click;
                 ccvPanel.menuTestEmptyTrayInspect.Click += MenuTestEmptyTrayInspect_Click;
                 ccvPanel.menuTestQRCode.Click += MenuTestQRCode_Click;
+                ccvPanel.menuClearResults.Click += MenuClearResults_Click;
 
                 ccvPanel.contextMenuStrip1.Tag = carrierID;
                 ccvPanel.menuLoadImage.Tag = carrierID;
                 ccvPanel.menuTestChipInspect.Tag = carrierID;
                 ccvPanel.menuTestEmptyTrayInspect.Tag = carrierID;
                 ccvPanel.menuTestQRCode.Tag = carrierID;
+                ccvPanel.menuClearResults.Tag = carrierID;
             }
         }
+
         private void ContextMenuStrip1_VisibleChanged(object sender, EventArgs e)
         {
             if (sender is ContextMenuStrip menu)
@@ -490,6 +493,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 ActiveViewer.Reset();
                 LineScanSingleProcess.Instance.Start(ScanInspectMode.QRCODE);
             }
+        }
+        private void MenuClearResults_Click(object sender, EventArgs e)
+        {
+            ActiveViewer?.Reset();
         }
         #endregion
 
