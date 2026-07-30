@@ -410,8 +410,8 @@ namespace LaserAlignDX.AoiModel.V3
                     CMvdLineSegmentF mvdLine;
                     if (true)   // if (!_is2ndRun)
                     {
-                        // 海康線檢(輸出為 cell.cMvdLineSegmentFsOut)
-                        mvdLine = this.LineSegmentRun(mvdLineFinder, borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
+                        // 海康線檢
+                        mvdLine = _RunMvdLineFinder(mvdLineFinder, borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
                     }
                     //(2.1) 海康線檢 II (暫時不使用)
                     else
@@ -421,13 +421,13 @@ namespace LaserAlignDX.AoiModel.V3
                             // 塗掉中段 (1/3) 
                             fill_border_mid_area(cellBmp2, borderQuad, eBorder, Scalar.Black);
                             // 海康線檢(輸出為 cell.cMvdLineSegmentFsOut)
-                            mvdLine = this.LineSegmentRun(mvdLineFinder, borderIdx, cellBmp2, mvdRoi, chipData.ChipQuad2D.Angle);
+                            mvdLine = _RunMvdLineFinder(mvdLineFinder, borderIdx, cellBmp2, mvdRoi, chipData.ChipQuad2D.Angle);
                         }
 
                         // 如果塗掉中段 (1/3) 仍然抓不到, 回過頭使用 原來的方法
                         if (mvdLine == null)
                         {
-                            mvdLine = this.LineSegmentRun(mvdLineFinder, borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
+                            mvdLine = _RunMvdLineFinder(mvdLineFinder, borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
                         }
                     }
 
@@ -454,7 +454,8 @@ namespace LaserAlignDX.AoiModel.V3
                     borderQuad.Offset(cellRoi.X, cellRoi.Y);
                     //(4.2) 更新 LineBorderBoxes;
                     chipData.LineBorderBoxes[borderIdx] = borderQuad.ToBox2D();
-                    ////(4.3) 更新到 cell 舊的 Gaara Data
+
+                    ////(4.3) 更新到 cell 舊的 Gaara Data (廢除)
                     //cell.cMvdShapesForFindLineRegion[borderIdx] = borderQuad.ToCMvdRectangleF();
                 }
 
@@ -1026,18 +1027,16 @@ namespace LaserAlignDX.AoiModel.V3
                     _mvdLineFinders[i] = new MvdFindLineClass();
             }
         }
-        /// <summary>
-        /// 寻找直线
-        /// </summary>
-        CMvdLineSegmentF LineSegmentRun(IMvdLineFinder mvdFindLineClass, int borderIndex, Bitmap bmp, CMvdRectangleF roi, double angleRef = 0)
-        {
-            CMvdLineSegmentF resultLine = null;
 
+        /// <summary>
+        /// 使用海康套件尋找直線
+        /// </summary>
+        CMvdLineSegmentF _RunMvdLineFinder(IMvdLineFinder mvdFindLineClass, int borderIndex, Bitmap bmp, CMvdRectangleF roi, double angleRef = 0)
+        {
             int NP = 4;
 
             //if (mvdFindLineClass == null)
             //    mvdFindLineClass = new MvdFindLineClass();
-
             //borderIndex %= NP;
             //cMvdLineSegmentFsOut[borderIndex] = null;
 
@@ -1086,18 +1085,19 @@ namespace LaserAlignDX.AoiModel.V3
             }
 
             mvdFindLineClass.Background = _xInspect.xCarrierBackground;
-            resultLine = mvdFindLineClass.Run(bmp, roi, sideIndex);
+            var resultLine = mvdFindLineClass.Run(bmp, roi, sideIndex);
 
             //cMvdLineSegmentFsOut[borderIndex] = resultLine;
             return resultLine;
         }
+        
         /// <summary>
         /// 寻找平行线
         /// </summary>
         /// <param name="iSideIndex">哪条边序号</param>
         /// <param name="bmp">输入图片</param>
         /// <param name="r">寻找的ROI</param>
-        void pairLineSegmentRun(int iSideIndex, Bitmap bmp, CMvdRectangleF r)
+        void _RunMvdPairLineFinder(int iSideIndex, Bitmap bmp, CMvdRectangleF r)
         {
             // 停用, 改用新的計算方式 !!!
 #if (OPT_LEGACY)
