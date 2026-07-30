@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Traveller106;
 using VisionDesigner;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
+using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
 
 namespace LaserAlignDX.AoiModel.V3
 {
@@ -50,10 +51,20 @@ namespace LaserAlignDX.AoiModel.V3
         IMicroChipTransform _microTransform;
         #endregion
 
+        #region MVD_TOOLS
+        MvdFindLineClass[] _mvdLineFinders;
+        #endregion
+
         #region RUNTIME_DATA
         GaCellsGroup[] _cellGroups;
         bool _is2ndRun;
         #endregion
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            disposeMvdLineFinders();
+        }
 
         public void SetCellGroups(GaCellsGroup[] cellGroups)
         {
@@ -113,10 +124,11 @@ namespace LaserAlignDX.AoiModel.V3
         {
             if (_microTransform == null)
                 _microTransform = _sysModel.GetMicroTransform(getActiveCarrierID());
+            
             if (_microTransform == null)
                 return;
 
-            RunOneChipMeasurement(cell, cellBmp, ref cellRoi);
+            RunOneChipMeasurement(cell, cellBmp, ref cellRoi, 0);
         }
 
         #region PRIVATE_FUNCTIONS
@@ -140,6 +152,8 @@ namespace LaserAlignDX.AoiModel.V3
             int N_GROUPS = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;
             var groups = _cellGroups != null ? _cellGroups : GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
             #endregion
+
+            prepareMvdLineFinders(Universal.N_THREADS);
 
             if (groups == null || groups.Length == 0)
                 return;
@@ -244,7 +258,7 @@ namespace LaserAlignDX.AoiModel.V3
                 if (go)
                 {
                     //(2) 量測單一晶粒
-                    RunOneChipMeasurement(cell, cellBmp, ref cellRoi);
+                    RunOneChipMeasurement(cell, cellBmp, ref cellRoi, threadIdx);
                     PackMeasureResult(cell);
                     //_TM.END("OneChipMeasurement");
                 }
@@ -365,12 +379,14 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 量測單一晶粒 (直线寻找)
         /// </summary>
-        private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
+        private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, int threadId)
         {
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
             if (chipData == null || chipData.ChipQuad2D == null)
                 return;
+
+            var mvdLineFinder = _mvdLineFinders[threadId % _mvdLineFinders.Length];
 
             #region 邊線處理
             EdgeBorder eBorder = EdgeBorder.Left;
@@ -395,7 +411,7 @@ namespace LaserAlignDX.AoiModel.V3
                     if (true)   // if (!_is2ndRun)
                     {
                         // 海康線檢(輸出為 cell.cMvdLineSegmentFsOut)
-                        mvdLine = cell.LineSegmentRun(borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
+                        mvdLine = this.LineSegmentRun(mvdLineFinder, borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
                     }
                     //(2.1) 海康線檢 II (暫時不使用)
                     else
@@ -405,13 +421,13 @@ namespace LaserAlignDX.AoiModel.V3
                             // 塗掉中段 (1/3) 
                             fill_border_mid_area(cellBmp2, borderQuad, eBorder, Scalar.Black);
                             // 海康線檢(輸出為 cell.cMvdLineSegmentFsOut)
-                            mvdLine = cell.LineSegmentRun(borderIdx, cellBmp2, mvdRoi, chipData.ChipQuad2D.Angle);
+                            mvdLine = this.LineSegmentRun(mvdLineFinder, borderIdx, cellBmp2, mvdRoi, chipData.ChipQuad2D.Angle);
                         }
 
                         // 如果塗掉中段 (1/3) 仍然抓不到, 回過頭使用 原來的方法
                         if (mvdLine == null)
                         {
-                            mvdLine = cell.LineSegmentRun(borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
+                            mvdLine = this.LineSegmentRun(mvdLineFinder, borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
                         }
                     }
 
@@ -869,7 +885,7 @@ namespace LaserAlignDX.AoiModel.V3
             }
         }
 
-#if(OPT_OLD_CODE)
+#if (OPT_OLD_CODE)
         /// <summary>
         /// LETIAN: 读码测试 搬移至此.
         /// caller 負責 bmpInputImage 生命
@@ -988,6 +1004,306 @@ namespace LaserAlignDX.AoiModel.V3
             }
         }
 #endif
+        #endregion
+
+        #region MVD_LINE_SEGMENTS_FUNCTIONS
+        private void disposeMvdLineFinders()
+        {
+            if (_mvdLineFinders != null)
+            {
+                foreach (var finder in _mvdLineFinders)
+                    finder?.Dispose();
+                _mvdLineFinders = null;
+            }
+        }
+        private void prepareMvdLineFinders(int NThreads)
+        {
+            if (_mvdLineFinders == null || _mvdLineFinders.Length < NThreads)
+            {
+                disposeMvdLineFinders();
+                _mvdLineFinders = new MvdFindLineClass[NThreads];
+                for (int i = 0; i < NThreads; i++)
+                    _mvdLineFinders[i] = new MvdFindLineClass();
+            }
+        }
+        /// <summary>
+        /// 寻找直线
+        /// </summary>
+        CMvdLineSegmentF LineSegmentRun(IMvdLineFinder mvdFindLineClass, int borderIndex, Bitmap bmp, CMvdRectangleF roi, double angleRef = 0)
+        {
+            CMvdLineSegmentF resultLine = null;
+
+            int NP = 4;
+
+            //if (mvdFindLineClass == null)
+            //    mvdFindLineClass = new MvdFindLineClass();
+
+            //borderIndex %= NP;
+            //cMvdLineSegmentFsOut[borderIndex] = null;
+
+            //>>> 根據 angleRef 將 borderIndex 正規化
+            int sideIndex;
+            if (angleRef > 70.0)
+            {
+                sideIndex = (borderIndex + 1) % NP;
+            }
+            else if (angleRef < -70.0)
+            {
+                sideIndex = borderIndex == 0 ? NP - 1 : (borderIndex - 1) % NP;
+            }
+            else
+            {
+                sideIndex = borderIndex;
+            }
+
+            // 左
+            if (sideIndex == 0)
+            {
+                mvdFindLineClass.bPositive = _xInspect.bPositive0;
+                mvdFindLineClass.bFindOrient = true;
+                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity0;
+            }
+            // 上
+            else if (sideIndex == 1)
+            {
+                mvdFindLineClass.bPositive = _xInspect.bPositive1;
+                mvdFindLineClass.bFindOrient = false;
+                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity1;
+            }
+            // 右
+            else if (sideIndex == 2)
+            {
+                mvdFindLineClass.bPositive = _xInspect.bPositive2;
+                mvdFindLineClass.bFindOrient = true;
+                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity2;
+            }
+            // 下
+            else if (sideIndex == 3)
+            {
+                mvdFindLineClass.bPositive = _xInspect.bPositive3;
+                mvdFindLineClass.bFindOrient = false;
+                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity3;
+            }
+
+            mvdFindLineClass.Background = _xInspect.xCarrierBackground;
+            resultLine = mvdFindLineClass.Run(bmp, roi, sideIndex);
+
+            //cMvdLineSegmentFsOut[borderIndex] = resultLine;
+            return resultLine;
+        }
+        /// <summary>
+        /// 寻找平行线
+        /// </summary>
+        /// <param name="iSideIndex">哪条边序号</param>
+        /// <param name="bmp">输入图片</param>
+        /// <param name="r">寻找的ROI</param>
+        void pairLineSegmentRun(int iSideIndex, Bitmap bmp, CMvdRectangleF r)
+        {
+            // 停用, 改用新的計算方式 !!!
+#if (OPT_LEGACY)
+            if (mvdPairLineClass == null)
+                mvdPairLineClass = new MvdPairLineClass();
+            cMvdLineSegmentFsOut[iSideIndex] = null;
+            CPairLineFindResult cPairLineFindResult = null;
+            if (iSideIndex == 0)
+            {
+                mvdPairLineClass.bPositive = xInspect.bPositive0;
+                mvdPairLineClass.bFindOrient = true;
+                //mvdPairLineClass.bEdgePolarity = xInspect.bEdgePolarity0;
+                cPairLineFindResult = mvdPairLineClass.Run(bmp, r);
+                if (cPairLineFindResult != null)
+                {
+                    #region 左边距
+
+                    try
+                    {
+                        if (cPairLineFindResult.Line0 != null && cPairLineFindResult.Line1 != null)
+                        {
+                            // 使用 MVD VisionDesigner Tool
+                            using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                            {
+                                cL2LMeasureToolObj.BasicParam.Line1 = cPairLineFindResult.Line0;
+                                cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
+                                cL2LMeasureToolObj.Run();
+                                var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                                DisLeft = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX;
+                            }
+                        }
+                    }
+                    catch (MvdException ex)
+                    {
+                        //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+                        LtDebug.LOG.Error(ex, "左边距 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        //Console.WriteLine("Fail with error " + ex.Message);
+                        LtDebug.LOG.Error(ex, "左边距 異常");
+                    }
+
+                    #endregion
+
+                    if (xInspect.bPositive0)
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line0;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line1;
+                    }
+                    else
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line1;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line0;
+                    }
+                }
+            }
+            else if (iSideIndex == 1)
+            {
+                mvdPairLineClass.bPositive = xInspect.bPositive1;
+                mvdPairLineClass.bFindOrient = false;
+                //mvdPairLineClass.bEdgePolarity = xInspect.bEdgePolarity1;
+                cPairLineFindResult = mvdPairLineClass.Run(bmp, r);
+                if (cPairLineFindResult != null)
+                {
+                    #region 上边距
+
+                    try
+                    {
+                        if (cPairLineFindResult.Line0 != null && cPairLineFindResult.Line1 != null)
+                        {
+                            // 使用 MVD VisionDesigner Tool
+                            using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                            {
+                                cL2LMeasureToolObj.BasicParam.Line1 = cPairLineFindResult.Line0;
+                                cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
+                                cL2LMeasureToolObj.Run();
+                                var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                                DisTop = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY;
+                            }
+                        }
+                    }
+                    catch (MvdException ex)
+                    {
+                        //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+                        LtDebug.LOG.Error(ex, "上边距 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        //Console.WriteLine("Fail with error " + ex.Message);
+                        LtDebug.LOG.Error(ex, "上边距 異常");
+                    }
+
+                    #endregion
+                    if (xInspect.bPositive1)
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line0;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line1;
+                    }
+                    else
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line1;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line0;
+                    }
+                }
+            }
+            else if (iSideIndex == 2)
+            {
+                mvdPairLineClass.bPositive = xInspect.bPositive2;
+                mvdPairLineClass.bFindOrient = true;
+                //mvdPairLineClass.bEdgePolarity = xInspect.bEdgePolarity2;
+                cPairLineFindResult = mvdPairLineClass.Run(bmp, r);
+                if (cPairLineFindResult != null)
+                {
+                    #region 右边距
+
+                    try
+                    {
+                        if (cPairLineFindResult.Line0 != null && cPairLineFindResult.Line1 != null)
+                        {
+                            // 使用 MVD VisionDesigner Tool
+                            using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                            {
+                                cL2LMeasureToolObj.BasicParam.Line1 = cPairLineFindResult.Line0;
+                                cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
+                                cL2LMeasureToolObj.Run();
+                                var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                                DisRight = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionX;
+                            }
+                        }
+                    }
+                    catch (MvdException ex)
+                    {
+                        //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+                        LtDebug.LOG.Error(ex, "右边距 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        //Console.WriteLine("Fail with error " + ex.Message);
+                        LtDebug.LOG.Error(ex, "右边距 異常");
+                    }
+
+                    #endregion
+                    if (xInspect.bPositive2)
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line1;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line0;
+                    }
+                    else
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line0;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line1;
+                    }
+                }
+            }
+            else if (iSideIndex == 3)
+            {
+                mvdPairLineClass.bPositive = xInspect.bPositive3;
+                mvdPairLineClass.bFindOrient = false;
+                //mvdPairLineClass.bEdgePolarity = xInspect.bEdgePolarity3;
+                cPairLineFindResult = mvdPairLineClass.Run(bmp, r);
+                if (cPairLineFindResult != null)
+                {
+                    #region 下边距
+
+                    try
+                    {
+                        if (cPairLineFindResult.Line0 != null && cPairLineFindResult.Line1 != null)
+                        {
+                            // 使用 MVD VisionDesigner Tool
+                            using (var cL2LMeasureToolObj = new VisionDesigner.L2LMeasure.CL2LMeasureTool())
+                            {
+                                cL2LMeasureToolObj.BasicParam.Line1 = cPairLineFindResult.Line0;
+                                cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
+                                cL2LMeasureToolObj.Run();
+                                var cL2LMeasureRes = cL2LMeasureToolObj.Result;
+                                DisBottom = cL2LMeasureRes.VerticalAbsDist * INI.Instance.ImageResolutionY;
+                            }
+                        }
+                    }
+                    catch (MvdException ex)
+                    {
+                        //Console.WriteLine("Fail with ErrorCode: 0x" + ex.ErrorCode.ToString("X"));
+                        LtDebug.LOG.Error(ex, "下边距 異常: ErrorCode = 0x{0:X}", ex.ErrorCode);
+                    }
+                    catch (System.Exception ex)
+                    {
+                        //Console.WriteLine("Fail with error " + ex.Message);
+                        LtDebug.LOG.Error(ex, "下边距 異常");
+                    }
+
+                    #endregion
+                    if (xInspect.bPositive3)
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line1;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line0;
+                    }
+                    else
+                    {
+                        cMvdLineSegmentFsOut[iSideIndex] = cPairLineFindResult.Line0;
+                        cMvdLineSegmentFsInSide[iSideIndex] = cPairLineFindResult.Line1;
+                    }
+                }
+            }
+#endif
+        }
         #endregion
 
         #region PRIVATE_HELPER_FUNCTIONS

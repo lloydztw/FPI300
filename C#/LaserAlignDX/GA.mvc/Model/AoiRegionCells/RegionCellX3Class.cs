@@ -1,19 +1,16 @@
 ﻿using JetEazy.QvMath;
-using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using Traveller106;
-using VisionDesigner;
-using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
 
 namespace LaserAlignDX.OPSpace
 {
     public class RegionCellX3Class : IDisposable
     {
-        #region MVD_TOOLS
+        #region NOT_USED_LEGACY_MVD_TOOLS
         //CPositionFixTool cPositionFixToolObj = null;// new VisionDesigner.PositionFix.CPositionFixTool();
         //CImageArithmeticTool cImageArithmeticToolObj = null;// new CImageArithmeticTool();
         //VisionDesigner.ImageBinary.CImageBinaryTool cImageBinaryToolObj = null;// new VisionDesigner.ImageBinary.CImageBinaryTool();
@@ -21,8 +18,8 @@ namespace LaserAlignDX.OPSpace
         //VisionDesigner.BlobFind.CBlobFindTool cBlobFindToolObj = null;// new VisionDesigner.BlobFind.CBlobFindTool();
         //VisionDesigner.ImageAffineTransform.CImageAffineTransformTool cImageAffineTransformToolObj = null;
         //Mvd2DReaderClass mvd2DReader = null;// new Mvd2DReaderClass();
-        MvdFindLineClass mvdFindLineClass = null;
-        MvdPairLineClass mvdPairLineClass = null;
+        //MvdFindLineClass mvdFindLineClass = null;
+        //MvdPairLineClass mvdPairLineClass = null;
         //CMvdRectangleF MvdRunPositionFix;
         #endregion
 
@@ -37,10 +34,7 @@ namespace LaserAlignDX.OPSpace
         public RegionCellX3Class()
         {
         }
-        ~RegionCellX3Class()
-        {
-            Dispose();
-        }
+
         public void Dispose()
         {
             //cPositionFixToolObj?.Dispose();
@@ -55,10 +49,10 @@ namespace LaserAlignDX.OPSpace
             //cBlobFindToolObj = null;
             //mvd2DReader?.Dispose();
             //mvd2DReader = null;
-            mvdFindLineClass?.Dispose();
-            mvdFindLineClass = null;
-            mvdPairLineClass?.Dispose();
-            mvdPairLineClass = null;
+            //mvdFindLineClass?.Dispose();
+            //mvdFindLineClass = null;
+            //mvdPairLineClass?.Dispose();
+            //mvdPairLineClass = null;
             //cImageAffineTransformToolObj?.Dispose();
             //cImageAffineTransformToolObj = null;
 
@@ -173,7 +167,7 @@ namespace LaserAlignDX.OPSpace
 #endif
         #endregion
 
-        #region IMAGE_FILE_DUMP_SETTINGS
+        #region NOT_USED_LEGACY_IMAGE_FILE_DUMP_SETTINGS
         //public static bool IsSaveDebugPicture => _INI.IsSaveTestImage;
         //public static string SaveDebugPath { get; set; } = "D:\\log\\DebugImage";
         #endregion
@@ -398,7 +392,8 @@ namespace LaserAlignDX.OPSpace
 #endif
         #endregion
 
-        #region MVD_LINE_SEGMENTS
+        #region NOT_USED_LEGACY_MVD_LINE_SEGMENTS
+#if (OPT_NOT_USED_LEGACY)
         /// <summary>
         /// 寻找直线
         /// </summary>
@@ -677,6 +672,7 @@ namespace LaserAlignDX.OPSpace
             }
 #endif
         }
+#endif
         #endregion
 
         #region RUNTIME_QRCODE_RESULT_DATA
