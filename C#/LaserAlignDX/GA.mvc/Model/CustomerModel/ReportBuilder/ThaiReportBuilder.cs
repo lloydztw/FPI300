@@ -212,7 +212,7 @@ namespace LaserAlignDX.Model
             sb.Append(", ").AppendPointF(isSkip ? PointF.Empty : cell.Sur1);
             sb.Append(", ").AppendPointF(isSkip ? PointF.Empty : cell.Sur2);
 
-            sb.Append(", ").Append(isSkip || cell.RunCodeInfo == null ? "" : cell.RunCodeInfo.Content);
+            sb.Append(", ").Append(""); // isSkip || cell.RunCodeInfo == null ? "" : cell.RunCodeInfo.Content);
             //sb.Append(", ").Append(isSkip ? "" : cell.SetBarcodeStr);
 
             sb.AppendLine();

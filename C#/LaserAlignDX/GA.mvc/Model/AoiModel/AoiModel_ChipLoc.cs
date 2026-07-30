@@ -723,7 +723,7 @@ namespace LaserAlignDX.AoiModel.V3
                         //(4.1) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
                         var chipQuad2D = chipData.ChipQuad2D;
                         var chipCentroid = chipQuad2D.Center;
-                        cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
+                        //cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
 
                         //(4.2) DEBUG_STRING
                         #region 加入_DEBUG_STRING
@@ -787,7 +787,7 @@ namespace LaserAlignDX.AoiModel.V3
                         //(6.5) 只簡單記入 ChipData
                         var chipQuad2D = chipData.ChipQuad2D;
                         var chipCentroid = chipQuad2D.Center;
-                        cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
+                        //cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
                         cell.ChipData = chipData;
                         cell.ChipData.ChipCoords.Centroid = _transCP?.Trans(chipCentroid);
                         //>>> cell.ChipData.ChipCoords.Angle = cell.RunAngle;
