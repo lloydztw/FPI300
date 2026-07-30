@@ -13,14 +13,12 @@
  */
 #endregion
 
-
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Transform;
-using JetEazy.Utils;
 using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
@@ -29,12 +27,9 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using Traveller106;
 using _TM = LeTian.AoiLib.LtDebug;
-
 
 namespace LaserAlignDX.AoiModel.V3
 {
@@ -92,13 +87,14 @@ namespace LaserAlignDX.AoiModel.V3
                 ResetCellsResultData();
 
                 //(2) 準備資料夾
-                string imgLogPath = GetLogPath(this.FileBarcodeStr);
+                string imgLogPath; 
                 #region PREPARE_PATH
-                if (INI.Instance.IsSaveTestImage)
-                {
-                    if (!Directory.Exists(imgLogPath))
-                        Directory.CreateDirectory(imgLogPath);
-                }
+                //if (INI.Instance.IsSaveTestImage)
+                //{
+                //    if (!Directory.Exists(imgLogPath))
+                //        Directory.CreateDirectory(imgLogPath);
+                //}
+                imgLogPath = INI.Instance.IsSaveTestImage ? GetLogPath(this.FileBarcodeStr) : null;
                 #endregion
 
                 //(3) 取得座標轉換
@@ -127,7 +123,7 @@ namespace LaserAlignDX.AoiModel.V3
 
                 //(9) 異步輸出 Debug 數據
                 markFileTimeTag();
-                saveDebugDataAsync(bmpFullfov, null, imgLogPath);
+                //saveDebugDataAsync(bmpFullfov, null, imgLogPath);
 
                 //(10) 標記終止計時
                 markRunEnd(true);
@@ -693,16 +689,18 @@ namespace LaserAlignDX.AoiModel.V3
                 //(0) 進度條事件
                 fire_AoiProgressing(cell);
 
-                //(1) 清除上一次結果 (由外部清除!)
+                //(1) 清除上一次結果 (改由外部清除!)
                 //>>> cell.Reset();
 
                 //(2) 異步保存 Cell 圖像檔案
-                if (INI.Instance.IsSaveTestImage && imgPath != null)
-                {
-                    cell.IsSaveDebugPicture = true;
-                    cell.SaveDebugPath = imgPath;
-                    saveCellBmpAsync(cellBmp, cell);
-                }
+                //if (INI.Instance.IsSaveTestImage && imgPath != null)
+                //{
+                //    cell.IsSaveDebugPicture = true;
+                //    cell.SaveDebugPath = imgPath;
+                //    saveCellBmpAsync(cellBmp, cell);
+                //}
+                if (imgPath != null)
+                    AsyncSaveCellBmp(cellBmp, cell);
 
                 //(3) 執行像測 或 使用原有的 cell.ChipData
                 bool ok;
@@ -1093,8 +1091,9 @@ namespace LaserAlignDX.AoiModel.V3
         /// LETIAN: 非同步保存 cellBmp.
         /// caller 負責 cellBmp 生命
         /// </summary>
-        void saveCellBmpAsync(Bitmap cellBmp, RegionCellX3Class cell)
+        void AsyncSaveCellBmp(Bitmap cellBmp, RegionCellX3Class cell)
         {
+#if (OPT_LEGACY)
             if (cellBmp == null || cell == null)
                 return;
 
@@ -1132,8 +1131,11 @@ namespace LaserAlignDX.AoiModel.V3
             },
                 new object[] { cellBmp.Clone(), fullFileName }
             );
+#endif
+            _lotDataHolder.AsyncSaveCellBmp(cellBmp, cell);
         }
 
+#if (OPT_ABANDONED_CODE)
         /// <summary>
         /// LETIAN: 非同步保存 Debug 數據 搬移至此.
         /// caller 負責 bmpFullfov 生命
@@ -1152,17 +1154,17 @@ namespace LaserAlignDX.AoiModel.V3
                 {
                     using (Bitmap bmpBig = (Bitmap)arg)
                     {
-                        //(1) SAVE debugCellCenterStr
-                        if (INI.Instance.IsSaveTestImage && debugDumpPath != null && debugCellCenterStr != null)
-                        {
+                    //(1) SAVE debugCellCenterStr
+                    if (INI.Instance.IsSaveTestImage && debugDumpPath != null && debugCellCenterStr != null)
+                    {
                             //>>> GaUtil.SaveData(debugCellCenterStr, debugDumpPath + $"\\PositionFix\\DEBUG_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt");
 
                             if (!System.IO.Directory.Exists(debugDumpPath))
                                 System.IO.Directory.CreateDirectory(debugDumpPath);
 
-                            string fileName = System.IO.Path.Combine(debugDumpPath, GetLotFileName(LotId, ".txt"));
-                            GaUtil.SaveData(debugCellCenterStr, fileName);
-                        }
+                        string fileName = System.IO.Path.Combine(debugDumpPath, GetLotFileName(LotId, ".txt"));
+                        GaUtil.SaveData(debugCellCenterStr, fileName);
+                    }
 
 #if (OPT_REPLACED_BY_PARENT)
                         //(2) SAVE debug Bmp
@@ -1171,7 +1173,7 @@ namespace LaserAlignDX.AoiModel.V3
                             //>>> GaImageUtil.SaveImageWithQuality(ezImage.Bitmap, $"{m_PicResultPath}\\{m_FileName}", INI.Instance.ImageQuality);
                             string fileName = GetDebugBmpFileName();
                             GaImageUtil.SaveImageWithQuality(bmpBig, fileName, INI.Instance.ImageQuality);
-                        }
+                }
 
                         //(3) SAVE debug OrgBmp
                         if (INI.Instance.IsSaveDebugOrgBmp)
@@ -1192,6 +1194,7 @@ namespace LaserAlignDX.AoiModel.V3
                 bmpFullfov.Clone()
             );
         }
+#endif
 
         /// <summary>
         /// 準備 Template Matchers

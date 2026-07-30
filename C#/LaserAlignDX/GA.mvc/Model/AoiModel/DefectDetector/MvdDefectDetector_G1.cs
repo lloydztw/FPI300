@@ -24,6 +24,7 @@ using OpenCvSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using Traveller106;
 using VisionDesigner;
 using VisionDesigner.ImageArithmetic;
 
@@ -38,6 +39,7 @@ namespace LaserAlignDX.Model.Defects.G1
         #region GLOBAL_MESS
         RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         InspectX3ParaClass _xInspect => _xRecipe.InspectParams;
+        INI _ini => INI.Instance;
         #endregion
 
         #region MVD_TOOLS
@@ -332,7 +334,7 @@ namespace LaserAlignDX.Model.Defects.G1
             }
 
             // 保存調試用的圖片檔 (包含形態學處理後的結果，利於工程師現場調機)
-            if (cell.IsSaveDebugPicture && (blobMvdRectFNGList.Count > 0 || isException))
+            if (_ini.IsSaveTestImage && (blobMvdRectFNGList.Count > 0 || isException))
             {
                 _DUMP_IMAGES(cell, cBlobFindRes);
             }
@@ -344,17 +346,27 @@ namespace LaserAlignDX.Model.Defects.G1
         void _DUMP_IMAGES(RegionCellX3Class cell, VisionDesigner.BlobFind.CBlobFindResult cBlobFindRes)
         {
             // 保存調試用的圖片檔 (包含形態學處理後的結果，利於工程師現場調機)
-            string dumpFolder = System.IO.Path.Combine(cell.SaveDebugPath, "Detect");
-            if (!System.IO.Directory.Exists(dumpFolder))
-                System.IO.Directory.CreateDirectory(dumpFolder);
 
-            string fileStem = System.IO.Path.Combine(dumpFolder, cell.lblName);
-            _cImageArithmeticTool?.InputImage1?.SaveImage(fileStem + "_Template.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
-            _cImageArithmeticTool?.InputImage2?.SaveImage(fileStem + "_Run.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
-            _cImageBinaryTool?.Result?.OutputImage?.SaveImage(fileStem + "_Diff_Binary.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
-            _cImageMorphTool?.Result?.OutputImage?.SaveImage(fileStem + "_Diff_MorphOpen.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP); // 新增儲存開運算圖
-            _cBlobFindTool?.RegionImage?.SaveImage(fileStem + "_MaskRegion.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
-            cBlobFindRes?.BlobImage?.SaveImage(fileStem + "_BlobResult.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+            //string dumpFolder = System.IO.Path.Combine(RegionCellX3Class.SaveDebugPath, "Detect");
+            //JetEazy.IO.QxPathUtility.InitDirectory(dumpFolder);
+
+            ////string fileStem = System.IO.Path.Combine(dumpFolder, cell.lblName);
+            //string fileStem = $"Cell_{cell.Index}@{cell.CellRow}_{cell.CellCol}";
+
+            //_cImageArithmeticTool?.InputImage1?.SaveImage(fileStem + "_Template.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+            //_cImageArithmeticTool?.InputImage2?.SaveImage(fileStem + "_Run.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+            //_cImageBinaryTool?.Result?.OutputImage?.SaveImage(fileStem + "_Diff_Binary.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+            //_cImageMorphTool?.Result?.OutputImage?.SaveImage(fileStem + "_Diff_MorphOpen.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP); // 新增儲存開運算圖
+            //_cBlobFindTool?.RegionImage?.SaveImage(fileStem + "_MaskRegion.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+            //cBlobFindRes?.BlobImage?.SaveImage(fileStem + "_BlobResult.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
+
+            var dumper = LotDataHolder.Instance;
+            dumper.DumpImage(cell, _cImageArithmeticTool?.InputImage1, "Defects", "Template");
+            dumper.DumpImage(cell, _cImageArithmeticTool?.InputImage2, "Defects", "Scene");
+            dumper.DumpImage(cell, _cImageBinaryTool?.Result?.OutputImage, "Defects", "Diff-Binary");
+            dumper.DumpImage(cell, _cImageMorphTool?.Result?.OutputImage, "Defects", "Diff-MorphOpen");
+            dumper.DumpImage(cell, _cBlobFindTool?.RegionImage, "Defects", "MaskRegion");
+            dumper.DumpImage(cell, cBlobFindRes?.BlobImage, "Defects", "BlobResult");
         }
         #endregion
     }

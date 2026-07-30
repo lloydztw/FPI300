@@ -13,7 +13,6 @@
  */
 #endregion
 
-
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
@@ -33,7 +32,6 @@ using System.Threading.Tasks;
 using Traveller106;
 using VisionDesigner;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
-
 
 namespace LaserAlignDX.AoiModel.V3
 {
@@ -56,19 +54,6 @@ namespace LaserAlignDX.AoiModel.V3
         GaCellsGroup[] _cellGroups;
         bool _is2ndRun;
         #endregion
-
-#if(OPT_OLD_CODE)
-        public bool QrUsed
-        {
-            get;
-            set;
-        }
-        public bool QrJudged
-        {
-            get;
-            set;
-        }
-#endif
 
         public void SetCellGroups(GaCellsGroup[] cellGroups)
         {
@@ -269,7 +254,7 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 量測單一晶粒 (直线寻找)
         /// </summary>
-        private void _RunOneChipMeasurement_000(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
+        private void __RunOneChipMeasurement_000(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
         {
 #if(OPT_OLD_CODE)
             // 取得 上一輪 晶粒定位 的結果 (chipData)
@@ -441,6 +426,7 @@ namespace LaserAlignDX.AoiModel.V3
                     //    cell.ChipData.LineSegments[i] = lines[i];
                     //}
                     #endregion
+
                     var line = mvdLine?.ToLineSegment();
                     //(3.1) 加回 ROI Offset
                     line?.Offset(cellRoi.X, cellRoi.Y);
@@ -455,6 +441,8 @@ namespace LaserAlignDX.AoiModel.V3
                     ////(4.3) 更新到 cell 舊的 Gaara Data
                     //cell.cMvdShapesForFindLineRegion[borderIdx] = borderQuad.ToCMvdRectangleF();
                 }
+
+                AsyncDumpLineSegmentsData(cell, ref cellRoi);
             }
             catch (Exception ex)
             {
@@ -1057,6 +1045,113 @@ namespace LaserAlignDX.AoiModel.V3
         {
             var v = p2 - p1;
             return v / v.NormLength;
+        }
+        #endregion
+
+        #region PRIVATE_DUMP_FUNCTIONS
+        /// <summary>
+        /// LETIAN: 非同步保存 邊框數據
+        /// </summary>
+        void AsyncDumpLineSegmentsData(RegionCellX3Class cell, ref RectangleF cellRoi)
+        {
+#if (OPT_LEGACY)
+            if (cell == null)
+                return;
+
+            var lineBorderBoxes = cell?.ChipData?.LineBorderBoxes;
+            var lineSegments = cell?.ChipData?.LineSegments;
+            if (lineBorderBoxes == null)
+                return;
+
+            var lineBorderBoxesA = Array.ConvertAll(lineBorderBoxes, lb => lb?.Clone());
+            var lineSegmentsA = lineSegments != null ?
+                                Array.ConvertAll(lineSegments, ls => ls?.Clone()) :
+                                null;
+
+            string dumpFolder = System.IO.Path.Combine(RegionCellX3Class.SaveDebugPath, "PositionFix");
+            string fname = $"Cell_{cell.Index}@{cell.CellRow}_{cell.CellCol}_lines.json";
+            string fullFileName = System.IO.Path.Combine(dumpFolder, fname);
+
+            ThreadPool.QueueUserWorkItem(arg =>
+            {
+                try
+                {
+                    object[] args = (object[])arg;
+                    string fileName = args[0] as string;
+                    lineBorderBoxesA = args[1] as QvBox2D[];
+                    lineSegmentsA = args[2] as EzLSD.LineSegment[];
+                    var roi = (RectangleF)args[3];
+
+                    var lines = new List<string>();
+                    if (lineBorderBoxesA != null)
+                    {
+                        int idx = 0;
+                        foreach (var lb in lineBorderBoxesA)
+                        {
+                            var sb = new StringBuilder();
+                            sb.Append($"\"lineBorderBox_{idx}\" : [");
+                            if (lb != null)
+                            {
+                                // OFFSET
+                                var center = lb.Center;
+                                var cx = center.X - roi.X;
+                                var cy = center.Y - roi.Y;
+                                lb.SetCenter(cx, cy);
+                                // dump CORNERS
+                                var pts = lb.Corners;
+                                foreach (var pt in pts)
+                                {
+                                    sb.Append(pt.X).Append(",").Append(pt.Y).Append(",");
+                                }
+                            }
+                            lines.Add(sb.ToString().TrimEnd(',') + "],");
+                            idx++;
+                        }
+                    }
+
+                    if (lineSegmentsA != null)
+                    {
+                        int idx = 0;
+                        foreach (var ls in lineSegmentsA)
+                        {
+                            var sb = new StringBuilder();
+                            sb.Append($"\"lineSegment_{idx}\" : [");
+                            if (ls != null)
+                            {
+                                // OFFSET
+                                ls.Offset(-roi.X, -roi.Y);
+                                // dump P1 P2
+                                if (ls.P1 != null && ls.P2 != null)
+                                {
+                                    foreach (var pt in new[] {ls.P1, ls.P2})
+                                    {
+                                        sb.Append(pt.X).Append(",").Append(pt.Y).Append(",");
+                                    }
+                                }
+                            }
+                            lines.Add(sb.ToString().TrimEnd(',') + "],");
+                            idx++;
+                        }
+                    }
+
+                    if (lines.Count > 0)
+                    {
+                        lines[lines.Count - 1] = lines[lines.Count - 1].TrimEnd(',');
+                        lines.Insert(0, "{");
+                        lines.Add("}");
+                    }
+
+                    System.IO.File.WriteAllLines(fileName, lines, Encoding.UTF8);
+                }
+                catch (Exception ex)
+                {
+                    _LOG_ERROR(ex, $"{GetType().Name}.AsyncDumpLineSegmentsData");
+                }
+            },
+                new object[] { fullFileName, lineBorderBoxesA, lineSegmentsA, cellRoi }
+            );
+#endif
+            _lotDataHolder.AsyncDumpLineSegmentsData(cell, ref cellRoi);
         }
         #endregion
     }

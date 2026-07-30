@@ -6,6 +6,7 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using Traveller106;
 using VisionDesigner;
 using VisionDesigner.Code2DReader;
 using VisionDesigner.PositionFix;
@@ -37,6 +38,7 @@ namespace LaserAlignDX.OPSpace
         {
             get => RecipeFPIX3Class.Instance.InspectParams;
         }
+        static INI _INI => INI.Instance;
         #endregion
 
         public RegionCellX3Class()
@@ -179,8 +181,8 @@ namespace LaserAlignDX.OPSpace
         #endregion
 
         #region IMAGE_FILE_DUMP_SETTINGS
-        public bool IsSaveDebugPicture = false;
-        public string SaveDebugPath = $"D:\\log\\DebugImage";
+        //public static bool IsSaveDebugPicture => _INI.IsSaveTestImage;
+        //public static string SaveDebugPath { get; set; } = "D:\\log\\DebugImage";
         #endregion
 
         #region OLD_CODE
@@ -1081,7 +1083,7 @@ namespace LaserAlignDX.OPSpace
             RunX = 0;
             RunY = 0;
             RunAngle = 0;
-            IsSaveDebugPicture = false;
+            //IsSaveDebugPicture = false;
 
             //int i = 0;
             //while (i < 4)
@@ -1369,14 +1371,16 @@ namespace LaserAlignDX.OPSpace
                 #region GENERATE_MVD_GUI_COMPONENT_UGLY_CODE
                 DrawBarcodePosition = null;
 
-                if (IsSaveDebugPicture)
+                if (_INI.IsSaveTestImage)
                 {
-                    string dumpFolder = System.IO.Path.Combine(SaveDebugPath, "Code");
-                    if (!System.IO.Directory.Exists(dumpFolder))
-                        System.IO.Directory.CreateDirectory(dumpFolder);
+                    //string dumpFolder = System.IO.Path.Combine(SaveDebugPath, "Code");
+                    //JetEazy.IO.QxPathUtility.InitDirectory(dumpFolder);
+                    ////string fileName = System.IO.Path.Combine(dumpFolder, $"{lblName}_Run.bmp");
+                    //string fname = $"Cell_{this.Index}@{this.CellRow}_{this.CellCol}.bmp";
+                    //string fileName = System.IO.Path.Combine(dumpFolder, fname);
+                    //mvd2DReader.MvdRunImage.SaveImage(fileName, MVD_FILE_FORMAT.MVD_FILE_BMP);
 
-                    string fileName = System.IO.Path.Combine(dumpFolder, $"{lblName}_Run.bmp");
-                    mvd2DReader.MvdRunImage.SaveImage(fileName, MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    LotDataHolder.Instance.DumpImage(this, mvd2DReader.MvdRunImage, "QRCode", "QRCode");
                 }
 
                 #endregion
