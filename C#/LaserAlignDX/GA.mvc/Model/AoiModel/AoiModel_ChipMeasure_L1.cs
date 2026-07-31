@@ -27,8 +27,12 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Forms;
+using System.Windows.Media;
 using Traveller106;
 using VisionDesigner;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
@@ -41,6 +45,10 @@ namespace LaserAlignDX.AoiModel.V3.L1
     /// </summary>
     public class AoiModel_ChipMeasure : AoiModelBase
     {
+        static bool N_THREADS_ENABLED => GlobalConfig.N_THREADS_ENABLED && false;
+        static int N_THREADS => GlobalConfig.N_THREADS;
+        static int N_CHUNKS = 7;
+
         #region GLOBAL_MESS
         InspectX3ParaClass _xInspect => base._xRecipe.InspectParams;
         #endregion
@@ -59,7 +67,8 @@ namespace LaserAlignDX.AoiModel.V3.L1
         #region GOLDEN_DATA
         Dictionary<EdgeBorder, QvQuad2D> _goldenLineBorderQuads;
         Dictionary<EdgeBorder, EzLSD.LineSegment> _goldenLines;
-        Dictionary<EdgeBorder, Mat[]> _goldenImageChunks;
+        Dictionary<EdgeBorder, Mat[]> _goldenChunkImages;
+        //Dictionary<EdgeBorder, QVector[]> _goldenChunkPoints;
         #endregion
 
         #region RUNTIME_DATA
@@ -71,6 +80,7 @@ namespace LaserAlignDX.AoiModel.V3.L1
         {
             base.Dispose();
             disposeMvdLineFinders();
+            disposeGoldenData();
         }
 
         public void SetCellGroups(GaCellsGroup[] cellGroups)
@@ -89,18 +99,25 @@ namespace LaserAlignDX.AoiModel.V3.L1
                 fire_AoiBegin();
                 markRunStart();
 
-                var activeCarrierID = getActiveCarrierID();
-                //>>> _worldTransform = _sysModel.TransformsModel.GetCameraPhysicTransform(activeCarrierID);
-                _microTransform = _sysModel.GetMicroTransform(activeCarrierID);
-                if (_microTransform == null)
-                    throw new Exception($"無法取得 Micro Transform ({activeCarrierID})");
+                ////(1) 取得 Micro Transform
+                //var activeCarrierID = getActiveCarrierID();
+                ////>>> _worldTransform = _sysModel.TransformsModel.GetCameraPhysicTransform(activeCarrierID);
+                //_microTransform = _sysModel.GetMicroTransform(activeCarrierID);
+                //if (_microTransform == null)
+                //    throw new Exception($"無法取得 Micro Transform ({activeCarrierID})");
 
+                //(1) 尺寸量測前置準備
+                if (!PrepareMeasurementData())
+                    return;
+
+                //(2) bmpFullfov
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
-                RunChipsMeasurement(bmpFullfov);
-                RunChipsMeasurement2ndForNGs(bmpFullfov);
 
-                // Defects And QrCode 拉出 成為一個 獨立的 AoiModel_Defects
-                // RunDefectsAndQrCode(bmpFullfov, LineScanCamImageHolder.PeekMvdImage());
+                //(3) Run Measurements
+                RunChipsMeasurement(bmpFullfov);
+
+                //(4) Run Measurements (2nd)
+                //RunChipsMeasurement2ndForNGs(bmpFullfov);
 
                 markRunEnd(true);
                 fire_AoiEnd();
@@ -129,16 +146,58 @@ namespace LaserAlignDX.AoiModel.V3.L1
         /// </summary>
         internal void TryMeasureOneChip(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
         {
-            if (_microTransform == null)
-                _microTransform = _sysModel.GetMicroTransform(getActiveCarrierID());
-            
-            if (_microTransform == null)
+            //if (_microTransform == null)
+            //    _microTransform = _sysModel.GetMicroTransform(getActiveCarrierID());
+            //if (_microTransform == null)
+            //    return;
+
+            if (!PrepareMeasurementData(silent: true))
                 return;
 
             RunOneChipMeasurement(cell, cellBmp, ref cellRoi, 0);
         }
 
-        #region PRIVATE_FUNCTIONS
+        internal bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine)
+        {
+            //--------------------------------------------------------------
+            // 海康邊線 準確度 深受 前景背景 對比 影響
+            //--------------------------------------------------------------
+            prepareMvdLineFinders(N_THREADS);
+            var lineSegFinder = _mvdLineFinders[0];
+            lineSegFinder.Background = _xInspect.xCarrierBackground;
+            resultLine = lineSegFinder.Run(bmpSrc, roiRect, (int)eBorder);
+            return resultLine != null;
+        }
+
+        internal void AnalyzeGoldenData()
+        {
+            prepareGoldenData(true);
+        }
+
+        #region PRIVATE_RUN_FUNCTIONS
+        private bool PrepareMeasurementData(bool silent = false)
+        {
+            //(1) Micro Transform
+            if (_microTransform == null)
+                _microTransform = _sysModel.GetMicroTransform(getActiveCarrierID());
+
+            if (_microTransform == null)
+            {
+                if (!silent)
+                    throw new Exception($"無法取得 Micro Transform ({getActiveCarrierID()})");
+                return false;
+            }
+
+            //(2) MvdFinders
+            prepareMvdLineFinders(N_THREADS);
+
+            //(3) Golden Data
+            prepareGoldenData();
+
+            // Success
+            return true;
+        }
+
         /// <summary>
         /// LETIAN: 晶粒定位 與 尺寸量測 
         /// </summary>
@@ -152,20 +211,15 @@ namespace LaserAlignDX.AoiModel.V3.L1
             fire_AoiBegin("晶粒尺寸量測");
 
             //_TM.RESET_ACCUM();
-
-            bool usingMultiThread = Universal.N_THREADS_ENABLED;
-
             #region 準備_CELL_GROUPS
             int N_GROUPS = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;
             var groups = _cellGroups != null ? _cellGroups : GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
             #endregion
 
-            prepareMvdLineFinders(Universal.N_THREADS);
-
             if (groups == null || groups.Length == 0)
                 return;
 
-            if (!usingMultiThread)
+            if (!N_THREADS_ENABLED)
             {
                 // 單線程 (驗證用)
                 for (int gid = 0; gid < groups.Length; gid++)
@@ -206,9 +260,7 @@ namespace LaserAlignDX.AoiModel.V3.L1
 
             //_TM.RESET_ACCUM();
 
-            bool usingMultiThread = Universal.N_THREADS_ENABLED;
-
-            #region 準備_CELL_GROUPS
+            #region 準備_CELL_GROUPS_FOR_第二次補測
             int N = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;
             var ngGroups = GaCellsGroup.CollectGroups(N, _xRecipe, bmpFullfov, option: "NG_DIM_ONLY");
             #endregion
@@ -216,7 +268,7 @@ namespace LaserAlignDX.AoiModel.V3.L1
             if (ngGroups == null || ngGroups.Length == 0)
                 return;
 
-            if (!usingMultiThread)
+            if (!N_THREADS_ENABLED)
             {
                 // 單線程 (驗證用)
                 for (int gid = 0; gid < ngGroups.Length; gid++)
@@ -273,126 +325,16 @@ namespace LaserAlignDX.AoiModel.V3.L1
         }
 
         /// <summary>
-        /// 量測單一晶粒 (直线寻找)
+        /// 量測單一晶粒 (使用海康搜尋直線)
         /// </summary>
-        private void __RunOneChipMeasurement_000(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
-        {
-#if(OPT_OLD_CODE)
-            // 取得 上一輪 晶粒定位 的結果 (chipData)
-            var chipData = cell?.ChipData;
-            var chipQuad = chipData?.ChipQuad2D;
-            if (chipQuad == null)
-                return;
-
-            #region 邊線處理
-            EdgeBorder eBorder = EdgeBorder.Left;
-            try
-            {
-                var lineBorderRects = new RectangleF[]
-                {
-                    _xRecipe.xLineLeft,
-                    _xRecipe.xLineTop,
-                    _xRecipe.xLineRight,
-                    _xRecipe.xLineBottom,
-                };
-
-                //var xLocalResult = cell.xFindResult;
-                //xLocalResult.fCenterX -= cellRoi.X;
-                //xLocalResult.fCenterY -= cellRoi.Y;
-                var xLocalResult = new AUVision.xFindResult();
-                xLocalResult.fCenterX = (float)(chipQuad.Center.X - cellRoi.X);
-                xLocalResult.fCenterY = (float)(chipQuad.Center.Y - cellRoi.Y);
-                xLocalResult.fAngle = (float)chipQuad.Angle;
-
-                for (int borderIdx = 0, N = lineBorderRects.Length; borderIdx < N; borderIdx++)
-                {
-                    eBorder = (EdgeBorder)borderIdx;
-
-                    CMvdRectangleF mvdBorderRect = GaImageUtil.ToCMvdRectangleF(ref lineBorderRects[borderIdx]);
-
-                    CMvdRectangleF mvdBorderRotatedRect = cell.PositionFixRun(
-                                                            mvdBorderRect,
-                                                            _xRecipe.xRegionTrain,
-                                                            Rectangle.Round(cellRoi),
-                                                            xLocalResult) as CMvdRectangleF;
-
-                    //(1) 海康線檢 (輸出為 cell.cMvdLineSegmentFsOut)
-                    cell.LineSegmentRun(borderIdx, cellBmp, mvdBorderRotatedRect);
-
-                    //(2) 將 CMvdLine 轉換成 EzLSD.LineSegment
-                    var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
-                    for (int i = 0, len = lines.Length; i < len; i++)
-                    {
-                        // 記入 加回 ROI Offset
-                        lines[i]?.Offset(cellRoi.X, cellRoi.Y);
-                        // 記入 cell.ChipData
-                        cell.ChipData.LineSegments[i] = lines[i];
-                    }
-
-                    //(3) 更新 LineBorderBoxes
-                    //(3.1) 加回 ROI Offset
-                    mvdBorderRotatedRect.CenterX += cellRoi.X;
-                    mvdBorderRotatedRect.CenterY += cellRoi.Y;
-
-                    //(3.2) 更新 LineBorderBoxes;
-                    chipData.LineBorderBoxes[borderIdx] = mvdBorderRotatedRect.ToBox2D();
-                    //(3.3) 更新到 cell 舊的 Gaara Data
-                    cell.cMvdShapesForFindLineRegion[borderIdx] = (CMvdShape)mvdBorderRotatedRect.Clone();
-                }
-            }
-            catch (Exception ex)
-            {
-                string borderName = JetEazy.QxNums.GetEnumDescription(eBorder);
-                _LOG_ERROR(ex, $"{borderName} 定位異常");
-                throw ex;
-            }
-            #endregion
-
-            #region 尺寸長寬量測
-            try
-            {
-                //(1) 將 CMvdLine 轉換成 EzLSD.LineSegment
-                var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
-                for (int i = 0, len = lines.Length; i < len; i++)
-                {
-                    //(1.1) 加回 ROI Offset
-                    lines[i]?.Offset(cellRoi.X, cellRoi.Y);
-                    //(1.2) 記入 cell.ChipData
-                    chipData.LineSegments[i] = lines[i];
-                }
-
-                //(2) 使用 Micro Transform 計算 尺寸 與 邊隙
-                //    (結果會直接存入 cell.ChipData 內)
-                bool toMeasureGaps = _xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch;
-                var err = _microTransform.CalcChipDimension(out SizeF dimension, lines, chipData, toMeasureGaps);
-
-                //(3) 記入結果
-                cell.RunWidth = dimension.Width;
-                cell.RunHeight = dimension.Height;
-
-                //(4) 異常
-                if (err != ErrCodes.OK)
-                    throw new Exception(GaUtil.GetEnumDescription(err));
-            }
-            catch (Exception ex)
-            {
-                _LOG_ERROR(ex, "晶粒 尺寸量測 異常");
-                return;
-            }
-            #endregion
-#endif
-        }
-
-        /// <summary>
-        /// 量測單一晶粒 (直线寻找)
-        /// </summary>
-        private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, int threadId)
+        private void RunOneChipMeasurement_000(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, int threadId)
         {
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
             if (chipData == null || chipData.ChipQuad2D == null)
                 return;
 
+            // 海康直線蒐尋器
             var mvdLineFinder = _mvdLineFinders[threadId % _mvdLineFinders.Length];
 
             #region 邊線處理
@@ -439,17 +381,6 @@ namespace LaserAlignDX.AoiModel.V3.L1
                     }
 
                     //(3) 將 CMvdLine 轉換成 EzLSD.LineSegment
-                    #region OLD_CODE
-                    //var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
-                    //for (int i = 0, len = lines.Length; i < len; i++)
-                    //{
-                    //    //(3.1) 加回 ROI Offset
-                    //    lines[i]?.Offset(cellRoi.X, cellRoi.Y);
-                    //    //(3.2) 記入 cell.ChipData
-                    //    cell.ChipData.LineSegments[i] = lines[i];
-                    //}
-                    #endregion
-
                     var line = mvdLine?.ToLineSegment();
                     //(3.1) 加回 ROI Offset
                     line?.Offset(cellRoi.X, cellRoi.Y);
@@ -472,7 +403,7 @@ namespace LaserAlignDX.AoiModel.V3.L1
             {
                 string borderName = JetEazy.QxNums.GetEnumDescription(eBorder);
                 _LOG_ERROR(ex, $"{borderName} 定位異常");
-                throw ex;
+                throw;
             }
             #endregion
 
@@ -514,7 +445,191 @@ namespace LaserAlignDX.AoiModel.V3.L1
             }
             #endregion
         }
-        
+
+        /// <summary>
+        /// 量測單一晶粒 (使用分段 Template Match)
+        /// </summary>
+        private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, int threadId)
+        {
+            // 取得 上一輪 晶粒定位 的結果 (chipData)
+            var chipData = cell?.ChipData;
+            if (chipData == null || chipData.ChipQuad2D == null)
+                return;
+
+            #region 邊線處理
+            EdgeBorder eBorder = EdgeBorder.Left;
+            try
+            {
+                var runtimeBorderQuads = CalcRuntimeLocalLineBorderQuads(cell, cellRoi, cellBmp);
+                if (runtimeBorderQuads == null)
+                    return;
+
+                #region DEBUG_DUMP
+                if (false)
+                {
+                    using (var bridge = new QxImageBridge(cellBmp))
+                    using (Mat canvas = bridge.Image.CvtColor(ColorConversionCodes.GRAY2BGR))
+                    {
+                        for (int i = 0, len = runtimeBorderQuads.Length; i < len; i++)
+                            DrawQuad(canvas, runtimeBorderQuads[i].Corners, Scalar.BlueViolet);
+                        canvas.SaveImage("d:\\paso.log\\runtimeBorderQuads.png");
+                    }
+                }
+                #endregion
+
+                using (var bridge = new QxImageBridge(cellBmp))
+                {
+                    Mat cellImg = bridge.Image;
+
+                    for (int borderIdx = 0, N = runtimeBorderQuads.Length; borderIdx < N; borderIdx++)
+                    {
+                        //(0) enum
+                        eBorder = (EdgeBorder)borderIdx;
+
+                        //(1) goldenBorderQuad
+                        var goldenBorderQuad = _goldenLineBorderQuads[eBorder];
+                        var goldenLine = _goldenLines[eBorder];
+                        if (goldenBorderQuad == null || goldenLine == null)
+                            continue;
+
+                        //(2) borderQuad
+                        var runtimeBorderQuad = runtimeBorderQuads[borderIdx];
+                        runtimeBorderQuad.Sort();
+                        goldenBorderQuad.Sort();
+
+                        //(3) 投影
+                        var gRect = goldenBorderQuad.BoundaryRect;
+                        //(3.1) SRC: 直接使用 Runtime 在 cellBmp 上的座標
+                        Point2f[] src = Array.ConvertAll(runtimeBorderQuad.Corners, c => new Point2f((float)c.X, (float)c.Y));
+                        //(3.2) DST: 將 Golden 頂點扣除 BoundaryRect 的 X/Y 偏移，拉回 (0,0) 開始的局部畫布座標
+                        Point2f[] dst = Array.ConvertAll(goldenBorderQuad.Corners, c =>
+                            new Point2f((float)(c.X - gRect.X), (float)(c.Y - gRect.Y))
+                        );
+                        
+                        //(4) Chunk Template Matching
+                        using (Mat transToGolden = Cv2.GetPerspectiveTransform(src, dst))
+                        using (Mat transToRuntime = Cv2.GetPerspectiveTransform(dst, src))
+                        using (Mat runtimeBorderImg = new Mat())
+                        {
+                            //(3.3.1) dstSize
+                            var dstSize = new OpenCvSharp.Size((int)gRect.Width, (int)gRect.Height);
+                            //(3.3.2) 執行透視變換
+                            Cv2.WarpPerspective(bridge.Image, runtimeBorderImg, transToGolden, dstSize);
+                            //(3.3.3) 存檔驗證 (此時印出來的 perspective_*.png 應該就是拉直且清晰的局部邊緣圖像了)
+                            runtimeBorderImg.SaveImage($"d:\\paso.log\\perspective_{eBorder}.png");
+
+                            #region DEBUG_DUMP
+                            if (false)
+                            {
+                                //(3.3.4) 印出 src 與 dst 座標，確認數值範圍與順序
+                                System.Diagnostics.Trace.WriteLine($"SRC: {string.Join(" | ", src.Select(p => $"({p.X:0.0},{p.Y:0.0})"))}");
+                                System.Diagnostics.Trace.WriteLine($"DST: {string.Join(" | ", dst.Select(p => $"({p.X},{p.Y})"))}");
+                                //(3.3.5) 檢查輸入圖與輸出圖尺寸
+                                System.Diagnostics.Trace.WriteLine($"Input Image Size: {bridge.Image.Width}x{bridge.Image.Height}");
+                                System.Diagnostics.Trace.WriteLine($"Target dsize: {dstSize.Width}x{dstSize.Height}");
+                            }
+                            #endregion
+
+                            var boundRect = new Rect(0, 0, runtimeBorderImg.Width, runtimeBorderImg.Height);
+                            var goldenTemplates = _goldenChunkImages[eBorder];
+                            var linePoints = new List<Point2f>();
+                            var scores = new List<double>();
+                            var offsetX = (int)gRect.X;
+                            var offsetY = (int)gRect.Y;
+                            foreach (var roi in iterChunkRoiRects(eBorder, goldenBorderQuad, goldenLine, true))
+                            {
+                                var roiC = roi;
+                                roiC.X -= offsetX;
+                                roiC.Y -= offsetY;
+                                JetEazy.Qcvt.ClipBoundary(ref roiC, ref boundRect);
+
+                                int idx = linePoints.Count;
+                                if (idx >= goldenTemplates.Length)
+                                    break;
+
+                                var scene = runtimeBorderImg[roiC];
+                                var template = goldenTemplates[idx];
+
+                                using (Mat similarity = new Mat())
+                                {
+                                    Cv2.MatchTemplate(scene, template, similarity, TemplateMatchModes.CCorrNormed);
+                                    similarity.MinMaxLoc(out double minVal, out double maxVal, out OpenCvSharp.Point minLoc, out OpenCvSharp.Point maxLoc);
+                                    Point2f ptInWarped = new Point2f(maxLoc.X + roiC.X, maxLoc.Y + roiC.Y);
+                                    linePoints.Add(ptInWarped);
+                                    scores.Add(maxVal);
+                                }
+                            }
+
+                            var ptsInRuntime = Cv2.PerspectiveTransform(linePoints, transToRuntime);
+                            using (Mat canvas = cellImg.CvtColor(ColorConversionCodes.GRAY2BGR))
+                            {
+                                DrawDots(canvas, ptsInRuntime, Scalar.Red);
+                                canvas.SaveImage($"d:\\paso.log\\templ_chuck_line_{eBorder}.png");
+                            }
+                        }
+
+                        //var mvdRoi = runtimeBorderQuad.ToCMvdRectangleF();
+
+                        ////(2.0) 海康線檢 I
+                        //CMvdLineSegmentF mvdLine;
+                        //if (true)   // if (!_is2ndRun)
+                        //{
+                        //    // 海康線檢
+                        //    mvdLine = _RunMvdLineFinder(mvdLineFinder, borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
+                        //}
+
+                        ////(3) 將 CMvdLine 轉換成 EzLSD.LineSegment
+                        //var line = mvdLine?.ToLineSegment();
+                        ////(3.1) 加回 ROI Offset
+                        //line?.Offset(cellRoi.X, cellRoi.Y);
+                        ////(3.2) 記入 cell.ChipData
+                        //cell.ChipData.LineSegments[borderIdx] = line;
+
+                        ////(4) 更新 LineBorderBoxes
+                        ////(4.1) 加回 ROI Offset
+                        //runtimeBorderQuad.Offset(cellRoi.X, cellRoi.Y);
+                        ////(4.2) 更新 LineBorderBoxes;
+                        //chipData.LineBorderBoxes[borderIdx] = runtimeBorderQuad.ToBox2D();
+                    }
+                }
+
+                AsyncDumpLineSegmentsData(cell, ref cellRoi);
+            }
+            catch (Exception ex)
+            {
+                string borderName = JetEazy.QxNums.GetEnumDescription(eBorder);
+                _LOG_ERROR(ex, $"{borderName} 定位異常");
+                throw;
+            }
+            #endregion
+
+            #region 尺寸長寬量測
+            try
+            {
+                //(1) LineSegments (Camera Coordinates) (單位 pixels)
+                var lines = chipData.LineSegments;
+
+                //(2) 使用 Micro Transform 計算 尺寸 與 邊隙
+                //    (結果會直接存入 cell.ChipData 內)
+                bool toMeasureGaps = _xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch;
+                var err = _microTransform.CalcChipDimension(out SizeF dimension, lines, chipData, toMeasureGaps);
+
+                //(3) 記入結果
+                cell.RunWidth = dimension.Width;
+                cell.RunHeight = dimension.Height;
+
+                //(4) 異常
+                if (err != ErrorCodes.OK)
+                    throw new Exception(GaUtil.GetEnumDescription(err));
+            }
+            catch (Exception ex)
+            {
+                _LOG_ERROR(ex, "晶粒 尺寸量測 異常");
+                return;
+            }
+            #endregion
+        }
+
         /// <summary>
         /// 整理打包 尺寸计算 的 最後判定结果
         /// </summary>
@@ -575,188 +690,6 @@ namespace LaserAlignDX.AoiModel.V3.L1
             }
         }
 
-#if(OPT_OLD_CODE)
-        /// <summary>
-        /// 計算 選轉&平移 後的 邊線框 (左, 上, 右, 下)
-        /// </summary>
-        private QvQuad2D[] _CalcRuntimeLocalLineBorderQuads_001(RegionCellX3Class cell, RectangleF cellRoi)
-        {
-#if (OPT_OLD_CODE)
-            // 取得 上一輪 晶粒定位 的結果 (chipData)
-            var chipData = cell?.ChipData;
-
-            //(0) 複製 goldenQuad 與 chipQuad
-            var chipQuad = chipData?.ChipQuad2D?.Clone();
-            var goldenQuad = chipData?.GoldenQuad2D?.Clone();
-            if (chipQuad == null || goldenQuad == null)
-                return null;
-
-            EdgeBorder eBorder = EdgeBorder.Left;
-            try
-            {
-                int NP = 4;
-
-                //(1) lineBorders : 位於 goldenRegionRect (_xRecipe.xRectRegionPrint) 內部
-                var lineBorderQuads = new QvQuad2D[]
-                {
-                    QvQuad2D.From(ref _xRecipe.xLineLeft),
-                    QvQuad2D.From(ref _xRecipe.xLineTop),
-                    QvQuad2D.From(ref _xRecipe.xLineRight),
-                    QvQuad2D.From(ref _xRecipe.xLineBottom),
-                };
-
-                //(2) 將 goldenQuad 平移到 goldenRegionRect (_xRecipe.xRectRegionPrint) 坐標系
-                var goldenChipTemplateRoi = _xRecipe.xRegionTrain;
-                goldenQuad.Offset(goldenChipTemplateRoi.X, goldenChipTemplateRoi.Y);
-
-                //(2.1) DEBUG
-                if (EzPadsGridFinder.VISUAL_DEBUG)
-                {
-                    using (var bridge = new QxImageBridge(_xRecipe.bmpprinttemplate))
-                    {
-                        var img = bridge.Image;
-                        var boxes = new List<QvBox2D>();
-                        boxes.Add(goldenQuad.ToBox2D());
-                        foreach (var line in lineBorderQuads)
-                            boxes.Add(line.ToBox2D());
-                        VxDebugDrawer.Draw(img, boxes, OpenCvSharp.Scalar.Orange, shrink: 0, displayWindowName: "CalcRuntimeLocalLineBorderQuads");
-                    }
-                }
-
-                for (int i = 0; i < NP; i++)
-                {
-                    int k = (i == 0) ? (NP - 1) : (i - 1);
-
-                    var goldenCcMidPt = (goldenQuad.Corners[i] + goldenQuad.Corners[k]) / 2.0;
-                    var goldenCcVect = goldenQuad.Corners[i] - goldenQuad.Corners[k];
-                    var goldenTheta = Math.Atan2(goldenCcVect.Y, goldenCcVect.X);
-                    var shiftVect = lineBorderQuads[i].Center - goldenCcMidPt;
-
-                    var runtimeQuad = chipQuad;
-                    var runtimeCcMidPt = (runtimeQuad.Corners[i] + runtimeQuad.Corners[k]) / 2.0;
-                    var runtimeCcVect = runtimeQuad.Corners[i] - runtimeQuad.Corners[k];
-                    var runtimeTheta = Math.Atan2(runtimeCcVect.Y, runtimeCcVect.X);
-                    var theta = runtimeTheta - goldenTheta;
-
-                    var borderQuad = lineBorderQuads[i];
-                    var borderCenter = runtimeCcMidPt + shiftVect;
-                    borderQuad.SetCenter(borderCenter);
-                    QvQuad2D.Rotate(borderQuad, borderCenter, theta, inplace: true);
-                }
-
-                foreach (var line in lineBorderQuads)
-                    line.Offset(-cellRoi.X, -cellRoi.Y);
-
-                return lineBorderQuads;
-            }
-            catch (Exception ex)
-            {
-                string borderName = JetEazy.QxNums.GetEnumDescription(eBorder);
-                _LOG_ERROR(ex, $"{borderName} 無法計算 LineBorderQuads!");
-                throw ex;
-            }
-#endif
-            return null;
-        }
-
-        /// <summary>
-        /// 計算 選轉&平移 後的 邊線框 (左, 上, 右, 下)
-        /// </summary>
-        private QvQuad2D[] _CalcRuntimeLocalLineBorderQuads_fine(RegionCellX3Class cell, RectangleF cellRoi)
-        {
-            // 取得 上一輪 晶粒定位 的結果 (chipData)
-            var chipData = cell?.ChipData;
-
-            //(0) 複製 goldenQuad 與 chipQuad
-            var chipQuad = chipData?.ChipQuad2D?.Clone();
-            var goldenQuad = chipData?.GoldenQuad2D?.Clone();
-            if (chipQuad == null || goldenQuad == null)
-                return null;
-
-            EdgeBorder eBorder = EdgeBorder.Left;
-            try
-            {
-                int NP = 4;
-
-                //(1) lineBorders : 位於 goldenRegionRect (_xRecipe.xRectRegionPrint) 內部
-                var lineBorderQuads = new QvQuad2D[]
-                {
-                    QvQuad2D.From(ref _xRecipe.xLineLeft),
-                    QvQuad2D.From(ref _xRecipe.xLineTop),
-                    QvQuad2D.From(ref _xRecipe.xLineRight),
-                    QvQuad2D.From(ref _xRecipe.xLineBottom),
-                };
-
-                //(2) 將 goldenQuad 平移到 goldenRegionRect (_xRecipe.xRectRegionPrint) 坐標系
-                var goldenChipTemplateRoi = _xRecipe.xRegionTrain;
-                goldenQuad.Offset(goldenChipTemplateRoi.X, goldenChipTemplateRoi.Y);
-
-                //(2.1) DEBUG
-                #region DEBUG
-                if (false && EzPadsGridFinder.VISUAL_DEBUG)
-                {
-                    using (var bridge = new QxImageBridge(_xRecipe.bmpprinttemplate))
-                    {
-                        var img = bridge.Image;
-                        var boxes = new List<QvBox2D>();
-                        foreach (var line in lineBorderQuads)
-                            boxes.Add(line.ToBox2D());
-                        boxes.Add(goldenQuad.ToBox2D());
-                        VxDebugDrawer.Draw(img, boxes, OpenCvSharp.Scalar.Orange, shrink: 0, displayWindowName: "CalcRuntimeLocalLineBorderQuads");
-                    }
-                }
-                #endregion
-
-                for (int i = 0; i < NP; i++)
-                {
-                    int k = (i == 0) ? (NP - 1) : (i - 1);
-
-                    var lineBorderQuad = lineBorderQuads[i];
-                    var goldenLine = new EzLSD.LineSegment(goldenQuad.Corners[i], goldenQuad.Corners[k]);
-                    var dists = Array.ConvertAll(lineBorderQuad.Corners, c => goldenLine.CalcDistance(c));
-                    var distMin = double.MaxValue;
-                    var distMax = double.MinValue;
-                    foreach(var d  in dists)
-                    {
-                        distMin = Math.Min(distMin, d);
-                        distMax = Math.Max(distMax, d);
-                    }
-                    lineBorderQuad.GetMidSize(out SizeF bsize);
-                    var borderSpan = Math.Max(bsize.Width, bsize.Height);
-
-                    var runtimeQuad = chipQuad;
-                    var runtimeCcMidPt = (runtimeQuad.Corners[i] + runtimeQuad.Corners[k]) / 2.0;
-                    var runtimeCcVect = runtimeQuad.Corners[i] - runtimeQuad.Corners[k];
-                    var U = runtimeCcVect / runtimeCcVect.NormLength;
-                    var V = runtimeCcMidPt - runtimeQuad.Center;
-                    V = V / V.NormLength;
-
-                    var qExt = runtimeCcMidPt + V * distMax;
-                    var qInd = runtimeCcMidPt + V * distMin;
-
-                    var Q0 = qExt + U * borderSpan / 2;
-                    var Q1 = qInd + U * borderSpan / 2;
-                    var Q2 = qInd - U * borderSpan / 2;
-                    var Q3 = qExt - U * borderSpan / 2;
-
-                    lineBorderQuad.Corners = new[] { Q0, Q1, Q2, Q3 };
-                    lineBorderQuad.Sort();
-                }
-
-                foreach (var line in lineBorderQuads)
-                    line.Offset(-cellRoi.X, -cellRoi.Y);
-
-                return lineBorderQuads;
-            }
-            catch (Exception ex)
-            {
-                string borderName = JetEazy.QxNums.GetEnumDescription(eBorder);
-                _LOG_ERROR(ex, $"{borderName} 無法計算 LineBorderQuads!");
-                throw ex;
-            }
-        }
-#endif
-
         /// <summary>
         /// 計算 選轉&平移 後的 邊線框 (左, 上, 右, 下)
         /// </summary>
@@ -793,8 +726,8 @@ namespace LaserAlignDX.AoiModel.V3.L1
                 var goldenChipTemplateRoi = _xRecipe.xRegionTrain;
                 goldenQuad.Offset(goldenChipTemplateRoi.X, goldenChipTemplateRoi.Y);
 
-                //(2.1) DEBUG
-                #region DEBUG
+                //(2.1) DEBUG_DUMP
+                #region DEBUG_DUMP
                 if (debug)
                 {
                     if (EzPadsGridFinder.VISUAL_DEBUG)
@@ -844,15 +777,15 @@ namespace LaserAlignDX.AoiModel.V3.L1
                     var lineBorderQuad = lineBorderQuads[i];
 
                     var goldenLineMid = (goldenQuad.Corners[i] + goldenQuad.Corners[iPrev]) / 2.0;
-                    var v = unitVect(goldenLineMid, goldenQuad.Center);
-                    var u = unitVect(goldenLineMid, goldenQuad.Corners[i]);
+                    var v = UnitVect(goldenLineMid, goldenQuad.Center);
+                    var u = UnitVect(goldenLineMid, goldenQuad.Corners[i]);
                     var lbCorners = Array.ConvertAll(lineBorderQuad.Corners, lc => lc - goldenLineMid);
                     var lbCornersU = Array.ConvertAll(lbCorners, c => c * u);
                     var lbCornersV = Array.ConvertAll(lbCorners, c => c * v);
 
                     var runtimeLineMid = (chipQuad.Corners[i] + chipQuad.Corners[iPrev]) / 2.0;
-                    var V = unitVect(runtimeLineMid, chipQuad.Center);
-                    var U = unitVect(runtimeLineMid, chipQuad.Corners[i]);
+                    var V = UnitVect(runtimeLineMid, chipQuad.Center);
+                    var U = UnitVect(runtimeLineMid, chipQuad.Corners[i]);
                     //debugPoints.Add(runtimeMid);
 
                     for (int k = 0, N = lbCorners.Length; k < 4; k++)
@@ -867,8 +800,8 @@ namespace LaserAlignDX.AoiModel.V3.L1
                 foreach (var line in lineBorderQuads)
                     line.Offset(-cellRoi.X, -cellRoi.Y);
 
-                //(3.1) DEBUG
-                #region DEBUG
+                //(3.1) DEBUG_DUMP_II
+                #region DEBUG_DUMP_II
                 if (debug && cellBmp != null)
                 {
                     using (var bmpTmp = (Bitmap)cellBmp.Clone())
@@ -893,126 +826,8 @@ namespace LaserAlignDX.AoiModel.V3.L1
             }
         }
 
-#if (OPT_OLD_CODE)
-        /// <summary>
-        /// LETIAN: 读码测试 搬移至此.
-        /// caller 負責 bmpInputImage 生命
-        /// </summary>
-        private void RunDefectsAndQrCode(Bitmap bmpFullfov,CMvdImage cMvdImage)
-        {
-            bool go = QrUsed || _xInspect.optChipDefectsInspect;
-            if (!go)
-                return;
-
-            fire_AoiBegin("晶粒瑕疵 與 QR CODE");
-
-            //>>> var cells = _xRecipe.xRegionCells;
-
-            foreach (var cell in PlcDataPacker.IterFinalResultCells())
-            {
-                fire_AoiProgressing(cell);
-
-                if (cell.ByPass && !INI.Instance.IsForceInspect)
-                    continue;
-
-                //if (cell.inspectReason == InspectReason.INS_ALIGNERR)
-                if (cell.IsEmptyPlaceHold() || cell.IsAmbiguousBloc())
-                    continue;
-
-                // Golden Region Size
-                var regionSize = _xRecipe.bmpprinttemplate.Size;
-
-                // 定位完成后裁切位置
-                // RectangleF _crop = new RectangleF(
-                //    cell.DrawResultRectF().CenterX - regionSize.Width / 2,
-                //    cell.DrawResultRectF().CenterY - regionSize.Height / 2,
-                //    regionSize.Width,
-                //    regionSize.Height);
-
-                var mvdRect = cell.DrawResultRectF();
-                var regionRoi = JetEazy.Qcvt.CreateCenterRect(mvdRect.CenterX, mvdRect.CenterY, regionSize.Width, regionSize.Height);
-
-                if (_xInspect.optChipDefectsInspect)
-                {
-                    try
-                    {
-                        //RectangleF _cropDefect = new RectangleF(
-                        //    xRecipe.xRegionTrain.X + regionRoi.X,
-                        //    xRecipe.xRegionTrain.Y + regionRoi.Y,
-                        //    xRecipe.xRegionTrain.Width,
-                        //    xRecipe.xRegionTrain.Height);
-                        //cell.bmpItemRun?.Dispose();
-                        //cell.bmpItemRun = bmpFullfov.Clone(_cropDefect, PixelFormat.Format8bppIndexed);
-                        //cell.bmpItemMask?.Dispose();
-                        //cell.bmpItemMask = xRecipe.bmpprintmask.Clone(
-                        //    new Rectangle(0, 0, xRecipe.bmpprintmask.Width, xRecipe.bmpprintmask.Height),
-                        //    PixelFormat.Format8bppIndexed);
-                        //cell.DetectDefects(xRecipe.bmpDefectTemplate, cell.bmpItemRun, cell.bmpItemMask);
-
-                        var templateSize = _xRecipe.bmpDefectTemplate.Size;
-                        var chipCenter = cell.ChipData.ChipQuad2D.Center;
-                        var chipAngle = cell.ChipData.ChipQuad2D.Angle;      //如果把 _xRecipe.bmpDefectTemplate 當成無角度的 rectangle 就不需要減 GoldenQuad2D.Angle
-                        //var box2d = new QvBox2D();
-                        //box2d.SetBox(PointF.Empty, templateSize);
-                        //box2d.SetCenter((float)chipCenter.X, (float)chipCenter.Y);
-                        //box2d.SetTheta((float)chipAngle * Math.PI / 180.0);
-                        //var mvdRectX = GaMvdExt.ToCMvdRectangleF(box2d);
-
-                        var mvdRectX = new CMvdRectangleF((float)chipCenter.X, (float)chipCenter.Y, templateSize.Width, templateSize.Height)
-                        {
-                            Angle = (float)chipAngle
-                        };
-
-                        var bmpTemplate = _xRecipe.bmpDefectTemplate;
-                        var bmpMask = _xRecipe.bmpprintmask;
-                        //var roi = _xRecipe.xRegionTrain;
-                        //roi.X += regionRoi.X;
-                        //roi.Y += regionRoi.Y;
-                        
-                        using (var bmpRun = cell.GetAffineTrainsFormRunBmp(cMvdImage, mvdRectX))
-                        //using (var bmpRun = bmpFullfov.Clone(roi, PixelFormat.Format8bppIndexed))
-                        {
-                            cell.DetectDefects(bmpTemplate, bmpRun, bmpMask);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _LOG_ERROR(ex, "cell.DetectDefects 異常!");
-                        _xInspect.optChipDefectsInspect = false;
-                    }
-                }
-
-                if (QrUsed)
-                {
-                    try
-                    {
-                        //RectangleF _cropCode = new RectangleF(
-                        //    xRecipe.xRectCodeRegion.X + regionRoi.X,
-                        //    xRecipe.xRectCodeRegion.Y + regionRoi.Y,
-                        //    xRecipe.xRectCodeRegion.Width,
-                        //    xRecipe.xRectCodeRegion.Height);
-                        //cell.bmpItemCodeRun?.Dispose();
-                        //cell.bmpItemCodeRun = bmpFullfov.Clone(_cropCode, PixelFormat.Format8bppIndexed);
-
-                        var roi = _xRecipe.xRectCodeRegion;
-                        roi.X += regionRoi.X;
-                        roi.Y += regionRoi.Y;
-                        using (var bmpRun = bmpFullfov.Clone(roi, PixelFormat.Format8bppIndexed))
-                        {
-                            //cell.DeCode2D(cell.bmpItemCodeRun, _cropCode.Location, m_QrJudged);
-                            cell.DeCode2D(bmpRun, roi.Location, QrJudged);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _LOG_ERROR(ex, "cell.DeCode2D 異常!");
-                        //xInspect.m_QrUsed = false;
-                    }
-                }
-            }
-        }
-#endif
         #endregion
+
 
         #region MVD_LINE_SEGMENTS_FUNCTIONS
         private void disposeMvdLineFinders()
@@ -1313,6 +1128,201 @@ namespace LaserAlignDX.AoiModel.V3.L1
         }
         #endregion
 
+        #region PRIVATE_GOLDEN_DATA_FUNCTIONS
+        private void disposeGoldenData()
+        {
+            if (_goldenChunkImages != null)
+            {
+                foreach (var imgs in _goldenChunkImages.Values)
+                {
+                    if (imgs == null) continue;
+                    foreach (var img in imgs)
+                        img?.Dispose();
+                }
+                _goldenChunkImages.Clear();
+                _goldenChunkImages = null;
+            }
+        }
+        private void prepareGoldenData(bool force = false)
+        {
+            if (!force && _goldenChunkImages != null && _goldenLineBorderQuads != null && _goldenLines != null)
+                return;
+
+            disposeGoldenData();
+
+            //(1) goldenLineBorderQuads : 位於 goldenRegionCellRect 內部
+            //    (以 _xRecipe.GoldenRegionCellRect 左上為相對零點) 
+            _goldenLineBorderQuads = new Dictionary<EdgeBorder, QvQuad2D>()
+            {
+                {EdgeBorder.Left, QvQuad2D.From(ref _xRecipe.xLineLeft) },
+                {EdgeBorder.Top, QvQuad2D.From(ref _xRecipe.xLineTop) },
+                {EdgeBorder.Right, QvQuad2D.From(ref _xRecipe.xLineRight) },
+                {EdgeBorder.Bottom, QvQuad2D.From(ref _xRecipe.xLineBottom) },
+            };
+            var borderKeys = _goldenLineBorderQuads.Keys;
+
+            //(2) goldenLines
+            //    (以 _xRecipe.GoldenRegionCellRect 左上為相對零點) 
+            var goldenRegionCellBmp = _xRecipe.GoldenRegionCellBmp;
+            _goldenLines = new Dictionary<EdgeBorder, EzLSD.LineSegment>();
+            foreach (EdgeBorder eb in borderKeys)
+            {
+                var borderRect = _goldenLineBorderQuads[eb].ToBox2D().BoundaryRect;
+                TryFindLineSegment(eb, goldenRegionCellBmp, borderRect, out var mvdLine);
+                var lineSegment = mvdLine?.ToLineSegment();
+                //lineSegment?.Offset(borderRect.X, borderRect.Y);
+                _goldenLines[eb] = lineSegment;
+            }
+
+            if (false)
+            {
+                #region DEBUG_DUMP_I
+                using (var bridge = new QxImageBridge(goldenRegionCellBmp))
+                using (Mat canvas = bridge.Image.CvtColor(ColorConversionCodes.GRAY2BGR))
+                {
+                    foreach (EdgeBorder eb in borderKeys)
+                    {
+                        var border = _goldenLineBorderQuads[eb];
+                        var line = _goldenLines[eb];
+                        DrawQuad(canvas, border.Corners, Scalar.Blue);
+                        DrawLine(canvas, line, Scalar.Cyan);
+                    }
+                    canvas.SaveImage("d:\\paso.log\\golden_quad_lines.png");
+                }
+                #endregion
+
+                #region DEBUG_DUMP_II
+                using (var bridge = new QxImageBridge(_xRecipe.GoldenRegionCellBmp))
+                using (Mat canvas = bridge.Image.CvtColor(ColorConversionCodes.GRAY2BGR))
+                {
+                    var boundRect = new Rect(0, 0, canvas.Width, canvas.Height);
+                    foreach (EdgeBorder eb in borderKeys)
+                    {
+                        var border = _goldenLineBorderQuads[eb];
+                        var lineSegment = _goldenLines[eb];
+                        if (lineSegment == null) continue;
+
+                        foreach (var roi in iterChunkRoiRects(eb, border, lineSegment))
+                        {
+                            var roiC = roi;
+                            JetEazy.Qcvt.ClipBoundary(ref roiC, ref boundRect);
+                            canvas.Rectangle(roiC, Scalar.LightBlue);
+                        }
+                    }
+                    canvas?.SaveImage($"d:\\paso.log\\golden_chunks_roi.png");
+                }
+                #endregion
+            }
+
+            //(3) Gold Image Chunks
+            //    (以 _xRecipe.GoldenRegionCellRect 左上為相對零點)
+            _goldenChunkImages = new Dictionary<EdgeBorder, Mat[]>();
+            using (var bridge = new QxImageBridge(_xRecipe.GoldenRegionCellBmp))
+            {
+                var goldenRegionCellImg = bridge.Image;
+                var boundRect = new Rect(0, 0, goldenRegionCellImg.Width, goldenRegionCellImg.Height);
+
+                foreach (EdgeBorder eb in borderKeys)
+                {
+                    var border = _goldenLineBorderQuads[eb];
+                    var lineSegment = _goldenLines[eb];
+                    if (lineSegment == null)
+                    {
+                        _goldenChunkImages[eb] = null;
+                        continue;
+                    }
+
+                    var imgs = new List<Mat>();
+                    foreach (var roi in iterChunkRoiRects(eb, border, lineSegment))
+                    {
+                        var roiC = roi;
+                        JetEazy.Qcvt.ClipBoundary(ref roiC, ref boundRect);
+                        var img = goldenRegionCellImg[roiC].Clone();
+                        imgs.Add(img);
+                        
+                        // DUMP
+                        //img.SaveImage($"d:\\paso.log\\golden_chuck_{eb}_{imgs.Count - 1}.png");
+                    }
+
+                    _goldenChunkImages[eb] = imgs.ToArray();
+                }
+            }
+        }
+        private IEnumerable<Rect> iterChunkRoiRects(EdgeBorder eb, QvQuad2D borderQuad, EzLSD.LineSegment lineSegment, bool fullThickness = false)
+        {
+            int NDivs = N_CHUNKS + 1;
+
+            var borderRect = borderQuad.BoundaryRect;
+            var bW = borderRect.Width;
+            var bH = borderRect.Height;
+
+            QVector beginPt;
+            QVector endPt;
+            switch (eb)
+            {
+                case EdgeBorder.Left:
+                    beginPt = new QVector2(borderRect.Left, borderRect.Bottom);
+                    endPt = new QVector2(borderRect.Left, borderRect.Top);
+                    break;
+                case EdgeBorder.Top:
+                    beginPt = new QVector2(borderRect.Left, borderRect.Top);
+                    endPt = new QVector2(borderRect.Right, borderRect.Top);
+                    break;
+                case EdgeBorder.Right:
+                    beginPt = new QVector2(borderRect.Right, borderRect.Top);
+                    endPt = new QVector2(borderRect.Right, borderRect.Bottom);
+                    break;
+                case EdgeBorder.Bottom:
+                default:
+                    beginPt = new QVector2(borderRect.Right, borderRect.Bottom);
+                    endPt = new QVector2(borderRect.Left, borderRect.Bottom);
+                    break;
+            }
+
+            bool isHorizontalBorder = (eb == EdgeBorder.Top || eb == EdgeBorder.Bottom);
+
+            beginPt = lineSegment.CalcTheNearestPoint(beginPt);
+            endPt = lineSegment.CalcTheNearestPoint(endPt);
+            var vect = endPt - beginPt;
+            var len = vect.NormLength;
+            var U = vect / len;
+
+            var strideSpan = len / NDivs;
+            var cropSpan = Math.Max(strideSpan * 0.1, 32);
+
+            double x1, y1, x2, y2;
+            var center = beginPt + U * strideSpan;
+            for (int i = 0; i < N_CHUNKS; i++)
+            {
+                var p1 = center - U * cropSpan;
+                var p2 = center + U * cropSpan;
+
+                if (isHorizontalBorder)
+                {
+                    x1 = p1.X;
+                    x2 = p2.X;
+                    y1 = fullThickness ? borderRect.Top : center.Y - bH / 4;
+                    y2 = fullThickness ? borderRect.Bottom : center.Y + bH / 4;
+                }
+                else
+                {
+                    y1 = p1.Y;
+                    y2 = p2.Y;
+                    x1 = fullThickness ? borderRect.Left : center.X - bW / 4;
+                    x2 = fullThickness ? borderRect.Right : center.X + bW / 4;
+                }
+
+                var ix1 = (int)Math.Min(x1, x2);
+                var ix2 = (int)Math.Max(x1, x2);
+                var iy1 = (int)Math.Min(y1, y2);
+                var iy2 = (int)Math.Max(y1, y2);
+                var roi = new Rect(ix1, iy1, ix2 - ix1, iy2 - iy1);
+                yield return roi;
+                center = center + U * strideSpan;
+            }
+        }
+        #endregion
+
         #region PRIVATE_HELPER_FUNCTIONS
         void fill_border_mid_area(Bitmap cellBmp2, QvQuad2D borderQuad, EdgeBorder eBorder, Scalar color)
         {
@@ -1361,13 +1371,42 @@ namespace LaserAlignDX.AoiModel.V3.L1
                     return points.ToArray();
                 }
             }
-
             return null;
         }
-        QVector unitVect(QVector p1, QVector p2)
+        QVector UnitVect(QVector p1, QVector p2)
         {
             var v = p2 - p1;
             return v / v.NormLength;
+        }
+        void DrawQuad(Mat canvas, QVector[] points, Scalar color)
+        {
+            for (int i = 0, len = points.Length; i < len; i++)
+            {
+                int j = (i + 1) % len;
+                int x1 = (int)points[i].X;
+                int y1 = (int)points[i].Y;
+                int x2 = (int)points[j].X;
+                int y2 = (int)points[j].Y;
+                canvas.Line(x1, y1, x2, y2, color);
+            }
+        }
+        void DrawDots(Mat canvas, Point2f[] points, Scalar color)
+        {
+            foreach (var pt in points)
+                Cv2.Circle(canvas, new OpenCvSharp.Point((int)pt.X, (int)pt.Y), 3, color, -1);
+        }
+        void DrawLine(Mat canvas, EzLSD.LineSegment line, Scalar color)
+        {
+            var p1 = line?.P1;
+            var p2 = line?.P2;
+            if (p1 != null && p2 != null)
+            {
+                int x1 = (int)p1.X;
+                int y1 = (int)p1.Y;
+                int x2 = (int)p2.X;
+                int y2 = (int)p2.Y;
+                canvas.Line(x1, y1, x2, y2, color);
+            }
         }
         #endregion
 

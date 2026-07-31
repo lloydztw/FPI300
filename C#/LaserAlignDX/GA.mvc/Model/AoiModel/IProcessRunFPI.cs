@@ -1,9 +1,11 @@
-﻿using LaserAlignDX.Model;
+﻿using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
 using System;
 using System.Drawing;
+using VisionDesigner;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 
 
@@ -48,8 +50,13 @@ namespace LaserAlignDX.AoiModel
         ErrorCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi);
 
         /// <summary>
-        /// 調試 用
+        /// 為 參數調試 所用
         /// </summary>
         bool TryRunOneChip(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi);
+
+        /// <summary>
+        /// 為 參數調試 所用
+        /// </summary>
+        bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine);
     }
 }

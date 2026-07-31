@@ -14,15 +14,17 @@
 #endregion
 
 using JetEazy.Utils;
+using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using System.Threading;
+using VisionDesigner;
+using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.V3.L1.AoiModel_ChipMeasure;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
-using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.V3.L1.AoiModel_ChipMeasure;
 
 namespace LaserAlignDX.AoiModel.V3
 {
@@ -280,6 +282,8 @@ namespace LaserAlignDX.AoiModel.V3
 
         public ErrorCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi)
         {
+            ErrorCodes err = ErrorCodes.OK;
+
             using (var workBmp = (Bitmap)regionBmp.Clone())
             {
                 //(1) 晶粒定位
@@ -300,14 +304,17 @@ namespace LaserAlignDX.AoiModel.V3
                 //(3) 建立 Micro Transform
                 var carrierID = getActiveCarrierID();
                 var microTrf = _sysModel.GetMicroTransform(carrierID);
-                var err = microTrf.BuildMicroTransform(targetSize, lines, chipData);
+                err = microTrf.BuildMicroTransform(targetSize, lines, chipData);
 
                 //(4) 保存參數
                 if (err == ErrorCodes.OK)
                     microTrf.Save(null);
-
-                return err;
             }
+
+            if (err == ErrorCodes.OK)
+                _aoiChipMeasure.AnalyzeGoldenData();
+
+            return err;
         }
         public bool TryRunOneChip(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
         {
@@ -317,6 +324,10 @@ namespace LaserAlignDX.AoiModel.V3
             if (ok && _xRecipe.InspectParams.optChipMeasurement)
                 _aoiChipMeasure.TryMeasureOneChip(cell, cellBmp, ref cellRoi);
             return ok;
+        }
+        public bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine)
+        {
+            return _aoiChipMeasure.TryFindLineSegment(eBorder, bmpSrc, roiRect, out resultLine);
         }
 
         public override void Run()

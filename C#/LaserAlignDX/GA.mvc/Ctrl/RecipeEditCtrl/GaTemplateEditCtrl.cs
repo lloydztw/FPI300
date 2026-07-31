@@ -1155,9 +1155,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         bool aoiTryRunFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF boxRect, out CMvdLineSegmentF[] resultLines)
         {
-            resultLines = null;
-
-#if (OPT_RESERVED)
+#if (OPT_LEGACY_000)
             bool bPositive, bEdgePolarity, bFindOrient;
 
             #region 方向與極性
@@ -1231,6 +1229,7 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
 #endif
 
+#if (OPT_LEGACY_001)
             // 目前邊線 用於 黑色背景 比較準確
             using (MvdFindLineClass lineSegFinder = new MvdFindLineClass())
             {
@@ -1239,6 +1238,11 @@ namespace LaserAlignDX.Mvc.Ctrl
                 resultLines = new[] { mvdLine };
                 return mvdLine != null;
             }
+#endif
+            var aoiModel = _sysModel.AoiModel;
+            aoiModel.TryFindLineSegment(eBorder, bmpSrc, boxRect, out var line);
+            resultLines = new CMvdLineSegmentF[] { line };
+            return line != null;
         }
 
         /// <summary>

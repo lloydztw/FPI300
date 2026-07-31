@@ -249,81 +249,202 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region 模板區_舊接口
+        #region 模板區_新接口
+        /// <summary>
+        /// Golden Region Cell Rect (晶粒區域粗框)
+        /// </summary>
+        public RectangleF GoldenRegionCellRect
+        {
+            get => _dtoGoldenRegionTemplate.RectF;
+            set => _dtoGoldenRegionTemplate.RectF = value;
+        }
+
+        /// <summary>
+        /// Golden Region Bitmap (晶粒區域粗框)
+        /// </summary>
+        /// <remarks>
+        /// Caller 必須維持 Bitmap 生命週期
+        /// </remarks>
+        public Bitmap GoldenRegionCellBmp
+        {
+            get => _dtoGoldenRegionTemplate.Bmp;
+            set => _dtoGoldenRegionTemplate.Bmp = value;
+        }
+
+        /// <summary>
+        /// Golden Chip Rect
+        /// 更精確(內縮)的晶粒矩形區域,
+        /// 位於 Golden Region Cell Rect 之內,
+        /// 以 GoldenRegionCellRect 的左上角 為相對零點
+        /// </summary>
+        public RectangleF GoldenChipRect
+        {
+            get => _dtoGoldenChipTemplate.RectF;
+            set => _dtoGoldenChipTemplate.RectF = value;
+        }
+
+        /// <summary>
+        /// Golden Chip Bitmap 更精確(內縮)的晶粒模板圖像
+        /// </summary>
+        /// <remarks>
+        /// Caller 必須維持 Bitmap 生命週期
+        /// </remarks>        
+        public Bitmap GoldenChipBmp
+        {
+            get => _dtoGoldenChipTemplate.Bmp;
+            set => _dtoGoldenChipTemplate.Bmp = value;
+        }
+
+        /// <summary>
+        /// Defects Mask Bitmap (瑕疵檢遮罩)
+        /// </summary>
+        public Bitmap DefectsMaskBmp
+        {
+            get => _dtoGoldenMaskTemplate.Bmp;
+            set => _dtoGoldenMaskTemplate.Bmp = value;
+        }
+
+        /// <summary>
+        /// 二維碼框選區
+        /// </summary>
+        public RectangleF QrCodeRect
+        {
+            get => _dtoQrCodeTemplate.RectF;
+            set => _dtoQrCodeTemplate.RectF = value;
+        }
+
+        /// <summary>
+        /// 二維碼影像樣本圖像
+        /// </summary>
+        /// <remarks>
+        /// Caller 必須維持 Bitmap 生命週期
+        /// </remarks>        
+        public Bitmap QrCodeBmp
+        {
+            get => _dtoQrCodeTemplate.Bmp;
+            set => _dtoQrCodeTemplate.Bmp = value;
+        }
+
+        /// <summary>
+        /// 飛拍 矩形區塊
+        /// </summary>
+        public RectangleF FlyTemplateRect
+        {
+            get => _dtoFlyAoiTemplate.RectF;
+            set => _dtoFlyAoiTemplate.RectF = value;
+        }
+
+        /// <summary>
+        /// 飛拍 模板 圖像
+        /// </summary>
+        /// <remarks>
+        /// Caller 必須維持 Bitmap 生命週期
+        /// </remarks>   
+        public Bitmap FlyTemplateBmp
+        {
+            get => _dtoFlyAoiTemplate.Bmp;
+            set => _dtoFlyAoiTemplate.Bmp = value;
+        }
+        #endregion
+
+        #region 模板區_舊接口_(陸版爛英文)
         /// <summary>
         /// Golden Region Cell (晶粒區域粗框)
         /// </summary>
         public RectangleF xRectRegionPrint
         {
-            get => _dtoGoldenRegionTemplate.RectF;
-            set => _dtoGoldenRegionTemplate.RectF = value;
+            get => GoldenRegionCellRect;
+            set => GoldenRegionCellRect = value;
         }
         /// <summary>
         /// Golden Region Bitmap (晶粒區域粗框)
         /// </summary>
+        /// <remarks>
+        /// Caller 必須維持 Bitmap 生命週期
+        /// </remarks>        
         public Bitmap bmpprinttemplate
         {
-            get => _dtoGoldenRegionTemplate.Bmp;
-            set => _dtoGoldenRegionTemplate.Bmp = value;
+            get => GoldenRegionCellBmp;
+            set => GoldenRegionCellBmp = value;
         }
         /// <summary>
         /// Golden Chip Rect
         /// 更精確(內縮)的晶粒矩形區域
-        /// 位於 Golden Region (xRectRegionPrint) 之內
-        /// 相對於 Golden Region (xRectRegionPrint) 的左上角為零點
+        /// 位於 Golden Region Cell (xRectRegionPrint) 之內
+        /// 相對於 Golden Region Cell (xRectRegionPrint) 的左上角為零點
         /// </summary>
         public RectangleF xRegionTrain
         {
-            get => _dtoGoldenChipTemplate.RectF;
-            set => _dtoGoldenChipTemplate.RectF = value;
+            get => GoldenChipRect;
+            set => GoldenChipRect = value;
         }
         /// <summary>
         /// 這個其實就是 Golden Chip Template Bitmap
         /// </summary>
+        /// <remarks>
+        /// Caller 必須維持 Bitmap 生命週期
+        /// </remarks>
         public Bitmap bmpDefectTemplate
         {
-            get => _dtoGoldenChipTemplate.Bmp;
-            set => _dtoGoldenChipTemplate.Bmp = value;
+            get => GoldenChipBmp;
+            set => GoldenChipBmp = value;
         }
         /// <summary>
-        /// Mask Bitmap
+        /// Defects Mask Bitmap
         /// </summary>
+        /// <remarks>
+        /// Caller 必須維持 Bitmap 生命週期
+        /// </remarks>        
         public Bitmap bmpprintmask
         {
-            get => _dtoGoldenMaskTemplate.Bmp;
-            set => _dtoGoldenMaskTemplate.Bmp = value;
+            get => DefectsMaskBmp;
+            set => DefectsMaskBmp = value;
         }
         /// <summary>
         /// 二維碼框選區
         /// </summary>
         public RectangleF xRectCodeRegion
         {
-            get => _dtoQrCodeTemplate.RectF;
-            set => _dtoQrCodeTemplate.RectF = value;
+            //get => _dtoQrCodeTemplate.RectF;
+            //set => _dtoQrCodeTemplate.RectF = value;
+            get => QrCodeRect;
+            set => QrCodeRect = value;
         }
         /// <summary>
         /// 二維碼影像樣本
         /// </summary>
+        /// <remarks>
+        /// Caller 必須維持 Bitmap 生命週期
+        /// </remarks>
         public Bitmap bmpcodetemplate
         {
-            get => _dtoQrCodeTemplate.Bmp;
-            set => _dtoQrCodeTemplate.Bmp = value;
+            //get => _dtoQrCodeTemplate.Bmp;
+            //set => _dtoQrCodeTemplate.Bmp = value;
+            get => QrCodeBmp;
+            set => QrCodeBmp = value;
         }
         /// <summary>
         /// 飛拍 矩形區塊
         /// </summary>
         public RectangleF xRectRegionPrintFly
         {
-            get => _dtoFlyAoiTemplate.RectF;
-            set => _dtoFlyAoiTemplate.RectF = value;
+            //get => _dtoFlyAoiTemplate.RectF;
+            //set => _dtoFlyAoiTemplate.RectF = value;
+            get => FlyTemplateRect; 
+            set => FlyTemplateRect = value;
         }
         /// <summary>
         /// 飛拍 模板 圖像
         /// </summary>
+        /// <remarks>
+        /// Caller 必須維持 Bitmap 生命週期
+        /// </remarks>        
         public Bitmap bmpprintFlytemplate
         {
-            get => _dtoFlyAoiTemplate.Bmp;
-            set => _dtoFlyAoiTemplate.Bmp = value;
+            //get => _dtoFlyAoiTemplate.Bmp;
+            //set => _dtoFlyAoiTemplate.Bmp = value;
+            get => FlyTemplateBmp;
+            set => FlyTemplateBmp = value;
         }
         #endregion
 
@@ -781,7 +902,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region MVD_AOI_TOOLS_RUNTIME_海康工具相關成員
+        #region MVD_AOI_TOOLS_RUNTIME_海康工具相關成員_放在這裡非常不妥
         public MVD_CHIP_MATCHER mvdprinttemp_Find = new MVD_CHIP_MATCHER();
         public MvdFindClass mvdprintFlytemp_Find = new MvdFindClass();
         public Mvd2DReaderClass mvd2DReader = new Mvd2DReaderClass();
@@ -799,7 +920,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region AOI_FUNCTIONS_FOR_CHIP_LOCATE_TRAIN_AND_RUN_晶粒定位的相關像測函式
+        #region MVD_AOI_FUNCTIONS_FOR_CHIP_LOCATE_TRAIN_AND_RUN_晶粒定位的相關像測函式_放在這裡非常不妥
         //----------------------------------------------------------------------
         // 這些應該放在 AOI MODEL 
         //----------------------------------------------------------------------
@@ -1034,7 +1155,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region TCP_DATA_沒用到
+        #region NOT_USED_LEGACY_TCP_DATA_沒用到
 #if (OPT_TCP_DATA)
         public int SetByPass(bool[] eBypass)
         {
@@ -1116,14 +1237,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             return isgood;
         }
 #endif
-#endregion
+        #endregion
 
-        #region NO_USE_本專案沒用到_但是這應該放在_AOI_RESULT_區域
+        #region NOT_USED_LEGACY_本專案沒用到_但是這應該放在_AOI_RESULT_區域
         private int PassCount = 0;
         private int NGCount = 0;
         #endregion
 
-        #region 统计数据
+        #region 统计数据_沒用到
 #if (OPT_NOT_USED)
         public float[] AnalyzeDatas = new float[9];
 #endif
@@ -1199,7 +1320,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region 校正與座標轉換_GAARA_版本
+        #region NOT_USED_LEGACY_校正與座標轉換_GAARA_版本
+#if (OPT_NOT_USED_LEGACY)
         /// <summary>
         /// 校正與座標轉換: 第一吸嘴排. (GAARA版)
         /// (載台: 由 xStageNumber Runtime 決定)
@@ -1253,6 +1375,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 return ptCenter;
             }
         }
+#endif
         #endregion
 
         /// <summary>
