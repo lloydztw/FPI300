@@ -1,35 +1,26 @@
-﻿using AUVision;
-using JetEazy.Utils;
-using LaserAlignDX.BasicSpace;
+﻿using JetEazy.QvMath;
 using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using VisionDesigner;
-using VisionDesigner.Code2DReader;
-using VisionDesigner.PositionFix;
-using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
-
+using Traveller106;
 
 namespace LaserAlignDX.OPSpace
 {
     public class RegionCellX3Class : IDisposable
     {
-        public static bool DUMP_IMAGE_ENABLED = false;
-        public static string DUMP_IMAGE_PATH = null;
-
-        #region MVD_TOOLS
-        CPositionFixTool cPositionFixToolObj = null;// new VisionDesigner.PositionFix.CPositionFixTool();
+        #region NOT_USED_LEGACY_MVD_TOOLS
+        //CPositionFixTool cPositionFixToolObj = null;// new VisionDesigner.PositionFix.CPositionFixTool();
         //CImageArithmeticTool cImageArithmeticToolObj = null;// new CImageArithmeticTool();
         //VisionDesigner.ImageBinary.CImageBinaryTool cImageBinaryToolObj = null;// new VisionDesigner.ImageBinary.CImageBinaryTool();
         //VisionDesigner.ImageMorph.CImageMorphTool cImageMorphToolObj = null;// new VisionDesigner.ImageMorph.CImageMorphTool();
         //VisionDesigner.BlobFind.CBlobFindTool cBlobFindToolObj = null;// new VisionDesigner.BlobFind.CBlobFindTool();
         //VisionDesigner.ImageAffineTransform.CImageAffineTransformTool cImageAffineTransformToolObj = null;
-        Mvd2DReaderClass mvd2DReader = null;// new Mvd2DReaderClass();
-        MvdFindLineClass mvdFindLineClass = null;
-        MvdPairLineClass mvdPairLineClass = null;
-        CMvdRectangleF MvdRunPositionFix;
+        //Mvd2DReaderClass mvd2DReader = null;// new Mvd2DReaderClass();
+        //MvdFindLineClass mvdFindLineClass = null;
+        //MvdPairLineClass mvdPairLineClass = null;
+        //CMvdRectangleF MvdRunPositionFix;
         #endregion
 
         #region GLOBAL_MESS
@@ -37,19 +28,17 @@ namespace LaserAlignDX.OPSpace
         {
             get => RecipeFPIX3Class.Instance.InspectParams;
         }
+        static INI _INI => INI.Instance;
         #endregion
 
         public RegionCellX3Class()
         {
         }
-        ~RegionCellX3Class()
-        {
-            Dispose();
-        }
+
         public void Dispose()
         {
-            cPositionFixToolObj?.Dispose();
-            cPositionFixToolObj = null;
+            //cPositionFixToolObj?.Dispose();
+            //cPositionFixToolObj = null;
             //cImageArithmeticToolObj?.Dispose();
             //cImageArithmeticToolObj = null;
             //cImageBinaryToolObj?.Dispose();
@@ -58,12 +47,12 @@ namespace LaserAlignDX.OPSpace
             //cImageMorphToolObj = null;
             //cBlobFindToolObj?.Dispose();
             //cBlobFindToolObj = null;
-            mvd2DReader?.Dispose();
-            mvd2DReader = null;
-            mvdFindLineClass?.Dispose();
-            mvdFindLineClass = null;
-            mvdPairLineClass?.Dispose();
-            mvdPairLineClass = null;
+            //mvd2DReader?.Dispose();
+            //mvd2DReader = null;
+            //mvdFindLineClass?.Dispose();
+            //mvdFindLineClass = null;
+            //mvdPairLineClass?.Dispose();
+            //mvdPairLineClass = null;
             //cImageAffineTransformToolObj?.Dispose();
             //cImageAffineTransformToolObj = null;
 
@@ -150,7 +139,7 @@ namespace LaserAlignDX.OPSpace
         }
         #endregion
 
-        #region OLD_CODE
+        #region NOT_USED_LEGACY_OLD_CODE
 #if (false)
         /// <summary>
         /// 测量结果: 格點型晶粒 邊緣厚度 左右差 (X方向) (單位 mm)
@@ -178,12 +167,12 @@ namespace LaserAlignDX.OPSpace
 #endif
         #endregion
 
-        #region IMAGE_FILE_DUMP_SETTINGS
-        public bool IsSaveDebugPicture = false;
-        public string SaveDebugPath = $"D:\\log\\DebugImage";
+        #region NOT_USED_LEGACY_IMAGE_FILE_DUMP_SETTINGS
+        //public static bool IsSaveDebugPicture => _INI.IsSaveTestImage;
+        //public static string SaveDebugPath { get; set; } = "D:\\log\\DebugImage";
         #endregion
 
-        #region OLD_CODE
+        #region NOT_USED_LEGACY_OLD_CODE
         //>>> private AUVision.xFindResult xFindResult = new AUVision.xFindResult();
         #endregion
 
@@ -263,8 +252,30 @@ namespace LaserAlignDX.OPSpace
                 }
             }
         }
+        /// <summary>
+        /// 根據 inspectResult 傳回是否為 "疑似有料"
+        /// </summary>
+        public string GetNoTrayDesc()
+        {
+            string str = string.Empty;
+            if (_inspectResult == InspectReason.NG_APPEARANCE)
+            {
+                str = "疑似有料";
+                return str;
+            }
+            foreach (var reason in _inspectNgList)
+            {
+                if (reason == InspectReason.NG_APPEARANCE)
+                {
+                    str = "疑似有料";
+                    //str = "Maybe.P";
+                    break;
+                }
+            }
+            return str;
+        }
 
-        #region OLD_CODE
+        #region NOT_USED_LEGACY_OLD_CODE
         ///// <summary>
         ///// 外围的直线
         ///// </summary>
@@ -279,7 +290,7 @@ namespace LaserAlignDX.OPSpace
         //public CMvdShape[] cMvdShapesForFindLineRegion = new CMvdShape[4];
         #endregion
 
-        #region MVD_IMAGE_AFFINETRANSFORM
+        #region NOT_USED_LEGACY_MVD_IMAGE_AFFINETRANSFORM
 #if (OPT_REPLACED_BY_MvdDefectDetector)
         /// <summary>
         /// 抓取全域图形的转正图像 位置框由前期定位决定
@@ -381,7 +392,8 @@ namespace LaserAlignDX.OPSpace
 #endif
         #endregion
 
-        #region MVD_LINE_SEGMENTS
+        #region NOT_USED_LEGACY_MVD_LINE_SEGMENTS
+#if (OPT_NOT_USED_LEGACY)
         /// <summary>
         /// 寻找直线
         /// </summary>
@@ -660,15 +672,18 @@ namespace LaserAlignDX.OPSpace
             }
 #endif
         }
+#endif
         #endregion
 
-        #region MVD_QRCODE_DATA
-        public string SetBarcodeStr = string.Empty;
-        public C2DCodeInfo RunCodeInfo = null;
-        public CMvdPolygonF DrawBarcodePosition = null;
+        #region RUNTIME_QRCODE_RESULT_DATA
+        public string BarcodeResultText { get; set; } = "";
+        public QvQuad2D BarcodeResultQuad { get; set; } = null;
+        //public C2DCodeInfo RunCodeInfo { get; set; } = null;
+        //public CMvdPolygonF DrawBarcodePosition { get; set; } = null;
         #endregion
 
-        #region MVD_DEFAULT_RECTF
+        #region NOT_USED_LEGACY_MVD_DEFAULT_RECTF
+#if (OPT_NOT_USED_LEGACY)
         /// <summary>
         /// 只是把 viewRectF 轉成 CMvdRectangleF 並加上 MVD 顏色
         /// </summary>
@@ -728,11 +743,13 @@ namespace LaserAlignDX.OPSpace
         }
         public void SetMvdRunPositionFix(CMvdRectangleF mvdRect)
         {
-            MvdRunPositionFix = mvdRect;
+            //MvdRunPositionFix = mvdRect;
         }
+#endif
         #endregion
 
-        #region MVD_FOR_EMPTY_TRAY
+        #region NOT_USED_LEGACY_MVD_FOR_EMPTY_TRAY
+#if (OPT_NOT_USED_LEGACY)
         /// <summary>
         /// 画出有无料的位置框
         /// </summary>
@@ -789,9 +806,10 @@ namespace LaserAlignDX.OPSpace
             }
             return str;
         }
+#endif
         #endregion
 
-        #region MVD_DEFECT_INSPECT_MEMBERS
+        #region NOT_USED_LEGACY_MVD_DEFECT_INSPECT_MEMBERS
 #if (OPT_REPLACED_BY_MvdDefectDetector)
         private List<CMvdRectangleF> _blobMvdRectFNGList = new List<CMvdRectangleF>();
         private SizeF _defectRunRoiSize = new SizeF(100, 100);
@@ -842,7 +860,7 @@ namespace LaserAlignDX.OPSpace
 #endif
         #endregion
 
-        #region OLD_CODE
+        #region NOT_USED_LEGACY_OLD_CODE
 #if (OPT_MOVED_TO_AOI_MODEL)
         /// <summary>
         /// 整理打包 尺寸计算 的 最後判定结果
@@ -899,7 +917,7 @@ namespace LaserAlignDX.OPSpace
 #endif
         #endregion
 
-        #region OLD_CODE_不要在此生成_客戶要求的_顯示與報表_字串格式_不然換不同廠家就要跟著一直變動_CELL
+        #region NOT_USED_LEGACY_OLD_CODE_不要在此生成_客戶要求的_顯示與報表_字串格式_不然換不同廠家就要跟著一直變動_CELL
 #if (OPT_OLD_STRING_FORMATTER_CODE)
         const string m_Format = "0.000";
         public string ToResultStr()
@@ -1071,17 +1089,17 @@ namespace LaserAlignDX.OPSpace
             //inspectReasons.Clear();
             MarkResult(InspectReason.PASS, reset: true);
 
-            RunCodeInfo = null;
-
-            if (mvd2DReader != null)
-                mvd2DReader.DCodeInfo = null;
-
-            DrawBarcodePosition = null;
+            //RunCodeInfo = null;
+            //if (mvd2DReader != null)
+            //    mvd2DReader.DCodeInfo = null;
+            //DrawBarcodePosition = null;
+            BarcodeResultText = "";
+            BarcodeResultQuad = null;
 
             RunX = 0;
             RunY = 0;
             RunAngle = 0;
-            IsSaveDebugPicture = false;
+            //IsSaveDebugPicture = false;
 
             //int i = 0;
             //while (i < 4)
@@ -1106,7 +1124,7 @@ namespace LaserAlignDX.OPSpace
             //DisBottom = 0;
         }
 
-        #region MVD_AOI_FUNCTIONS
+        #region NOT_USED_LEGACY_MVD_AOI_FUNCTIONS
 #if (OPT_NOT_USED)
         /// <summary>
         /// 计算修正后的位置框
@@ -1150,6 +1168,7 @@ namespace LaserAlignDX.OPSpace
         }
 #endif
 
+#if (OPT_NOT_USED_LEGACY)
         /// <summary>
         /// 计算修正后的位置框
         /// </summary>
@@ -1187,6 +1206,7 @@ namespace LaserAlignDX.OPSpace
             // Get the result
             return cPositionFixToolObj.Result.CorrectedShape;
         }
+#endif
 
 #if (OPT_REPLACED_BY_MvdDefectDetector)
         public void DetectDefects(Bitmap bmpTemplate, Bitmap bmpRun, Bitmap bmpMask)
@@ -1317,6 +1337,7 @@ namespace LaserAlignDX.OPSpace
         }
 #endif
 
+#if (OPT_NOT_USED_LEGACY)
         public void DeCode2D(Bitmap eBmpRun, PointF Poi_CodeBase, bool eJudged = false)
         {
             //if (IsSaveDebugPicture)
@@ -1369,19 +1390,22 @@ namespace LaserAlignDX.OPSpace
                 #region GENERATE_MVD_GUI_COMPONENT_UGLY_CODE
                 DrawBarcodePosition = null;
 
-                if (IsSaveDebugPicture)
+                if (_INI.IsSaveTestImage)
                 {
-                    string dumpFolder = System.IO.Path.Combine(SaveDebugPath, "Code");
-                    if (!System.IO.Directory.Exists(dumpFolder))
-                        System.IO.Directory.CreateDirectory(dumpFolder);
+                    //string dumpFolder = System.IO.Path.Combine(SaveDebugPath, "Code");
+                    //JetEazy.IO.QxPathUtility.InitDirectory(dumpFolder);
+                    ////string fileName = System.IO.Path.Combine(dumpFolder, $"{lblName}_Run.bmp");
+                    //string fname = $"Cell_{this.Index}@{this.CellRow}_{this.CellCol}.bmp";
+                    //string fileName = System.IO.Path.Combine(dumpFolder, fname);
+                    //mvd2DReader.MvdRunImage.SaveImage(fileName, MVD_FILE_FORMAT.MVD_FILE_BMP);
 
-                    string fileName = System.IO.Path.Combine(dumpFolder, $"{lblName}_Run.bmp");
-                    mvd2DReader.MvdRunImage.SaveImage(fileName, MVD_FILE_FORMAT.MVD_FILE_BMP);
+                    LotDataHolder.Instance.DumpImage(this, mvd2DReader.MvdRunImage, "QRCode", "QRCode");
                 }
 
                 #endregion
             }
         }
+#endif
         #endregion
 
         public override string ToString()

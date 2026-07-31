@@ -141,11 +141,13 @@ namespace LaserAlignDX.Model
             //else
             //    str += $"" + ";";
 
-            sb.Append(cell.SetBarcodeStr).Append(",");
-            if (cell.RunCodeInfo != null)
-                sb.Append(cell.RunCodeInfo.Content).Append(";");
-            else
-                sb.Append(";");
+            //sb.Append(cell.BarcodeResultText).Append(",");
+            //if (cell.RunCodeInfo != null)
+            //    sb.Append(cell.RunCodeInfo.Content).Append(";");
+            //else
+            //    sb.Append(";");
+
+            sb.Append(cell.BarcodeResultText).Append(",;");
         }
         #endregion
     }

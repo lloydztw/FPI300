@@ -265,7 +265,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         private void turn_off_ini_image_savings()
         {
             var ini = Traveller106.INI.Instance;
-            ini.IsSaveDebugBMP = false;
+            ini.IsSaveDebugBmp = false;
             ini.IsSaveDebugOrgBmp = false;
             ini.IsSaveStripImage = false;
             ini.IsSaveTestImage = false;

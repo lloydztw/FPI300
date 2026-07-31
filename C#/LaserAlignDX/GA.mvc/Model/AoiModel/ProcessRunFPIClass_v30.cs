@@ -13,7 +13,6 @@
  */
 #endregion
 
-
 using JetEazy.Utils;
 using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
@@ -21,10 +20,8 @@ using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using System.Threading;
-using Traveller106;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
-
 
 namespace LaserAlignDX.AoiModel.V3
 {
@@ -539,10 +536,11 @@ namespace LaserAlignDX.AoiModel.V3
         /// </summary>
         void AsyncSaveOrgImage(Bitmap bmpFullfov, bool pass)
         {
+#if (false)
             if (bmpFullfov == null)
                 return;
 
-            if (!INI.Instance.IsSaveDebugBMP && !INI.Instance.IsSaveDebugOrgBmp)
+            if (!INI.Instance.IsSaveDebugBmp && !INI.Instance.IsSaveDebugOrgBmp)
                 return;
 
             var args = new object[]
@@ -561,7 +559,7 @@ namespace LaserAlignDX.AoiModel.V3
                     using (Bitmap bmpBig = (Bitmap)argvs[0])
                     {
                         //(1) 保存壓縮圖檔 (IsSaveDebugBMP)
-                        if (INI.Instance.IsSaveDebugBMP)
+                        if (INI.Instance.IsSaveDebugBmp)
                         {
                             string fileName = GetDebugBmpFileName(cPass);
                             GaImageUtil.SaveImageWithQuality(bmpBig, fileName, INI.Instance.ImageQuality);
@@ -583,7 +581,8 @@ namespace LaserAlignDX.AoiModel.V3
             },
                 args
             );
+#endif
+            _lotDataHolder.AsyncSaveOrgImage(bmpFullfov, pass);
         }
-
     }
 }

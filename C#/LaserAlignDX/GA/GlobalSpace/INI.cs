@@ -706,7 +706,7 @@ namespace Traveller106
         //[Editor(typeof(GetPositionPropertyEditor), typeof(UITypeEditor))]
         [DisplayName("02.存储压缩图片")]
         [Browsable(true)]
-        public bool IsSaveDebugBMP { get; set; } = false;
+        public bool IsSaveDebugBmp { get; set; } = false;
 
         /// <summary>
         /// 存储原始图片
@@ -879,7 +879,7 @@ namespace Traveller106
             
             IsSaveStripImage = ReadINIValue("Basic", "IsSaveStripImage", (IsSaveStripImage ? "1" : "0"), INIFILE) == "1";
             IsSaveTestImage = ReadINIValue("Basic", "IsSaveTestImage", (IsSaveTestImage ? "1" : "0"), INIFILE) == "1";
-            IsSaveDebugBMP = ReadINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBMP ? "1" : "0"), INIFILE) == "1";
+            IsSaveDebugBmp = ReadINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBmp ? "1" : "0"), INIFILE) == "1";
             IsSaveDebugOrgBmp = ReadINIValue("Basic", "IsSaveDebugOrgBmp", (IsSaveDebugOrgBmp ? "1" : "0"), INIFILE) == "1";
             UseOkNgDiffImageFolders = ReadINIValue("Basic", "UseOkNgDiffImageFolders", (UseOkNgDiffImageFolders ? "1" : "0"), INIFILE) == "1";
 
@@ -989,7 +989,7 @@ namespace Traveller106
             //WriteINIValue("Basic", "IsOpenUpload", (IsOpenUpload ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsSaveStripImage", (IsSaveStripImage ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsSaveTestImage", (IsSaveTestImage ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBMP ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBmp ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsSaveDebugOrgBmp", (IsSaveDebugOrgBmp ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "UseOkNgDiffImageFolders", (UseOkNgDiffImageFolders ? "1" : "0"), INIFILE);
 
@@ -1142,7 +1142,7 @@ namespace Traveller106
             AddProperty(cat0, "IsSaveResultImage", "IsSaveResultImage", IsSaveStripImage, "");
             AddProperty(cat0, "ResultImagePath", "ResultImagePath", ResultImagePath, "");
             AddProperty(cat0, "ImageQuality", "ImageQuality", ImageQuality, "");
-            AddProperty(cat0, "IsSaveDebugBMP", "IsSaveDebugBMP", IsSaveDebugBMP, "");
+            AddProperty(cat0, "IsSaveDebugBMP", "IsSaveDebugBMP", IsSaveDebugBmp, "");
             AddProperty(cat0, "LaserSharePath", "LaserSharePath", LaserSharePath, "");
             AddProperty(cat0, "IsOpenThread", "IsOpenThread", IsOpenThread, "");
             AddProperty(cat0, "IsOpenDrawNumber", "IsOpenDrawNumber", IsOpenDrawNumber, "");
@@ -1206,7 +1206,7 @@ namespace Traveller106
                         ImageQuality = (long)xpropItem.Value;
                         break;
                     case "IsSaveDebugBMP":
-                        IsSaveDebugBMP = (bool)xpropItem.Value;
+                        IsSaveDebugBmp = (bool)xpropItem.Value;
                         break;
                     case "LaserSharePath":
                         LaserSharePath = (string)xpropItem.Value;

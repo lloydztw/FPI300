@@ -13,7 +13,6 @@
  */
 #endregion
 
-
 using JetEazy.Utils;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
@@ -25,7 +24,6 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
-using Traveller106;
 
 
 namespace LaserAlignDX.AoiModel
@@ -106,61 +104,62 @@ namespace LaserAlignDX.AoiModel
         }
 
         #region LOT_DATA
-        LotData _lotData = new LotData();
-        string _fileBarcodeStr = string.Empty;
+        protected LotDataHolder _lotDataHolder => LotDataHolder.Instance;
         #endregion
 
         public LotData LotData
         {
-            get => _lotData;
-            set => _lotData = value;
+            get => _lotDataHolder.LotData;
+            set
+            {
+                _lotDataHolder.LotData = value;
+            }
         }
         public string LotId
         {
-            //get { return m_LotId; }
-            //set { m_LotId = value; }
-            get => _lotData.LotID;
+            get => _lotDataHolder.LotData.LotID;
             set
             {
-                _lotData.LotID = value;
+                _lotDataHolder.LotData.LotID = value;
                 OnLotDataChanged?.Invoke(this, EventArgs.Empty);
             }
         }
         public string StripId
         {
-            //get { return m_StripId; }
-            //set { m_StripId = value; }
-            get => _lotData.StripID;
-            set => _lotData.StripID = value;
+            get => _lotDataHolder.LotData.StripID;
+            set => _lotDataHolder.LotData.StripID = value;
         }
         public string FileName
         {
-            get { return GetLotFileName(LotId, ".txt"); }
+            get => _lotDataHolder.GetLotFileName(LotId, ".txt");
         }
         public string FileBarcodeStr
         {
             get
             {
-                return _fileBarcodeStr;
+                return _lotDataHolder.FileBarcodeStr;
             }
             set
             {
-                _fileBarcodeStr = value;
-                markFileTimeTag();
+                //_fileBarcodeStr = value;
+                //markFileTimeTag();
+                _lotDataHolder.FileBarcodeStr = value;
             }
         }
 
         #region PRIVATE_PATH_FILE_FUNCTIONS
-        DateTime _timeTag = DateTime.Now;
+        //DateTime _timeTag = DateTime.Now;
 
         /// <summary>
         /// 標定統一的存檔時間
         /// </summary>
         protected void markFileTimeTag()
         {
-            _timeTag = DateTime.Now;
+            //_timeTag = DateTime.Now;
+            _lotDataHolder?.MarkFileTimeTag();
         }
 
+#if (OPT_LEGACY)
         /// <summary>
         /// 帶日期時間尾綴的檔名
         /// </summary>
@@ -216,13 +215,15 @@ namespace LaserAlignDX.AoiModel
             string file = $"{lotID}-{_timeTag:yyyyMMdd_HHmmss}.jpg";
             return System.IO.Path.Combine(path, file);
         }
-        
+#endif
+
         /// <summary>
         /// 指向 [LOG_ROOT]\\Images\\[yyyyMMdd] 資料夾
         /// </summary>
         protected string GetLogPath(string subFolder)
         {
-            return System.IO.Path.Combine(Universal.LOG_IMG_PATH, _timeTag.ToString("yyyyMMdd"), subFolder);
+            // return System.IO.Path.Combine(Universal.LOG_IMG_PATH, _timeTag.ToString("yyyyMMdd"), subFolder);
+            return _lotDataHolder.GetLogPath(subFolder);
         }
         #endregion
 

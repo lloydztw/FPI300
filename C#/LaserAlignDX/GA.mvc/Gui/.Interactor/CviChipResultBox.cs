@@ -690,24 +690,17 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (!_xRecipe.InspectParams.optChipDefectsInspect)
                 return;
 
-            if (cell != null && cell.DrawBarcodePosition != null)
+            if (cell != null && cell.BarcodeResultQuad != null)
             {
-                //_mvsUI.mvdRenderActivex1.AddShape(cell.DrawBarcodePosition);
-                //CMvdTextF _CodeText
-                //    = new CMvdTextF(cell.DrawBarcodePosition.GetVertex(2).fX,
-                //                                  cell.DrawBarcodePosition.GetVertex(2).fY + 120,
-                //                                  cell.RunCodeInfo.Content);
-                //_CodeText.BorderColor = new MVD_COLOR(0, 255, 0);
-                ////_CodeText.FontWidth = 11;
-                //_CodeText.FillColor = new MVD_COLOR(0, 0, 0);
-                //_mvsUI.mvdRenderActivex1.AddShape(_CodeText);
+                //var poly = cell.DrawBarcodePosition;
+                //var cc = poly.GetVertex(2);
+                //var x = cc.fX;
+                //var y = cc.fY + 120;
+                //string text = cell.BarcodeResultText;
+                //gxView.DrawString(text, _font, Brushes.Black, x, y);
 
-                var poly = cell.DrawBarcodePosition;
-                var cc = poly.GetVertex(2);
-                var x = cc.fX;
-                var y = cc.fY + 120;
-                string text = cell.RunCodeInfo?.Content;
-                gxView.DrawString(text, _font, Brushes.Black, x, y);
+                var rect = cell.BarcodeResultQuad.ToBox2D().BoundaryRect;
+                gxView.DrawString(cell.BarcodeResultText, _font, Brushes.Black, rect);
             }
         }
         #endregion

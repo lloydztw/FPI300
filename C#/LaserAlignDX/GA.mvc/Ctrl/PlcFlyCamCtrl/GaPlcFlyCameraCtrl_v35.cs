@@ -19,6 +19,7 @@ using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.GA.BasicSpace;
+using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -956,10 +957,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         /// </summary>
         void AsyncSaveFlyCameraImage(FlyID flyID, Bitmap bmpFly, FlyLotData lotData)
         {
+#if (OPT_LEGACY)
             if (bmpFly == null)
                 return;
 
-            if (!INI.Instance.IsSaveDebugBMP && !INI.Instance.IsSaveDebugOrgBmp)
+            if (!INI.Instance.IsSaveDebugBmp && !INI.Instance.IsSaveDebugOrgBmp)
                 return;
 
             var result = m_iFlyResult!=null && flyID.flyIndex < m_iFlyResult.Length 
@@ -1019,6 +1021,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             },
                 args
             );
+#endif
+            var dumper = LotDataHolder.Instance;
+            dumper.AsyncSaveFlyCameraImage(flyID, bmpFly, lotData, m_iFlyResult);
         }
 
         void _LOG_ERROR(Exception ex, string message)

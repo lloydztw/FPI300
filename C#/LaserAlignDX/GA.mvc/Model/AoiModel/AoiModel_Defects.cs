@@ -13,7 +13,6 @@
  */
 #endregion
 
-
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
@@ -23,7 +22,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Traveller106;
 using MvdDefectDetector = LaserAlignDX.Model.Defects.G1.MvdDefectDetector;
-
 
 namespace LaserAlignDX.AoiModel.V3
 {

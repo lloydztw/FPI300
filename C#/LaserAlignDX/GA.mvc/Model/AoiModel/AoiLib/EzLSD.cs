@@ -13,21 +13,18 @@
  */
 #endregion
 
-
 using JetEazy.QMath;
-using NLog.Targets;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using VisionDesigner;
 
-
 namespace LeTian.AoiLib
 {
     public class EzLSD
     {
-        public class LineSegment
+        public class LineSegment : ICloneable
         {
             #region PRIVATE_DATA
             QVector _p1;
@@ -56,6 +53,18 @@ namespace LeTian.AoiLib
             {
                 _p1 = new QVector(cvLine.Item0, cvLine.Item1);
                 _p2 = new QVector(cvLine.Item2, cvLine.Item3);
+            }
+
+            public LineSegment Clone()
+            {
+                var p1 = _p1 != null ? new QVector(_p1) : null;
+                var p2 = _p2 != null ? new QVector(_p2) : null;
+                var ls = new LineSegment(p1, p2);
+                return ls;
+            }
+            object ICloneable.Clone()
+            {
+                return Clone();
             }
 
             public double GetSegmentLengthSQ()
