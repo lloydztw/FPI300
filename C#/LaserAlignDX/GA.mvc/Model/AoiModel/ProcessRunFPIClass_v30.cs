@@ -22,6 +22,7 @@ using System.Drawing;
 using System.Threading;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
+using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.V3.L1.AoiModel_ChipMeasure;
 
 namespace LaserAlignDX.AoiModel.V3
 {

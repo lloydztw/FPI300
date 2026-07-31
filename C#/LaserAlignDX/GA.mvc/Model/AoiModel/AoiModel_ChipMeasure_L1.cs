@@ -34,7 +34,7 @@ using VisionDesigner;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
 
-namespace LaserAlignDX.AoiModel.V3.L0
+namespace LaserAlignDX.AoiModel.V3.L1
 {
     /// <summary>
     /// 晶粒尺寸量測
@@ -46,13 +46,20 @@ namespace LaserAlignDX.AoiModel.V3.L0
         #endregion
 
         #region KERNEL_MEMBERS
-        //ITransform _worldTransform;
-        //QMicroChipTransform _microTransform;
+        /// <summary>
+        /// Coordinates Transform
+        /// </summary>
         IMicroChipTransform _microTransform;
+        /// <summary>
+        /// MVD Line Finders
+        /// </summary>
+        MvdFindLineClass[] _mvdLineFinders;
         #endregion
 
-        #region MVD_TOOLS
-        MvdFindLineClass[] _mvdLineFinders;
+        #region GOLDEN_DATA
+        Dictionary<EdgeBorder, QvQuad2D> _goldenLineBorderQuads;
+        Dictionary<EdgeBorder, EzLSD.LineSegment> _goldenLines;
+        Dictionary<EdgeBorder, Mat[]> _goldenImageChunks;
         #endregion
 
         #region RUNTIME_DATA
