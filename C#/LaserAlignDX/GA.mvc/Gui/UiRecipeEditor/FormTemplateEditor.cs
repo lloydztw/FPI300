@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.Lang;
+using JetEazy.OpenCV.Viewer;
 using LaserAlignDX.Mvc.Ctrl;
 using System.Windows.Forms;
 using DispUI = JzDisplay.UISpace.DispUI;
@@ -30,6 +31,7 @@ namespace LaserAlignDX.Mvc.Gui
                 return;
 
             DispViewers = new[] { DS1, DS2, DS3 };
+
             rdoBoxSelectors = new[] { radioButtonG, radioButtonLn, radioButtonQr };
             SizeChanged += (s, e) => autoLayout();
             autoLayout();
@@ -48,6 +50,11 @@ namespace LaserAlignDX.Mvc.Gui
         public DispUI[] DispViewers
         {
             get; private set;
+        }
+        public Control[] ImgViewers
+        {
+            get;
+            private set;
         }
         public RadioButton[] rdoBoxSelectors
         {

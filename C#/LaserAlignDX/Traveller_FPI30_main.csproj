@@ -376,6 +376,7 @@
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorZCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaCommonMotorJogCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl_v25.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaTemplateEditCtrl_v25.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
@@ -510,6 +511,12 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.Designer.cs">
       <DependentUpon>FormLightControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v25.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v25.Designer.cs">
+      <DependentUpon>FormTemplateEditor_v25.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -527,6 +534,30 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.Designer.cs">
       <DependentUpon>GvRecipeBtnsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpDefectBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpDefectBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpDefectBtnsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineBorderBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineBorderBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpLineBorderBtnsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpQrCodeBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpQrCodeBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpQrCodeBtnsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpTemplateBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpTemplateBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpTemplateBtnsPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
@@ -826,6 +857,9 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.resx">
       <DependentUpon>FormLightControl.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v25.resx">
+      <DependentUpon>FormTemplateEditor_v25.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.resx">
       <DependentUpon>FormRecipeEditor_v25.cs</DependentUpon>
     </EmbeddedResource>
@@ -834,6 +868,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.resx">
       <DependentUpon>GvRecipeBtnsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpDefectBtnsPanel.resx">
+      <DependentUpon>GwRcpDefectBtnsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineBorderBtnsPanel.resx">
+      <DependentUpon>GwRcpLineBorderBtnsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpQrCodeBtnsPanel.resx">
+      <DependentUpon>GwRcpQrCodeBtnsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpTemplateBtnsPanel.resx">
+      <DependentUpon>GwRcpTemplateBtnsPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.resx">
       <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>

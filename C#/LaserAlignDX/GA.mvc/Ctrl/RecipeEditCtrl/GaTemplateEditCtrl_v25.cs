@@ -18,8 +18,6 @@ using JetEazy.Lang;
 using JetEazy.OpenCV;
 using JetEazy.QvMath;
 using JetEazy.Utils;
-using JzDisplay;
-using JzDisplay.UISpace;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
@@ -35,7 +33,7 @@ using VisionDesigner;
 
 using CviGoldenBox = JetEazy.ImageViewerEx.Interactors.CviQuad;
 
-namespace LaserAlignDX.Mvc.Ctrl
+namespace LaserAlignDX.Mvc.Ctrl.V25
 {
     public partial class GaTemplateEditCtrl
     {
@@ -59,8 +57,8 @@ namespace LaserAlignDX.Mvc.Ctrl
         #endregion
 
         #region GLOBAL_MESS
-        CarrierEnum _carrierID;
         ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        CarrierEnum _carrierID => _sysModel.ActiveCarrierID;
         #endregion
 
         #region RECIPE_PARAMS
@@ -185,9 +183,9 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         #region GUI_LINKS
         IvTemplateEditorUI _editorUI;
-        DispUI DS1 => _editorUI.DispViewers[0];
-        DispUI DS2 => _editorUI.DispViewers[1];
-        DispUI DS3 => _editorUI.DispViewers[2];
+        JezTransImageViewPanel wndRegionViewer => _editorUI.ImgViewers[0] as JezTransImageViewPanel;
+        JezTransImageViewPanel wndTemplateViewer => _editorUI.ImgViewers[1] as JezTransImageViewPanel;
+        JezTransImageViewPanel wndDefectsViewer => _editorUI.ImgViewers[2] as JezTransImageViewPanel;
         Button btnPickGolden => _editorUI.btnPickGolden;
         Button btnTryScanQrCode => _editorUI.btnTryScanQrCode;
         Button btnAutoLayoutLineBorders => _editorUI.btnAutoLineBorders;
@@ -198,6 +196,12 @@ namespace LaserAlignDX.Mvc.Ctrl
         Button btnTrainTemplate => _editorUI.btnTrainTemplate;
         Button btnSaveAllParams => _editorUI.btnSaveAllParams;
         Button btnCancel => _editorUI.btnCancel;
+        #endregion
+
+        #region VIEWER_TITLES
+        string _Title1 => QMSG.T("Region View");
+        string _Title2 => QMSG.T("Template View");
+        string _Title3 => QMSG.T("Defects View");
         #endregion
 
         #region INTERACTORS
@@ -219,10 +223,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         QvQuad2D _goldenQuad2D = null;
         #endregion
 
-        public void Attach(IvTemplateEditorUI ui, CarrierEnum C)
+        public void Attach(IvTemplateEditorUI ui)
         {
             _editorUI = ui;
-            _carrierID = C;
             initGui();
             connectEventHandlers();
         }
@@ -277,8 +280,11 @@ namespace LaserAlignDX.Mvc.Ctrl
             _editorUI.Window.FindForm().FormClosing += GaTemplateEditCtrl_FormClosing;
 
             _editorUI.Window.BeginInvoke((Action)updateSubTitle);
-            updateDispUI(DS1, _xBmpGoldenRegionTemplate);
-            updateDispUI(DS2, _xBmpGoldenChipTemplate);
+
+            //updateDispUI(DS1, _xBmpGoldenRegionTemplate);
+            //updateDispUI(DS2, _xBmpGoldenChipTemplate);
+            wndRegionViewer?.UpdateImage(_xBmpGoldenRegionTemplate, _Title1, false);
+            wndTemplateViewer?.UpdateImage(_xBmpGoldenChipTemplate, _Title2, false);
 
             updateGoldenBoxes(false);
             persistLineBorderIndentExt(false);
@@ -319,7 +325,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 {
                     //自動刷新 邊線 抓取結果
                     updateLineSegmentBoxes(true);
-                    refreshDispUI(DS1);
+                    refreshDispUI(wndRegionViewer);
                 }
             }
         }
@@ -340,12 +346,12 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region DISP_UI_FUNCTIONS
         void initDispUIs()
         {
-            DS1.Initial(100, 0.01f);
-            DS1.SetDisplayType(DisplayTypeEnum.SHOW);
-            DS2.Initial(100, 0.01f);
-            DS2.SetDisplayType(DisplayTypeEnum.SHOW);
-            DS3.Initial(100, 0.01f);
-            DS3.SetDisplayType(DisplayTypeEnum.SHOW);
+            //DS1.Initial(100, 0.01f);
+            //DS1.SetDisplayType(DisplayTypeEnum.SHOW);
+            //DS2.Initial(100, 0.01f);
+            //DS2.SetDisplayType(DisplayTypeEnum.SHOW);
+            //DS3.Initial(100, 0.01f);
+            //DS3.SetDisplayType(DisplayTypeEnum.SHOW);
         }
         void initInteractors()
         {
@@ -361,42 +367,23 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _cviLineSegmentBoxes[i] = new CviLineSegmentsBox(Color.Cyan) { Visible = false };
             }
 
-            var viewer = DS1.ImageViewer;
-            viewer.AddInteractor(_cviGoldenChipBox);
-            viewer.AddInteractor(_cviQrCodeBox);
-
-            foreach (var box in _cviLineBorderBoxes)
-                viewer.AddInteractor(box);
-            foreach (var box in _cviLineSegmentBoxes)
-                viewer.AddInteractor(box);
-        }
-        void updateDispUI(DispUI dispUI, Bitmap bmp, bool autoZoom = false)
-        {
-            //-------------------------------------------------------------------------------------------------
-            // GAARA 版本的 dispUI
-            // ReplaceDisplayImage 內部會調用 bmp.Clone()
-            //-------------------------------------------------------------------------------------------------
-
-            if (bmp != null)
+            var viewer = wndRegionViewer?.ImgViewer;
+            if (viewer != null)
             {
-                dispUI.ReplaceDisplayImage(bmp);
+                viewer.AddInteractor(_cviGoldenChipBox);
+                viewer.AddInteractor(_cviQrCodeBox);
+                foreach (var box in _cviLineBorderBoxes)
+                    viewer.AddInteractor(box);
+                foreach (var box in _cviLineSegmentBoxes)
+                    viewer.AddInteractor(box);
             }
+        }
+        void refreshDispUI(Control dispUI)
+        {
+            if (dispUI is JezTransImageViewPanel panel)
+                panel.MatViewer.Invalidate();
             else
-            {
-                using (var dummy = new Bitmap(200, 200, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
-                {
-                    dispUI.ReplaceDisplayImage(dummy);
-                }
-            }
-
-            dispUI.Refresh();
-
-            if (autoZoom)
-                dispUI.DefaultView();
-        }
-        void refreshDispUI(DispUI dispUI)
-        {
-            (dispUI?.ImageViewer as Control).Invalidate();
+                dispUI?.Invalidate();
         }
         #endregion
 
@@ -407,9 +394,10 @@ namespace LaserAlignDX.Mvc.Ctrl
                 _opSelector = selector;
                 updateSubTitle();
                 updateGuiStatus();
-                refreshDispUI(DS1);
-                refreshDispUI(DS3);
                 updateLineSegmentBoxes(_opSelector == OpSelector.LineBorders);
+                refreshDispUI(wndRegionViewer);
+                refreshDispUI(wndTemplateViewer);
+                refreshDispUI(wndDefectsViewer);
             }
         }
         void BuildGoldenChipTemplate()
@@ -429,7 +417,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             _goldenQuad2D = null;
 
             // 更新 GUI
-            updateDispUI(DS2, bmpGoldenChip, autoZoom: true);
+            //updateDispUI(wndTemplateViewer, bmpGoldenChip, autoZoom: true);
+            wndTemplateViewer?.UpdateImage(bmpGoldenChip, "Template View", true);
 
             // 更新 mask
             updateMaskTemplate(false);
@@ -457,47 +446,6 @@ namespace LaserAlignDX.Mvc.Ctrl
                 // 更新 Text
                 _editorUI.wndQrCodeResult.Text = text;
             }
-        }
-        void _AutoLayoutLineBorders_000_()
-        {
-#if (false)
-            if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
-            {
-                VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
-                return;
-            }
-
-            if (_cviGoldenChipBox.Box != Rectangle.Round(_xGoldenChipRect))
-            {
-                // 重新 擷取 Golden Chip
-                BuildGoldenChipTemplate();
-            }
-
-            var rect = Rectangle.Round(_xGoldenChipRect);
-            var ind = (int)_editorUI.numBorderIndent.Value;
-            var ext = (int)_editorUI.numBorderExtend.Value;
-            var ratio = (double)_editorUI.numLineSpanPercentage.Value * 0.01;
-
-            var W = rect.Width;
-            var H = rect.Height;
-            var ww = (int)(rect.Width * ratio);
-            var hh = (int)(rect.Height * ratio);
-            var dw = W - ww;
-            var dh = H - hh;
-            var x = rect.X;
-            var y = rect.Y;
-
-            int i = 0;
-            _cviLineBorderBoxes[i++].Box = new Rectangle(x - ext, y + dh / 2, ind + ext, hh);
-            _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, y - ext, ww, ind + ext);
-            _cviLineBorderBoxes[i++].Box = new Rectangle(rect.Right - ind, y + dh / 2, ind + ext, hh);
-            _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, rect.Bottom - ind, ww, ind + ext);
-            refreshDispUI(DS1);
-
-            updateLineBorderBoxes(true);
-            updateLineSegmentBoxes(true);
-            _isLineBorderModified = true;
-#endif
         }
         void AutoLayoutLineBorders()
         {
@@ -626,7 +574,7 @@ namespace LaserAlignDX.Mvc.Ctrl
                 updateNumBorderIndentDynamically();
             }
 
-            refreshDispUI(DS1);
+            refreshDispUI(wndRegionViewer);
             updateLineBorderBoxes(true);
             updateLineSegmentBoxes(true);
             _isLineBorderModified = true;
@@ -726,9 +674,11 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         void DfRegion_Add()
         {
+            if (wndTemplateViewer == null) return;
+
             // 暫停 dispUI 運作
-            var dispUI = DS2;
-            var imgViewer = dispUI.ImageViewer;
+            var dispUI = wndTemplateViewer;
+            var imgViewer = wndTemplateViewer.ImgViewer;
             bool flag = dispUI.Enabled;
             dispUI.Enabled = false;
 
@@ -757,8 +707,8 @@ namespace LaserAlignDX.Mvc.Ctrl
                 return;
 
             // 暫停 dispUI 運作
-            var dispUI = DS2;
-            var imgViewer = dispUI.ImageViewer;
+            var dispUI = wndTemplateViewer;
+            var imgViewer = dispUI.ImgViewer;
             bool flag = dispUI.Enabled;
             dispUI.Enabled = false;
 
@@ -779,9 +729,11 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void DfRegion_ClearAll()
         {
+            if (wndTemplateViewer == null) return;
+
             // 暫停 dispUI 運作
-            var dispUI = DS2;
-            var imgViewer = dispUI.ImageViewer;
+            var dispUI = wndTemplateViewer;
+            var imgViewer = dispUI.ImgViewer;
             bool flag = dispUI.Enabled;
             dispUI.Enabled = false;
 
@@ -818,12 +770,21 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
             return maskRects;
         }
-        void showInteractors(OpSelector selector)
+        void updateCviBoxesStatus(OpSelector selector)
         {
+            // Region View Gui
             _cviGoldenChipBox.Visible = selector == OpSelector.Golden;
+
+            // QR Code Gui
             _cviQrCodeBox.Visible = selector == OpSelector.QrCode;
+            
+            // Line Border Gui
             foreach (var cviBox in _cviLineBorderBoxes)
                 cviBox.Visible = selector == OpSelector.LineBorders;
+
+            // Defects Gui
+            foreach (var cviBox in _cviDefectMaskBoxes)
+                cviBox.Visible = selector == OpSelector.Defects;
         }
         void updateSubTitle()
         {
@@ -951,8 +912,10 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updateDefectMaskBoxes(bool toRecipe)
         {
-            var dispUI = DS2;
-            var imgViewer = dispUI.ImageViewer;
+            if (wndTemplateViewer == null) return;
+
+            var dispUI = wndTemplateViewer;
+            var imgViewer = dispUI.ImgViewer;
             bool flag = dispUI.Enabled;
             dispUI.Enabled = false;
 
@@ -1022,7 +985,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             }
 
             // 更新 bmpMask 到 GUI
-            updateDispUI(DS3, maskRects.Count > 0 ? bmpDisp : null);
+            //updateDispUI(wndDefectsViewer, maskRects.Count > 0 ? bmpDisp : null);
+            wndDefectsViewer?.UpdateImage(maskRects.Count > 0 ? bmpDisp : null, _Title3, false);
 
             // CleanUp
             bmpDisp?.Dispose();
@@ -1049,16 +1013,19 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
         void updateGuiStatus()
         {
-            showInteractors(_opSelector);
+            updateCviBoxesStatus(_opSelector);
+
+            // Template Gui
             _editorUI.btnPickGolden.Enabled = _opSelector == OpSelector.Golden;
+
+            // Line Border Gui
+            updateNumBorderIndentDynamically();
             _editorUI.btnAutoLineBorders.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.btnBuildMircoTransform.Enabled = _opSelector == OpSelector.LineBorders;
-
-            //>>> _editorUI.numBorderIndent.Enabled = false && _opSelector == OpSelector.LineBorders;
-            updateNumBorderIndentDynamically();
-
             _editorUI.numBorderExtend.Enabled = _opSelector == OpSelector.LineBorders;
             _editorUI.numLineSpanPercentage.Enabled = _opSelector == OpSelector.LineBorders;
+
+            // QR Code Gui
             _editorUI.btnTryScanQrCode.Enabled = _opSelector == OpSelector.QrCode;
         }
         int updateNumBorderIndentDynamically(int? indent = null)

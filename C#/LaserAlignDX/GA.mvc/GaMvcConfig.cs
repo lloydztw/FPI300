@@ -18,7 +18,6 @@ using JetEazy.EzImage;
 using JetEazy.OpenCV;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
-using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using System;
 using System.Drawing;
@@ -26,11 +25,10 @@ using System.Windows.Forms;
 using Traveller106;
 
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
-using JetEazy.Lang;
-
 
 #if (OPT_CALIB_V5)
 using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V25.FormRecipeEditor;
+using FormTemplateEditor = LaserAlignDX.Mvc.Gui.V25.FormTemplateEditor;
 using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V5.FormCalibrationTool;
 using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
 #elif (OPT_CALIB_V4)
@@ -125,6 +123,7 @@ namespace LaserAlignDX
         {
             using (var dlg = new FormTemplateEditor(C))
             {
+                dlg.WindowState = FormWindowState.Maximized;
                 dlg.ShowDialog();
             }
         }

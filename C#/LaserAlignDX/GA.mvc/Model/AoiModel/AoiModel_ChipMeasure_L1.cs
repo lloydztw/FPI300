@@ -45,7 +45,7 @@ namespace LaserAlignDX.AoiModel.V3.L1
     /// </summary>
     public class AoiModel_ChipMeasure : AoiModelBase
     {
-        static bool N_THREADS_ENABLED => GlobalConfig.N_THREADS_ENABLED && false;
+        static bool N_THREADS_ENABLED => GlobalConfig.N_THREADS_ENABLED && true;
         static int N_THREADS => GlobalConfig.N_THREADS;
         static int N_CHUNKS = 7;
 
@@ -451,6 +451,9 @@ namespace LaserAlignDX.AoiModel.V3.L1
         /// </summary>
         private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, int threadId)
         {
+            RunOneChipMeasurement_000(cell, cellBmp, ref cellRoi, threadId);
+            return;
+
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
             if (chipData == null || chipData.ChipQuad2D == null)

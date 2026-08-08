@@ -98,7 +98,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BasicSpace\CviCross.cs" />
     <Compile Include="BasicSpace\CviLabel.cs" />
     <Compile Include="BasicSpace\JzPolyEAG.cs" />
     <Compile Include="BasicSpace\JzCircleEAG.cs" />
@@ -129,7 +128,6 @@
   <ItemGroup>
     <Content Include="Interface\ReadMe.txt" />
     <Content Include="OPSpace\ReadMe.txt" />
-    <Content Include="ToBeComplete.txt" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="UISpace\DispUI.resx">

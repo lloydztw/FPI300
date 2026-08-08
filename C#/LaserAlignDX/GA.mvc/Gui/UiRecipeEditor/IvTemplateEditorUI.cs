@@ -22,6 +22,7 @@ namespace LaserAlignDX.Mvc.Gui
     {
         Control Window { get; }
         DispUI[] DispViewers { get; }
+        Control[] ImgViewers { get; }
 
         Control lblActiveCarrierID { get; }
         RadioButton[] rdoBoxSelectors { get; }

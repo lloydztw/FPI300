@@ -91,6 +91,12 @@ namespace LaserAlignDX
         static bool run_unit_test_others()
         {
             return false;
+            using (var frm = new LaserAlignDX.Mvc.Gui.V25.FormTemplateEditor())
+            {
+                frm.StartPosition = FormStartPosition.CenterScreen;
+                frm.ShowDialog();
+                return true;
+            }
             using (var dlg = new LaserAlignDX.Mvc.Gui.FormMotors_CarierSuckerXY())
             {
                 dlg.ShowDialog();
