@@ -985,8 +985,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V25
             }
 
             // 更新 bmpMask 到 GUI
-            //updateDispUI(wndDefectsViewer, maskRects.Count > 0 ? bmpDisp : null);
-            wndDefectsViewer?.UpdateImage(maskRects.Count > 0 ? bmpDisp : null, _Title3, false);
+            // updateDispUI(wndDefectsViewer, maskRects.Count > 0 ? bmpDisp : null);
+            wndDefectsViewer?.UpdateImage(bmpDisp, _Title3, false);
 
             // CleanUp
             bmpDisp?.Dispose();
