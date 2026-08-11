@@ -207,7 +207,7 @@ namespace LaserAlignDX.AoiModel.V35
 
             //_TM.RESET_ACCUM();
             #region 準備_CELL_GROUPS
-            int N_GROUPS = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;
+            int N_GROUPS = _cellGroups != null ? _cellGroups.Length : N_THREADS;
             var groups = _cellGroups != null ? _cellGroups : GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
             #endregion
 

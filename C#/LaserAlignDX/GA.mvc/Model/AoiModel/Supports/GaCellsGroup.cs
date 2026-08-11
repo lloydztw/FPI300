@@ -246,7 +246,7 @@ namespace LaserAlignDX.AoiModel
                     if (isSukcer) continue;
 
                     //(f) 蒐集 剩下可能有料 cell 之 副本
-                    System.Diagnostics.Debug.WriteLine("Boundary [{0},{1}]", r, c);
+                    //>>> System.Diagnostics.Debug.WriteLine("Boundary [{0},{1}]", r, c);
                     collectedCells.Add(cell);
                 }
                 if (collectedCells.Count == 0)
@@ -574,7 +574,7 @@ namespace LaserAlignDX.AoiModel
         #region PRIVATE_DEBUG_FUNCTIONS
         static void verify(GaCellsGroup[] groups, bool alert = true)
         {
-#if DEBUG
+#if (DEBUG && false)
             for (int ig = 0; ig < groups.Length; ig++)
             {
                 var grp = groups[ig];

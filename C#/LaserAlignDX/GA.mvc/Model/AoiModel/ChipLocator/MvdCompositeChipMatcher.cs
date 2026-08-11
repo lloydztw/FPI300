@@ -25,7 +25,7 @@ namespace LaserAlignDX.AoiModel
 {
     public class MvdCompositeChipMatcher : IMvdTemplateMatcher
     {
-        public static int N_CHANNLS => Traveller106.Universal.N_THREADS;
+        public static int N_CHANNLS => GlobalConfig.N_THREADS;
 
         #region GLOBAL_RECIPE_MESS
         InspectX3ParaClass _recipeParams => InspectX3ParaClass.Instance;

@@ -38,6 +38,11 @@ namespace LaserAlignDX.AoiModel.V3
     /// </summary>
     public class AoiModel_ChipLoc : AoiModelBase, IAoiChipLocator
     {
+        #region CONFIG
+        static bool N_THREADS_ENABLED => GlobalConfig.N_THREADS_ENABLED;
+        static int N_THREADS => GlobalConfig.N_THREADS;
+        #endregion
+
         #region MVD_COMPONENTS
         MvdCompositeChipMatcher _mvdCompositeChipMatcher;
         #endregion
@@ -260,10 +265,10 @@ namespace LaserAlignDX.AoiModel.V3
         {
             _TM.RESET_ACCUM();
 
-            bool usingMultiThread = Universal.N_THREADS_ENABLED;
+            bool usingMultiThread = N_THREADS_ENABLED;
 
             DisposeCellGroups();
-            int N_GROUPS = MvdCompositeChipMatcher.N_CHANNLS;
+            int N_GROUPS = N_THREADS;
             var groups = GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov, _preEmptyTrayResult);
             _cellGroups = groups;
 
@@ -304,8 +309,8 @@ namespace LaserAlignDX.AoiModel.V3
             _TM.RESET_ACCUM();
 
             //(1) 蒐集 GaCellsGroups
-            bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            var outGridGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "OUT_GRID_BOUND");
+            bool usingMultiThread = N_THREADS_ENABLED;
+            var outGridGroups = GaCellsGroup.CollectGroups(N_THREADS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "OUT_GRID_BOUND");
             if (outGridGroups == null || outGridGroups.Length == 0)
                 return;
 
@@ -446,8 +451,8 @@ namespace LaserAlignDX.AoiModel.V3
 #endif
 
             //(1) 蒐集 GaCellsGroups
-            bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            var boundaryGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "ON_GRID_BOUND");
+            bool usingMultiThread = N_THREADS_ENABLED;
+            var boundaryGroups = GaCellsGroup.CollectGroups(N_THREADS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "ON_GRID_BOUND");
             if (boundaryGroups == null || boundaryGroups.Length == 0)
                 return;
 

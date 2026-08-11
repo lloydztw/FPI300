@@ -41,11 +41,16 @@ namespace LaserAlignDX.AoiModel.V30
     /// </summary>
     public class AoiModel_ChipMeasure : AoiModelBase, IAoiChipMeasurer
     {
+        #region CONFIG
+        static bool N_THREADS_ENABLED => GlobalConfig.N_THREADS_ENABLED;
+        static int N_THREADS => GlobalConfig.N_THREADS;
+        #endregion
+
         #region GLOBAL_MESS
         InspectX3ParaClass _xInspect => base._xRecipe.InspectParams;
         #endregion
 
-        #region KERNEL_MEMBERS
+        #region COORDINDATES_TRANSFORM
         //ITransform _worldTransform;
         //QMicroChipTransform _microTransform;
         IMicroChipTransform _microTransform;
@@ -73,7 +78,7 @@ namespace LaserAlignDX.AoiModel.V30
 
         public override void Run(Bitmap sceneBmp = null)
         {
-            bool go = _xInspect.optChipMeasurement; // || _xInspect.optChipDefectsInspect || QrUsed;
+            bool go = _xInspect.optChipMeasurement; 
             if (!go)
                 return;
 
@@ -91,9 +96,6 @@ namespace LaserAlignDX.AoiModel.V30
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
                 RunChipsMeasurement(bmpFullfov);
                 RunChipsMeasurement2ndForNGs(bmpFullfov);
-
-                // Defects And QrCode 拉出 成為一個 獨立的 AoiModel_Defects
-                // RunDefectsAndQrCode(bmpFullfov, LineScanCamImageHolder.PeekMvdImage());
 
                 markRunEnd(true);
                 fire_AoiEnd();
@@ -117,9 +119,6 @@ namespace LaserAlignDX.AoiModel.V30
             }
         }
 
-        /// <summary>
-        /// 調試 使用
-        /// </summary>
         public void TryMeasureOneChip(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
         {
             if (_microTransform == null)
@@ -129,7 +128,7 @@ namespace LaserAlignDX.AoiModel.V30
                 return;
 
             RunOneChipMeasurement(cell, cellBmp, ref cellRoi, 0);
-        }
+        }        
         public bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine)
         {
             // RESERVED
@@ -156,14 +155,14 @@ namespace LaserAlignDX.AoiModel.V30
 
             //_TM.RESET_ACCUM();
 
-            bool usingMultiThread = Universal.N_THREADS_ENABLED;
+            bool usingMultiThread = N_THREADS_ENABLED;
 
             #region 準備_CELL_GROUPS
-            int N_GROUPS = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;
+            int N_GROUPS = _cellGroups != null ? _cellGroups.Length : N_THREADS;
             var groups = _cellGroups != null ? _cellGroups : GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
             #endregion
 
-            prepareMvdLineFinders(Universal.N_THREADS);
+            prepareMvdLineFinders(N_THREADS);
 
             if (groups == null || groups.Length == 0)
                 return;

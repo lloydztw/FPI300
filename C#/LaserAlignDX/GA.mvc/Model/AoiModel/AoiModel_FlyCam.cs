@@ -28,11 +28,6 @@ namespace LaserAlignDX.AoiModel.V3
     /// </summary>
     public class AoiModel_FlyCam : AoiModelBase, IAoiFlyCamMatcher
     {
-        #region CONFIG
-        //static bool N_THREADS_ENABLED => GlobalConfig.N_THREADS_ENABLED;
-        //static int N_THREADS => GlobalConfig.N_THREADS;
-        #endregion
-
         #region GLOBAL_MESS
         FlyParaClass _xFlyAoiParams => _xRecipe.FlyAoiParams;
         #endregion
