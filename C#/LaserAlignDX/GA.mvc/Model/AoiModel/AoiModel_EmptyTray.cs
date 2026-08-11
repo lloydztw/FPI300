@@ -13,7 +13,6 @@
  */
 #endregion
 
-
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.Utils;
@@ -21,9 +20,6 @@ using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Drawing;
-using System.Threading;
-using Traveller106;
-
 
 namespace LaserAlignDX.AoiModel.V3
 {
@@ -32,7 +28,7 @@ namespace LaserAlignDX.AoiModel.V3
     /// </summary>
     public class AoiModel_EmptyTray : AoiModelBase
     {
-        public override void Run()
+        public override void Run(Bitmap sceneBmp = null)
         {
             try
             {

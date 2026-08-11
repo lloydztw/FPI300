@@ -1,4 +1,4 @@
-﻿namespace LaserAlignDX.Mvc.Gui.V25
+﻿namespace LaserAlignDX.Mvc.Gui.V35
 {
     partial class FormRecipeEditor
     {

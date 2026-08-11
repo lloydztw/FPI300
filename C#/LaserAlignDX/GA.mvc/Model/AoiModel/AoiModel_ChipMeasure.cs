@@ -34,12 +34,12 @@ using VisionDesigner;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
 
-namespace LaserAlignDX.AoiModel.V3.L0
+namespace LaserAlignDX.AoiModel.V30
 {
     /// <summary>
     /// 晶粒尺寸量測
     /// </summary>
-    public class AoiModel_ChipMeasure : AoiModelBase
+    public class AoiModel_ChipMeasure : AoiModelBase, IAoiChipMeasurer
     {
         #region GLOBAL_MESS
         InspectX3ParaClass _xInspect => base._xRecipe.InspectParams;
@@ -71,7 +71,7 @@ namespace LaserAlignDX.AoiModel.V3.L0
             this._cellGroups = cellGroups;
         }
 
-        public override void Run()
+        public override void Run(Bitmap sceneBmp = null)
         {
             bool go = _xInspect.optChipMeasurement; // || _xInspect.optChipDefectsInspect || QrUsed;
             if (!go)
@@ -120,15 +120,25 @@ namespace LaserAlignDX.AoiModel.V3.L0
         /// <summary>
         /// 調試 使用
         /// </summary>
-        internal void TryMeasureOneChip(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
+        public void TryMeasureOneChip(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
         {
             if (_microTransform == null)
                 _microTransform = _sysModel.GetMicroTransform(getActiveCarrierID());
-            
+
             if (_microTransform == null)
                 return;
 
             RunOneChipMeasurement(cell, cellBmp, ref cellRoi, 0);
+        }
+        public bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine)
+        {
+            // RESERVED
+            resultLine = null;
+            return false;
+        }
+        public void AnalyzeGoldenData()
+        {
+            // RESERVED
         }
 
         #region PRIVATE_FUNCTIONS
@@ -507,7 +517,7 @@ namespace LaserAlignDX.AoiModel.V3.L0
             }
             #endregion
         }
-        
+
         /// <summary>
         /// 整理打包 尺寸计算 的 最後判定结果
         /// </summary>
@@ -568,7 +578,7 @@ namespace LaserAlignDX.AoiModel.V3.L0
             }
         }
 
-#if(OPT_OLD_CODE)
+#if (OPT_OLD_CODE)
         /// <summary>
         /// 計算 選轉&平移 後的 邊線框 (左, 上, 右, 下)
         /// </summary>
@@ -1090,7 +1100,7 @@ namespace LaserAlignDX.AoiModel.V3.L0
             //cMvdLineSegmentFsOut[borderIndex] = resultLine;
             return resultLine;
         }
-        
+
         /// <summary>
         /// 寻找平行线
         /// </summary>

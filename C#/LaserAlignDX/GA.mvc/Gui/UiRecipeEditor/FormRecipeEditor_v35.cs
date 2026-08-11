@@ -19,9 +19,9 @@ using JetEazy.QMath;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using GaRecipeEditCtrl = LaserAlignDX.Mvc.Ctrl.V25.GaRecipeEditCtrl;
+using GaRecipeEditCtrl = LaserAlignDX.Mvc.Ctrl.V35.GaRecipeEditCtrl;
 
-namespace LaserAlignDX.Mvc.Gui.V25
+namespace LaserAlignDX.Mvc.Gui.V35
 {
     public partial class FormRecipeEditor : Form, IvRecipeEditorUI
     {

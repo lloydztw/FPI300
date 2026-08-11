@@ -14,7 +14,6 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model;
-using JetEazy.Match;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model.Coords;
 using NeedleX.ProcessSpace;

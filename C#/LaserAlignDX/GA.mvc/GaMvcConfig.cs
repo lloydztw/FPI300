@@ -27,8 +27,8 @@ using Traveller106;
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
 
 #if (OPT_CALIB_V5)
-using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V25.FormRecipeEditor;
-using FormTemplateEditor = LaserAlignDX.Mvc.Gui.V25.FormTemplateEditor;
+using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V35.FormRecipeEditor;
+using FormTemplateEditor = LaserAlignDX.Mvc.Gui.V35.FormTemplateEditor;
 using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V5.FormCalibrationTool;
 using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
 #elif (OPT_CALIB_V4)

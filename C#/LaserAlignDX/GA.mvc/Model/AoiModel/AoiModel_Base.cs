@@ -25,7 +25,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 
-
 namespace LaserAlignDX.AoiModel
 {
     public abstract class AoiModelBase : IDisposable
@@ -292,7 +291,21 @@ namespace LaserAlignDX.AoiModel
             _regionCells = null;
         }
 
-        public abstract void Run();
+        /// <summary>
+        /// 訓練 AOI (目前是為了 MVD套件)
+        /// </summary>
+        public virtual bool Train(Bitmap goldenBmp, params object[] args)
+        {
+            return false;
+        }
+
+        /// <summary>
+        /// 執行 AOI 運算
+        /// </summary>
+        /// <remarks>
+        /// 默認 sceneBmp = null, 代表使用 GaBigImageHolder 當輸入影像
+        /// </remarks>
+        public abstract void Run(Bitmap sceneBmp = null);
 
         /// <summary>
         /// 复位所有数据

@@ -26,11 +26,14 @@ using MvdDefectDetector = LaserAlignDX.Model.Defects.G1.MvdDefectDetector;
 namespace LaserAlignDX.AoiModel.V3
 {
     /// <summary>
-    /// 晶粒尺寸量測
+    /// 晶粒瑕疵檢測
     /// </summary>
-    public partial class AoiModel_Defects : AoiModelBase, IDisposable
+    public class AoiModel_Defects : AoiModelBase, IAoiDefectsDetector
     {
-        static bool OPT_DEBUG_USE_ONE_THREAD = false;
+        #region CONFIG
+        static bool N_THREADS_ENABLED => GlobalConfig.N_THREADS_ENABLED;
+        static int N_THREADS => GlobalConfig.N_THREADS;
+        #endregion
 
         #region GLOBAL_MESS
         InspectX3ParaClass _xInspect => base._xRecipe.InspectParams;
@@ -44,6 +47,7 @@ namespace LaserAlignDX.AoiModel.V3
         GaCellsGroup[] _cellGroups;
         #endregion
 
+#if (false)
         public bool QrUsed
         {
             get;
@@ -54,13 +58,14 @@ namespace LaserAlignDX.AoiModel.V3
             get;
             set;
         }
+#endif
 
         public override void Dispose()
         {
-            var detectors = _detectors;
+            var oldItems = _detectors;
             _detectors = new MvdDefectDetector[0];
-            foreach(var detector in detectors)
-                detector?.Dispose();
+            foreach(var item in oldItems)
+                item?.Dispose();
         }
 
         public void SetCellGroups(GaCellsGroup[] cellGroups)
@@ -68,9 +73,9 @@ namespace LaserAlignDX.AoiModel.V3
             this._cellGroups = cellGroups;
         }
 
-        public override void Run()
+        public override void Run(Bitmap sceneBmp = null)
         {
-            bool go = _xInspect.optChipDefectsInspect || QrUsed;
+            bool go = _xInspect.optChipDefectsInspect;
             if (!go)
                 return;
 
@@ -145,12 +150,10 @@ namespace LaserAlignDX.AoiModel.V3
             fire_AoiBegin("晶粒瑕疵檢測");
 
             // 暫時強制使用 single thread
-            bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            if (OPT_DEBUG_USE_ONE_THREAD)
-                usingMultiThread = false;
+            bool usingMultiThread = N_THREADS_ENABLED;
 
             #region 準備_CELL_GROUPS
-            int N_GROUPS = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;
+            int N_GROUPS = _cellGroups != null ? _cellGroups.Length : N_THREADS;
             var groups = _cellGroups != null ? _cellGroups : GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
             if (groups == null || groups.Length == 0)
                 return;

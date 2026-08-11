@@ -30,24 +30,22 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Forms;
-using System.Windows.Media;
-using Traveller106;
 using VisionDesigner;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
 
-namespace LaserAlignDX.AoiModel.V3.L1
+namespace LaserAlignDX.AoiModel.V35
 {
     /// <summary>
     /// 晶粒尺寸量測
     /// </summary>
-    public class AoiModel_ChipMeasure : AoiModelBase
+    public class AoiModel_ChipMeasure : AoiModelBase, IAoiChipMeasurer
     {
+        #region CONFIG
         static bool N_THREADS_ENABLED => GlobalConfig.N_THREADS_ENABLED && true;
         static int N_THREADS => GlobalConfig.N_THREADS;
         static int N_CHUNKS = 7;
+        #endregion
 
         #region GLOBAL_MESS
         InspectX3ParaClass _xInspect => base._xRecipe.InspectParams;
@@ -88,7 +86,7 @@ namespace LaserAlignDX.AoiModel.V3.L1
             this._cellGroups = cellGroups;
         }
 
-        public override void Run()
+        public override void Run(Bitmap sceneBmp = null)
         {
             bool go = _xInspect.optChipMeasurement; // || _xInspect.optChipDefectsInspect || QrUsed;
             if (!go)
@@ -141,10 +139,7 @@ namespace LaserAlignDX.AoiModel.V3.L1
             }
         }
 
-        /// <summary>
-        /// 調試 使用
-        /// </summary>
-        internal void TryMeasureOneChip(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
+        public void TryMeasureOneChip(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
         {
             //if (_microTransform == null)
             //    _microTransform = _sysModel.GetMicroTransform(getActiveCarrierID());
@@ -157,7 +152,7 @@ namespace LaserAlignDX.AoiModel.V3.L1
             RunOneChipMeasurement(cell, cellBmp, ref cellRoi, 0);
         }
 
-        internal bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine)
+        public bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine)
         {
             //--------------------------------------------------------------
             // 海康邊線 準確度 深受 前景背景 對比 影響
@@ -169,7 +164,7 @@ namespace LaserAlignDX.AoiModel.V3.L1
             return resultLine != null;
         }
 
-        internal void AnalyzeGoldenData()
+        public void AnalyzeGoldenData()
         {
             prepareGoldenData(true);
         }
@@ -830,7 +825,6 @@ namespace LaserAlignDX.AoiModel.V3.L1
         }
 
         #endregion
-
 
         #region MVD_LINE_SEGMENTS_FUNCTIONS
         private void disposeMvdLineFinders()

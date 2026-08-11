@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model;
@@ -22,7 +23,8 @@ using System;
 using System.Drawing;
 using System.Threading;
 using VisionDesigner;
-using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.V3.L1.AoiModel_ChipMeasure;
+
+using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.V30.AoiModel_ChipMeasure;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 
@@ -57,15 +59,17 @@ namespace LaserAlignDX.AoiModel.V3
         }
         public override void Dispose()
         {
-            // To DO: 請把自己清乾淨
-            //_DisposeTools();
-
+            // 請把自己清乾淨
             _aoiChipLoc?.Dispose();
             _aoiChipLoc = null;
             _aoiChipMeasure?.Dispose();
             _aoiChipMeasure = null;
             _aoiChipDefects?.Dispose();
-            _aoiChipDefects = null; 
+            _aoiChipDefects = null;
+            _aoiFlyCam?.Dispose();
+            _aoiFlyCam = null;
+            _mvdQrCodeDecorder?.Dispose();
+            _mvdQrCodeDecorder = null;
         }
 
         #region GLOBAL_MESS
@@ -102,15 +106,18 @@ namespace LaserAlignDX.AoiModel.V3
         #endregion
 
         #region SUB_MODELS
+        AoiModel_EmptyTray _aoiEmptyTray = new AoiModel_EmptyTray();
         AoiModel_ChipLoc _aoiChipLoc = new AoiModel_ChipLoc();
         AoiModel_ChipMeasure _aoiChipMeasure = new AoiModel_ChipMeasure();
         AoiModel_Defects _aoiChipDefects = new AoiModel_Defects();
-        AoiModel_EmptyTray _aoiEmptyTray = new AoiModel_EmptyTray();
+        AoiModel_QrCode _aoiQrCode = new AoiModel_QrCode();
+        AoiModel_FlyCam _aoiFlyCam = new AoiModel_FlyCam();
+        Mvd2DReaderClass _mvdQrCodeDecorder = new Mvd2DReaderClass();
         #endregion
 
         void initSubModels()
         {
-            var subModels = new AoiModelBase[] { _aoiChipLoc, _aoiChipMeasure, _aoiChipDefects, _aoiEmptyTray };
+            var subModels = new AoiModelBase[] { _aoiChipLoc, _aoiChipMeasure, _aoiChipDefects, _aoiQrCode, _aoiEmptyTray };
             foreach (var subModel in subModels)
             {
                 //model.OnAoiBegin+=
@@ -150,13 +157,13 @@ namespace LaserAlignDX.AoiModel.V3
         }
         public bool QrUsed
         {
-            get { return _aoiChipDefects.QrUsed; }
-            set { _aoiChipDefects.QrUsed = value; }
+            get { return _aoiQrCode.QrUsed; }
+            set { _aoiQrCode.QrUsed = value; }
         }
         public bool QrJudged
         {
-            get { return _aoiChipDefects.QrJudged; }
-            set { _aoiChipDefects.QrJudged = value; }
+            get { return _aoiQrCode.QrJudged; }
+            set { _aoiQrCode.QrJudged = value; }
         }
 
         #region PUBLIC_RESULT_PACKERS_FOR_PLC
@@ -329,8 +336,69 @@ namespace LaserAlignDX.AoiModel.V3
         {
             return _aoiChipMeasure.TryFindLineSegment(eBorder, bmpSrc, roiRect, out resultLine);
         }
+        public string DecodeQrCode(Bitmap bmp, Rectangle? roi = null)
+        {
+            if (bmp != null && _mvdQrCodeDecorder != null)
+            {
+                RectangleF roiF;
+                if (roi == null)
+                {
+                    roiF = new RectangleF(0, 0, bmp.Width, bmp.Height);
+                }
+                else
+                {
+                    roiF = roi.Value;
+                    GaUtil.Clip(ref roiF, bmp.Width, bmp.Height);
+                }
+                if (roiF.Width < 2 || roiF.Height < 2)
+                    return "";
 
-        public override void Run()
+                _mvdQrCodeDecorder.Run(bmp, roiF);
+                var decodeInfo = _mvdQrCodeDecorder.DCodeInfo;
+                var code = (decodeInfo?.Content) ?? "";
+                return code;
+            }
+
+            return "";
+        }
+        
+        public IAoiChipLocator GetChipLocAoi()
+        {
+            return _aoiChipLoc;
+        }
+        public IAoiFlyCamMatcher GetFlyCameraAoi()
+        {
+            return _aoiFlyCam;
+        }
+
+        public void Train()
+        {
+            var err1 = Mvc.Model.ErrorCodes.AoiErr_Template_Train_Failed;
+            var err2 = Mvc.Model.ErrorCodes.AoiErr_FlyCam_Train_Failed;
+
+            try
+            {
+                bool ok = GetChipLocAoi().Train(_xRecipe.GoldenChipBmp);
+                if (ok) err1 = ErrorCodes.OK;
+
+                ok = GetFlyCameraAoi().Train(_xRecipe.FlyTemplateBmp);
+                if (ok) err2 = ErrorCodes.OK;
+            }
+            catch
+            {
+            }
+
+            if (err1 != ErrorCodes.OK)
+            {
+                throw new Exception(QMSG.Text(err1));
+            }
+            if (err1 != ErrorCodes.OK)
+            {
+                throw new Exception(QMSG.Text(err2));
+            }
+        }
+
+        public override void Run(Bitmap sceneBmp = null)
         {
             #region DIRECTORIES_可以搬到後面處理_才不會有遲滯感覺
             //if (INI.Instance.IsSaveDebugBMP)
@@ -387,12 +455,25 @@ namespace LaserAlignDX.AoiModel.V3
                 var cellGroups = _aoiChipLoc.CellGroups;
 
                 // 尺寸量測
-                _aoiChipMeasure.SetCellGroups(cellGroups);
-                _aoiChipMeasure.Run();
+                if (_xRecipe.InspectParams.optChipMeasurement)
+                {
+                    _aoiChipMeasure.SetCellGroups(cellGroups);
+                    _aoiChipMeasure.Run();
+                }
 
                 // 瑕疵檢測
-                _aoiChipDefects.SetCellGroups(cellGroups);
-                _aoiChipDefects.Run();
+                if (_xRecipe.InspectParams.optChipDefectsInspect)
+                {
+                    _aoiChipDefects.SetCellGroups(cellGroups);
+                    _aoiChipDefects.Run();
+                }
+
+                // QRCODE
+                if (QrUsed || QrJudged)
+                {
+                    _aoiChipDefects.SetCellGroups(cellGroups);
+                    _aoiQrCode.Run();
+                }
 
                 // 釋放 多執行續的 CellGroups
                 _aoiChipLoc.DisposeCellGroups();

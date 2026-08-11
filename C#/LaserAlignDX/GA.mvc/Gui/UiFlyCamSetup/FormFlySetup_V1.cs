@@ -23,9 +23,9 @@ using JetEazy.Utils;
 using JzDisplay;
 using LaserAlignDX.GA.FormSpace.FPI30Form;
 using LaserAlignDX.Mvc.Gui;
+using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using MoveGraphLibrary;
-using OpenCvSharp.ML;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -36,6 +36,7 @@ using Traveller106;
 using VisionDesigner.BlobFind;
 using VsCommon.ControlSpace.MachineSpace;
 using WorldOfMoveableObjects;
+
 using Timer = System.Windows.Forms.Timer;
 using VsLight = JetEazy.ControlSpace.PLCSpace.VsLight;
 
@@ -48,11 +49,9 @@ namespace LaserAlignDX.FormSpace
         Mover xMovers = new Mover();
         #endregion
 
-        #region GLOBAL_MESS_RECIPE
-        protected RecipeFPIX3Class xRecipe
-        {
-            get { return RecipeFPIX3Class.Instance; }
-        }
+        #region GLOBAL_MESS
+        ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        RecipeFPIX3Class xRecipe => RecipeFPIX3Class.Instance;
         #endregion
 
         #region GLOBAL_MESS_MACHINE
@@ -233,46 +232,50 @@ namespace LaserAlignDX.FormSpace
         {
             RectangleF rectf = xRecipe.xRectRegionPrintFly;
             BoundRect(ref rectf, xRecipe.bmpOrgFly.Size);
-            if (rectf.Width > 1 && rectf.Height > 1)
+
+            var flyAoi = _sysModel?.AoiModel?.GetFlyCameraAoi();
+            if (flyAoi != null && rectf.Width > 1 && rectf.Height > 1)
             {
-                Bitmap bmp0 = xRecipe.bmpOrgFly.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-                bool bOK = xRecipe.CheckSpecialAngle(bmp0, out List<CBlobInfo> list, out float angle, out System.Drawing.PointF Center);
-                if (bOK)
+                using (Bitmap bmpG = xRecipe.bmpOrgFly.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
                 {
+                    bool bOK = flyAoi.CheckSpecialAngle(bmpG, out List<CBlobInfo> list, out float angle, out System.Drawing.PointF Center);
 
-                    DS2.ClearStaticMover();
-                    xMovers.Clear();
-                    DS2.ReplaceDisplayImage(xRecipe.bmpOrgFly);
-                    foreach (CBlobInfo cBlob in list)
+                    if (bOK)
                     {
-                        RectangleF x = new RectangleF(cBlob.RectInfo.CenterX - cBlob.RectInfo.Width / 2 + rectf.X,
-                            cBlob.RectInfo.CenterY - cBlob.RectInfo.Height / 2 + rectf.Y,
-                            cBlob.RectInfo.Width,
-                            cBlob.RectInfo.Height);
+                        DS2.ClearStaticMover();
+                        xMovers.Clear();
+                        DS2.ReplaceDisplayImage(xRecipe.bmpOrgFly);
 
-                        JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), x);
-                        _rect.RelateLevel = 2;
-                        _rect.RelatePosition = 0;
-                        _rect.SetAngle(-cBlob.BoxInfo.Angle + 90);
-                        xMovers.Add(_rect);
+                        foreach (CBlobInfo cBlob in list)
+                        {
+                            RectangleF x = new RectangleF(cBlob.RectInfo.CenterX - cBlob.RectInfo.Width / 2 + rectf.X,
+                                cBlob.RectInfo.CenterY - cBlob.RectInfo.Height / 2 + rectf.Y,
+                                cBlob.RectInfo.Width,
+                                cBlob.RectInfo.Height);
+
+                            JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), x);
+                            _rect.RelateLevel = 2;
+                            _rect.RelatePosition = 0;
+                            _rect.SetAngle(-cBlob.BoxInfo.Angle + 90);
+                            xMovers.Add(_rect);
+                        }
+
+                        //CviLabel cviLabel = new CviLabel();
+                        //cviLabel.Text = $"计算角度:{angle}";
+                        //cviLabel.Location = new Point((int)Center.X, (int)Center.Y);
+                        //cviLabel.Visible = true;
+                        //DS2.ImageViewer.AddInteractor(cviLabel);
+
+                        DS2.SetStaticMover(xMovers);
+                        DS2.RefreshDisplayShape();
+                        DS2.MappingSelect();
+
+                        update_Display(false);
+
+                        //MessageBox.Show($"计算角度:{angle}");
+                        VsMessageBox.Info($"{QMSG.Text(Prompts.Info_FlyCam_Angle)} : {angle:0.00}");
                     }
-
-                    //CviLabel cviLabel = new CviLabel();
-                    //cviLabel.Text = $"计算角度:{angle}";
-                    //cviLabel.Location = new Point((int)Center.X, (int)Center.Y);
-                    //cviLabel.Visible = true;
-                    //DS2.ImageViewer.AddInteractor(cviLabel);
-
-                    DS2.SetStaticMover(xMovers);
-                    DS2.RefreshDisplayShape();
-                    DS2.MappingSelect();
-
-                    update_Display(false);
-
-                    //MessageBox.Show($"计算角度:{angle}");
-                    VsMessageBox.Info($"{QMSG.Text(Prompts.Info_FlyCam_Angle)} : {angle:0.00}");
                 }
-
             }
         }
         private void BtnLightTrigger_Click(object sender, EventArgs e)
@@ -647,6 +650,7 @@ namespace LaserAlignDX.FormSpace
         //----------------------------------------------------------------------------
         void aoiDecodeCode(Bitmap srcBmp, out string text)
         {
+#if (OPT_OLD_CODE)
             if (srcBmp == null)
             {
                 text = "";
@@ -663,6 +667,11 @@ namespace LaserAlignDX.FormSpace
 
             var decodeInfo = aoiTool.DCodeInfo;
             text = decodeInfo != null ? decodeInfo.Content : "";
+#endif
+
+            text = _sysModel?.AoiModel?.DecodeQrCode(srcBmp);
+            if (text == null)
+                text = "";
         }
 
         void getCamDevParaAndUpdateUI()

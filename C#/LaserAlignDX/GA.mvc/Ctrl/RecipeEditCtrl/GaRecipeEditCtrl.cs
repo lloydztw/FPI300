@@ -25,7 +25,6 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LeTian.JxProps.PropertyMeta;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System;

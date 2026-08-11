@@ -1,9 +1,8 @@
 ﻿using AUVision;
+using JetEazy.Utils;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using VisionDesigner;
 using VisionDesigner.AlmightyPatMatch;
 
@@ -11,51 +10,70 @@ namespace LaserAlignDX.BasicSpace
 {
     public class MvdFindClass : IDisposable
     {
+        #region PRIVATE_MVD_TOOLS
+        CAlmightyPattern _almightyPattern = new CAlmightyPattern();
+        CAlmightyPatMatchTool _almightyPatmatchTool = new CAlmightyPatMatchTool();
+        //VisionDesigner.GrayPatMatch.CGrayPattern cGrayPatternObj = null;
+        //VisionDesigner.GrayPatMatch.CGrayPatMatchTool cGrayPatMatchToolObj = null;
+        #endregion
+
         public Bitmap bmpObj_Image = null;
         public Bitmap bmpRun_Image = null;
         public CMvdImage xMvdObj_Image = null;
         public CMvdImage xMvdRun_Image = null;
 
-        VisionDesigner.AlmightyPatMatch.CAlmightyPattern cAlmightyPatternObj = null;
-        VisionDesigner.AlmightyPatMatch.CAlmightyPatMatchTool cAlmightyPatmatchToolObj = null;
-
         public List<xFindResult> xResults = new List<xFindResult>();
         public List<CMvdRectangleF> xMvdResultRects = new List<CMvdRectangleF>();
 
-        public float xMvdAngle { get; set; } = 5;
+        #region PUBLIC_PARAMS
+        public float xMvdAngle { get; set; } = 5f;
         public int xMvdMaxOcc { get; set; } = 1;
         public float xMvdTolerance { get; set; } = 0.5f;
         public PointF xMvdFixed { get; set; } = new PointF(-1, -1);
         public int xMaxOverlap { get; set; } = 80;
+        #endregion
 
-        //VisionDesigner.GrayPatMatch.CGrayPattern cGrayPatternObj = null;
-        //VisionDesigner.GrayPatMatch.CGrayPatMatchTool cGrayPatMatchToolObj = null;
+        public MvdFindClass()
+        {
+        }
 
-        public MvdFindClass() { }
+#if(false)
         ~MvdFindClass()
         {
             Dispose();
+        }
+#endif
+
+        public void Dispose()
+        {
+            bmpObj_Image?.Dispose();
+            bmpObj_Image = null;
+            bmpRun_Image?.Dispose();
+            bmpRun_Image = null;
+            xMvdObj_Image?.Dispose();
+            xMvdObj_Image = null;
+            xMvdRun_Image?.Dispose();
+            xMvdRun_Image = null;
+            _almightyPatmatchTool?.Dispose();
+            _almightyPatmatchTool = null;
+            _almightyPattern?.Dispose();
+            _almightyPattern = null;
         }
 
         public bool HikTrainBmp()
         {
             xMvdObj_Image?.Dispose();
-            xMvdObj_Image = BitmapToCMvdImage(bmpObj_Image);
+            xMvdObj_Image = GaImageUtil.BitmapToCMvdImage(bmpObj_Image);
             return HikTrain2();
-        }
-        public bool HikTrainBmp(CMvdRectangleF cMvdRectangleF)
-        {
-            xMvdObj_Image?.Dispose();
-            xMvdObj_Image = BitmapToCMvdImage(bmpObj_Image);
-            return HikTrain2(cMvdRectangleF);
         }
         public bool HikRunBmp()
         {
             xMvdRun_Image?.Dispose();
-            xMvdRun_Image = BitmapToCMvdImage(bmpRun_Image);
+            xMvdRun_Image = GaImageUtil.BitmapToCMvdImage(bmpRun_Image);
             return HikRun2();
         }
-        public bool HikTrain2()
+        
+        bool HikTrain2()
         {
             bool bOK = false;
             string errmessage = string.Empty;
@@ -63,12 +81,12 @@ namespace LaserAlignDX.BasicSpace
             #region HIK_TRAIN
             try
             {
-                // CreatePatternInstance
-                if (cAlmightyPatternObj == null)
-                    cAlmightyPatternObj = new VisionDesigner.AlmightyPatMatch.CAlmightyPattern();
+                //// CreatePatternInstance
+                //if (_almightyPattern == null)
+                //    _almightyPattern = new VisionDesigner.AlmightyPatMatch.CAlmightyPattern();
 
                 //Set type
-                cAlmightyPatternObj.Type = PatMatchAlgorithmType.HPFeature;
+                _almightyPattern.Type = PatMatchAlgorithmType.HPFeature;
                 //cAlmightyPatternObj.Type = PatMatchAlgorithmType.FastFeature;
 
                 if (xMvdObj_Image.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
@@ -76,16 +94,16 @@ namespace LaserAlignDX.BasicSpace
                     //当前程序仅支持mono8。因此像素格会转换.
                     xMvdObj_Image.ConvertImagePixelFormat(MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08);
                 }
-                cAlmightyPatternObj.InputImage = xMvdObj_Image;
+                _almightyPattern.InputImage = xMvdObj_Image;
                 // Set ROI region (optional)
-                cAlmightyPatternObj.RegionList.Clear();
+                _almightyPattern.RegionList.Clear();
                 float extendvalue = 1f;
                 var region1 = new VisionDesigner.CMvdRectangleF(xMvdObj_Image.Width * 0.5f,
                     xMvdObj_Image.Height * 0.5f,
                     xMvdObj_Image.Width * extendvalue,
                     xMvdObj_Image.Height * extendvalue);
 
-                cAlmightyPatternObj.RegionList.Add(new CAlmightyPatMatchRegion(region1, true));
+                _almightyPattern.RegionList.Add(new CAlmightyPatMatchRegion(region1, true));
 
                 // Set basic parameter
 
@@ -95,20 +113,20 @@ namespace LaserAlignDX.BasicSpace
 
                 if (xMvdFixed.X < 0 || xMvdFixed.X > xMvdObj_Image.Width || xMvdFixed.Y < 0 || xMvdFixed.Y > xMvdObj_Image.Height)
                 {
-                    cAlmightyPatternObj.BasicParam.FixPoint =
+                    _almightyPattern.BasicParam.FixPoint =
                         new VisionDesigner.MVD_POINT_F(Convert.ToSingle(xMvdObj_Image.Width * extendvalue) / 2,
                                                                                    Convert.ToSingle(xMvdObj_Image.Height * extendvalue) / 2);
 
                 }
                 else
                 {
-                    cAlmightyPatternObj.BasicParam.FixPoint =
+                    _almightyPattern.BasicParam.FixPoint =
                                     new VisionDesigner.MVD_POINT_F(xMvdFixed.X, xMvdFixed.Y);
                 }
 
                 // Train
 
-                cAlmightyPatternObj.Train();
+                _almightyPattern.Train();
                 bOK = true;
             }
             catch (Exception ex)
@@ -121,20 +139,18 @@ namespace LaserAlignDX.BasicSpace
             return bOK;
 
         }
-        public bool HikTrain2(CMvdRectangleF cMvdRectangleF)
+        bool HikTrain2(CMvdRectangleF cMvdRectangleF)
         {
             bool bOK = false;
-            string errmessage = string.Empty;
 
-            #region HIK_TRAIN
             try
             {
                 // CreatePatternInstance
-                if (cAlmightyPatternObj == null)
-                    cAlmightyPatternObj = new VisionDesigner.AlmightyPatMatch.CAlmightyPattern();
+                if (_almightyPattern == null)
+                    _almightyPattern = new VisionDesigner.AlmightyPatMatch.CAlmightyPattern();
 
                 //Set type
-                cAlmightyPatternObj.Type = PatMatchAlgorithmType.HPFeature;
+                _almightyPattern.Type = PatMatchAlgorithmType.HPFeature;
                 //cAlmightyPatternObj.Type = PatMatchAlgorithmType.FastFeature;
 
                 if (xMvdObj_Image.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
@@ -142,36 +158,34 @@ namespace LaserAlignDX.BasicSpace
                     //当前程序仅支持mono8。因此像素格会转换.
                     xMvdObj_Image.ConvertImagePixelFormat(MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08);
                 }
-                cAlmightyPatternObj.InputImage = xMvdObj_Image;
+                _almightyPattern.InputImage = xMvdObj_Image;
                 // Set ROI region (optional)
-                cAlmightyPatternObj.RegionList.Clear();
+                _almightyPattern.RegionList.Clear();
                 var region1 = cMvdRectangleF;
 
-                cAlmightyPatternObj.RegionList.Add(new CAlmightyPatMatchRegion(region1, true));
+                _almightyPattern.RegionList.Add(new CAlmightyPatMatchRegion(region1, true));
 
                 // Set basic parameter
 
-                cAlmightyPatternObj.BasicParam.FixPoint =
+                _almightyPattern.BasicParam.FixPoint =
                     new VisionDesigner.MVD_POINT_F(cMvdRectangleF.CenterX, cMvdRectangleF.CenterY);
 
                 // Train
 
-                cAlmightyPatternObj.Train();
+                _almightyPattern.Train();
                 bOK = true;
             }
             catch (Exception ex)
             {
-                errmessage = ex.Message;
-                bOK = false;
+                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
-            #endregion
 
             return bOK;
-
         }
-        public bool HikRun2()
+
+        bool HikRun2()
         {
-            bool bOK = HikRun3(new RectangleF(0, 0, bmpRun_Image.Width, bmpRun_Image.Height));
+            bool bOK = HikRun2(new RectangleF(0, 0, bmpRun_Image.Width, bmpRun_Image.Height));
 
             //xResults.Clear();
 
@@ -254,7 +268,7 @@ namespace LaserAlignDX.BasicSpace
 
             return bOK;
         }
-        public bool HikRun3(RectangleF eRectF)
+        bool HikRun2(RectangleF eRectF)
         {
             bool bOK = false;
 
@@ -264,51 +278,51 @@ namespace LaserAlignDX.BasicSpace
             #region HIK_RUN
 
             // CreateToolInstance
-            if (cAlmightyPatmatchToolObj == null)
-                cAlmightyPatmatchToolObj = new VisionDesigner.AlmightyPatMatch.CAlmightyPatMatchTool();
+            if (_almightyPatmatchTool == null)
+                _almightyPatmatchTool = new VisionDesigner.AlmightyPatMatch.CAlmightyPatMatchTool();
 
             //Set type
 
-            cAlmightyPatmatchToolObj.Type = PatMatchAlgorithmType.HPFeature;
+            _almightyPatmatchTool.Type = PatMatchAlgorithmType.HPFeature;
             //cAlmightyPatmatchToolObj.Type = PatMatchAlgorithmType.FastFeature;
 
             //// Set ROI region (optional)
-            cAlmightyPatmatchToolObj.RegionList.Clear();
+            _almightyPatmatchTool.RegionList.Clear();
             var region2 = new VisionDesigner.CMvdRectangleF(eRectF.X + eRectF.Width / 2,
                eRectF.Y + eRectF.Height / 2,
                 eRectF.Width,
                 eRectF.Height);
-            cAlmightyPatmatchToolObj.RegionList.Add(new CAlmightyPatMatchRegion(region2, true));
+            _almightyPatmatchTool.RegionList.Add(new CAlmightyPatMatchRegion(region2, true));
 
             // Set basic parameter
 
-            cAlmightyPatmatchToolObj.BasicParam.ShowOutlineStatus = false;
+            _almightyPatmatchTool.BasicParam.ShowOutlineStatus = false;
 
             // Set Pattern
 
-            cAlmightyPatmatchToolObj.Pattern = cAlmightyPatternObj;
+            _almightyPatmatchTool.Pattern = _almightyPattern;
 
-            cAlmightyPatmatchToolObj.SetRunParam("AngleStart", (-xMvdAngle).ToString());
-            cAlmightyPatmatchToolObj.SetRunParam("AngleEnd", xMvdAngle.ToString());
-            cAlmightyPatmatchToolObj.SetRunParam("MinScore", xMvdTolerance.ToString());
-            cAlmightyPatmatchToolObj.SetRunParam("MaxOverlap", xMaxOverlap.ToString());
+            _almightyPatmatchTool.SetRunParam("AngleStart", (-xMvdAngle).ToString());
+            _almightyPatmatchTool.SetRunParam("AngleEnd", xMvdAngle.ToString());
+            _almightyPatmatchTool.SetRunParam("MinScore", xMvdTolerance.ToString());
+            _almightyPatmatchTool.SetRunParam("MaxOverlap", xMaxOverlap.ToString());
 
             if (xMvdRun_Image.PixelFormat != MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08)
             {
                 //当前程序仅支持mono8。因此像素格会转换.
                 xMvdRun_Image.ConvertImagePixelFormat(MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08);
             }
-            cAlmightyPatmatchToolObj.InputImage = xMvdRun_Image;
+            _almightyPatmatchTool.InputImage = xMvdRun_Image;
 
             try
             {
                 // Running
 
-                cAlmightyPatmatchToolObj.Run();
+                _almightyPatmatchTool.Run();
 
                 // Get the result
 
-                VisionDesigner.AlmightyPatMatch.CAlmightyPatMatchResult cHPMatchRes = cAlmightyPatmatchToolObj.Result;
+                VisionDesigner.AlmightyPatMatch.CAlmightyPatMatchResult cHPMatchRes = _almightyPatmatchTool.Result;
 
                 //foreach (var item in cHPMatchRes.MatchInfoList)
 
@@ -345,10 +359,10 @@ namespace LaserAlignDX.BasicSpace
 
             }
             bOK = xResults.Count > 0;
-            if (cAlmightyPatmatchToolObj != null)
+            if (_almightyPatmatchTool != null)
             {
-                cAlmightyPatmatchToolObj.Dispose();
-                cAlmightyPatmatchToolObj = null;
+                _almightyPatmatchTool.Dispose();
+                _almightyPatmatchTool = null;
             }
             
             //GC.Collect();
@@ -357,7 +371,9 @@ namespace LaserAlignDX.BasicSpace
 
             return bOK;
         }
-        public bool HikRun4Pre()
+
+#if (false)
+        bool HikRun4Pre()
         {
             bool bOK = true;
 
@@ -400,7 +416,7 @@ namespace LaserAlignDX.BasicSpace
 
             return bOK;
         }
-        public bool HikRun4(RectangleF eRectF)
+        bool HikRun4(RectangleF eRectF)
         {
             bool bOK = false;
 
@@ -471,102 +487,6 @@ namespace LaserAlignDX.BasicSpace
 
             return bOK;
         }
-        public void Dispose()
-        {
-            if (bmpObj_Image != null)
-            {
-                bmpObj_Image.Dispose();
-                bmpObj_Image = null;
-            }
-            if (bmpRun_Image != null)
-            {
-                bmpRun_Image.Dispose();
-                bmpRun_Image = null;
-            }
-            if (xMvdObj_Image != null)
-            {
-                xMvdObj_Image.Dispose();
-                xMvdObj_Image = null;
-            }
-            if (xMvdRun_Image != null)
-            {
-                xMvdRun_Image.Dispose();
-                xMvdRun_Image = null;
-            }
-
-            if (cAlmightyPatmatchToolObj != null)
-            {
-                cAlmightyPatmatchToolObj.Dispose();
-                cAlmightyPatmatchToolObj = null;
-            }
-            if (cAlmightyPatternObj != null)
-            {
-                cAlmightyPatternObj.Dispose();
-                cAlmightyPatternObj = null;
-            }
-        }
-
-        private CMvdImage BitmapToCMvdImage(Bitmap bmpInputImg)
-        {
-            CMvdImage cMvdImage = new CMvdImage();
-            System.Drawing.Imaging.PixelFormat bitPixelFormat = bmpInputImg.PixelFormat;
-            BitmapData bmData = bmpInputImg.LockBits(new Rectangle(0, 0, bmpInputImg.Width, bmpInputImg.Height), ImageLockMode.ReadOnly, bitPixelFormat);//锁定
-
-            if (bitPixelFormat == System.Drawing.Imaging.PixelFormat.Format8bppIndexed)
-            {
-                Int32 bitmapDataSize = bmData.Stride * bmData.Height;//bitmap图像缓存长度
-                int offset = bmData.Stride - bmData.Width;
-                Int32 ImageBaseDataSize = bmData.Width * bmData.Height;//imageBaseData_V2图像真正的缓存长度
-                byte[] _BitImageBufferBytes = new byte[bitmapDataSize];
-                byte[] _ImageBaseDataBufferBytes = new byte[ImageBaseDataSize];
-                Marshal.Copy(bmData.Scan0, _BitImageBufferBytes, 0, bitmapDataSize);
-                int bitmapIndex = 0;
-                int ImageBaseDataIndex = 0;
-                for (int i = 0; i < bmData.Height; i++)
-                {
-                    for (int j = 0; j < bmData.Width; j++)
-                    {
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex++];
-                    }
-                    bitmapIndex += offset;
-                }
-                MVD_IMAGE_DATA_INFO stImageData = new MVD_IMAGE_DATA_INFO();
-                stImageData.stDataChannel[0].nRowStep = (uint)bmData.Width;
-                stImageData.stDataChannel[0].nLen = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].nSize = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].arrDataBytes = _ImageBaseDataBufferBytes;
-                cMvdImage.InitImage((uint)bmData.Width, (uint)bmData.Height, MVD_PIXEL_FORMAT.MVD_PIXEL_MONO_08, stImageData);
-            }
-            else if (bitPixelFormat == System.Drawing.Imaging.PixelFormat.Format24bppRgb)
-            {
-                Int32 bitmapDataSize = bmData.Stride * bmData.Height;//bitmap图像缓存长度
-                int offset = bmData.Stride - bmData.Width * 3;
-                Int32 ImageBaseDataSize = bmData.Width * bmData.Height * 3;//imageBaseData_V2图像真正的缓存长度
-                byte[] _BitImageBufferBytes = new byte[bitmapDataSize];
-                byte[] _ImageBaseDataBufferBytes = new byte[ImageBaseDataSize];
-                Marshal.Copy(bmData.Scan0, _BitImageBufferBytes, 0, bitmapDataSize);
-                int bitmapIndex = 0;
-                int ImageBaseDataIndex = 0;
-                for (int i = 0; i < bmData.Height; i++)
-                {
-                    for (int j = 0; j < bmData.Width; j++)
-                    {
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex + 2];
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex + 1];
-                        _ImageBaseDataBufferBytes[ImageBaseDataIndex++] = _BitImageBufferBytes[bitmapIndex];
-                        bitmapIndex += 3;
-                    }
-                    bitmapIndex += offset;
-                }
-                MVD_IMAGE_DATA_INFO stImageData = new MVD_IMAGE_DATA_INFO();
-                stImageData.stDataChannel[0].nRowStep = (uint)bmData.Width * 3;
-                stImageData.stDataChannel[0].nLen = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].nSize = (uint)ImageBaseDataSize;
-                stImageData.stDataChannel[0].arrDataBytes = _ImageBaseDataBufferBytes;
-                cMvdImage.InitImage((uint)bmData.Width, (uint)bmData.Height, MVD_PIXEL_FORMAT.MVD_PIXEL_RGB_RGB24_C3, stImageData);
-            }
-            bmpInputImg.UnlockBits(bmData);  // 解除锁定
-            return cMvdImage;
-        }
+#endif
     }
 }

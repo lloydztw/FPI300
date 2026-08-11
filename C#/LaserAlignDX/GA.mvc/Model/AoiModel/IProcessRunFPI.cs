@@ -1,5 +1,19 @@
-﻿using LaserAlignDX.BasicSpace;
-using LaserAlignDX.Model;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-08-01 開始重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
@@ -7,7 +21,6 @@ using System;
 using System.Drawing;
 using VisionDesigner;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
-
 
 namespace LaserAlignDX.AoiModel
 {
@@ -42,7 +55,18 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         GaBigImageHolder LineScanCamImageHolder { get; }
 
-        void Run();
+        /// <summary>
+        /// 為了 Mvd 海康套件 所使用
+        /// </summary>
+        void Train();
+
+        /// <summary>
+        /// 執行 AOI 運算
+        /// </summary>
+        /// <remarks>
+        /// 默認 sceneBmp = null, 代表使用 GaBigImageHolder 當輸入影像
+        /// </remarks>
+        void Run(Bitmap bmpScene = null);
 
         /// <summary>
         /// 為 參數編輯 所用
@@ -58,5 +82,14 @@ namespace LaserAlignDX.AoiModel
         /// 為 參數調試 所用
         /// </summary>
         bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine);
+
+        /// <summary>
+        /// Decodes a QR code from the specified bitmap image within the defined region of interest.
+        /// </summary>
+        string DecodeQrCode(Bitmap bmp, Rectangle? roi = null);
+
+        IAoiChipLocator GetChipLocAoi();
+
+        IAoiFlyCamMatcher GetFlyCameraAoi();
     }
 }

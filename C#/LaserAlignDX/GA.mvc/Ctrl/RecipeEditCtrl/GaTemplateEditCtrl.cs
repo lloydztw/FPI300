@@ -63,14 +63,14 @@ namespace LaserAlignDX.Mvc.Ctrl
         ITravelerModel _sysModel => GaMvcConfig.SysModel;
         #endregion
 
-        #region RECIPE_PARAMS
+        #region GLOBAL_RECIPE_PARAMS
         RecipeFPIX3Class _xRecipe
         {
-            get { return RecipeFPIX3Class.Instance; }
+            get => RecipeFPIX3Class.Instance;
         }
         InspectX3ParaClass _xInspectX3
         {
-            get { return InspectX3ParaClass.Instance; }
+            get => _xRecipe.InspectParams;
         }
         MatchAlgorithmEnum _xAlgorithm
         {
@@ -537,7 +537,8 @@ namespace LaserAlignDX.Mvc.Ctrl
             {
                 try
                 {
-                    var matcherComposite = _xRecipe.mvdprinttemp_Find;
+                    //var matcherComposite = _xRecipe.mvdprinttemp_Find;
+                    var matcherComposite = _sysModel?.AoiModel?.GetChipLocAoi()?.GetTemplateMatcher();
                     matcherComposite.SetRecipeParams(_xRecipe.InspectParams);   //<<< 使用 matcherComposite.SetRecipeParams 才能反映 _xAlogrithm
 
                     var matcher = matcherComposite.GetMatcher(0);
@@ -646,9 +647,20 @@ namespace LaserAlignDX.Mvc.Ctrl
         {
             VxDebugDrawer.DestroyAllWindows();
 
-            int err = _xRecipe.PrintTempTrain(!silentSuccess);
+            //int err = _xRecipe.PrintTempTrain(!silentSuccess);
+            //mvdprinttemp_Find.SetRecipeParams(this.InspectParams);
+            //bool bOK = mvdprinttemp_Find.Train(this.bmpDefectTemplate);
+            //mvdprinttemp_Find.ShowGoldenTemplateVisualizer(showGoldenVisualizedFeature);
 
-            if (err != 0)
+            bool ok = false;
+            var aoi = _sysModel.AoiModel.GetChipLocAoi();
+            if (aoi != null)
+            {
+                var goldenBmp = _xRecipe.GoldenChipBmp;
+                ok = aoi.Train(goldenBmp, !silentSuccess);
+            }
+
+            if (!ok)
             {
                 //VsMessageBox.Warning("匹配模板 創建失敗!");
                 VsMessageBox.Warning(QMSG.Text(ErrorCodes.AoiErr_Template_Creation_Failed));
@@ -1103,6 +1115,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         //----------------------------------------------------------------------------
         void aoiDecodeQrCode(Bitmap srcBmp, out string text)
         {
+#if (OPT_OLD_CODE)
             if (srcBmp == null)
             {
                 text = "";
@@ -1119,6 +1132,10 @@ namespace LaserAlignDX.Mvc.Ctrl
 
             var decodeInfo = aoiTool.DCodeInfo;
             text = decodeInfo != null ? decodeInfo.Content : "";
+#endif
+            text = _sysModel?.AoiModel?.DecodeQrCode(srcBmp);
+            if (text == null) 
+                text = "";
         }
         void aoiCreateTemplateMask(Bitmap bmpTemplate, IEnumerable<RectangleF> maskRects, out Bitmap bmpMask, out Bitmap bmpDisp)
         {

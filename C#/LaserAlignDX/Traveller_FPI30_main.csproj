@@ -375,8 +375,8 @@
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorSafetyChecker.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorZCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaCommonMotorJogCtrl.cs" />
-    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl_v25.cs" />
-    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaTemplateEditCtrl_v25.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaRecipeEditCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplateEditCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
@@ -511,17 +511,17 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.Designer.cs">
       <DependentUpon>FormLightControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v25.cs">
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v35.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v25.Designer.cs">
-      <DependentUpon>FormTemplateEditor_v25.cs</DependentUpon>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v35.Designer.cs">
+      <DependentUpon>FormTemplateEditor_v35.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.cs">
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v35.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.Designer.cs">
-      <DependentUpon>FormRecipeEditor_v25.cs</DependentUpon>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v35.Designer.cs">
+      <DependentUpon>FormRecipeEditor_v35.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.cs">
       <SubType>Form</SubType>
@@ -570,12 +570,18 @@
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_Base.cs" />
     <Compile Include="GA.mvc\Model\.Common\LotData.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_ChipMeasure_L1.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_ChipMeasure_v35.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_ChipMeasure.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_ChipLoc.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_FlyCam.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_QrCode.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_Defects.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\AoiModel_EmptyTray.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\DefectDetector\MvdDefectDetector_G1.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiChipLocator.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiFlyCamMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiDefectsDetector.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiChipMeasurer.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v30.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaBigImageHolder.cs" />
@@ -614,10 +620,8 @@
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\LineScanCalibrateClass.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeParaGridClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyReadonlyProvider.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\JxMetadataUtil.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyMetadataUtil.cs" />
     <Compile Include="App\ErrorCodes.cs" />
     <Compile Include="GA.mvc\Model\SysModel\ITravellerSysModel.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerSysModel.cs" />
@@ -857,11 +861,11 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.resx">
       <DependentUpon>FormLightControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v25.resx">
-      <DependentUpon>FormTemplateEditor_v25.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v35.resx">
+      <DependentUpon>FormTemplateEditor_v35.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.resx">
-      <DependentUpon>FormRecipeEditor_v25.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v35.resx">
+      <DependentUpon>FormRecipeEditor_v35.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.resx">
       <DependentUpon>FormTemplateEditor.cs</DependentUpon>
@@ -933,7 +937,6 @@
     <None Include="GA.mvc\Model\AI\Readme.md" />
     <None Include="GA.mvc\Model\CustomerModel\Readme.md" />
     <None Include="GA.mvc\Model\Readme.md" />
-    <None Include="GA.mvc\Model\Recipes\JxRecipes\Readme.md" />
     <None Include="GA.mvc\Readme.md" />
     <None Include="LT\UnitTest\Readme.md" />
     <None Include="NLog.config" />

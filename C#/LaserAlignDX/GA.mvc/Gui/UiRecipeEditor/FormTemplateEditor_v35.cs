@@ -18,9 +18,9 @@ using JetEazy.OpenCV.Viewer;
 using JzDisplay.UISpace;
 using System;
 using System.Windows.Forms;
-using GaTemplateEditCtrl = LaserAlignDX.Mvc.Ctrl.V25.GaTemplateEditCtrl;
+using GaTemplateEditCtrl = LaserAlignDX.Mvc.Ctrl.V35.GaTemplateEditCtrl;
 
-namespace LaserAlignDX.Mvc.Gui.V25
+namespace LaserAlignDX.Mvc.Gui.V35
 {
     public partial class FormTemplateEditor : Form, IvTemplateEditorUI
     {

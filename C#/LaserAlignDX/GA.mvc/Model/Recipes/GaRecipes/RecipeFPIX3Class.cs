@@ -13,10 +13,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Text;
-using VisionDesigner;
-using VisionDesigner.BlobFind;
-using MVD_CHIP_MATCHER = LaserAlignDX.AoiModel.MvdCompositeChipMatcher;
-
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
 {
@@ -50,7 +46,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             disposeRegionCells();
             disposeCamGrids();
 
-            disposeMvdTools();
+            //2026-08-11 將所有的 MVD AOI 代碼, 重整至 AoiModel 內!
+            //disposeMvdTools();
 
             disposeBmpOrgs();
             disposeAllTemplates();
@@ -307,6 +304,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// <summary>
         /// 二維碼框選區
         /// </summary>
+        /// <remarks>
+        /// 位於 Golden Region Cell Rect 之內,
+        /// 以 GoldenRegionCellRect 的左上角 為相對零點        
+        /// </remarks>
         public RectangleF QrCodeRect
         {
             get => _dtoQrCodeTemplate.RectF;
@@ -484,8 +485,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        public string xLotNoStr = "NONE";
-
         #region 參數區_PARA_GRID
         // 以下成員, 是讓 RecipeParaGridClass 來進行 ini 存取 
         internal int xRow = 1;
@@ -628,7 +627,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
         public override void Load(bool eCancel = false)
         {
-            xLotNoStr = ReadINIValue("Collect", "xLotNoStr", "NONE", INIFILE);
+            //xLotNoStr = ReadINIValue("Collect", "xLotNoStr", "NONE", INIFILE);
 
             xRow = int.Parse(ReadINIValue("Recipe Basic", "xRow", "1", INIFILE));
             xColumn = int.Parse(ReadINIValue("Recipe Basic", "xColumn", "1", INIFILE));
@@ -898,11 +897,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// </summary>
         public void SaveLotNo()
         {
-            WriteINIValue("Collect", "xLotNoStr", xLotNoStr, INIFILE);
+            //WriteINIValue("Collect", "xLotNoStr", xLotNoStr, INIFILE);
         }
         #endregion
 
         #region MVD_AOI_TOOLS_RUNTIME_海康工具相關成員_放在這裡非常不妥
+#if (OPT_OLD_MVD_AOI_CODE)
         public MVD_CHIP_MATCHER mvdprinttemp_Find = new MVD_CHIP_MATCHER();
         public MvdFindClass mvdprintFlytemp_Find = new MvdFindClass();
         public Mvd2DReaderClass mvd2DReader = new Mvd2DReaderClass();
@@ -918,6 +918,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             fly2DReader?.Dispose();
             fly2DReader = null;
         }
+#endif
         #endregion
 
         #region MVD_AOI_FUNCTIONS_FOR_CHIP_LOCATE_TRAIN_AND_RUN_晶粒定位的相關像測函式_放在這裡非常不妥
@@ -929,6 +930,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         //      出各種飯局料理 是 廚師 而不是 食譜食材
         //      一隻雞 會自己剁雞腿 變成 滷雞腿 或 炸雞腿 是非常違反常理的謬異.
         //----------------------------------------------------------------------
+
+#if (OPT_OLD_CODE)
         /// <summary>
         /// 這其實等同於 bmpDefectTemplate.Size
         /// </summary>
@@ -936,26 +939,21 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         {
             get
             {
-                // LETIAN: Revised for multithread
-                if (mvdprinttemp_Find != null)
-                    return mvdprinttemp_Find.TemplateSize;
-                return new Size(1, 1);
+                //// LETIAN: Revised for multithread
+                //if (mvdprinttemp_Find != null)
+                //    return mvdprinttemp_Find.TemplateSize;
+                //return new Size(1, 1);
+
+                if (GoldenChipBmp != null)
+                    return GoldenChipBmp.Size;
+                return new Size(1, 1);  
             }
         }
+#endif
+
+#if (OPT_OLD_CODE)
         public int PrintTempTrain(bool showGoldenVisualizedFeature = false)
         {
-#if (OPT_OLD)
-            mvdprinttemp_Find.bmpObj_Image?.Dispose();
-            mvdprinttemp_Find.bmpObj_Image = (Bitmap)bmpDefectTemplate.Clone();
-
-            //CMvdRectangleF cMvd = new CMvdRectangleF(
-            //    xRegionTrain.Width / 2,
-            //    xRegionTrain.Height / 2,
-            //    xRegionTrain.Width,
-            //    xRegionTrain.Height);
-
-            bool bOK = mvdprinttemp_Find.HikTrainBmp();
-#endif
             // LETIAN: Revised for multithread
             mvdprinttemp_Find.SetRecipeParams(this.InspectParams);
             bool bOK = mvdprinttemp_Find.Train(this.bmpDefectTemplate);
@@ -964,6 +962,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             return (bOK ? 0 : -1);
         }
+#endif
+
+#if (OPT_OLD_CODE)
         public int PrintTempRun(Bitmap ebmpInput)
         {
 #if (OPT_OLD)
@@ -979,28 +980,32 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             bool bOK = mvdprinttemp_Find.RunMatch(ebmpInput);
             return (bOK ? 0 : -1);
         }
+#endif
 
-        //public int PrintTempRun(CMvdImage eMvdInput)
-        //{
-        //    mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
-        //    mvdprinttemp_Find.xMvdTolerance = InspectX3ParaClass.Instance.xTolerance;
-        //    mvdprinttemp_Find.xMaxOverlap = InspectX3ParaClass.Instance.xMaxOverlap;
-        //    mvdprinttemp_Find.xMvdRun_Image?.Dispose();
-        //    mvdprinttemp_Find.xMvdRun_Image = (CMvdImage)eMvdInput.Clone();
-        //    bool bOK = mvdprinttemp_Find.HikRun2();
-        //    return (bOK ? 0 : -1);
-        //}
-        //public int PrintTempRun(CMvdImage eMvdInput, RectangleF eRectF)
-        //{
-        //    mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
-        //    mvdprinttemp_Find.xMvdTolerance = InspectX3ParaClass.Instance.xTolerance;
-        //    mvdprinttemp_Find.xMaxOverlap = InspectX3ParaClass.Instance.xMaxOverlap;
-        //    mvdprinttemp_Find.xMvdRun_Image?.Dispose();
-        //    mvdprinttemp_Find.xMvdRun_Image = (CMvdImage)eMvdInput.Clone();
-        //    bool bOK = mvdprinttemp_Find.HikRun3(eRectF);
-        //    return (bOK ? 0 : -1);
-        //}
+#if (OPT_OLD_TEMPLATE_MATCH)
+        public int PrintTempRun(CMvdImage eMvdInput)
+        {
+            mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
+            mvdprinttemp_Find.xMvdTolerance = InspectX3ParaClass.Instance.xTolerance;
+            mvdprinttemp_Find.xMaxOverlap = InspectX3ParaClass.Instance.xMaxOverlap;
+            mvdprinttemp_Find.xMvdRun_Image?.Dispose();
+            mvdprinttemp_Find.xMvdRun_Image = (CMvdImage)eMvdInput.Clone();
+            bool bOK = mvdprinttemp_Find.HikRun2();
+            return (bOK ? 0 : -1);
+        }
+        public int PrintTempRun(CMvdImage eMvdInput, RectangleF eRectF)
+        {
+            mvdprinttemp_Find.xMvdAngle = InspectX3ParaClass.Instance.xAngle;
+            mvdprinttemp_Find.xMvdTolerance = InspectX3ParaClass.Instance.xTolerance;
+            mvdprinttemp_Find.xMaxOverlap = InspectX3ParaClass.Instance.xMaxOverlap;
+            mvdprinttemp_Find.xMvdRun_Image?.Dispose();
+            mvdprinttemp_Find.xMvdRun_Image = (CMvdImage)eMvdInput.Clone();
+            bool bOK = mvdprinttemp_Find.HikRun3(eRectF);
+            return (bOK ? 0 : -1);
+        }
+#endif
 
+#if (OPT_OLD_FLY_CAM_AOI)
         public int PrintTempFlyTrain()
         {
             mvdprintFlytemp_Find.bmpObj_Image?.Dispose();
@@ -1017,6 +1022,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             bool bOK = mvdprintFlytemp_Find.HikRunBmp();
             return (bOK ? 0 : -1);
         }
+
         //public int PrintTempFlyRun(CMvdImage eMvdInput)
         //{
         //    mvdprintFlytemp_Find.xMvdAngle = FlyParaClass.Instance.xAngle;
@@ -1153,6 +1159,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             cBlobFindToolObj = null;
             return bOK;
         }
+#endif
         #endregion
 
         #region NOT_USED_LEGACY_TCP_DATA_沒用到
@@ -1383,14 +1390,26 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         /// (1) PrintTempTrain
         /// (2) PrintTempFlyTrain
         /// </summary>
-        private int ViewTrainLoad()
+        private bool ViewTrainLoad()
         {
+            try
+            {
+                var sysModel = GaMvcConfig.SysModel;
+                sysModel?.AoiModel?.Train();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                VsMessageBox.Warning(ex.Message);
+                return false;
+            }
+
+#if (OPT_OLD_CODE)
             //-----------------------------------------------------------------------------
             // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
             // 不應該由 Recipe 自己調用 !
             //-----------------------------------------------------------------------------
             int err = 0;
-
             if (err == 0)
             {
                 err = PrintTempTrain();
@@ -1400,7 +1419,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                     VsMessageBox.Warning(QMSG.Text(Mvc.Model.ErrorCodes.AoiErr_Template_Train_Failed));
                 }
             }
+#endif
 
+#if (OPT_OLD_FLY_CAM_AOI)
             if (err == 0)
             {
                 err = PrintTempFlyTrain();
@@ -1410,7 +1431,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                     VsMessageBox.Warning(QMSG.Text(Mvc.Model.ErrorCodes.AoiErr_FlyCam_Train_Failed));
                 }
             }
-            return err;
+
+            return err == 0;
+#endif
         }
 
         /// <summary>

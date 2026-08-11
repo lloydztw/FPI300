@@ -26,7 +26,6 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using LeTian.JxProps.PropertyMeta;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System;
@@ -36,7 +35,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Traveller106;
 
-namespace LaserAlignDX.Mvc.Ctrl.V25
+namespace LaserAlignDX.Mvc.Ctrl.V35
 {
     public partial class GaRecipeEditCtrl
     {
