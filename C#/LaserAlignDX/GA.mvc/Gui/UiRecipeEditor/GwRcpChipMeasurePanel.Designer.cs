@@ -1,6 +1,6 @@
 ﻿namespace LaserAlignDX.GA.mvc.Gui.UiRecipeEditor
 {
-    partial class GwRcpLineBorderBtnsPanel
+    partial class GwRcpChipMeasurePanel
     {
         /// <summary> 
         /// 設計工具所需的變數。
@@ -29,12 +29,9 @@
         private void InitializeComponent()
         {
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.lblLB3 = new System.Windows.Forms.Label();
-            this.numMeasureMasks = new System.Windows.Forms.NumericUpDown();
-            this.lblLB1 = new System.Windows.Forms.Label();
-            this.numMeasureXs = new System.Windows.Forms.NumericUpDown();
-            this.lblLB2 = new System.Windows.Forms.Label();
-            this.numMeasureYs = new System.Windows.Forms.NumericUpDown();
+            this.btnLbMaskClear = new System.Windows.Forms.Button();
+            this.btnLbMaskDelete = new System.Windows.Forms.Button();
+            this.btnLbMaskAdd = new System.Windows.Forms.Button();
             this.btnBuildMircoTrf = new System.Windows.Forms.Button();
             this.label2 = new System.Windows.Forms.Label();
             this.numSpanRatio = new System.Windows.Forms.NumericUpDown();
@@ -43,10 +40,10 @@
             this.labelB = new System.Windows.Forms.Label();
             this.numBorderSize = new System.Windows.Forms.NumericUpDown();
             this.btnAutoLineBorders = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numMeasureMasks)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMeasureXs)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMeasureYs)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numSpanRatio)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numBorderIndent)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numBorderSize)).BeginInit();
@@ -54,12 +51,12 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.lblLB3);
-            this.groupBox1.Controls.Add(this.numMeasureMasks);
-            this.groupBox1.Controls.Add(this.lblLB1);
-            this.groupBox1.Controls.Add(this.numMeasureXs);
-            this.groupBox1.Controls.Add(this.lblLB2);
-            this.groupBox1.Controls.Add(this.numMeasureYs);
+            this.groupBox1.Controls.Add(this.button3);
+            this.groupBox1.Controls.Add(this.button2);
+            this.groupBox1.Controls.Add(this.button1);
+            this.groupBox1.Controls.Add(this.btnLbMaskClear);
+            this.groupBox1.Controls.Add(this.btnLbMaskDelete);
+            this.groupBox1.Controls.Add(this.btnLbMaskAdd);
             this.groupBox1.Controls.Add(this.btnBuildMircoTrf);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.numSpanRatio);
@@ -73,99 +70,56 @@
             this.groupBox1.Location = new System.Drawing.Point(8, 2);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(8);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(912, 136);
+            this.groupBox1.Size = new System.Drawing.Size(758, 136);
             this.groupBox1.TabIndex = 76;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Line Borders";
+            this.groupBox1.Text = "Chip Measurement";
             // 
-            // lblLB3
+            // btnLbMaskClear
             // 
-            this.lblLB3.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblLB3.AutoSize = true;
-            this.lblLB3.Location = new System.Drawing.Point(60, 99);
-            this.lblLB3.Name = "lblLB3";
-            this.lblLB3.Size = new System.Drawing.Size(73, 20);
-            this.lblLB3.TabIndex = 80;
-            this.lblLB3.Text = "遮罩 數量";
+            this.btnLbMaskClear.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnLbMaskClear.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.btnLbMaskClear.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnLbMaskClear.Location = new System.Drawing.Point(617, 94);
+            this.btnLbMaskClear.Margin = new System.Windows.Forms.Padding(4);
+            this.btnLbMaskClear.Name = "btnLbMaskClear";
+            this.btnLbMaskClear.Size = new System.Drawing.Size(116, 30);
+            this.btnLbMaskClear.TabIndex = 77;
+            this.btnLbMaskClear.Text = "遮罩 清空";
+            this.btnLbMaskClear.UseVisualStyleBackColor = false;
             // 
-            // numMeasureMasks
+            // btnLbMaskDelete
             // 
-            this.numMeasureMasks.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.numMeasureMasks.Location = new System.Drawing.Point(178, 96);
-            this.numMeasureMasks.Maximum = new decimal(new int[] {
-            16,
-            0,
-            0,
-            0});
-            this.numMeasureMasks.Name = "numMeasureMasks";
-            this.numMeasureMasks.Size = new System.Drawing.Size(123, 27);
-            this.numMeasureMasks.TabIndex = 79;
-            this.numMeasureMasks.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.btnLbMaskDelete.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnLbMaskDelete.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.btnLbMaskDelete.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnLbMaskDelete.Location = new System.Drawing.Point(617, 60);
+            this.btnLbMaskDelete.Margin = new System.Windows.Forms.Padding(4);
+            this.btnLbMaskDelete.Name = "btnLbMaskDelete";
+            this.btnLbMaskDelete.Size = new System.Drawing.Size(116, 30);
+            this.btnLbMaskDelete.TabIndex = 76;
+            this.btnLbMaskDelete.Text = "遮罩 刪除";
+            this.btnLbMaskDelete.UseVisualStyleBackColor = false;
             // 
-            // lblLB1
+            // btnLbMaskAdd
             // 
-            this.lblLB1.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblLB1.AutoSize = true;
-            this.lblLB1.Location = new System.Drawing.Point(60, 33);
-            this.lblLB1.Name = "lblLB1";
-            this.lblLB1.Size = new System.Drawing.Size(83, 20);
-            this.lblLB1.TabIndex = 78;
-            this.lblLB1.Text = "X量測 數量";
-            // 
-            // numMeasureXs
-            // 
-            this.numMeasureXs.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.numMeasureXs.Location = new System.Drawing.Point(178, 30);
-            this.numMeasureXs.Maximum = new decimal(new int[] {
-            3,
-            0,
-            0,
-            0});
-            this.numMeasureXs.Name = "numMeasureXs";
-            this.numMeasureXs.Size = new System.Drawing.Size(123, 27);
-            this.numMeasureXs.TabIndex = 77;
-            this.numMeasureXs.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.numMeasureXs.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            // 
-            // lblLB2
-            // 
-            this.lblLB2.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblLB2.AutoSize = true;
-            this.lblLB2.Location = new System.Drawing.Point(60, 66);
-            this.lblLB2.Name = "lblLB2";
-            this.lblLB2.Size = new System.Drawing.Size(82, 20);
-            this.lblLB2.TabIndex = 76;
-            this.lblLB2.Text = "Y量測 數量";
-            // 
-            // numMeasureYs
-            // 
-            this.numMeasureYs.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.numMeasureYs.Location = new System.Drawing.Point(178, 63);
-            this.numMeasureYs.Maximum = new decimal(new int[] {
-            3,
-            0,
-            0,
-            0});
-            this.numMeasureYs.Name = "numMeasureYs";
-            this.numMeasureYs.Size = new System.Drawing.Size(123, 27);
-            this.numMeasureYs.TabIndex = 75;
-            this.numMeasureYs.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.numMeasureYs.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
+            this.btnLbMaskAdd.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnLbMaskAdd.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.btnLbMaskAdd.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnLbMaskAdd.Location = new System.Drawing.Point(617, 26);
+            this.btnLbMaskAdd.Margin = new System.Windows.Forms.Padding(4);
+            this.btnLbMaskAdd.Name = "btnLbMaskAdd";
+            this.btnLbMaskAdd.Size = new System.Drawing.Size(116, 30);
+            this.btnLbMaskAdd.TabIndex = 75;
+            this.btnLbMaskAdd.Text = "遮罩 增加";
+            this.btnLbMaskAdd.UseVisualStyleBackColor = false;
             // 
             // btnBuildMircoTrf
             // 
             this.btnBuildMircoTrf.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnBuildMircoTrf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnBuildMircoTrf.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnBuildMircoTrf.Location = new System.Drawing.Point(659, 79);
+            this.btnBuildMircoTrf.Location = new System.Drawing.Point(336, 77);
             this.btnBuildMircoTrf.Margin = new System.Windows.Forms.Padding(4);
             this.btnBuildMircoTrf.Name = "btnBuildMircoTrf";
             this.btnBuildMircoTrf.Size = new System.Drawing.Size(116, 46);
@@ -177,7 +131,7 @@
             // 
             this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(373, 99);
+            this.label2.Location = new System.Drawing.Point(50, 97);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(96, 20);
             this.label2.TabIndex = 73;
@@ -187,7 +141,7 @@
             // 
             this.numSpanRatio.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.numSpanRatio.DecimalPlaces = 1;
-            this.numSpanRatio.Location = new System.Drawing.Point(491, 96);
+            this.numSpanRatio.Location = new System.Drawing.Point(168, 94);
             this.numSpanRatio.Minimum = new decimal(new int[] {
             50,
             0,
@@ -207,7 +161,7 @@
             // 
             this.labelA.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.labelA.AutoSize = true;
-            this.labelA.Location = new System.Drawing.Point(373, 33);
+            this.labelA.Location = new System.Drawing.Point(50, 31);
             this.labelA.Name = "labelA";
             this.labelA.Size = new System.Drawing.Size(95, 20);
             this.labelA.TabIndex = 71;
@@ -216,7 +170,7 @@
             // numBorderIndent
             // 
             this.numBorderIndent.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.numBorderIndent.Location = new System.Drawing.Point(491, 30);
+            this.numBorderIndent.Location = new System.Drawing.Point(168, 28);
             this.numBorderIndent.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -241,7 +195,7 @@
             // 
             this.labelB.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.labelB.AutoSize = true;
-            this.labelB.Location = new System.Drawing.Point(373, 66);
+            this.labelB.Location = new System.Drawing.Point(50, 64);
             this.labelB.Name = "labelB";
             this.labelB.Size = new System.Drawing.Size(95, 20);
             this.labelB.TabIndex = 69;
@@ -250,7 +204,7 @@
             // numBorderSize
             // 
             this.numBorderSize.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.numBorderSize.Location = new System.Drawing.Point(491, 63);
+            this.numBorderSize.Location = new System.Drawing.Point(168, 61);
             this.numBorderSize.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -276,7 +230,7 @@
             this.btnAutoLineBorders.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnAutoLineBorders.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnAutoLineBorders.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnAutoLineBorders.Location = new System.Drawing.Point(659, 27);
+            this.btnAutoLineBorders.Location = new System.Drawing.Point(336, 25);
             this.btnAutoLineBorders.Margin = new System.Windows.Forms.Padding(4);
             this.btnAutoLineBorders.Name = "btnAutoLineBorders";
             this.btnAutoLineBorders.Size = new System.Drawing.Size(116, 46);
@@ -284,19 +238,55 @@
             this.btnAutoLineBorders.Text = "一鍵框選";
             this.btnAutoLineBorders.UseVisualStyleBackColor = false;
             // 
-            // GwRcpLineBorderBtnsPanel
+            // button1
+            // 
+            this.button1.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.button1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button1.Location = new System.Drawing.Point(480, 26);
+            this.button1.Margin = new System.Windows.Forms.Padding(4);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(116, 30);
+            this.button1.TabIndex = 78;
+            this.button1.Text = "增加 X 量測";
+            this.button1.UseVisualStyleBackColor = false;
+            // 
+            // button2
+            // 
+            this.button2.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.button2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button2.Location = new System.Drawing.Point(480, 61);
+            this.button2.Margin = new System.Windows.Forms.Padding(4);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(116, 30);
+            this.button2.TabIndex = 79;
+            this.button2.Text = "增加 Y 量測";
+            this.button2.UseVisualStyleBackColor = false;
+            // 
+            // button3
+            // 
+            this.button3.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.button3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.button3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.button3.Location = new System.Drawing.Point(480, 94);
+            this.button3.Margin = new System.Windows.Forms.Padding(4);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(116, 30);
+            this.button3.TabIndex = 80;
+            this.button3.Text = "增加 Y 量測";
+            this.button3.UseVisualStyleBackColor = false;
+            // 
+            // GwRcpChipMeasurePanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.groupBox1);
-            this.Name = "GwRcpLineBorderBtnsPanel";
+            this.Name = "GwRcpChipMeasurePanel";
             this.Padding = new System.Windows.Forms.Padding(8, 2, 12, 2);
-            this.Size = new System.Drawing.Size(932, 140);
+            this.Size = new System.Drawing.Size(778, 140);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numMeasureMasks)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMeasureXs)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numMeasureYs)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numSpanRatio)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numBorderIndent)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numBorderSize)).EndInit();
@@ -315,11 +305,11 @@
         public System.Windows.Forms.NumericUpDown numBorderIndent;
         public System.Windows.Forms.NumericUpDown numBorderSize;
         public System.Windows.Forms.Button btnAutoLineBorders;
-        private System.Windows.Forms.Label lblLB3;
-        public System.Windows.Forms.NumericUpDown numMeasureMasks;
-        private System.Windows.Forms.Label lblLB1;
-        public System.Windows.Forms.NumericUpDown numMeasureXs;
-        private System.Windows.Forms.Label lblLB2;
-        public System.Windows.Forms.NumericUpDown numMeasureYs;
+        public System.Windows.Forms.Button btnLbMaskClear;
+        public System.Windows.Forms.Button btnLbMaskDelete;
+        public System.Windows.Forms.Button btnLbMaskAdd;
+        public System.Windows.Forms.Button button3;
+        public System.Windows.Forms.Button button2;
+        public System.Windows.Forms.Button button1;
     }
 }

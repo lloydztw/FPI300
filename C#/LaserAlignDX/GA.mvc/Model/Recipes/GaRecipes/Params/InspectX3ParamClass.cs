@@ -1,7 +1,22 @@
-﻿using Common.RecipeSpace;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2026-08-29 重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using Common.RecipeSpace;
 using Eazy_Project_III;
 using JetEazy;
-using LaserAlignDX.AoiModel;
+using JetEazy.Lang;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Mvc.Model.Recipe;
 using System.Collections.Generic;
@@ -9,8 +24,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
 
-
-namespace LaserAlignDX.Mvc.Model.Recipes
+namespace LaserAlignDX.OPSpace.RecipeSpace
 {
     public class InspectX3ParaClass : RecipeBaseClass
     {
@@ -47,20 +61,21 @@ namespace LaserAlignDX.Mvc.Model.Recipes
         }
 
         [CategoryAttribute(_Cat01), DescriptionAttribute("僅適用於 格點晶粒!")]
-        [DisplayName("02 啟用 尺寸偏移檢測")]
+        [DisplayName("02 啟用 邊隙檢測")]
         [Browsable(true)]
-        public bool optChipEdgesDiffCompare
+        public bool optPadEdgeGapsMeasurement
         {
-            get => _spec.optChipEdgesCompare;
-            set => _spec.optChipEdgesCompare = value;
+            get => _spec.optPadEdgeGapsMeasurement;
+            set => _spec.optPadEdgeGapsMeasurement = value;
         }
 
         [CategoryAttribute(_Cat01), DescriptionAttribute("")]
         [DisplayName("03 啟用 缺陷檢測")]
         [Browsable(true)]
+        //[ReadOnly(true)]
         public bool optChipDefectsInspect
         {
-            get => _spec.optChipDefectsInspect;
+            get => _spec.optChipDefectsInspect;// = false;     // 暫時不開放
             set => _spec.optChipDefectsInspect = value;
         }
         #endregion
@@ -71,31 +86,51 @@ namespace LaserAlignDX.Mvc.Model.Recipes
 
         [CategoryAttribute(_Cat02), DescriptionAttribute("")]
         [DisplayName("01 啟用 整盤 NG百分比 判定")]
-        [Browsable(false)]
-        public bool optUseTrayNgPercentage
+        [Browsable(true)]
+        public bool optUseTotalNgPercentage
         {
-            get => _spec.optUseTrayNgPercentage;
-            set => _spec.optUseTrayNgPercentage = value;
+            get => _spec.optUseTotalNgPercentage;
+            set => _spec.optUseTotalNgPercentage = value;
         }
 
         [CategoryAttribute(_Cat02), DescriptionAttribute("單位 %")]
         [DisplayName("02 整盤 NG百分比 上限 (%)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 0.5f, 1)]
-        [Browsable(false)]
-        public float TryNgPercentage
+        [Browsable(true)]
+        public float xTotalNgPercentage
         {
-            get => _spec.TrayNgPercentage;
-            set => _spec.TrayNgPercentage = value;
+            get => _spec.TotalNgPercentage;
+            set => _spec.TotalNgPercentage = value;
         }
 
         [CategoryAttribute(_Cat02), DescriptionAttribute("")]
         [DisplayName("03 顯示 個別 NG 檢測結果")]
-        [Browsable(false)]
+        [Browsable(true)]
         public bool optShowIndividualNG
         {
             get => _spec.optShowIndividualNG;
             set => _spec.optShowIndividualNG = value;
+        }
+
+        [CategoryAttribute(_Cat02), DescriptionAttribute("")]
+        [DisplayName("04 傾斜(踩腳) 偵測 啟用")]
+        [Browsable(true)]
+        public bool optTiltDetectEnabled
+        {
+            get => _spec.optTiltDetectEnabled;
+            set => _spec.optTiltDetectEnabled = value;
+        }
+
+        [CategoryAttribute(_Cat02), DescriptionAttribute("比重值 0.000 ~ 1.000")]
+        [DisplayName("05 傾斜(踩腳) 門限值")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.001f, 4)]
+        [Browsable(true)]
+        public float xTiltRatioThres
+        {
+            get => _spec.TiltRatioThres;
+            set => _spec.TiltRatioThres = value;
         }
         #endregion
 
@@ -116,15 +151,27 @@ namespace LaserAlignDX.Mvc.Model.Recipes
         [Browsable(true)]
         public float xChipOverlap { get; set; } = 0.5f;
 
-        //const string _Cat1A = "A01.A '格點型' 晶粒定位";
+        //>>> const string _Cat1A = "A01.A '格點型' 晶粒定位";
         [CategoryAttribute(_Cat03), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '格點門限值'")]
-        [DisplayName("A0 格點型晶粒 門限")]
+        [DisplayName("A1 格點型晶粒 門限")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
         [Browsable(true)]
         public int xGridPadThreshold { get; set; } = 0;
 
-        //const string _Cat1B = "A01.B '一般型' 晶粒定位";
+        [CategoryAttribute(_Cat03), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '去刮痕閥值'")]
+        [DisplayName("A2 格點型晶粒 去刮痕閥值")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
+        [Browsable(true)]
+        public int xDistTransThreshold { get; set; } = 0;
+
+        [CategoryAttribute(_Cat03), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '啟用大角度定位'")]
+        [DisplayName("A3 格點型晶粒 啟用大角度定位")]
+        [Browsable(true)]
+        public bool xUseLargePadGridAngle { get; set; } = false;
+
+        //>>> const string _Cat1B = "A01.B '一般型' 晶粒定位";
         [CategoryAttribute(_Cat03), DescriptionAttribute("'一般型晶粒' 模板匹配的相似程度")]
         [DisplayName("B1 一般型晶粒 相似度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -145,6 +192,8 @@ namespace LaserAlignDX.Mvc.Model.Recipes
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 1f, 0)]
         [Browsable(true)]
         public int xMaxOverlap { get; set; } = 80;
+
+
         #endregion
 
 
@@ -320,30 +369,30 @@ namespace LaserAlignDX.Mvc.Model.Recipes
         [Browsable(true)]
         public float mWidthStand
         {
-            get => _spec.StandardWidth;
-            set => _spec.StandardWidth = value;
+            get => _spec.StandardWidth.Standard;
+            set => _spec.StandardWidth.Standard = value;
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("01a 尺寸X上限")]
+        [DisplayName("01a 尺寸X上公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
-        public float mWidthStandMax
+        public float mWidthDeltaUpper
         {
-            get => _spec.StandardDimRangeW.Max;
-            set => _spec.StandardDimRangeW.Max = value;
+            get => _spec.StandardWidth.DeltaUpper;
+            set => _spec.StandardWidth.DeltaUpper = value;
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("01b 尺寸X下限")]
+        [DisplayName("01b 尺寸X下公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
-        public float mWidthStandMin
+        public float mWidthDeltaLower
         {
-            get => _spec.StandardDimRangeW.Min;
-            set => _spec.StandardDimRangeW.Min = value;
+            get => _spec.StandardWidth.DeltaLower;
+            set => _spec.StandardWidth.DeltaLower = value;
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
@@ -353,57 +402,155 @@ namespace LaserAlignDX.Mvc.Model.Recipes
         [Browsable(true)]
         public float mHeightStand
         {
-            get => _spec.StandardHeight;
-            set => _spec.StandardHeight = value;
+            get => _spec.StandardHeight.Standard;
+            set => _spec.StandardHeight.Standard = value;
         }
 
         [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("02a 尺寸Y上限")]
+        [DisplayName("02a 尺寸Y上公差")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
+        public float mHeightDeltaUpper
+        {
+            get => _spec.StandardHeight.DeltaUpper;
+            set => _spec.StandardHeight.DeltaUpper = value;
+        }
+
+        [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
+        [DisplayName("02b 尺寸Y下公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float mHeightDeltaLower
+        {
+            get => _spec.StandardHeight.DeltaLower;
+            set => _spec.StandardHeight.DeltaLower = value;
+        }
+
+
+        [Browsable(false)]
+        public float mWidthStandMax
+        {
+            get => _spec.StandardWidth.Max;
+        }
+        [Browsable(false)]
+        public float mWidthStandMin
+        {
+            get => _spec.StandardWidth.Min;
+        }
+        [Browsable(false)]
         public float mHeightStandMax
         {
-            get => _spec.StandardDimRangeH.Max;
-            set => _spec.StandardDimRangeH.Max = value;
+            get => _spec.StandardHeight.Max;
         }
-
-        [CategoryAttribute(_Cat5), DescriptionAttribute("單位 mm")]
-        [DisplayName("02b 尺寸Y下限")]
-        [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
-        [Browsable(true)]
+        [Browsable(false)]
         public float mHeightStandMin
         {
-            get => _spec.StandardDimRangeH.Min;
-            set => _spec.StandardDimRangeH.Min = value;
+            get => _spec.StandardHeight.Min;
         }
         #endregion
 
 
-        #region 6_尺寸偏移_SPEC_(兩載台共用)
-        const string _Cat6 = "6. 尺寸偏移规格设置";
+        #region 6_邊隙_SPEC_(兩載台共用)
+        const string _Cat6 = "6. PAD邊隙規格設定";
 
         [CategoryAttribute(_Cat6), DescriptionAttribute("僅適用於 格點晶粒! (單位 mm)")]
-        [DisplayName("01 邊緣差異X 上限")]
+        [DisplayName("01 PAD邊隙 X 標準值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
-        public float PadEdgeDiffMaxX
+        public float PadEdgeX
         {
-            get => _spec.PadEdgeDiffMaxX;
-            set => _spec.PadEdgeDiffMaxX = value;
+            get => _spec.PadEdgeGapX.Standard;
+            set => _spec.PadEdgeGapX.Standard = value;
+        }
+
+        [CategoryAttribute(_Cat6), DescriptionAttribute("單位 mm")]
+        [DisplayName("01a PAD邊隙 X 上公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float PadEdgeX_DeltaUpper
+        {
+            get => _spec.PadEdgeGapX.DeltaUpper;
+            set => _spec.PadEdgeGapX.DeltaUpper = value;
+        }
+
+        [CategoryAttribute(_Cat6), DescriptionAttribute("單位 mm")]
+        [DisplayName("01b PAD邊隙 X 下公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float PadEdgeX_DeltaLower
+        {
+            get => _spec.PadEdgeGapX.DeltaLower;
+            set => _spec.PadEdgeGapX.DeltaLower = value;
         }
 
         [CategoryAttribute(_Cat6), DescriptionAttribute("僅適用於 格點晶粒! (單位 mm)")]
-        [DisplayName("02 邊緣差異Y 上限")]
+        [DisplayName("02 PAD邊隙 Y 標準值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
         [Browsable(true)]
-        public float PadEdgeDiffMaxY
+        public float PadEdgeY
         {
-            get => _spec.PadEdgeDiffMaxY;
-            set => _spec.PadEdgeDiffMaxY = value;
+            get => _spec.PadEdgeGapY.Standard;
+            set => _spec.PadEdgeGapY.Standard = value;
+        }
+
+        [CategoryAttribute(_Cat6), DescriptionAttribute("單位 mm")]
+        [DisplayName("02a PAD邊隙 Y 上公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float PadEdgeY_DeltaUpper
+        {
+            get => _spec.PadEdgeGapY.DeltaUpper;
+            set => _spec.PadEdgeGapY.DeltaUpper = value;
+        }
+
+        [CategoryAttribute(_Cat6), DescriptionAttribute("單位 mm")]
+        [DisplayName("02b PAD邊隙 Y 下公差")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float PadEdgeY_DeltaLower
+        {
+            get => _spec.PadEdgeGapY.DeltaLower;
+            set => _spec.PadEdgeGapY.DeltaLower = value;
+        }
+
+        [CategoryAttribute(_Cat6), DescriptionAttribute("單位 mm")]
+        [DisplayName("03 PAD邊隙 左右差異 上限")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0.001f, 9999f, 0.010f, 3)]
+        [Browsable(true)]
+        public float PadEdgeX_Diff_Upper
+        {
+            get => _spec.PadEdgeGapDiffX.DeltaUpper;
+            set => _spec.PadEdgeGapDiffX.DeltaUpper = value;
+        }
+
+        [Browsable(false)]
+        public float PadEdgeGapX_Max
+        {
+            get => _spec.PadEdgeGapX.Max;
+        }
+        [Browsable(false)]
+        public float PadEdgeGapX_Min
+        {
+            get => _spec.PadEdgeGapX.Min;
+        }
+        [Browsable(false)]
+        public float PadEdgeGapY_Max
+        {
+            get => _spec.PadEdgeGapY.Max;
+        }
+        [Browsable(false)]
+        public float PadEdgeGapY_Min
+        {
+            get => _spec.PadEdgeGapY.Min;
         }
         #endregion
 
@@ -417,7 +564,10 @@ namespace LaserAlignDX.Mvc.Model.Recipes
             //xExtendy = int.Parse(ReadINIValue("Basic", "xExtendy", "20", INIFILE));
             xMaxOverlap = int.Parse(ReadINIValue("Basic", "xMaxOverlap", "80", INIFILE));
             xChipOverlap = float.Parse(ReadINIValue("Basic", "xChipOverlap", "0.5", INIFILE));
+
             xGridPadThreshold = int.Parse(ReadINIValue("Basic", "xGridPadThreshold", "0", INIFILE));
+            xDistTransThreshold = int.Parse(ReadINIValue("Basic", "xDistTransThreshold", "0", INIFILE));
+            xUseLargePadGridAngle = int.Parse(ReadINIValue("Basic", "xUseLargePadGridAngle", "0", INIFILE)) == 1;
 
             xThresholdValue = int.Parse(ReadINIValue("Inspect", "xThresholdValue", "128", INIFILE));
             xCharWidth = float.Parse(ReadINIValue("Inspect", "xCharWidth", "15.1", INIFILE));
@@ -434,9 +584,9 @@ namespace LaserAlignDX.Mvc.Model.Recipes
             xChipDimScaleH = double.Parse(ReadINIValue("Basic", "xChipDimScaleH", "1.0", INIFILE));
 
             if (xTemplateChipWidth <= 0)
-                xTemplateChipWidth = _spec.StandardWidth;
+                xTemplateChipWidth = _spec.StandardWidth.Standard;
             if (xTemplateChipHeight <= 0)
-                xTemplateChipHeight = _spec.StandardHeight;
+                xTemplateChipHeight = _spec.StandardHeight.Standard;
 
             if (xChipDimScaleW <= 0)
                 xChipDimScaleW = 1.0;
@@ -493,7 +643,10 @@ namespace LaserAlignDX.Mvc.Model.Recipes
             //WriteINIValue("Basic", "xExtendy", xExtendy.ToString(), INIFILE);
             WriteINIValue("Basic", "xMaxOverlap", xMaxOverlap.ToString(), INIFILE);
             WriteINIValue("Basic", "xChipOverlap", xChipOverlap.ToString(), INIFILE);
+
             WriteINIValue("Basic", "xGridPadThreshold", xGridPadThreshold.ToString(), INIFILE);
+            WriteINIValue("Basic", "xDistTransThreshold", xDistTransThreshold.ToString(), INIFILE);
+            WriteINIValue("Basic", "xUseLargePadGridAngle", xUseLargePadGridAngle ? "1" : "0", INIFILE);
 
             WriteINIValue("Inspect", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
             WriteINIValue("Inspect", "xCharWidth", xCharWidth.ToString(), INIFILE);

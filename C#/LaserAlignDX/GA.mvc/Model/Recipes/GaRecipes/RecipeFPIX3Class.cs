@@ -1,17 +1,11 @@
 ﻿using Common.RecipeSpace;
-using Eazy_Project_III;
-using JetEazy;
 using JetEazy.FormSpace;
-using JetEazy.Lang;
 using JetEazy.Match;
 using JetEazy.Utils;
-using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Mvc.Model.Recipe;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Design;
 using System.Text;
 
 namespace LaserAlignDX.OPSpace.RecipeSpace
@@ -485,29 +479,36 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region 參數區_PARA_GRID
-        // 以下成員, 是讓 RecipeParaGridClass 來進行 ini 存取 
-        internal int xRow = 1;
-        internal int xColumn = 1;
-        internal int xLeftTopX = 1;
-        internal int xLeftTopY = 1;
-        internal float xRowOffset = 2f;
-        internal float xColumnOffset = 2f;
-        internal float xChipWidth = 10;
-        internal float xChipHeight = 10;
-        internal int xExtendx = 100;
-        internal int xExtendy = 100;
-        internal float xAngle = 0;
-        internal int xChNum = 1;
-        internal int xChValue = 255;
-        internal StageNumber xStageNumber = StageNumber.N0;
+        #region 參數區_PARAM_GRID
+        //internal int xRow = 1;
+        //internal int xColumn = 1;
+        //internal int xLeftTopX = 1;
+        //internal int xLeftTopY = 1;
+        //internal float xRowOffset = 2f;
+        //internal float xColumnOffset = 2f;
+        //internal float xChipWidth = 10;
+        //internal float xChipHeight = 10;
+        internal int xExtendx
+        {
+            get => GridParams.xExtendx;
+            set => GridParams.xExtendx = value;
+        }
+        internal int xExtendy
+        {
+            get => GridParams.xExtendy;
+            set => GridParams.xExtendy = value;
+        }
+        //internal float xAngle = 0;
+        internal int xChNum => GridParams.xChNum;
+        internal int xChValue => GridParams.xChValue;
+        //internal StageNumber xStageNumber = StageNumber.N0;
         #endregion
 
         #region 參數區_实际矩阵XY_即將被新的座標系統完全取代
-        public float xRealLeftX = 0;
-        public float xRealLeftY = 0;
-        public float xRealOffsetX = 1;
-        public float xRealOffsetY = 1;
+        //public float xRealLeftX = 0;
+        //public float xRealLeftY = 0;
+        public float xRealOffsetX => GridParams.xRealOffsetX;
+        public float xRealOffsetY => GridParams.xRealOffsetY;
         #endregion
 
         #region 參數區_相機工作高度
@@ -621,12 +622,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region 參數區_其他子群
+        internal readonly DtoX3GridParams GridParams = new DtoX3GridParams();
         public InspectX3ParaClass InspectParams => InspectX3ParaClass.Instance;
         public FlyParaClass FlyAoiParams => FlyParaClass.Instance;
         #endregion
 
         public override void Load(bool eCancel = false)
         {
+#if (OPT_NOT_USED_LEGACY_CODE)
             //xLotNoStr = ReadINIValue("Collect", "xLotNoStr", "NONE", INIFILE);
 
             xRow = int.Parse(ReadINIValue("Recipe Basic", "xRow", "1", INIFILE));
@@ -653,9 +656,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             xChNum = int.Parse(ReadINIValue("Recipe Basic", "xChNum", "1", INIFILE));
             xChValue = int.Parse(ReadINIValue("Recipe Basic", "xChValue", "255", INIFILE));
+#endif
+
+            GridParams.Load(INIFILE);
+
             zFocusOnCarrier = float.Parse(ReadINIValue("Recipe Basic", "zFocusOnCarrier", "1", INIFILE));
             zFocusOnChip = float.Parse(ReadINIValue("Recipe Basic", "zFocusOnChip", "1", INIFILE));
 
+            #region NOT_USED_LEGACY_CODE
             //xRectRegionPrint = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrint", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             //xRegionTrain = StringtoRectF(ReadINIValue("Recipe Basic", "xRegionTrain", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             //xRectRegionPrintFly = StringtoRectF(ReadINIValue("Recipe Basic", "xRectRegionPrintFly", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
@@ -664,6 +672,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //xLineTop = StringtoRectF(ReadINIValue("Recipe Basic", "xLineTop", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             //xLineRight = StringtoRectF(ReadINIValue("Recipe Basic", "xLineRight", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
             //xLineBottom = StringtoRectF(ReadINIValue("Recipe Basic", "xLineBottom", RectFtoStringSimple(new RectangleF(0, 0, 100, 100)), INIFILE));
+            #endregion
 
             loadCamGrids(CarrierEnum.C1, out var grid1);
             loadCamGrids(CarrierEnum.C2, out var grid2);
@@ -698,7 +707,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 #endregion
 
                 //建立所有的 Region Cells (應該放在 Aoi Model)
-                CreateViews();
+                //CreateViews();
                 ViewTrainLoad();
             }
 
@@ -712,6 +721,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         public override void Save()
         {
+#if (OPT_NOT_USED_LEGACY_CODE)
             WriteINIValue("Recipe Basic", "xRow", xRow.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xColumn", xColumn.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xLeftTopX", xLeftTopX.ToString(), INIFILE);
@@ -731,12 +741,16 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             WriteINIValue("Recipe Basic", "xChNum", xChNum.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xChValue", xChValue.ToString(), INIFILE);
+#endif
+            GridParams.Save(INIFILE);
+
             WriteINIValue("Recipe Basic", "zFocusOnCarrier", zFocusOnCarrier.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "zFocusOnChip", zFocusOnChip.ToString(), INIFILE);
 
             saveCamGrid(CarrierEnum.C1, xCamGrid1);
             saveCamGrid(CarrierEnum.C2, xCamGrid2);
 
+            #region NOT_USED_LEGACY_CODE
             //==============================================================
             // 以下區塊 是調用 各別保存 函式
             //--------------------------------------------------------------
@@ -752,13 +766,14 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             ////(3) 邊線框 (根據載台號 載入不同對應的設定值)
             //SaveLineBorderRects(_CARRIER_TAG);
             //==============================================================
+            #endregion
 
             _bmpHolderOrg1.Save();
             _bmpHolderOrg2.Save();
             _bmpHolderOrgFly.Save();
 
             // 建立所有的 Region Cells (應該放在 Aoi Model)
-            CreateViews();
+            //CreateViews();
             ViewTrainLoad();
 
             InspectParams.Save();
@@ -781,16 +796,16 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             string chipType = GaUtil.GetEnumDescription(InspectParams.xAlgorithm);
             sb.AppendLine(chipType);
             //(2) Rows x Cols
-            int rows = xRow;
-            int cols = xColumn;
-            var pitchX = xRealOffsetX;
-            var pitchY = xRealOffsetY;
+            int rows = GridParams.xRow;
+            int cols = GridParams.xColumn;
+            var pitchX = GridParams.xRealOffsetX;
+            var pitchY = GridParams.xRealOffsetY;
             sb.AppendLine($"格位數: {rows} x {cols}");
             sb.AppendLine($"格位間距X: {pitchX:0.000} mm");
             sb.AppendLine($"格位間距Y: {pitchY:0.000} mm");
             //(3) Chip Dimentsion
-            sb.AppendLine($"晶粒尺寸X : {xChipWidth:0.000} mm");
-            sb.AppendLine($"晶粒尺寸Y : {xChipHeight:0.000} mm");
+            sb.AppendLine($"晶粒尺寸X : {GridParams.xChipWidth:0.000} mm");
+            sb.AppendLine($"晶粒尺寸Y : {GridParams.xChipHeight:0.000} mm");
             //(4) OPTIONS
             sb.AppendLine($"尺寸檢測 : {InspectParams.optChipMeasurement}");
             sb.AppendLine($"邊隙檢測 : {InspectParams.optPadEdgeGapsMeasurement}");
@@ -901,7 +916,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        #region MVD_AOI_TOOLS_RUNTIME_海康工具相關成員_放在這裡非常不妥
+        #region NOT_USED_LEGACY_MVD_AOI_TOOLS_RUNTIME_海康工具相關成員_放在這裡非常不妥
 #if (OPT_OLD_MVD_AOI_CODE)
         public MVD_CHIP_MATCHER mvdprinttemp_Find = new MVD_CHIP_MATCHER();
         public MvdFindClass mvdprintFlytemp_Find = new MvdFindClass();
@@ -921,7 +936,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 #endif
         #endregion
 
-        #region MVD_AOI_FUNCTIONS_FOR_CHIP_LOCATE_TRAIN_AND_RUN_晶粒定位的相關像測函式_放在這裡非常不妥
+        #region NOT_USED_LEGACY_MVD_AOI_FUNCTIONS_FOR_CHIP_LOCATE_TRAIN_AND_RUN_晶粒定位的相關像測函式_放在這裡非常不妥
         //----------------------------------------------------------------------
         // 這些應該放在 AOI MODEL 
         //----------------------------------------------------------------------
@@ -1247,11 +1262,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region NOT_USED_LEGACY_本專案沒用到_但是這應該放在_AOI_RESULT_區域
-        private int PassCount = 0;
-        private int NGCount = 0;
+        //private int PassCount = 0;
+        //private int NGCount = 0;
         #endregion
 
-        #region 统计数据_沒用到
+        #region NOT_USED_LEGACY_统计数据_沒用到
 #if (OPT_NOT_USED)
         public float[] AnalyzeDatas = new float[9];
 #endif
@@ -1300,6 +1315,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             return true;
         }
 
+#if (OPT_NOT_USED)
         //public int PassCount = 0;
         //public int NGCount = 0;
         public void ResetZero()
@@ -1325,6 +1341,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Recipe Basic", "PassCount", PassCount.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "NGCount", NGCount.ToString(), INIFILE);
         }
+#endif
         #endregion
 
         #region NOT_USED_LEGACY_校正與座標轉換_GAARA_版本
@@ -1436,11 +1453,12 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 #endif
         }
 
+        #region NOT_USED_LEGACY_CODE
         /// <summary>
         /// 創建 RegionCells.
         /// (這個應該是放在 AOI MODEL 內)
         /// </summary>
-        public void CreateViews()
+        private void CreateViews()
         {
             //-----------------------------------------------------------------------------
             // 這應該設計在 AoiModel.SetRecipe(RecipeFPIX3Class recipe) 內,
@@ -1450,7 +1468,6 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             // GaMvcConfig.SysModel.ApplyRecipe(optWritebackToRecipe: true);
             return;
         }
-
         /// <summary>
         /// 創建 RegionCells. (Gaara 版)
         /// (這個應該是放在 AOI MODEL 內)
@@ -1555,8 +1572,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //}
 #endif
         }
+        #endregion
 
-        #region MISC_UTIL_FUNCTIONS
+        #region NOT_USED_LEGACY_MISC_UTIL_FUNCTIONS
+#if (OPT_NOT_USED_CODE)
         /// <summary>
         /// 绕任意点旋转一个点 (這個應該放在 Util 模塊內)
         /// </summary>
@@ -1588,6 +1607,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             return finalPoint;
         }
+#endif
         #endregion
 
         #region REDUNDENT_FILES_刪除冗余文件
@@ -1629,6 +1649,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
     }
 
 
+#if (OPT_移動至_各自獨立的檔案)
     public class FlyParaClass : RecipeBaseClass
     {
         const int POINT_COUNT = 8;
@@ -2521,4 +2542,5 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
         }
     }
+#endif
 }

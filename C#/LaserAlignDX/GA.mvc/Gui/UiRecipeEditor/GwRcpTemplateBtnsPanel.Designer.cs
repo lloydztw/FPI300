@@ -30,6 +30,7 @@
         {
             this.btnPickGolden = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.btnRotateGolden = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -38,7 +39,7 @@
             this.btnPickGolden.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnPickGolden.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnPickGolden.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnPickGolden.Location = new System.Drawing.Point(28, 38);
+            this.btnPickGolden.Location = new System.Drawing.Point(205, 39);
             this.btnPickGolden.Margin = new System.Windows.Forms.Padding(4);
             this.btnPickGolden.Name = "btnPickGolden";
             this.btnPickGolden.Size = new System.Drawing.Size(160, 52);
@@ -48,16 +49,30 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.btnRotateGolden);
             this.groupBox1.Controls.Add(this.btnPickGolden);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.groupBox1.Location = new System.Drawing.Point(8, 2);
             this.groupBox1.Margin = new System.Windows.Forms.Padding(8);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(360, 116);
+            this.groupBox1.Size = new System.Drawing.Size(409, 116);
             this.groupBox1.TabIndex = 77;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Template";
+            // 
+            // btnRotateGolden
+            // 
+            this.btnRotateGolden.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnRotateGolden.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
+            this.btnRotateGolden.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.btnRotateGolden.Location = new System.Drawing.Point(32, 39);
+            this.btnRotateGolden.Margin = new System.Windows.Forms.Padding(4);
+            this.btnRotateGolden.Name = "btnRotateGolden";
+            this.btnRotateGolden.Size = new System.Drawing.Size(160, 52);
+            this.btnRotateGolden.TabIndex = 51;
+            this.btnRotateGolden.Text = "轉正";
+            this.btnRotateGolden.UseVisualStyleBackColor = false;
             // 
             // GwRcpTemplateBtnsPanel
             // 
@@ -66,7 +81,7 @@
             this.Controls.Add(this.groupBox1);
             this.Name = "GwRcpTemplateBtnsPanel";
             this.Padding = new System.Windows.Forms.Padding(8, 2, 12, 2);
-            this.Size = new System.Drawing.Size(380, 120);
+            this.Size = new System.Drawing.Size(429, 120);
             this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -76,5 +91,6 @@
 
         public System.Windows.Forms.Button btnPickGolden;
         private System.Windows.Forms.GroupBox groupBox1;
+        public System.Windows.Forms.Button btnRotateGolden;
     }
 }

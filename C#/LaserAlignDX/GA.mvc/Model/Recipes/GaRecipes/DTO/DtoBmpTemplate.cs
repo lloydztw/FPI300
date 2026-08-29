@@ -17,7 +17,6 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Drawing;
 
-
 namespace LaserAlignDX.Mvc.Model.Recipe
 {
     /// <summary>
@@ -26,12 +25,12 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     /// </summary>
     public class DtoBmpTemplate : DtoBase, IDisposable
     {
-        #region PRIVATE_DATA
-        Bitmap _templateBmp;
-        string _tpName;
-        string _sectName;
-        string _keyName;
-        string _postTag = "";
+        #region PROTECTED_DATA
+        protected Bitmap _templateBmp;
+        protected string _tpName;
+        protected string _sectName;
+        protected string _keyName;
+        protected string _postTag = "";
         #endregion
 
         public DtoBmpTemplate(string templateName, string sectName = null, string keyName = null, string ext = ".bmp")
@@ -86,6 +85,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             SaveBmp();
         }
 
+        #region PRIVATE_LOAD_SAVE_FUNCTIONS
         void LoadRectF(string iniFileName, string sectName, string keyName)
         {
             normalize(ref iniFileName, ref sectName, ref keyName);
@@ -132,9 +132,10 @@ namespace LaserAlignDX.Mvc.Model.Recipe
                 }
             }
         }
+        #endregion
 
-        #region PRIVATE_FUNCTIONS
-        private void normalize(ref string iniFileName, ref string sectName, ref string keyName)
+        #region PROTECTED_FUNCTIONS
+        protected void normalize(ref string iniFileName, ref string sectName, ref string keyName)
         {
             //if (!string.IsNullOrEmpty(_postTag))
             //{

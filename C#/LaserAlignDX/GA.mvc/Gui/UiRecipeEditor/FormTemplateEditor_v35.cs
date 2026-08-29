@@ -54,13 +54,18 @@ namespace LaserAlignDX.Mvc.Gui.V35
             get; private set;
         }
 
+        Button IvTemplateEditorUI.btnRotateGolden => gwRcpTemplateBtnsPanel1.btnPickGolden;
         Button IvTemplateEditorUI.btnPickGolden => gwRcpTemplateBtnsPanel1.btnPickGolden;
+
         Button IvTemplateEditorUI.btnAutoLineBorders => gwRcpLineBorderBtnsPanel1.btnAutoLineBorders;
         Button IvTemplateEditorUI.btnBuildMircoTransform => gwRcpLineBorderBtnsPanel1.btnBuildMircoTrf;
-
         NumericUpDown IvTemplateEditorUI.numBorderIndent => gwRcpLineBorderBtnsPanel1.numBorderIndent;
         NumericUpDown IvTemplateEditorUI.numBorderExtend => gwRcpLineBorderBtnsPanel1.numBorderSize;
         NumericUpDown IvTemplateEditorUI.numLineSpanPercentage => gwRcpLineBorderBtnsPanel1.numSpanRatio;
+
+        NumericUpDown IvTemplateEditorUI.numMeasureDistXs => gwRcpLineBorderBtnsPanel1.numMeasureXs;
+        NumericUpDown IvTemplateEditorUI.numMeasureDistYs => gwRcpLineBorderBtnsPanel1.numMeasureYs;
+        NumericUpDown IvTemplateEditorUI.numMasks => gwRcpLineBorderBtnsPanel1.numMeasureMasks;
 
         Button IvTemplateEditorUI.btnTryScanQrCode => gwRcpQrCodeBtnsPanel1.btnTryQrCode;
         Control IvTemplateEditorUI.wndQrCodeResult => gwRcpQrCodeBtnsPanel1.rtbCodeContent;

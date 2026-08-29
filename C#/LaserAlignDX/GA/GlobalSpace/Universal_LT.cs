@@ -179,7 +179,10 @@ namespace Traveller106
         //public static string MainX6_Path = "D:\\CollectPictures\\Inspection\\";
         static string DATACNNSTRING => "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + DBPATH + @"\DATA.mdb;Jet OLEDB:Database Password=12892414;";
 #endif
+
+#if (OPT_NOT_USED_LEGACY)
         static int LanguageIndex = 0;
+#endif
 
         public static string InitialErrorString = "";
 
@@ -220,9 +223,11 @@ namespace Traveller106
         public static FreeImageAPI.FreeImageBitmap bmpGlobalFreeImage = new FreeImageAPI.FreeImageBitmap(1, 1);
 #endif
 
+#if (OPT_NOT_USED_LEGACY)
         public static CommonLogClass COMMON_LOG_INFOS = new CommonLogClass();
         public static PropGrid_CaliClass CaliClass = new PropGrid_CaliClass();
         public static LineScanCalibrateClass[] LineScanCalibrateClasses = null;
+#endif
 
         /// <summary>
         /// 飞拍相机
@@ -329,13 +334,13 @@ namespace Traveller106
             //}
 
             ////初始化语言
+#if (OPT_NOT_USED_LEGACY)
             //JetEazy.BasicSpace.LanguageExClass.Instance.Load(WORKPATH);
             //JetEazy.BasicSpace.LanguageExClass.Instance.LanguageIndex = 1;
             ////JetEazy.BasicSpace.LanguageExClass.Instance.FirstCsv = true;
             LanguageIndex = langIndex;
-
             COMMON_LOG_INFOS.LogPath = LOG_INFO_PATH;
-
+#endif
             //myTestProgramme();
 
 
@@ -347,6 +352,7 @@ namespace Traveller106
             //RCPDB = new RCPDBClass(DBPATH + @"\RCPDB.jdb", RCPPATH, 1);//總是加載第一個參數 即為正常模式
             RUNDB = new RUNDBClass(DBPATH + @"\RUNDB.jdb");
 
+#if (OPT_NOT_USED_LEGACY)
             LineScanCalibrateClasses = new LineScanCalibrateClass[4];
             int i = 0;
             while (i < 4)
@@ -356,6 +362,7 @@ namespace Traveller106
                 LineScanCalibrateClasses[i].Load();
                 i++;
             }
+#endif
 
             RecipeFPIX3Class.Instance.Initial(RCPPATH, ESSDB.LastRecipeIndex, "Strip_default_info.ini");
             RecipeFPIX3Class.Instance.Load();
@@ -415,10 +422,13 @@ namespace Traveller106
             //}
             return ret;
         }
+
+#if (OPT_NOT_USED_LEGACY)
         public static void SetLanguage(int langindex)
         {
             LanguageIndex = langindex;
         }
+#endif
 
         static bool InitialMachineCollection()
         {
@@ -1011,11 +1021,13 @@ namespace Traveller106
         }
 #endif
 
+#if (OPT_NOT_USED_LEGACY)
         static string ToChangeLanguage(string eText)
         {
             string retStr = eText;
             retStr = LanguageExClass.Instance.GetLanguageText(eText);
             return retStr;
         }
+#endif
     }
 }

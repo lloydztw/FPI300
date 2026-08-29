@@ -616,8 +616,10 @@
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\JcetReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3GridParams.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3MeasureSpec.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\LineScanCalibrateClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\FlyParamClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\InspectX3ParamClass.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeParaGridClass.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\CsPropertyReadonlyProvider.cs" />

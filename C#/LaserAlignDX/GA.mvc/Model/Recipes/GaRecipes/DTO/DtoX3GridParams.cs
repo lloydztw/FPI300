@@ -13,6 +13,7 @@
  */
 #endregion
 
+using Eazy_Project_III;
 
 namespace LaserAlignDX.Mvc.Model.Recipe
 {
@@ -22,26 +23,31 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     /// </summary>
     public class DtoX3GridParams : DtoBase
     {
-        public int xRow = 1;
-        public int xColumn = 1;
-        public int xLeftTopX = 1;
-        public int xLeftTopY = 1;
-        public float xRowOffset = 2f;
-        public float xColumnOffset = 2f;
-        public float xChipWidth = 10;
-        public float xChipHeight = 10;
-        public int xExtendx = 100;
-        public int xExtendy = 100;
-        public float xAngle = 0;
-        public int xChNum = 1;
-        public int xChValue = 255;
+        #region 參數區_PARAM_GRID
+        internal int xRow = 1;
+        internal int xColumn = 1;
+        internal int xLeftTopX = 1;
+        internal int xLeftTopY = 1;
+        internal float xRowOffset = 2f;
+        internal float xColumnOffset = 2f;
+        internal float xChipWidth = 10;
+        internal float xChipHeight = 10;
+        internal int xExtendx = 100;
+        internal int xExtendy = 100;
+        internal float xAngle = 0;
+        internal int xChNum = 1;
+        internal int xChValue = 255;
+        internal StageNumber xStageNumber = StageNumber.N0;
+        #endregion
+
+        #region 參數區_实际矩阵XY_即將被新的座標系統完全取代
         public float xRealLeftX = 0;
         public float xRealLeftY = 0;
         public float xRealOffsetX = 1;
         public float xRealOffsetY = 1;
-        public int xStageNumber = 0;
+        #endregion
 
-        public override void Load(string iniFile, string sectName = null, string keyName = null)
+        public override void Load(string iniFile)
         {
             xRow = int.Parse(ReadINIValue("Recipe Basic", "xRow", "1", iniFile));
             xColumn = int.Parse(ReadINIValue("Recipe Basic", "xColumn", "1", iniFile));
@@ -54,15 +60,16 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             xChipHeight = float.Parse(ReadINIValue("Recipe Basic", "xChipHeight", "10", iniFile));
             xExtendx = int.Parse(ReadINIValue("Recipe Basic", "xExtendx", "100", iniFile));
             xExtendy = int.Parse(ReadINIValue("Recipe Basic", "xExtendy", "100", iniFile));
-            xChNum = int.Parse(ReadINIValue("Recipe Basic", "xChNum", "1", iniFile));
-            xChValue = int.Parse(ReadINIValue("Recipe Basic", "xChValue", "255", iniFile));
+
             //xRealLeftX = float.Parse(ReadINIValue("Recipe Basic", "xRealLeftX", "0", INIFILE));
             //xRealLeftY = float.Parse(ReadINIValue("Recipe Basic", "xRealLeftY", "0", INIFILE));
             xRealOffsetX = float.Parse(ReadINIValue("Recipe Basic", "xRealOffsetX", "1", iniFile));
-            xRealOffsetY = float.Parse(ReadINIValue("Recipe Basic", "xRealOffsetY", "1", iniFile));
-            xStageNumber = int.Parse(ReadINIValue("Recipe Basic", "xStageNumber", "0", iniFile));
+            xRealOffsetY = float.Parse(ReadINIValue("Recipe Basic", "xRealOffsetY", "1", iniFile));            xStageNumber = (StageNumber)int.Parse(ReadINIValue("Recipe Basic", "xStageNumber", "0", iniFile));
+
+            xChNum = int.Parse(ReadINIValue("Recipe Basic", "xChNum", "1", iniFile));
+            xChValue = int.Parse(ReadINIValue("Recipe Basic", "xChValue", "255", iniFile));
         }
-        public override void Save(string iniFile, string sectName = null, string keyName = null)
+        public override void Save(string iniFile)
         {
             WriteINIValue("Recipe Basic", "xRow", xRow.ToString(), iniFile);
             WriteINIValue("Recipe Basic", "xColumn", xColumn.ToString(), iniFile);
@@ -75,13 +82,18 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             WriteINIValue("Recipe Basic", "xChipHeight", xChipHeight.ToString(), iniFile);
             WriteINIValue("Recipe Basic", "xExtendx", xExtendx.ToString(), iniFile);
             WriteINIValue("Recipe Basic", "xExtendy", xExtendy.ToString(), iniFile);
-            WriteINIValue("Recipe Basic", "xChNum", xChNum.ToString(), iniFile);
-            WriteINIValue("Recipe Basic", "xChValue", xChValue.ToString(), iniFile);
+
             //WriteINIValue("Recipe Basic", "xRealLeftX", xRealLeftX.ToString(), INIFILE);
             //WriteINIValue("Recipe Basic", "xRealLeftY", xRealLeftY.ToString(), INIFILE);
             WriteINIValue("Recipe Basic", "xRealOffsetX", xRealOffsetX.ToString(), iniFile);
             WriteINIValue("Recipe Basic", "xRealOffsetY", xRealOffsetY.ToString(), iniFile);
             WriteINIValue("Recipe Basic", "xStageNumber", ((int)xStageNumber).ToString(), iniFile);
+
+            WriteINIValue("Recipe Basic", "xChNum", xChNum.ToString(), iniFile);
+            WriteINIValue("Recipe Basic", "xChValue", xChValue.ToString(), iniFile);
+
+            //WriteINIValue("Recipe Basic", "zFocusOnCarrier", zFocusOnCarrier.ToString(), INIFILE);
+            //WriteINIValue("Recipe Basic", "zFocusOnChip", zFocusOnChip.ToString(), INIFILE);
         }
     }
 }

@@ -1,12 +1,27 @@
-﻿using Common.RecipeSpace;
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2026-08-29 重整 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using Common.RecipeSpace;
 using Eazy_Project_III;
 using JetEazy;
+using JetEazy.Lang;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
 
-
-namespace LaserAlignDX.Mvc.Model.Recipes
+namespace LaserAlignDX.OPSpace.RecipeSpace
 {
     public class FlyParaClass : RecipeBaseClass
     {
@@ -29,6 +44,24 @@ namespace LaserAlignDX.Mvc.Model.Recipes
                 return _instance;
             }
         }
+
+        #region A00
+        const string _Cat0 = "A00.相机参数";
+
+        [CategoryAttribute(_Cat0), DescriptionAttribute("即相机抓图时的曝光值 单位 us")]
+        [DisplayName("A01.曝光")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 300, 1f, 2)]
+        [Browsable(true)]
+        public float xCamExpo { get; set; } = 100f;
+
+        [CategoryAttribute(_Cat0), DescriptionAttribute("即相机抓图时的增益值 单位 dB")]
+        [DisplayName("A02.增益")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 20, 1f, 2)]
+        [Browsable(true)]
+        public float xCamGain { get; set; } = 8f;
+        #endregion
 
         #region A01
         const string _Cat1 = "A01.基础设置";
@@ -108,6 +141,19 @@ namespace LaserAlignDX.Mvc.Model.Recipes
         public bool xIsShuiPing { get; set; } = true;
         #endregion
 
+        #region A01
+        const string _Cat3 = "A03.读码设置";
+
+        [CategoryAttribute(_Cat3), DescriptionAttribute("true 打开  false  关闭")]
+        [DisplayName("A00.开启读码")]
+        //[TypeConverter(typeof(NumericUpDownTypeConverter))]
+        //[Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
+        [Browsable(true)]
+        public bool bOpenCodeReader { get; set; } = false;
+
+
+        #endregion
+
         #region GLOBAL_OFFSETS
         [Browsable(false)]
         public PointF[] ptsOffset = new PointF[POINT_COUNT];
@@ -122,12 +168,17 @@ namespace LaserAlignDX.Mvc.Model.Recipes
             xExtendx = int.Parse(ReadINIValue("Fly", "xExtendx", "20", INIFILE));
             xExtendy = int.Parse(ReadINIValue("Fly", "xExtendy", "20", INIFILE));
 
+            xCamExpo = float.Parse(ReadINIValue("Fly", "xCamExpo", "100", INIFILE));
+            xCamGain = float.Parse(ReadINIValue("Fly", "xCamGain", "8", INIFILE));
+
             xIsOpenMuit = ReadINIValue("Basic", "xIsOpenMuit", "0", INIFILE) == "1";
             xThresholdValue = int.Parse(ReadINIValue("Basic", "xThresholdValue", "128", INIFILE));
             xBlobMode = (BlobMode)int.Parse(ReadINIValue("Basic", "xBlobMode", "1", INIFILE));
             xBlobAreaMin = int.Parse(ReadINIValue("Basic", "xBlobAreaMin", "10", INIFILE));
             xBlobAreaMax = int.Parse(ReadINIValue("Basic", "xBlobAreaMax", "20000", INIFILE));
             xIsShuiPing = ReadINIValue("Basic", "xIsShuiPing", "1", INIFILE) == "1";
+
+            bOpenCodeReader = ReadINIValue("Basic", "bOpenCodeReader", "0", INIFILE) == "1";
 
             int i = 0;
             while (i < POINT_COUNT)
@@ -145,12 +196,17 @@ namespace LaserAlignDX.Mvc.Model.Recipes
             WriteINIValue("Fly", "xExtendx", xExtendx.ToString(), INIFILE);
             WriteINIValue("Fly", "xExtendy", xExtendy.ToString(), INIFILE);
 
+            WriteINIValue("Fly", "xCamExpo", xCamExpo.ToString(), INIFILE);
+            WriteINIValue("Fly", "xCamGain", xCamGain.ToString(), INIFILE);
+
             WriteINIValue("Basic", "xIsOpenMuit", (xIsOpenMuit ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "xThresholdValue", xThresholdValue.ToString(), INIFILE);
             WriteINIValue("Basic", "xBlobMode", ((int)xBlobMode).ToString(), INIFILE);
             WriteINIValue("Basic", "xBlobAreaMin", xBlobAreaMin.ToString(), INIFILE);
             WriteINIValue("Basic", "xBlobAreaMax", xBlobAreaMax.ToString(), INIFILE);
             WriteINIValue("Basic", "xIsShuiPing", (xIsShuiPing ? "1" : "0"), INIFILE);
+
+            WriteINIValue("Basic", "bOpenCodeReader", (bOpenCodeReader ? "1" : "0"), INIFILE);
 
             int i = 0;
             while (i < POINT_COUNT)
@@ -160,6 +216,13 @@ namespace LaserAlignDX.Mvc.Model.Recipes
 
                 i++;
             }
+        }
+
+        public bool GetCameraExpoAndGain(out float expo, out float gain)
+        {
+            expo = xCamExpo;
+            gain = xCamGain;
+            return true;
         }
     }
 }

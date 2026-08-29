@@ -27,11 +27,47 @@ namespace LaserAlignDX.Mvc.Gui
         Control lblActiveCarrierID { get; }
         RadioButton[] rdoBoxSelectors { get; }
 
-        Button btnPickGolden {  get; }
+        /// <summary>
+        /// 轉正模板
+        /// </summary>
+        Button btnRotateGolden { get; }
+        /// <summary>
+        /// 擷取模板
+        /// </summary>
+        Button btnPickGolden { get; }
+
+        /// <summary>
+        /// 尺寸X 量測數量
+        /// </summary>
+        NumericUpDown numMeasureDistXs { get; }
+        /// <summary>
+        /// 尺寸Y 量測數量
+        /// </summary>
+        NumericUpDown numMeasureDistYs { get; }
+        /// <summary>
+        /// 遮罩數量
+        /// </summary>
+        NumericUpDown numMasks { get; }
+
+        /// <summary>
+        /// 一鍵自動框
+        /// </summary>
         Button btnAutoLineBorders { get; }
+        /// <summary>
+        /// 精算尺寸
+        /// </summary>
         Button btnBuildMircoTransform { get; }
+        /// <summary>
+        /// 內緣
+        /// </summary>
         NumericUpDown numBorderIndent { get; }
+        /// <summary>
+        /// 外緣
+        /// </summary>
         NumericUpDown numBorderExtend { get; }
+        /// <summary>
+        /// 跨距
+        /// </summary>
         NumericUpDown numLineSpanPercentage { get; }
 
         Button btnTryScanQrCode { get; }
@@ -46,4 +82,5 @@ namespace LaserAlignDX.Mvc.Gui
         Button btnSaveAllParams { get; }
         Button btnCancel { get; }
     }
+
 }

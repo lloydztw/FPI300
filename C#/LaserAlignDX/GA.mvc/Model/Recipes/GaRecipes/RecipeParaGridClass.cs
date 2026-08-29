@@ -2,12 +2,16 @@
 using JetEazy;
 using JetEazy.Lang;
 using JetEazy.Utils;
+using LaserAlignDX.Mvc.Model.Recipe;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System.ComponentModel;
 using System.Drawing.Design;
 
 namespace LaserAlignDX.BasicSpace
 {
+    /// <summary>
+    /// 參數摘要
+    /// </summary>
     public class RecipeParaGridClass
     {
         #region SINGLETON
@@ -31,6 +35,7 @@ namespace LaserAlignDX.BasicSpace
         #region PRIVATE_DATA_LINK
         RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         InspectX3ParaClass _spec => _xRecipe.InspectParams;
+        DtoX3GridParams _dtoGridParams => _xRecipe.GridParams;
         #endregion
 
         #region 0A_參數摘要
@@ -41,7 +46,7 @@ namespace LaserAlignDX.BasicSpace
         [ReadOnly(true)]
         public string ChipTypeStr
         {
-            get => GaUtil.GetEnumDescription(_xRecipe.InspectParams.xAlgorithm);
+            get => GaUtil.GetEnumDescription(_spec.xAlgorithm);
         }
 
         [CategoryAttribute(cat0), DescriptionAttribute("Rows x Cols")]
@@ -130,8 +135,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(true)]
         public LightChannelEnum xChNum
         {
-            get { return (LightChannelEnum)_xRecipe.xChNum; }
-            set { _xRecipe.xChNum = (int)value; }
+            get { return (LightChannelEnum)_dtoGridParams.xChNum; }
+            set { _dtoGridParams.xChNum = (int)value; }
         }
 
         [CategoryAttribute(cat2), DescriptionAttribute("0~255")]
@@ -141,8 +146,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(true)]
         public int xChValue
         {
-            get { return _xRecipe.xChValue; }
-            set { _xRecipe.xChValue = value; }
+            get { return _dtoGridParams.xChValue; }
+            set { _dtoGridParams.xChValue = value; }
         }
         #endregion
 
@@ -156,8 +161,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         internal float xAngle
         {
-            get { return _xRecipe.xAngle; }
-            set { _xRecipe.xAngle = value; }
+            get { return _dtoGridParams.xAngle; }
+            set { _dtoGridParams.xAngle = value; }
         }
 
         //[CategoryAttribute(cat1), DescriptionAttribute("矩阵行数")]
@@ -168,8 +173,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public int xRow
         {
-            get { return _xRecipe.xRow; }
-            set { _xRecipe.xRow = value; }
+            get { return _dtoGridParams.xRow; }
+            set { _dtoGridParams.xRow = value; }
         }
 
         //[CategoryAttribute(cat1), DescriptionAttribute("矩阵列数")]
@@ -180,8 +185,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public int xColumn
         {
-            get { return _xRecipe.xColumn; }
-            set { _xRecipe.xColumn = value; }
+            get { return _dtoGridParams.xColumn; }
+            set { _dtoGridParams.xColumn = value; }
         }
 
         //[CategoryAttribute(cat1), DescriptionAttribute("矩阵左上角Chip的左上角图像位置X")]
@@ -192,8 +197,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public int xLeftTopX
         {
-            get { return _xRecipe.xLeftTopX; }
-            set { _xRecipe.xLeftTopX = value; }
+            get { return _dtoGridParams.xLeftTopX; }
+            set { _dtoGridParams.xLeftTopX = value; }
         }
 
         //[CategoryAttribute(cat1), DescriptionAttribute("矩阵左上角Chip的左上角图像位置Y")]
@@ -204,8 +209,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public int xLeftTopY
         {
-            get { return _xRecipe.xLeftTopY; }
-            set { _xRecipe.xLeftTopY = value; }
+            get { return _dtoGridParams.xLeftTopY; }
+            set { _dtoGridParams.xLeftTopY = value; }
         }
 
         //[CategoryAttribute(cat1), DescriptionAttribute("矩阵行间距")]
@@ -216,8 +221,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public float xRowOffset
         {
-            get { return _xRecipe.xRowOffset; }
-            set { _xRecipe.xRowOffset = value; }
+            get { return _dtoGridParams.xRowOffset; }
+            set { _dtoGridParams.xRowOffset = value; }
         }
 
         //[CategoryAttribute(cat1), DescriptionAttribute("矩阵列间距")]
@@ -228,8 +233,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public float xColumnOffset
         {
-            get { return _xRecipe.xColumnOffset; }
-            set { _xRecipe.xColumnOffset = value; }
+            get { return _dtoGridParams.xColumnOffset; }
+            set { _dtoGridParams.xColumnOffset = value; }
         }
 
         //[CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品尺寸X")]
@@ -240,8 +245,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public float xChipWidth
         {
-            get { return _xRecipe.xChipWidth; }
-            set { _xRecipe.xChipWidth = value; }
+            get { return _dtoGridParams.xChipWidth; }
+            set { _dtoGridParams.xChipWidth = value; }
         }
 
         //[CategoryAttribute(cat1), DescriptionAttribute("矩阵中产品尺寸Y")]
@@ -252,8 +257,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public float xChipHeight
         {
-            get { return _xRecipe.xChipHeight; }
-            set { _xRecipe.xChipHeight = value; }
+            get { return _dtoGridParams.xChipHeight; }
+            set { _dtoGridParams.xChipHeight = value; }
         }
 
         //[CategoryAttribute(cat1), DescriptionAttribute("模板匹配搜寻范围X扩大的像素")]
@@ -292,8 +297,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public StageNumber xStageNumber
         {
-            get { return _xRecipe.xStageNumber; }
-            set { _xRecipe.xStageNumber = value; }
+            get { return _dtoGridParams.xStageNumber; }
+            set { _dtoGridParams.xStageNumber = value; }
         }
 
         //[CategoryAttribute(cat3), DescriptionAttribute("矩阵左上角实际位置X")]
@@ -305,8 +310,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public float xRealLeftX
         {
-            get { return _xRecipe.xRealLeftX; }
-            set { _xRecipe.xRealLeftX = value; }
+            get { return _dtoGridParams.xRealLeftX; }
+            set { _dtoGridParams.xRealLeftX = value; }
         }
 
         //[CategoryAttribute(cat3), DescriptionAttribute("矩阵左上角实际位置Y")]
@@ -318,8 +323,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public float xRealLeftY
         {
-            get { return _xRecipe.xRealLeftY; }
-            set { _xRecipe.xRealLeftY = value; }
+            get { return _dtoGridParams.xRealLeftY; }
+            set { _dtoGridParams.xRealLeftY = value; }
         }
 
         //[CategoryAttribute(cat3), DescriptionAttribute("矩阵横向产品中心距离")]
@@ -330,8 +335,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public float xRealOffsetX
         {
-            get { return _xRecipe.xRealOffsetX; }
-            set { _xRecipe.xRealOffsetX = value; }
+            get { return _dtoGridParams.xRealOffsetX; }
+            set { _dtoGridParams.xRealOffsetX = value; }
         }
 
         //[CategoryAttribute(cat3), DescriptionAttribute("矩阵纵向产品中心距离")]
@@ -342,8 +347,8 @@ namespace LaserAlignDX.BasicSpace
         [Browsable(false)]
         public float xRealOffsetY
         {
-            get { return _xRecipe.xRealOffsetY; }
-            set { _xRecipe.xRealOffsetY = value; }
+            get { return _dtoGridParams.xRealOffsetY; }
+            set { _dtoGridParams.xRealOffsetY = value; }
         }
         #endregion
     }
