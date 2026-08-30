@@ -377,6 +377,7 @@
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaCommonMotorJogCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaRecipeEditCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplateEditCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplateLineBorderEditCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
@@ -561,6 +562,7 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
+    <Compile Include="GA.mvc\Model\.Common\LineBorderPair.cs" />
     <Compile Include="GA.mvc\Model\.Common\PixRounder.cs" />
     <Compile Include="GA.mvc\Model\.Common\LotDataHolder.cs" />
     <Compile Include="GA.mvc\Model\.Common\XCellBloc.cs" />
@@ -616,6 +618,7 @@
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\JcetReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3LineBorderParams.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3GridParams.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3MeasureSpec.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\FlyParamClass.cs" />

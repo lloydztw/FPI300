@@ -16,6 +16,7 @@
 using JetEazy.FormSpace;
 using JetEazy.Lang;
 using JetEazy.Utils;
+using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
 using System;
 using System.Drawing;
@@ -162,9 +163,9 @@ namespace LaserAlignDX.Mvc.Gui
             if (chipData == null)
                 return ErrorCodes.ERR_NO_CHIP_LOCATION;
 
-            var goldenW = (float)numChipWidth.Value;
-            var goldenH = (float)numChipHeight.Value;
-            var goldenDim = new SizeF(goldenW, goldenH);
+            //var goldenW = (float)numChipWidth.Value;
+            //var goldenH = (float)numChipHeight.Value;
+            //var goldenDim = new SizeF(goldenW, goldenH);
 
             // Region Bitmap
             var regionRoi = Rectangle.Round(chipData.CellRoi);
@@ -174,7 +175,13 @@ namespace LaserAlignDX.Mvc.Gui
 
             using (var regionBmp = fullfovBmp.Clone(Rectangle.Round(regionRoi), System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                var err = aoiModel.BuildMicroChipTransform(goldenDim, chipData.LineSegments, regionBmp, regionRoi);
+                //var err = aoiModel.BuildMicroChipTransform(goldenDim, chipData.GetQuadLineSegments(), regionBmp, regionRoi);
+
+                var goldenW = (float)numChipWidth.Value;
+                var goldenH = (float)numChipHeight.Value;
+                var goldenDim = new SizeF(goldenW, goldenH);
+                chipData?.LineBorderPairs?.SetTargetDists(goldenDim);
+                var err = aoiModel.BuildMicroChipTransform(chipData.LineBorderPairs, regionBmp, regionRoi);
                 return err;
             }
         }

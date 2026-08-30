@@ -14,10 +14,12 @@
 #endregion
 
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using VisionDesigner;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
@@ -68,10 +70,20 @@ namespace LaserAlignDX.AoiModel
         /// </remarks>
         void Run(Bitmap bmpScene = null);
 
+#if (OPT_OLD || true)
         /// <summary>
         /// 為 參數編輯 所用
         /// </summary>
         ErrorCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi);
+#endif
+
+        /// <summary>
+        /// 為 參數編輯 所用
+        /// </summary>
+        /// <remarks>
+        /// lineEdgePairs 單位為 pixels (FullFov Cammera Coordinates)
+        /// </remarks>
+        ErrorCodes BuildMicroChipTransform(Dictionary<string, LineBorderPair> lineEdgePairs, Bitmap regionBmp, RectangleF regionRoi);
 
         /// <summary>
         /// 為 參數調試 所用

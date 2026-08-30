@@ -17,6 +17,7 @@ using EzAoiEmptyTrayInspector.Model;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.Utils;
+using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using OpenCvSharp;
@@ -458,7 +459,7 @@ namespace LaserAlignDX.AoiModel
                     if (xCell == null || !xCell.IsResultPass()) 
                         continue;
                     
-                    var lines = xCell?.ChipData?.LineSegments;
+                    var lines = xCell?.ChipData?.LineBorderPairs.GetQuadLineSegments();
                     if (lines == null || lines.Length < NP) 
                         continue;
 

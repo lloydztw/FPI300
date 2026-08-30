@@ -23,6 +23,7 @@ using LaserAlignDX.Model.Coords.Support;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
@@ -238,6 +239,10 @@ namespace LaserAlignDX.Model.Coords.V33
         public ErrorCodes CalcChipDimension(out SizeF dimension, EzLSD.LineSegment[] lines, GaChipData chipData, bool includePadGaps)
         {
             return CalcChipDimension_PadTrf(out dimension, lines, chipData, includePadGaps);
+        }
+        public ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData)
+        {
+            throw new NotImplementedException();
         }
 
         #region PRIVATE_CALC_DIMENSION_FUNCTIONS

@@ -248,6 +248,7 @@ namespace LaserAlignDX.Model
         /// </summary>
         public void AsyncDumpLineSegmentsData(RegionCellX3Class cell, ref RectangleF cellRoi)
         {
+#if (OPT_RESERVED)
             if (!_INI.IsSaveTestImage || cell == null)
                 return;
 
@@ -346,6 +347,7 @@ namespace LaserAlignDX.Model
                     _LOG_ERROR(ex, $"{GetType().Name}.AsyncDumpLineSegmentsData");
                 }
             }, args);
+#endif
         }
 
         /// <summary>

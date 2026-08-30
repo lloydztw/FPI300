@@ -18,23 +18,25 @@ using JetEazy.Lang;
 using JetEazy.OpenCV;
 using JetEazy.QvMath;
 using JetEazy.Utils;
+using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
+using LaserAlignDX.Mvc.Model.Recipe;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using VisionDesigner;
 
 using CviGoldenBox = JetEazy.ImageViewerEx.Interactors.CviQuad;
 
-namespace LaserAlignDX.Mvc.Ctrl.V35
+namespace LaserAlignDX.Mvc.Ctrl.V35.Try
 {
-    public class GaTemplateEditCtrl
+    public partial class GaTemplateEditCtrl
     {
         #region CONSTS
         /// <summary>
@@ -53,10 +55,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             Defects,
         }
         OpSelector _opSelector = OpSelector.None;
-        #endregion
-
-        #region CHILD_CTRL
-        readonly GaTemplateLineBorderEditCtrl _lineBordersCtrl = new GaTemplateLineBorderEditCtrl();
         #endregion
 
         #region GLOBAL_MESS
@@ -191,6 +189,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         JezTransImageViewPanel wndDefectsViewer => _editorUI.ImgViewers[2] as JezTransImageViewPanel;
         Button btnPickGolden => _editorUI.btnPickGolden;
         Button btnTryScanQrCode => _editorUI.btnTryScanQrCode;
+        Button btnAutoLayoutLineBorders => _editorUI.btnAutoLineBorders;
+        Button btnBuildMictroTransform => _editorUI.btnBuildMircoTransform;
         Button btnDefectRegionAdd => _editorUI.btnDefectRegionAdd;
         Button btnDefectRegionDelete => _editorUI.btnDefectRegionDelete;
         Button btnDefectRegionClearAll => _editorUI.btnDefectRegionClearAll;
@@ -212,33 +212,48 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         CviRcpBox _cviActiveMaskBox;
         #endregion
 
+        #region INTERACTORS_FOR_LINE_BORDERS
+        int MAX_LINE_BORDER_PAIRS = DtoX3LineBorderParams.MAX_PAIRS;
+        CviRcpBox[] _cviLineBorderBoxes;
+        CviLineSegmentsBox[] _cviLineSegmentBoxes;
+        List<CviRcpBox[]> _cviLineBorderBoxPairsH;
+        List<CviRcpBox[]> _cviLineBorderBoxPairsV;
+        List<CviLineSegmentsBox[]> _cviLineSegmentPairsH;
+        List<CviLineSegmentsBox[]> _cviLineSegmentPairsV;
+        IEnumerable<CviRcpBox> IterLineBorderBoxes()
+        {
+            foreach(var pair in _cviLineBorderBoxPairsH)
+            {
+                yield return pair[0];
+                yield return pair[1];
+            }
+            foreach (var pair in _cviLineBorderBoxPairsV)
+            {
+                yield return pair[0];
+                yield return pair[1];
+            }
+        }
+        #endregion
+
         #region RUNTIME_DATA
         bool _bypassWindowEvents = false;
         bool _isGoldenModified = false;
         bool _isQrCodeModified = false;
+        bool _isLineBorderModified = false;
         bool _isDefectMaskModified = false;
         bool _isPropertyModified = false;
-        bool _isLineBorderModified
-        {
-            get => _lineBordersCtrl.IsModified;
-            set => _lineBordersCtrl.IsModified = value;
-        }
         QvQuad2D _goldenQuad2D = null;
         #endregion
 
         public void Attach(IvTemplateEditorUI ui)
         {
             _editorUI = ui;
-
             initGui();
             connectEventHandlers();
-            
-            _lineBordersCtrl.Attach(ui);
-            _lineBordersCtrl.OnRequestToLocateGoldenQuad += OnRequestToLocateGoldenQuad;
-            _lineBordersCtrl.OnMicroTransformChanged += OnMicroTransformChanged;
         }
         void initGui()
         {
+            initDispUIs();
             initInteractors();
             btnTrainTemplate.Visible = true;
         }
@@ -247,12 +262,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             _editorUI.Window.HandleCreated += Window_HandleCreated;
             btnPickGolden.Click += (s, e) => BuildGoldenChipTemplate();
             btnTryScanQrCode.Click += (s, e) => BuildQRCodeTemplate();
+            btnAutoLayoutLineBorders.Click += (s, e) => AutoLayoutLineBorders();
+            btnBuildMictroTransform.Click += (s, e) => BuildMicroTransform();
 
-            //btnAutoLayoutLineBorders.Click += (s, e) => AutoLayoutLineBorders();
-            //btnBuildMictroTransform.Click += (s, e) => BuildMicroTransform();
-            //_editorUI.numBorderIndent.ValueChanged += NumBorderExtend_ValueChanged;
-            //_editorUI.numBorderExtend.ValueChanged += NumBorderExtend_ValueChanged;
-            //_editorUI.numLineSpanPercentage.ValueChanged += NumBorderExtend_ValueChanged;
+            _editorUI.numBorderIndent.ValueChanged += NumBorderExtend_ValueChanged;
+            _editorUI.numBorderExtend.ValueChanged += NumBorderExtend_ValueChanged;
+            _editorUI.numLineSpanPercentage.ValueChanged += NumBorderExtend_ValueChanged;
 
             btnDefectRegionAdd.Click += (s, e) => DfRegion_Add();
             btnDefectRegionDelete.Click += (s, e) => DfRegion_Delete();
@@ -267,14 +282,17 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 rdoBoxSelector.CheckedChanged += RdoBoxSelector_CheckedChanged;
             }
 
-            //foreach (var cviBox in _cviLineBorderBoxes)
-            //{
-            //    cviBox.OnChanged += (s, e) =>
-            //    {
-            //        updateLineBorderBoxes(true);
-            //        updateLineSegmentBoxes(true);
-            //    };
-            //}
+            // LINE BORDERS
+            foreach (var cviBox in IterLineBorderBoxes())
+            {
+                cviBox.OnChanged += (s, e) =>
+                {
+                    updateLineBorderBoxes(true);
+                    updateLineSegmentBoxes(true);
+                };
+            }
+            _editorUI.numMeasureDistXs.ValueChanged += NumMeasureDistXs_ValueChanged;
+            _editorUI.numMeasureDistYs.ValueChanged += NumMeasureDistYs_ValueChanged;
 
             _cviQrCodeBox.OnChanged += (s, e) => BuildQRCodeTemplate(decode: false);
 
@@ -296,21 +314,18 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             wndTemplateViewer?.UpdateImage(_xBmpGoldenChipTemplate, _Title2, false);
 
             updateGoldenBoxes(false);
-            //persistLineBorderIndentExt(false);
-            //updateLineBorderBoxes(false);
+            persistLineBorderIndentExt(false);
+            updateLineBorderBoxes(false);
             updateDefectMaskBoxes(false);
             updateMaskTemplate(false);
             updateVisionParams();
 
-            _editorUI.Window.BeginInvoke(new Action(() =>
-            {
-                SetSelector(OpSelector.Golden);
-            }));
+            SetSelector(OpSelector.Golden);
         }
         private void GaTemplateEditCtrl_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveAllParams(force: false);
-            //persistLineBorderIndentExt(true);
+            persistLineBorderIndentExt(true);
             VxDebugDrawer.DestroyAllWindows();
         }
         private void RdoBoxSelector_CheckedChanged(object sender, EventArgs e)
@@ -328,7 +343,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
             if (propertyName == "xAlgorithm")
             {
-                _lineBordersCtrl.UpdateNumBorderIndentDynamically();
+                updateNumBorderIndentDynamically();
             }
 
             if (_opSelector == OpSelector.LineBorders)
@@ -336,74 +351,61 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 if (propertyName == "xCarrierBackground")
                 {
                     //自動刷新 邊線 抓取結果
-                    _lineBordersCtrl.UpdateLineSegmentBoxes(true);
+                    updateLineSegmentBoxes(true);
                     refreshDispUI(wndRegionViewer);
                 }
             }
+        }
+        private void NumBorderExtend_ValueChanged(object sender, EventArgs e)
+        {
+            if (_bypassWindowEvents)
+                return;
+
+            _editorUI?.Window?.BeginInvoke((Action)AutoLayoutLineBorders);
         }
         private void CviDefectMaskBox_OnChanged(object sender, EventArgs e)
         {
             _cviActiveMaskBox = (sender as CviRcpBox);
             updateMaskTemplate(true);
         }
-        private void OnMicroTransformChanged(object sender, EventArgs e)
+        private void NumMeasureDistYs_ValueChanged(object sender, EventArgs e)
         {
-            _isPropertyModified = true;
+            throw new NotImplementedException();
         }
-        private void OnRequestToLocateGoldenQuad(object sender, DoWorkEventArgs e)
+
+        private void NumMeasureDistXs_ValueChanged(object sender, EventArgs e)
         {
-            e.Result = null;
-
-            if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
-            {
-                //VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
-                var errMsg = GaUtil.GetEnumDescription(ErrorCodes.WARN_NO_GOLDN_TEMPLATE_SETUP);
-                VsMessageBox.Warning(errMsg);
-                return;
-            }
-
-            if (_cviGoldenChipBox.Box != Rectangle.Round(_xGoldenChipRect))
-            {
-                // 重新 擷取 Golden Chip
-                BuildGoldenChipTemplate();
-            }
-
-            // 強制 重新抓取 goldenQuad2D
-            if ((e.Argument is bool force) && force || _goldenQuad2D == null)
-            {
-                try
-                {
-                    //var matcherComposite = _xRecipe.mvdprinttemp_Find;
-                    var matcherComposite = _sysModel?.AoiModel?.GetChipLocAoi()?.GetTemplateMatcher();
-
-                    matcherComposite.SetRecipeParams(_xRecipe.InspectParams);   //<<< 使用 matcherComposite.SetRecipeParams 才能反映 _xAlogrithm
-
-                    var matcher = matcherComposite.GetMatcher(0);
-                    matcher.Train(_xBmpGoldenChipTemplate);
-
-                    _goldenQuad2D = matcher.GoldenQuad2D?.Clone();
-                    _goldenQuad2D?.Offset(_xGoldenChipRect.X, _xGoldenChipRect.Y);
-
-                    // 回傳到 event args
-                    e.Result = _goldenQuad2D;
-                }
-                catch (Exception ex)
-                {
-                    var errMsg = GaUtil.GetEnumDescription(ErrorCodes.WARN_CAN_NOT_FETCH_QUAD_2D) + "\n\r\n\r" + ex.Message;
-                    VsMessageBox.Warning(errMsg);
-                    return;
-                }
-            }
+            throw new NotImplementedException();
         }
         #endregion
 
         #region DISP_UI_FUNCTIONS
+        void initDispUIs()
+        {
+            //DS1.Initial(100, 0.01f);
+            //DS1.SetDisplayType(DisplayTypeEnum.SHOW);
+            //DS2.Initial(100, 0.01f);
+            //DS2.SetDisplayType(DisplayTypeEnum.SHOW);
+            //DS3.Initial(100, 0.01f);
+            //DS3.SetDisplayType(DisplayTypeEnum.SHOW);
+        }
         void initInteractors()
         {
             _cviGoldenChipBox = new CviGoldenBox(Brushes.Orange, 1, 3) { Visible = false };
             _cviQrCodeBox = new CviRcpBox(Brushes.DeepPink, 1, 3) { Visible = false };
             _cviDefectMaskBoxes = new List<CviRcpBox>();
 
+            var viewer = wndRegionViewer?.ImgViewer;
+            if (viewer != null)
+            {
+                viewer.AddInteractor(_cviGoldenChipBox);
+                viewer.AddInteractor(_cviQrCodeBox);
+            }
+
+            initInteractorsForLineBorders();
+        }
+        void initInteractorsForLineBorders()
+        {
             //_cviLineBorderBoxes = new CviRcpBox[4];
             //_cviLineSegmentBoxes = new CviLineSegmentsBox[4];
             //for (int i = 0, N = _cviLineBorderBoxes.Length; i < N; i++)
@@ -412,18 +414,70 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             //    _cviLineSegmentBoxes[i] = new CviLineSegmentsBox(Color.Cyan) { Visible = false };
             //}
 
+            //var viewer = wndRegionViewer?.ImgViewer;
+            //if (viewer != null)
+            //{
+            //    foreach (var box in _cviLineBorderBoxes)
+            //        viewer.AddInteractor(box);
+            //    foreach (var box in _cviLineSegmentBoxes)
+            //        viewer.AddInteractor(box);
+            //}
+
+            int N_PAIRS = MAX_LINE_BORDER_PAIRS;
+            _cviLineBorderBoxPairsH = new List<CviRcpBox[]>();
+            _cviLineBorderBoxPairsV = new List<CviRcpBox[]>();
+            _cviLineSegmentPairsH = new List<CviLineSegmentsBox[]>();
+            _cviLineSegmentPairsV = new List<CviLineSegmentsBox[]>();
+            for (int i = 0; i < N_PAIRS; i++)
+            {
+                _cviLineBorderBoxPairsH.Add(new CviRcpBox[]
+                {
+                    new CviRcpBox(Brushes.Blue, 1, 3) { Visible = false },
+                    new CviRcpBox(Brushes.Blue, 1, 3) { Visible = false },
+                });
+                _cviLineBorderBoxPairsV.Add(new CviRcpBox[]
+                {
+                    new CviRcpBox(Brushes.Blue, 1, 3) { Visible = false },
+                    new CviRcpBox(Brushes.Blue, 1, 3) { Visible = false },
+                });
+                _cviLineSegmentPairsH.Add(new CviLineSegmentsBox[]
+                {
+                    new CviLineSegmentsBox(Color.Cyan) { Visible = false },
+                    new CviLineSegmentsBox(Color.Cyan) { Visible = false },
+                });
+                _cviLineSegmentPairsV.Add(new CviLineSegmentsBox[]
+                {
+                    new CviLineSegmentsBox(Color.Cyan) { Visible = false },
+                    new CviLineSegmentsBox(Color.Cyan) { Visible = false },
+                });
+            }
+
             var viewer = wndRegionViewer?.ImgViewer;
             if (viewer != null)
             {
-                viewer.AddInteractor(_cviGoldenChipBox);
-                viewer.AddInteractor(_cviQrCodeBox);
-
-                //foreach (var box in _cviLineBorderBoxes)
-                //    viewer.AddInteractor(box);
-                //foreach (var box in _cviLineSegmentBoxes)
-                //    viewer.AddInteractor(box);
+                foreach (var pair in _cviLineBorderBoxPairsH)
+                {
+                    viewer.AddInteractor(pair[0]);
+                    viewer.AddInteractor(pair[1]);
+                }
+                foreach (var pair in _cviLineBorderBoxPairsV)
+                {
+                    viewer.AddInteractor(pair[0]);
+                    viewer.AddInteractor(pair[1]);
+                }
+                foreach (var pair in _cviLineSegmentPairsH)
+                {
+                    viewer.AddInteractor(pair[0]);
+                    viewer.AddInteractor(pair[1]);
+                }
+                foreach (var pair in _cviLineSegmentPairsV)
+                {
+                    viewer.AddInteractor(pair[0]);
+                    viewer.AddInteractor(pair[1]);
+                }
             }
         }
+
         void refreshDispUI(Control dispUI)
         {
             if (dispUI is JezTransImageViewPanel panel)
@@ -440,7 +494,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 _opSelector = selector;
                 updateSubTitle();
                 updateGuiStatus();
-                _lineBordersCtrl.UpdateLineSegmentBoxes(_opSelector == OpSelector.LineBorders);
+                updateLineSegmentBoxes(_opSelector == OpSelector.LineBorders);
                 refreshDispUI(wndRegionViewer);
                 refreshDispUI(wndTemplateViewer);
                 refreshDispUI(wndDefectsViewer);
@@ -493,8 +547,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 _editorUI.wndQrCodeResult.Text = text;
             }
         }
-
-#if (OPT_MOVED_TO_CHILD_CTRL)
         void AutoLayoutLineBorders()
         {
             //-----------------------------------------------------------------------------------
@@ -640,26 +692,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             _isPropertyModified = true;
             updateLineSegmentBoxes(true, calcGoldenDim: true);
         }
-#endif
-
         void TrainGoldenChipTemplate(bool silentSuccess = false)
         {
             VxDebugDrawer.DestroyAllWindows();
-
-#if (OPT_OLD_CODE)
-            int err = _xRecipe.PrintTempTrain(!silentSuccess);
-
-            if (err != 0)
-            {
-                //VsMessageBox.Warning("匹配模板 創建失敗!");
-                VsMessageBox.Warning(QMSG.Text(ErrorCodes.AoiErr_Template_Creation_Failed));
-            }
-            else if (!silentSuccess)
-            {
-                //VsMessageBox.Info("匹配模板 創建成功!");
-                VsMessageBox.Info(QMSG.Text(ErrorCodes.AoiErr_Template_Creation_OK));
-            }
-#endif
 
             bool ok = false;
             var aoi = _sysModel.AoiModel.GetChipLocAoi();
@@ -851,9 +886,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             // QR Code Gui
             _cviQrCodeBox.Visible = selector == OpSelector.QrCode;
             
-            //// Line Border Gui
-            //foreach (var cviBox in _cviLineBorderBoxes)
-            //    cviBox.Visible = selector == OpSelector.LineBorders;
+            // Line Border Gui
+            foreach (var cviBox in _cviLineBorderBoxes)
+                cviBox.Visible = selector == OpSelector.LineBorders;
 
             // Defects Gui
             foreach (var cviBox in _cviDefectMaskBoxes)
@@ -891,8 +926,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 _cviQrCodeBox.Box = rect;
             }
         }
-
-#if (OPT_MOVED_TO_CHILD_CTRL)
         void updateLineBorderBoxes(bool toRecipe)
         {
             if (toRecipe)
@@ -985,8 +1018,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             {
             }
         }
-#endif
-
         void updateDefectMaskBoxes(bool toRecipe)
         {
             if (wndTemplateViewer == null) return;
@@ -1095,19 +1126,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             // Template Gui
             _editorUI.btnPickGolden.Enabled = _opSelector == OpSelector.Golden;
 
-            //// Line Border Gui
-            //updateNumBorderIndentDynamically();
-            //_editorUI.btnAutoLineBorders.Enabled = _opSelector == OpSelector.LineBorders;
-            //_editorUI.btnBuildMircoTransform.Enabled = _opSelector == OpSelector.LineBorders;
-            //_editorUI.numBorderExtend.Enabled = _opSelector == OpSelector.LineBorders;
-            //_editorUI.numLineSpanPercentage.Enabled = _opSelector == OpSelector.LineBorders;
-            _lineBordersCtrl.IsEditting = _opSelector == OpSelector.LineBorders;
+            // Line Border Gui
+            updateNumBorderIndentDynamically();
+            _editorUI.btnAutoLineBorders.Enabled = _opSelector == OpSelector.LineBorders;
+            _editorUI.btnBuildMircoTransform.Enabled = _opSelector == OpSelector.LineBorders;
+            _editorUI.numBorderExtend.Enabled = _opSelector == OpSelector.LineBorders;
+            _editorUI.numLineSpanPercentage.Enabled = _opSelector == OpSelector.LineBorders;
 
             // QR Code Gui
             _editorUI.btnTryScanQrCode.Enabled = _opSelector == OpSelector.QrCode;
         }
-
-#if (OPT_MOVED_TO_CHILD_CTRL)
         int updateNumBorderIndentDynamically(int? indent = null)
         {
             //----------------------------------------------
@@ -1142,7 +1170,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
             return (int)num.Value;
         }
-#endif
         #endregion
 
         #region AOI_MODEL_FUNCTIONS
@@ -1206,7 +1233,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 bmpDisp = BitmapConverter.ToBitmap(gray);
             }
         }
-#if (OPT_MOVED_TO_CHILD_CTRL)
         bool aoiTryRunFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF boxRect, out CMvdLineSegmentF[] resultLines)
         {
 #if (OPT_LEGACY_000)
@@ -1298,6 +1324,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             resultLines = new CMvdLineSegmentF[] { line };
             return line != null;
         }
+
         /// <summary>
         /// 注意: 這裡會影響 PAD型晶粒的 Golden Template "GRID" !!! 
         /// </summary>
@@ -1329,7 +1356,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 }
             }
         }
-#endif
         Bitmap cropBitmap(Bitmap bmpSrc, ref Rectangle roiRect)
         {
             GaUtil.Clip(ref roiRect, bmpSrc.Size);

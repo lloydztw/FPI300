@@ -18,6 +18,7 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -193,6 +194,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #region UPDATE_DRAW_ITEMS_FUNCTIONS
         void updateBoundaryPolygon()
         {
+#if (OPT_ORIGINAL)
             _boundaryPolygon = null;
 
             if (_cell != null)
@@ -201,6 +203,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     var mpts = new List<QVector>();
                     var lines = _cell.ChipData?.LineSegments;
+
                     if (lines != null && lines.Length >= 4)
                     {
                         for (int i = 0, NP = lines.Length; i < NP; i++)
@@ -229,6 +232,12 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     _boundaryPolygon = Array.ConvertAll(chipQuad.Corners, p => new OpenCvSharp.Point2f((float)p.X, (float)p.Y));
                 }
+            }
+#endif
+            _boundaryPolygon = null;
+            if (_xRecipe.InspectParams.optChipMeasurement)
+            {
+                _cell?.ChipData?.CalcChipBoundaryPolygon(out _boundaryPolygon);
             }
         }
         void updateDrawItems()
@@ -330,7 +339,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             #region 邊線
             // 繪件: 邊線 (左上右下)
-            foreach (var lineSeg in chipData.LineSegments)
+            foreach (var lineSeg in chipData.LineBorderPairs.IterLineSegments())
             {
                 if (lineSeg != null)
                     drawItemsOfLineSegments.Add(new CviLineSegmentsBox(Color.Cyan, lineSeg.ToCSharpLine()) { Tag = cell });
@@ -339,15 +348,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             #region 邊線拉框
             // 繪件: 邊線手拉框
-            int borderIdx = 0;
-            foreach (var borderBox in chipData.LineBorderBoxes)
+            //int borderIdx = 0;
+            //foreach (var borderBox in chipData.LineBorderBoxes)
+            foreach (var borderBox in chipData.LineBorderPairs.IterLineBorderBoxes())
             {
                 if (borderBox != null)
                 {
                     //drawItemsOfBorderBoxes.Add(new CviRotRectBox(borderBox, Color.DarkBlue) { Tag = cell, Text = $"{borderIdx}" });
                     drawItemsOfBorderBoxes.Add(new CviRotRectBox(borderBox, Color.DarkBlue) { Tag = cell });
                 }
-                borderIdx++;
+                //borderIdx++;
             }
             #endregion
 

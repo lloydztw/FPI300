@@ -21,9 +21,7 @@ using JetEazy.Utils;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.OPSpace;
-using LeTian.AoiLib;
 using OpenCvSharp;
-using OpenCvSharp.Flann;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -108,7 +106,7 @@ namespace LaserAlignDX.AoiModel.AI
                 return;
 
             //晶粒四邊線 (左上右下)
-            var lines = chipData.LineSegments;
+            var lines = chipData.LineBorderPairs.GetQuadLineSegments();
 
             //檢查
             int NP = 4;
@@ -244,7 +242,7 @@ namespace LaserAlignDX.AoiModel.AI
                 return false;
 
             //晶粒四邊線 (左上右下)
-            var lines = cell.ChipData.LineSegments;
+            var lines = cell?.ChipData?.LineBorderPairs.GetQuadLineSegments();
 
             //檢查
             int NP = 4;
@@ -262,7 +260,7 @@ namespace LaserAlignDX.AoiModel.AI
             if (chipData != null)
             {
                 var points = new List<QVector>();
-                var lines = chipData.LineSegments;
+                var lines = chipData.LineBorderPairs.GetQuadLineSegments();
                 if (lines != null && lines.Length >= 4)
                 {
                     for (int i = 0, NP = lines.Length; i < NP; i++)

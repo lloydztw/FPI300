@@ -18,9 +18,11 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
 using LeTian.AoiLib;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 
 namespace LaserAlignDX.Model
@@ -57,6 +59,7 @@ namespace LaserAlignDX.Model
         /// </summary>
         public EzBlocsGrid PadsGrid { get; set; } = null;
 
+#if (OPT_OLD_DATA_FIELDS)
         /// <summary>
         /// 抓到的邊線 (左上右下) (單位 pixels) (FullFov Cammera Coordinates)
         /// (圖示用)
@@ -67,6 +70,128 @@ namespace LaserAlignDX.Model
         /// 邊線拉框 (左上右下) (單位 pixels) (FullFov Cammera Coordinates)
         /// </summary>
         public QvBox2D[] LineBorderBoxes { get; set; } = new QvBox2D[4];
+#endif
+
+        /// <summary>
+        /// 邊線拉框 配對
+        /// </summary>
+        /// <remarks>
+        /// 單位 pixels (FullFov Cammera Coordinates)
+        /// </remarks>
+        public readonly Dictionary<string, LineBorderPair> LineBorderPairs = new Dictionary<string, LineBorderPair>();
+
+#if (false)
+        /// <summary>
+        /// 枚舉 所有 邊線拉框 (不限於 左上右下 四個)
+        /// </summary>
+        /// <remarks>
+        /// 單位 pixels (FullFov Cammera Coordinates)
+        /// </remarks>
+        public IEnumerable<QvBox2D> IterLineBorderBoxes()
+        {
+            foreach (var pair in LineBorderPairs.Values)
+            {
+                if (pair != null)
+                {
+                    for (int i = 0; i < pair.Borders.Length; i++)
+                    {
+                        var b = pair.Borders[i];
+                        if (b != null)
+                            yield return b;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 枚舉 抓到的 所有邊線 (不限於 左上右下 四個) 
+        /// </summary>
+        /// <remarks>
+        /// 單位 pixels (FullFov Cammera Coordinates)
+        /// </remarks>
+        public IEnumerable<EzLSD.LineSegment> IterLineSegments()
+        {
+            foreach (var pair in LineBorderPairs.Values)
+            {
+                if (pair != null)
+                {
+                    for (int i = 0; i < pair.LineSegments.Length; i++)
+                    {
+                        var ls = pair.LineSegments[i];
+                        if (ls != null)
+                            yield return ls;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 取得 左, 上, 右, 下, 四邊線 
+        /// </summary>
+        /// <remarks>
+        /// 單位 pixels (FullFov Cammera Coordinates)
+        /// </remarks>
+        public EzLSD.LineSegment[] GetQuadLineSegments()
+        {
+            if (LineBorderPairs.TryGetValue("X", out var pairX) &&
+                LineBorderPairs.TryGetValue("Y", out var pairY))
+            {
+                var lines = new List<EzLSD.LineSegment> {
+                    pairX.LineSegments[0],  // Left
+                    pairY.LineSegments[0],  // Top
+                    pairX.LineSegments[1],  // Right
+                    pairY.LineSegments[1],  // Bottom
+                };
+                lines.RemoveAll(line => line == null);
+                return lines.ToArray();
+            }
+            return null;
+        }
+#endif
+
+        /// <summary>
+        /// 計算晶粒 尺寸量測 之 邊界多邊形
+        /// </summary>
+        /// <remarks>
+        /// 單位 pixels (FullFov Cammera Coordinates)
+        /// </remarks>
+        public void CalcChipBoundaryPolygon(out Point2f[] polygonPoints)
+        {
+            polygonPoints = null;
+
+            #region CASE_1_如果有抓到四邊線
+            var quadLines = LineBorderPairs.GetQuadLineSegments();
+            if (quadLines != null && quadLines.Length >= 4)
+            {
+                var quadCorners = new List<QVector>();
+                for (int i = 0, NP = quadLines.Length; i < NP; i++)
+                {
+                    int j = (i + 1) % NP;
+                    var line1 = quadLines[i];
+                    var line2 = quadLines[j];
+                    if (line1 == null || line2 == null) continue;
+                    var pt = line1.CalcIntersectedPoint(line2);
+                    if (pt == null) continue;
+                    quadCorners.Add(pt);
+                }
+
+                if (quadCorners.Count >= 4)
+                {
+                    polygonPoints = Array.ConvertAll(quadCorners.ToArray(), p => new OpenCvSharp.Point2f((float)p.X, (float)p.Y));
+                    return;
+                }
+            }
+            #endregion
+
+            #region CASE2_使用_ChipQuad2D
+            var chipQuad = this.ChipQuad2D;
+            if (chipQuad != null)
+            {
+                polygonPoints = Array.ConvertAll(chipQuad.Corners, p => new OpenCvSharp.Point2f((float)p.X, (float)p.Y));
+            }
+            #endregion`
+        }
+
 
         /// <summary>
         /// 定位後之世界座標
@@ -119,13 +244,26 @@ namespace LaserAlignDX.Model
     public class GaChipDimension
     {
         /// <summary>
+        /// 量測結果 (單位 mm)
+        /// </summary>
+        public readonly Dictionary<string, float> Measurements = new Dictionary<string, float>();
+
+        /// <summary>
         /// 量測结果: 晶粒尺寸X (單位 mm)
         /// </summary>
-        public float ChipWidth { get; set; } = 0;
+        public float ChipWidth
+        {
+            get => Measurements.TryGetValue("X", out var width) ? width : 0f;
+            set => Measurements["X"] = value;
+        }
         /// <summary>
         /// 量測结果: 晶粒尺寸Y (單位 mm)
         /// </summary>
-        public float ChipHeight { get; set; } = 0;
+        public float ChipHeight
+        {
+            get => Measurements.TryGetValue("Y", out var width) ? width : 0f;
+            set => Measurements["Y"] = value;
+        }
 
         /// <summary>
         /// 尺寸量測點 (左上右下) (單位 pixels) 

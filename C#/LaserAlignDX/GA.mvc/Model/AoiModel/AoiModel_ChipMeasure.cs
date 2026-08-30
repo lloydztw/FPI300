@@ -441,6 +441,7 @@ namespace LaserAlignDX.AoiModel.V30
                     }
 
                     //(3) 將 CMvdLine 轉換成 EzLSD.LineSegment
+
                     #region OLD_CODE
                     //var lines = Array.ConvertAll(cell.cMvdLineSegmentFsOut, mvdLine => mvdLine?.ToLineSegment());
                     //for (int i = 0, len = lines.Length; i < len; i++)
@@ -455,17 +456,25 @@ namespace LaserAlignDX.AoiModel.V30
                     var line = mvdLine?.ToLineSegment();
                     //(3.1) 加回 ROI Offset
                     line?.Offset(cellRoi.X, cellRoi.Y);
-                    //(3.2) 記入 cell.ChipData
-                    cell.ChipData.LineSegments[borderIdx] = line;
+                    //>>> (3.2) 記入 cell.ChipData
+                    //>>> cell.ChipData.LineSegments[borderIdx] = line;
 
                     //(4) 更新 LineBorderBoxes
                     //(4.1) 加回 ROI Offset
                     borderQuad.Offset(cellRoi.X, cellRoi.Y);
-                    //(4.2) 更新 LineBorderBoxes;
-                    chipData.LineBorderBoxes[borderIdx] = borderQuad.ToBox2D();
+                    //>>> (4.2) 更新 LineBorderBoxes;
+                    //>>> chipData.LineBorderBoxes[borderIdx] = borderQuad.ToBox2D();
 
-                    ////(4.3) 更新到 cell 舊的 Gaara Data (廢除)
-                    //cell.cMvdShapesForFindLineRegion[borderIdx] = borderQuad.ToCMvdRectangleF();
+                    //>>> //(4.3) 更新到 cell 舊的 Gaara Data (廢除)
+                    //>>> cell.cMvdShapesForFindLineRegion[borderIdx] = borderQuad.ToCMvdRectangleF();
+
+                    //(5) 記入 cell.ChipData
+                    (string key, int offset) = eBorder.GetKeyOffset();
+                    if (!cell.ChipData.LineBorderPairs.TryGetValue(key, out var pair))
+                        pair = new LineBorderPair();
+                    pair.Borders[offset] = borderQuad.ToBox2D();
+                    pair.LineSegments[offset] = line;
+                    //pair.Dir = eBorder == EdgeBorder.Left || eBorder == EdgeBorder.Right ? LineEdgePair.MeasureDir.X : LineEdgePair.MeasureDir.Y;
                 }
 
                 AsyncDumpLineSegmentsData(cell, ref cellRoi);
@@ -494,7 +503,7 @@ namespace LaserAlignDX.AoiModel.V30
                 #endregion
 
                 //(1) LineSegments (Camera Coordinates) (單位 pixels)
-                var lines = chipData.LineSegments;
+                var lines = chipData.LineBorderPairs.GetQuadLineSegments();
 
                 //(2) 使用 Micro Transform 計算 尺寸 與 邊隙
                 //    (結果會直接存入 cell.ChipData 內)
@@ -785,10 +794,10 @@ namespace LaserAlignDX.AoiModel.V30
                 //(1) lineBorders : 位於 goldenRegionRect (_xRecipe.xRectRegionPrint) 內部
                 var lineBorderQuads = new QvQuad2D[]
                 {
-                    QvQuad2D.From(ref _xRecipe.xLineLeft),
-                    QvQuad2D.From(ref _xRecipe.xLineTop),
-                    QvQuad2D.From(ref _xRecipe.xLineRight),
-                    QvQuad2D.From(ref _xRecipe.xLineBottom),
+                    QvQuad2D.From(_xRecipe.xLineLeft),
+                    QvQuad2D.From(_xRecipe.xLineTop),
+                    QvQuad2D.From(_xRecipe.xLineRight),
+                    QvQuad2D.From(_xRecipe.xLineBottom),
                 };
 
                 //(2) 將 goldenQuad 平移到 goldenRegionRect (_xRecipe.xRectRegionPrint) 坐標系
@@ -1343,7 +1352,7 @@ namespace LaserAlignDX.AoiModel.V30
             if (chipData != null)
             {
                 var points = new List<QVector>();
-                var lines = chipData.LineSegments;
+                var lines = chipData.LineBorderPairs.GetQuadLineSegments();
                 if (lines != null && lines.Length >= 4)
                 {
                     for (int i = 0, NP = lines.Length; i < NP; i++)

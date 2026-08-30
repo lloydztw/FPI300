@@ -65,7 +65,7 @@ namespace LaserAlignDX.Mvc.Gui.V35
 
         NumericUpDown IvTemplateEditorUI.numMeasureDistXs => gwRcpLineBorderBtnsPanel1.numMeasureXs;
         NumericUpDown IvTemplateEditorUI.numMeasureDistYs => gwRcpLineBorderBtnsPanel1.numMeasureYs;
-        NumericUpDown IvTemplateEditorUI.numMasks => gwRcpLineBorderBtnsPanel1.numMeasureMasks;
+        NumericUpDown IvTemplateEditorUI.numMeasureMasks => gwRcpLineBorderBtnsPanel1.numMeasureMasks;
 
         Button IvTemplateEditorUI.btnTryScanQrCode => gwRcpQrCodeBtnsPanel1.btnTryQrCode;
         Control IvTemplateEditorUI.wndQrCodeResult => gwRcpQrCodeBtnsPanel1.rtbCodeContent;

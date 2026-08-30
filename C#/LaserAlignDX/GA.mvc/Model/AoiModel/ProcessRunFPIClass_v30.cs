@@ -20,6 +20,7 @@ using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using VisionDesigner;
@@ -294,10 +295,6 @@ namespace LaserAlignDX.AoiModel.V3
             using (var workBmp = (Bitmap)regionBmp.Clone())
             {
                 //(1) 晶粒定位
-                //      chipData.Roi = cellRoi;
-                //      chipData.ChipBox2D = chipBox2D;
-                //      chipData.PadsGrid = chipMatcher.GetResultPadsGrid();
-                //      chipData.PadsGrid.Offset(cellRoi.X, cellRoi.Y);
                 bool ok = _aoiChipLoc.LocateOneChip(workBmp, ref regionRoi, out var chipData);
                 if (!ok || chipData == null)
                     return ErrorCodes.ERR_NO_CHIP_LOCATION;
@@ -323,6 +320,103 @@ namespace LaserAlignDX.AoiModel.V3
 
             return err;
         }
+
+        /// <summary>
+        /// 為 參數編輯 所用
+        /// </summary>
+        /// <remarks>
+        /// lineEdgePairs 單位為 pixels (FullFov Cammera Coordinates)
+        /// </remarks>
+        public ErrorCodes BuildMicroChipTransform(Dictionary<string, LineBorderPair> lineEdgePairs, Bitmap regionBmp, RectangleF regionRoi)
+        {
+            ErrorCodes err = ErrorCodes.OK;
+
+            using (var workBmp = (Bitmap)regionBmp.Clone())
+            {
+                //(0) 晶粒定位
+                bool ok = _aoiChipLoc.LocateOneChip(workBmp, ref regionRoi, out var chipData);
+                if (!ok || chipData == null)
+                    return ErrorCodes.ERR_NO_CHIP_LOCATION;
+
+                //(1) 準備建立 Micro Transform
+                var carrierID = getActiveCarrierID();
+                var microTrf = _sysModel.GetMicroTransform(carrierID);
+                
+                //(2) 有 QuadLines (使用原來的 MicroTransform 計算方式)
+                var quadLines = lineEdgePairs.GetQuadLineSegments();
+                if (quadLines != null && quadLines.Length >= 4)
+                {
+                    //(2.0) 檢查 PadsGrid
+                    if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch && chipData.PadsGrid == null)
+                    {
+                        return ErrorCodes.ERR_NO_CHIP_PADS;
+                    }
+
+                    //(2.1) 取得 targetSize
+                    var targetSize = new SizeF();
+                    if (lineEdgePairs.TryGetValue("X", out var pairX))
+                        targetSize.Width = pairX.TargetDist;
+                    if (lineEdgePairs.TryGetValue("Y", out var pairY))
+                        targetSize.Height = pairX.TargetDist;
+
+                    //(2.2) 建立 MicroTransform (使用原來的 MicroTransform 計算方式)
+                    err = microTrf.BuildMicroTransform(targetSize, quadLines, chipData);
+                }
+
+                //(3) 沒有 QuadLines
+                else
+                {
+                    //(3.0) Global Transform
+                    var trfGlobal = _sysModel.TransformsModel.GetCameraPhysicTransform(carrierID);
+
+                    //(3.1) chipQuad
+                    var chipQuad = chipData.ChipQuad2D;
+                    if (chipQuad == null)
+                        return ErrorCodes.ERR_NO_CHIP_LOCATION;
+
+                    //(3.2) 利用 chipQuad 建構 quadLines
+                    int NP = 4;
+                    quadLines = new EzLSD.LineSegment[NP];
+                    var corners = chipQuad.Corners;
+                    for (int i = 0; i < NP; i++)
+                    {
+                        int iPrev = i == 0 ? corners.Length - 1 : i - 1;
+                        quadLines[i] = new EzLSD.LineSegment(corners[i], corners[iPrev]);
+                    }
+                    var midPoints = Array.ConvertAll(quadLines, line => trfGlobal.Trans(line.GetMidPoint()));
+                    var targetWidth = (midPoints[0] - midPoints[2]).NormLength;
+                    var targetHeight = (midPoints[1] - midPoints[3]).NormLength;
+
+                    //(3.3) 根據 lineEdgePairs 修改 quadLines
+                    if (lineEdgePairs.TryGetValue("X", out var pairX))
+                    {
+                        targetWidth = pairX.TargetDist;
+                        quadLines[0] = pairX.LineSegments[0];   // LEFT
+                        quadLines[2] = pairX.LineSegments[1];   // RIGHT
+                    }
+                    if (lineEdgePairs.TryGetValue("Y", out var pairY))
+                    {
+                        targetHeight = pairX.TargetDist;
+                        quadLines[1] = pairY.LineSegments[0];   // TOP
+                        quadLines[3] = pairY.LineSegments[1];   // BOTTOM
+                    }
+
+                    //(3.4) 建立 MicroTransform (使用原來的 MicroTransform 計算方式)
+                    var targetSize = new SizeF((float)targetWidth, (float)targetHeight);
+                    err = microTrf.BuildMicroTransform(targetSize, quadLines, chipData);
+                }
+
+                //(4) 保存參數
+                if (err == ErrorCodes.OK)
+                    microTrf.Save(null);
+            }
+
+            if (err == ErrorCodes.OK)
+                _aoiChipMeasure.AnalyzeGoldenData();
+
+            return err;
+        }
+
         public bool TryRunOneChip(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi)
         {
             if (cell == null) return false;

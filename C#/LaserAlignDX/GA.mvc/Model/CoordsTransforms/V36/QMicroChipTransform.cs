@@ -23,6 +23,7 @@ using LaserAlignDX.Model.Coords.Support;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
@@ -238,6 +239,21 @@ namespace LaserAlignDX.Model.Coords.V36
         {
             return CalcChipDimension_PadTrf(out dimension, lines, chipData, includePadGaps);
         }
+        public ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData)
+        {
+            /*
+                [CalcChipMeasurements]
+                    │
+                    ▼ (呼叫內部私有方法)
+                [CalcChipDimension_PadTrf2]
+                       ├─► 1.getDimMeasurePoints (計算各對邊線與晶片中心線的交點 pixels)
+                       ├─► 2.Shift to Local (扣除晶片中心座標 point -Center)
+                       ├─► 3.Pads Transform (若有 PadsGrid，透過 runtimePadTrf 進行晶片旋轉 / 拉伸補償)
+                       ├─► 4.Local Transform (_localTrf: 將 pixels 轉為實體物理 mm)
+                       └─► 5.計算兩兩距離(NormLength) 並存入 results 字典(四捨五入至小數點後 3 位)
+            */
+            return CalcChipDimension_PadTrf2(out results, lineBorderPairs, chipData);
+        }
 
         #region PRIVATE_CALC_DIMENSION_FUNCTIONS
         ErrorCodes CalcChipDimension_PadTrf(out SizeF dimension, EzLSD.LineSegment[] lines, GaChipData chipData, bool includePadGaps)
@@ -264,10 +280,11 @@ namespace LaserAlignDX.Model.Coords.V36
                 var measurePoints = Array.ConvertAll(camMeasurePoints, pt => (pt != null) ? pt - runtimeChipCenter : runtimeChipCenter);
 
                 //(4) PAD Transform (runtime)
-                int NP = 4;
                 var padsGrid = chipData.PadsGrid;
                 if (padsGrid != null)
                 {
+                    int NP = 4;
+
                     //(3.1) Golden PadsCorner (local scop)
                     var goldenPadsCorners = _padsTrf?.GetCalibCornerPoints()?.GetAll(isSrc: true);
                     if (goldenPadsCorners != null)
@@ -358,6 +375,257 @@ namespace LaserAlignDX.Model.Coords.V36
             {
                 _LOG_ERROR(ex, "GetDimMeasurePoints (H) 異常");
                 return null;
+            }
+        }
+        ErrorCodes _CalcChipDimension_PadTrf2_000(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData)
+        {
+            results = new Dictionary<string, float>();
+            ITransform runtimePadTrf = null;
+
+            try
+            {
+                //(1) chipQuad2D
+                var chipQuad2D = chipData?.ChipQuad2D;
+                if (chipQuad2D == null)
+                    return ErrorCodes.ERR_NO_CHIP_LOCATION;
+                var runtimeChipCenter = new QVector(chipQuad2D.Center);
+
+                //(2) 取得 camMeasurePointPairs (pixels)
+                var camMeasurePoints = getDimNamedMeasurePoints(out var keyNames, lineBorderPairs, chipQuad2D);
+                chipData.ChipDimension.DimMeasurePoints = camMeasurePoints;
+
+                //(3) 平移到 LOCAL (以 runtimeChipCenter 當原點)
+                var measurePoints = Array.ConvertAll(camMeasurePoints, pt => (pt != null) ? pt - runtimeChipCenter : runtimeChipCenter);
+
+                //(4) PAD Transform (runtime)
+                var padsGrid = chipData.PadsGrid;
+                if (padsGrid != null)
+                {
+                    int NP = 4;
+
+                    //(4.1) Golden PadsCorner(local scop)
+                    var goldenPadsCorners = _padsTrf?.GetCalibCornerPoints()?.GetAll(isSrc: true);
+                    if (goldenPadsCorners != null)
+                    {
+                        //(4.1.*) SHIFT 調整大角度排序
+                        if (Math.Abs(chipQuad2D.Angle) > 70)
+                            goldenPadsCorners = _SHIFT(goldenPadsCorners, chipQuad2D.Angle > 0 ? 1 : -1);
+
+                        //(4.2) runtimePadTrf
+                        runtimePadTrf = new QTransform("RunTimePadTrf");
+
+                        //(4.3) Runtime PadsCorners (local scope)
+                        EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var runtimePadsBox2D, false);
+                        var runPadsCorners = Array.ConvertAll(runtimePadsBox2D.Corners, c => new QVector(c.X, c.Y) - runtimeChipCenter);
+
+                        //(4.4) Runtime calibration
+                        var trfCalib = runtimePadTrf.GetCalibCornerPoints();
+                        for (int i = 0; i < NP; i++)
+                            trfCalib.Set(i, runPadsCorners[i], goldenPadsCorners[i]);
+
+                        //(4.5) Build Transform
+                        bool ok = runtimePadTrf.Build();
+
+                        //(4.6) 再次將 measurePoints 投影
+                        if (ok)
+                            measurePoints = transform(measurePoints, runtimePadTrf);
+                    }
+                }
+
+                //(5) local transform
+                measurePoints = transform(measurePoints, _localTrf);
+
+                //(6) 計算距離
+                for (int i = 0, N = measurePoints.Length; i < N; i += 2)
+                {
+                    //(6.0) Name
+                    string name = keyNames[i];
+                    
+                    //(6.1) 兩兩距離
+                    double dist = (measurePoints[i] - measurePoints[i + 1]).NormLength;
+
+                    //(6.2) 存入 results
+                    results[name] = (float)Math.Round(dist, 3);
+                }
+
+                return ErrorCodes.OK;
+            }
+            catch (Exception ex)
+            {
+                _LOG_ERROR(ex, "CalcChipDimension_PadTrf2");
+                return ErrorCodes.ERR_EDGE_DIM_CALCULATION;
+            }
+            finally
+            {
+                //(*) CleanUp
+                runtimePadTrf?.Dispose();
+                runtimePadTrf = null;
+            }
+        }
+        QVector[] _getDimNamedMeasurePoints_000(out string[] keyNames, Dictionary<string, LineBorderPair> pairs, QvQuad2D chipQuad)
+        {
+            try
+            {
+                // 0 1
+                // 3 2
+                var corners = chipQuad.Corners;
+
+                var L = (corners[0] + corners[3]) / 2.0;
+                var R = (corners[1] + corners[2]) / 2.0;
+                var T = (corners[0] + corners[1]) / 2.0;
+                var B = (corners[3] + corners[2]) / 2.0;
+
+                var lineH = new EzLSD.LineSegment(L, R);
+                var lineV = new EzLSD.LineSegment(T, B);
+
+                var measurePointsDict = new Dictionary<QVector, string>();
+                var measurePoints = new List<QVector>();
+                var keyNamesList = new List<string>();
+                foreach (var keyName in pairs.Keys)
+                {
+                    var pair = pairs[keyName];
+                    bool isHoriz = keyName.StartsWith("X");
+                    var lineMid = isHoriz ? lineV : lineH;
+                    var p1 = pair.LineSegments[0].CalcIntersectedPoint(lineMid);
+                    var p2 = pair.LineSegments[1].CalcIntersectedPoint(lineMid);
+                    measurePoints.Add(p1); keyNamesList.Add(keyName);
+                    measurePoints.Add(p2); keyNamesList.Add(keyName);
+                }
+
+                keyNames = keyNamesList.ToArray();
+                return measurePoints.ToArray();
+            }
+            catch (Exception ex)
+            {
+                _LOG_ERROR(ex, "getDimMeasurePointsDict 異常");
+                keyNames = new string[0];
+                return null;
+            }
+        }
+        ErrorCodes CalcChipDimension_PadTrf2(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData)
+        {
+            results = new Dictionary<string, float>();
+            ITransform runtimePadTrf = null;
+
+            try
+            {
+                var chipQuad2D = chipData?.ChipQuad2D;
+                if (chipQuad2D == null)
+                    return ErrorCodes.ERR_NO_CHIP_LOCATION;
+
+                var runtimeChipCenter = new QVector(chipQuad2D.Center);
+
+                var camMeasurePoints = getDimNamedMeasurePoints(out var keyNames, lineBorderPairs, chipQuad2D);
+                if (camMeasurePoints == null || camMeasurePoints.Length == 0 || camMeasurePoints.Length % 2 != 0)
+                {
+                    return ErrorCodes.ERR_WEAK_LINE_CONDITION;
+                }
+
+                chipData.ChipDimension.DimMeasurePoints = camMeasurePoints;
+
+                // 平移到 LOCAL
+                var measurePoints = Array.ConvertAll(camMeasurePoints, pt => pt != null ? pt - runtimeChipCenter : runtimeChipCenter);
+
+                // PAD Transform 補償
+                var padsGrid = chipData.PadsGrid;
+                if (padsGrid != null)
+                {
+                    int NP = 4;
+                    var goldenPadsCorners = _padsTrf?.GetCalibCornerPoints()?.GetAll(isSrc: true);
+                    if (goldenPadsCorners != null)
+                    {
+                        if (Math.Abs(chipQuad2D.Angle) > 70)
+                            goldenPadsCorners = _SHIFT(goldenPadsCorners, chipQuad2D.Angle > 0 ? 1 : -1);
+
+                        runtimePadTrf = new QTransform("RunTimePadTrf");
+
+                        EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var runtimePadsBox2D, false);
+                        var runPadsCorners = Array.ConvertAll(runtimePadsBox2D.Corners, c => new QVector(c.X, c.Y) - runtimeChipCenter);
+
+                        var trfCalib = runtimePadTrf.GetCalibCornerPoints();
+                        for (int i = 0; i < NP; i++)
+                            trfCalib.Set(i, runPadsCorners[i], goldenPadsCorners[i]);
+
+                        if (runtimePadTrf.Build())
+                            measurePoints = transform(measurePoints, runtimePadTrf);
+                    }
+                }
+
+                // Local Transform
+                measurePoints = transform(measurePoints, _localTrf);
+
+                // 計算距離
+                for (int i = 0; i < measurePoints.Length - 1; i += 2)
+                {
+                    string name = keyNames[i];
+                    double dist = (measurePoints[i] - measurePoints[i + 1]).NormLength;
+                    results[name] = (float)Math.Round(dist, 3);
+                }
+
+                return ErrorCodes.OK;
+            }
+            catch (Exception ex)
+            {
+                _LOG_ERROR(ex, "CalcChipDimension_PadTrf2");
+                return ErrorCodes.ERR_EDGE_DIM_CALCULATION;
+            }
+            finally
+            {
+                runtimePadTrf?.Dispose();
+            }
+        }
+        QVector[] getDimNamedMeasurePoints(out string[] keyNames, Dictionary<string, LineBorderPair> pairs, QvQuad2D chipQuad)
+        {
+            var measurePoints = new List<QVector>();
+            var keyNamesList = new List<string>();
+
+            try
+            {
+                var corners = chipQuad.Corners;
+                var L = (corners[0] + corners[3]) / 2.0;
+                var R = (corners[1] + corners[2]) / 2.0;
+                var T = (corners[0] + corners[1]) / 2.0;
+                var B = (corners[3] + corners[2]) / 2.0;
+
+                var lineH = new EzLSD.LineSegment(L, R);
+                var lineV = new EzLSD.LineSegment(T, B);
+
+                if (pairs != null)
+                {
+                    foreach (var kvp in pairs)
+                    {
+                        var keyName = kvp.Key;
+                        var pair = kvp.Value;
+
+                        // 防禦：檢查 pair 與 LineSegments 是否完整
+                        if (pair == null || pair.LineSegments == null || pair.LineSegments.Length < 2)
+                            continue;
+
+                        if (pair.LineSegments[0] == null || pair.LineSegments[1] == null)
+                            continue;
+
+                        bool isHoriz = keyName.StartsWith("X", StringComparison.OrdinalIgnoreCase);
+                        var lineMid = isHoriz ? lineV : lineH;
+
+                        var p1 = pair.LineSegments[0].CalcIntersectedPoint(lineMid);
+                        var p2 = pair.LineSegments[1].CalcIntersectedPoint(lineMid);
+
+                        if (p1 != null && p2 != null)
+                        {
+                            measurePoints.Add(p1); keyNamesList.Add(keyName);
+                            measurePoints.Add(p2); keyNamesList.Add(keyName);
+                        }
+                    }
+                }
+
+                keyNames = keyNamesList.ToArray();
+                return measurePoints.ToArray();
+            }
+            catch (Exception ex)
+            {
+                _LOG_ERROR(ex, "getDimMeasurePoints 異常");
+                keyNames = Array.Empty<string>();
+                return Array.Empty<QVector>();
             }
         }
         #endregion

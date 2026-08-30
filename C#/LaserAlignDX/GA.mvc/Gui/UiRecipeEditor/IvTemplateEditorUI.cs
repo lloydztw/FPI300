@@ -47,7 +47,7 @@ namespace LaserAlignDX.Mvc.Gui
         /// <summary>
         /// 遮罩數量
         /// </summary>
-        NumericUpDown numMasks { get; }
+        NumericUpDown numMeasureMasks { get; }
 
         /// <summary>
         /// 一鍵自動框

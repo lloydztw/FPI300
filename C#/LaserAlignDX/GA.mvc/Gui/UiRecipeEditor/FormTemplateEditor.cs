@@ -72,7 +72,7 @@ namespace LaserAlignDX.Mvc.Gui
 
         NumericUpDown IvTemplateEditorUI.numMeasureDistXs => null;
         NumericUpDown IvTemplateEditorUI.numMeasureDistYs => null;
-        NumericUpDown IvTemplateEditorUI.numMasks => null;
+        NumericUpDown IvTemplateEditorUI.numMeasureMasks => null;
 
         Button IvTemplateEditorUI.btnTryScanQrCode => btnTryQrCode;
         Control IvTemplateEditorUI.wndQrCodeResult => rtbCodeContent;
