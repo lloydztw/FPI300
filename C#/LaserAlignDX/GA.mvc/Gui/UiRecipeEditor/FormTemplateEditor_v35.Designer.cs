@@ -31,13 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormTemplateEditor));
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.tblayoutRight = new System.Windows.Forms.TableLayoutPanel();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.radioButtonDe = new System.Windows.Forms.RadioButton();
-            this.radioButtonLn = new System.Windows.Forms.RadioButton();
-            this.radioButtonG = new System.Windows.Forms.RadioButton();
-            this.radioButtonQr = new System.Windows.Forms.RadioButton();
-            this.lblActiveCarrierID = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblRecipeTag = new System.Windows.Forms.Label();
             this.tblayoutMajor = new System.Windows.Forms.TableLayoutPanel();
             this.tbLayoutImgViews = new System.Windows.Forms.TableLayoutPanel();
             this.panelBottom = new System.Windows.Forms.Panel();
@@ -45,30 +39,40 @@
             this.btnTrain = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.tbLayoutBottom = new System.Windows.Forms.TableLayoutPanel();
             this.panelRcpBtns = new System.Windows.Forms.Panel();
-            this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
-            this.jezTransImageViewPanel2 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
-            this.jezTransImageViewPanel3 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
+            this.lblActiveCarrierID = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.radioButtonDe = new System.Windows.Forms.RadioButton();
+            this.radioButtonLn = new System.Windows.Forms.RadioButton();
+            this.radioButtonG = new System.Windows.Forms.RadioButton();
+            this.radioButtonQr = new System.Windows.Forms.RadioButton();
             this.gwRcpDefectBtnsPanel1 = new LaserAlignDX.GA.mvc.Gui.UiRecipeEditor.GwRcpDefectBtnsPanel();
             this.gwRcpQrCodeBtnsPanel1 = new LaserAlignDX.GA.mvc.Gui.UiRecipeEditor.GwRcpQrCodeBtnsPanel();
             this.gwRcpLineBorderBtnsPanel1 = new LaserAlignDX.GA.mvc.Gui.UiRecipeEditor.GwRcpLineBorderBtnsPanel();
             this.gwRcpTemplateBtnsPanel1 = new LaserAlignDX.GA.mvc.Gui.UiRecipeEditor.GwRcpTemplateBtnsPanel();
+            this.jezTransImageViewPanel1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
+            this.jezTransImageViewPanel2 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
+            this.jezTransImageViewPanel3 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.tblayoutRight.SuspendLayout();
-            this.panel1.SuspendLayout();
             this.tblayoutMajor.SuspendLayout();
             this.tbLayoutImgViews.SuspendLayout();
             this.panelBottom.SuspendLayout();
+            this.tbLayoutBottom.SuspendLayout();
             this.panelRcpBtns.SuspendLayout();
+            this.panel1.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // propertyGrid1
             // 
             this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.propertyGrid1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.propertyGrid1.Location = new System.Drawing.Point(3, 207);
+            this.propertyGrid1.Location = new System.Drawing.Point(3, 77);
             this.propertyGrid1.Margin = new System.Windows.Forms.Padding(3, 1, 3, 1);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(368, 437);
+            this.propertyGrid1.Size = new System.Drawing.Size(368, 567);
             this.propertyGrid1.TabIndex = 0;
             // 
             // tblayoutRight
@@ -78,108 +82,29 @@
             this.tblayoutRight.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tblayoutRight.Controls.Add(this.panel1, 0, 0);
             this.tblayoutRight.Controls.Add(this.propertyGrid1, 0, 2);
-            this.tblayoutRight.Controls.Add(this.label1, 0, 1);
+            this.tblayoutRight.Controls.Add(this.lblRecipeTag, 0, 1);
             this.tblayoutRight.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tblayoutRight.Location = new System.Drawing.Point(885, 3);
             this.tblayoutRight.Name = "tblayoutRight";
             this.tblayoutRight.RowCount = 4;
-            this.tblayoutRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 168F));
+            this.tblayoutRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 38F));
             this.tblayoutRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 38F));
             this.tblayoutRight.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tblayoutRight.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tblayoutRight.Size = new System.Drawing.Size(374, 645);
             this.tblayoutRight.TabIndex = 9;
             // 
-            // panel1
+            // lblRecipeTag
             // 
-            this.panel1.BackColor = System.Drawing.Color.LightBlue;
-            this.panel1.Controls.Add(this.radioButtonDe);
-            this.panel1.Controls.Add(this.radioButtonLn);
-            this.panel1.Controls.Add(this.radioButtonG);
-            this.panel1.Controls.Add(this.radioButtonQr);
-            this.panel1.Controls.Add(this.lblActiveCarrierID);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel1.Location = new System.Drawing.Point(3, 0);
-            this.panel1.Margin = new System.Windows.Forms.Padding(3, 0, 3, 1);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(368, 167);
-            this.panel1.TabIndex = 9;
-            // 
-            // radioButtonDe
-            // 
-            this.radioButtonDe.AutoSize = true;
-            this.radioButtonDe.Location = new System.Drawing.Point(86, 105);
-            this.radioButtonDe.Margin = new System.Windows.Forms.Padding(4);
-            this.radioButtonDe.Name = "radioButtonDe";
-            this.radioButtonDe.Size = new System.Drawing.Size(88, 19);
-            this.radioButtonDe.TabIndex = 82;
-            this.radioButtonDe.TabStop = true;
-            this.radioButtonDe.Text = "瑕疵檢測";
-            this.radioButtonDe.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonLn
-            // 
-            this.radioButtonLn.AutoSize = true;
-            this.radioButtonLn.Location = new System.Drawing.Point(86, 77);
-            this.radioButtonLn.Margin = new System.Windows.Forms.Padding(4);
-            this.radioButtonLn.Name = "radioButtonLn";
-            this.radioButtonLn.Size = new System.Drawing.Size(88, 19);
-            this.radioButtonLn.TabIndex = 81;
-            this.radioButtonLn.TabStop = true;
-            this.radioButtonLn.Text = "邊線檢測";
-            this.radioButtonLn.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonG
-            // 
-            this.radioButtonG.AutoSize = true;
-            this.radioButtonG.Checked = true;
-            this.radioButtonG.Location = new System.Drawing.Point(86, 49);
-            this.radioButtonG.Margin = new System.Windows.Forms.Padding(4);
-            this.radioButtonG.Name = "radioButtonG";
-            this.radioButtonG.Size = new System.Drawing.Size(88, 19);
-            this.radioButtonG.TabIndex = 79;
-            this.radioButtonG.TabStop = true;
-            this.radioButtonG.Text = "晶粒模板";
-            this.radioButtonG.UseVisualStyleBackColor = true;
-            // 
-            // radioButtonQr
-            // 
-            this.radioButtonQr.AutoSize = true;
-            this.radioButtonQr.Location = new System.Drawing.Point(86, 133);
-            this.radioButtonQr.Margin = new System.Windows.Forms.Padding(4);
-            this.radioButtonQr.Name = "radioButtonQr";
-            this.radioButtonQr.Size = new System.Drawing.Size(73, 19);
-            this.radioButtonQr.TabIndex = 80;
-            this.radioButtonQr.TabStop = true;
-            this.radioButtonQr.Text = "二維碼";
-            this.radioButtonQr.UseVisualStyleBackColor = true;
-            // 
-            // lblActiveCarrierID
-            // 
-            this.lblActiveCarrierID.BackColor = System.Drawing.Color.Black;
-            this.lblActiveCarrierID.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblActiveCarrierID.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblActiveCarrierID.ForeColor = System.Drawing.Color.Lime;
-            this.lblActiveCarrierID.Location = new System.Drawing.Point(0, 0);
-            this.lblActiveCarrierID.Margin = new System.Windows.Forms.Padding(0);
-            this.lblActiveCarrierID.Name = "lblActiveCarrierID";
-            this.lblActiveCarrierID.Padding = new System.Windows.Forms.Padding(18, 0, 0, 0);
-            this.lblActiveCarrierID.Size = new System.Drawing.Size(368, 38);
-            this.lblActiveCarrierID.TabIndex = 78;
-            this.lblActiveCarrierID.Text = "載台 1";
-            this.lblActiveCarrierID.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label1
-            // 
-            this.label1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.label1.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(3, 168);
-            this.label1.Name = "label1";
-            this.label1.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
-            this.label1.Size = new System.Drawing.Size(368, 38);
-            this.label1.TabIndex = 8;
-            this.label1.Text = "參數設定";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lblRecipeTag.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lblRecipeTag.Font = new System.Drawing.Font("微软雅黑", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblRecipeTag.Location = new System.Drawing.Point(3, 38);
+            this.lblRecipeTag.Name = "lblRecipeTag";
+            this.lblRecipeTag.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
+            this.lblRecipeTag.Size = new System.Drawing.Size(368, 38);
+            this.lblRecipeTag.TabIndex = 8;
+            this.lblRecipeTag.Text = "參數設定";
+            this.lblRecipeTag.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // tblayoutMajor
             // 
@@ -187,9 +112,9 @@
             this.tblayoutMajor.ColumnCount = 2;
             this.tblayoutMajor.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tblayoutMajor.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 380F));
+            this.tblayoutMajor.Controls.Add(this.tbLayoutBottom, 0, 1);
             this.tblayoutMajor.Controls.Add(this.tbLayoutImgViews, 0, 0);
             this.tblayoutMajor.Controls.Add(this.panelBottom, 1, 1);
-            this.tblayoutMajor.Controls.Add(this.panelRcpBtns, 0, 1);
             this.tblayoutMajor.Controls.Add(this.tblayoutRight, 1, 0);
             this.tblayoutMajor.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tblayoutMajor.Location = new System.Drawing.Point(0, 0);
@@ -287,6 +212,21 @@
             this.btnCancel.UseVisualStyleBackColor = false;
             this.btnCancel.Visible = false;
             // 
+            // tbLayoutBottom
+            // 
+            this.tbLayoutBottom.ColumnCount = 2;
+            this.tbLayoutBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 180F));
+            this.tbLayoutBottom.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tbLayoutBottom.Controls.Add(this.panelRcpBtns, 1, 0);
+            this.tbLayoutBottom.Controls.Add(this.panel2, 0, 0);
+            this.tbLayoutBottom.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tbLayoutBottom.Location = new System.Drawing.Point(3, 654);
+            this.tbLayoutBottom.Name = "tbLayoutBottom";
+            this.tbLayoutBottom.RowCount = 1;
+            this.tbLayoutBottom.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tbLayoutBottom.Size = new System.Drawing.Size(876, 162);
+            this.tbLayoutBottom.TabIndex = 15;
+            // 
             // panelRcpBtns
             // 
             this.panelRcpBtns.BackColor = System.Drawing.Color.LightSlateGray;
@@ -295,38 +235,100 @@
             this.panelRcpBtns.Controls.Add(this.gwRcpLineBorderBtnsPanel1);
             this.panelRcpBtns.Controls.Add(this.gwRcpTemplateBtnsPanel1);
             this.panelRcpBtns.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panelRcpBtns.Location = new System.Drawing.Point(0, 651);
+            this.panelRcpBtns.Location = new System.Drawing.Point(180, 0);
             this.panelRcpBtns.Margin = new System.Windows.Forms.Padding(0);
             this.panelRcpBtns.Name = "panelRcpBtns";
-            this.panelRcpBtns.Size = new System.Drawing.Size(882, 168);
-            this.panelRcpBtns.TabIndex = 12;
+            this.panelRcpBtns.Size = new System.Drawing.Size(696, 162);
+            this.panelRcpBtns.TabIndex = 13;
             // 
-            // jezTransImageViewPanel1
+            // lblActiveCarrierID
             // 
-            this.jezTransImageViewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jezTransImageViewPanel1.Location = new System.Drawing.Point(2, 1);
-            this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
-            this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
-            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(290, 649);
-            this.jezTransImageViewPanel1.TabIndex = 0;
+            this.lblActiveCarrierID.BackColor = System.Drawing.Color.Black;
+            this.lblActiveCarrierID.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblActiveCarrierID.Font = new System.Drawing.Font("Microsoft YaHei UI", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblActiveCarrierID.ForeColor = System.Drawing.Color.Lime;
+            this.lblActiveCarrierID.Location = new System.Drawing.Point(0, 0);
+            this.lblActiveCarrierID.Margin = new System.Windows.Forms.Padding(0);
+            this.lblActiveCarrierID.Name = "lblActiveCarrierID";
+            this.lblActiveCarrierID.Padding = new System.Windows.Forms.Padding(18, 0, 0, 0);
+            this.lblActiveCarrierID.Size = new System.Drawing.Size(368, 38);
+            this.lblActiveCarrierID.TabIndex = 78;
+            this.lblActiveCarrierID.Text = "載台 1";
+            this.lblActiveCarrierID.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // jezTransImageViewPanel2
+            // panel1
             // 
-            this.jezTransImageViewPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jezTransImageViewPanel2.Location = new System.Drawing.Point(296, 1);
-            this.jezTransImageViewPanel2.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
-            this.jezTransImageViewPanel2.Name = "jezTransImageViewPanel2";
-            this.jezTransImageViewPanel2.Size = new System.Drawing.Size(290, 649);
-            this.jezTransImageViewPanel2.TabIndex = 1;
+            this.panel1.BackColor = System.Drawing.Color.LightBlue;
+            this.panel1.Controls.Add(this.lblActiveCarrierID);
+            this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel1.Location = new System.Drawing.Point(3, 0);
+            this.panel1.Margin = new System.Windows.Forms.Padding(3, 0, 3, 1);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(368, 37);
+            this.panel1.TabIndex = 9;
             // 
-            // jezTransImageViewPanel3
+            // panel2
             // 
-            this.jezTransImageViewPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.jezTransImageViewPanel3.Location = new System.Drawing.Point(590, 1);
-            this.jezTransImageViewPanel3.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
-            this.jezTransImageViewPanel3.Name = "jezTransImageViewPanel3";
-            this.jezTransImageViewPanel3.Size = new System.Drawing.Size(290, 649);
-            this.jezTransImageViewPanel3.TabIndex = 2;
+            this.panel2.BackColor = System.Drawing.Color.LightSlateGray;
+            this.panel2.Controls.Add(this.radioButtonDe);
+            this.panel2.Controls.Add(this.radioButtonLn);
+            this.panel2.Controls.Add(this.radioButtonG);
+            this.panel2.Controls.Add(this.radioButtonQr);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(0, 0);
+            this.panel2.Margin = new System.Windows.Forms.Padding(0);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(180, 162);
+            this.panel2.TabIndex = 14;
+            // 
+            // radioButtonDe
+            // 
+            this.radioButtonDe.AutoSize = true;
+            this.radioButtonDe.Location = new System.Drawing.Point(17, 85);
+            this.radioButtonDe.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonDe.Name = "radioButtonDe";
+            this.radioButtonDe.Size = new System.Drawing.Size(88, 19);
+            this.radioButtonDe.TabIndex = 86;
+            this.radioButtonDe.TabStop = true;
+            this.radioButtonDe.Text = "瑕疵檢測";
+            this.radioButtonDe.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonLn
+            // 
+            this.radioButtonLn.AutoSize = true;
+            this.radioButtonLn.Location = new System.Drawing.Point(17, 57);
+            this.radioButtonLn.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonLn.Name = "radioButtonLn";
+            this.radioButtonLn.Size = new System.Drawing.Size(88, 19);
+            this.radioButtonLn.TabIndex = 85;
+            this.radioButtonLn.TabStop = true;
+            this.radioButtonLn.Text = "邊線檢測";
+            this.radioButtonLn.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonG
+            // 
+            this.radioButtonG.AutoSize = true;
+            this.radioButtonG.Checked = true;
+            this.radioButtonG.Location = new System.Drawing.Point(17, 29);
+            this.radioButtonG.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonG.Name = "radioButtonG";
+            this.radioButtonG.Size = new System.Drawing.Size(88, 19);
+            this.radioButtonG.TabIndex = 83;
+            this.radioButtonG.TabStop = true;
+            this.radioButtonG.Text = "晶粒模板";
+            this.radioButtonG.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonQr
+            // 
+            this.radioButtonQr.AutoSize = true;
+            this.radioButtonQr.Location = new System.Drawing.Point(17, 113);
+            this.radioButtonQr.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonQr.Name = "radioButtonQr";
+            this.radioButtonQr.Size = new System.Drawing.Size(73, 19);
+            this.radioButtonQr.TabIndex = 84;
+            this.radioButtonQr.TabStop = true;
+            this.radioButtonQr.Text = "二維碼";
+            this.radioButtonQr.UseVisualStyleBackColor = true;
             // 
             // gwRcpDefectBtnsPanel1
             // 
@@ -363,6 +365,33 @@
             this.gwRcpTemplateBtnsPanel1.Size = new System.Drawing.Size(167, 75);
             this.gwRcpTemplateBtnsPanel1.TabIndex = 0;
             // 
+            // jezTransImageViewPanel1
+            // 
+            this.jezTransImageViewPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jezTransImageViewPanel1.Location = new System.Drawing.Point(2, 1);
+            this.jezTransImageViewPanel1.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.jezTransImageViewPanel1.Name = "jezTransImageViewPanel1";
+            this.jezTransImageViewPanel1.Size = new System.Drawing.Size(290, 649);
+            this.jezTransImageViewPanel1.TabIndex = 0;
+            // 
+            // jezTransImageViewPanel2
+            // 
+            this.jezTransImageViewPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jezTransImageViewPanel2.Location = new System.Drawing.Point(296, 1);
+            this.jezTransImageViewPanel2.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.jezTransImageViewPanel2.Name = "jezTransImageViewPanel2";
+            this.jezTransImageViewPanel2.Size = new System.Drawing.Size(290, 649);
+            this.jezTransImageViewPanel2.TabIndex = 1;
+            // 
+            // jezTransImageViewPanel3
+            // 
+            this.jezTransImageViewPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.jezTransImageViewPanel3.Location = new System.Drawing.Point(590, 1);
+            this.jezTransImageViewPanel3.Margin = new System.Windows.Forms.Padding(2, 1, 2, 1);
+            this.jezTransImageViewPanel3.Name = "jezTransImageViewPanel3";
+            this.jezTransImageViewPanel3.Size = new System.Drawing.Size(290, 649);
+            this.jezTransImageViewPanel3.TabIndex = 2;
+            // 
             // FormTemplateEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -375,12 +404,14 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "模板參數設定";
             this.tblayoutRight.ResumeLayout(false);
-            this.panel1.ResumeLayout(false);
-            this.panel1.PerformLayout();
             this.tblayoutMajor.ResumeLayout(false);
             this.tbLayoutImgViews.ResumeLayout(false);
             this.panelBottom.ResumeLayout(false);
+            this.tbLayoutBottom.ResumeLayout(false);
             this.panelRcpBtns.ResumeLayout(false);
+            this.panel1.ResumeLayout(false);
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -388,27 +419,29 @@
         #endregion
         private System.Windows.Forms.PropertyGrid propertyGrid1;
         private System.Windows.Forms.TableLayoutPanel tblayoutRight;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblRecipeTag;
         private System.Windows.Forms.TableLayoutPanel tblayoutMajor;
-        private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.RadioButton radioButtonLn;
-        private System.Windows.Forms.RadioButton radioButtonG;
-        private System.Windows.Forms.RadioButton radioButtonQr;
-        private System.Windows.Forms.Label lblActiveCarrierID;
-        private System.Windows.Forms.RadioButton radioButtonDe;
         private System.Windows.Forms.Panel panelBottom;
         private System.Windows.Forms.Button btnOK;
         private System.Windows.Forms.Button btnCancel;
-        private System.Windows.Forms.Panel panelRcpBtns;
-        private GA.mvc.Gui.UiRecipeEditor.GwRcpDefectBtnsPanel gwRcpDefectBtnsPanel1;
-        private GA.mvc.Gui.UiRecipeEditor.GwRcpQrCodeBtnsPanel gwRcpQrCodeBtnsPanel1;
-        private GA.mvc.Gui.UiRecipeEditor.GwRcpLineBorderBtnsPanel gwRcpLineBorderBtnsPanel1;
-        private GA.mvc.Gui.UiRecipeEditor.GwRcpTemplateBtnsPanel gwRcpTemplateBtnsPanel1;
         private System.Windows.Forms.TableLayoutPanel tbLayoutImgViews;
         private JezTransImageViewPanel jezTransImageViewPanel1;
         private JezTransImageViewPanel jezTransImageViewPanel2;
         private JezTransImageViewPanel jezTransImageViewPanel3;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnTrain;
+        private System.Windows.Forms.Panel panel1;
+        private System.Windows.Forms.Label lblActiveCarrierID;
+        private System.Windows.Forms.TableLayoutPanel tbLayoutBottom;
+        private System.Windows.Forms.Panel panelRcpBtns;
+        private GA.mvc.Gui.UiRecipeEditor.GwRcpDefectBtnsPanel gwRcpDefectBtnsPanel1;
+        private GA.mvc.Gui.UiRecipeEditor.GwRcpQrCodeBtnsPanel gwRcpQrCodeBtnsPanel1;
+        private GA.mvc.Gui.UiRecipeEditor.GwRcpLineBorderBtnsPanel gwRcpLineBorderBtnsPanel1;
+        private GA.mvc.Gui.UiRecipeEditor.GwRcpTemplateBtnsPanel gwRcpTemplateBtnsPanel1;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.RadioButton radioButtonDe;
+        private System.Windows.Forms.RadioButton radioButtonLn;
+        private System.Windows.Forms.RadioButton radioButtonG;
+        private System.Windows.Forms.RadioButton radioButtonQr;
     }
 }

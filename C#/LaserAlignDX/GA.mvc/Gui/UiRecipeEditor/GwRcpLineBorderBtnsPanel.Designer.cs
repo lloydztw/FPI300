@@ -36,11 +36,11 @@
             this.lblLB2 = new System.Windows.Forms.Label();
             this.numMeasureYs = new System.Windows.Forms.NumericUpDown();
             this.btnBuildMircoTrf = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
+            this.lblLB6 = new System.Windows.Forms.Label();
             this.numSpanRatio = new System.Windows.Forms.NumericUpDown();
-            this.labelA = new System.Windows.Forms.Label();
+            this.lblLB4 = new System.Windows.Forms.Label();
             this.numBorderIndent = new System.Windows.Forms.NumericUpDown();
-            this.labelB = new System.Windows.Forms.Label();
+            this.lblLB5 = new System.Windows.Forms.Label();
             this.numBorderSize = new System.Windows.Forms.NumericUpDown();
             this.btnAutoLineBorders = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
@@ -61,11 +61,11 @@
             this.groupBox1.Controls.Add(this.lblLB2);
             this.groupBox1.Controls.Add(this.numMeasureYs);
             this.groupBox1.Controls.Add(this.btnBuildMircoTrf);
-            this.groupBox1.Controls.Add(this.label2);
+            this.groupBox1.Controls.Add(this.lblLB6);
             this.groupBox1.Controls.Add(this.numSpanRatio);
-            this.groupBox1.Controls.Add(this.labelA);
+            this.groupBox1.Controls.Add(this.lblLB4);
             this.groupBox1.Controls.Add(this.numBorderIndent);
-            this.groupBox1.Controls.Add(this.labelB);
+            this.groupBox1.Controls.Add(this.lblLB5);
             this.groupBox1.Controls.Add(this.numBorderSize);
             this.groupBox1.Controls.Add(this.btnAutoLineBorders);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -76,7 +76,6 @@
             this.groupBox1.Size = new System.Drawing.Size(912, 136);
             this.groupBox1.TabIndex = 76;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Line Borders";
             // 
             // lblLB3
             // 
@@ -165,7 +164,7 @@
             this.btnBuildMircoTrf.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnBuildMircoTrf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.btnBuildMircoTrf.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnBuildMircoTrf.Location = new System.Drawing.Point(659, 79);
+            this.btnBuildMircoTrf.Location = new System.Drawing.Point(625, 79);
             this.btnBuildMircoTrf.Margin = new System.Windows.Forms.Padding(4);
             this.btnBuildMircoTrf.Name = "btnBuildMircoTrf";
             this.btnBuildMircoTrf.Size = new System.Drawing.Size(116, 46);
@@ -173,21 +172,21 @@
             this.btnBuildMircoTrf.Text = "精算尺寸";
             this.btnBuildMircoTrf.UseVisualStyleBackColor = false;
             // 
-            // label2
+            // lblLB6
             // 
-            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(373, 99);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(96, 20);
-            this.label2.TabIndex = 73;
-            this.label2.Text = "跨度比例 (%)";
+            this.lblLB6.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblLB6.AutoSize = true;
+            this.lblLB6.Location = new System.Drawing.Point(339, 99);
+            this.lblLB6.Name = "lblLB6";
+            this.lblLB6.Size = new System.Drawing.Size(96, 20);
+            this.lblLB6.TabIndex = 73;
+            this.lblLB6.Text = "跨度比例 (%)";
             // 
             // numSpanRatio
             // 
             this.numSpanRatio.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.numSpanRatio.DecimalPlaces = 1;
-            this.numSpanRatio.Location = new System.Drawing.Point(491, 96);
+            this.numSpanRatio.Location = new System.Drawing.Point(457, 96);
             this.numSpanRatio.Minimum = new decimal(new int[] {
             50,
             0,
@@ -203,20 +202,20 @@
             0,
             0});
             // 
-            // labelA
+            // lblLB4
             // 
-            this.labelA.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.labelA.AutoSize = true;
-            this.labelA.Location = new System.Drawing.Point(373, 33);
-            this.labelA.Name = "labelA";
-            this.labelA.Size = new System.Drawing.Size(95, 20);
-            this.labelA.TabIndex = 71;
-            this.labelA.Text = "內緣 (pixels)";
+            this.lblLB4.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblLB4.AutoSize = true;
+            this.lblLB4.Location = new System.Drawing.Point(339, 33);
+            this.lblLB4.Name = "lblLB4";
+            this.lblLB4.Size = new System.Drawing.Size(95, 20);
+            this.lblLB4.TabIndex = 71;
+            this.lblLB4.Text = "內緣 (pixels)";
             // 
             // numBorderIndent
             // 
             this.numBorderIndent.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.numBorderIndent.Location = new System.Drawing.Point(491, 30);
+            this.numBorderIndent.Location = new System.Drawing.Point(457, 30);
             this.numBorderIndent.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -237,20 +236,20 @@
             0,
             0});
             // 
-            // labelB
+            // lblLB5
             // 
-            this.labelB.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.labelB.AutoSize = true;
-            this.labelB.Location = new System.Drawing.Point(373, 66);
-            this.labelB.Name = "labelB";
-            this.labelB.Size = new System.Drawing.Size(95, 20);
-            this.labelB.TabIndex = 69;
-            this.labelB.Text = "外緣 (pixels)";
+            this.lblLB5.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblLB5.AutoSize = true;
+            this.lblLB5.Location = new System.Drawing.Point(339, 66);
+            this.lblLB5.Name = "lblLB5";
+            this.lblLB5.Size = new System.Drawing.Size(95, 20);
+            this.lblLB5.TabIndex = 69;
+            this.lblLB5.Text = "外緣 (pixels)";
             // 
             // numBorderSize
             // 
             this.numBorderSize.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.numBorderSize.Location = new System.Drawing.Point(491, 63);
+            this.numBorderSize.Location = new System.Drawing.Point(457, 63);
             this.numBorderSize.Maximum = new decimal(new int[] {
             1000,
             0,
@@ -276,7 +275,7 @@
             this.btnAutoLineBorders.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnAutoLineBorders.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnAutoLineBorders.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnAutoLineBorders.Location = new System.Drawing.Point(659, 27);
+            this.btnAutoLineBorders.Location = new System.Drawing.Point(625, 27);
             this.btnAutoLineBorders.Margin = new System.Windows.Forms.Padding(4);
             this.btnAutoLineBorders.Name = "btnAutoLineBorders";
             this.btnAutoLineBorders.Size = new System.Drawing.Size(116, 46);
@@ -307,9 +306,9 @@
         #endregion
 
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label labelA;
-        private System.Windows.Forms.Label labelB;
+        private System.Windows.Forms.Label lblLB6;
+        private System.Windows.Forms.Label lblLB4;
+        private System.Windows.Forms.Label lblLB5;
         public System.Windows.Forms.Button btnBuildMircoTrf;
         public System.Windows.Forms.NumericUpDown numSpanRatio;
         public System.Windows.Forms.NumericUpDown numBorderIndent;

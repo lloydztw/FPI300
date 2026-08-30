@@ -59,7 +59,6 @@
             this.groupBox1.Size = new System.Drawing.Size(409, 116);
             this.groupBox1.TabIndex = 77;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Template";
             // 
             // btnRotateGolden
             // 
