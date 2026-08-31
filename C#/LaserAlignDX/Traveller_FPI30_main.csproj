@@ -384,9 +384,8 @@
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v35.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyAoiResult.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyMetaData.cs" />
-    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaTemplateEditCtrl.cs" />
-    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
+    <Compile Include="GA.mvc\Gui\.Interactor\CviLineBorderBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\TooltipProvider.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCalibResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviChipResultBox.cs" />
@@ -500,12 +499,6 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormChipTemplateDim.Designer.cs">
       <DependentUpon>FormChipTemplateDim.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.Designer.cs">
-      <DependentUpon>FormRecipeEditor.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -523,12 +516,6 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v35.Designer.cs">
       <DependentUpon>FormRecipeEditor_v35.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.Designer.cs">
-      <DependentUpon>FormTemplateEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.cs">
       <SubType>UserControl</SubType>
@@ -860,9 +847,6 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormChipTemplateDim.resx">
       <DependentUpon>FormChipTemplateDim.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.resx">
-      <DependentUpon>FormRecipeEditor.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.resx">
       <DependentUpon>FormLightControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -871,9 +855,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v35.resx">
       <DependentUpon>FormRecipeEditor_v35.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.resx">
-      <DependentUpon>FormTemplateEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.resx">
       <DependentUpon>GvRecipeBtnsPanel.cs</DependentUpon>

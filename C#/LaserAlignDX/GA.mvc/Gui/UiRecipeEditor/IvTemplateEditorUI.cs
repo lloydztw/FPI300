@@ -21,8 +21,9 @@ namespace LaserAlignDX.Mvc.Gui
     public interface IvTemplateEditorUI
     {
         Control Window { get; }
-        DispUI[] DispViewers { get; }
+        DispUI[] DispViewers { get; }   // 準備廢除, 全面改用 ImvViewers
         Control[] ImgViewers { get; }
+        Control wndVisionSettingsPanel { get; }
 
         Control lblActiveCarrierID { get; }
         RadioButton[] rdoBoxSelectors { get; }
@@ -48,15 +49,6 @@ namespace LaserAlignDX.Mvc.Gui
         /// 遮罩數量
         /// </summary>
         NumericUpDown numMeasureMasks { get; }
-
-        /// <summary>
-        /// 一鍵自動框
-        /// </summary>
-        Button btnAutoLineBorders { get; }
-        /// <summary>
-        /// 精算尺寸
-        /// </summary>
-        Button btnBuildMircoTransform { get; }
         /// <summary>
         /// 內緣
         /// </summary>
@@ -70,10 +62,19 @@ namespace LaserAlignDX.Mvc.Gui
         /// </summary>
         NumericUpDown numLineSpanPercentage { get; }
 
+        /// <summary>
+        /// 一鍵自動框
+        /// </summary>
+        Button btnAutoLineBorders { get; }
+        /// <summary>
+        /// 精算尺寸
+        /// </summary>
+        Button btnBuildMircoTransform { get; }
+
+
         Button btnTryScanQrCode { get; }
         Control wndQrCodeResult { get; }
 
-        Control wndVisionSettingsPanel { get; }
         Button btnDefectRegionAdd { get; }  
         Button btnDefectRegionDelete {  get; }  
         Button btnDefectRegionClearAll { get; }

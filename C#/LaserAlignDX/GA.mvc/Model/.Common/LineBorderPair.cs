@@ -56,6 +56,37 @@ namespace LaserAlignDX.Model
             }
             return clone;
         }
+
+        #region STATIC_UTIL_FUNCTIONS
+        public static (string, int) ParseKeyName(string keyName)
+        {
+            if (string.IsNullOrEmpty(keyName))
+                return ("", -1);
+
+            int index = 0;
+            string category = keyName.Substring(0, 1);
+            if (keyName.Length > 1)
+                int.TryParse(keyName.Substring(1), out index);
+
+            return (category, index);
+        }
+        public static string GetPostfix(string keyName, int offset)
+        {
+            if (keyName == null)
+                return null;
+
+            if (keyName.StartsWith("X"))
+            {
+                //return offset == 0 ? ".L" : ".R";
+                return offset == 0 ? " ◀" : " ▶";
+            }
+            else
+            {
+                //return offset == 0 ? ".T" : ".B";
+                return offset == 0 ? " ▲" : " ▼";
+            }
+        }
+        #endregion
     }
 
 

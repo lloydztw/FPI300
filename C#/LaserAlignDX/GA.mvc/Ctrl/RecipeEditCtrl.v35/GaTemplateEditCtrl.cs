@@ -328,7 +328,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
             if (propertyName == "xAlgorithm")
             {
-                _lineBordersCtrl.UpdateNumBorderIndentDynamically();
+                _lineBordersCtrl.UpdateAlgorithmStatus();
             }
 
             if (_opSelector == OpSelector.LineBorders)
