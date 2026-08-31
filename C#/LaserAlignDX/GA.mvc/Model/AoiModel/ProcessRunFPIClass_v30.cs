@@ -290,6 +290,8 @@ namespace LaserAlignDX.AoiModel.V3
 
         public ErrorCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi)
         {
+            //NOTE: lines 輸入單位為 pixels (必須為 FullFov Camera Coordinates)
+
             ErrorCodes err = ErrorCodes.OK;
 
             using (var workBmp = (Bitmap)regionBmp.Clone())
@@ -321,14 +323,10 @@ namespace LaserAlignDX.AoiModel.V3
             return err;
         }
 
-        /// <summary>
-        /// 為 參數編輯 所用
-        /// </summary>
-        /// <remarks>
-        /// lineEdgePairs 單位為 pixels (FullFov Cammera Coordinates)
-        /// </remarks>
         public ErrorCodes BuildMicroChipTransform(Dictionary<string, LineBorderPair> lineEdgePairs, Bitmap regionBmp, RectangleF regionRoi)
         {
+            //NOTE: lineEdgePairs 輸入單位為 pixels (必須為 FullFov Camera Coordinates)
+
             ErrorCodes err = ErrorCodes.OK;
 
             using (var workBmp = (Bitmap)regionBmp.Clone())

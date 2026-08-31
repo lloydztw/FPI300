@@ -247,6 +247,7 @@ namespace LaserAlignDX.Model
         /// 量測結果 (單位 mm)
         /// </summary>
         public readonly Dictionary<string, float> Measurements = new Dictionary<string, float>();
+        public bool IsSimpleQuad { get; set; } = true;
 
         /// <summary>
         /// 量測结果: 晶粒尺寸X (單位 mm)
@@ -264,7 +265,6 @@ namespace LaserAlignDX.Model
             get => Measurements.TryGetValue("Y", out var width) ? width : 0f;
             set => Measurements["Y"] = value;
         }
-
         /// <summary>
         /// 尺寸量測點 (左上右下) (單位 pixels) 
         /// (FullFov Cammera Coordinates)
@@ -300,6 +300,7 @@ namespace LaserAlignDX.Model
             get;
             set;
         }
+
         /// <summary>
         /// Runtime Results
         /// </summary>

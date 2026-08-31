@@ -252,6 +252,8 @@ namespace LaserAlignDX.Model.Coords.V36
                        ├─► 4.Local Transform (_localTrf: 將 pixels 轉為實體物理 mm)
                        └─► 5.計算兩兩距離(NormLength) 並存入 results 字典(四捨五入至小數點後 3 位)
             */
+
+
             return CalcChipDimension_PadTrf2(out results, lineBorderPairs, chipData);
         }
 
@@ -377,6 +379,8 @@ namespace LaserAlignDX.Model.Coords.V36
                 return null;
             }
         }
+
+#if (OPT_RESERVED)
         ErrorCodes _CalcChipDimension_PadTrf2_000(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData)
         {
             results = new Dictionary<string, float>();
@@ -502,6 +506,8 @@ namespace LaserAlignDX.Model.Coords.V36
                 return null;
             }
         }
+#endif
+
         ErrorCodes CalcChipDimension_PadTrf2(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData)
         {
             results = new Dictionary<string, float>();
@@ -509,12 +515,14 @@ namespace LaserAlignDX.Model.Coords.V36
 
             try
             {
+                //(1) chipQuad
                 var chipQuad2D = chipData?.ChipQuad2D;
                 if (chipQuad2D == null)
                     return ErrorCodes.ERR_NO_CHIP_LOCATION;
 
                 var runtimeChipCenter = new QVector(chipQuad2D.Center);
 
+                //(2) 取得 camMeasurePoints (pixels)
                 var camMeasurePoints = getDimNamedMeasurePoints(out var keyNames, lineBorderPairs, chipQuad2D);
                 if (camMeasurePoints == null || camMeasurePoints.Length == 0 || camMeasurePoints.Length % 2 != 0)
                 {
@@ -523,10 +531,10 @@ namespace LaserAlignDX.Model.Coords.V36
 
                 chipData.ChipDimension.DimMeasurePoints = camMeasurePoints;
 
-                // 平移到 LOCAL
+                //(3) 平移到 LOCAL (以 runtimeChipCenter 當原點)
                 var measurePoints = Array.ConvertAll(camMeasurePoints, pt => pt != null ? pt - runtimeChipCenter : runtimeChipCenter);
 
-                // PAD Transform 補償
+                //(4) PAD Transform 補償
                 var padsGrid = chipData.PadsGrid;
                 if (padsGrid != null)
                 {
@@ -551,10 +559,10 @@ namespace LaserAlignDX.Model.Coords.V36
                     }
                 }
 
-                // Local Transform
+                //(5) Local Transform
                 measurePoints = transform(measurePoints, _localTrf);
 
-                // 計算距離
+                //(6) 計算距離
                 for (int i = 0; i < measurePoints.Length - 1; i += 2)
                 {
                     string name = keyNames[i];

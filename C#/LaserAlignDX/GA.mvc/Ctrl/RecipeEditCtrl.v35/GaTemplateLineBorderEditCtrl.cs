@@ -1019,8 +1019,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                             break;
 
                         var borderRect = _cviLineBorderBoxes[idx].Box;
-
                         EdgeBorder ebID = getBorderEnum(keyName, ib);
+
                         bool ok = aoiTryRunFindLineSegment(ebID, _xRecipe.GoldenRegionCellBmp, borderRect, out var mvdLines);
                         var linesOut = GaMvdExt.ToCSharpLines(mvdLines);
                         
@@ -1089,6 +1089,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
         /// <summary>
         /// 嘗試尋找 LineSegments
+        /// (LineSegments 單位 pixels, 必須是 FullFov Camera Coordinates)
         /// </summary>
         /// <remarks>
         /// 此處函式不牽扯到 GUI, 將來要納入 AOI MODEL
@@ -1187,6 +1188,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
         /// <summary>
         /// 計算所有 量測尺寸 的 理想預期值
+        /// (lineBorderPairs 單位 pixels, 必須是 FullFov Camera Coordinates)
         /// </summary>
         /// <remarks>
         /// 注意: 這裡會影響 PAD型晶粒的 Golden Template "GRID" !!! 
@@ -1227,6 +1229,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         /// </remarks>
         void aoiCalcGoldenChipDimension_000(List<EzLSD.LineSegment> lines)
         {
+#if (OPT_OLD)
             var aoiModel = _sysModel?.AoiModel;
             if (aoiModel != null && lines != null)
             {
@@ -1252,6 +1255,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                     VsMessageBox.Info(msg);
                 }
             }
+#endif
         }
         #endregion
     }

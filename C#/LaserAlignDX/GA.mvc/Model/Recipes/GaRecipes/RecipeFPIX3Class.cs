@@ -482,7 +482,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         }
         #endregion
 
-        void LoadLineBorderRects(string carrierTag)
+        void LoadLineBorderParams(string carrierTag)
         {
 #if (OPT_LEGACY_SIMPLE_LINE_BORDERS)
             string sectName = "Recipe Basic" + carrierTag;
@@ -494,7 +494,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             LineBorderParams.CarrierTag = _CARRIER_TAG;
             LineBorderParams.Load(INIFILE);
         }
-        void SaveLineBorderRects(string carrierTag)
+        void SaveLineBorderParams(string carrierTag)
         {
 #if (OPT_LEGACY_SIMPLE_LINE_BORDERS)
             string sectName = "Recipe Basic" + carrierTag;
@@ -716,7 +716,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             _dtoFlyAoiTemplate.Load(INIFILE);
 
             //(LD3) 邊線框 (根據載台號 載入不同對應的設定值)
-            LoadLineBorderRects(_CARRIER_TAG);
+            LoadLineBorderParams(_CARRIER_TAG);
 
             if (!eCancel)
             {
@@ -875,7 +875,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             if (name.Contains("LINEBORDER"))
             {
                 // 邊線框 (根據載台號 存入不同對應的設定值)
-                SaveLineBorderRects(_CARRIER_TAG);
+                SaveLineBorderParams(_CARRIER_TAG);
                 //InspectParams.Save();
             }
             if (name.Contains("FLY"))

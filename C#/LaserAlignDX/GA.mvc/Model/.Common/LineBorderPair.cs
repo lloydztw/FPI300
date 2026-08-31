@@ -18,7 +18,6 @@ using LaserAlignDX.BasicSpace;
 using LeTian.AoiLib;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO.Ports;
 using System.Linq;
 
 namespace LaserAlignDX.Model
@@ -104,10 +103,11 @@ namespace LaserAlignDX.Model
             return (null, -1);
         }
 
+        #region RESERVED
         /// <summary>
         /// 設定目標值
         /// </summary>
-        static void SetTargetDists_000(this Dictionary<string, LineBorderPair> lineBorderPairs, SizeF targetSize)
+        static void _SetTargetDists_000(this Dictionary<string, LineBorderPair> lineBorderPairs, SizeF targetSize)
         {
             if (lineBorderPairs == null)
                 return;
@@ -120,6 +120,7 @@ namespace LaserAlignDX.Model
                     pairYi.TargetDist = targetSize.Height;
             }
         }
+        #endregion
 
         /// <summary>
         /// 設定目標值（支援任意組數）
@@ -249,13 +250,14 @@ namespace LaserAlignDX.Model
             return numX + numY;
         }
 
+        #region RESERVED
         /// <summary>
         /// 取得 左, 上, 右, 下, 四邊線 
         /// </summary>
         /// <remarks>
         /// 單位 pixels (FullFov Cammera Coordinates)
         /// </remarks>
-        static EzLSD.LineSegment[] GetQuadLineSegments_000(this Dictionary<string, LineBorderPair> LineBorderPairs)
+        static EzLSD.LineSegment[] _GetQuadLineSegments_000(this Dictionary<string, LineBorderPair> LineBorderPairs)
         {
             if (LineBorderPairs.TryGetValue("X", out var pairX) &&
                 LineBorderPairs.TryGetValue("Y", out var pairY))
@@ -271,6 +273,7 @@ namespace LaserAlignDX.Model
             }
             return null;
         }
+        #endregion
 
         /// <summary>
         /// 取得 左, 上, 右, 下, 四邊線（增加防禦性檢查）
@@ -301,6 +304,18 @@ namespace LaserAlignDX.Model
             }
 
             return lines.Count > 0 ? lines.ToArray() : null;
+        }
+
+        /// <summary>
+        /// 是否 只簡單量測四邊
+        /// </summary>
+        public static bool IsSimpleQuad(this Dictionary<string, LineBorderPair> lineBorderPairs)
+        {
+            if (lineBorderPairs == null)
+                return false;
+
+            var lines = lineBorderPairs.GetQuadLineSegments();
+            return (lines != null && lines.Length >= 4);
         }
     }
 }

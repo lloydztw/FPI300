@@ -70,18 +70,19 @@ namespace LaserAlignDX.AoiModel
         /// </remarks>
         void Run(Bitmap bmpScene = null);
 
-#if (OPT_OLD || true)
-        /// <summary>
-        /// 為 參數編輯 所用
-        /// </summary>
+        ///<summary>
+        /// 建立 MicroChipTransform
+        ///</summary>
+        /// <remarks>
+        /// lines 輸入單位為 pixels (FullFov Camera Coordinates)
+        /// </remarks>
         ErrorCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi);
-#endif
 
         /// <summary>
         /// 為 參數編輯 所用
         /// </summary>
         /// <remarks>
-        /// lineEdgePairs 單位為 pixels (FullFov Cammera Coordinates)
+        /// lineEdgePairs 單位為 pixels (FullFov Camera Coordinates)
         /// </remarks>
         ErrorCodes BuildMicroChipTransform(Dictionary<string, LineBorderPair> lineEdgePairs, Bitmap regionBmp, RectangleF regionRoi);
 

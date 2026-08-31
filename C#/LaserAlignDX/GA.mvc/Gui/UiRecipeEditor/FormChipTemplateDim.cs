@@ -163,10 +163,6 @@ namespace LaserAlignDX.Mvc.Gui
             if (chipData == null)
                 return ErrorCodes.ERR_NO_CHIP_LOCATION;
 
-            //var goldenW = (float)numChipWidth.Value;
-            //var goldenH = (float)numChipHeight.Value;
-            //var goldenDim = new SizeF(goldenW, goldenH);
-
             // Region Bitmap
             var regionRoi = Rectangle.Round(chipData.CellRoi);
             GaUtil.Clip(ref regionRoi, fullfovBmp.Size);
@@ -181,6 +177,7 @@ namespace LaserAlignDX.Mvc.Gui
                 var goldenH = (float)numChipHeight.Value;
                 var goldenDim = new SizeF(goldenW, goldenH);
                 chipData?.LineBorderPairs?.SetTargetDists(goldenDim);
+
                 var err = aoiModel.BuildMicroChipTransform(chipData.LineBorderPairs, regionBmp, regionRoi);
                 return err;
             }

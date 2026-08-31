@@ -27,7 +27,6 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Traveller106;
@@ -457,7 +456,7 @@ namespace LaserAlignDX.AoiModel.V30
                         //(3) 將 CMvdLine 轉換成 EzLSD.LineSegment
                         var line = mvdLine?.ToLineSegment();
 
-                        //(4) 加回 ROI Offset
+                        //(4) 加回 ROI Offset (轉換到 FullFov Camera Coordinates)
                         line?.Offset(cellRoi.X, cellRoi.Y);
                         borderQuad.Offset(cellRoi.X, cellRoi.Y);
 
@@ -480,20 +479,23 @@ namespace LaserAlignDX.AoiModel.V30
             #region 尺寸長寬量測
             try
             {
-                //(1) LineSegments (Camera Coordinates) (單位 pixels)
+                //(1) LineSegments (FullFov Camera Coordinates) (單位 pixels)
                 var quadLines = chipData.LineBorderPairs.GetQuadLineSegments();
                 if (quadLines != null && quadLines.Length >= 4)
                 {
                     //(1.1) 使用 Micro Transform 計算 尺寸 與 邊隙
                     //    (結果會直接存入 cell.ChipData 內)
                     bool toMeasureGaps = _xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch;
+
+                    //(1.2) 計算
                     var err = _microTransform.CalcChipDimension(out SizeF dimension, quadLines, chipData, toMeasureGaps);
 
-                    //(1.2) 記入結果
+                    //(1.3) 記入結果
                     cell.RunWidth = dimension.Width;
                     cell.RunHeight = dimension.Height;
+                    cell.ChipData.ChipDimension.IsSimpleQuad = true;
 
-                    //(1.3) 異常
+                    //(1.4) 異常
                     if (err != ErrorCodes.OK)
                         throw new Exception(GaUtil.GetEnumDescription(err));
                 }
@@ -501,15 +503,18 @@ namespace LaserAlignDX.AoiModel.V30
                 else
                 {
                     //(2.0) Reset the previous results
-                    var dstMeasurements = cell.ChipData.ChipDimension.Measurements;
-                    dstMeasurements.Clear();
+                    var chipMeasurements = cell.ChipData.ChipDimension.Measurements;
+                    chipMeasurements.Clear();
 
                     //(2.1) 使用 Micro Transform 計算各種尺寸 
                     var err = _microTransform.CalcChipMeasurements(out var results, chipData.LineBorderPairs, chipData);
 
                     //(2.2) 記入結果 (cell.ChipData.ChipDimension.Measurements)
                     foreach (var key in results.Keys)
-                        dstMeasurements.Add(key, results[key]);
+                        chipMeasurements.Add(key, results[key]);
+
+                    //(2.2.*)
+                    cell.ChipData.ChipDimension.IsSimpleQuad = chipData.LineBorderPairs.IsSimpleQuad();
 
                     //(2.3) 異常
                     if (err != ErrorCodes.OK)
@@ -554,39 +559,74 @@ namespace LaserAlignDX.AoiModel.V30
 
             if (_xInspect.optChipMeasurement)
             {
-                //(1) 判定 長寬 是否達標
-                var dimResults = new bool[2];
-                ok &= (dimResults[0] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
-                ok &= (dimResults[1] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
-
                 var chipDim = cell.ChipData?.ChipDimension;
-                if (chipDim != null)
-                    chipDim.PassNgResults = dimResults;
 
-                if (!ok)
+                //(A) 原有 判定方式 (長寬)
+                if (chipDim == null || chipDim.IsSimpleQuad)
                 {
-                    cell.MarkResult(InspectReason.NG_CUT);
-                }
+                    //(A1) 判定 長寬 是否達標
+                    var dimResults = new bool[2];
+                    ok &= (dimResults[0] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
+                    ok &= (dimResults[1] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
 
-                //(2) 判定 邊隙 是否達標
-                if (_xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
-                {
-                    var gaps = cell.ChipData?.PadEdgeGaps;
-                    if (gaps == null)
-                    {
-                        ok = false;
-                    }
-                    else
-                    {
-                        var min = new QVector(_xInspect.PadEdgeGapX_Min, _xInspect.PadEdgeGapY_Min);
-                        var max = new QVector(_xInspect.PadEdgeGapX_Max, _xInspect.PadEdgeGapY_Max);
-                        var maxDiff = _xInspect.PadEdgeX_Diff_Upper;
-                        gaps.Check(out ok, min, max, maxDiff);
-                    }
+                    if (chipDim != null)
+                        chipDim.PassNgResults = dimResults;
 
                     if (!ok)
                     {
-                        cell.MarkResult(InspectReason.NG_EDGE_GAP);
+                        cell.MarkResult(InspectReason.NG_CUT);
+                    }
+
+                    //(A2) 判定 邊隙 是否達標
+                    if (_xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
+                    {
+                        var gaps = cell.ChipData?.PadEdgeGaps;
+                        if (gaps == null)
+                        {
+                            ok = false;
+                        }
+                        else
+                        {
+                            var min = new QVector(_xInspect.PadEdgeGapX_Min, _xInspect.PadEdgeGapY_Min);
+                            var max = new QVector(_xInspect.PadEdgeGapX_Max, _xInspect.PadEdgeGapY_Max);
+                            var maxDiff = _xInspect.PadEdgeX_Diff_Upper;
+                            gaps.Check(out ok, min, max, maxDiff);
+                        }
+
+                        if (!ok)
+                        {
+                            cell.MarkResult(InspectReason.NG_EDGE_GAP);
+                        }
+                    }
+                }
+
+                // (B) 其他 判定方式 (逐項)
+                else
+                {
+                    var dimResults = new List<bool>();
+                    foreach(var kv in chipDim.Measurements)
+                    {
+                        var key = kv.Key;
+                        var dist = kv.Value;
+                        if (key.StartsWith("X"))
+                        {
+                            var ok_x = !(dist < _xInspect.mWidthStandMin || dist > _xInspect.mWidthStandMax);
+                            dimResults.Add(ok_x);
+                            ok &= ok_x;
+                        }
+                        else
+                        {
+                            var ok_y = !(dist < _xInspect.mHeightStandMin || dist > _xInspect.mHeightStandMax);
+                            dimResults.Add(ok_y);
+                            ok &= ok_y;
+                        }
+                    }
+
+                    chipDim.PassNgResults = dimResults.ToArray();
+
+                    if (!ok)
+                    {
+                        cell.MarkResult(InspectReason.NG_CUT);
                     }
                 }
             }
@@ -743,7 +783,7 @@ namespace LaserAlignDX.AoiModel.V30
         private Dictionary<string, LineBorderPair> CalcRuntimeLocalLineBorderPairs(RegionCellX3Class cell, RectangleF cellRoi, Bitmap cellBmp = null, bool debug = false)
         {
             //------------------------------------------------------------------------------
-            // REV_2026-08-30 改用 LineEdgePairs
+            // REV_2026-08-30 改用 LineBorderPairs
             //------------------------------------------------------------------------------
 
             //(0) 取得 上一輪 晶粒定位 的結果 (chipData)
@@ -818,6 +858,7 @@ namespace LaserAlignDX.AoiModel.V30
                     //(3.1) 計算 lineBorder 與 goldenQuad 邊線, 相對距離
                     bool isHoriz = keyName.StartsWith("X");
                     int cid = isHoriz ? 0 : 1;
+
                     for (int ib = 0; ib < 2; ib++, cid += 2)
                     {
                         int cidPrev = (cid == 0) ? (NP - 1) : (cid - 1);
@@ -842,7 +883,7 @@ namespace LaserAlignDX.AoiModel.V30
                         lineBorderNew.Corners = lbCorners;
                         lineBorderNew.Sort();
 
-                        //(3.2) Offset
+                        //(3.2) OFFSET
                         lineBorderNew.Offset(-cellRoi.X, -cellRoi.Y);
 
                         //(3.3) 更新 pairNew

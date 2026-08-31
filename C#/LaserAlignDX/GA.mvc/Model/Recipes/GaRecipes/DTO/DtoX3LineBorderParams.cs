@@ -29,7 +29,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     /// </summary>
     public class DtoX3LineBorderParams : DtoBase
     {
-        #region DATA
+        #region DATA_DICT
         /// <summary>
         /// 量測框資料
         /// </summary>
@@ -79,6 +79,16 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             get;
             set;
         }
+
+        /// <summary>
+        /// 是否 只簡單量測四邊
+        /// </summary>
+        /// <returns></returns>
+        public bool IsSimpleQuad()
+        {
+            return LineBorderPairs.IsSimpleQuad();
+        }
+
         public override void Load(string iniFile)
         {
             LineBorderPairs.Clear();
@@ -115,6 +125,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
                 LineBorderPairs.Add("Y", pairY);
             }
         }
+
         public override void Save(string iniFile)
         {
             var measureKeyNames = LineBorderPairs.Keys.ToArray();
