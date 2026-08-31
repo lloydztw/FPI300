@@ -36,10 +36,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
     public class GaTemplateLineBorderEditCtrl
     {
         #region CONSTS
-        /// <summary>
-        /// 海康 邊線自動框 最小內縮 
-        /// </summary>
-        const int MIN_INDENT_FOR_MVD = -32;
+        ///// <summary>
+        ///// 海康 邊線自動框 最小內縮 
+        ///// </summary>
+        //const int MIN_INDENT_FOR_MVD = -32;
         #endregion
 
         #region GLOBAL_MESS
@@ -193,7 +193,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         }
         void connectEventHandlers()
         {
-            _editorUI.Window.HandleCreated += Window_HandleCreated;
+            //_editorUI.Window.HandleCreated += Window_HandleCreated;
 
             btnAutoLayoutLineBorders.Click += (s, e) => AutoLayoutLineBorders();
             btnBuildMictroTransform.Click += (s, e) => BuildMicroTransform();
@@ -219,13 +219,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         #endregion
 
         #region EVENT_HANDLERS
-        private void Window_HandleCreated(object sender, EventArgs e)
-        {
-            persistLineBorderIndentExt(false);
-            updateLineBorderBoxesNumber(false);
-            updateLineBorderBoxes(false);
-            updateGuiStatus();
-        }
         private void GaTemplateEditCtrl_FormClosing(object sender, FormClosingEventArgs e)
         {
             persistLineBorderIndentExt(true);
@@ -273,6 +266,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             set => _isLineBorderModified = value;
         }
         
+        internal void PostInit()
+        {
+            persistLineBorderIndentExt(false);
+            updateLineBorderBoxesNumber(false);
+            updateLineBorderBoxes(false);
+            //UpdateAlgorithmStatus();
+            updateGuiStatus();
+        }
         internal void AutoLayoutLineBorders()
         {
             if (_xAlgorithm == MatchAlgorithmEnum.GridMatch)
@@ -284,10 +285,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         #region PRIVATE_AUTO_LAYOUT_FUNCTIONS
         void autoLayoutLineBorders_000()
         {
+#if (OPT_OLD_CODE)
             //>>> var ind = (int)_editorUI.numBorderIndent.Value;
             var ind = updateNumBorderIndentDynamically();
-            var ext = (int)_editorUI.numBorderExtend.Value;
-            var spanRatio = (double)_editorUI.numLineSpanPercentage.Value * 0.01;
+            var ext = (int)numBorderOutdent.Value;
+            var spanRatio = (double)numLineSpanPercentage.Value * 0.01;
 
             var baseRect = Rectangle.Round(_xRecipe.GoldenChipRect);
             var W = baseRect.Width;
@@ -361,7 +363,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 {
                     // ind 固定在 baseRect 與 quadRect 中間處
                     var quadRect = Rectangle.Round(_goldenQuad2D.BoundaryRect);
-                    var extraIndent = (int)Math.Abs(_editorUI.numBorderIndent.Minimum) / 2;
+                    var extraIndent = (int)Math.Abs(numBorderIndent.Minimum) / 2;
 
                     var inX = (quadRect.X + baseRect.X) / 2 + extraIndent;
                     var inY = (quadRect.Y + baseRect.Y) / 2 + extraIndent;
@@ -404,16 +406,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             updateLineSegmentBoxes(true);
 
             _isLineBorderModified = true;
+#endif
         }
         void autoLayoutLineBorders_for_GridPad_Chips()
         {
             if (_xAlgorithm != MatchAlgorithmEnum.GridMatch)
                 return;
 
-            //>>> var ind = (int)_editorUI.numBorderIndent.Value;
-            var indent = updateNumBorderIndentDynamically();
-            var extent = (int)_editorUI.numBorderExtend.Value;
-            var spanRatio = (double)_editorUI.numLineSpanPercentage.Value * 0.01;
+            int indent = updateNumBorderIndentDynamically();
+            int outdent = (int)numBorderOutdent.Value;
+            var spanRatio = (double)numLineSpanPercentage.Value * 0.01;
 
             var baseRect = Rectangle.Round(_xRecipe.GoldenChipRect);
             var W = baseRect.Width;
@@ -444,10 +446,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 var indB = Math.Abs(inY2 - yB);
 
                 int i = 0;
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xL - extent, yT + dh / 2, indL + extent, hh);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yT - extent, ww, indT + extent);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xR - indR, yT + dh / 2, indR + extent, hh);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yB - indB, ww, indB + extent);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(xL - outdent, yT + dh / 2, indL + outdent, hh);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yT - outdent, ww, indT + outdent);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(xR - indR, yT + dh / 2, indR + outdent, hh);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yB - indB, ww, indB + outdent);
 
                 updateNumBorderIndentDynamically((indL + indR + indT + indB) / 4);
             }
@@ -457,10 +459,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 var y = baseRect.Y;
                 int i = 0;
 
-                _cviLineBorderBoxes[i++].Box = new Rectangle(x - extent, y + dh / 2, indent + extent, hh);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, y - extent, ww, indent + extent);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(baseRect.Right - indent, y + dh / 2, indent + extent, hh);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, baseRect.Bottom - indent, ww, indent + extent);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(x - outdent, y + dh / 2, indent + outdent, hh);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, y - outdent, ww, indent + outdent);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(baseRect.Right - indent, y + dh / 2, indent + outdent, hh);
+                _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, baseRect.Bottom - indent, ww, indent + outdent);
 
                 updateNumBorderIndentDynamically();
             }
@@ -473,13 +475,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         }
         void autoLayoutLineBorders_for_General_Chips()
         {
-            if (_xAlgorithm != MatchAlgorithmEnum.TemplateMatch)
-                return;
-
-            //(0) indent, extent, spanRatio
+            //(0) indent, outdent, spanRatio
             int indent = Math.Abs(updateNumBorderIndentDynamically());
-            int outdent = (int)_editorUI.numBorderExtend.Value;
-            double spanRatio = (double)_editorUI.numLineSpanPercentage.Value * 0.01;
+            int outdent = (int)numBorderOutdent.Value;
+            double spanRatio = (double)numLineSpanPercentage.Value * 0.01;
 
             //(1) 強制 重新抓取 goldenQuad
             var goldenQuad = requestToLocateGoldenQuad(true);
@@ -636,10 +635,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
             _isLineBorderModified = true;
         }
-        void autoLayoutLineBordersX()
-        {
-
-        }
         #endregion
 
         internal void BuildMicroTransform()
@@ -657,6 +652,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             
             OnMicroTransformChanged?.Invoke(this, null);
         }
+        
         internal void UpdateAlgorithmStatus()
         {
             updateNumBorderIndentDynamically();
@@ -742,34 +738,34 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             //----------------------------------------------
             // 根據晶粒型態動態配置 內緣 NumericUpDown
             //----------------------------------------------
-            var num = _editorUI.numBorderIndent;
-            if (num == null)
+            if (numBorderIndent == null)
                 return 0;
-
-            decimal value = indent != null ? indent.Value : num.Value;
 
             _bypassWindowEvents = true;
 
             if (_xAlgorithm == MatchAlgorithmEnum.GridMatch)
             {
                 // 格點型 晶粒
-                num.Minimum = 1;
-                GaUtil.SetNum(num, 1);
-                num.Enabled = false;
+                numBorderIndent.Minimum = 0m;
+                numBorderIndent.Maximum = 1m;
+                GaUtil.SetNum(numBorderIndent, 1);
+                numBorderIndent.Enabled = false;
             }
             else
             {
                 // 一般型 晶粒 (使用海康 template match)
-                num.Enabled = true;
-                num.Minimum = MIN_INDENT_FOR_MVD;
-                if (value >= 0)
-                    value = num.Minimum / 2m;
-                GaUtil.SetNum(num, value);
+                decimal value = indent != null ? indent.Value : numBorderIndent.Value;
+                numBorderIndent.Minimum = -1000m;
+                numBorderIndent.Maximum = -32m;
+                //if (value >= 0)
+                //    value = numBorderIndent.Minimum / 2m;
+                GaUtil.SetNum(numBorderIndent, value);
+                numBorderIndent.Enabled = true;
             }
 
             _bypassWindowEvents = false;
 
-            return (int)num.Value;
+            return (int)numBorderIndent.Value;
         }
         void persistLineBorderIndentExt(bool save)
         {
@@ -780,16 +776,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 {
                     //>>> settings.lineBorderIndent = (int)_editorUI.numBorderIndent.Value;
                     settings.lineBorderIndent = updateNumBorderIndentDynamically();
-                    settings.lineBorderExt = (int)_editorUI.numBorderExtend.Value;
-                    settings.lineSpanPercentage = (float)_editorUI.numLineSpanPercentage.Value;
+                    settings.lineBorderExt = (int)numBorderOutdent.Value;
+                    settings.lineSpanPercentage = (float)numLineSpanPercentage.Value;
                     settings.Save();
                 }
                 else
                 {
                     _bypassWindowEvents = true;
                     //>>> GaUtil.SetNum(_editorUI.numBorderIndent, settings.lineBorderIndent);
-                    GaUtil.SetNum(_editorUI.numBorderExtend, settings.lineBorderExt);
-                    GaUtil.SetNum(_editorUI.numLineSpanPercentage, (decimal)settings.lineSpanPercentage);
+                    GaUtil.SetNum(numBorderOutdent, settings.lineBorderExt);
+                    GaUtil.SetNum(numLineSpanPercentage, (decimal)settings.lineSpanPercentage);
                     _bypassWindowEvents = false;
 
                     updateNumBorderIndentDynamically(settings.lineBorderIndent);
@@ -866,6 +862,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             }
         }
 #endif
+
         void updateLineBorderAlgorithmStatus()
         {
             // 格點型晶粒 : 只能固定使用 numX = 1, numY = 1

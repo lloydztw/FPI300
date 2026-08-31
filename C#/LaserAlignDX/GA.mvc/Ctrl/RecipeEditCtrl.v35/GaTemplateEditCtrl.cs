@@ -16,6 +16,7 @@
 using JetEazy.FormSpace;
 using JetEazy.Lang;
 using JetEazy.OpenCV;
+using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
 using LaserAlignDX.Mvc.Gui;
@@ -87,13 +88,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         /// </summary>
         Bitmap _xBmpGoldenRegionTemplate
         {
-            get => _xRecipe.bmpprinttemplate;
+            get => _xRecipe.GoldenRegionCellBmp;
             set
             {
-                if (_xRecipe.bmpprinttemplate != value)
+                if (_xRecipe.GoldenRegionCellBmp != value)
                 {
-                    var old = _xRecipe.bmpprinttemplate;
-                    _xRecipe.bmpprinttemplate = value;
+                    var old = _xRecipe.GoldenRegionCellBmp;
+                    _xRecipe.GoldenRegionCellBmp = value;
                     old?.Dispose();
                 }
             }
@@ -105,13 +106,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         /// </summary>
         Bitmap _xBmpGoldenChipTemplate
         {
-            get => _xRecipe.bmpDefectTemplate;
+            get => _xRecipe.GoldenChipBmp;
             set
             {
-                if (_xRecipe.bmpDefectTemplate != value)
+                if (_xRecipe.GoldenChipBmp != value)
                 {
-                    var old = _xRecipe.bmpDefectTemplate;
-                    _xRecipe.bmpDefectTemplate = value;
+                    var old = _xRecipe.GoldenChipBmp;
+                    _xRecipe.GoldenChipBmp = value;
                     old?.Dispose();
                 }
             }
@@ -123,13 +124,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         /// </summary>
         Bitmap _xBmpQrCodeTemplate
         {
-            get => _xRecipe.bmpcodetemplate;
+            get => _xRecipe.QrCodeBmp;
             set
             {
-                if (_xRecipe.bmpcodetemplate != value)
+                if (_xRecipe.QrCodeBmp != value)
                 {
-                    var old = _xRecipe.bmpcodetemplate;
-                    _xRecipe.bmpcodetemplate = value;
+                    var old = _xRecipe.QrCodeBmp;
+                    _xRecipe.QrCodeBmp = value;
                     old?.Dispose();
                 }
             }
@@ -141,13 +142,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         /// </summary>
         Bitmap _xBmpMask
         {
-            get => _xRecipe.bmpprintmask;
+            get => _xRecipe.DefectsMaskBmp;
             set
             {
-                if (_xRecipe.bmpprintmask != value)
+                if (_xRecipe.DefectsMaskBmp != value)
                 {
-                    var old = _xRecipe.bmpprintmask;
-                    _xRecipe.bmpprintmask = value;
+                    var old = _xRecipe.DefectsMaskBmp;
+                    _xRecipe.DefectsMaskBmp = value;
                     old?.Dispose();
                 }
             }
@@ -159,8 +160,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         /// </summary>
         RectangleF _xGoldenChipRect
         {
-            get => _xRecipe.xRegionTrain;
-            set => _xRecipe.xRegionTrain = value;
+            //get => _xRecipe.xRegionTrain;
+            //set => _xRecipe.xRegionTrain = value;
+            get => _xRecipe.GoldenChipRect;
+            set => _xRecipe.GoldenChipRect = value;
         }
         /// <summary>
         /// QrCode 樣本在 Region Cell 內的矩形位置.
@@ -169,8 +172,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         /// </summary>
         RectangleF _xQrCodeRect
         {
-            get => _xRecipe.xRectCodeRegion;
-            set => _xRecipe.xRectCodeRegion = value;
+            //get => _xRecipe.xRectCodeRegion;
+            //set => _xRecipe.xRectCodeRegion = value;
+            get => _xRecipe.QrCodeRect;
+            set => _xRecipe.QrCodeRect = value;
         }
         /// <summary>
         /// _xMaskRects
@@ -187,9 +192,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         #region GUI_LINKS
         IvTemplateEditorUI _editorUI;
         JezTransImageViewPanel wndRegionViewer => _editorUI.ImgViewers[0] as JezTransImageViewPanel;
-        JezTransImageViewPanel wndTemplateViewer => _editorUI.ImgViewers[1] as JezTransImageViewPanel;
+        JezTransImageViewPanel wndGoldenViewer => _editorUI.ImgViewers[1] as JezTransImageViewPanel;
         JezTransImageViewPanel wndDefectsViewer => _editorUI.ImgViewers[2] as JezTransImageViewPanel;
         Button btnPickGolden => _editorUI.btnPickGolden;
+        Button btnRotateGolden => _editorUI.btnRotateGolden;
         Button btnTryScanQrCode => _editorUI.btnTryScanQrCode;
         Button btnDefectRegionAdd => _editorUI.btnDefectRegionAdd;
         Button btnDefectRegionDelete => _editorUI.btnDefectRegionDelete;
@@ -245,6 +251,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         void connectEventHandlers()
         {
             _editorUI.Window.HandleCreated += Window_HandleCreated;
+
+            btnRotateGolden.Click += (s, e) => RotateGoldenRegionBmp();
             btnPickGolden.Click += (s, e) => BuildGoldenChipTemplate();
             btnTryScanQrCode.Click += (s, e) => BuildQRCodeTemplate();
 
@@ -292,12 +300,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
             //updateDispUI(DS1, _xBmpGoldenRegionTemplate);
             //updateDispUI(DS2, _xBmpGoldenChipTemplate);
+
             wndRegionViewer?.UpdateImage(_xBmpGoldenRegionTemplate, _Title1, false);
-            wndTemplateViewer?.UpdateImage(_xBmpGoldenChipTemplate, _Title2, false);
+            wndGoldenViewer?.UpdateImage(_xBmpGoldenChipTemplate, _Title2, false);
 
             updateGoldenBoxes(false);
+
             //persistLineBorderIndentExt(false);
             //updateLineBorderBoxes(false);
+            _lineBordersCtrl.PostInit();
+
             updateDefectMaskBoxes(false);
             updateMaskTemplate(false);
             updateVisionParams();
@@ -352,6 +364,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         }
         private void OnRequestToLocateGoldenQuad(object sender, DoWorkEventArgs e)
         {
+#if(false)
             e.Result = null;
 
             if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
@@ -394,6 +407,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                     return;
                 }
             }
+#endif
+            e.Result = new QvQuad2D()
+            {
+                Corners = Array.ConvertAll(_cviGoldenChipBox.Corners, c => new QVector2(c.X, c.Y))
+            };
         }
         #endregion
 
@@ -440,57 +458,144 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 _opSelector = selector;
                 updateSubTitle();
                 updateGuiStatus();
+                
                 _lineBordersCtrl.UpdateLineSegmentBoxes(_opSelector == OpSelector.LineBorders);
+
                 refreshDispUI(wndRegionViewer);
-                refreshDispUI(wndTemplateViewer);
+                refreshDispUI(wndGoldenViewer);
                 refreshDispUI(wndDefectsViewer);
+            }
+        }
+
+        void RotateGoldenRegionBmp()
+        {
+            Bitmap bmpRot = null;
+
+            try
+            {
+                var srcBmp = _xBmpGoldenRegionTemplate;
+                if (srcBmp == null) return;
+
+                // 1. 取得來源 quad
+                var quadSrc = new QvQuad2D { Corners = Array.ConvertAll(_cviGoldenChipBox.Corners, c => new QVector2(c.X, c.Y)) };
+
+                // 2. 計算目標角度與需要旋轉的差值 angleDiff
+                double currentAngle = quadSrc.Angle;
+                double targetAngle = Math.Abs(currentAngle) < Math.Abs(Math.Abs(currentAngle) - 90) ? 0 : 90;
+                double angleDiff = currentAngle - targetAngle; // 需要旋轉的角度
+
+                // 2.1 如果角度差極小，代表已經是正的，直接返回
+                if (Math.Abs(angleDiff) < 0.01) 
+                    return;
+
+                // 3. 以 quadSrc 中心點進行旋轉
+                var center = new Point2f((float)quadSrc.Center.X, (float)quadSrc.Center.Y);
+                var dSize = new OpenCvSharp.Size(srcBmp.Width, srcBmp.Height);
+
+                // 注意：OpenCV 的旋轉角度正值為逆時針，因此使用 angleDiff 進行校正
+                using (var matRot = Cv2.GetRotationMatrix2D(center, angleDiff, 1.0))
+                using (var srcBridge = new QxImageBridge(srcBmp))
+                using (var dstImg = new Mat(dSize, srcBridge.Image.Type()))
+                {
+                    // 使用 WarpAffine 進行整張圖擺正
+                    Cv2.WarpAffine(
+                        srcBridge.Image,
+                        dstImg,
+                        matRot,
+                        dSize,
+                        InterpolationFlags.Cubic,
+                        BorderTypes.Replicate
+                    );
+                    bmpRot = dstImg.ToBitmap();
+                }
+
+                // 5. 同步更新 Target Quad 的點陣
+                var quadDst = quadSrc.Clone();
+                quadDst.Angle = targetAngle;
+                var rectDst = quadDst.BoundaryRect;
+                quadDst = QvQuad2D.From(rectDst);
+
+                // 6. 同步更新 _cviGoldenChipBox
+                _cviGoldenChipBox.Corners = Array.ConvertAll(quadDst.Corners, c => new PointF((float)c.X, (float)c.Y));
+                _cviGoldenChipBox.Box = Rectangle.Round(rectDst);
+                _xGoldenChipRect = rectDst;
+
+                // 7. 更新 Recipe
+                _xBmpGoldenRegionTemplate = bmpRot;
+                bmpRot = null;
+
+                // 8. 更新影像 (to Recipe and to UI)
+                wndRegionViewer?.UpdateImage(_xBmpGoldenRegionTemplate, _Title1, false);
+                _isGoldenModified = true;
+            }
+            catch (Exception ex)
+            {
+                HandleException("RotateGoldenRegionBmp", ex);
+            }
+            finally
+            {
+                bmpRot?.Dispose();
+                bmpRot = null;
             }
         }
         void BuildGoldenChipTemplate()
         {
-            // 從 _xBmpGoldenRegionTemplate 切出 bmpTemplate
-            var roiRect = _cviGoldenChipBox.Box;
-            var bmpGoldenChip = cropBitmap(_xBmpGoldenRegionTemplate, ref roiRect);
-            if (bmpGoldenChip == null)
-                return;
+            try
+            {
+                // 從 _xBmpGoldenRegionTemplate 切出 bmpTemplate
+                var roiRect = _cviGoldenChipBox.Box;
+                var bmpGoldenChip = cropBitmap(_xBmpGoldenRegionTemplate, ref roiRect);
+                if (bmpGoldenChip == null)
+                    return;
 
-            // 更新 參數
-            this._xBmpGoldenChipTemplate = bmpGoldenChip;
-            this._xGoldenChipRect = roiRect;
+                // 更新 參數
+                this._xBmpGoldenChipTemplate = bmpGoldenChip;
+                this._xGoldenChipRect = roiRect;
 
-            // 標記 已改變
-            _isGoldenModified = true;
-            _goldenQuad2D = null;
+                // 標記 已改變
+                _isGoldenModified = true;
+                _goldenQuad2D = null;
 
-            // 更新 GUI
-            //updateDispUI(wndTemplateViewer, bmpGoldenChip, autoZoom: true);
-            wndTemplateViewer?.UpdateImage(bmpGoldenChip, "Template View", true);
+                // 更新 GUI
+                wndGoldenViewer?.UpdateImage(_xBmpGoldenChipTemplate, _Title2, false);
 
-            // 更新 mask
-            updateMaskTemplate(false);
+                // 更新 mask
+                updateMaskTemplate(false);
+            }
+            catch (Exception ex)
+            {
+                HandleException("BuildGoldenChipTemplate", ex);
+            }
         }
         void BuildQRCodeTemplate(bool decode = true)
         {
-            // 從 _xBmpGoldenRegionTemplate 切出 bmp
-            var roiRect = _cviQrCodeBox.Box;
-            var bmp = cropBitmap(_xBmpGoldenRegionTemplate, ref roiRect);
-            if (bmp == null)
-                return;
-
-            // 更新 參數
-            this._xBmpQrCodeTemplate = bmp;
-            this._xQrCodeRect = roiRect;
-
-            // 標記 已改變
-            _isQrCodeModified = true;
-
-            if (decode)
+            try
             {
-                // DECODE
-                aoiDecodeQrCode(this._xBmpQrCodeTemplate, out string text);
+                // 從 _xBmpGoldenRegionTemplate 切出 bmp
+                var roiRect = _cviQrCodeBox.Box;
+                var bmp = cropBitmap(_xBmpGoldenRegionTemplate, ref roiRect);
+                if (bmp == null)
+                    return;
 
-                // 更新 Text
-                _editorUI.wndQrCodeResult.Text = text;
+                // 更新 參數
+                this._xBmpQrCodeTemplate = bmp;
+                this._xQrCodeRect = roiRect;
+
+                // 標記 已改變
+                _isQrCodeModified = true;
+
+                if (decode)
+                {
+                    // DECODE
+                    aoiDecodeQrCode(this._xBmpQrCodeTemplate, out string text);
+
+                    // 更新 Text
+                    _editorUI.wndQrCodeResult.Text = text;
+                }
+            }
+            catch(Exception ex)
+            {
+                HandleException("BuildQRCodeTemplate", ex);
             }
         }
 
@@ -644,7 +749,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
         void TrainGoldenChipTemplate(bool silentSuccess = false)
         {
-            VxDebugDrawer.DestroyAllWindows();
+            try
+            {
+                VxDebugDrawer.DestroyAllWindows();
 
 #if (OPT_OLD_CODE)
             int err = _xRecipe.PrintTempTrain(!silentSuccess);
@@ -661,23 +768,28 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             }
 #endif
 
-            bool ok = false;
-            var aoi = _sysModel.AoiModel.GetChipLocAoi();
-            if (aoi != null)
-            {
-                var goldenBmp = _xRecipe.GoldenChipBmp;
-                ok = aoi.Train(goldenBmp, !silentSuccess);
-            }
+                bool ok = false;
+                var aoi = _sysModel.AoiModel.GetChipLocAoi();
+                if (aoi != null)
+                {
+                    var goldenBmp = _xRecipe.GoldenChipBmp;
+                    ok = aoi.Train(goldenBmp, !silentSuccess);
+                }
 
-            if (!ok)
-            {
-                //VsMessageBox.Warning("匹配模板 創建失敗!");
-                VsMessageBox.Warning(QMSG.Text(ErrorCodes.AoiErr_Template_Creation_Failed));
+                if (!ok)
+                {
+                    //VsMessageBox.Warning("匹配模板 創建失敗!");
+                    VsMessageBox.Warning(QMSG.Text(ErrorCodes.AoiErr_Template_Creation_Failed));
+                }
+                else if (!silentSuccess)
+                {
+                    //VsMessageBox.Info("匹配模板 創建成功!");
+                    VsMessageBox.Info(QMSG.Text(ErrorCodes.AoiErr_Template_Creation_OK));
+                }
             }
-            else if (!silentSuccess)
+            catch(Exception ex)
             {
-                //VsMessageBox.Info("匹配模板 創建成功!");
-                VsMessageBox.Info(QMSG.Text(ErrorCodes.AoiErr_Template_Creation_OK));
+                HandleException("TrainGoldenTemplate", ex);
             }
         }
         void SaveAllParams(bool force)
@@ -747,11 +859,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
         void DfRegion_Add()
         {
-            if (wndTemplateViewer == null) return;
+            if (wndGoldenViewer == null) return;
 
             // 暫停 dispUI 運作
-            var dispUI = wndTemplateViewer;
-            var imgViewer = wndTemplateViewer.ImgViewer;
+            var dispUI = wndGoldenViewer;
+            var imgViewer = wndGoldenViewer.ImgViewer;
             bool flag = dispUI.Enabled;
             dispUI.Enabled = false;
 
@@ -780,7 +892,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 return;
 
             // 暫停 dispUI 運作
-            var dispUI = wndTemplateViewer;
+            var dispUI = wndGoldenViewer;
             var imgViewer = dispUI.ImgViewer;
             bool flag = dispUI.Enabled;
             dispUI.Enabled = false;
@@ -802,10 +914,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         }
         void DfRegion_ClearAll()
         {
-            if (wndTemplateViewer == null) return;
+            if (wndGoldenViewer == null) return;
 
             // 暫停 dispUI 運作
-            var dispUI = wndTemplateViewer;
+            var dispUI = wndGoldenViewer;
             var imgViewer = dispUI.ImgViewer;
             bool flag = dispUI.Enabled;
             dispUI.Enabled = false;
@@ -989,9 +1101,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
         void updateDefectMaskBoxes(bool toRecipe)
         {
-            if (wndTemplateViewer == null) return;
+            if (wndGoldenViewer == null) return;
 
-            var dispUI = wndTemplateViewer;
+            var dispUI = wndGoldenViewer;
             var imgViewer = dispUI.ImgViewer;
             bool flag = dispUI.Enabled;
             dispUI.Enabled = false;
@@ -1175,35 +1287,45 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         }
         void aoiCreateTemplateMask(Bitmap bmpTemplate, IEnumerable<RectangleF> maskRects, out Bitmap bmpMask, out Bitmap bmpDisp)
         {
-            // 使用 OpenCvSharp, 製作 mask (8 bpp) 將 maskRects 指定的區域塗成白色
-            using (var bridge = new QxImageBridge(bmpTemplate))
-            using (Mat gray = new Mat(bridge.Image.Size(), MatType.CV_8UC1))
-            using (Mat mask = new Mat(bridge.Image.Size(), MatType.CV_8UC1))
+            try
             {
-                var imgSrc = bridge.Image;
-                switch (imgSrc.Channels())
+                // 使用 OpenCvSharp, 製作 mask (8 bpp) 將 maskRects 指定的區域塗成白色
+                using (var bridge = new QxImageBridge(bmpTemplate))
+                using (Mat gray = new Mat(bridge.Image.Size(), MatType.CV_8UC1))
+                using (Mat mask = new Mat(bridge.Image.Size(), MatType.CV_8UC1))
                 {
-                    case 4: Cv2.CvtColor(imgSrc, gray, ColorConversionCodes.RGBA2GRAY); break;
-                    case 3: Cv2.CvtColor(imgSrc, gray, ColorConversionCodes.RGB2GRAY); break;
-                    case 2: Cv2.CvtColor(imgSrc, gray, ColorConversionCodes.BGR5652GRAY); break;
-                    case 1: imgSrc.CopyTo(gray); break;
-                    default:
-                        throw new Exception("bmpTemplate 格式異常!");
-                }
+                    var imgSrc = bridge.Image;
+                    switch (imgSrc.Channels())
+                    {
+                        case 4: Cv2.CvtColor(imgSrc, gray, ColorConversionCodes.RGBA2GRAY); break;
+                        case 3: Cv2.CvtColor(imgSrc, gray, ColorConversionCodes.RGB2GRAY); break;
+                        case 2: Cv2.CvtColor(imgSrc, gray, ColorConversionCodes.BGR5652GRAY); break;
+                        case 1: imgSrc.CopyTo(gray); break;
+                        default:
+                            throw new Exception("bmpTemplate 格式異常!");
+                    }
 
-                mask.SetTo(Scalar.Black);
-                var bound = new Rect(0, 0, imgSrc.Width, imgSrc.Height);
-                foreach (var rect in maskRects)
-                {
-                    var roi = JetEazy.Qcvt.CV(Rectangle.Round(rect));
-                    JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
-                    if (roi.Width > 1 && roi.Height > 1)
-                        mask[roi].SetTo(Scalar.White);
-                }
+                    mask.SetTo(Scalar.Black);
+                    var bound = new Rect(0, 0, imgSrc.Width, imgSrc.Height);
+                    foreach (var rect in maskRects)
+                    {
+                        var roi = JetEazy.Qcvt.CV(Rectangle.Round(rect));
+                        JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+                        if (roi.Width > 1 && roi.Height > 1)
+                            mask[roi].SetTo(Scalar.White);
+                    }
 
-                Cv2.BitwiseAnd(gray, mask, gray);
-                bmpMask = BitmapConverter.ToBitmap(mask);
-                bmpDisp = BitmapConverter.ToBitmap(gray);
+                    Cv2.BitwiseAnd(gray, mask, gray);
+                    bmpMask = BitmapConverter.ToBitmap(mask);
+                    bmpDisp = BitmapConverter.ToBitmap(gray);
+                }
+            }
+            catch (Exception ex)
+            {
+                bmpMask = null;
+                bmpDisp = null;
+                HandleException("aoiCreateTemplateMask", ex);
+                throw;
             }
         }
 #if (OPT_MOVED_TO_CHILD_CTRL)
@@ -1339,5 +1461,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             return bmp;
         }
         #endregion
+
+        void HandleException(string funcName, Exception ex)
+        {
+            var errMsg = $"Error : {GetType().Name}.{funcName}";
+            errMsg += "\n\r" + ex.Message;
+            errMsg += "\n\r" + ex.StackTrace;
+            QMessageBox.Warning(errMsg, translate: false);
+        }
     }
 }

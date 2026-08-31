@@ -13,7 +13,6 @@
  */
 #endregion
 
-using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
@@ -31,8 +30,6 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.UI;
-using System.Windows.Input;
 using VisionDesigner;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;

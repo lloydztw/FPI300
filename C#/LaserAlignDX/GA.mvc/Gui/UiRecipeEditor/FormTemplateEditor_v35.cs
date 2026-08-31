@@ -54,7 +54,7 @@ namespace LaserAlignDX.Mvc.Gui.V35
             get; private set;
         }
 
-        Button IvTemplateEditorUI.btnRotateGolden => gwRcpTemplateBtnsPanel1.btnPickGolden;
+        Button IvTemplateEditorUI.btnRotateGolden => gwRcpTemplateBtnsPanel1.btnRotateGolden;
         Button IvTemplateEditorUI.btnPickGolden => gwRcpTemplateBtnsPanel1.btnPickGolden;
 
         Button IvTemplateEditorUI.btnAutoLineBorders => gwRcpLineBorderBtnsPanel1.btnAutoLineBorders;

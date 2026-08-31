@@ -182,7 +182,7 @@ namespace LaserAlignDX.Model.Defects.G1
                     dstImg,
                     matrixToGolden,
                     templateSize,
-                    InterpolationFlags.Linear | InterpolationFlags.Cubic
+                    InterpolationFlags.Cubic
                 );
 
                 if (matrixToGolden != matrixToGoldenArg)
