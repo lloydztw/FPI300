@@ -18,6 +18,7 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
 using LeTian.AoiLib;
+using Newtonsoft.Json.Linq;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -243,12 +244,109 @@ namespace LaserAlignDX.Model
 
     public class GaChipDimension
     {
+        public bool IsSimpleQuad { get; set; } = true;
+
         /// <summary>
         /// 量測結果 (單位 mm)
         /// </summary>
         public readonly Dictionary<string, float> Measurements = new Dictionary<string, float>();
-        public bool IsSimpleQuad { get; set; } = true;
+        
+        /// <summary>
+        /// 量測 Pass / NG
+        /// </summary>
+        public readonly Dictionary<string, bool> MeasureResults = new Dictionary<string, bool>();
 
+        /// <summary>
+        /// 量測點對 (單位 pixels)
+        /// </summary>
+        public readonly Dictionary<string, QVector[]> MeasureCamPtPairs = new Dictionary<string, QVector[]>();
+
+        public void Reset()
+        {
+            Measurements.Clear();
+            MeasureCamPtPairs.Clear();
+            MeasureResults.Clear();
+        }
+
+        public bool IsAllPass()
+        {
+            //int passCount = 0;
+            //if (PassNgResults != null)
+            //{
+            //    foreach (var pass in PassNgResults)
+            //    {
+            //        if (pass)
+            //            passCount++;
+            //    }
+            //}
+            //return passCount >= 2;
+
+            if (MeasureResults.Count == 0)
+                return false;
+
+            foreach (var pass in MeasureResults.Values)
+            {
+                if (!pass)
+                    return false;
+            }
+
+            return true;
+        }
+
+        #region 量測點相關函式
+        public IEnumerable<QVector> IterMeasureCamPoint()
+        {
+            foreach (var key in MeasureCamPtPairs.Keys)
+            {
+                var pts = MeasureCamPtPairs[key];
+                if (pts != null)
+                {
+                    foreach (var pt in pts)
+                    {
+                        if (pt != null)
+                            yield return pt;
+                    }
+                }
+            }
+        }
+        public QVector[] GetMeasureCamPointsQuad()
+        {
+            if (MeasureCamPtPairs.TryGetValue("X", out QVector[] ptsH) &&
+                MeasureCamPtPairs.TryGetValue("Y", out QVector[] ptsV))
+            {
+                var pts = new QVector[]
+                {
+                    ptsH?[0],
+                    ptsV?[0],
+                    ptsH?[1],
+                    ptsV?[1],
+                };
+                //foreach (var pt in pts)
+                //{
+                //    if (pt == null)
+                //        return null;
+                //}
+                return pts;
+            }
+            return null;
+        }
+        public void SetMeasureCamPointsQuad(QVector[] pts)
+        {
+            if (pts.Length >= 4)
+            {
+                if (!MeasureCamPtPairs.TryGetValue("X", out QVector[] ptsH))
+                    ptsH = new QVector[2];
+                if (!MeasureCamPtPairs.TryGetValue("Y", out QVector[] ptsV))
+                    ptsV = new QVector[2];
+                ptsH[0] = pts[0];
+                ptsV[0] = pts[1];
+                ptsH[1] = pts[2];
+                ptsV[1] = pts[3];
+            }
+        }
+        #endregion
+
+        #region SIMPLE_QUAD_接口
         /// <summary>
         /// 量測结果: 晶粒尺寸X (單位 mm)
         /// </summary>
@@ -270,53 +368,54 @@ namespace LaserAlignDX.Model
         /// (FullFov Cammera Coordinates)
         /// (顯示繪圖用)
         /// </summary>
-        public QVector[] DimMeasurePoints { get; set; }
+        public QVector[] DimMeasurePoints
+        {
+            get => GetMeasureCamPointsQuad();
+            set => SetMeasureCamPointsQuad(value);
+        }
         /// <summary>
-        /// 取得晶粒 像素 長寬 (單位 pixels)
+        /// 取得晶粒 像素 長寬 (單位 pixels) (GUI 顯示用)
         /// </summary>
         public bool GetPixelSize(out double pixWidth, out double pixHeight)
         {
             pixWidth = 0;
             pixHeight = 0;
 
-            // 0:左, 1:上, 2:右, 3:下
-            var pts = DimMeasurePoints;
-            if (pts == null)
-                return false;
+            //// 0:左, 1:上, 2:右, 3:下
+            //var pts = DimMeasurePoints;
+            //if (pts == null)
+            //    return false;
 
-            if (pts[0] != null && pts[2] != null)
-                pixWidth = Math.Round((pts[0] - pts[2]).NormLength, 1);
-            if (pts[1] != null && pts[3] != null)
-                pixHeight = Math.Round((pts[1] - pts[3]).NormLength, 1);
+            //if (pts[0] != null && pts[2] != null)
+            //    pixWidth = Math.Round((pts[0] - pts[2]).NormLength, 1);
+            //if (pts[1] != null && pts[3] != null)
+            //    pixHeight = Math.Round((pts[1] - pts[3]).NormLength, 1);
+
+            if (MeasureCamPtPairs.TryGetValue("X", out QVector[] pts) && pts.Length > 1 && pts[0] != null && pts[1] != null)
+            {
+                pixWidth = Math.Round((pts[0] - pts[1]).NormLength, 1);
+            }
+            if (MeasureCamPtPairs.TryGetValue("Y", out pts) && pts.Length > 1 && pts[0] != null && pts[1] != null)
+            {
+                pixHeight = Math.Round((pts[0] - pts[1]).NormLength, 1);
+            }
 
             return pixWidth > 0 && pixHeight > 0;
         }
-
+#if(false)
         /// <summary>
         /// Runtime Results
         /// </summary>
         public bool[] PassNgResults
         {
-            get;
-            set;
-        }
-
-        /// <summary>
-        /// Runtime Results
-        /// </summary>
-        public bool IsAllPass()
-        {
-            int passCount = 0;
-            if (PassNgResults != null)
+            get
             {
-                foreach (var pass in PassNgResults)
-                {
-                    if (pass)
-                        passCount++;
-                }
+                //foreach(var kv in MeasureResults)
+                return MeasureResults.Values.ToArray();
             }
-            return passCount >= 2;
         }
+#endif
+        #endregion
     }
 
 

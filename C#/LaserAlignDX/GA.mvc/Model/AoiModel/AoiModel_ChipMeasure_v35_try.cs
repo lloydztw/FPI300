@@ -775,39 +775,70 @@ namespace LaserAlignDX.AoiModel.V35
 
             if (_xInspect.optChipMeasurement)
             {
-                //(1) 判定 長寬 是否達標
-                var dimResults = new bool[2];
-                ok &= (dimResults[0] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
-                ok &= (dimResults[1] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
-
                 var chipDim = cell.ChipData?.ChipDimension;
-                if (chipDim != null)
-                    chipDim.PassNgResults = dimResults;
+                var resultsDict = chipDim.MeasureResults;
 
-                if (!ok)
+                //(A) 原有 判定方式 (長寬)
+                if (chipDim == null || chipDim.IsSimpleQuad)
                 {
-                    cell.MarkResult(InspectReason.NG_CUT);
+                    //(A1) 判定 長寬 是否達標
+                    //var dimResults = new bool[2];
+                    //ok &= (dimResults[0] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
+                    //ok &= (dimResults[1] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
+                    //if (chipDim != null)
+                    //    chipDim.PassNgResults = dimResults;
+
+                    ok &= (resultsDict["X"] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
+                    ok &= (resultsDict["Y"] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
+
+                    if (!ok)
+                    {
+                        cell.MarkResult(InspectReason.NG_CUT);
+                    }
+
+                    //(A2) 判定 邊隙 是否達標
+                    if (_xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
+                    {
+                        var gaps = cell.ChipData?.PadEdgeGaps;
+                        if (gaps == null)
+                        {
+                            ok = false;
+                        }
+                        else
+                        {
+                            var min = new QVector(_xInspect.PadEdgeGapX_Min, _xInspect.PadEdgeGapY_Min);
+                            var max = new QVector(_xInspect.PadEdgeGapX_Max, _xInspect.PadEdgeGapY_Max);
+                            var maxDiff = _xInspect.PadEdgeX_Diff_Upper;
+                            gaps.Check(out ok, min, max, maxDiff);
+                        }
+
+                        if (!ok)
+                        {
+                            cell.MarkResult(InspectReason.NG_EDGE_GAP);
+                        }
+                    }
                 }
 
-                //(2) 判定 邊隙 是否達標
-                if (_xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch)
+                // (B) 其他 判定方式 (逐項)
+                else
                 {
-                    var gaps = cell.ChipData?.PadEdgeGaps;
-                    if (gaps == null)
+                    foreach (var kv in chipDim.Measurements)
                     {
-                        ok = false;
-                    }
-                    else
-                    {
-                        var min = new QVector(_xInspect.PadEdgeGapX_Min, _xInspect.PadEdgeGapY_Min);
-                        var max = new QVector(_xInspect.PadEdgeGapX_Max, _xInspect.PadEdgeGapY_Max);
-                        var maxDiff = _xInspect.PadEdgeX_Diff_Upper;
-                        gaps.Check(out ok, min, max, maxDiff);
+                        var key = kv.Key;
+                        var dist = kv.Value;
+                        if (key.StartsWith("X"))
+                        {
+                            ok &= (resultsDict[key] = !(dist < _xInspect.mWidthStandMin || dist > _xInspect.mWidthStandMax));
+                        }
+                        else
+                        {
+                            ok &= (resultsDict[key] = !(dist < _xInspect.mHeightStandMin || dist > _xInspect.mHeightStandMax));
+                        }
                     }
 
                     if (!ok)
                     {
-                        cell.MarkResult(InspectReason.NG_EDGE_GAP);
+                        cell.MarkResult(InspectReason.NG_CUT);
                     }
                 }
             }

@@ -632,10 +632,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         bool isFetched = false;
 
                         //(2) iterate MEASURE Points
-                        var measurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
-                        if (measurePts != null)
+                        var chipDim = cell?.ChipData.ChipDimension;
+                        if (chipDim != null)
                         {
-                            foreach (var pt in measurePts)
+                            foreach (var pt in chipDim.IterMeasureCamPoint())
                             {
                                 if (pt == null) continue;
                                 var pseudoBloc = createPseudoBloc(pt, bloc);

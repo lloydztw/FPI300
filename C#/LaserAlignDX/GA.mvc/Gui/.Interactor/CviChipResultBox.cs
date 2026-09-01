@@ -615,6 +615,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (!_xRecipe.InspectParams.optChipMeasurement)
                 return;
 
+#if (false)
             var measurePts = activeCell?.ChipData?.ChipDimension?.DimMeasurePoints;
             if (measurePts != null)
             {
@@ -647,6 +648,54 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 draw_MeasureLine(viewer, gxView, measurePts[0], measurePts[2], Color.Yellow);
                 draw_MeasureLine(viewer, gxView, measurePts[1], measurePts[3], Color.Yellow);
+            }
+#endif
+
+            var chipDim = activeCell?.ChipData?.ChipDimension;
+            if (chipDim != null)
+            {
+                var measurePtPairs = chipDim.MeasureCamPtPairs;
+                var dimResults = chipDim.MeasureResults;
+
+                #region DRAW_POINTS
+                foreach (var key in measurePtPairs.Keys)
+                {
+                    if (!dimResults.TryGetValue(key, out bool isPass))
+                        isPass = false;
+
+                    var pts = measurePtPairs[key];
+                    foreach (var p in pts)
+                        draw_MeasurePoint(viewer, gxView, p, isPass);
+                }
+                #endregion
+
+                #region DRAW_TEXT
+                if (viewer.GetZoomScale() > 0.35)
+                {
+                    int idx = 0;
+                    var offset = new QVector(25, -25);
+                    foreach (var p in chipDim.IterMeasureCamPoint())
+                    {
+                        if (p != null)
+                        {
+                            var pt = p + offset;
+                            gxView.DrawString($"{idx}", _font, Brushes.Orange, (float)pt.X, (float)pt.Y);
+                        }
+                        idx++;
+                    }
+                }
+                #endregion
+
+                #region DRAW_LINES
+                //draw_MeasureLine(viewer, gxView, measurePtPairs[0], measurePtPairs[2], Color.Yellow);
+                //draw_MeasureLine(viewer, gxView, measurePtPairs[1], measurePtPairs[3], Color.Yellow);
+                foreach (var key in measurePtPairs.Keys)
+                {
+                    var pts = measurePtPairs[key];
+                    if (pts != null && pts.Length > 1 && pts[0] != null && pts[1] != null)
+                        draw_MeasureLine(viewer, gxView, pts[0], pts[1], Color.Yellow);
+                }
+                #endregion
             }
         }
         void draw_MeasurePoint(CvImageViewer viewer, Graphics gxView, QVector pt, bool isPass)

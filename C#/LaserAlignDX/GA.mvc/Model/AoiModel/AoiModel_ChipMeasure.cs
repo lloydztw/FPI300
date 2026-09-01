@@ -503,15 +503,22 @@ namespace LaserAlignDX.AoiModel.V30
                 else
                 {
                     //(2.0) Reset the previous results
-                    var chipMeasurements = cell.ChipData.ChipDimension.Measurements;
-                    chipMeasurements.Clear();
+                    var chipDim = cell?.ChipData?.ChipDimension;
+                    if (chipDim == null)
+                        return;
 
-                    //(2.1) 使用 Micro Transform 計算各種尺寸 
-                    var err = _microTransform.CalcChipMeasurements(out var results, chipData.LineBorderPairs, chipData);
+                    chipDim.Reset();
+                    //var chipMeasurements = cell.ChipData.ChipDimension.Measurements;
+                    //chipMeasurements.Clear();
+
+                    //(2.1) 使用 Micro Transform 計算各種尺寸
+                    var carrierID = _sysModel.ActiveCarrierID;
+                    var globalTrf = _sysModel.TransformsModel.GetCameraPhysicTransform(carrierID);
+                    var err = _microTransform.CalcChipMeasurements(out var results, chipData.LineBorderPairs, chipData, globalTrf);
 
                     //(2.2) 記入結果 (cell.ChipData.ChipDimension.Measurements)
                     foreach (var key in results.Keys)
-                        chipMeasurements.Add(key, results[key]);
+                        chipDim.Measurements[key] = results[key];
 
                     //(2.2.*)
                     cell.ChipData.ChipDimension.IsSimpleQuad = chipData.LineBorderPairs.IsSimpleQuad();
@@ -534,14 +541,18 @@ namespace LaserAlignDX.AoiModel.V30
         /// </summary>
         private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, int threadId)
         {
-            // 如果有 quadLines, 則使用原來的計算方式
-            var quadLines = cell?.ChipData?.LineBorderPairs.GetQuadLineSegments();
-            if (quadLines != null && quadLines.Length >= 4)
+            var lineBorderPairs = cell?.ChipData?.LineBorderPairs;
+            if (lineBorderPairs == null)
+                return;
+
+            if (lineBorderPairs.IsSimpleQuad())
             {
+                // 如果有 quadLines, 則使用原來的計算方式
                 _RunOneChipMeasurement_000(cell, cellBmp, ref cellRoi, threadId);
             }
             else
             {
+                // 新的計算方式
                 _RunOneChipMeasurement_002(cell, cellBmp, ref cellRoi, threadId);
             }
         }
@@ -560,17 +571,20 @@ namespace LaserAlignDX.AoiModel.V30
             if (_xInspect.optChipMeasurement)
             {
                 var chipDim = cell.ChipData?.ChipDimension;
+                var resultsDict = chipDim.MeasureResults;
 
                 //(A) 原有 判定方式 (長寬)
                 if (chipDim == null || chipDim.IsSimpleQuad)
                 {
                     //(A1) 判定 長寬 是否達標
-                    var dimResults = new bool[2];
-                    ok &= (dimResults[0] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
-                    ok &= (dimResults[1] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
+                    //var dimResults = new bool[2];
+                    //ok &= (dimResults[0] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
+                    //ok &= (dimResults[1] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
+                    //if (chipDim != null)
+                    //    chipDim.PassNgResults = dimResults;
 
-                    if (chipDim != null)
-                        chipDim.PassNgResults = dimResults;
+                    ok &= (resultsDict["X"] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
+                    ok &= (resultsDict["Y"] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
 
                     if (!ok)
                     {
@@ -603,26 +617,19 @@ namespace LaserAlignDX.AoiModel.V30
                 // (B) 其他 判定方式 (逐項)
                 else
                 {
-                    var dimResults = new List<bool>();
                     foreach(var kv in chipDim.Measurements)
                     {
                         var key = kv.Key;
                         var dist = kv.Value;
                         if (key.StartsWith("X"))
                         {
-                            var ok_x = !(dist < _xInspect.mWidthStandMin || dist > _xInspect.mWidthStandMax);
-                            dimResults.Add(ok_x);
-                            ok &= ok_x;
+                            ok &= (resultsDict[key] = !(dist < _xInspect.mWidthStandMin || dist > _xInspect.mWidthStandMax));
                         }
                         else
                         {
-                            var ok_y = !(dist < _xInspect.mHeightStandMin || dist > _xInspect.mHeightStandMax);
-                            dimResults.Add(ok_y);
-                            ok &= ok_y;
+                            ok &= (resultsDict[key] = !(dist < _xInspect.mHeightStandMin || dist > _xInspect.mHeightStandMax));
                         }
                     }
-
-                    chipDim.PassNgResults = dimResults.ToArray();
 
                     if (!ok)
                     {

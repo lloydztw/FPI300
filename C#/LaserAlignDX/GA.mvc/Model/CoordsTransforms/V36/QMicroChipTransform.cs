@@ -239,7 +239,7 @@ namespace LaserAlignDX.Model.Coords.V36
         {
             return CalcChipDimension_PadTrf(out dimension, lines, chipData, includePadGaps);
         }
-        public ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData)
+        public ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData, ITransform globalTrf)
         {
             /*
                 [CalcChipMeasurements]
@@ -254,7 +254,7 @@ namespace LaserAlignDX.Model.Coords.V36
             */
 
 
-            return CalcChipDimension_PadTrf2(out results, lineBorderPairs, chipData);
+            return CalcChipDimension_PadTrf2(out results, lineBorderPairs, chipData, globalTrf);
         }
 
         #region PRIVATE_CALC_DIMENSION_FUNCTIONS
@@ -508,9 +508,10 @@ namespace LaserAlignDX.Model.Coords.V36
         }
 #endif
 
-        ErrorCodes CalcChipDimension_PadTrf2(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData)
+        ErrorCodes CalcChipDimension_PadTrf2(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData, ITransform globalTrf)
         {
             results = new Dictionary<string, float>();
+
             ITransform runtimePadTrf = null;
 
             try
@@ -529,38 +530,54 @@ namespace LaserAlignDX.Model.Coords.V36
                     return ErrorCodes.ERR_WEAK_LINE_CONDITION;
                 }
 
-                chipData.ChipDimension.DimMeasurePoints = camMeasurePoints;
+                //(2.*) 保存 camMeasurePoints
+                //>>> chipData.ChipDimension.DimMeasurePoints = camMeasurePoints;
+                for (int i = 0; i < camMeasurePoints.Length - 1; i += 2)
+                {
+                    string key = keyNames[i];
+                    chipData.ChipDimension.MeasureCamPtPairs[key] = new QVector[]
+                    {
+                        camMeasurePoints[i], 
+                        camMeasurePoints[i + 1]
+                    };
+                }
 
                 //(3) 平移到 LOCAL (以 runtimeChipCenter 當原點)
-                var measurePoints = Array.ConvertAll(camMeasurePoints, pt => pt != null ? pt - runtimeChipCenter : runtimeChipCenter);
+                var measurePoints = globalTrf != null ?
+                    camMeasurePoints :
+                    Array.ConvertAll(camMeasurePoints, pt => pt != null ? pt - runtimeChipCenter : runtimeChipCenter);
 
                 //(4) PAD Transform 補償
-                var padsGrid = chipData.PadsGrid;
-                if (padsGrid != null)
+                if (false && globalTrf == null)
                 {
-                    int NP = 4;
-                    var goldenPadsCorners = _padsTrf?.GetCalibCornerPoints()?.GetAll(isSrc: true);
-                    if (goldenPadsCorners != null)
+                    var padsGrid = chipData.PadsGrid;
+                    if (padsGrid != null)
                     {
-                        if (Math.Abs(chipQuad2D.Angle) > 70)
-                            goldenPadsCorners = _SHIFT(goldenPadsCorners, chipQuad2D.Angle > 0 ? 1 : -1);
+                        int NP = 4;
+                        var goldenPadsCorners = _padsTrf?.GetCalibCornerPoints()?.GetAll(isSrc: true);
+                        if (goldenPadsCorners != null)
+                        {
+                            if (Math.Abs(chipQuad2D.Angle) > 70)
+                                goldenPadsCorners = _SHIFT(goldenPadsCorners, chipQuad2D.Angle > 0 ? 1 : -1);
 
-                        runtimePadTrf = new QTransform("RunTimePadTrf");
+                            runtimePadTrf = new QTransform("RunTimePadTrf");
 
-                        EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var runtimePadsBox2D, false);
-                        var runPadsCorners = Array.ConvertAll(runtimePadsBox2D.Corners, c => new QVector(c.X, c.Y) - runtimeChipCenter);
+                            EzBlocsGridAnalyzer.CalcRotatedBox2D(padsGrid, out var runtimePadsBox2D, false);
+                            var runPadsCorners = Array.ConvertAll(runtimePadsBox2D.Corners, c => new QVector(c.X, c.Y) - runtimeChipCenter);
 
-                        var trfCalib = runtimePadTrf.GetCalibCornerPoints();
-                        for (int i = 0; i < NP; i++)
-                            trfCalib.Set(i, runPadsCorners[i], goldenPadsCorners[i]);
+                            var trfCalib = runtimePadTrf.GetCalibCornerPoints();
+                            for (int i = 0; i < NP; i++)
+                                trfCalib.Set(i, runPadsCorners[i], goldenPadsCorners[i]);
 
-                        if (runtimePadTrf.Build())
-                            measurePoints = transform(measurePoints, runtimePadTrf);
+                            if (runtimePadTrf.Build())
+                                measurePoints = transform(measurePoints, runtimePadTrf);
+                        }
                     }
                 }
 
                 //(5) Local Transform
-                measurePoints = transform(measurePoints, _localTrf);
+                var trf = globalTrf != null ? globalTrf : _localTrf;
+                measurePoints = transform(measurePoints, trf);
 
                 //(6) 計算距離
                 for (int i = 0; i < measurePoints.Length - 1; i += 2)
@@ -594,9 +611,8 @@ namespace LaserAlignDX.Model.Coords.V36
                 var R = (corners[1] + corners[2]) / 2.0;
                 var T = (corners[0] + corners[1]) / 2.0;
                 var B = (corners[3] + corners[2]) / 2.0;
-
-                var lineH = new EzLSD.LineSegment(L, R);
-                var lineV = new EzLSD.LineSegment(T, B);
+                var vectH = R - L;
+                var vectV = B - T;
 
                 if (pairs != null)
                 {
@@ -612,17 +628,17 @@ namespace LaserAlignDX.Model.Coords.V36
                         if (pair.LineSegments[0] == null || pair.LineSegments[1] == null)
                             continue;
 
-                        bool isHoriz = keyName.StartsWith("X", StringComparison.OrdinalIgnoreCase);
-                        var lineMid = isHoriz ? lineV : lineH;
+                        var line0 = pair.LineSegments[0];
+                        var line1 = pair.LineSegments[1];
 
-                        var p1 = pair.LineSegments[0].CalcIntersectedPoint(lineMid);
-                        var p2 = pair.LineSegments[1].CalcIntersectedPoint(lineMid);
+                        bool isHoriz = keyName.StartsWith("X");
+                        var vect = isHoriz ? vectH : vectV;
 
-                        if (p1 != null && p2 != null)
-                        {
-                            measurePoints.Add(p1); keyNamesList.Add(keyName);
-                            measurePoints.Add(p2); keyNamesList.Add(keyName);
-                        }
+                        var p0 = line0.GetMidPoint();
+                        var lineCross = new EzLSD.LineSegment(p0, p0 + vect);
+                        var p1 = lineCross.CalcIntersectedPoint(line1);
+                        measurePoints.Add(p0); keyNamesList.Add(keyName);
+                        measurePoints.Add(p1); keyNamesList.Add(keyName);
                     }
                 }
 

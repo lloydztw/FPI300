@@ -21,6 +21,6 @@ namespace LaserAlignDX.Model.Coords
         /// <summary>
         /// lines 單位是 pixels, 與 chipData.ChipQuad2D.Center 相同 參考原點
         /// </summary>
-        ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData);
+        ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData, ITransform globalTrf = null);
     }
 }

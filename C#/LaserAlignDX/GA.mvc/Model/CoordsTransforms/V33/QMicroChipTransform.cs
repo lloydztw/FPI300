@@ -240,7 +240,7 @@ namespace LaserAlignDX.Model.Coords.V33
         {
             return CalcChipDimension_PadTrf(out dimension, lines, chipData, includePadGaps);
         }
-        public ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData)
+        public ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData, ITransform externTrf)
         {
             throw new NotImplementedException();
         }

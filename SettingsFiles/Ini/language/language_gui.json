@@ -64,7 +64,7 @@
 "btnOK" : ["OK", "確定", "", "ตกลง"],
 "btnCancel" : ["Cancel", "取消", "", "ยกเลิก"],
 
-"FormRecipeEditor.tblayoutMajor.tblayoutRight.label1" : ["Recipe", "參數設定", "", "การตั้งค่าพารามิเตอร์"],
+"lblRecipeTag" : ["Recipe", "參數設定", "", "การตั้งค่าพารามิเตอร์"],
 "btnWriteCoordsToPlc" : ["Write coord. to PLC","將座標寫入PLC", "", "เขียนพิกัดลง PLC"],
 "btnSaveImage" : ["Save Image", "另存圖片", "", "บันทึกรูปภาพเป็น"],
 "btnOpenFlyCamRcpWindow" : ["Fly Camera", "飛拍介面", "", "หน้าจอภาพฟลาย"],
@@ -95,9 +95,15 @@
 "FormTemplateEditor" : ["Template Match Editor", "匹配模板設定", "","ตัวแก้ไขการจับคู่เทมเพลต"],
 "radioButtonG": [ "Chip Template", "晶粒 匹配模板", "", "เทมเพลตแมตช์ชิงได (Chip)" ],
 "radioButtonLn": [ "Edge Lines", "邊線 檢測範圍", "", "ขอบเขตการตรวจจับเส้นขอบ" ],
+"radioButtonDe": [ "Defects", "瑕疵檢測", "", "ขอบเขตการตรวจจับเส้นขอบ" ],
 "radioButtonQr": [ "QR Code", "二維碼 範圍", "", "ขอบเขตคิวอาร์โค้ด" ],
-"labelA": [ "Indent (pix)", "內緣 (pixels)", "", "ขอบเว้า(pix)" ],
-"labelB": [ "Outdent (pix)", "外緣 (pixels)", "", "ขอบนูน(pix)" ],
+
+"lblLB1": [ "X Measures", "X量測 數量", "", ""],
+"lblLB2": [ "Y Measures", "Y量測 數量", "", ""],
+"lblLB3": [ "Masks", "遮罩 數量", "", ""],
+"lblLB4": [ "Indent (pix)", "內緣 (pixels)", "", "ขอบเว้า(pix)" ],
+"lblLB5": [ "Outdent (pix)", "外緣 (pixels)", "", "ขอบนูน(pix)" ],
+"lblLB6": [ "Span (%)", "跨度比例 (%)", "", "" ],
 
 "btnDefectDelete" : ["Del Defect Area", "缺陷區域 刪除", "","ลบพื้นที่ข้อบกพร่อง"],
 "btnDefectClear" : ["Clear Defect Area", "缺陷區域 清空", "","ล้างพื้นที่ข้อบกพร่อง"],
@@ -118,6 +124,7 @@
 "FormTemplateEditor.tbLayoutB.tbLayoutSubL.groupBox1.radioButtonLn" : ["Borders", "邊線 檢測範圍", "","ขอบเขตการตรวจจับเส้นขอบ"],
 "FormTemplateEditor.tbLayoutB.tbLayoutSubL.groupBox1.radioButtonQr" : ["QR Code", "二維碼 範圍", "","ขอบเขตคิวอาร์โค้ด"],
 "btnPickGolden" : ["Crop", "擷取模板", "","ตัดครอบเทมเพลต"],
+"btnRotateGolden" : ["Rotate", "轉正", "",""],
 
 "FormFlySetup" : ["Fly Camera Recipe Editor", "飛拍參數設定窗口", "", "หน้าต่างตั้งค่าพารามิเตอร์ภาพฟลาย"],
 "FormFlySetup.tabControl2.tabPage3" : ["Original Image", "原始圖片", "", "รูปภาพต้นฉบับ"],
