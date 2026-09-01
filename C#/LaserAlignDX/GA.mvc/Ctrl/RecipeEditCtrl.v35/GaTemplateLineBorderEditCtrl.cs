@@ -413,6 +413,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             if (_xAlgorithm != MatchAlgorithmEnum.GridMatch)
                 return;
 
+            //(1) 強制 重新抓取 goldenPadsQuad
+            var goldenPadsQuad = requestToLocateGoldenQuad(true);
+
             int indent = updateNumBorderIndentDynamically();
             int outdent = (int)numBorderOutdent.Value;
             var spanRatio = (double)numLineSpanPercentage.Value * 0.01;
@@ -425,13 +428,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             var dw = W - ww;
             var dh = H - hh;
 
-            // 強制 重新抓取 goldenQuad
-            var goldenQuad = requestToLocateGoldenQuad(true);
+            //(2) 計算 rectL, rectT, rectR, rectB
+            Rectangle rectL;
+            Rectangle rectT;
+            Rectangle rectR;
+            Rectangle rectB;
 
-            if (goldenQuad != null)
+            if (goldenPadsQuad != null)
             {
                 // ind 固定在 baseRect 與 quadRect 中間處
-                var quadRect = Rectangle.Round(goldenQuad.BoundaryRect);
+                var quadRect = Rectangle.Round(goldenPadsQuad.BoundaryRect);
                 var inX = (quadRect.X + baseRect.X) / 2;
                 var inY = (quadRect.Y + baseRect.Y) / 2;
                 var inX2 = (quadRect.Right + baseRect.Right) / 2;
@@ -445,11 +451,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 var indT = Math.Abs(inY - yT);
                 var indB = Math.Abs(inY2 - yB);
 
-                int i = 0;
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xL - outdent, yT + dh / 2, indL + outdent, hh);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yT - outdent, ww, indT + outdent);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xR - indR, yT + dh / 2, indR + outdent, hh);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(xL + dw / 2, yB - indB, ww, indB + outdent);
+                rectL = new Rectangle(xL - outdent, yT + dh / 2, indL + outdent, hh);   //Left
+                rectT = new Rectangle(xL + dw / 2, yT - outdent, ww, indT + outdent);   //Top
+                rectR = new Rectangle(xR - indR, yT + dh / 2, indR + outdent, hh);      //Right
+                rectB = new Rectangle(xL + dw / 2, yB - indB, ww, indB + outdent);      //Bottom
 
                 updateNumBorderIndentDynamically((indL + indR + indT + indB) / 4);
             }
@@ -457,26 +462,40 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             {
                 var x = baseRect.X;
                 var y = baseRect.Y;
-                int i = 0;
 
-                _cviLineBorderBoxes[i++].Box = new Rectangle(x - outdent, y + dh / 2, indent + outdent, hh);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, y - outdent, ww, indent + outdent);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(baseRect.Right - indent, y + dh / 2, indent + outdent, hh);
-                _cviLineBorderBoxes[i++].Box = new Rectangle(x + dw / 2, baseRect.Bottom - indent, ww, indent + outdent);
+                rectL = new Rectangle(x - outdent, y + dh / 2, indent + outdent, hh);               //Left
+                rectT = new Rectangle(x + dw / 2, y - outdent, ww, indent + outdent);               //Top
+                rectR = new Rectangle(baseRect.Right - indent, y + dh / 2, indent + outdent, hh);   //Right
+                rectB = new Rectangle(x + dw / 2, baseRect.Bottom - indent, ww, indent + outdent);  //Bottom
 
                 updateNumBorderIndentDynamically();
             }
 
+            //(3) 更新 Recipe 的 LineBorderParams.LineBorderPairs
+            var rcpLineBorderPairs = _xRecipe.LineBorderParams.LineBorderPairs;
+            rcpLineBorderPairs.AdjustPairsNumber(1, 1);
+
+            if (!rcpLineBorderPairs.TryGetValue("X", out var pairX)) 
+                rcpLineBorderPairs["X"] = pairX = new LineBorderPair();
+
+            if (!rcpLineBorderPairs.TryGetValue("Y", out var pairY))
+                rcpLineBorderPairs["Y"] = pairY = new LineBorderPair();
+
+            pairX.Borders[0] = QvQuad2D.From(rectL).ToBox2D();
+            pairX.Borders[1] = QvQuad2D.From(rectR).ToBox2D();
+            pairY.Borders[0] = QvQuad2D.From(rectT).ToBox2D();
+            pairY.Borders[1] = QvQuad2D.From(rectB).ToBox2D();
+
+            updateLineBorderBoxes(false);
+            updateLineSegmentBoxes(false);
             refreshViewer(wndRegionViewer);
-            updateLineBorderBoxes(true);
-            updateLineSegmentBoxes(true);
 
             _isLineBorderModified = true;
         }
         void autoLayoutLineBorders_for_General_Chips()
         {
             //(0) indent, outdent, spanRatio
-            int indent = Math.Abs(updateNumBorderIndentDynamically());
+            int indent = updateNumBorderIndentDynamically();
             int outdent = (int)numBorderOutdent.Value;
             double spanRatio = (double)numLineSpanPercentage.Value * 0.01;
 
@@ -538,7 +557,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 {
                     var x = (int)Math.Round(pAnchor.X - outdent);
                     var y = (int)Math.Round(pAnchor.Y);
-                    var w = (int)(outdent + indent);
+                    var w = (int)(outdent - indent);
                     var h = (int)Math.Round(len * boxRatio);
                     boxes[i].Box = new Rectangle(x, y, w, h); 
                     pAnchor += vect * (len * gapRatio + len * boxRatio);
@@ -564,9 +583,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 var pAnchor = pBegin + vect * (len * gapRatio);
                 for (int i = 0; i < N; i++)
                 {
-                    var x = (int)Math.Round(pAnchor.X - indent);
+                    var x = (int)Math.Round(pAnchor.X + indent);
                     var y = (int)Math.Round(pAnchor.Y);
-                    var w = (int)(outdent + indent);
+                    var w = (int)(outdent - indent);
                     var h = (int)Math.Round(len * boxRatio);
                     boxes[i].Box = new Rectangle(x, y, w, h);
                     pAnchor += vect * (len * gapRatio + len * boxRatio);
@@ -594,7 +613,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 {
                     var x = (int)Math.Round(pAnchor.X);
                     var y = (int)Math.Round(pAnchor.Y - outdent);
-                    var h = (int)(outdent + indent);
+                    var h = (int)(outdent - indent);
                     var w = (int)Math.Round(len * boxRatio);
                     boxes[i].Box = new Rectangle(x, y, w, h);
                     pAnchor += vect * (len * gapRatio + len * boxRatio);
@@ -621,8 +640,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 for (int i = 0; i < N; i++)
                 {
                     var x = (int)Math.Round(pAnchor.X);
-                    var y = (int)Math.Round(pAnchor.Y - indent);
-                    var h = (int)(outdent + indent);
+                    var y = (int)Math.Round(pAnchor.Y + indent);
+                    var h = (int)(outdent - indent);
                     var w = (int)Math.Round(len * boxRatio);
                     boxes[i].Box = new Rectangle(x, y, w, h);
                     pAnchor += vect * (len * gapRatio + len * boxRatio);
@@ -652,7 +671,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             
             OnMicroTransformChanged?.Invoke(this, null);
         }
-        
+
         internal void UpdateAlgorithmStatus()
         {
             updateNumBorderIndentDynamically();
@@ -746,8 +765,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             if (_xAlgorithm == MatchAlgorithmEnum.GridMatch)
             {
                 // 格點型 晶粒
-                numBorderIndent.Minimum = 0m;
-                numBorderIndent.Maximum = 1m;
+                numBorderIndent.Minimum = 1m;
+                numBorderIndent.Maximum = 100m;
                 GaUtil.SetNum(numBorderIndent, 1);
                 numBorderIndent.Enabled = false;
             }
@@ -755,10 +774,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             {
                 // 一般型 晶粒 (使用海康 template match)
                 decimal value = indent != null ? indent.Value : numBorderIndent.Value;
-                numBorderIndent.Minimum = -1000m;
-                numBorderIndent.Maximum = -32m;
-                //if (value >= 0)
-                //    value = numBorderIndent.Minimum / 2m;
+                numBorderIndent.Minimum = -32m;
+                numBorderIndent.Maximum = 100m;
+                if (value >= 0)
+                    value = numBorderIndent.Minimum / 2m;
                 GaUtil.SetNum(numBorderIndent, value);
                 numBorderIndent.Enabled = true;
             }
@@ -951,10 +970,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             else
             {
                 var pairsDict = rcpParams.LineBorderPairs;
-                var postfixes = new string[][]
-                {
-
-                };
 
                 int idx = 0;
                 foreach (var kv in pairsDict)
@@ -1006,6 +1021,46 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 if (lineBorderPairs == null)
                     return;
 
+                foreach(var lineSegBox in _cviLineSegmentBoxes)
+                {
+                    lineSegBox.Attach(null);
+                    lineSegBox.Visible = false;
+                }
+
+                for (int index = 0, N = _cviLineBorderBoxes.Length; index < N; index++)
+                {
+                    var cviBorderBox = _cviLineBorderBoxes[index];
+                    if (cviBorderBox.Tag is Tuple<string, int> tag)
+                    {
+                        var keyName = tag.Item1;
+                        var ib = tag.Item2;
+
+                        if (!lineBorderPairs.ContainsKey(keyName))
+                            continue;
+
+                        var borderRect = cviBorderBox.Box;
+                        var eb = getBorderEnum(keyName, ib);
+                        bool ok = aoiTryRunFindLineSegment(eb, _xRecipe.GoldenRegionCellBmp, borderRect, out var mvdLines);
+                        var linesOut = GaMvdExt.ToCSharpLines(mvdLines);
+
+                        // 更新到 lineSegmentBoxes
+                        _cviLineSegmentBoxes[index].Attach(linesOut);
+                        _cviLineSegmentBoxes[index].Visible = ok;
+
+                        // 更新到 lineBorderPairs (recipe)
+                        if (linesOut != null && linesOut.Length > 0)
+                        {
+                            if (!lineBorderPairs.TryGetValue(keyName, out var rcpPair))
+                            {
+                                lineBorderPairs[keyName] = rcpPair = new LineBorderPair();
+                                rcpPair.Borders[ib] = QvQuad2D.From(borderRect).ToBox2D();
+                            }
+                            rcpPair.LineSegments[ib] = new EzLSD.LineSegment(linesOut[0][0], linesOut[0][1]);
+                        }
+                    }
+                }
+
+#if (false)
                 int idx = 0;
                 foreach (var kv in lineBorderPairs)
                 {
@@ -1023,6 +1078,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
                         bool ok = aoiTryRunFindLineSegment(ebID, _xRecipe.GoldenRegionCellBmp, borderRect, out var mvdLines);
                         var linesOut = GaMvdExt.ToCSharpLines(mvdLines);
+
+                        // 更新到 model (recipe)
+                        if (linesOut != null && linesOut.Length > 0)
+                        {
+                            var pts = linesOut[0];
+                            pair.LineSegments[ib] = new EzLSD.LineSegment(pts[0], pts[1]);
+                        }
                         
                         _cviLineSegmentBoxes[idx].Attach(linesOut);
                         _cviLineSegmentBoxes[idx].Visible = ok;
@@ -1032,12 +1094,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
                 for(int i = idx; i < _cviLineSegmentBoxes.Length; i++)
                     _cviLineSegmentBoxes[i].Visible = false;
-
+#endif
                 if (calcGoldenDim)
                 {
                     // NOTE: 這裡會影響 PAD型晶粒的 Golden Template "GRID" !!! 
                     aoiCalcGoldenChipDimension(lineBorderPairs);
                 }
+
+                refreshViewer(wndRegionViewer);
             }
         }
 
@@ -1208,6 +1272,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 lineBorderPairs.SetTargetDists(targetSize);
   
                 var err = aoiModel.BuildMicroChipTransform(lineBorderPairs, regionBmp, regionRoi);
+
                 if (err != Model.ErrorCodes.OK)
                 {
                     string errMsg = "無法建立 Micro Transform:\n\r\n\r" + GaUtil.GetEnumDescription(err);

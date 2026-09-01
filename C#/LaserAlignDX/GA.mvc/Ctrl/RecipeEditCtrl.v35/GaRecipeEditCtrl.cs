@@ -524,11 +524,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             }
         }
 
-        void BuildGoldenRegion()
+        void BuildGoldenRegion(bool updateGui = true)
         {
             showCviResult(false);
             // 直接使用 viewer 的影像 (OpenCvSharp 的 Mat)
-            var imgSrc = _imgViewer.MatViewer.Image;            
+            var imgSrc = _imgViewer.MatViewer.Image;
             var goldenRegionRect = _cviGoldenRegionBox.Box;
 
             // ROI            
@@ -537,6 +537,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
             // 更新至 recipe
             updateGoldenRegionToRecipe(imgSrc[goldenRoi], goldenRoi);
+
+            // GUI
+            if (updateGui)
+                enableGoldenRegionPicking(false);
         }
 
         void __AutoUpdateRegions()

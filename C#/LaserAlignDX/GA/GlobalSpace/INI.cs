@@ -801,6 +801,17 @@ namespace Traveller106
         [Browsable(false)]
         public bool IsCheat { get; set; } = false;
 
+        //----------------------------------------------------------------------------------------------------
+        const string X3_Cat5 = "A05.PLC 設定";
+        [CategoryAttribute(X3_Cat5), DescriptionAttribute("")]
+        [DisplayName("01.使用單一NG碼")]
+        [Browsable(true)]
+        public bool UsingSingleNgCode { get; set; } = false;
+        
+        [CategoryAttribute(X3_Cat5), DescriptionAttribute("")]
+        [DisplayName("02.指定NG碼")]
+        [Browsable(true)]
+        public int SingleNgCode { get; set; } = 2;
         #endregion
 
         #region SQL_SETUP
@@ -860,6 +871,7 @@ namespace Traveller106
             DelayImageTime = int.Parse(ReadINIValue("Basic", "DelayImageTime", DelayImageTime.ToString(), INIFILE));
             ImageResolutionX = float.Parse(ReadINIValue("Basic", "ImageResolutionX", ImageResolutionX.ToString(), INIFILE));
             ImageResolutionY = float.Parse(ReadINIValue("Basic", "ImageResolutionY", ImageResolutionY.ToString(), INIFILE));
+            
             mysql_server_ip = ReadINIValue("sql", "mysql_server_ip", mysql_server_ip.ToString(), INIFILE);
             mysql_server_port = int.Parse(ReadINIValue("sql", "mysql_server_port", mysql_server_port.ToString(), INIFILE));
             mysql_server_user = ReadINIValue("sql", "mysql_server_user", mysql_server_user.ToString(), INIFILE);
@@ -890,6 +902,10 @@ namespace Traveller106
             IsResultShowChar = ReadINIValue("Basic", "IsResultShowChar", (IsResultShowChar ? "1" : "0"), INIFILE) == "1";
             IsCheat = ReadINIValue("Basic", "IsCheat", (IsCheat ? "1" : "0"), INIFILE) == "1";
             IsAutoDisableZoom = ReadINIValue("Basic", "IsAutoDisableZoom", (IsAutoDisableZoom ? "1" : "0"), INIFILE) == "1";
+
+            UsingSingleNgCode = ReadINIValue("Basic", "UsingSingleNgCode", (UsingSingleNgCode ? "1" : "0"), INIFILE) == "1";
+            SingleNgCode = int.Parse(ReadINIValue("Basic", "SingleNgCode", SingleNgCode.ToString(), INIFILE));
+
             //mark_rect = StringtoRect(ReadINIValue("Basic", "mark_rect", RecttoString(mark_rect), INIFILE));
             //mark_org = StringToPointF(ReadINIValue("Basic", "mark_org", PointFtoString(mark_org), INIFILE));
             //mark_thresholdvalue = int.Parse(ReadINIValue("Basic", "mark_thresholdvalue", mark_thresholdvalue.ToString(), INIFILE));
@@ -1001,6 +1017,9 @@ namespace Traveller106
             WriteINIValue("Basic", "IsResultShowChar", (IsResultShowChar ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsCheat", (IsCheat ? "1" : "0"), INIFILE);
             WriteINIValue("Basic", "IsAutoDisableZoom", (IsAutoDisableZoom ? "1" : "0"), INIFILE);
+
+            WriteINIValue("Basic", "UsingSingleNgCode", (UsingSingleNgCode ? "1" : "0"), INIFILE);
+            WriteINIValue("Basic", "SingleNgCode", SingleNgCode.ToString(), INIFILE);
 
             //WriteINIValue("Basic", "mark_rect", RecttoString(mark_rect), INIFILE);
             //WriteINIValue("Basic", "mark_org", PointFtoString(mark_org), INIFILE);

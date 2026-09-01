@@ -19,6 +19,7 @@ using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System.Collections.Generic;
 using System.Text;
+using Traveller106;
 
 
 namespace LaserAlignDX.Model
@@ -193,13 +194,14 @@ namespace LaserAlignDX.Model
                 }
                 #endregion
 
-                states[i] = (int)plcCode;
+                states[i] = FinalCode(plcCode);
                 i++;
 
                 _TRACE_LINE(sb, cell, plcCode);
             }
 
             _TRACE_END(sb, "SingleResult");
+
             return states;
         }
 
@@ -272,7 +274,7 @@ namespace LaserAlignDX.Model
                 }
                 #endregion
 
-                states[i] = (int)plcCode;
+                states[i] = FinalCode(plcCode);
                 i++;
 
                 _TRACE_LINE(sb, cell, plcCode);
@@ -324,6 +326,16 @@ namespace LaserAlignDX.Model
 
             _TRACE_END(sb, "ScanOffset");
             return states;
+        }
+
+        static int FinalCode(PlcResultCode code)
+        {
+            if (INI.Instance.UsingSingleNgCode)
+            {
+                if(code != PlcResultCode.OK && code != PlcResultCode.NG_EMPTY)
+                    return INI.Instance.SingleNgCode;
+            }
+            return (int)code;
         }
 
         /// <summary>

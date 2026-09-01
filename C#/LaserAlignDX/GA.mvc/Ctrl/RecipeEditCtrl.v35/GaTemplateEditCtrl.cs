@@ -364,54 +364,58 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         }
         private void OnRequestToLocateGoldenQuad(object sender, DoWorkEventArgs e)
         {
-#if(false)
-            e.Result = null;
-
-            if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
+            if (_xAlgorithm == MatchAlgorithmEnum.GridMatch)
             {
-                //VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
-                var errMsg = GaUtil.GetEnumDescription(ErrorCodes.WARN_NO_GOLDN_TEMPLATE_SETUP);
-                VsMessageBox.Warning(errMsg);
-                return;
-            }
+                e.Result = null;
 
-            if (_cviGoldenChipBox.Box != Rectangle.Round(_xGoldenChipRect))
-            {
-                // 重新 擷取 Golden Chip
-                BuildGoldenChipTemplate();
-            }
-
-            // 強制 重新抓取 goldenQuad2D
-            if ((e.Argument is bool force) && force || _goldenQuad2D == null)
-            {
-                try
+                if (_xBmpGoldenChipTemplate == null || _xGoldenChipRect == RectangleF.Empty)
                 {
-                    //var matcherComposite = _xRecipe.mvdprinttemp_Find;
-                    var matcherComposite = _sysModel?.AoiModel?.GetChipLocAoi()?.GetTemplateMatcher();
-
-                    matcherComposite.SetRecipeParams(_xRecipe.InspectParams);   //<<< 使用 matcherComposite.SetRecipeParams 才能反映 _xAlogrithm
-
-                    var matcher = matcherComposite.GetMatcher(0);
-                    matcher.Train(_xBmpGoldenChipTemplate);
-
-                    _goldenQuad2D = matcher.GoldenQuad2D?.Clone();
-                    _goldenQuad2D?.Offset(_xGoldenChipRect.X, _xGoldenChipRect.Y);
-
-                    // 回傳到 event args
-                    e.Result = _goldenQuad2D;
-                }
-                catch (Exception ex)
-                {
-                    var errMsg = GaUtil.GetEnumDescription(ErrorCodes.WARN_CAN_NOT_FETCH_QUAD_2D) + "\n\r\n\r" + ex.Message;
+                    //VsMessageBox.Warning("請先設定 晶粒匹配樣本!");
+                    var errMsg = GaUtil.GetEnumDescription(ErrorCodes.WARN_NO_GOLDN_TEMPLATE_SETUP);
                     VsMessageBox.Warning(errMsg);
                     return;
                 }
+
+                if (_cviGoldenChipBox.Box != Rectangle.Round(_xGoldenChipRect))
+                {
+                    // 重新 擷取 Golden Chip
+                    BuildGoldenChipTemplate();
+                }
+
+                // 強制 重新抓取 goldenQuad2D
+                if ((e.Argument is bool force) && force || _goldenQuad2D == null)
+                {
+                    try
+                    {
+                        //var matcherComposite = _xRecipe.mvdprinttemp_Find;
+                        var matcherComposite = _sysModel?.AoiModel?.GetChipLocAoi()?.GetTemplateMatcher();
+
+                        matcherComposite.SetRecipeParams(_xRecipe.InspectParams);   //<<< 使用 matcherComposite.SetRecipeParams 才能反映 _xAlogrithm
+
+                        var matcher = matcherComposite.GetMatcher(0);
+                        matcher.Train(_xBmpGoldenChipTemplate);
+
+                        _goldenQuad2D = matcher.GoldenQuad2D?.Clone();
+                        _goldenQuad2D?.Offset(_xGoldenChipRect.X, _xGoldenChipRect.Y);
+
+                        // 回傳到 event args
+                        e.Result = _goldenQuad2D;
+                    }
+                    catch (Exception ex)
+                    {
+                        var errMsg = GaUtil.GetEnumDescription(ErrorCodes.WARN_CAN_NOT_FETCH_QUAD_2D) + "\n\r\n\r" + ex.Message;
+                        VsMessageBox.Warning(errMsg);
+                        return;
+                    }
+                }
             }
-#endif
-            e.Result = new QvQuad2D()
+            else
             {
-                Corners = Array.ConvertAll(_cviGoldenChipBox.Corners, c => new QVector2(c.X, c.Y))
-            };
+                e.Result = new QvQuad2D()
+                {
+                    Corners = Array.ConvertAll(_cviGoldenChipBox.Corners, c => new QVector2(c.X, c.Y))
+                };
+            }
         }
         #endregion
 
