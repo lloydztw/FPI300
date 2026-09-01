@@ -38,11 +38,14 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine);
 
+        ///// <summary>
+        ///// 參數調試用
+        ///// </summary>
+        //void TryApplyFilters(Bitmap bmpSrc, out Bitmap bmpFeature, RectangleF? roiRect = null);
+
         /// <summary>
-        /// 參數調試用
+        /// 參數調試用 (保留)
         /// </summary>
         void AnalyzeGoldenData();
-
-
     }
 }

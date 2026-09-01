@@ -248,46 +248,65 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
 
-        #region 4B_找直线的参数_(舊)
-        [CategoryAttribute(_Cat04)]
-        [DisplayName("B00 测量方式")]
+        #region 4A_邊線前置濾波
+        const string _Cat04A = "4A. 邊線前置濾波";
+        [CategoryAttribute(_Cat04A)]
+        [DisplayName("01 灰階上限")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
+        [Browsable(false)]
+        public int GrayLimitHi { get; set; } = 255;
+
+        [CategoryAttribute(_Cat04A)]
+        [DisplayName("02 灰階下限")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
+        [Browsable(false)]
+        public int GrayLimitLo { get; set; } = 0;
+        #endregion
+
+
+        #region 4B_找邊線參數_(目前不會用到, AOI 內部根據載台顏色自動設定)
+        const string _Cat04B = "4B. 找邊線參數";
+        [CategoryAttribute(_Cat04B)]
+        [DisplayName("00 测量方式")]
         [TypeConverter(typeof(JzEnumConverter))]
         [Browsable(false)]
         public MeasureFindLineType MFLType { get; set; } = MeasureFindLineType.FindLineType_v1;
 
-        [CategoryAttribute(_Cat04), DescriptionAttribute("从左到右 true正向 false反向")]
-        [DisplayName("B01 左边查找方向")]
+        [CategoryAttribute(_Cat04B), DescriptionAttribute("从左到右 true正向 false反向")]
+        [DisplayName("01 左边查找方向")]
         [Browsable(false)]
         public bool bPositive0 { get; set; } = true;
-        [CategoryAttribute(_Cat04), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("B02 左边极性")]
+        [CategoryAttribute(_Cat04B), DescriptionAttribute("true白到黑 false黑到白")]
+        [DisplayName("02 左边极性")]
         [Browsable(false)]
         public bool bEdgePolarity0 { get; set; } = true;
 
-        [CategoryAttribute(_Cat04), DescriptionAttribute("从上到下 true正向 false反向")]
-        [DisplayName("B03 上边查找方向")]
+        [CategoryAttribute(_Cat04B), DescriptionAttribute("从上到下 true正向 false反向")]
+        [DisplayName("03 上边查找方向")]
         [Browsable(false)]
         public bool bPositive1 { get; set; } = true;
-        [CategoryAttribute(_Cat04), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("B04 上边极性")]
+        [CategoryAttribute(_Cat04B), DescriptionAttribute("true白到黑 false黑到白")]
+        [DisplayName("04 上边极性")]
         [Browsable(false)]
         public bool bEdgePolarity1 { get; set; } = true;
 
-        [CategoryAttribute(_Cat04), DescriptionAttribute("从左到右 true正向 false反向")]
-        [DisplayName("B05 右边查找方向")]
+        [CategoryAttribute(_Cat04B), DescriptionAttribute("从左到右 true正向 false反向")]
+        [DisplayName("05 右边查找方向")]
         [Browsable(false)]
         public bool bPositive2 { get; set; } = true;
         [CategoryAttribute(_Cat04), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("B06 右边极性")]
+        [DisplayName("06 右边极性")]
         [Browsable(false)]
         public bool bEdgePolarity2 { get; set; } = true;
 
-        [CategoryAttribute(_Cat04), DescriptionAttribute("从上到下 true正向 false反向")]
-        [DisplayName("B07 下边查找方向")]
+        [CategoryAttribute(_Cat04B), DescriptionAttribute("从上到下 true正向 false反向")]
+        [DisplayName("07 下边查找方向")]
         [Browsable(false)]
         public bool bPositive3 { get; set; } = true;
-        [CategoryAttribute(_Cat04), DescriptionAttribute("true白到黑 false黑到白")]
-        [DisplayName("B08 下边极性")]
+        [CategoryAttribute(_Cat04B), DescriptionAttribute("true白到黑 false黑到白")]
+        [DisplayName("08 下边极性")]
         [Browsable(false)]
         public bool bEdgePolarity3 { get; set; } = true;
         #endregion
@@ -591,22 +610,29 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
                 xChipDimScaleW = 1.0;
             if (xChipDimScaleH <= 0)
                 xChipDimScaleH = 1.0;
+
+            GrayLimitHi = int.Parse(ReadINIValue("LineBorder", "GrayLimitHi", "255", INIFILE));
+            GrayLimitLo = int.Parse(ReadINIValue("LineBorder", "GrayLimitLo", "0", INIFILE));
+
             //---------------------------------------------------------------------------------------------------
-            // 以下參數 目前沒有用到
+            // 以下 找邊線參數 目前沒有用到 (AOI 內部根據載台顏色自動設定)
             //---------------------------------------------------------------------------------------------------
-            MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
-            bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
-            bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
-            bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
-            bPositive3 = ReadINIValue("Basic", "bPositive3", "1", INIFILE) == "1";
-            bEdgePolarity0 = ReadINIValue("Basic", "bEdgePolarity0", "1", INIFILE) == "1";
-            bEdgePolarity1 = ReadINIValue("Basic", "bEdgePolarity1", "1", INIFILE) == "1";
-            bEdgePolarity2 = ReadINIValue("Basic", "bEdgePolarity2", "1", INIFILE) == "1";
-            bEdgePolarity3 = ReadINIValue("Basic", "bEdgePolarity3", "1", INIFILE) == "1";
+            #region NOT_USED_CODE
+            //MFLType = (MeasureFindLineType)int.Parse(ReadINIValue("Basic", "MFLType", "0", INIFILE));
+            //bPositive0 = ReadINIValue("Basic", "bPositive0", "1", INIFILE) == "1";
+            //bPositive1 = ReadINIValue("Basic", "bPositive1", "1", INIFILE) == "1";
+            //bPositive2 = ReadINIValue("Basic", "bPositive2", "1", INIFILE) == "1";
+            //bPositive3 = ReadINIValue("Basic", "bPositive3", "1", INIFILE) == "1";
+            //bEdgePolarity0 = ReadINIValue("Basic", "bEdgePolarity0", "1", INIFILE) == "1";
+            //bEdgePolarity1 = ReadINIValue("Basic", "bEdgePolarity1", "1", INIFILE) == "1";
+            //bEdgePolarity2 = ReadINIValue("Basic", "bEdgePolarity2", "1", INIFILE) == "1";
+            //bEdgePolarity3 = ReadINIValue("Basic", "bEdgePolarity3", "1", INIFILE) == "1";
+            #endregion
 
             //---------------------------------------------------------------------------------------------------
             // 以下改由 DtoX3MeasureSpec 於上層 RecipeFPIX3Class 處理
             //---------------------------------------------------------------------------------------------------
+            #region REPLACED_BY_DTO
             //bCheckInspect = ReadINIValue("Inspect", "bCheckInspect", "1", INIFILE) == "1";
             //bOpenLineMeasure = ReadINIValue("Basic", "bOpenLineMeasure", "0", INIFILE) == "1";
             //bCheckMeasureOffset = ReadINIValue("Basic", "bCheckMeasureOffset", "0", INIFILE) == "1";
@@ -616,11 +642,13 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //mHeightPercentage = float.Parse(ReadINIValue("Basic", "mHeightPercentage", "1.0", INIFILE));
             //XOffset = float.Parse(ReadINIValue("Basic", "XOffset", "0.05", INIFILE));
             //YOffset = float.Parse(ReadINIValue("Basic", "YOffset", "0.05", INIFILE));
+            #endregion
             _spec.Load(INIFILE);
 
             //---------------------------------------------------------------------------------------------------
             // 以下改由 LoadMaskRects 處理
             //---------------------------------------------------------------------------------------------------
+            #region REPLACED_BY_LoadMaskRects
             //RoiCount = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
             //int i = 0;
             //rectangles.Clear();
@@ -630,7 +658,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //    rectangles.Add(rectf);
             //    i++;
             //}
-
+            #endregion
             LoadMaskRects();
         }
         public override void Save()
@@ -662,21 +690,30 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Basic", "xChipDimScaleH", xChipDimScaleH.ToString(), INIFILE);
 
             //---------------------------------------------------------------------------------------------------
-            // 以下參數 目前沒有用到
+            // 找邊線前置濾波
             //---------------------------------------------------------------------------------------------------
-            WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
-            WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bPositive2", (bPositive2 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bPositive3", (bPositive3 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity0", (bEdgePolarity0 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity1", (bEdgePolarity1 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity2", (bEdgePolarity2 ? "1" : "0"), INIFILE);
-            WriteINIValue("Basic", "bEdgePolarity3", (bEdgePolarity3 ? "1" : "0"), INIFILE);
+            WriteINIValue("LineBorder", "GrayLimitHi", GrayLimitHi.ToString(), INIFILE);
+            WriteINIValue("LineBorder", "GrayLimitLo", GrayLimitLo.ToString(), INIFILE);
+
+            //---------------------------------------------------------------------------------------------------
+            // 以下 找邊線參數 目前沒有用到 (AOI 內部根據載台顏色自動設定)
+            //---------------------------------------------------------------------------------------------------
+            #region NOT_USED_CODE
+            //WriteINIValue("Basic", "MFLType", ((int)MFLType).ToString(), INIFILE);
+            //WriteINIValue("Basic", "bPositive0", (bPositive0 ? "1" : "0"), INIFILE);
+            //WriteINIValue("Basic", "bPositive1", (bPositive1 ? "1" : "0"), INIFILE);
+            //WriteINIValue("Basic", "bPositive2", (bPositive2 ? "1" : "0"), INIFILE);
+            //WriteINIValue("Basic", "bPositive3", (bPositive3 ? "1" : "0"), INIFILE);
+            //WriteINIValue("Basic", "bEdgePolarity0", (bEdgePolarity0 ? "1" : "0"), INIFILE);
+            //WriteINIValue("Basic", "bEdgePolarity1", (bEdgePolarity1 ? "1" : "0"), INIFILE);
+            //WriteINIValue("Basic", "bEdgePolarity2", (bEdgePolarity2 ? "1" : "0"), INIFILE);
+            //WriteINIValue("Basic", "bEdgePolarity3", (bEdgePolarity3 ? "1" : "0"), INIFILE);
+            #endregion
 
             //---------------------------------------------------------------------------------------------------
             // 以下改由 DtoX3MeasureSpec 於上層 RecipeFPIX3Class 處理
             //---------------------------------------------------------------------------------------------------
+            #region REPLACED_BY_DTO
             //WriteINIValue("Inspect", "bCheckInspect", (bCheckInspect ? "1" : "0"), INIFILE);
             //WriteINIValue("Basic", "bOpenLineMeasure", (bOpenLineMeasure ? "1" : "0"), INIFILE);
             //WriteINIValue("Basic", "bCheckMeasureOffset", (bCheckMeasureOffset ? "1" : "0"), INIFILE);
@@ -686,6 +723,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //WriteINIValue("Basic", "mHeightPercentage", mHeightPercentage.ToString(), INIFILE);
             //WriteINIValue("Basic", "XOffset", XOffset.ToString(), INIFILE);
             //WriteINIValue("Basic", "YOffset", YOffset.ToString(), INIFILE);
+            #endregion
             _spec.Save(INIFILE);
 
             //>>> SaveMaskRects();
