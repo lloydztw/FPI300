@@ -151,49 +151,48 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Browsable(true)]
         public float xChipOverlap { get; set; } = 0.5f;
 
-        //>>> const string _Cat1A = "A01.A '格點型' 晶粒定位";
-        [CategoryAttribute(_Cat03), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '格點門限值'")]
-        [DisplayName("A1 格點型晶粒 門限")]
+        const string _Cat03A = "3A. 晶粒定位 (格點型)";
+        [CategoryAttribute(_Cat03A), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '格點門限值'")]
+        [DisplayName("01 晶粒格點門限")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
         [Browsable(true)]
         public int xGridPadThreshold { get; set; } = 0;
 
-        [CategoryAttribute(_Cat03), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '去刮痕閥值'")]
-        [DisplayName("A2 格點型晶粒 去刮痕閥值")]
+        [CategoryAttribute(_Cat03A), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '去刮痕閥值'")]
+        [DisplayName("02 去刮痕閥值")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
         [Browsable(true)]
         public int xDistTransThreshold { get; set; } = 0;
 
-        [CategoryAttribute(_Cat03), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '啟用大角度定位'")]
-        [DisplayName("A3 格點型晶粒 啟用大角度定位")]
+        [CategoryAttribute(_Cat03A), DescriptionAttribute("搭配 '格點晶粒' 匹配演算法的 '啟用大角度定位'")]
+        [DisplayName("03 啟用大角度定位")]
         [Browsable(true)]
         public bool xUseLargePadGridAngle { get; set; } = false;
 
         //>>> const string _Cat1B = "A01.B '一般型' 晶粒定位";
-        [CategoryAttribute(_Cat03), DescriptionAttribute("'一般型晶粒' 模板匹配的相似程度")]
-        [DisplayName("B1 一般型晶粒 相似度")]
+        const string _Cat03B = "3B. 晶粒定位 (一般型)";
+        [CategoryAttribute(_Cat03B), DescriptionAttribute("'一般型晶粒' 模板匹配的相似程度")]
+        [DisplayName("01 晶粒相似度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 1, 0.1f, 2)]
         [Browsable(true)]
         public float xTolerance { get; set; } = 0.5f;
 
-        [CategoryAttribute(_Cat03), DescriptionAttribute("'一般型晶粒' 模板匹配的允许的角度")]
-        [DisplayName("B2 一般型晶粒 角度範圍")]
+        [CategoryAttribute(_Cat03B), DescriptionAttribute("'一般型晶粒' 模板匹配的允许的角度")]
+        [DisplayName("02 角度範圍")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 360, 1f, 2)]
         [Browsable(true)]
         public float xAngle { get; set; } = 30f;
 
-        [CategoryAttribute(_Cat03), DescriptionAttribute("'一般型晶粒' 模板匹配的搜寻范围内重叠率")]
-        [DisplayName("B3 一般型晶粒 匹配重叠率 (%)")]
+        [CategoryAttribute(_Cat03B), DescriptionAttribute("'一般型晶粒' 模板匹配的搜寻范围内重叠率")]
+        [DisplayName("03 匹配重叠率 (%)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0f, 100f, 1f, 0)]
         [Browsable(true)]
         public int xMaxOverlap { get; set; } = 80;
-
-
         #endregion
 
 

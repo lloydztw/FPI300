@@ -39,7 +39,7 @@
             this.btnTryQrCode.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnTryQrCode.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnTryQrCode.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnTryQrCode.Location = new System.Drawing.Point(28, 38);
+            this.btnTryQrCode.Location = new System.Drawing.Point(28, 37);
             this.btnTryQrCode.Margin = new System.Windows.Forms.Padding(4);
             this.btnTryQrCode.Name = "btnTryQrCode";
             this.btnTryQrCode.Size = new System.Drawing.Size(160, 52);
@@ -52,10 +52,10 @@
             this.rtbCodeContent.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.rtbCodeContent.BackColor = System.Drawing.Color.Ivory;
             this.rtbCodeContent.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtbCodeContent.Location = new System.Drawing.Point(202, 38);
+            this.rtbCodeContent.Location = new System.Drawing.Point(202, 37);
             this.rtbCodeContent.Name = "rtbCodeContent";
             this.rtbCodeContent.ReadOnly = true;
-            this.rtbCodeContent.Size = new System.Drawing.Size(348, 52);
+            this.rtbCodeContent.Size = new System.Drawing.Size(352, 52);
             this.rtbCodeContent.TabIndex = 54;
             this.rtbCodeContent.Text = "";
             // 
@@ -65,10 +65,11 @@
             this.groupBox1.Controls.Add(this.rtbCodeContent);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(8, 2);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(8);
+            this.groupBox1.Location = new System.Drawing.Point(8, 0);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(8, 0, 8, 8);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(576, 116);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 0, 3, 3);
+            this.groupBox1.Size = new System.Drawing.Size(580, 118);
             this.groupBox1.TabIndex = 78;
             this.groupBox1.TabStop = false;
             // 
@@ -77,8 +78,9 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.groupBox1);
+            this.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
             this.Name = "GwRcpQrCodeBtnsPanel";
-            this.Padding = new System.Windows.Forms.Padding(8, 2, 12, 2);
+            this.Padding = new System.Windows.Forms.Padding(8, 0, 8, 2);
             this.Size = new System.Drawing.Size(596, 120);
             this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);

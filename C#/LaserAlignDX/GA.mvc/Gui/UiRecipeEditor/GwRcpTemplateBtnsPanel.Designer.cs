@@ -39,7 +39,7 @@
             this.btnPickGolden.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnPickGolden.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.btnPickGolden.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnPickGolden.Location = new System.Drawing.Point(205, 39);
+            this.btnPickGolden.Location = new System.Drawing.Point(205, 38);
             this.btnPickGolden.Margin = new System.Windows.Forms.Padding(4);
             this.btnPickGolden.Name = "btnPickGolden";
             this.btnPickGolden.Size = new System.Drawing.Size(160, 52);
@@ -53,10 +53,11 @@
             this.groupBox1.Controls.Add(this.btnPickGolden);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.groupBox1.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(8, 2);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(8);
+            this.groupBox1.Location = new System.Drawing.Point(8, 0);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(8, 0, 8, 8);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(409, 116);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 0, 3, 3);
+            this.groupBox1.Size = new System.Drawing.Size(413, 118);
             this.groupBox1.TabIndex = 77;
             this.groupBox1.TabStop = false;
             // 
@@ -65,7 +66,7 @@
             this.btnRotateGolden.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.btnRotateGolden.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnRotateGolden.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnRotateGolden.Location = new System.Drawing.Point(32, 39);
+            this.btnRotateGolden.Location = new System.Drawing.Point(32, 38);
             this.btnRotateGolden.Margin = new System.Windows.Forms.Padding(4);
             this.btnRotateGolden.Name = "btnRotateGolden";
             this.btnRotateGolden.Size = new System.Drawing.Size(160, 52);
@@ -78,8 +79,9 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.groupBox1);
+            this.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
             this.Name = "GwRcpTemplateBtnsPanel";
-            this.Padding = new System.Windows.Forms.Padding(8, 2, 12, 2);
+            this.Padding = new System.Windows.Forms.Padding(8, 0, 8, 2);
             this.Size = new System.Drawing.Size(429, 120);
             this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
