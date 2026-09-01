@@ -103,7 +103,7 @@ namespace LaserAlignDX.BasicSpace.LineFinder.V1
         #region PRIVATE_FUNCIONS
         private CMvdLineSegmentF runMvd(CMvdImage cInputImg, CMvdRectangleF roi, int borderId)
         {
-            CMvdLineSegmentF retLineSegment = null;
+            CMvdLineSegmentF resultLineSegment = null;
 
             try
             {
@@ -111,8 +111,8 @@ namespace LaserAlignDX.BasicSpace.LineFinder.V1
 
                 // 边缘极性: 從背景進入晶粒的變化
                 var polarity = Background == EdgeBackGroundType.Dark? 
-                            EdgeSearchPolarity.BlackToWhite: 
-                            EdgeSearchPolarity.WhiteToBlack;
+                                EdgeSearchPolarity.BlackToWhite: 
+                                EdgeSearchPolarity.WhiteToBlack;
 
                 // 搜索方向
                 string orient;
@@ -186,22 +186,22 @@ namespace LaserAlignDX.BasicSpace.LineFinder.V1
 
                 if (mvdResult.Status == 1)
                 {
-                    retLineSegment = new CMvdLineSegmentF(mvdResult.LineStartPoint, mvdResult.LineEndPoint);
+                    resultLineSegment = new CMvdLineSegmentF(mvdResult.LineStartPoint, mvdResult.LineEndPoint);
                 }
                 else
                 {
-                    LtDebug.LOG.Warn("MvdLineFinder[{0}]: 找不到邊線 Result Status = {1}", borderId, mvdResult.Status);
+                    LtDebug.LOG.Warn("MvdFindLineClassV1[{0}]: 找不到邊線 Result Status = {1}", borderId, mvdResult.Status);
                 }
             }
             catch (MvdException ex)
             {
-                LtDebug.LOG.Error(ex, "MvdFindLineClass: Fail with ErrorCode: 0x{0:X}", ex.ErrorCode);
+                LtDebug.LOG.Error(ex, "MvdFindLineClassV1: Fail with ErrorCode: 0x{0:X}", ex.ErrorCode);
             }
             catch (System.Exception ex)
             {
-                LtDebug.LOG.Error(ex, "MvdFindLineClass: Fail");
+                LtDebug.LOG.Error(ex, "MvdFindLineClassV1: Fail");
             }
-            return retLineSegment;
+            return resultLineSegment;
         }
 
         void adjustRoiAngle(CMvdRectangleF roi, bool inverse)

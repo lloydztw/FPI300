@@ -956,14 +956,9 @@ namespace LaserAlignDX.AoiModel.V30
         /// <summary>
         /// 使用海康套件尋找直線
         /// </summary>
-        CMvdLineSegmentF _RunMvdLineFinder(IMvdLineFinder mvdFindLineClass, int borderIndex, Bitmap bmp, CMvdRectangleF roi, double angleRef = 0)
+        CMvdLineSegmentF _RunMvdLineFinder(IMvdLineFinder mvdLineFinder, int borderIndex, Bitmap bmp, CMvdRectangleF roi, double angleRef = 0)
         {
             int NP = 4;
-
-            //if (mvdFindLineClass == null)
-            //    mvdFindLineClass = new MvdFindLineClass();
-            //borderIndex %= NP;
-            //cMvdLineSegmentFsOut[borderIndex] = null;
 
             //>>> 根據 angleRef 將 borderIndex 正規化
             int sideIndex;
@@ -983,36 +978,36 @@ namespace LaserAlignDX.AoiModel.V30
             // 左
             if (sideIndex == 0)
             {
-                mvdFindLineClass.bPositive = _xInspect.bPositive0;
-                mvdFindLineClass.bFindOrient = true;
-                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity0;
+                mvdLineFinder.bPositive = _xInspect.bPositive0;
+                mvdLineFinder.bFindOrient = true;
+                mvdLineFinder.bEdgePolarity = _xInspect.bEdgePolarity0;
             }
             // 上
             else if (sideIndex == 1)
             {
-                mvdFindLineClass.bPositive = _xInspect.bPositive1;
-                mvdFindLineClass.bFindOrient = false;
-                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity1;
+                mvdLineFinder.bPositive = _xInspect.bPositive1;
+                mvdLineFinder.bFindOrient = false;
+                mvdLineFinder.bEdgePolarity = _xInspect.bEdgePolarity1;
             }
             // 右
             else if (sideIndex == 2)
             {
-                mvdFindLineClass.bPositive = _xInspect.bPositive2;
-                mvdFindLineClass.bFindOrient = true;
-                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity2;
+                mvdLineFinder.bPositive = _xInspect.bPositive2;
+                mvdLineFinder.bFindOrient = true;
+                mvdLineFinder.bEdgePolarity = _xInspect.bEdgePolarity2;
             }
             // 下
             else if (sideIndex == 3)
             {
-                mvdFindLineClass.bPositive = _xInspect.bPositive3;
-                mvdFindLineClass.bFindOrient = false;
-                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity3;
+                mvdLineFinder.bPositive = _xInspect.bPositive3;
+                mvdLineFinder.bFindOrient = false;
+                mvdLineFinder.bEdgePolarity = _xInspect.bEdgePolarity3;
             }
 
-            mvdFindLineClass.Background = _xInspect.xCarrierBackground;
-            var resultLine = mvdFindLineClass.Run(bmp, roi, sideIndex);
+            mvdLineFinder.Background = _xInspect.xCarrierBackground;
 
-            //cMvdLineSegmentFsOut[borderIndex] = resultLine;
+            var resultLine = mvdLineFinder.Run(bmp, roi, sideIndex);
+
             return resultLine;
         }
 
@@ -1025,7 +1020,7 @@ namespace LaserAlignDX.AoiModel.V30
         void _RunMvdPairLineFinder(int iSideIndex, Bitmap bmp, CMvdRectangleF r)
         {
             // 停用, 改用新的計算方式 !!!
-#if (OPT_LEGACY)
+#if (OPT_RESERVED)
             if (mvdPairLineClass == null)
                 mvdPairLineClass = new MvdPairLineClass();
             cMvdLineSegmentFsOut[iSideIndex] = null;
