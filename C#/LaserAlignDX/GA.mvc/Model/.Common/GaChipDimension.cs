@@ -233,6 +233,7 @@ namespace LaserAlignDX.Model
                 UpdateMeasurement("Y", value);
             }
         }
+
         /// <summary>
         /// 尺寸量測點 (左上右下) (單位 pixels) 
         /// (FullFov Cammera Coordinates)
@@ -241,8 +242,9 @@ namespace LaserAlignDX.Model
         public QVector[] DimMeasurePoints
         {
             get => GetMeasureCamPointsQuad();
-            set => SetMeasureCamPointsQuad(value);
+            //set => SetMeasureCamPointsQuad(value);
         }
+
         /// <summary>
         /// 取得晶粒 像素 長寬 (單位 pixels) (GUI 顯示用)
         /// </summary>

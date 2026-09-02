@@ -17,6 +17,7 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
+using LeTian.AoiLib;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -57,17 +58,56 @@ namespace LaserAlignDX.Model
         /// </summary>
         public EzBlocsGrid PadsGrid { get; set; } = null;
 
-#if (OPT_OLD_DATA_FIELDS)
+#if (OPT_OLD_LINE_BORDER_FUNCTIONS)
         /// <summary>
         /// 抓到的邊線 (左上右下) (單位 pixels) (FullFov Cammera Coordinates)
         /// (圖示用)
         /// </summary>
-        public EzLSD.LineSegment[] LineSegments { get; set; } = new EzLSD.LineSegment[4];
-
+        public EzLSD.LineSegment[] LineSegments
+        {
+            get
+            {
+                var lines = new EzLSD.LineSegment[4];
+                LineBorderPairs.Get(EdgeBorder.Left, out lines[0]);
+                LineBorderPairs.Get(EdgeBorder.Top, out lines[1]);
+                LineBorderPairs.Get(EdgeBorder.Right, out lines[2]);
+                LineBorderPairs.Get(EdgeBorder.Bottom, out lines[3]);
+                return lines;
+            }
+            set
+            {
+                var lines = value;
+                if (lines == null || lines.Length < 4) return;
+                LineBorderPairs.Set(EdgeBorder.Left, lines[0]);
+                LineBorderPairs.Set(EdgeBorder.Top, lines[1]);
+                LineBorderPairs.Set(EdgeBorder.Right, lines[2]);
+                LineBorderPairs.Set(EdgeBorder.Bottom, lines[3]);
+            }
+        }
         /// <summary>
         /// 邊線拉框 (左上右下) (單位 pixels) (FullFov Cammera Coordinates)
         /// </summary>
-        public QvBox2D[] LineBorderBoxes { get; set; } = new QvBox2D[4];
+        public QvBox2D[] LineBorderBoxes //{ get; set; } = new QvBox2D[4];
+        {
+            get
+            {
+                var borderBoxes = new QvBox2D[4];
+                LineBorderPairs.Get(EdgeBorder.Left, out borderBoxes[0]);
+                LineBorderPairs.Get(EdgeBorder.Top, out borderBoxes[1]);
+                LineBorderPairs.Get(EdgeBorder.Right, out borderBoxes[2]);
+                LineBorderPairs.Get(EdgeBorder.Bottom, out borderBoxes[3]);
+                return borderBoxes;
+            }
+            set
+            {
+                var borderBoxes = value;
+                if (borderBoxes == null || borderBoxes.Length < 4) return;
+                LineBorderPairs.Set(EdgeBorder.Left, borderBoxes[0]);
+                LineBorderPairs.Set(EdgeBorder.Top, borderBoxes[1]);
+                LineBorderPairs.Set(EdgeBorder.Right, borderBoxes[2]);
+                LineBorderPairs.Set(EdgeBorder.Bottom, borderBoxes[3]);
+            }
+        }
 #endif
 
         /// <summary>

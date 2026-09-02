@@ -700,6 +700,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void syncRegionBox(EzBloc cursorBloc)
         {
+            if (_cviRegionBox == null)
+                return;
+
             //>>> var cursorBloc = GetCursorBloc(0);
             var cellBloc = cursorBloc is CellBloc cb ? cb : cursorBloc?.Tag as CellBloc;
             var activeCell = cellBloc?.Cell;

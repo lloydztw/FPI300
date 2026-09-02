@@ -16,9 +16,11 @@
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
 using LeTian.AoiLib;
+using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Controls;
 
 namespace LaserAlignDX.Model
 {
@@ -29,13 +31,13 @@ namespace LaserAlignDX.Model
         /// <summary>
         /// 邊線拉框 (單位 pixels) (FullFov Cammera Coordinates)
         /// </summary>
-        public QvBox2D[] Borders = new QvBox2D[2];
+        public readonly QvBox2D[] Borders = new QvBox2D[2];
 
         /// <summary>
         /// 抓到的邊線 (單位 pixels) (FullFov Cammera Coordinates)
         /// (圖示用)
         /// </summary>
-        public EzLSD.LineSegment[] LineSegments = new EzLSD.LineSegment[2];
+        public readonly EzLSD.LineSegment[] LineSegments = new EzLSD.LineSegment[2];
 
         /// <summary>
         /// 目標值 (Runtime Data)
@@ -268,36 +270,76 @@ namespace LaserAlignDX.Model
             return numX + numY;
         }
 
+        #region INTERFACE_FOR_SIMPLE_QUAD_為了相容_舊接口
         /// <summary>
-        /// 取得 左, 上, 右, 下, 四邊線（增加防禦性檢查）
+        /// 取得 左, 上, 右, 下, 四邊線
         /// </summary>
-        public EzLSD.LineSegment[] GetQuadLineSegments()
+        public EzLSD.LineSegment[] GetQuadLineSegments(bool allowsNull = false)
         {
-            var lines = new List<EzLSD.LineSegment>();
-
-            if (_dict.TryGetValue("X", out var pairX) && pairX?.LineSegments != null)
+            if (!_dict.TryGetValue("X", out var pairX) && allowsNull)
             {
-                if (pairX.LineSegments.Length > 0 && pairX.LineSegments[0] != null)
-                    lines.Add(pairX.LineSegments[0]); // Left
-
-                if (pairX.LineSegments.Length > 1 && pairX.LineSegments[1] != null)
-                    lines.Add(pairX.LineSegments[1]); // Right
+                _dict["X"] = pairX = new LineBorderPair();
+            }
+            if (!_dict.TryGetValue("Y", out var pairY) && allowsNull)
+            {
+                _dict["Y"] = pairY = new LineBorderPair();
             }
 
-            if (_dict.TryGetValue("Y", out var pairY) && pairY?.LineSegments != null)
-            {
-                if (pairY.LineSegments.Length > 0 && pairY.LineSegments[0] != null)
-                    lines.Add(pairY.LineSegments[0]); // Top
-
-                if (pairY.LineSegments.Length > 1 && pairY.LineSegments[1] != null)
-                    lines.Add(pairY.LineSegments[1]); // Bottom
-            }
-
-            if (lines.Count != 4)
+            if (pairX == null || pairY == null)
                 return null;
 
-            return lines.ToArray();
+            var lines = new[]
+            {
+                pairX?.LineSegments[0],
+                pairY?.LineSegments[0],
+                pairX?.LineSegments[1],
+                pairY?.LineSegments[1],
+            };
+
+            if (!allowsNull)
+            {
+                foreach (var line in lines)
+                {
+                    if (line == null)
+                        return null;
+                }
+            }
+
+            return lines;
         }
+        public bool Get(EdgeBorder eb, out EzLSD.LineSegment borderLine)
+        {
+            (string key, int i) = eb.GetKeyOffset();
+            if (_dict.TryGetValue(key, out var pair))
+                borderLine = pair.LineSegments[i];
+            else
+                borderLine = null;
+            return borderLine != null;
+        }
+        public void Set(EdgeBorder eb, EzLSD.LineSegment borerLine)
+        {
+            (string key, int i) = eb.GetKeyOffset();
+            if (!_dict.TryGetValue(key, out var pair))
+                _dict[key] = pair = new LineBorderPair();
+            pair.LineSegments[i] = borerLine;
+        }
+        public bool Get(EdgeBorder eb, out QvBox2D borderBox)
+        {
+            (string key, int i) = eb.GetKeyOffset();
+            if (_dict.TryGetValue(key, out var pair))
+                borderBox = pair.Borders[i];
+            else
+                borderBox = null;
+            return borderBox != null;
+        }
+        public void Set(EdgeBorder eb, QvBox2D borderBox)
+        {
+            (string key, int i) = eb.GetKeyOffset();
+            if (!_dict.TryGetValue(key, out var pair))
+                _dict[key] = pair = new LineBorderPair();
+            pair.Borders[i] = borderBox;
+        }
+        #endregion
     }
 
 
@@ -308,8 +350,8 @@ namespace LaserAlignDX.Model
             switch (eb)
             {
                 case EdgeBorder.Left: return ("X", 0);
-                case EdgeBorder.Right: return ("X", 1);
                 case EdgeBorder.Top: return ("Y", 0);
+                case EdgeBorder.Right: return ("X", 1);
                 case EdgeBorder.Bottom: return ("Y", 1);
             }
             return (null, -1);

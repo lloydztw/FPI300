@@ -276,7 +276,9 @@ namespace LaserAlignDX.Model.Coords.V36
 
                 //(2) 取得 camMeasurePoints (pixels)
                 var camMeasurePoints = getDimMeasurePoints(lines, chipQuad2D);
-                chipData.ChipDimension.DimMeasurePoints = camMeasurePoints;
+                //chipData.ChipDimension.DimMeasurePoints = camMeasurePoints;
+                chipData.ChipDimension.UpdateMeasurement("X", camMeasurePoints[0], camMeasurePoints[2]);
+                chipData.ChipDimension.UpdateMeasurement("Y", camMeasurePoints[1], camMeasurePoints[3]);
 
                 //(3) 平移到 LOCAL (以 runtimeChipCenter 當原點)
                 var measurePoints = Array.ConvertAll(camMeasurePoints, pt => (pt != null) ? pt - runtimeChipCenter : runtimeChipCenter);

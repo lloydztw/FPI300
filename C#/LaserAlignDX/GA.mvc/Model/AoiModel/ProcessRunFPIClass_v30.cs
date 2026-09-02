@@ -24,7 +24,9 @@ using System.Drawing;
 using System.Threading;
 using VisionDesigner;
 
-using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.V30.AoiModel_ChipMeasure;
+using AoiModel_ChipMeasureQuad = LaserAlignDX.AoiModel.V31.AoiModel_ChipMeasure;
+using AoiModel_ChipMeasureNew = LaserAlignDX.AoiModel.V35.AoiModel_ChipMeasure;
+
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 
@@ -62,8 +64,12 @@ namespace LaserAlignDX.AoiModel.V3
             // 請把自己清乾淨
             _aoiChipLoc?.Dispose();
             _aoiChipLoc = null;
-            _aoiChipMeasure?.Dispose();
-            _aoiChipMeasure = null;
+            
+            _aoiChipMeasureQ?.Dispose();
+            _aoiChipMeasureQ = null;
+            _aoiChipMeasureN?.Dispose();
+            _aoiChipMeasureN = null;
+            
             _aoiChipDefects?.Dispose();
             _aoiChipDefects = null;
             _aoiFlyCam?.Dispose();
@@ -108,7 +114,20 @@ namespace LaserAlignDX.AoiModel.V3
         #region SUB_MODELS
         AoiModel_EmptyTray _aoiEmptyTray = new AoiModel_EmptyTray();
         AoiModel_ChipLoc _aoiChipLoc = new AoiModel_ChipLoc();
-        AoiModel_ChipMeasure _aoiChipMeasure = new AoiModel_ChipMeasure();
+
+        IAoiChipMeasurer _aoiChipMeasure
+        {
+            get
+            {
+                if (_xRecipe.LineBorderParams.IsSimpleQuad)
+                    return _aoiChipMeasureQ;
+                else 
+                    return _aoiChipMeasureN;
+            }
+        }
+        AoiModel_ChipMeasureQuad _aoiChipMeasureQ = new AoiModel_ChipMeasureQuad();
+        AoiModel_ChipMeasureNew _aoiChipMeasureN = new AoiModel_ChipMeasureNew();
+
         AoiModel_Defects _aoiChipDefects = new AoiModel_Defects();
         AoiModel_QrCode _aoiQrCode = new AoiModel_QrCode();
         AoiModel_FlyCam _aoiFlyCam = new AoiModel_FlyCam();
@@ -117,7 +136,14 @@ namespace LaserAlignDX.AoiModel.V3
 
         void initSubModels()
         {
-            var subModels = new AoiModelBase[] { _aoiChipLoc, _aoiChipMeasure, _aoiChipDefects, _aoiQrCode, _aoiEmptyTray };
+            var subModels = new AoiModelBase[] { 
+                _aoiChipLoc, 
+                _aoiChipMeasureQ,
+                _aoiChipMeasureN,
+                _aoiChipDefects, 
+                _aoiQrCode, 
+                _aoiEmptyTray 
+            };
             foreach (var subModel in subModels)
             {
                 //model.OnAoiBegin+=
@@ -321,7 +347,6 @@ namespace LaserAlignDX.AoiModel.V3
 
             return err;
         }
-
         public ErrorCodes BuildMicroChipTransform(LineBorderPairsCollection lineEdgePairs, Bitmap regionBmp, RectangleF regionRoi)
         {
             //NOTE: lineEdgePairs 輸入單位為 pixels (必須為 FullFov Camera Coordinates)
@@ -340,9 +365,10 @@ namespace LaserAlignDX.AoiModel.V3
                 var microTrf = _sysModel.GetMicroTransform(carrierID);
                 
                 //(2) 有 QuadLines (使用原來的 MicroTransform 計算方式)
-                var quadLines = lineEdgePairs.GetQuadLineSegments();
-                if (quadLines != null && quadLines.Length >= 4)
+                if (_xRecipe.LineBorderParams.IsSimpleQuad)
                 {
+                    var quadLines = lineEdgePairs.GetQuadLineSegments();
+
                     //(2.0) 檢查 PadsGrid
                     if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch && chipData.PadsGrid == null)
                     {
@@ -373,7 +399,7 @@ namespace LaserAlignDX.AoiModel.V3
 
                     //(3.2) 利用 chipQuad 建構 quadLines
                     int NP = 4;
-                    quadLines = new EzLSD.LineSegment[NP];
+                    var quadLines = new EzLSD.LineSegment[NP];
                     var corners = chipQuad.Corners;
                     for (int i = 0; i < NP; i++)
                     {
@@ -518,7 +544,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             #region 把 LotID 與 StripID 設定給 SubAoiModel
             _aoiChipLoc.LotData = this.LotData;
-            _aoiChipMeasure.LotData = this.LotData;
+            ((AoiModelBase)_aoiChipMeasure).LotData = this.LotData;
             _aoiEmptyTray.LotData = this.LotData;
             #endregion
 

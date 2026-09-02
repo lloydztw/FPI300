@@ -16,10 +16,10 @@
 using JetEazy.FormSpace;
 using JetEazy.Lang;
 using JetEazy.Utils;
-using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
@@ -86,9 +86,18 @@ namespace LaserAlignDX.Mvc.Gui
             sb.Append(QMSG.T("格點")).Append(": [").Append(row).Append(",").Append(col).Append("]");
 
             #region 尺寸量測詳細點位
-            var meansurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
-            if (meansurePts != null && meansurePts.Length >= 4 &&
-                meansurePts[0] != null && meansurePts[1] != null &&
+            //var meansurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
+            var chipDim = cell?.ChipData.ChipDimension;
+            var measureX = chipDim?["X"];
+            var measureY = chipDim?["Y"];
+            var meansurePts = new[]
+            {
+                measureX?.CamMeasurePts[0],
+                measureY?.CamMeasurePts[0],
+                measureX?.CamMeasurePts[1],
+                measureY?.CamMeasurePts[1],
+            };
+            if (meansurePts[0] != null && meansurePts[1] != null &&
                 meansurePts[2] != null && meansurePts[3] != null)
             {
                 var dpX = (meansurePts[0] - meansurePts[2]).NormLength;
@@ -171,15 +180,26 @@ namespace LaserAlignDX.Mvc.Gui
 
             using (var regionBmp = fullfovBmp.Clone(Rectangle.Round(regionRoi), System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                //var err = aoiModel.BuildMicroChipTransform(goldenDim, chipData.GetQuadLineSegments(), regionBmp, regionRoi);
-
                 var goldenW = (float)numChipWidth.Value;
                 var goldenH = (float)numChipHeight.Value;
                 var goldenDim = new SizeF(goldenW, goldenH);
-                chipData?.LineBorderPairs?.SetTargetDists(goldenDim);
 
-                var err = aoiModel.BuildMicroChipTransform(chipData.LineBorderPairs, regionBmp, regionRoi);
-                return err;
+                var lineBorderPairs = chipData.LineBorderPairs;
+                lineBorderPairs.SetTargetDists(goldenDim);
+
+                if (_xRecipe.LineBorderParams.IsSimpleQuad)
+                {
+                    // 使用原有的計算方式
+                    var quadLines = lineBorderPairs.GetQuadLineSegments();
+                    var err = aoiModel.BuildMicroChipTransform(goldenDim, quadLines, regionBmp, regionRoi);
+                    return err;
+                }
+                else
+                {
+                    // 使用新的計算方式
+                    var err = aoiModel.BuildMicroChipTransform(lineBorderPairs, regionBmp, regionRoi);
+                    return err;
+                }
             }
         }
     }

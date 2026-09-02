@@ -27,7 +27,6 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Traveller106;
@@ -35,7 +34,7 @@ using VisionDesigner;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
 
-namespace LaserAlignDX.AoiModel.V30
+namespace LaserAlignDX.AoiModel.V35
 {
     /// <summary>
     /// 晶粒尺寸量測
@@ -494,10 +493,16 @@ namespace LaserAlignDX.AoiModel.V30
             #region 尺寸長寬量測
             try
             {
-                //(1) LineSegments (FullFov Camera Coordinates) (單位 pixels)
-                var quadLines = chipData.LineBorderPairs.GetQuadLineSegments();
-                if (quadLines != null && quadLines.Length >= 4)
+                //(1) Simple Quad Lines
+                if (_xRecipe.LineBorderParams.IsSimpleQuad)
                 {
+                    //(*) 重置量測項目
+                    var chipDim = cell?.ChipData?.ChipDimension;
+                    chipDim?.Reset(new[] { "X", "Y" });
+
+                    //(1.0) LineSegments (FullFov Camera Coordinates) (單位 pixels)
+                    var quadLines = chipData.LineBorderPairs.GetQuadLineSegments();
+
                     //(1.1) 使用 Micro Transform 計算 尺寸 與 邊隙
                     //    (結果會直接存入 cell.ChipData 內)
                     bool toMeasureGaps = _xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch;
@@ -508,7 +513,6 @@ namespace LaserAlignDX.AoiModel.V30
                     //(1.3) 記入結果
                     cell.RunWidth = dimension.Width;
                     cell.RunHeight = dimension.Height;
-                    //>>> cell.ChipData.ChipDimension.IsSimpleQuad = true;
 
                     //(1.4) 異常
                     if (err != ErrorCodes.OK)

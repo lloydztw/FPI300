@@ -71,13 +71,11 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             }
             return new RectangleF(0, 0, 100, 100);
         }
-
         private void setOldBorder(string key, int borderIndex, RectangleF rect)
         {
             if (!LineBorderPairs.TryGetValue(key, out var pair) || pair == null)
             {
-                pair = new LineBorderPair();
-                LineBorderPairs[key] = pair;
+                LineBorderPairs[key] = pair = new LineBorderPair();
             }
             pair.Borders[borderIndex] = QvQuad2D.From(rect).ToBox2D();
         }
