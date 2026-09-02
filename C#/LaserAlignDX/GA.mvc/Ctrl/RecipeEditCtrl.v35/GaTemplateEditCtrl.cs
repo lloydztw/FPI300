@@ -478,30 +478,35 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             try
             {
                 var srcBmp = _xBmpGoldenRegionTemplate;
-                if (srcBmp == null) return;
-
-                // 1. 取得來源 quad
-                var quadSrc = new QvQuad2D { Corners = Array.ConvertAll(_cviGoldenChipBox.Corners, c => new QVector2(c.X, c.Y)) };
-
-                // 2. 計算目標角度與需要旋轉的差值 angleDiff
-                double currentAngle = quadSrc.Angle;
-                double targetAngle = Math.Abs(currentAngle) < Math.Abs(Math.Abs(currentAngle) - 90) ? 0 : 90;
-                double angleDiff = currentAngle - targetAngle; // 需要旋轉的角度
-
-                // 2.1 如果角度差極小，代表已經是正的，直接返回
-                if (Math.Abs(angleDiff) < 0.01) 
+                if (srcBmp == null || srcBmp.Width <= 0 || srcBmp.Height <= 0)
                     return;
 
-                // 3. 以 quadSrc 中心點進行旋轉
+                // 1. 取得來源 quad
+                var quadSrc = new QvQuad2D
+                {
+                    Corners = Array.ConvertAll(_cviGoldenChipBox.Corners, c => new QVector2(c.X, c.Y))
+                };
+
+                // 2. 計算目標角度與旋轉差值
+                double currentAngle = quadSrc.Angle;
+                double targetAngle = Math.Abs(currentAngle) < Math.Abs(Math.Abs(currentAngle) - 90) ? 0 : 90;
+
+                // 目標角度 - 當前角度 (若 QvQuad2D 為順時針，OpenCV GetRotationMatrix2D 需留意逆時針正負號)
+                double deltaAngle = targetAngle - currentAngle;
+
+                // 2.1 角度差極小，無需旋轉
+                System.Diagnostics.Debug.WriteLine("轉正角度 = {0:0.00}°", deltaAngle);
+                if (Math.Abs(deltaAngle) < 0.01)
+                    return;
+
+                // 3. 以 quadSrc 中心點進行 OpenCV 旋轉
                 var center = new Point2f((float)quadSrc.Center.X, (float)quadSrc.Center.Y);
                 var dSize = new OpenCvSharp.Size(srcBmp.Width, srcBmp.Height);
 
-                // 注意：OpenCV 的旋轉角度正值為逆時針，因此使用 angleDiff 進行校正
-                using (var matRot = Cv2.GetRotationMatrix2D(center, angleDiff, 1.0))
+                using (var matRot = Cv2.GetRotationMatrix2D(center, deltaAngle, 1.0))
                 using (var srcBridge = new QxImageBridge(srcBmp))
                 using (var dstImg = new Mat(dSize, srcBridge.Image.Type()))
                 {
-                    // 使用 WarpAffine 進行整張圖擺正
                     Cv2.WarpAffine(
                         srcBridge.Image,
                         dstImg,
@@ -510,27 +515,28 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                         InterpolationFlags.Cubic,
                         BorderTypes.Replicate
                     );
+
                     bmpRot = dstImg.ToBitmap();
                 }
 
-                // 5. 同步更新 Target Quad 的點陣
+                // 4. 同步更新 Target Quad 與內部 ROI 幾何資訊
                 var quadDst = quadSrc.Clone();
                 quadDst.Angle = targetAngle;
-                var rectDst = quadDst.BoundaryRect;
+                quadDst.GetMidSize(out var midSize);
+                var rectDst = JetEazy.Qcvt.CreateCenterRect((float)quadDst.Center.X, (float)quadDst.Center.Y, midSize.Width, midSize.Height);
                 quadDst = QvQuad2D.From(rectDst);
 
-                // 6. 同步更新 _cviGoldenChipBox
                 _cviGoldenChipBox.Corners = Array.ConvertAll(quadDst.Corners, c => new PointF((float)c.X, (float)c.Y));
                 _cviGoldenChipBox.Box = Rectangle.Round(rectDst);
                 _xGoldenChipRect = rectDst;
 
-                // 7. 更新 Recipe
+                // 5. 直接將新圖交給物件管理 (內部已自動處置舊圖)
                 _xBmpGoldenRegionTemplate = bmpRot;
-                bmpRot = null;
+                bmpRot = null; // 轉移成功，防止 finally 處置到新圖
 
-                // 8. 更新影像 (to Recipe and to UI)
-                wndRegionViewer?.UpdateImage(_xBmpGoldenRegionTemplate, _Title1, false);
+                // 6. 更新 UI 與狀態
                 _isGoldenModified = true;
+                wndRegionViewer?.UpdateImage(_xBmpGoldenRegionTemplate, _Title1, false);
             }
             catch (Exception ex)
             {
@@ -538,6 +544,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             }
             finally
             {
+                // 僅在轉移失敗 (發生 Exception) 時，才需要處置未付諸使用的 bmpRot
                 bmpRot?.Dispose();
                 bmpRot = null;
             }
