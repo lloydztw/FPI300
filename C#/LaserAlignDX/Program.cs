@@ -24,12 +24,11 @@ namespace LaserAlignDX
             //通用的 Title
             QMSG.Title = GlobalConfig.TITLE;
 
-            LtAoiFactory.Migrate();
-
             // 解析引數 (args)
             bool go = parse_args(args);
             if (!go)
                 return;
+
 
             if (AppInstance())
             {
@@ -37,6 +36,8 @@ namespace LaserAlignDX
                 MessageBox.Show(msg, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
+
+            LtAoiFactory.Migrate();
 
             Form frm = new Traveller106.FormMainDX();
 
