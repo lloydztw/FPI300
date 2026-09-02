@@ -27,6 +27,7 @@ using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Traveller106;
@@ -141,7 +142,22 @@ namespace LaserAlignDX.AoiModel.V30
             resultLine = lineSegFinder.Run(bmpSrc, roiRect, (int)eBorder);
             return resultLine != null;
         }
-        
+
+        public bool TryApplyFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null)
+        {
+            if (needsToApplyGrayLimits() && bmpSrc != null && bmpSrc.Width > 2 && bmpSrc.Height > 2)
+            {
+                bmpResult = (Bitmap)bmpSrc.Clone();
+                applyFiltersForGrayLimits(bmpResult, backGroundColor);
+                return true;
+            }
+            else
+            {
+                bmpResult = null;
+                return false;
+            }
+        }
+
         public void AnalyzeGoldenData()
         {
             // RESERVED
@@ -431,10 +447,9 @@ namespace LaserAlignDX.AoiModel.V30
                 var lineBorderPairs = CalcRuntimeLocalLineBorderPairs(cell, cellRoi, cellBmp);
 
                 //(2) Pair by pair
-                foreach (var kv in lineBorderPairs)
+                foreach ((var key, var pair) in lineBorderPairs.IterPairs())
                 {
-                    keyName = kv.Key;
-                    var pair = kv.Value;
+                    keyName = key;
 
                     bool isHoriz = keyName.StartsWith("X");
                     int borderIdx = isHoriz ? 0 : 1;
@@ -493,7 +508,7 @@ namespace LaserAlignDX.AoiModel.V30
                     //(1.3) 記入結果
                     cell.RunWidth = dimension.Width;
                     cell.RunHeight = dimension.Height;
-                    cell.ChipData.ChipDimension.IsSimpleQuad = true;
+                    //>>> cell.ChipData.ChipDimension.IsSimpleQuad = true;
 
                     //(1.4) 異常
                     if (err != ErrorCodes.OK)
@@ -507,23 +522,22 @@ namespace LaserAlignDX.AoiModel.V30
                     if (chipDim == null)
                         return;
 
-                    chipDim.Reset();
-                    //var chipMeasurements = cell.ChipData.ChipDimension.Measurements;
-                    //chipMeasurements.Clear();
+                    //(2.1) 重置量測項目
+                    chipDim.Reset(_xRecipe.LineBorderParams.LineBorderPairs.Keys);
 
-                    //(2.1) 使用 Micro Transform 計算各種尺寸
+                    //(2.2) 使用 Micro Transform 計算各種尺寸
                     var carrierID = _sysModel.ActiveCarrierID;
                     var globalTrf = _sysModel.TransformsModel.GetCameraPhysicTransform(carrierID);
                     var err = _microTransform.CalcChipMeasurements(out var results, chipData.LineBorderPairs, chipData, globalTrf);
 
-                    //(2.2) 記入結果 (cell.ChipData.ChipDimension.Measurements)
+                    //(2.3) 記入結果 (cell.ChipData.ChipDimension)
                     foreach (var key in results.Keys)
-                        chipDim.Measurements[key] = results[key];
+                        chipDim.UpdateMeasurement(key, results[key]);
 
-                    //(2.2.*)
-                    cell.ChipData.ChipDimension.IsSimpleQuad = chipData.LineBorderPairs.IsSimpleQuad();
+                    //(2.3.*)
+                    //cell.ChipData.ChipDimension.IsSimpleQuad = chipData.LineBorderPairs.IsSimpleQuad();
 
-                    //(2.3) 異常
+                    //(2.4) 異常
                     if (err != ErrorCodes.OK)
                         throw new Exception(GaUtil.GetEnumDescription(err));
                 }
@@ -545,7 +559,7 @@ namespace LaserAlignDX.AoiModel.V30
             if (lineBorderPairs == null)
                 return;
 
-            if (lineBorderPairs.IsSimpleQuad())
+            if (_xRecipe.LineBorderParams.IsSimpleQuad)
             {
                 // 如果有 quadLines, 則使用原來的計算方式
                 _RunOneChipMeasurement_000(cell, cellBmp, ref cellRoi, threadId);
@@ -566,27 +580,31 @@ namespace LaserAlignDX.AoiModel.V30
             if (cell == null)
                 return;
 
-            bool ok = true;
+            bool isAllPass = true;
 
             if (_xInspect.optChipMeasurement)
             {
                 var chipDim = cell.ChipData?.ChipDimension;
-                var resultsDict = chipDim.MeasureResults;
 
                 //(A) 原有 判定方式 (長寬)
-                if (chipDim == null || chipDim.IsSimpleQuad)
+                if (_xRecipe.LineBorderParams.IsSimpleQuad)
                 {
                     //(A1) 判定 長寬 是否達標
+
                     //var dimResults = new bool[2];
                     //ok &= (dimResults[0] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
                     //ok &= (dimResults[1] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
                     //if (chipDim != null)
                     //    chipDim.PassNgResults = dimResults;
 
-                    ok &= (resultsDict["X"] = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax));
-                    ok &= (resultsDict["Y"] = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax));
+                    bool ok_x = !(cell.RunWidth < _xInspect.mWidthStandMin || cell.RunWidth > _xInspect.mWidthStandMax);
+                    bool ok_y = !(cell.RunHeight < _xInspect.mHeightStandMin || cell.RunHeight > _xInspect.mHeightStandMax);
+                    
+                    chipDim?.UpdateMeasurement("X", ok_x);
+                    chipDim?.UpdateMeasurement("Y", ok_y);
+                    isAllPass &= ok_x && ok_y;
 
-                    if (!ok)
+                    if (!isAllPass)
                     {
                         cell.MarkResult(InspectReason.NG_CUT);
                     }
@@ -597,41 +615,42 @@ namespace LaserAlignDX.AoiModel.V30
                         var gaps = cell.ChipData?.PadEdgeGaps;
                         if (gaps == null)
                         {
-                            ok = false;
+                            isAllPass = false;
                         }
                         else
                         {
                             var min = new QVector(_xInspect.PadEdgeGapX_Min, _xInspect.PadEdgeGapY_Min);
                             var max = new QVector(_xInspect.PadEdgeGapX_Max, _xInspect.PadEdgeGapY_Max);
                             var maxDiff = _xInspect.PadEdgeX_Diff_Upper;
-                            gaps.Check(out ok, min, max, maxDiff);
+                            gaps.Check(out isAllPass, min, max, maxDiff);
                         }
 
-                        if (!ok)
+                        if (!isAllPass)
                         {
                             cell.MarkResult(InspectReason.NG_EDGE_GAP);
                         }
                     }
                 }
 
-                // (B) 其他 判定方式 (逐項)
+                //(B) 其他 判定方式 (逐項)
                 else
                 {
-                    foreach(var kv in chipDim.Measurements)
+                    foreach(var key in chipDim.Keys)
                     {
-                        var key = kv.Key;
-                        var dist = kv.Value;
-                        if (key.StartsWith("X"))
-                        {
-                            ok &= (resultsDict[key] = !(dist < _xInspect.mWidthStandMin || dist > _xInspect.mWidthStandMax));
-                        }
-                        else
-                        {
-                            ok &= (resultsDict[key] = !(dist < _xInspect.mHeightStandMin || dist > _xInspect.mHeightStandMax));
-                        }
+                        var measurement = chipDim[key];
+                        if (measurement == null) continue;
+
+                        var dist = measurement.Value;
+
+                        bool ok = key.StartsWith("X")
+                            ? !(dist < _xInspect.mWidthStandMin || dist > _xInspect.mWidthStandMax)
+                            : !(dist < _xInspect.mHeightStandMin || dist > _xInspect.mHeightStandMax);
+
+                        measurement.IsPass = ok;
+                        isAllPass &= ok;
                     }
 
-                    if (!ok)
+                    if (!isAllPass)
                     {
                         cell.MarkResult(InspectReason.NG_CUT);
                     }
@@ -787,7 +806,7 @@ namespace LaserAlignDX.AoiModel.V30
         /// <summary>
         /// 計算 旋轉 + 平移 後的 邊線框對
         /// </summary>
-        private Dictionary<string, LineBorderPair> CalcRuntimeLocalLineBorderPairs(RegionCellX3Class cell, RectangleF cellRoi, Bitmap cellBmp = null, bool debug = false)
+        private LineBorderPairsCollection CalcRuntimeLocalLineBorderPairs(RegionCellX3Class cell, RectangleF cellRoi, Bitmap cellBmp = null, bool debug = false)
         {
             //------------------------------------------------------------------------------
             // REV_2026-08-30 改用 LineBorderPairs
@@ -795,6 +814,7 @@ namespace LaserAlignDX.AoiModel.V30
 
             //(0) 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
+
             //(0.1) 複製 goldenQuad 與 chipQuad
             var chipQuad = chipData?.ChipQuad2D?.Clone();
             var goldenQuad = chipData?.GoldenQuad2D?.Clone();
@@ -856,11 +876,12 @@ namespace LaserAlignDX.AoiModel.V30
                 #endregion
 
                 //(3) LineBorderPairs : 位於 goldenRegionRect (_xRecipe.xRectRegionPrint) 內部
-                var lineBorderPairs = new Dictionary<string, LineBorderPair>();
-                foreach (var kv in _xRecipe.LineBorderParams.LineBorderPairs)
+                Dictionary<string,LineBorderPair> rcpLineBorderPairs = _xRecipe.LineBorderParams;
+                var lineBorderPairs = new LineBorderPairsCollection();
+                foreach (var kvp in rcpLineBorderPairs)
                 {
-                    keyName = kv.Key;
-                    var pairNew = kv.Value.Clone();
+                    keyName = kvp.Key;
+                    var pairNew = kvp.Value.Clone();
 
                     //(3.1) 計算 lineBorder 與 goldenQuad 邊線, 相對距離
                     bool isHoriz = keyName.StartsWith("X");
@@ -911,7 +932,7 @@ namespace LaserAlignDX.AoiModel.V30
                     {
                         Cv2.CvtColor(bridge.Image, img, ColorConversionCodes.GRAY2BGR);
                         var boxes = new List<QvBox2D>();
-                        foreach (var pair in lineBorderPairs.Values)
+                        foreach ((var key, var pair) in lineBorderPairs.IterPairs())
                         {
                             foreach (var b in pair.Borders)
                                 boxes.Add(b);
@@ -929,6 +950,100 @@ namespace LaserAlignDX.AoiModel.V30
                 _LOG_ERROR(ex, $"{keyName} 無法計算 lineBorderPairs!");
                 throw ex;
             }
+        }
+        #endregion
+
+        #region FILTER_FUNCTIONS
+        bool needsToApplyGrayLimits()
+        {
+            return _xInspect != null && _xInspect.GrayLimitHi < 255 || _xInspect.GrayLimitLo > 0;
+        }
+        void applyFiltersForGrayLimits(Bitmap bmpWork, Color? backGroundColor = null)
+        {
+            var grayLimitHi = (byte)Math.Max(_xInspect.GrayLimitHi, _xInspect.GrayLimitLo);
+            var grayLimitLo = (byte)Math.Min(_xInspect.GrayLimitHi, _xInspect.GrayLimitLo);
+
+            using (var bridge = new QxImageBridge(bmpWork))
+            using (var mask = createGrayMask(bridge.Image, grayLimitLo, grayLimitHi))
+            {
+                var img = bridge.Image;
+                var fillColor = backGroundColor != null ?
+                    new Scalar(backGroundColor.Value.R, backGroundColor.Value.G, backGroundColor.Value.B) :
+                    sampleBackgroundColor(img);
+                img.SetTo(fillColor, mask);
+            }
+        }
+        Mat createGrayMask(Mat src, byte grayLimitLo, byte grayLimitHi)
+        {
+            Mat srcGray;
+
+            if (src.Type() == MatType.CV_8UC3)
+            {
+                srcGray = new Mat();
+                Cv2.CvtColor(src, srcGray, ColorConversionCodes.BGR2GRAY);
+            }
+            else if (src.Type() == MatType.CV_8UC1)
+            {
+                srcGray = src;
+            }
+            else if (src.Type() == MatType.CV_8UC4)
+            {
+                srcGray = new Mat();
+                Cv2.CvtColor(src, srcGray, ColorConversionCodes.BGRA2GRAY);
+            }
+            else
+            {
+                throw new ArgumentException("輸入影像必須為 CV_8UC1、CV_8UC3 或 CV_8UC4");
+            }
+
+            Mat mask = new Mat();
+
+            // 將像素值在 [grayLimitLo, grayLimitHi] 範圍內的設為 255 (白色)，其餘設為 0 (黑色)
+            Cv2.InRange(
+                srcGray,
+                Scalar.All(grayLimitLo),
+                Scalar.All(grayLimitHi),
+                mask
+            );
+
+            // 反向掩膜，使得在範圍內的像素為 0，範圍外的像素為 255
+            Cv2.BitwiseNot(mask, mask);
+
+            // CleanUp
+            if (srcGray != src)
+                srcGray?.Dispose();
+
+            return mask;
+        }
+        Scalar sampleBackgroundColor(Mat src)
+        {
+            // 取樣區域的大小
+            int wh = Math.Min(src.Width, src.Height);
+            int sampleSize = Math.Max(16, wh / 50);
+            sampleSize = Math.Min(sampleSize, wh / 4);
+            if (sampleSize < 8)
+                return Scalar.Black;
+
+            // 計算取樣區域的 左上角
+            Rect roi = new Rect(0, 0, sampleSize, sampleSize);
+            Scalar mean1 = Cv2.Mean(src[roi]);
+            // 計算取樣區域的 右上角
+            roi = new Rect(src.Width - sampleSize, 0, sampleSize, sampleSize);
+            Scalar mean2 = Cv2.Mean(src[roi]);
+            // 計算取樣區域的 右下角
+            roi = new Rect(src.Width - sampleSize, src.Height - sampleSize, sampleSize, sampleSize);
+            Scalar mean3 = Cv2.Mean(src[roi]);
+            // 計算取樣區域的 左下角
+            roi = new Rect(0, src.Height - sampleSize, sampleSize, sampleSize);
+            Scalar mean4 = Cv2.Mean(src[roi]);
+
+            // 計算四個角落的平均顏色
+            Scalar meanColor = new Scalar(
+                (mean1.Val0 + mean2.Val0 + mean3.Val0 + mean4.Val0) / 4.0,
+                (mean1.Val1 + mean2.Val1 + mean3.Val1 + mean4.Val1) / 4.0,
+                (mean1.Val2 + mean2.Val2 + mean3.Val2 + mean4.Val2) / 4.0
+            );
+            return meanColor;
         }
         #endregion
 
@@ -960,7 +1075,8 @@ namespace LaserAlignDX.AoiModel.V30
         {
             int NP = 4;
 
-            //>>> 根據 angleRef 將 borderIndex 正規化
+            #region (1) 根據 angleRef 將 borderIndex 正規化
+            // 根據 angleRef 將 borderIndex 正規化
             int sideIndex;
             if (angleRef > 70.0)
             {
@@ -974,7 +1090,9 @@ namespace LaserAlignDX.AoiModel.V30
             {
                 sideIndex = borderIndex;
             }
+            #endregion
 
+            #region (2) 根據 sideIndex 設定 mvdLineFinder 的參數
             // 左
             if (sideIndex == 0)
             {
@@ -1003,10 +1121,21 @@ namespace LaserAlignDX.AoiModel.V30
                 mvdLineFinder.bFindOrient = false;
                 mvdLineFinder.bEdgePolarity = _xInspect.bEdgePolarity3;
             }
+            #endregion
 
+            //(3) 設定背景顏色
             mvdLineFinder.Background = _xInspect.xCarrierBackground;
 
-            var resultLine = mvdLineFinder.Run(bmp, roi, sideIndex);
+            //(4) Filters
+            if(!TryApplyFilters(bmp, out Bitmap bmpWork))
+                bmpWork = bmp;
+
+            //(5) 執行海康直線尋找
+            var resultLine = mvdLineFinder.Run(bmpWork, roi, sideIndex);
+
+            //(6) CleanUp
+            if (bmpWork != bmp)
+                bmpWork?.Dispose();
 
             return resultLine;
         }

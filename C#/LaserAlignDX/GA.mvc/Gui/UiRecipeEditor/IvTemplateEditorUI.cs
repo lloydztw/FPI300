@@ -63,6 +63,19 @@ namespace LaserAlignDX.Mvc.Gui
         NumericUpDown numLineSpanPercentage { get; }
 
         /// <summary>
+        /// 顯示 邊線前置濾波 效果
+        /// </summary>
+        CheckBox chkShowFilterResult { get; }
+        /// <summary>
+        /// 邊線前置濾波: 灰階上限
+        /// </summary>
+        NumericUpDown numGrayLimitHi { get; }
+        /// <summary>
+        /// 邊線前置濾波: 灰階下限
+        /// </summary>
+        NumericUpDown numGrayLimitLo { get; }
+
+        /// <summary>
         /// 一鍵自動框
         /// </summary>
         Button btnAutoLineBorders { get; }
@@ -70,7 +83,6 @@ namespace LaserAlignDX.Mvc.Gui
         /// 精算尺寸
         /// </summary>
         Button btnBuildMircoTransform { get; }
-
 
         Button btnTryScanQrCode { get; }
         Control wndQrCodeResult { get; }

@@ -239,7 +239,7 @@ namespace LaserAlignDX.Model.Coords.V36
         {
             return CalcChipDimension_PadTrf(out dimension, lines, chipData, includePadGaps);
         }
-        public ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData, ITransform globalTrf)
+        public ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, LineBorderPairsCollection lineBorderPairs, GaChipData chipData, ITransform globalTrf)
         {
             /*
                 [CalcChipMeasurements]
@@ -381,7 +381,7 @@ namespace LaserAlignDX.Model.Coords.V36
         }
 
 #if (OPT_RESERVED)
-        ErrorCodes _CalcChipDimension_PadTrf2_000(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData)
+        ErrorCodes _CalcChipDimension_PadTrf2_000(out Dictionary<string, float> results, LineBorderPairsCollection lineBorderPairs, GaChipData chipData)
         {
             results = new Dictionary<string, float>();
             ITransform runtimePadTrf = null;
@@ -466,7 +466,7 @@ namespace LaserAlignDX.Model.Coords.V36
                 runtimePadTrf = null;
             }
         }
-        QVector[] _getDimNamedMeasurePoints_000(out string[] keyNames, Dictionary<string, LineBorderPair> pairs, QvQuad2D chipQuad)
+        QVector[] _getDimNamedMeasurePoints_000(out string[] keyNames, LineBorderPairsCollection pairs, QvQuad2D chipQuad)
         {
             try
             {
@@ -508,7 +508,7 @@ namespace LaserAlignDX.Model.Coords.V36
         }
 #endif
 
-        ErrorCodes CalcChipDimension_PadTrf2(out Dictionary<string, float> results, Dictionary<string, LineBorderPair> lineBorderPairs, GaChipData chipData, ITransform globalTrf)
+        ErrorCodes CalcChipDimension_PadTrf2(out Dictionary<string, float> results, LineBorderPairsCollection lineBorderPairs, GaChipData chipData, ITransform globalTrf)
         {
             results = new Dictionary<string, float>();
 
@@ -534,12 +534,11 @@ namespace LaserAlignDX.Model.Coords.V36
                 //>>> chipData.ChipDimension.DimMeasurePoints = camMeasurePoints;
                 for (int i = 0; i < camMeasurePoints.Length - 1; i += 2)
                 {
-                    string key = keyNames[i];
-                    chipData.ChipDimension.MeasureCamPtPairs[key] = new QVector[]
-                    {
-                        camMeasurePoints[i], 
+                    chipData.ChipDimension.UpdateMeasurement(
+                        keyNames[i], 
+                        camMeasurePoints[i],
                         camMeasurePoints[i + 1]
-                    };
+                    );
                 }
 
                 //(3) 平移到 LOCAL (以 runtimeChipCenter 當原點)
@@ -599,7 +598,7 @@ namespace LaserAlignDX.Model.Coords.V36
                 runtimePadTrf?.Dispose();
             }
         }
-        QVector[] getDimNamedMeasurePoints(out string[] keyNames, Dictionary<string, LineBorderPair> pairs, QvQuad2D chipQuad)
+        QVector[] getDimNamedMeasurePoints(out string[] keyNames, LineBorderPairsCollection lineBorderPairs, QvQuad2D chipQuad)
         {
             var measurePoints = new List<QVector>();
             var keyNamesList = new List<string>();
@@ -614,12 +613,12 @@ namespace LaserAlignDX.Model.Coords.V36
                 var vectH = R - L;
                 var vectV = B - T;
 
-                if (pairs != null)
+                if (lineBorderPairs != null)
                 {
-                    foreach (var kvp in pairs)
+                    foreach ((var keyName, var pair) in lineBorderPairs.IterPairs())
                     {
-                        var keyName = kvp.Key;
-                        var pair = kvp.Value;
+                        //var keyName = kvp.Key;
+                        //var pair = kvp.Value;
 
                         // 防禦：檢查 pair 與 LineSegments 是否完整
                         if (pair == null || pair.LineSegments == null || pair.LineSegments.Length < 2)

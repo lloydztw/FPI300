@@ -89,47 +89,50 @@ namespace LaserAlignDX.Model
     }
 
 
-    public static class LineEdgeDictExtension
+    public class LineBorderPairsCollection
     {
-        public static (string, int) GetKeyOffset(this EdgeBorder eb)
+        #region PRIVATE_DATA
+        readonly Dictionary<string, LineBorderPair> _dict = new Dictionary<string, LineBorderPair>();
+        #endregion
+
+        #region PUBLIC_DICT_DATA
+        public static implicit operator Dictionary<string, LineBorderPair>(LineBorderPairsCollection collection)
         {
-            switch (eb)
-            {
-                case EdgeBorder.Left: return ("X", 0);
-                case EdgeBorder.Right: return ("X", 1);
-                case EdgeBorder.Top: return ("Y", 0);
-                case EdgeBorder.Bottom: return ("Y", 1);
-            }
-            return (null, -1);
+            return collection?._dict;
         }
+        #endregion
 
-        #region RESERVED
-        /// <summary>
-        /// 設定目標值
-        /// </summary>
-        static void _SetTargetDists_000(this Dictionary<string, LineBorderPair> lineBorderPairs, SizeF targetSize)
+        #region PUBLIC_DICT_OPERATORS
+        public LineBorderPair this[string key]
         {
-            if (lineBorderPairs == null)
-                return;
-
-            for (int i = 0; i < LineBorderPair.MAX_PAIRS; i++)
+            get => _dict.TryGetValue(key, out var pair) ? pair : null;
+            set
             {
-                if (lineBorderPairs.TryGetValue(i == 0 ? "X" : $"X{i}", out var pairXi))
-                    pairXi.TargetDist = targetSize.Width;
-                if (lineBorderPairs.TryGetValue(i == 0 ? "Y" : $"Y{i}", out var pairYi))
-                    pairYi.TargetDist = targetSize.Height;
+                if (value != null) 
+                    _dict[key] = value;
             }
+        }
+        public IEnumerable<string> Keys => _dict.Keys;
+        public bool TryGetValue(string key, out LineBorderPair pair)
+        {
+            return _dict.TryGetValue(key, out pair);
+        }
+        public bool ContainsKey(string key)
+        {
+            return _dict.ContainsKey(key);
+        }
+        public void Clear()
+        {
+            _dict.Clear();
         }
         #endregion
 
         /// <summary>
         /// 設定目標值（支援任意組數）
         /// </summary>
-        public static void SetTargetDists(this Dictionary<string, LineBorderPair> lineBorderPairs, SizeF targetSize)
+        public void SetTargetDists(SizeF targetSize)
         {
-            if (lineBorderPairs == null) return;
-
-            foreach (var kvp in lineBorderPairs)
+            foreach (var kvp in _dict)
             {
                 if (kvp.Value == null) continue;
 
@@ -142,15 +145,30 @@ namespace LaserAlignDX.Model
         }
 
         /// <summary>
-        /// 枚舉 所有 邊線拉框 (不限於 左上右下 四個)
+        /// 枚舉所有量測框對
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<(string key, LineBorderPair pair)> IterPairs()
+        {
+            foreach (var kvp in _dict)
+            {
+                if(kvp.Value != null)
+                    yield return (kvp.Key, kvp.Value);
+            }
+        }
+
+        /// <summary>
+        /// 枚舉 所有 邊線拉框
+        /// (不限於 左上右下 四個)
         /// </summary>
         /// <remarks>
         /// 單位 pixels (FullFov Cammera Coordinates)
         /// </remarks>
-        public static IEnumerable<QvBox2D> IterLineBorderBoxes(this Dictionary<string, LineBorderPair> LineBorderPairs)
+        public IEnumerable<QvBox2D> IterLineBorderBoxes()
         {
-            foreach (var pair in LineBorderPairs.Values)
+            foreach (var kvp in _dict)
             {
+                var pair = kvp.Value;
                 if (pair != null)
                 {
                     for (int i = 0; i < pair.Borders.Length; i++)
@@ -164,15 +182,17 @@ namespace LaserAlignDX.Model
         }
 
         /// <summary>
-        /// 枚舉 抓到的 所有邊線 (不限於 左上右下 四個) 
+        /// 枚舉 抓到的 所有邊線 
+        /// (不限於 左上右下 四個) 
         /// </summary>
         /// <remarks>
         /// 單位 pixels (FullFov Cammera Coordinates)
         /// </remarks>
-        public static IEnumerable<EzLSD.LineSegment> IterLineSegments(this Dictionary<string, LineBorderPair> LineBorderPairs)
+        public IEnumerable<EzLSD.LineSegment> IterLineSegments()
         {
-            foreach (var pair in LineBorderPairs.Values)
+            foreach (var kvp in _dict)
             {
+                var pair = kvp.Value;
                 if (pair != null)
                 {
                     for (int i = 0; i < pair.LineSegments.Length; i++)
@@ -188,10 +208,8 @@ namespace LaserAlignDX.Model
         /// <summary>
         /// 調整數據數量（使用 HashSet 優化記憶體與搜尋效能）
         /// </summary>
-        public static bool AdjustPairsNumber(this Dictionary<string, LineBorderPair> lineBorderPairs, int numX, int numY)
+        public bool AdjustPairsNumber(int numX, int numY)
         {
-            if (lineBorderPairs == null) return false;
-
             var targetKeyNames = new HashSet<string>();
             for (int i = 0; i < numX; i++) targetKeyNames.Add(i == 0 ? "X" : $"X{i}");
             for (int i = 0; i < numY; i++) targetKeyNames.Add(i == 0 ? "Y" : $"Y{i}");
@@ -199,12 +217,12 @@ namespace LaserAlignDX.Model
             bool isChanged = false;
 
             // 移除多餘的 Key
-            var existingKeys = lineBorderPairs.Keys.ToList();
+            var existingKeys = _dict.Keys.ToList();
             foreach (var key in existingKeys)
             {
                 if (!targetKeyNames.Contains(key))
                 {
-                    lineBorderPairs.Remove(key);
+                    _dict.Remove(key);
                     isChanged = true;
                 }
             }
@@ -212,12 +230,12 @@ namespace LaserAlignDX.Model
             // 補足缺少的 Key
             foreach (var key in targetKeyNames)
             {
-                if (!lineBorderPairs.ContainsKey(key))
+                if (!_dict.ContainsKey(key))
                 {
                     var pair = new LineBorderPair();
                     pair.Borders[0] = new QvBox2D();
                     pair.Borders[1] = new QvBox2D();
-                    lineBorderPairs.Add(key, new LineBorderPair());
+                    _dict.Add(key, new LineBorderPair());
                     isChanged = true;
                 }
             }
@@ -228,15 +246,15 @@ namespace LaserAlignDX.Model
         /// <summary>
         /// 取得數據數量
         /// </summary>
-        public static int GetPairsNumbers(this Dictionary<string, LineBorderPair> LineBorderPairs, out int numX, out int numY)
+        public int GetPairsNumbers(out int numX, out int numY)
         {
             numX = 0;
             numY = 0;
-            
-            if (LineBorderPairs == null || LineBorderPairs.Count == 0)
+
+            if (_dict.Count == 0)
                 return 0;
 
-            foreach (var kv in LineBorderPairs)
+            foreach (var kv in _dict)
             {
                 var key = kv.Key;
                 var pair = kv.Value;
@@ -250,72 +268,51 @@ namespace LaserAlignDX.Model
             return numX + numY;
         }
 
-        #region RESERVED
-        /// <summary>
-        /// 取得 左, 上, 右, 下, 四邊線 
-        /// </summary>
-        /// <remarks>
-        /// 單位 pixels (FullFov Cammera Coordinates)
-        /// </remarks>
-        static EzLSD.LineSegment[] _GetQuadLineSegments_000(this Dictionary<string, LineBorderPair> LineBorderPairs)
-        {
-            if (LineBorderPairs.TryGetValue("X", out var pairX) &&
-                LineBorderPairs.TryGetValue("Y", out var pairY))
-            {
-                var lines = new List<EzLSD.LineSegment> {
-                    pairX.LineSegments[0],  // Left
-                    pairY.LineSegments[0],  // Top
-                    pairX.LineSegments[1],  // Right
-                    pairY.LineSegments[1],  // Bottom
-                };
-                lines.RemoveAll(line => line == null);
-                return lines.ToArray();
-            }
-            return null;
-        }
-        #endregion
-
         /// <summary>
         /// 取得 左, 上, 右, 下, 四邊線（增加防禦性檢查）
         /// </summary>
-        public static EzLSD.LineSegment[] GetQuadLineSegments(this Dictionary<string, LineBorderPair> lineBorderPairs)
+        public EzLSD.LineSegment[] GetQuadLineSegments()
         {
-            if (lineBorderPairs == null) 
-                return null;
-
             var lines = new List<EzLSD.LineSegment>();
 
-            if (lineBorderPairs.TryGetValue("X", out var pairX) && pairX?.LineSegments != null)
+            if (_dict.TryGetValue("X", out var pairX) && pairX?.LineSegments != null)
             {
-                if (pairX.LineSegments.Length > 0 && pairX.LineSegments[0] != null) 
+                if (pairX.LineSegments.Length > 0 && pairX.LineSegments[0] != null)
                     lines.Add(pairX.LineSegments[0]); // Left
 
-                if (pairX.LineSegments.Length > 1 && pairX.LineSegments[1] != null) 
+                if (pairX.LineSegments.Length > 1 && pairX.LineSegments[1] != null)
                     lines.Add(pairX.LineSegments[1]); // Right
             }
 
-            if (lineBorderPairs.TryGetValue("Y", out var pairY) && pairY?.LineSegments != null)
+            if (_dict.TryGetValue("Y", out var pairY) && pairY?.LineSegments != null)
             {
-                if (pairY.LineSegments.Length > 0 && pairY.LineSegments[0] != null) 
+                if (pairY.LineSegments.Length > 0 && pairY.LineSegments[0] != null)
                     lines.Add(pairY.LineSegments[0]); // Top
 
-                if (pairY.LineSegments.Length > 1 && pairY.LineSegments[1] != null) 
+                if (pairY.LineSegments.Length > 1 && pairY.LineSegments[1] != null)
                     lines.Add(pairY.LineSegments[1]); // Bottom
             }
 
-            return lines.Count > 0 ? lines.ToArray() : null;
+            if (lines.Count != 4)
+                return null;
+
+            return lines.ToArray();
         }
+    }
 
-        /// <summary>
-        /// 是否 只簡單量測四邊
-        /// </summary>
-        public static bool IsSimpleQuad(this Dictionary<string, LineBorderPair> lineBorderPairs)
+
+    public static class LineEdgeBorderExtension
+    {
+        public static (string, int) GetKeyOffset(this EdgeBorder eb)
         {
-            if (lineBorderPairs == null)
-                return false;
-
-            var lines = lineBorderPairs.GetQuadLineSegments();
-            return (lines != null && lines.Length >= 4);
+            switch (eb)
+            {
+                case EdgeBorder.Left: return ("X", 0);
+                case EdgeBorder.Right: return ("X", 1);
+                case EdgeBorder.Top: return ("Y", 0);
+                case EdgeBorder.Bottom: return ("Y", 1);
+            }
+            return (null, -1);
         }
     }
 }

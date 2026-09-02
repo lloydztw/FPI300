@@ -14,7 +14,6 @@
 #endregion
 
 using JetEazy.Lang;
-using JetEazy.OpenCV.Viewer;
 using JzDisplay.UISpace;
 using System;
 using System.Windows.Forms;
@@ -66,6 +65,10 @@ namespace LaserAlignDX.Mvc.Gui.V35
         NumericUpDown IvTemplateEditorUI.numMeasureDistXs => gwRcpLineBorderBtnsPanel1.numMeasureXs;
         NumericUpDown IvTemplateEditorUI.numMeasureDistYs => gwRcpLineBorderBtnsPanel1.numMeasureYs;
         NumericUpDown IvTemplateEditorUI.numMeasureMasks => gwRcpLineBorderBtnsPanel1.numMeasureMasks;
+
+        CheckBox IvTemplateEditorUI.chkShowFilterResult => gwRcpLineBorderBtnsPanel1.chkShowFilterResult;
+        NumericUpDown IvTemplateEditorUI.numGrayLimitHi => gwRcpLineBorderBtnsPanel1.numLbFilter1;
+        NumericUpDown IvTemplateEditorUI.numGrayLimitLo => gwRcpLineBorderBtnsPanel1.numLbFilter2;
 
         Button IvTemplateEditorUI.btnTryScanQrCode => gwRcpQrCodeBtnsPanel1.btnTryQrCode;
         Control IvTemplateEditorUI.wndQrCodeResult => gwRcpQrCodeBtnsPanel1.rtbCodeContent;

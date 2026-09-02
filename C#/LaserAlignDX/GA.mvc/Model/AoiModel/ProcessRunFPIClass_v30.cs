@@ -20,7 +20,6 @@ using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Threading;
 using VisionDesigner;
@@ -323,7 +322,7 @@ namespace LaserAlignDX.AoiModel.V3
             return err;
         }
 
-        public ErrorCodes BuildMicroChipTransform(Dictionary<string, LineBorderPair> lineEdgePairs, Bitmap regionBmp, RectangleF regionRoi)
+        public ErrorCodes BuildMicroChipTransform(LineBorderPairsCollection lineEdgePairs, Bitmap regionBmp, RectangleF regionRoi)
         {
             //NOTE: lineEdgePairs 輸入單位為 pixels (必須為 FullFov Camera Coordinates)
 
@@ -457,6 +456,10 @@ namespace LaserAlignDX.AoiModel.V3
         public IAoiChipLocator GetChipLocAoi()
         {
             return _aoiChipLoc;
+        }
+        public IAoiChipMeasurer GetChipMeasureAoi()
+        {
+            return _aoiChipMeasure;
         }
         public IAoiFlyCamMatcher GetFlyCameraAoi()
         {

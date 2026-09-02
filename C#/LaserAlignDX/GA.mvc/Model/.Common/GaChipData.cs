@@ -17,13 +17,10 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
-using LeTian.AoiLib;
-using Newtonsoft.Json.Linq;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 
 
 namespace LaserAlignDX.Model
@@ -79,76 +76,7 @@ namespace LaserAlignDX.Model
         /// <remarks>
         /// 單位 pixels (FullFov Cammera Coordinates)
         /// </remarks>
-        public readonly Dictionary<string, LineBorderPair> LineBorderPairs = new Dictionary<string, LineBorderPair>();
-
-#if (false)
-        /// <summary>
-        /// 枚舉 所有 邊線拉框 (不限於 左上右下 四個)
-        /// </summary>
-        /// <remarks>
-        /// 單位 pixels (FullFov Cammera Coordinates)
-        /// </remarks>
-        public IEnumerable<QvBox2D> IterLineBorderBoxes()
-        {
-            foreach (var pair in LineBorderPairs.Values)
-            {
-                if (pair != null)
-                {
-                    for (int i = 0; i < pair.Borders.Length; i++)
-                    {
-                        var b = pair.Borders[i];
-                        if (b != null)
-                            yield return b;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 枚舉 抓到的 所有邊線 (不限於 左上右下 四個) 
-        /// </summary>
-        /// <remarks>
-        /// 單位 pixels (FullFov Cammera Coordinates)
-        /// </remarks>
-        public IEnumerable<EzLSD.LineSegment> IterLineSegments()
-        {
-            foreach (var pair in LineBorderPairs.Values)
-            {
-                if (pair != null)
-                {
-                    for (int i = 0; i < pair.LineSegments.Length; i++)
-                    {
-                        var ls = pair.LineSegments[i];
-                        if (ls != null)
-                            yield return ls;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 取得 左, 上, 右, 下, 四邊線 
-        /// </summary>
-        /// <remarks>
-        /// 單位 pixels (FullFov Cammera Coordinates)
-        /// </remarks>
-        public EzLSD.LineSegment[] GetQuadLineSegments()
-        {
-            if (LineBorderPairs.TryGetValue("X", out var pairX) &&
-                LineBorderPairs.TryGetValue("Y", out var pairY))
-            {
-                var lines = new List<EzLSD.LineSegment> {
-                    pairX.LineSegments[0],  // Left
-                    pairY.LineSegments[0],  // Top
-                    pairX.LineSegments[1],  // Right
-                    pairY.LineSegments[1],  // Bottom
-                };
-                lines.RemoveAll(line => line == null);
-                return lines.ToArray();
-            }
-            return null;
-        }
-#endif
+        public readonly LineBorderPairsCollection LineBorderPairs = new LineBorderPairsCollection();
 
         /// <summary>
         /// 計算晶粒 尺寸量測 之 邊界多邊形
@@ -192,7 +120,6 @@ namespace LaserAlignDX.Model
             }
             #endregion`
         }
-
 
         /// <summary>
         /// 定位後之世界座標
@@ -242,6 +169,7 @@ namespace LaserAlignDX.Model
     }
 
 
+#if (OPT_拉出至獨立檔案)
     public class GaChipDimension
     {
         public bool IsSimpleQuad { get; set; } = true;
@@ -417,7 +345,7 @@ namespace LaserAlignDX.Model
 #endif
         #endregion
     }
-
+#endif
 
     public class GaPadEdgeGaps
     {

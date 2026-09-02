@@ -549,6 +549,7 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
+    <Compile Include="GA.mvc\Model\.Common\GaChipDimension.cs" />
     <Compile Include="GA.mvc\Model\.Common\LineBorderPair.cs" />
     <Compile Include="GA.mvc\Model\.Common\PixRounder.cs" />
     <Compile Include="GA.mvc\Model\.Common\LotDataHolder.cs" />

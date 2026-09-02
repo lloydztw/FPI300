@@ -635,7 +635,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         var chipDim = cell?.ChipData.ChipDimension;
                         if (chipDim != null)
                         {
-                            foreach (var pt in chipDim.IterMeasureCamPoint())
+                            foreach (var pt in chipDim.IterMeasureCamPoints())
                             {
                                 if (pt == null) continue;
                                 var pseudoBloc = createPseudoBloc(pt, bloc);
@@ -934,7 +934,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                     if (_xRecipe.InspectParams.optChipMeasurement)
                     {
-                        if (_xRecipe.LineBorderParams.IsSimpleQuad())
+                        if (_xRecipe.LineBorderParams.IsSimpleQuad)
                         {
                             var tag1 = QMSG.T("晶粒.尺寸X");
                             var tag2 = QMSG.T("晶粒.尺寸Y");
@@ -1008,15 +1008,13 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         else
                         {
                             var chipDim = cell?.ChipData?.ChipDimension;
-                            var measurements = chipDim?.Measurements;
-                            if (measurements != null)
+                            if (chipDim != null)
                             {
                                 var tag = QMSG.T("晶粒.尺寸X").Trim('X');
-                                foreach (var kv in measurements)
+                                foreach (var key in chipDim.Keys)
                                 {
                                     #region 尺寸量測結果_(mm)
-                                    var key = kv.Key;
-                                    var dist = kv.Value;
+                                    var dist = chipDim[key].Value;
                                     var target = key.StartsWith("X")
                                                 ? _xRecipe.InspectParams.mWidthStand
                                                 : _xRecipe.InspectParams.mHeightStand;

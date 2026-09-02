@@ -45,12 +45,13 @@
             this.btnAutoLineBorders = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.chkShowFilterResult = new System.Windows.Forms.CheckBox();
+            this.lblLB9 = new System.Windows.Forms.Label();
+            this.lblLB8 = new System.Windows.Forms.Label();
             this.lblLB7 = new System.Windows.Forms.Label();
             this.numLbFilter2 = new System.Windows.Forms.NumericUpDown();
             this.numLbFilter1 = new System.Windows.Forms.NumericUpDown();
             this.numLbFilter3 = new System.Windows.Forms.NumericUpDown();
-            this.lblLB8 = new System.Windows.Forms.Label();
-            this.lblLB9 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numMeasureMasks)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMeasureXs)).BeginInit();
@@ -311,6 +312,7 @@
             // 
             // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.chkShowFilterResult);
             this.groupBox3.Controls.Add(this.lblLB9);
             this.groupBox3.Controls.Add(this.lblLB8);
             this.groupBox3.Controls.Add(this.lblLB7);
@@ -326,6 +328,38 @@
             this.groupBox3.Size = new System.Drawing.Size(671, 138);
             this.groupBox3.TabIndex = 78;
             this.groupBox3.TabStop = false;
+            // 
+            // chkShowFilterResult
+            // 
+            this.chkShowFilterResult.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.chkShowFilterResult.AutoSize = true;
+            this.chkShowFilterResult.Location = new System.Drawing.Point(282, 29);
+            this.chkShowFilterResult.Name = "chkShowFilterResult";
+            this.chkShowFilterResult.Size = new System.Drawing.Size(118, 24);
+            this.chkShowFilterResult.TabIndex = 75;
+            this.chkShowFilterResult.Text = "顯示濾波效果";
+            this.chkShowFilterResult.UseVisualStyleBackColor = true;
+            // 
+            // lblLB9
+            // 
+            this.lblLB9.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblLB9.AutoSize = true;
+            this.lblLB9.Location = new System.Drawing.Point(22, 98);
+            this.lblLB9.Name = "lblLB9";
+            this.lblLB9.Size = new System.Drawing.Size(78, 20);
+            this.lblLB9.TabIndex = 74;
+            this.lblLB9.Text = "濾波門限3";
+            this.lblLB9.Visible = false;
+            // 
+            // lblLB8
+            // 
+            this.lblLB8.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.lblLB8.AutoSize = true;
+            this.lblLB8.Location = new System.Drawing.Point(22, 65);
+            this.lblLB8.Name = "lblLB8";
+            this.lblLB8.Size = new System.Drawing.Size(69, 20);
+            this.lblLB8.TabIndex = 73;
+            this.lblLB8.Text = "灰階下限";
             // 
             // lblLB7
             // 
@@ -385,27 +419,6 @@
             this.numLbFilter3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.numLbFilter3.Visible = false;
             // 
-            // lblLB8
-            // 
-            this.lblLB8.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblLB8.AutoSize = true;
-            this.lblLB8.Location = new System.Drawing.Point(22, 65);
-            this.lblLB8.Name = "lblLB8";
-            this.lblLB8.Size = new System.Drawing.Size(69, 20);
-            this.lblLB8.TabIndex = 73;
-            this.lblLB8.Text = "灰階下限";
-            // 
-            // lblLB9
-            // 
-            this.lblLB9.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.lblLB9.AutoSize = true;
-            this.lblLB9.Location = new System.Drawing.Point(22, 98);
-            this.lblLB9.Name = "lblLB9";
-            this.lblLB9.Size = new System.Drawing.Size(78, 20);
-            this.lblLB9.TabIndex = 74;
-            this.lblLB9.Text = "濾波門限3";
-            this.lblLB9.Visible = false;
-            // 
             // GwRcpLineBorderBtnsPanel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
@@ -460,5 +473,6 @@
         public System.Windows.Forms.NumericUpDown numLbFilter3;
         private System.Windows.Forms.Label lblLB8;
         private System.Windows.Forms.Label lblLB9;
+        public System.Windows.Forms.CheckBox chkShowFilterResult;
     }
 }

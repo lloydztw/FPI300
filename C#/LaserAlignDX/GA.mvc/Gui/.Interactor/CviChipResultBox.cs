@@ -654,18 +654,20 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var chipDim = activeCell?.ChipData?.ChipDimension;
             if (chipDim != null)
             {
-                var measurePtPairs = chipDim.MeasureCamPtPairs;
-                var dimResults = chipDim.MeasureResults;
-
                 #region DRAW_POINTS
-                foreach (var key in measurePtPairs.Keys)
+                foreach (var key in chipDim.Keys)
                 {
-                    if (!dimResults.TryGetValue(key, out bool isPass))
-                        isPass = false;
+                    var measurement = chipDim[key];
+                    var camPts = measurement?.CamMeasurePts;
+                    if (camPts == null)
+                        continue;
+                    
+                    // LINE
+                    draw_MeasureLine(viewer, gxView, camPts, Color.Yellow);
 
-                    var pts = measurePtPairs[key];
-                    foreach (var p in pts)
-                        draw_MeasurePoint(viewer, gxView, p, isPass);
+                    // POINTS
+                    foreach (var pt in camPts)
+                        draw_MeasurePoint(viewer, gxView, pt, measurement.IsPass);
                 }
                 #endregion
 
@@ -674,26 +676,15 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     int idx = 0;
                     var offset = new QVector(25, -25);
-                    foreach (var p in chipDim.IterMeasureCamPoint())
+                    foreach (var pt in chipDim.IterMeasureCamPoints())
                     {
-                        if (p != null)
+                        if (pt != null)
                         {
-                            var pt = p + offset;
-                            gxView.DrawString($"{idx}", _font, Brushes.Orange, (float)pt.X, (float)pt.Y);
+                            var loc = pt + offset;
+                            gxView.DrawString($"{idx}", _font, Brushes.Orange, (float)loc.X, (float)loc.Y);
                         }
                         idx++;
                     }
-                }
-                #endregion
-
-                #region DRAW_LINES
-                //draw_MeasureLine(viewer, gxView, measurePtPairs[0], measurePtPairs[2], Color.Yellow);
-                //draw_MeasureLine(viewer, gxView, measurePtPairs[1], measurePtPairs[3], Color.Yellow);
-                foreach (var key in measurePtPairs.Keys)
-                {
-                    var pts = measurePtPairs[key];
-                    if (pts != null && pts.Length > 1 && pts[0] != null && pts[1] != null)
-                        draw_MeasureLine(viewer, gxView, pts[0], pts[1], Color.Yellow);
                 }
                 #endregion
             }
@@ -732,6 +723,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var cx2 = (float)pt2.X;
             var cy2 = (float)pt2.Y;
             gxView.DrawLine(pen, cx, cy, cx2, cy2);
+        }
+        void draw_MeasureLine(CvImageViewer viewer, Graphics gxView, QVector[] pts, Color color)
+        {
+            if (pts != null && pts.Length > 1)
+                draw_MeasureLine(viewer, gxView, pts[0], pts[1], color);
         }
         #endregion
 

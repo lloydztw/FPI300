@@ -29,18 +29,30 @@ namespace LaserAlignDX.Mvc.Model.Recipe
     /// </summary>
     public class DtoX3LineBorderParams : DtoBase
     {
-        #region DATA_DICT
+        #region DATA
         /// <summary>
         /// 量測框資料
         /// </summary>
-        public readonly Dictionary<string, LineBorderPair> LineBorderPairs = new Dictionary<string, LineBorderPair>();
+        public readonly LineBorderPairsCollection LineBorderPairs = new LineBorderPairsCollection();
         #endregion
 
+        #region PUBLIC_OPERATORS
+        public static implicit operator LineBorderPairsCollection(DtoX3LineBorderParams dto)
+        {
+            return dto?.LineBorderPairs;
+        }
+        public static implicit operator Dictionary<string,LineBorderPair>(DtoX3LineBorderParams dto)
+        {
+            return dto?.LineBorderPairs;
+        }
         public LineBorderPair this[string measureKeyName]
         {
-            get => LineBorderPairs.TryGetValue(measureKeyName, out var pair) ? pair : null;
-            set { if (value != null) LineBorderPairs[measureKeyName] = value; }
+            //get => LineBorderPairs.TryGetValue(measureKeyName, out var pair) ? pair : null;
+            //set { if (value != null) LineBorderPairs[measureKeyName] = value; }
+            get => LineBorderPairs[measureKeyName];
+            set => LineBorderPairs[measureKeyName] = value;
         }
+        #endregion
 
         #region 相容舊接口
         public RectangleF xLineLeft { get => getOldBorder("X", 0); set => setOldBorder("X", 0, value); }
@@ -81,12 +93,11 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         }
 
         /// <summary>
-        /// 是否 只簡單量測四邊
+        /// 是否 為 簡單四邊線 (相容原有的計算)
         /// </summary>
-        /// <returns></returns>
-        public bool IsSimpleQuad()
+        public bool IsSimpleQuad
         {
-            return LineBorderPairs.IsSimpleQuad();
+            get => LineBorderPairs.ContainsKey("X") && LineBorderPairs.ContainsKey("Y");
         }
 
         public override void Load(string iniFile)
@@ -116,13 +127,13 @@ namespace LaserAlignDX.Mvc.Model.Recipe
                 var pairX = new LineBorderPair();
                 pairX.Borders[0] = QvQuad2D.From(oldParams.xLineLeft).ToBox2D();
                 pairX.Borders[1] = QvQuad2D.From(oldParams.xLineRight).ToBox2D();
-                LineBorderPairs.Add("X", pairX);
+                LineBorderPairs["X"] = pairX;
 
                 // Y: xLineTop, xLineBottom
                 var pairY = new LineBorderPair();
                 pairY.Borders[0] = QvQuad2D.From(oldParams.xLineTop).ToBox2D();
                 pairY.Borders[1] = QvQuad2D.From(oldParams.xLineBottom).ToBox2D();
-                LineBorderPairs.Add("Y", pairY);
+                LineBorderPairs["Y"] = pairY;
             }
         }
 

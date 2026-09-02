@@ -492,7 +492,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 double targetAngle = Math.Abs(currentAngle) < Math.Abs(Math.Abs(currentAngle) - 90) ? 0 : 90;
 
                 // 目標角度 - 當前角度 (若 QvQuad2D 為順時針，OpenCV GetRotationMatrix2D 需留意逆時針正負號)
-                double deltaAngle = targetAngle - currentAngle;
+                double deltaAngle = -(targetAngle - currentAngle);
 
                 // 2.1 角度差極小，無需旋轉
                 System.Diagnostics.Debug.WriteLine("轉正角度 = {0:0.00}°", deltaAngle);

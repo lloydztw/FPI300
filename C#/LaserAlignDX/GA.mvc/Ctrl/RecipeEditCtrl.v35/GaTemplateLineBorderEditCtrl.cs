@@ -70,8 +70,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         NumericUpDown numBorderIndent => _editorUI.numBorderIndent;
         NumericUpDown numBorderOutdent => _editorUI.numBorderExtend;
         NumericUpDown numLineSpanPercentage => _editorUI.numLineSpanPercentage;
+        NumericUpDown numGrayLimitHi => _editorUI.numGrayLimitHi;
+        NumericUpDown numGrayLimitLo => _editorUI.numGrayLimitLo;
+        CheckBox chkAlwaysShowFilterResult => _editorUI.chkShowFilterResult;
         Button btnAutoLayoutLineBorders => _editorUI.btnAutoLineBorders;
         Button btnBuildMictroTransform => _editorUI.btnBuildMircoTransform;
+        Timer _restoreRegionViewTimer;
         #endregion
 
         #region GUI_DRAWING_OBJECTS
@@ -115,6 +119,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             numMeasureDistYs.Maximum = MAX_LINE_BORDER_PAIRS;
             numMeasureMasks.Visible = true;
             initInteractors();
+            updateFilterSettings(false);
         }
         void initInteractors()
         {
@@ -193,8 +198,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         }
         void connectEventHandlers()
         {
-            //_editorUI.Window.HandleCreated += Window_HandleCreated;
-
+            _editorUI.Window.HandleDestroyed += Window_HandleDestroyed;
             btnAutoLayoutLineBorders.Click += (s, e) => AutoLayoutLineBorders();
             btnBuildMictroTransform.Click += (s, e) => BuildMicroTransform();
 
@@ -206,7 +210,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             numBorderOutdent.ValueChanged += NumBorderOutdent_ValueChanged;
             numLineSpanPercentage.ValueChanged += NumBorderOutdent_ValueChanged;
 
-            // LINE BORDERS
+            // FILTERS
+            numGrayLimitHi.ValueChanged += NumGrayLimit_ValueChanged;
+            numGrayLimitLo.ValueChanged += NumGrayLimit_ValueChanged;
+            chkAlwaysShowFilterResult.CheckedChanged += ChkShowFilterResult_CheckedChanged;
+
+            // LINE BORDER BOXES
             foreach (var cviBox in _cviLineBorderBoxes)
             {
                 cviBox.OnChanged += (s, e) =>
@@ -216,12 +225,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 };
             }
         }
+
+
         #endregion
 
         #region EVENT_HANDLERS
-        private void GaTemplateEditCtrl_FormClosing(object sender, FormClosingEventArgs e)
+        private void Window_HandleDestroyed(object sender, EventArgs e)
         {
+            disposeRestoreRegionViewTimer();
             persistLineBorderIndentExt(true);
+
             VxDebugDrawer.DestroyAllWindows();
         }
         private void NumMeasureDistXs_ValueChanged(object sender, EventArgs e)
@@ -245,6 +258,22 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 return;
 
             _editorUI?.Window?.BeginInvoke((Action)AutoLayoutLineBorders);
+        }
+        private void NumGrayLimit_ValueChanged(object sender, EventArgs e)
+        {
+            if (_bypassWindowEvents) return;
+
+            bool autoRestore = !chkAlwaysShowFilterResult.Checked;
+            ApplyLineBorderFilters(autoRestore);
+        }
+        private void ChkShowFilterResult_CheckedChanged(object sender, EventArgs e)
+        {
+            if(_bypassWindowEvents) return;
+
+            if (chkAlwaysShowFilterResult.Checked)
+                ApplyLineBorderFilters(autoRestore: false);
+            else
+                startRestoreRegionViewTimer(1);
         }
         #endregion
 
@@ -671,7 +700,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             
             OnMicroTransformChanged?.Invoke(this, null);
         }
-
         internal void UpdateAlgorithmStatus()
         {
             updateNumBorderIndentDynamically();
@@ -682,7 +710,29 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             updateLineSegmentBoxes(show, false);
         }
 
-        #region PRIVATE_HELPER_FUNCTIONS
+        void ApplyLineBorderFilters(bool autoRestore = true)
+        {
+            var aoi = _sysModel?.AoiModel?.GetChipMeasureAoi();
+            if (aoi == null)
+                return;
+
+            updateFilterSettings(true);
+
+            if (aoi.TryApplyFilters(_xRecipe.GoldenRegionCellBmp, out Bitmap bmpFilter))
+            {
+                wndRegionViewer.UpdateImage(bmpFilter, "Region View (Filtered)", true);
+
+                if(autoRestore)
+                    startRestoreRegionViewTimer(5000);
+            }
+            else
+            {
+                if (autoRestore)
+                    startRestoreRegionViewTimer(1);
+            }
+        }
+
+        #region PRIVATE_FUNCTIONS
         QvQuad2D requestToLocateGoldenQuad(bool force)
         {
 #if (OPT_MOVED_TO_EXTERNAL)
@@ -740,6 +790,27 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             }
 
             return goldenQuad;
+        }
+        void startRestoreRegionViewTimer(int delay = 5000)
+        {
+            if (_restoreRegionViewTimer == null)
+            {
+                _restoreRegionViewTimer = new Timer();
+                _restoreRegionViewTimer.Tick += (s, e) =>
+                {
+                    _restoreRegionViewTimer.Stop();
+                    wndRegionViewer?.UpdateImage(_xRecipe.GoldenRegionCellBmp, "Region View", false);
+                };
+            }
+            _restoreRegionViewTimer?.Stop();
+            _restoreRegionViewTimer.Interval = delay;
+            _restoreRegionViewTimer?.Start();
+        }
+        void disposeRestoreRegionViewTimer()
+        {
+            _restoreRegionViewTimer?.Stop();
+            _restoreRegionViewTimer?.Dispose();
+            _restoreRegionViewTimer = null;
         }
         #endregion
 
@@ -815,7 +886,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             }
         }
 
-#if (OPT_OLD_CODE)
+#if (OPT_OLD_LINE_BORDER_FUNCTIONS)
         void _updateLineBorderBoxes_000(bool toRecipe)
         {
             if (toRecipe)
@@ -938,19 +1009,15 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         }
         void updateLineBorderBoxes(bool toRecipe)
         {
-            var rcpParams = _xRecipe?.LineBorderParams;
-            if (rcpParams == null)
+            LineBorderPairsCollection lineBorderPairs = _xRecipe?.LineBorderParams;
+            if (lineBorderPairs == null)
                 return;
 
             if (toRecipe)
             {
-                var pairsDict = rcpParams.LineBorderPairs;
-
                 int idx = 0;
-                foreach (var kv in pairsDict)
+                foreach ((var keyName, var pair) in lineBorderPairs.IterPairs())
                 {
-                    var keyName = kv.Key;
-                    var pair = kv.Value;
                     if (pair == null)
                         continue;
 
@@ -969,13 +1036,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             }
             else
             {
-                var pairsDict = rcpParams.LineBorderPairs;
-
                 int idx = 0;
-                foreach (var kv in pairsDict)
+                foreach ((var keyName, var pair) in lineBorderPairs.IterPairs())
                 {
-                    var keyName = kv.Key;
-                    var pair = kv.Value;
                     if (pair == null)
                         continue;
 
@@ -1104,7 +1167,22 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 refreshViewer(wndRegionViewer);
             }
         }
-
+        void updateFilterSettings(bool toRecipe)
+        {
+            if (toRecipe)
+            {
+                _xInspectX3.GrayLimitHi = (int)numGrayLimitHi.Value;
+                _xInspectX3.GrayLimitLo = (int)numGrayLimitLo.Value;
+                _isLineBorderModified = true;
+            }
+            else
+            {
+                _bypassWindowEvents = true;
+                GaUtil.SetNum(numGrayLimitHi, _xInspectX3.GrayLimitHi);
+                GaUtil.SetNum(numGrayLimitLo, _xInspectX3.GrayLimitLo);
+                _bypassWindowEvents = false;
+            }
+        }
         void updateCviBoxesStatus()
         {
             int idx = 0;
@@ -1257,7 +1335,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         /// <remarks>
         /// 注意: 這裡會影響 PAD型晶粒的 Golden Template "GRID" !!! 
         /// </remarks>
-        void aoiCalcGoldenChipDimension(Dictionary<string, LineBorderPair> lineBorderPairs)
+        void aoiCalcGoldenChipDimension(LineBorderPairsCollection lineBorderPairs)
         {
             var aoiModel = _sysModel?.AoiModel;
 
