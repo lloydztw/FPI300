@@ -16,7 +16,6 @@
 using JetEazy.Match;
 using JetEazy.QvMath;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using MoveGraphLibrary;
 using System;
 using System.Drawing;
 using System.Threading.Tasks;
@@ -26,7 +25,7 @@ namespace LaserAlignDX.AoiModel
 {
     public class MvdCompositeChipMatcher : IMvdTemplateMatcher
     {
-        public static int N_CHANNLS => Traveller106.Universal.N_THREADS;
+        public static int N_CHANNLS => GlobalConfig.N_THREADS;
 
         #region GLOBAL_RECIPE_MESS
         InspectX3ParaClass _recipeParams => InspectX3ParaClass.Instance;
@@ -173,12 +172,20 @@ namespace LaserAlignDX.AoiModel
             for (int i = 0; i < N; i++)
                 bmps[i] = (Bitmap)bmpTemplate.Clone();
 
+#if (OPT_DEBUG_ONE_BY_ONE)
+            for (int i = 0; i < N; i++)
+            {
+                oks[i] = _matchers[i].Train(bmps[i]);
+                System.Diagnostics.Trace.WriteLine($"[循序慢速] 訓練模板 Train({i}) = {oks[i]}");
+            }
+#else
             Parallel.For(0, N, i =>
             {
                 oks[i] = _matchers[i].Train(bmps[i]);
             });
+#endif
 
-            foreach(var bmp in bmps)
+            foreach (var bmp in bmps)
                 bmp.Dispose();
 
             return Array.TrueForAll(oks, ok => ok);
@@ -216,6 +223,12 @@ namespace LaserAlignDX.AoiModel
         public object GetResultDetails()
         {
             return _matchers[0]?.GetResultDetails();
+        }
+
+        public void ShowGoldenTemplateVisualizer(bool show)
+        {
+            if (_matchers.Length > 0)
+                _matchers[0]?.ShowGoldenTemplateVisualizer(show);
         }
     }
 }

@@ -382,6 +382,8 @@
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v35.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiModel_ChipLoc.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_Combo.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyAoiResult.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyMetaData.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
@@ -559,13 +561,12 @@
     <Compile Include="GA.mvc\Model\AoiModel\0_Base\AoiModel_Base.cs" />
     <Compile Include="GA.mvc\Model\.Common\LotData.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\0_Base\EzLSD.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\AoiLib\EzPadsGridFinder.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\AoiLib\EzRigidBodyGridMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\AoiModel_ChipLoc.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\Matchers\implements\JezGridPadsChipMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\Matchers\implements\MvdChipMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\Matchers\IMvdTemplateMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\Matchers\MvdCompositeChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiLib\EzPadsGridFinder.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiLib\EzRigidBodyGridMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\implements\JezGridPadsChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\implements\MvdChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\IMvdTemplateMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\MvdCompositeChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v31.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v35.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\AoiModel_FlyCam.cs" />
@@ -922,6 +923,7 @@
     <None Include="App\Readme.md" />
     <None Include="GA.mvc\Ctrl\Readme.md" />
     <None Include="GA.mvc\Gui\Readme.md" />
+    <None Include="GA.mvc\Model\AoiModel\2_ChipLocator\Readme.md" />
     <None Include="GA.mvc\Model\CustomerModel\Readme.md" />
     <None Include="GA.mvc\Model\Readme.md" />
     <None Include="GA.mvc\Readme.md" />

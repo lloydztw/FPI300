@@ -24,9 +24,8 @@ using System.Drawing;
 using System.Threading;
 using VisionDesigner;
 
-using AoiModel_ChipMeasureQuad = LaserAlignDX.AoiModel.V31.AoiModel_ChipMeasure;
-using AoiModel_ChipMeasureNew = LaserAlignDX.AoiModel.V35.AoiModel_ChipMeasure;
-
+using AoiModel_ChipLoc = LaserAlignDX.AoiModel.v31.AoiModel_ChipLoc;
+using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.Combo.AoiModel_ChipMeasure;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 
@@ -63,13 +62,9 @@ namespace LaserAlignDX.AoiModel.V3
         {
             // 請把自己清乾淨
             _aoiChipLoc?.Dispose();
-            _aoiChipLoc = null;
-            
-            _aoiChipMeasureQ?.Dispose();
-            _aoiChipMeasureQ = null;
-            _aoiChipMeasureN?.Dispose();
-            _aoiChipMeasureN = null;
-            
+            _aoiChipLoc = null;            
+            _aoiChipMeasure?.Dispose();
+            _aoiChipMeasure = null;
             _aoiChipDefects?.Dispose();
             _aoiChipDefects = null;
             _aoiFlyCam?.Dispose();
@@ -114,20 +109,7 @@ namespace LaserAlignDX.AoiModel.V3
         #region SUB_MODELS
         AoiModel_EmptyTray _aoiEmptyTray = new AoiModel_EmptyTray();
         AoiModel_ChipLoc _aoiChipLoc = new AoiModel_ChipLoc();
-
-        IAoiChipMeasurer _aoiChipMeasure
-        {
-            get
-            {
-                if (_xRecipe.LineBorderParams.IsSimpleQuad)
-                    return _aoiChipMeasureQ;
-                else 
-                    return _aoiChipMeasureN;
-            }
-        }
-        AoiModel_ChipMeasureQuad _aoiChipMeasureQ = new AoiModel_ChipMeasureQuad();
-        AoiModel_ChipMeasureNew _aoiChipMeasureN = new AoiModel_ChipMeasureNew();
-
+        AoiModel_ChipMeasure _aoiChipMeasure = new AoiModel_ChipMeasure();
         AoiModel_Defects _aoiChipDefects = new AoiModel_Defects();
         AoiModel_QrCode _aoiQrCode = new AoiModel_QrCode();
         AoiModel_FlyCam _aoiFlyCam = new AoiModel_FlyCam();
@@ -138,8 +120,8 @@ namespace LaserAlignDX.AoiModel.V3
         {
             var subModels = new AoiModelBase[] { 
                 _aoiChipLoc, 
-                _aoiChipMeasureQ,
-                _aoiChipMeasureN,
+                _aoiChipMeasure.BaseQ,
+                _aoiChipMeasure.BaseN,
                 _aoiChipDefects, 
                 _aoiQrCode, 
                 _aoiEmptyTray 

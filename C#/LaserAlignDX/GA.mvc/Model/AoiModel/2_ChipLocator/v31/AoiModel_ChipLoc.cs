@@ -13,39 +13,38 @@
  */
 #endregion
 
-
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Transform;
-using JetEazy.Utils;
 using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
-using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media.Animation;
 using Traveller106;
 using _TM = LeTian.AoiLib.LtDebug;
 
-
-namespace LaserAlignDX.AoiModel.V3
+namespace LaserAlignDX.AoiModel.v31
 {
     /// <summary>
     /// 晶粒定位
     /// </summary>
     public class AoiModel_ChipLoc : AoiModelBase, IAoiChipLocator
     {
-        #region GLOBAL_MESS
+        #region CONFIG
+        static bool N_THREADS_ENABLED => GlobalConfig.N_THREADS_ENABLED;
+        static int N_THREADS => GlobalConfig.N_THREADS;
+        #endregion
+
+        #region MVD_COMPONENTS
+        MvdCompositeChipMatcher _mvdCompositeChipMatcher;
         #endregion
 
         #region KERNEL_MEMBERS
@@ -63,6 +62,12 @@ namespace LaserAlignDX.AoiModel.V3
         EzEmptyTrayResult _preEmptyTrayResult;
         #endregion
 
+        public override void Dispose()
+        {
+            disposeChipMatchers();
+            base.Dispose();
+        }
+
         public GaCellsGroup[] CellGroups
         {
             get { return _cellGroups; }
@@ -75,7 +80,26 @@ namespace LaserAlignDX.AoiModel.V3
             GaCellsGroup.DisposeAll(old);
         }
 
-        public override void Run(Bitmap bmpScene = null)
+        public override bool Train(Bitmap goldenImage, params object[] args)
+        {
+            //mvdprinttemp_Find.SetRecipeParams(this.InspectParams);
+            //bool bOK = mvdprinttemp_Find.Train(this.bmpDefectTemplate);
+            //mvdprinttemp_Find.ShowGoldenTemplateVisualizer(showGoldenVisualizedFeature);
+
+            prepareChipMatcher(0, out var chipMatcher);
+
+            _mvdCompositeChipMatcher.SetRecipeParams(_xRecipe.InspectParams);
+
+            bool ok = _mvdCompositeChipMatcher.Train(goldenImage);
+
+            bool showGoldenVisualizedFeature = (args.Length > 0 && args[0] is bool show) ? show : false;
+
+            _mvdCompositeChipMatcher.ShowGoldenTemplateVisualizer(showGoldenVisualizedFeature);
+
+            return ok;
+        }
+
+        public override void Run(Bitmap sceneBmp = null)
         {
             try
             {
@@ -94,13 +118,14 @@ namespace LaserAlignDX.AoiModel.V3
                 ResetCellsResultData();
 
                 //(2) 準備資料夾
-                string imgLogPath = GetLogPath(this.FileBarcodeStr);
+                string imgLogPath;
                 #region PREPARE_PATH
-                if (INI.Instance.IsSaveTestImage)
-                {
-                    if (!Directory.Exists(imgLogPath))
-                        Directory.CreateDirectory(imgLogPath);
-                }
+                //if (INI.Instance.IsSaveTestImage)
+                //{
+                //    if (!Directory.Exists(imgLogPath))
+                //        Directory.CreateDirectory(imgLogPath);
+                //}
+                imgLogPath = INI.Instance.IsSaveTestImage ? GetLogPath(this.FileBarcodeStr) : null;
                 #endregion
 
                 //(3) 取得座標轉換
@@ -129,7 +154,7 @@ namespace LaserAlignDX.AoiModel.V3
 
                 //(9) 異步輸出 Debug 數據
                 markFileTimeTag();
-                saveDebugDataAsync(bmpFullfov, null, imgLogPath);
+                //saveDebugDataAsync(bmpFullfov, null, imgLogPath);
 
                 //(10) 標記終止計時
                 markRunEnd(true);
@@ -139,13 +164,20 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 // 2025-08-28 LETIAN: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
                 // 在此無需釋放 巨圖
+
+#if (OPT_OLD_CODE)
                 markRunEnd(false);
                 fire_AoiEnd();
                 var errCode = Mvc.Model.ErrorCodes.EXCEPTION_AT_AOI_RUN;
-                string errMsg = GaUtil.GetEnumDescription(errCode) + "\n\r" + ex.Message;
+                string errMsg = GaUtil.GetEnumDescription(errCode)
+                                + "\n\r" + GetType().Name
+                                + "\n\r\n\r" + GetDeepExceptionMessage(ex);
                 fire_AoiError(errCode, errMsg);
                 GaUtil.LOG(errMsg, Color.Red);
                 _LOG_ERROR(ex, $"異常 @ {GetType().Name}.Run");
+#endif
+
+                base.HandleAoiException(ex);
             }
             finally
             {
@@ -206,13 +238,11 @@ namespace LaserAlignDX.AoiModel.V3
 
         MvdCompositeChipMatcher IAoiChipLocator.GetTemplateMatcher()
         {
-            //prepareChipMatcher(0, out var _);
-            //return _mvdCompositeChipMatcher;
-            return RecipeFPIX3Class.Instance.mvdprinttemp_Find;
+            prepareChipMatcher(0, out var _);
+            return _mvdCompositeChipMatcher;
         }
 
         #region PRIVATE_FUNCTIONS
-
         void _PreInspectEmptyTray(Bitmap bmpFullfov)
         {
             _preEmptyTrayResult = null;
@@ -222,7 +252,7 @@ namespace LaserAlignDX.AoiModel.V3
                 aoi.RunAll(bmpFullfov, wait: true);
                 _preEmptyTrayResult = aoi.GetResult();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _LOG_ERROR(ex, "_PreCheckEmptyTray");
             }
@@ -235,10 +265,10 @@ namespace LaserAlignDX.AoiModel.V3
         {
             _TM.RESET_ACCUM();
 
-            bool usingMultiThread = Universal.N_THREADS_ENABLED;
+            bool usingMultiThread = N_THREADS_ENABLED;
 
             DisposeCellGroups();
-            int N_GROUPS = MvdCompositeChipMatcher.N_CHANNLS;
+            int N_GROUPS = N_THREADS;
             var groups = GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov, _preEmptyTrayResult);
             _cellGroups = groups;
 
@@ -279,8 +309,8 @@ namespace LaserAlignDX.AoiModel.V3
             _TM.RESET_ACCUM();
 
             //(1) 蒐集 GaCellsGroups
-            bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            var outGridGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "OUT_GRID_BOUND");
+            bool usingMultiThread = N_THREADS_ENABLED;
+            var outGridGroups = GaCellsGroup.CollectGroups(N_THREADS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "OUT_GRID_BOUND");
             if (outGridGroups == null || outGridGroups.Length == 0)
                 return;
 
@@ -421,8 +451,8 @@ namespace LaserAlignDX.AoiModel.V3
 #endif
 
             //(1) 蒐集 GaCellsGroups
-            bool usingMultiThread = Universal.N_THREADS_ENABLED;
-            var boundaryGroups = GaCellsGroup.CollectGroups(MvdCompositeChipMatcher.N_CHANNLS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "ON_GRID_BOUND");
+            bool usingMultiThread = N_THREADS_ENABLED;
+            var boundaryGroups = GaCellsGroup.CollectGroups(N_THREADS, _xRecipe, bmpFullfov, _preEmptyTrayResult, "ON_GRID_BOUND");
             if (boundaryGroups == null || boundaryGroups.Length == 0)
                 return;
 
@@ -486,13 +516,13 @@ namespace LaserAlignDX.AoiModel.V3
                 {
                     var onGridCells = _xRecipe.xRegionCells;
 
-                    foreach(var ogCell in outGridCells)
+                    foreach (var ogCell in outGridCells)
                     {
                         if (ogCell == null) continue;
 
                         RegionCellX3Class bestPlaceHold = null;
                         var quadCenter = ogCell?.ChipData?.ChipQuad2D?.Center;
-                        var ogCenter = quadCenter != null ? 
+                        var ogCenter = quadCenter != null ?
                                        new PointF((float)quadCenter.X, (float)quadCenter.Y) :
                                        JetEazy.Qcvt.CenterF(ref ogCell.viewRectF);
 
@@ -504,7 +534,7 @@ namespace LaserAlignDX.AoiModel.V3
 
                             if (cell.OutGridLink != null)
                             {
-                                if(cell.OutGridLink.IsLocated()) 
+                                if (cell.OutGridLink.IsLocated())
                                     continue;
 
                                 cell.OutGridLink?.Dispose();
@@ -538,7 +568,7 @@ namespace LaserAlignDX.AoiModel.V3
 
                             ogCell.OrgX = bestPlaceHold.OrgX;
                             ogCell.OrgY = bestPlaceHold.OrgY;
-                            
+
                             //>>> ogCell.viewRectF = bestPlaceHold.viewRectF;
                             //>>> _xRecipe.xRegionCells[ogCell.Index] = ogCell;
                         }
@@ -594,7 +624,7 @@ namespace LaserAlignDX.AoiModel.V3
             }
 
             //(5) boundaryGroups 併入 _cellGroups
-            foreach(var newGrp in boundaryGroups)
+            foreach (var newGrp in boundaryGroups)
             {
                 if (newGrp == null) continue;
                 foreach (var newGaCell in newGrp)
@@ -644,7 +674,7 @@ namespace LaserAlignDX.AoiModel.V3
                     {
                         if (cell.ChipData != null)
                             cell.ChipData.IsOutGrid = markAsOutgrid;
-                        
+
                         if (!isLinkLocated)
                         {
                             cell.OutGridLink?.Dispose();
@@ -680,6 +710,11 @@ namespace LaserAlignDX.AoiModel.V3
             //var fullFovSize = cellsGroup.FullFovRect.Size;
             //var debugSB = new StringBuilder();
 
+            if (EzPadsGridFinder.VISUAL_DEBUG)
+            {
+                chipMatcher.ShowGoldenTemplateVisualizer();
+            }
+
             foreach (var gaCell in cellsGroup)
             {
                 RegionCellX3Class cell = gaCell.Cell;
@@ -689,16 +724,18 @@ namespace LaserAlignDX.AoiModel.V3
                 //(0) 進度條事件
                 fire_AoiProgressing(cell);
 
-                //(1) 清除上一次結果 (由外部清除!)
+                //(1) 清除上一次結果 (改由外部清除!)
                 //>>> cell.Reset();
 
                 //(2) 異步保存 Cell 圖像檔案
-                if (INI.Instance.IsSaveTestImage && imgPath != null)
-                {
-                    cell.IsSaveDebugPicture = true;
-                    cell.SaveDebugPath = imgPath;
-                    saveCellBmpAsync(cellBmp, cell);
-                }
+                //if (INI.Instance.IsSaveTestImage && imgPath != null)
+                //{
+                //    cell.IsSaveDebugPicture = true;
+                //    cell.SaveDebugPath = imgPath;
+                //    saveCellBmpAsync(cellBmp, cell);
+                //}
+                if (imgPath != null)
+                    AsyncSaveCellBmp(cellBmp, cell);
 
                 //(3) 執行像測 或 使用原有的 cell.ChipData
                 bool ok;
@@ -721,7 +758,7 @@ namespace LaserAlignDX.AoiModel.V3
                         //(4.1) 將 chipBox2D 存回 Gaara 使用的海康 CMvdRectangleF (為了相容舊版)
                         var chipQuad2D = chipData.ChipQuad2D;
                         var chipCentroid = chipQuad2D.Center;
-                        cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
+                        //cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
 
                         //(4.2) DEBUG_STRING
                         #region 加入_DEBUG_STRING
@@ -785,7 +822,7 @@ namespace LaserAlignDX.AoiModel.V3
                         //(6.5) 只簡單記入 ChipData
                         var chipQuad2D = chipData.ChipQuad2D;
                         var chipCentroid = chipQuad2D.Center;
-                        cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
+                        //cell.SetMvdRunPositionFix(chipQuad2D?.ToCMvdRectangleF());
                         cell.ChipData = chipData;
                         cell.ChipData.ChipCoords.Centroid = _transCP?.Trans(chipCentroid);
                         //>>> cell.ChipData.ChipCoords.Angle = cell.RunAngle;
@@ -845,7 +882,7 @@ namespace LaserAlignDX.AoiModel.V3
                 chipData.PadsGrid = padsGrid;
                 chipData.ChipQuad2D = chipQuad;
                 chipData.GoldenQuad2D = chipMatcher.GoldenQuad2D?.Clone();
-                
+
                 //(4) DEBUG data
                 chipData.DebugRigidBodyData = chipMatcher.GetResultDetails();
             }
@@ -884,7 +921,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             _TM.DUMP_ACCUM();
         }
-        
+
         /// <summary>
         /// 排除重複交疊的 Cells (in one thread)
         /// </summary>
@@ -896,7 +933,7 @@ namespace LaserAlignDX.AoiModel.V3
             int rows = cellsGrid.Rows;
             int cols = cellsGrid.Cols;
             var delta = new[] { 0, 1 };
-            double overlapDistSQ = 5 * 5; 
+            double overlapDistSQ = 5 * 5;
 
             foreach (var gaCell in cellsGroup)
             {
@@ -909,12 +946,12 @@ namespace LaserAlignDX.AoiModel.V3
                 var curGridPt = JetEazy.Qcvt.CenterF(ref curCell.viewRectF);
                 var curOffsetSQ = (curChipCenter - new QVector(curGridPt.X, curGridPt.Y)).NormLengthSQ;
 
-                foreach(int dr in delta)
+                foreach (int dr in delta)
                 {
                     int r = curRow + dr;
                     if (r < 0 || r >= rows) continue;
 
-                    foreach(var dc in delta)
+                    foreach (var dc in delta)
                     {
                         if (dr == 0 && dc == 0) continue;
                         int c = curCol + dc;
@@ -978,13 +1015,13 @@ namespace LaserAlignDX.AoiModel.V3
                     //tiltRatio = diff / Math.Max(ratioU, ratioV);
                 }
             }
-            
+
             chipData.ChipCoords.TiltRatio = (float)tiltRatio;
             ok = tiltRatio <= _xRecipe.InspectParams.xTiltRatioThres;
 
             return ok;
         }
-        
+
         /// <summary>
         /// 傾斜程度 (晶粒踩腳)
         /// </summary>
@@ -1089,8 +1126,9 @@ namespace LaserAlignDX.AoiModel.V3
         /// LETIAN: 非同步保存 cellBmp.
         /// caller 負責 cellBmp 生命
         /// </summary>
-        void saveCellBmpAsync(Bitmap cellBmp, RegionCellX3Class cell)
+        void AsyncSaveCellBmp(Bitmap cellBmp, RegionCellX3Class cell)
         {
+#if (OPT_LEGACY)
             if (cellBmp == null || cell == null)
                 return;
 
@@ -1128,8 +1166,11 @@ namespace LaserAlignDX.AoiModel.V3
             },
                 new object[] { cellBmp.Clone(), fullFileName }
             );
+#endif
+            _lotDataHolder.AsyncSaveCellBmp(cellBmp, cell);
         }
 
+#if (OPT_ABANDONED_CODE)
         /// <summary>
         /// LETIAN: 非同步保存 Debug 數據 搬移至此.
         /// caller 負責 bmpFullfov 生命
@@ -1139,7 +1180,7 @@ namespace LaserAlignDX.AoiModel.V3
             if (bmpFullfov == null)
                 return;
 
-            if (!INI.Instance.IsSaveTestImage && !INI.Instance.IsSaveDebugBmp && !INI.Instance.IsSaveDebugOrgBmp)
+            if (!INI.Instance.IsSaveTestImage && !INI.Instance.IsSaveDebugBMP && !INI.Instance.IsSaveDebugOrgBmp)
                 return;
 
             ThreadPool.QueueUserWorkItem(arg =>
@@ -1148,25 +1189,26 @@ namespace LaserAlignDX.AoiModel.V3
                 {
                     using (Bitmap bmpBig = (Bitmap)arg)
                     {
-                        //(1) SAVE debugCellCenterStr
-                        if (INI.Instance.IsSaveTestImage && debugDumpPath != null && debugCellCenterStr != null)
-                        {
+                    //(1) SAVE debugCellCenterStr
+                    if (INI.Instance.IsSaveTestImage && debugDumpPath != null && debugCellCenterStr != null)
+                    {
                             //>>> GaUtil.SaveData(debugCellCenterStr, debugDumpPath + $"\\PositionFix\\DEBUG_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt");
 
                             if (!System.IO.Directory.Exists(debugDumpPath))
                                 System.IO.Directory.CreateDirectory(debugDumpPath);
 
-                            string fileName = System.IO.Path.Combine(debugDumpPath, GetLotFileName(LotId, ".txt"));
-                            GaUtil.SaveData(debugCellCenterStr, fileName);
-                        }
+                        string fileName = System.IO.Path.Combine(debugDumpPath, GetLotFileName(LotId, ".txt"));
+                        GaUtil.SaveData(debugCellCenterStr, fileName);
+                    }
 
+#if (OPT_REPLACED_BY_PARENT)
                         //(2) SAVE debug Bmp
-                        if (INI.Instance.IsSaveDebugBmp)
+                        if (INI.Instance.IsSaveDebugBMP)
                         {
                             //>>> GaImageUtil.SaveImageWithQuality(ezImage.Bitmap, $"{m_PicResultPath}\\{m_FileName}", INI.Instance.ImageQuality);
                             string fileName = GetDebugBmpFileName();
                             GaImageUtil.SaveImageWithQuality(bmpBig, fileName, INI.Instance.ImageQuality);
-                        }
+                }
 
                         //(3) SAVE debug OrgBmp
                         if (INI.Instance.IsSaveDebugOrgBmp)
@@ -1175,6 +1217,7 @@ namespace LaserAlignDX.AoiModel.V3
                             string fileName = GetDebugOrgBmpFileName();
                             GaImageUtil.SaveBigImage(fileName, bmpBig);
                         }
+#endif
                     }
                 }
                 catch (Exception ex)
@@ -1186,14 +1229,26 @@ namespace LaserAlignDX.AoiModel.V3
                 bmpFullfov.Clone()
             );
         }
+#endif
 
+        /// <summary>
+        /// 釋放 Template Matchers
+        /// </summary>
+        void disposeChipMatchers()
+        {
+            _mvdCompositeChipMatcher?.Dispose();
+            _mvdCompositeChipMatcher = null;
+        }
         /// <summary>
         /// 準備 Template Matchers
         /// </summary>
         void prepareChipMatcher(int threadIdx, out IMvdTemplateMatcher chipMatcher)
         {
-            MvdCompositeChipMatcher matchers = _xRecipe.mvdprinttemp_Find;
-            chipMatcher = matchers[threadIdx];
+            //MvdCompositeChipMatcher matchers = _xRecipe.mvdprinttemp_Find;
+            //chipMatcher = matchers[threadIdx];
+            if (_mvdCompositeChipMatcher == null)
+                _mvdCompositeChipMatcher = new MvdCompositeChipMatcher();
+            chipMatcher = _mvdCompositeChipMatcher[threadIdx];
         }
 
         /// <summary>
@@ -1207,7 +1262,8 @@ namespace LaserAlignDX.AoiModel.V3
 
             var cellRoi = gaCell.CellRoi;
 
-            var goldenTemplateSize = _xRecipe.PrintTemplateSize;
+            //var goldenTemplateSize = _xRecipe.PrintTemplateSize;
+            var goldenTemplateSize = _mvdCompositeChipMatcher.TemplateSize;
 
             // 格點中心 (local coordinates)
             var gridCenter = new System.Drawing.Point(cellRoi.Width / 2, cellRoi.Height / 2);
@@ -1259,9 +1315,7 @@ namespace LaserAlignDX.AoiModel.V3
             var quad = QvQuad2D.From(chipBox2D);
             return calcOverlap(gaCell, quad, isLocalCoordinate, debug);
         }
-
         #endregion
-
 
         #region HELPERS
         bool getSafeMidSize(QvQuad2D quad, out SizeF size)
@@ -1295,7 +1349,7 @@ namespace LaserAlignDX.AoiModel.V3
         }
         void offset(EzBlocsGrid grid, float dx, float dy)
         {
-            foreach(var bloc in grid)
+            foreach (var bloc in grid)
             {
                 if (bloc == null) continue;
                 //

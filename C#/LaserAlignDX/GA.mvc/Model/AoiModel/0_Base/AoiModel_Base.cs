@@ -24,6 +24,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
+using INI = Traveller106.INI;
 
 namespace LaserAlignDX.AoiModel
 {
@@ -147,7 +148,6 @@ namespace LaserAlignDX.AoiModel
         }
 
         #region PRIVATE_PATH_FILE_FUNCTIONS
-        //DateTime _timeTag = DateTime.Now;
 
         /// <summary>
         /// 標定統一的存檔時間
@@ -158,14 +158,17 @@ namespace LaserAlignDX.AoiModel
             _lotDataHolder?.MarkFileTimeTag();
         }
 
-#if (OPT_LEGACY)
+#if (OPT_LEGACY || true)
+        DateTime _timeTag => _lotDataHolder.TimeTag;
+        
         /// <summary>
         /// 帶日期時間尾綴的檔名
         /// </summary>
         protected string GetLotFileName(string tag, string ext)
         {
             //m_FileName = $"{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg";
-            return $"{tag}-{_timeTag:yyyyMMdd_HHmmss}{ext}";
+            //return $"{tag}-{_timeTag:yyyyMMdd_HHmmss}{ext}";
+            return _lotDataHolder.GetLotFileName(tag, ext);
         }
 
         /// <summary>
@@ -203,14 +206,14 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         protected string GetDebugImgSaveFileName(string subFolder, string stripID, string lotID, bool autoCreateDir = true)
         {
-            string path = System.IO.Path.Combine(INI.Instance.ResultImagePath, subFolder, _timeTag.ToString("yyyyMMdd"), stripID);
+            //string path = System.IO.Path.Combine(INI.Instance.ResultImagePath, subFolder, _timeTag.ToString("yyyyMMdd"), stripID);
+            string path = _lotDataHolder.GetLogPath(lotID);
             if (autoCreateDir && !System.IO.Directory.Exists(path))
             {
                 // 改用 JetEazy.IO.QxPathUtility.InitDirectory 可以 遞迴深層 創建資料夾.
                 // System.IO.Directory.CreateDirectory(path);
                 JetEazy.IO.QxPathUtility.InitDirectory(path);
             }
-
             string file = $"{lotID}-{_timeTag:yyyyMMdd_HHmmss}.jpg";
             return System.IO.Path.Combine(path, file);
         }

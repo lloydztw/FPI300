@@ -24,7 +24,7 @@ using CvSize = OpenCvSharp.Size;
 using EzAoiBase = EzAoiEmptyTrayInspector.Model.Aoi.EzAoiBase;
 using SizeF = System.Drawing.SizeF;
 
-namespace LeTian.AoiLib
+namespace LeTian.AoiLib.v35
 {
     public class EzPadsGridFinder : EzAoiBase
     {

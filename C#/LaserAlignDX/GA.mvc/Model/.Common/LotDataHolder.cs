@@ -75,7 +75,6 @@ namespace LaserAlignDX.Model
             set => _lotData.StripID = value;
         }
         public string FileName => GetLotFileName(LotId, ".txt");
-
         public string FileBarcodeStr
         {
             get => _fileBarcodeStr;
@@ -88,6 +87,8 @@ namespace LaserAlignDX.Model
 
         #region PRIVATE_PATH_FILE_FUNCTIONS
         DateTime _timeTag = DateTime.Now;
+
+        internal DateTime TimeTag => _timeTag;
 
         internal string GetLotFileName(string tag, string ext)
         {

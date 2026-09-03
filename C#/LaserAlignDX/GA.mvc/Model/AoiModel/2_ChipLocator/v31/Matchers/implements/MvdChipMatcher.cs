@@ -210,6 +210,14 @@ namespace LaserAlignDX.AoiModel
             return null;
         }
 
+        /// <summary>
+        /// 顯示 Golden Template 特徵圖 (調試用)
+        /// </summary>
+        public void ShowGoldenTemplateVisualizer(bool show)
+        {
+            // 海康版的 template match 不支援 
+        }
+
         #region PRIVATE_HIK_FUNCTIONS
 
 #if NO_USED_CODE
