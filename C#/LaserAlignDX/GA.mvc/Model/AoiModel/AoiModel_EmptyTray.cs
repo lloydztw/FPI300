@@ -36,7 +36,7 @@ namespace LaserAlignDX.AoiModel.V3
 
                 markRunStart();
 
-                _xRecipe.AnalyzeDatasData();    //<<< 在本專案, 貌似沒啥用處
+                //_xRecipe.AnalyzeDatasData();    //<<< 在本專案, 貌似沒啥用處
 
                 var aoiModel = _sysModel.EmptyTrayAoiModel;
                 bool isAllPass = false;
@@ -170,7 +170,7 @@ namespace LaserAlignDX.AoiModel.V3
         private void AsyncSaveDebugData(Bitmap bmpFullFov)
         {
 #if (OPT_REPLACED_BY_PARENT)
-            if (!INI.Instance.IsSaveDebugBMP || bmpFullFov == null)
+            if (!INI.Instance.IsSaveDebugBmp || bmpFullFov == null)
                 return;
                 
             ThreadPool.QueueUserWorkItem(arg =>
@@ -179,7 +179,7 @@ namespace LaserAlignDX.AoiModel.V3
                 {
                     using (Bitmap bmpBig = (Bitmap)arg)
                     {
-                        if (INI.Instance.IsSaveDebugBMP)
+                        if (INI.Instance.IsSaveDebugBmp)
                         {
                             //GaImageUtil.SaveImageWithQuality(bmpBig,
                             //    $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", INI.Instance.ImageQuality);

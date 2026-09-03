@@ -611,8 +611,10 @@
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3MeasureSpec.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\FlyParamClass.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\InspectX3ParamClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.Mvd.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.LB.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeParaGridClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\RecipeParaGridClass.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
     <Compile Include="App\ErrorCodes.cs" />

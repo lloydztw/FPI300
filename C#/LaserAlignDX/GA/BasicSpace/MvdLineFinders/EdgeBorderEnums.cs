@@ -26,16 +26,7 @@ namespace LaserAlignDX.BasicSpace
         [Description("右 邊線")]
         Right,
         [Description("下 邊線")]
-        Bottom,
-        
-        //[Description("左2 邊線")]
-        //Left2,
-        //[Description("上2 邊線")]
-        //Top2,
-        //[Description("右2 邊線")]
-        //Right2,
-        //[Description("下2 邊線")]
-        //Bottom2
+        Bottom
     }
 
     public enum EdgeBackGroundType : int
