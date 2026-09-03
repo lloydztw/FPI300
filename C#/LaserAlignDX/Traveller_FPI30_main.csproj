@@ -382,8 +382,8 @@
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v35.cs" />
-    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyAoiResult.cs" />
-    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyMetaData.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyAoiResult.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyMetaData.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviLineBorderBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\TooltipProvider.cs" />
@@ -558,10 +558,16 @@
     <Compile Include="GA.mvc\Model\.Common\GaChipData.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\0_Base\AoiModel_Base.cs" />
     <Compile Include="GA.mvc\Model\.Common\LotData.cs" />
-    <Compile Include="GA.mvc\Model\.Common\EzLSD.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\0_Base\EzLSD.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\AoiLib\EzPadsGridFinder.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\AoiLib\EzRigidBodyGridMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\AoiModel_ChipLoc.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\Matchers\implements\JezGridPadsChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\Matchers\implements\MvdChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\Matchers\IMvdTemplateMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v30\Matchers\MvdCompositeChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v31.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v35.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\AoiModel_ChipLoc.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\AoiModel_FlyCam.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\5_QrCode\AoiModel_QrCode.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\4_DefectDetector\AoiModel_Defects.cs" />
@@ -640,12 +646,6 @@
     <Compile Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.Designer.cs">
       <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\Supports\EzPadsGridFinder.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\Supports\EzRigidBodyGridMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\Matchers\Implements\MvdChipMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\Matchers\Implements\JezGridPadsChipMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\Matchers\IMvdTemplateMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\Matchers\MvdCompositeChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerBigImagesHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
     <Compile Include="GA.mvc\.Enums\ScanInspectModeEnum.cs" />
@@ -982,7 +982,9 @@
     <None Include="Resources\next.png" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="GA.mvc\Model\AoiModel\2_ChipLocator\v35\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)
