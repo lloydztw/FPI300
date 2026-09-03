@@ -505,10 +505,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             rcpLineBorderPairs.AdjustPairsNumber(1, 1);
 
             if (!rcpLineBorderPairs.TryGetValue("X", out var pairX)) 
-                rcpLineBorderPairs["X"] = pairX = new LineBorderPair();
+                rcpLineBorderPairs["X"] = pairX = new LineBorderPair(rcpLineBorderPairs.IsLocal);
 
             if (!rcpLineBorderPairs.TryGetValue("Y", out var pairY))
-                rcpLineBorderPairs["Y"] = pairY = new LineBorderPair();
+                rcpLineBorderPairs["Y"] = pairY = new LineBorderPair(rcpLineBorderPairs.IsLocal);
 
             pairX.Borders[0] = QvQuad2D.From(rectL).ToBox2D();
             pairX.Borders[1] = QvQuad2D.From(rectR).ToBox2D();
@@ -1010,6 +1010,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         void updateLineBorderBoxes(bool toRecipe)
         {
             LineBorderPairsCollection lineBorderPairs = _xRecipe?.LineBorderParams;
+
             if (lineBorderPairs == null)
                 return;
 
@@ -1115,7 +1116,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                         {
                             if (!lineBorderPairs.TryGetValue(keyName, out var rcpPair))
                             {
-                                lineBorderPairs[keyName] = rcpPair = new LineBorderPair();
+                                lineBorderPairs[keyName] = rcpPair = new LineBorderPair(lineBorderPairs.IsLocal);
                                 rcpPair.Borders[ib] = QvQuad2D.From(borderRect).ToBox2D();
                             }
                             rcpPair.LineSegments[ib] = new EzLSD.LineSegment(linesOut[0][0], linesOut[0][1]);
@@ -1349,7 +1350,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 var targetSize = new SizeF(_xInspectX3.xTemplateChipWidth, _xInspectX3.xTemplateChipHeight);
                 lineBorderPairs.SetTargetDists(targetSize);
   
-                var err = aoiModel.BuildMicroChipTransform(lineBorderPairs, regionBmp, regionRoi);
+                var err = _xRecipe.LineBorderParams.IsSimpleQuad ?
+                    aoiModel.BuildMicroChipTransform(targetSize, lineBorderPairs.GetQuadLineSegments(), regionBmp, regionRoi):
+                    aoiModel.BuildMicroChipTransform(lineBorderPairs, regionBmp, regionRoi);
 
                 if (err != Model.ErrorCodes.OK)
                 {

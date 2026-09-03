@@ -16,17 +16,26 @@
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
 using LeTian.AoiLib;
-using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Controls;
 
 namespace LaserAlignDX.Model
 {
     public class LineBorderPair
     {
         public const int MAX_PAIRS = 2;
+
+        public LineBorderPair(bool isLocal)
+        {
+            IsLocal = isLocal;
+        }
+
+        public bool IsLocal
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// 邊線拉框 (單位 pixels) (FullFov Cammera Coordinates)
@@ -49,7 +58,7 @@ namespace LaserAlignDX.Model
         /// </summary>
         public LineBorderPair Clone()
         {
-            var clone = new LineBorderPair();
+            var clone = new LineBorderPair(IsLocal);
             for (int i = 0; i < 2; i++)
             {
                 clone.Borders[i] = this.Borders[i]?.Clone();
@@ -95,6 +104,7 @@ namespace LaserAlignDX.Model
     {
         #region PRIVATE_DATA
         readonly Dictionary<string, LineBorderPair> _dict = new Dictionary<string, LineBorderPair>();
+        bool _isLocal;
         #endregion
 
         #region PUBLIC_DICT_DATA
@@ -128,6 +138,25 @@ namespace LaserAlignDX.Model
             _dict.Clear();
         }
         #endregion
+
+        public LineBorderPairsCollection(bool isLocal)
+        {
+            _isLocal = isLocal;
+        }
+
+        public bool IsLocal
+        {
+            get => _isLocal;
+            set
+            {
+                _isLocal = value;
+                foreach (var pair in _dict.Values)
+                {
+                    if (pair != null)
+                        pair.IsLocal = _isLocal;
+                }
+            }
+        }
 
         /// <summary>
         /// 設定目標值（支援任意組數）
@@ -234,10 +263,10 @@ namespace LaserAlignDX.Model
             {
                 if (!_dict.ContainsKey(key))
                 {
-                    var pair = new LineBorderPair();
-                    pair.Borders[0] = new QvBox2D();
-                    pair.Borders[1] = new QvBox2D();
-                    _dict.Add(key, new LineBorderPair());
+                    //var pair = new LineBorderPair(_isLocal);
+                    //pair.Borders[0] = new QvBox2D();
+                    //pair.Borders[1] = new QvBox2D();
+                    _dict.Add(key, new LineBorderPair(_isLocal));
                     isChanged = true;
                 }
             }
@@ -278,11 +307,11 @@ namespace LaserAlignDX.Model
         {
             if (!_dict.TryGetValue("X", out var pairX) && allowsNull)
             {
-                _dict["X"] = pairX = new LineBorderPair();
+                _dict["X"] = pairX = new LineBorderPair(_isLocal);
             }
             if (!_dict.TryGetValue("Y", out var pairY) && allowsNull)
             {
-                _dict["Y"] = pairY = new LineBorderPair();
+                _dict["Y"] = pairY = new LineBorderPair(_isLocal);
             }
 
             if (pairX == null || pairY == null)
@@ -320,7 +349,7 @@ namespace LaserAlignDX.Model
         {
             (string key, int i) = eb.GetKeyOffset();
             if (!_dict.TryGetValue(key, out var pair))
-                _dict[key] = pair = new LineBorderPair();
+                _dict[key] = pair = new LineBorderPair(_isLocal);
             pair.LineSegments[i] = borerLine;
         }
         public bool Get(EdgeBorder eb, out QvBox2D borderBox)
@@ -336,7 +365,7 @@ namespace LaserAlignDX.Model
         {
             (string key, int i) = eb.GetKeyOffset();
             if (!_dict.TryGetValue(key, out var pair))
-                _dict[key] = pair = new LineBorderPair();
+                _dict[key] = pair = new LineBorderPair(_isLocal);
             pair.Borders[i] = borderBox;
         }
         #endregion

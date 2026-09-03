@@ -33,7 +33,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         /// <summary>
         /// 量測框資料
         /// </summary>
-        public readonly LineBorderPairsCollection LineBorderPairs = new LineBorderPairsCollection();
+        public readonly LineBorderPairsCollection LineBorderPairs = new LineBorderPairsCollection(true);
         #endregion
 
         #region PUBLIC_OPERATORS
@@ -75,7 +75,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         {
             if (!LineBorderPairs.TryGetValue(key, out var pair) || pair == null)
             {
-                LineBorderPairs[key] = pair = new LineBorderPair();
+                LineBorderPairs[key] = pair = new LineBorderPair(LineBorderPairs.IsLocal);
             }
             pair.Borders[borderIndex] = QvQuad2D.From(rect).ToBox2D();
         }
@@ -122,17 +122,19 @@ namespace LaserAlignDX.Mvc.Model.Recipe
                 oldParams.Load(iniFile);
 
                 // X: xLineLeft, xLineRight
-                var pairX = new LineBorderPair();
+                var pairX = new LineBorderPair(LineBorderPairs.IsLocal);
                 pairX.Borders[0] = QvQuad2D.From(oldParams.xLineLeft).ToBox2D();
                 pairX.Borders[1] = QvQuad2D.From(oldParams.xLineRight).ToBox2D();
                 LineBorderPairs["X"] = pairX;
 
                 // Y: xLineTop, xLineBottom
-                var pairY = new LineBorderPair();
+                var pairY = new LineBorderPair(LineBorderPairs.IsLocal);
                 pairY.Borders[0] = QvQuad2D.From(oldParams.xLineTop).ToBox2D();
                 pairY.Borders[1] = QvQuad2D.From(oldParams.xLineBottom).ToBox2D();
                 LineBorderPairs["Y"] = pairY;
             }
+
+            LineBorderPairs.IsLocal = true;
         }
 
         public override void Save(string iniFile)
@@ -190,7 +192,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             }
             else
             {
-                pair = new LineBorderPair();
+                pair = new LineBorderPair(LineBorderPairs.IsLocal);
                 var corners0 = new PointF[4];
                 var corners1 = new PointF[4];
                 Array.Copy(corners, 0, corners0, 0, 4);

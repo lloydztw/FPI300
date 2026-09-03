@@ -371,7 +371,7 @@ namespace LaserAlignDX.AoiModel.V35
                     //(5) 記入 cell.ChipData
                     (string key, int offset) = eBorder.GetKeyOffset();
                     if (!cell.ChipData.LineBorderPairs.TryGetValue(key, out var pair))
-                        pair = new LineBorderPair();
+                        pair = new LineBorderPair(isLocal: false);
                     pair.Borders[offset] = borderQuad.ToBox2D();
                     pair.LineSegments[offset] = line;
                 }
@@ -881,7 +881,8 @@ namespace LaserAlignDX.AoiModel.V35
 
                 //(3) LineBorderPairs : 位於 goldenRegionRect (_xRecipe.xRectRegionPrint) 內部
                 Dictionary<string,LineBorderPair> rcpLineBorderPairs = _xRecipe.LineBorderParams;
-                var lineBorderPairs = new LineBorderPairsCollection();
+                var lineBorderPairs = new LineBorderPairsCollection(true);
+
                 foreach (var kvp in rcpLineBorderPairs)
                 {
                     keyName = kvp.Key;
@@ -915,7 +916,7 @@ namespace LaserAlignDX.AoiModel.V35
                         lineBorderNew.Corners = lbCorners;
                         lineBorderNew.Sort();
 
-                        //(3.2) OFFSET
+                        //(3.2) Offset (to local)
                         lineBorderNew.Offset(-cellRoi.X, -cellRoi.Y);
 
                         //(3.3) 更新 pairNew

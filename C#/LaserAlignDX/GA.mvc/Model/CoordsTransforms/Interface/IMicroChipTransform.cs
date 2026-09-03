@@ -19,7 +19,12 @@ namespace LaserAlignDX.Model.Coords
         ErrorCodes CalcChipDimension(out SizeF dimension, EzLSD.LineSegment[] lines, GaChipData chipData, bool includePadGaps);
 
         /// <summary>
-        /// lines 單位是 pixels, 與 chipData.ChipQuad2D.Center 相同 參考原點
+        /// lineBorderPairs 與 chipData.ChipQuad2D.Center 相同 參考原點
+        /// </summary>
+        ErrorCodes BuildMicroTransform(SizeF targetDim, LineBorderPairsCollection lineBorderPairs, GaChipData chipData, RectangleF regionRoi);
+
+        /// <summary>
+        /// lineBorderPairs 與 chipData.ChipQuad2D.Center 相同 參考原點
         /// </summary>
         ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, LineBorderPairsCollection lineBorderPairs, GaChipData chipData, ITransform globalTrf = null);
     }

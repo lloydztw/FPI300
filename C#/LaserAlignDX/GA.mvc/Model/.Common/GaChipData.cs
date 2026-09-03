@@ -116,7 +116,7 @@ namespace LaserAlignDX.Model
         /// <remarks>
         /// 單位 pixels (FullFov Cammera Coordinates)
         /// </remarks>
-        public readonly LineBorderPairsCollection LineBorderPairs = new LineBorderPairsCollection();
+        public readonly LineBorderPairsCollection LineBorderPairs = new LineBorderPairsCollection(false);
 
         /// <summary>
         /// 計算晶粒 尺寸量測 之 邊界多邊形

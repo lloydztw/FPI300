@@ -80,32 +80,57 @@ namespace LaserAlignDX.Mvc.Gui
                 lblInfo.Text = "";
                 return;
             }
+
             var sb = new StringBuilder();
             int row = cell.CellRow;
             int col = cell.CellCol;
             sb.Append(QMSG.T("格點")).Append(": [").Append(row).Append(",").Append(col).Append("]");
 
             #region 尺寸量測詳細點位
-            //var meansurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
+            bool isConditionOK = false;
             var chipDim = cell?.ChipData.ChipDimension;
-            var measureX = chipDim?["X"];
-            var measureY = chipDim?["Y"];
-            var meansurePts = new[]
+            if (chipDim != null)
             {
-                measureX?.CamMeasurePts[0],
-                measureY?.CamMeasurePts[0],
-                measureX?.CamMeasurePts[1],
-                measureY?.CamMeasurePts[1],
-            };
-            if (meansurePts[0] != null && meansurePts[1] != null &&
-                meansurePts[2] != null && meansurePts[3] != null)
-            {
-                var dpX = (meansurePts[0] - meansurePts[2]).NormLength;
-                var dpY = (meansurePts[1] - meansurePts[3]).NormLength;
-                sb.AppendLine().Append(QMSG.T("晶粒.尺寸X")).Append($" = {dpX:0.0} pix");
-                sb.AppendLine().Append(QMSG.T("晶粒.尺寸Y")).Append($" = {dpY:0.0} pix");
+                if (_xRecipe.LineBorderParams.IsSimpleQuad)
+                {
+                    var measureX = chipDim?["X"];
+                    var measureY = chipDim?["Y"];
+                    var meansurePts = new[]
+                    {
+                        measureX?.CamMeasurePts[0],     //  LEFT
+                        measureY?.CamMeasurePts[0],     //  TOP
+                        measureX?.CamMeasurePts[1],     //  RIGHT
+                        measureY?.CamMeasurePts[1],     //  BOTTOM
+                    };
+
+                    if (meansurePts[0] != null && meansurePts[1] != null &&
+                        meansurePts[2] != null && meansurePts[3] != null)
+                    {
+                        var dpX = (meansurePts[0] - meansurePts[2]).NormLength;
+                        var dpY = (meansurePts[1] - meansurePts[3]).NormLength;
+                        sb.AppendLine().Append(QMSG.T("晶粒.尺寸X")).Append($" = {dpX:0.0} pix");
+                        sb.AppendLine().Append(QMSG.T("晶粒.尺寸Y")).Append($" = {dpY:0.0} pix");
+                        isConditionOK = true;
+                    }
+                }
+                else
+                {
+                    string tagName = QMSG.T("晶粒.尺寸X").Replace("X", "");
+                    foreach (var key in chipDim.Keys)
+                    {
+                        var meansure = chipDim[key];
+                        if (meansure == null) continue;
+                        var pts = meansure.CamMeasurePts;
+                        if (pts[0] != null && pts[1] != null)
+                        {
+                            var dist = (pts[0] - pts[1]).NormLength;
+                            sb.AppendLine().Append(tagName).Append(key).Append($" = {dist:0.0} pix");
+                            isConditionOK = true;
+                        }
+                    }
+                }
             }
-            else
+            if (!isConditionOK)
             {
                 sb.AppendLine().AppendLine(QMSG.T("沒有 完整邊線, 無法建構 有效量測點位!"));
                 numChipWidth.Enabled = false;

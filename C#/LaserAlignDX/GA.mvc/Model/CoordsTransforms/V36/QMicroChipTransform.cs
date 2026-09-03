@@ -14,6 +14,7 @@
  */
 #endregion
 
+using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
@@ -25,6 +26,7 @@ using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Web.ModelBinding;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
 namespace LaserAlignDX.Model.Coords.V36
@@ -239,7 +241,61 @@ namespace LaserAlignDX.Model.Coords.V36
         {
             return CalcChipDimension_PadTrf(out dimension, lines, chipData, includePadGaps);
         }
-        public ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, LineBorderPairsCollection lineBorderPairs, GaChipData chipData, ITransform globalTrf)
+
+        public ErrorCodes BuildMicroTransform(SizeF targetDim, LineBorderPairsCollection lineBorderPairs, GaChipData chipData, RectangleF regionRoi)
+        {
+            //(0) 檢查
+            var chipQuad = chipData?.ChipQuad2D;
+            if (chipQuad == null)
+                return ErrorCodes.ERR_NO_CHIP_LOCATION;
+
+            //(1) 利用 chipQuad 建構 quadLines (FullFov Coordinates)
+            int NP = 4;
+            var quadLines = new EzLSD.LineSegment[NP];
+            var corners = chipQuad.Corners;
+            for (int i = 0; i < NP; i++)
+            {
+                int iPrev = i == 0 ? corners.Length - 1 : i - 1;
+                quadLines[i] = new EzLSD.LineSegment(corners[i], corners[iPrev]);
+            }
+
+#if(true)
+            //(2) 根據 lineBorderPairs["X"] 修改 quadLines
+            if (lineBorderPairs.TryGetValue("X", out var pairX))
+            {
+                targetDim.Width = pairX.TargetDist;
+                var L = pairX.LineSegments[0]?.Clone();
+                var R = pairX.LineSegments[1]?.Clone();
+                if (lineBorderPairs.IsLocal)
+                {
+                    L?.Offset(regionRoi.X, regionRoi.Y);    // Offset to FullFov coordinates
+                    R?.Offset(regionRoi.X, regionRoi.Y);    // Offset to FullFov coordinates
+                }
+                if (L != null) quadLines[0] = L;            // LEFT
+                if (R != null) quadLines[2] = R;            // RIGHT
+            }
+
+            //(3) 根據 lineBorderPairs["Y"] 修改 quadLines
+            if (lineBorderPairs.TryGetValue("Y", out var pairY))
+            {
+                targetDim.Height = pairY.TargetDist;
+                var T = pairY.LineSegments[0]?.Clone();
+                var B = pairY.LineSegments[1]?.Clone();
+                if (lineBorderPairs.IsLocal)
+                {
+                    T?.Offset(regionRoi.X, regionRoi.Y);    // Offset to FullFov coordinates
+                    B?.Offset(regionRoi.X, regionRoi.Y);    // Offset to FullFov coordinates
+                }
+                if (T != null) quadLines[1] = T;            // TOP
+                if (B != null) quadLines[3] = B;            // BOTTOM
+            }
+#endif
+
+            //(4) 建立 MicroTransform (使用原來的 MicroTransform 計算方式)
+            var err = this.BuildMicroTransform(targetDim, quadLines, chipData);
+            return ErrorCodes.OK;
+        }
+        public ErrorCodes CalcChipMeasurements(out Dictionary<string, float> results, LineBorderPairsCollection lineBorderPairs, GaChipData chipData, ITransform globalTrf = null)
         {
             /*
                 [CalcChipMeasurements]
@@ -253,7 +309,7 @@ namespace LaserAlignDX.Model.Coords.V36
                        └─► 5.計算兩兩距離(NormLength) 並存入 results 字典(四捨五入至小數點後 3 位)
             */
 
-
+            globalTrf = null;
             return CalcChipDimension_PadTrf2(out results, lineBorderPairs, chipData, globalTrf);
         }
 
