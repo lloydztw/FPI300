@@ -516,7 +516,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             pairY.Borders[1] = QvQuad2D.From(rectB).ToBox2D();
 
             updateLineBorderBoxes(false);
-            updateLineSegmentBoxes(false);
+            updateLineSegmentBoxes(true);
             refreshViewer(wndRegionViewer);
 
             _isLineBorderModified = true;
