@@ -28,7 +28,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using CviBoundBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 using CviGoldenBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
-
+using CviMaskBox = EzAoiEmptyTrayInspector.Ctrl.CviRcpBox;
 
 namespace EzAoiEmptyTrayInspector.Ctrl
 {
@@ -75,6 +75,10 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             get => _sideSettings?.Match;
         }
+        JxTempMatchMasks _masksSettings
+        {
+            get => _sideSettings?.TemplateMasks;
+        }
         bool _isRcpEdittingMode = false;
         bool _bypassJxEvents = false;
         #endregion
@@ -90,6 +94,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
         #region PRIVATE_INTERACTORS
         List<CviBoundBox> _cviGroupBoundBoxes;
+        List<CviMaskBox> _cviMaskBoxes;
         CviGoldenBox _cviGoldenBox;
         CviFiltersBox _cviFiltersBox;
         #endregion
@@ -177,6 +182,11 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             {
                 _sideSettings.RotAngle.OnModified += Side_RotAngle_OnModified;
             }
+
+            if (_masksSettings != null)
+            {
+                _masksSettings.MasksNumber.OnModified += MasksNumber_OnModified;
+            }
         }
 
         private void _recipesMgr_OnRecipeSelectionChanged(object sender, EventArgs e)
@@ -221,6 +231,12 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             if (_bypassJxEvents || !_isRcpEdittingMode)
                 return;
             showFiltersEffect();
+        }
+        private void MasksNumber_OnModified(object sender, EventArgs e)
+        {
+            if (_bypassJxEvents || !_isRcpEdittingMode)
+                return;
+            _frmOwner.BeginInvoke(new Action(() => update_mask_boxes_to_gui()));
         }
         private void SegsNumber_OnModified(object sender, EventArgs e)
         {
@@ -344,6 +360,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         #region CVI_BOX_FUNCTIONS
         void init_interactors()
         {
+            _cviMaskBoxes = new List<CviMaskBox>();
             _cviGroupBoundBoxes = new List<CviBoundBox>();
             _cviGoldenBox = new CviGoldenBox(Brushes.Orange, 1, 3);
             _cviFiltersBox = new CviFiltersBox(Brushes.Lime, 1, 3);
@@ -515,12 +532,146 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             _bypassJxEvents = flag;
         }
 
+        bool update_mask_boxes_to_gui()
+        {
+            bool isNumberChanged = false;
+
+            if (_masksSettings == null)
+                return isNumberChanged;
+
+            int targetNumber = _masksSettings.MasksNumber.Value;
+            //_masksSettings.SyncMasks(targetNumber);
+
+            var jxList = _masksSettings?.MasksList;
+            if (jxList == null)
+                return isNumberChanged;
+
+            if (_imgViewerWindow != null)
+                _imgViewerWindow.Enabled = false;
+
+            // 基準矩形
+            var baseRect = _cviGoldenBox.Box;
+            baseRect.Width /= 2;
+            baseRect.Height /= 2;
+
+            // 根據需要 生成新的 CviBox
+            for (int i = _cviMaskBoxes.Count; i < targetNumber; i++)
+            {
+                var defaultRect = baseRect;
+                defaultRect.X += i * 15;
+
+                if (i >= jxList.Count || jxList[i] == null || jxList[i].Value == Rectangle.Empty)
+                    _masksSettings.UpdateMask(i, defaultRect);
+
+                var brush = i % 2 == 0 ? Brushes.Red : Brushes.DarkRed;
+                var cviMaskBox = new CviBoundBox(brush, 1, 3)
+                {
+                    Text = $"M{i}",
+                    Box = jxList[i].Value,
+                };
+
+                cviMaskBox.OnChanged += (s, e) => update_mask_boxes_to_recipe(s);
+                _cviMaskBoxes.Add(cviMaskBox);
+                _imgViewer?.AddInteractor(cviMaskBox);
+
+                isNumberChanged = true;
+            }
+
+            // 刪除/隱藏多餘的 CviBox
+            if (targetNumber < _cviMaskBoxes.Count)
+            {
+                for (int i = targetNumber; i < _cviMaskBoxes.Count; i++)
+                {
+                    var cviMaskBox = _cviMaskBoxes[i];
+                    cviMaskBox.Visible = false;
+                    cviMaskBox.Enabled = false;
+                    _imgViewer?.RemoveInteractor(cviMaskBox);
+                }
+                _cviMaskBoxes.RemoveRange(targetNumber, _cviMaskBoxes.Count - targetNumber);
+                isNumberChanged = true;
+            }
+
+            // 更新 CviBox
+            for (int i = 0, N = _cviMaskBoxes.Count; i < N; i++)
+            {
+                var cviMaskBox = _cviMaskBoxes[i];
+
+                var maskRect = baseRect;
+                maskRect.X += i * 15;
+                maskRect.Y += i * 15;
+
+                if (i < jxList.Count)
+                {
+                    var jx = jxList[i];
+                    if (jx != null)
+                    {
+                        if (jx.Value == Rectangle.Empty)
+                            jx.Value = maskRect;
+                        else
+                            maskRect = jx.Value;
+                    }
+                }
+
+                cviMaskBox.Visible = _isRcpEdittingMode;
+                cviMaskBox.Enabled = _isRcpEdittingMode;
+                cviMaskBox.Box = maskRect;
+            }
+
+            //foreach (var cviMaskBox in _cviMaskBoxes)
+            //{
+            //    cviMaskBox.Visible = _isRcpEdittingMode;
+            //    cviMaskBox.Enabled = _isRcpEdittingMode;
+            //}
+
+            if (_imgViewerWindow != null)
+                _imgViewerWindow.Enabled = true;
+
+            if (jxList.Count != _cviMaskBoxes.Count)
+                isNumberChanged = true;
+
+            _masksSettings.SyncMasks(_cviMaskBoxes.Count);
+
+            return isNumberChanged;
+        }
+        void update_mask_boxes_to_recipe(object sender = null)
+        {
+            //var _masksSettings = this._masksSettings;
+            //var _cviMaskBoxes = this._cviMaskBoxes;
+
+            if (_masksSettings == null || _cviMaskBoxes == null)
+                return;
+
+            bool flag = _bypassJxEvents;
+            _bypassJxEvents = true;
+
+            ////(1) 取得 pitchY
+            //decimal pitchY = _activeRecipe.TrayMiscSettings.PitchY.Value;
+
+            //(2) 根據 sender 來決定要更新哪一個 CviBox，還是全部更新
+            int index = -1;
+            if (sender is CviBoundBox cviSegBox)
+                index = _cviMaskBoxes.IndexOf(cviSegBox);
+            int iStart = index >= 0 ? index : 0;
+            int iEnd = index >= 0 ? index + 1 : _cviMaskBoxes.Count;
+
+            //(3) 更新 _segGrpSettings 的 JxTraySegItem
+            for (int i = iStart; i < iEnd; i++)
+            {
+                _masksSettings.UpdateMask(i, _cviMaskBoxes[i].Box);
+            }
+
+            _bypassJxEvents = flag;
+        }
+
         void move_boxes_to_safe_location(Size boundarySize)
         {
             var boxes = new List<CviBoundBox>(_cviGroupBoundBoxes)
             {
                 _cviGoldenBox
             };
+
+            if (_cviMaskBoxes != null)
+                boxes.AddRange(_cviMaskBoxes);
 
             foreach (var cviBox in boxes)
             {
@@ -684,10 +835,17 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _cviGoldenBox.Enabled = _isRcpEdittingMode;
                 _cviFiltersBox.Visible = _isRcpEdittingMode;
                 _cviFiltersBox.Enabled = _isRcpEdittingMode;
+
                 foreach(var cviSegBox in _cviGroupBoundBoxes)
                 {
                     cviSegBox.Visible = _isRcpEdittingMode;
                     cviSegBox.Enabled = _isRcpEdittingMode;
+                }
+
+                foreach (var cviMaskBox in _cviMaskBoxes)
+                {
+                    cviMaskBox.Visible = _isRcpEdittingMode;
+                    cviMaskBox.Enabled = _isRcpEdittingMode;
                 }
             }
         }

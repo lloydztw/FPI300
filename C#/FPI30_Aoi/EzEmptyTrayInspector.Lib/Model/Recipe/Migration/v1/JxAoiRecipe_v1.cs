@@ -13,11 +13,12 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model;
 using LeTian.JxProps;
 using System;
-using System.Linq.Expressions;
+using JxTrayVisionSettings = EzAoiEmptyTrayInspector.Migration.V0.JxTrayVisionSettings;
 
-namespace EzAoiEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Migration.V1
 {
     /// <summary>
     /// 所有參數設定
@@ -80,56 +81,48 @@ namespace EzAoiEmptyTrayInspector.Model
     {
         internal static bool CheckVersion(string fileContent)
         {
-            return fileContent.Contains("JxTempMatchMasks");
+            return fileContent.Contains("JxTraySegGrpSettings");
         }
+
+#if (OPT_HANDLED_BY_MIGRATION)
         public override void Load(string fileName)
         {
-            //>>> 嘗試載入舊格式
-            migrateLoad(fileName);
+            ////>>> 嘗試載入舊格式
+            //migrateLoad(fileName);
+            ////>>> 參數版本升級, 進行必要的遷移處理.
+            //migrateBoundBox();
         }
         public override void Save(string fileName)
         {
             base.Save(fileName);
         }
+#endif
 
         #region MIGRATION
-        void migrateLoad(string fileName, string fileContent = null)
+        internal void migrateLoad(string fileName, string content)
         {
             if (!System.IO.File.Exists(fileName))
                 return;
 
             try
             {
-                if (fileContent == null)
-                    fileContent = System.IO.File.ReadAllText(fileName);
+                if (content == null)
+                    content = System.IO.File.ReadAllText(fileName);
 
-                // 如果是當下最新版本 (V2)
-                if (CheckVersion(fileContent))
+                // 如果是目前版本 (V1)
+                if (CheckVersion(content))
                 {
                     base.Load(fileName);
                 }
-                // 否則載入前一版 (V1)
+                // 否則載入前一版 (V0)
                 else
                 {
-                    using (var old = new Migration.V1.JxAoiRecipe())
+                    using (var old = new V0.JxAoiRecipe())
                     {
                         old.Load(fileName);
-
                         TrayMiscSettings.CopyFrom(old.TrayMiscSettings);
+                        VisionSettings.CopyFrom(old.VisionSettings);
                         TrayMiscSettings.Modified = false;
-
-                        TraySegGrpSettings.CopyFrom(old.TraySegGrpSettings);
-                        TraySegGrpSettings.Modified = false;
-
-                        var dst = this.VisionSettings;
-                        var src = old.VisionSettings;
-                        dst.Match.CopyFrom(src.Match);
-                        dst.Mirror.CopyFrom(src.Mirror);
-                        dst.RotAngle.CopyFrom(src.RotAngle);
-                        dst.Inverse.CopyFrom(src.Inverse);
-                        dst.OutGridBlocThreshold.CopyFrom(src.OutGridBlocThreshold);
-                        dst.FindAllFailBlocs.CopyFrom(src.FindAllFailBlocs);
-                        dst.OutGridBlocMinSize.CopyFrom(src.OutGridBlocMinSize);
                         VisionSettings.Modified = false;
                     }
                 }
@@ -139,7 +132,6 @@ namespace EzAoiEmptyTrayInspector.Model
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
 
-            //>>> 參數版本升級, 進行必要的遷移處理.
             migrateBoundBox();
         }
         void migrateBoundBox()

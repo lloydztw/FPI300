@@ -236,6 +236,7 @@
       <DependentUpon>GwLogPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\Enum\Scores.cs" />
+    <Compile Include="Model\Filters\CvStsThreshold.cs" />
     <Compile Include="Model\IxCommonModel.cs" />
     <Compile Include="Model\IxEmptyTrayInspector.cs" />
     <Compile Include="Model\Enum\ErrCodes.cs" />
@@ -253,6 +254,7 @@
     <Compile Include="Model\Match\EzRotAngleFinder.cs" />
     <Compile Include="Model\Match\EzOutGridNgBlocsDetector.cs" />
     <Compile Include="Model\Match\EzTemplateMatcher.cs" />
+    <Compile Include="Model\Match\EzTemplateMatcher.v0.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsGrid.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsGridAnalyzer.cs" />
     <Compile Include="Model\Match\Grid\EzBlocsGridBuilder.cs" />
@@ -261,8 +263,11 @@
     <Compile Include="Model\Match\Grid\EzBlocsPool.cs" />
     <Compile Include="Model\Match\Grid\QuadLinkNode.cs" />
     <Compile Include="Model\Match\Bloc\QvQuad2D.cs" />
+    <Compile Include="Model\Recipe\JxTempMatchMasks.cs" />
     <Compile Include="Model\Recipe\JxTraySegGrpSettings.cs" />
-    <Compile Include="Model\Recipe\Migration\JxAoiRecipe_v0.cs" />
+    <Compile Include="Model\Recipe\Migration\v0\JxTrayVisionSettings_v0.cs" />
+    <Compile Include="Model\Recipe\Migration\v1\JxAoiRecipe_v1.cs" />
+    <Compile Include="Model\Recipe\Migration\v0\JxAoiRecipe_v0.cs" />
     <Compile Include="Model\Recipe\Serializer\EzBlocsGridSerializer.cs" />
     <Compile Include="Model\Recipe\Serializer\Migrations\EzBlocsGridSerializer_v0.cs" />
     <Compile Include="Model\Recipe\JxAoiRecipe.cs" />

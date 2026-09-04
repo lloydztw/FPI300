@@ -13,10 +13,10 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model;
 using LeTian.JxProps;
 
-
-namespace EzAoiEmptyTrayInspector.Model
+namespace EzAoiEmptyTrayInspector.Migration.V0
 {
     /// <summary>
     /// 空盤 像測參數
@@ -24,8 +24,6 @@ namespace EzAoiEmptyTrayInspector.Model
     public class JxTrayVisionSettings : JxContainer
     {
         public JxTempMatchSettings Match = new JxTempMatchSettings(null, "吸嘴比對設定");
-        public JxTempMatchMasks TemplateMasks = new JxTempMatchMasks();
-
         public JxEnum<MirrorMode> Mirror = new JxEnum<MirrorMode>("Miror", description: "鏡像");
         public JxRotAngleSettings RotAngle = new JxRotAngleSettings();
         public JxBool Inverse = new JxBool("Inverse", "反相處理", false);
@@ -45,7 +43,6 @@ namespace EzAoiEmptyTrayInspector.Model
                 //Mirror,       // 保留擴充
                 //RotAngle,     // 保留擴充
                 Match,
-                TemplateMasks,
                 Inverse,
                 OutGridBlocThreshold,
                 FindAllFailBlocs,

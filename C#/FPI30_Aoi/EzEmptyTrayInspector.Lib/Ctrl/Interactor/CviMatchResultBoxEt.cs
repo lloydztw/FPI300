@@ -68,11 +68,10 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             draw_grid_lines(viewer, gxView, _matchResult?.Grid);
 
             // 畫出 正常 Blocs (有吸嘴)
-            draw_bloc_rects(viewer, gxView, _suckerBlocs, Color.Lime, Color.DarkGreen, 0.25f);
+            draw_bloc_rects(viewer, gxView, _suckerBlocs, Color.Lime, Color.DarkGreen, 0.10f);
 
             // 畫記 異常 Blocs (沒有吸嘴)
             draw_bloc_rects(viewer, gxView, iter_ng_blocs(), Color.Red, Color.DarkRed, 0.25f);
-
 
             if (!isWorld)
                 viewer.SwitchToViewportCoordinate(gxView);

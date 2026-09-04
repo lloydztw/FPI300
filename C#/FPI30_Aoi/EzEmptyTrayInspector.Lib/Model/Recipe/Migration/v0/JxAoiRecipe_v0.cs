@@ -13,9 +13,10 @@
  */
 #endregion
 
+using EzAoiEmptyTrayInspector.Model;
 using LeTian.JxProps;
 
-namespace EzAoiEmptyTrayInspector.Model.V0
+namespace EzAoiEmptyTrayInspector.Migration.V0
 {
     /// <summary>
     /// 所有參數設定
