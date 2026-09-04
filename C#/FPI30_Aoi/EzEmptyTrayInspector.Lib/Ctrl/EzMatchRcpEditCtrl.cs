@@ -99,6 +99,18 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         CviFiltersBox _cviFiltersBox;
         #endregion
 
+        #region CHILD_CTRLS
+        //EzRcpFiltersCtrl _filtersCtrl;
+        //EzRcpFiltersCtrl instanceFiltersCtrl()
+        //{
+        //    //NOTE: EzRcpFiltersCtrl 會隨著 wndRcpHostPanel 關閉, 而自動 Dispose.
+        //    _filtersCtrl?.Dispose();
+        //    _filtersCtrl = new EzRcpFiltersCtrl(_wndRcpHostPanel, _activeRecipe.VisionSettings.ImagePreSettings);
+        //    _filtersCtrl.AttachImageSource(_imgSource);
+        //    return _filtersCtrl;
+        //}
+        #endregion
+
         public EzMatchRcpEdittingCtrl(int sideId, IvSingleMatchView view, IvFuncButtonsPanel funcPanel, IRecipesMgrCtrl recipesMgr)
         {
             ID = (SideID)sideId;
@@ -110,7 +122,6 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             _imgViewer = view.ImageViewer;
             _imgViewerWindow = _imgViewer as Control;
             _funcButtonsPanel = funcPanel;
-            //_btnGolden = funcPanel?.btnPickGolden;
 
             var frmMain = _frmOwner as FormAwMain;
             _wndRcpHostPanel = frmMain?.OpDocker.FindPanel<AwFramework.Gui.DefaultPanels.GvRecipeDockPanel>();
@@ -193,6 +204,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             rebuildPropsView();
             updateActiveRecipe();
+            //instanceFiltersCtrl();
         }
         private void _recipesMgr_OnRecipeEditting(object sender, EventArgs e)
         {
@@ -286,6 +298,8 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             update_rcp_editor_gui_status();
             refresh(_imgViewerWindow);
             _model?.ResetAndClear();        //@<<<  EzMatchRcpEditingCtrl.enterEdittingMode
+
+            //instanceFiltersCtrl().IsEditting = true;
         }
         void leaveEdittingMode()
         {
@@ -293,6 +307,8 @@ namespace EzAoiEmptyTrayInspector.Ctrl
             update_cvi_boxes_to_recipe();
             update_rcp_editor_gui_status();
             refresh(_imgViewerWindow);
+            //if (_filtersCtrl != null)
+            //    _filtersCtrl.IsEditting = false;
         }
         void showFiltersEffect()
         {
