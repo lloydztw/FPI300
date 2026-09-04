@@ -644,7 +644,7 @@ namespace LaserAlignDX.AoiModel.V3
                 fire_AoiError(errCode, errMsg);
                 _LOG_ERROR(ex, "_RunChipLocAndMeasurement");
 #endif
-                base.HandleAoiException(ex);
+                base.HandleAoiException(ex, "_RunChipLocAndMeasurement");
             }
             finally
             {
@@ -662,13 +662,21 @@ namespace LaserAlignDX.AoiModel.V3
                 fire_AoiBegin();
                 markRunStart();
 
+                //(0) 取得線掃巨圖: 巨圖統一由 LineScanCamImageHolder 管理其生命週期
+                Bitmap bmpOrgBig = LineScanCamImageHolder.PeekBitmap();
+
                 _aoiEmptyTray.Run();
+
+                // 2026-07-09 LETIAN: 泰國要求按照 PASS/NG 分流存檔原圖
+                bool pass = _aoiEmptyTray.IsPass;
+                AsyncSaveOrgImage(bmpOrgBig, pass);
 
                 markRunEnd(_aoiEmptyTray.IsPass);
                 fire_AoiEnd();
             }
             catch (Exception ex)
             {
+#if (OPT_OLD_CODE)
                 markRunEnd(false);
                 //fire_AoiEnd();
                 //var errCode = Mvc.Model.ErrorCodes.EXCEPTION_AT_AOI_RUN;
@@ -679,6 +687,8 @@ namespace LaserAlignDX.AoiModel.V3
                                 + "\n\r\n\r" + GetDeepExceptionMessage(ex);
                 fire_AoiError(errCode, errMsg);
                 _LOG_ERROR(ex, "_RunEmptyTray");
+#endif
+                base.HandleAoiException(ex, "_RunEmptyTray");
             }
         }
         private bool _CheckChipsTotalPass()

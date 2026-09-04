@@ -359,7 +359,7 @@ namespace LaserAlignDX.AoiModel
             return msg;
         }
 
-        protected void HandleAoiException(Exception ex)
+        protected void HandleAoiException(Exception ex, string funcName = "Run")
         {
             markRunEnd(false);
             fire_AoiEnd();
@@ -370,7 +370,7 @@ namespace LaserAlignDX.AoiModel
                             + "\n\r\n\r" + GetDeepExceptionMessage(ex);
             GaUtil.LOG(errMsg, Color.Red);
 
-            _LOG_ERROR(ex, $"Error @ {GetType().Name}.Run");
+            _LOG_ERROR(ex, $"Error @ {GetType().Name}.{funcName}");
             fire_AoiError(errCode, errMsg);
         }
     }
