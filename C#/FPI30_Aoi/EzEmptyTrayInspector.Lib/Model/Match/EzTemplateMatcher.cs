@@ -563,8 +563,8 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
         {
             _dumpPath = pathStem;
             _isDumpEnabled = pathStem != null;
-            _dumpPath = "D:\\paso.log\\match";
-            _isDumpEnabled = true;
+            //_dumpPath = "D:\\paso.log\\match";
+            //_isDumpEnabled = true;
         }
         void _DUMP_SHRINK(Mat image, Mat golden)
         {

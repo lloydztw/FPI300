@@ -23,7 +23,7 @@ namespace EzAoiEmptyTrayInspector.Model
     /// </summary>
     public class JxTrayVisionSettings : JxContainer
     {
-        //public JxImagePreSettings ImagePreSettings = new JxImagePreSettings();
+        //public JxPreFilterSettings PreFilters = new JxPreFilterSettings();
         public JxTempMatchSettings Match = new JxTempMatchSettings(null, "吸嘴比對設定");
         public JxTempMatchMasks TemplateMasks = new JxTempMatchMasks();
 
@@ -43,7 +43,7 @@ namespace EzAoiEmptyTrayInspector.Model
         {
             //>>> 綁定以下成員, 會自動顯示在GUI編輯視窗.
             BindItems(new IProp[] {
-                //ImagePreSettings,
+                //PreFilters,
                 //Mirror,       // 保留擴充
                 //RotAngle,     // 保留擴充
                 Match,

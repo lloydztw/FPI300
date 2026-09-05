@@ -21,12 +21,12 @@ namespace EzAoiEmptyTrayInspector.Model
     /// <summary>
     /// 影像前處理
     /// </summary>
-    public class JxImagePreSettings : JxContainer
+    public class JxPreFilterSettings : JxContainer
     {
         public JxInt Brightness = new JxInt("Brightness", "亮度", 0, new Range(-100, 100));
         public JxInt Contrast = new JxInt("Contrast", "對比", 0, new Range(-100, 100));
 
-        public JxImagePreSettings() : base("Image Preprocess", "影像前處理")
+        public JxPreFilterSettings() : base("Pre-Filters", "影像前處理")
         {
         }
         public override void OnBindingSubItems()

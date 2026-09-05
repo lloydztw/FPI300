@@ -14,6 +14,7 @@
 #endregion
 
 using EzAoiEmptyTrayInspector.Model.Aoi;
+using EzCamera.Driver.Utils;
 using JetEazy.EzImage;
 using JetEazy.Lang;
 using JetEazy.Match;
@@ -231,7 +232,27 @@ namespace EzAoiEmptyTrayInspector.Model
             _recipe = null;
         }
 
-        public void TryApplyFilters(SideID sideId, IEzImage largeImg, JxRotAngleSettings settings, out object result)
+        public Mat TryApplyPreFilters(Mat src)
+        {
+            if (src == null)
+                return null;
+
+            var settings = _recipe?.VisionSettings?.PreFilters;
+            if (settings == null)
+                return src;
+
+            var b = settings.Brightness.Value;
+            var c = settings.Contrast.Value;
+            if (b == 0 && c == 0)
+                return src;
+
+            var dst = src.Clone();
+            var processor = new EzImageProcess();
+            processor.ApplyBrightnessContrast(dst, b, c);
+            return dst;
+        }
+
+        public void TryApplyRotationFilters(SideID sideId, IEzImage largeImg, JxRotAngleSettings settings, out object result)
         {
             var finder = new EzRotAngleFinder();
             finder.ApplyFilters(largeImg, settings, true, out var rotRects);
@@ -749,7 +770,7 @@ namespace EzAoiEmptyTrayInspector.Model
 
                     var matcher = new EzTemplateMatcher(EzAoiBaseUtil.GetShrinkFactor(srcImg.Width, srcImg.Height));
                     matcher.SetRecipe(matchSettings);
-                    matcher.SetMaskRecipe(_recipe?.VisionSettings?.TemplateMasks);
+                    matcher.SetMaskRecipe(_recipe.VisionSettings.TemplateMasks);
 
                     matcher.DumpPath = dumpPath;
                     matcher.OnProgress += (s, e) => _LOG.Info("[{0}] {1}", sideId, e.Message);

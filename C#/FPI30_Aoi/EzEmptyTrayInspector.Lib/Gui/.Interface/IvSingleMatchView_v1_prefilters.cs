@@ -15,7 +15,7 @@
 
 using AwFramework;
 using JetEazy.ImageViewerEx;
-using JetEazy.OpenCV.Viewer;
+using OpenCvSharp;
 
 
 namespace EzAoiEmptyTrayInspector.Gui
@@ -23,9 +23,14 @@ namespace EzAoiEmptyTrayInspector.Gui
     public interface IvSingleMatchView : IView
     {
         IvImageViewer ImageViewer { get; }
-        
+
         void UpdateImageSrcName(string srcName);
         void UpdateMatchState(object state);
         void UpdateStatusInfo(string msg);
+
+        /// <summary>
+        /// 2026-0905 新增 function
+        /// </summary>
+        void UpdateImage(Mat srcImg, string srcName, bool disposeSrc);
     }
 }

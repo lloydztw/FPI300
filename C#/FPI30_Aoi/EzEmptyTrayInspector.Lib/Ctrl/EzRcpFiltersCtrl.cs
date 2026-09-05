@@ -15,36 +15,43 @@
 
 using EzAoiEmptyTrayInspector.Gui;
 using EzAoiEmptyTrayInspector.Model;
-using EzCamera.Driver.Utils;
 using JetEazy.EzImage;
 using OpenCvSharp;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using Timer = System.Windows.Forms.Timer;
 
 namespace EzAoiEmptyTrayInspector.Ctrl
 {
     internal class EzRcpFiltersCtrl : BaseUtil, IDisposable
     {
-        #region PRIVATE_RUNTIME_DATA
-        JxImagePreSettings _jxImagePreSettings;
-        IEzImage _imgSource;
-        bool _isRcpEdittingMode = false;
+        #region GLOBAL_DATA
+        IxEmptyTrayInspector _model => Global.AoiModel;
         #endregion
 
         #region PRIVATE_GUI_MEMBERS
         Control _wndRcpHostPanel;
-        FormImageViewer _frmImageViewer;
+        IvSingleMatchView _filteredViewPanel;
         Timer _restoreTimer;
         #endregion
 
-        #region PRIVATE_KERNEL_MEMBERS
-        EzImageProcess _imgProcesser = new EzImageProcess();
+        #region PRIVATE_RUNTIME_DATA
+        IEzImage _imgSrcOrg;
+        JxPreFilterSettings _jxImagePreSettings;
+        bool _isRcpEdittingMode = false;
+        /// <summary>
+        /// 新增 CancellationTokenSource 用於取消過期的運算 Task
+        /// </summary>
+        CancellationTokenSource _cts;
         #endregion
 
-        public EzRcpFiltersCtrl(Control wndHost, JxImagePreSettings jxImagePreSettings)
+        public EzRcpFiltersCtrl(Control wndHost, JxPreFilterSettings jxImagePreSettings, IvSingleMatchView filteredViewPanel)
         {
             _wndRcpHostPanel = wndHost;
             _jxImagePreSettings = jxImagePreSettings;
+            _filteredViewPanel = filteredViewPanel;
             init_event_handlers();
         }
         public void Dispose()
@@ -54,14 +61,15 @@ namespace EzAoiEmptyTrayInspector.Ctrl
 
         public void AttachImageSource(IEzImage imgSrc)
         {
-            _imgSource = imgSrc;
+            _imgSrcOrg = imgSrc;
         }
-        public bool IsEditting
+        public void Enable(bool editting)
         {
-            get => _isRcpEdittingMode;
-            set
+            if(_isRcpEdittingMode != editting)
             {
-                _isRcpEdittingMode= value;
+                _isRcpEdittingMode=editting;
+                if (!editting)
+                    restoreToOriginalView(0);
             }
         }
 
@@ -90,57 +98,131 @@ namespace EzAoiEmptyTrayInspector.Ctrl
         {
             if (!_isRcpEdittingMode)
                 return;
-            ApplyFilters(_imgSource?.Image as Mat);
+
+            AsyncApplyFilters(_imgSrcOrg?.Image as Mat);
         }
         #endregion
 
         void CleanUp()
         {
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
+
             disconnect_recipe_prop_handlers();
-            closeViewer(0);
+            restoreToOriginalView(0);
             disposeRestoreTimer();
         }
-        void ApplyFilters(Mat imgSrc)
+        void AsyncApplyFilters(Mat imgSrc)
         {
-            if (imgSrc == null)
+            // 1. 取消並釋放前一次未完成的 CTS
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
+
+            if (!_isRcpEdittingMode)
+                return;
+
+            if (imgSrc == null || imgSrc.IsDisposed || imgSrc.Empty())
             {
-                closeViewer(0);
+                restoreToOriginalView(0);
                 return;
             }
 
-            int b = (int)_jxImagePreSettings.Brightness.Value;
-            int c = (int)_jxImagePreSettings.Contrast.Value;
-            var imgFiltered = imgSrc.Clone();
-            _imgProcesser.ApplyBrightnessContrast(imgFiltered, b, c);
-            showViewer(imgFiltered, "Filtered Image", true);
+            // 2. 建立新 CTS
+            _cts = new CancellationTokenSource();
+            var token = _cts.Token;
+
+            // 在 UI 主線程深拷貝一份獨立的 Mat 給背景線程使用
+            var imgWork = imgSrc.Clone();
+
+            // 3. 異步執行影像處理
+            Task.Run(async () =>
+            {
+                Mat imgFiltered = null;
+                try
+                {
+                    // 防抖延遲 50ms
+                    await Task.Delay(50, token);
+                    token.ThrowIfCancellationRequested();
+
+                    // 在背景線程進行 OpenCV 影像濾鏡運算 (不佔用 UI)
+                    imgFiltered = _model?.TryApplyPreFilters(imgWork);
+
+                    token.ThrowIfCancellationRequested();
+
+                    // 4. 計算 completed，切回 UI 主線程更新畫面
+                    if (imgFiltered != null && _wndRcpHostPanel.IsHandleCreated)
+                    {
+                        _wndRcpHostPanel.BeginInvoke(new Action(() =>
+                        {
+                            try
+                            {
+                                if (!token.IsCancellationRequested)
+                                {
+                                    bool disposeSrc = (imgFiltered != imgWork);
+                                    showFilteredView(imgFiltered, "Filtered Image", disposeSrc);
+                                }
+                                else
+                                {
+                                    // 切回 UI 後若已被取消，釋放濾鏡圖
+                                    if (imgFiltered != imgWork)
+                                        imgFiltered?.Dispose();
+                                }
+                            }
+                            catch
+                            {
+                                if (imgFiltered != imgWork)
+                                    imgFiltered?.Dispose();
+                            }
+                        }));
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // 中途取消時，若有產生新 Mat 則立即釋放
+                    if (imgFiltered != null && imgFiltered != imgWork)
+                    {
+                        imgFiltered.Dispose();
+                    }
+                }
+                catch
+                {
+                    if (imgFiltered != null && imgFiltered != imgWork)
+                    {
+                        imgFiltered.Dispose();
+                    }
+                    throw;
+                }
+                finally
+                {
+                    // imgWork 生命週期僅限於本次背景 Task，結束後必定釋放
+                    imgWork?.Dispose();
+                    imgWork = null;
+                }
+            }, token);
         }
 
         #region PRIVATE_FUNCTIONS
-        void showViewer(Mat img, string name, bool disposeSrc, int autoCloseDelay = 5000)
+        void showFilteredView(Mat img, string name, bool disposeSrc, int autoCloseDelay = 5000)
         {
             if (img == null)
             {
-                closeViewer(0);
+                restoreToOriginalView(0);
             }
             else
             {
-                if (_frmImageViewer == null)
-                {
-                    _frmImageViewer = new FormImageViewer { TopMost = true };
-                    _frmImageViewer.Show(_wndRcpHostPanel);
-                }
-                _wndRcpHostPanel.BeginInvoke(new Action(() =>
-                {
-                    _frmImageViewer.UpdateImage(img, name, disposeSrc);
-                    closeViewer(autoCloseDelay);
-                }));
+                _filteredViewPanel.UpdateImage(img, "Filtered Image", true);
+                _filteredViewPanel.Window.Visible = true;
+                restoreToOriginalView(autoCloseDelay);
             }
         }
-        void closeViewer(int delay = 5000)
+        void restoreToOriginalView(int delay = 5000)
         {
+            var viewer = _filteredViewPanel.Window;
             if (delay <= 0)
             {
-                _frmImageViewer?.Dispose();
+                viewer.Visible = false;
                 disposeRestoreTimer();
                 return;
             }
@@ -151,7 +233,7 @@ namespace EzAoiEmptyTrayInspector.Ctrl
                 _restoreTimer.Tick += (s, e) =>
                 {
                     _restoreTimer.Stop();
-                    _frmImageViewer?.Dispose();
+                    viewer.Visible = false;
                 };
             }
 

@@ -81,7 +81,7 @@ namespace EzAoiEmptyTrayInspector.Model
         internal static bool CheckVersion(string fileContent)
         {
             return fileContent.Contains("JxTempMatchMasks");
-            //return fileContent.Contains("JxImagePreSettings");
+            //return fileContent.Contains("PreFilters");
         }
         public override void Load(string fileName)
         {
