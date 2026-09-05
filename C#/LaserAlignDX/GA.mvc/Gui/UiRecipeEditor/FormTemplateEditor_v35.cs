@@ -15,6 +15,7 @@
 
 using JetEazy.Lang;
 using JzDisplay.UISpace;
+using LaserAlignDX.GA.mvc.Gui.UiRecipeEditor;
 using System;
 using System.Windows.Forms;
 using GaTemplateEditCtrl = LaserAlignDX.Mvc.Ctrl.V35.GaTemplateEditCtrl;
@@ -108,10 +109,17 @@ namespace LaserAlignDX.Mvc.Gui.V35
             }
 
             //(2) rdoBoxSelectors (順序: Golden, Line Border, QR Code, Defects)
-            rdoBoxSelectors = new[] { radioButtonG, radioButtonLn, radioButtonQr, radioButtonDe };
+            rdoBoxSelectors = new[] { 
+                radioButtonG, 
+                radioButtonLn, 
+                radioButtonQr, 
+                radioButtonDe, 
+                radioButtonCn 
+            };
             radioButtonG.Tag = gwRcpTemplateBtnsPanel1;
             radioButtonLn.Tag = gwRcpLineBorderBtnsPanel1;
             radioButtonDe.Tag = gwRcpDefectBtnsPanel1;
+            radioButtonCn.Tag = gwRcpConnBlocBtnsPanel1;
             radioButtonQr.Tag = gwRcpQrCodeBtnsPanel1;
             foreach (var rdo in rdoBoxSelectors)
             {

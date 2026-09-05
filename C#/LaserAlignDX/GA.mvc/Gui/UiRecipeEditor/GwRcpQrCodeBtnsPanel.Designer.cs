@@ -49,13 +49,13 @@
             // 
             // rtbCodeContent
             // 
-            this.rtbCodeContent.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
+            this.rtbCodeContent.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.rtbCodeContent.BackColor = System.Drawing.Color.Ivory;
             this.rtbCodeContent.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.rtbCodeContent.Location = new System.Drawing.Point(202, 37);
+            this.rtbCodeContent.Location = new System.Drawing.Point(198, 37);
             this.rtbCodeContent.Name = "rtbCodeContent";
             this.rtbCodeContent.ReadOnly = true;
-            this.rtbCodeContent.Size = new System.Drawing.Size(352, 52);
+            this.rtbCodeContent.Size = new System.Drawing.Size(470, 52);
             this.rtbCodeContent.TabIndex = 54;
             this.rtbCodeContent.Text = "";
             // 
@@ -69,7 +69,7 @@
             this.groupBox1.Margin = new System.Windows.Forms.Padding(8, 0, 8, 8);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Padding = new System.Windows.Forms.Padding(3, 0, 3, 3);
-            this.groupBox1.Size = new System.Drawing.Size(580, 118);
+            this.groupBox1.Size = new System.Drawing.Size(698, 118);
             this.groupBox1.TabIndex = 78;
             this.groupBox1.TabStop = false;
             // 
@@ -81,7 +81,7 @@
             this.Margin = new System.Windows.Forms.Padding(3, 0, 3, 3);
             this.Name = "GwRcpQrCodeBtnsPanel";
             this.Padding = new System.Windows.Forms.Padding(8, 0, 8, 2);
-            this.Size = new System.Drawing.Size(596, 120);
+            this.Size = new System.Drawing.Size(714, 120);
             this.groupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 

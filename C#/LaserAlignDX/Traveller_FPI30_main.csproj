@@ -382,6 +382,12 @@
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v35.cs" />
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpConnBlocBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpConnBlocBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpConnBlocBtnsPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiModel_ChipLoc.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_Combo.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyAoiResult.cs" />
@@ -865,6 +871,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.resx">
       <DependentUpon>GvRecipeBtnsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpConnBlocBtnsPanel.resx">
+      <DependentUpon>GwRcpConnBlocBtnsPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpDefectBtnsPanel.resx">
       <DependentUpon>GwRcpDefectBtnsPanel.cs</DependentUpon>
