@@ -23,7 +23,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;OPT_CALIB_V5 | OPT_TRANSFORM_V36 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPT_CALIB_V5 | OPT_TRANSFORM_V37 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -34,7 +34,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;OPT_CALIB_V5 | OPT_TRANSFORM_V36 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <DefineConstants>TRACE;OPT_CALIB_V5 | OPT_TRANSFORM_V37 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -602,6 +602,10 @@
     <Compile Include="GA.mvc\Model\CoordsTransforms\V33\QWorldGridPoints.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms_ini.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\QMicroChipTransform.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\QWorldGridPointsEx.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\TravellerTransforms.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\TravellerTransforms_ini.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V36\QMicroChipTransform.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V36\QWorldGridPointsEx.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\TrfMigration.cs" />

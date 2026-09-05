@@ -16,7 +16,10 @@
 
 using JetEazy.QMath;
 
-#if (OPT_TRANSFORM_V36)
+#if (OPT_TRANSFORM_V37)
+using QMicroChipTransform = LaserAlignDX.Model.Coords.V37.QMicroChipTransform;
+using TravellerTransforms = LaserAlignDX.Model.Coords.V37.TravellerTransforms;
+#elif (OPT_TRANSFORM_V36)
 using QMicroChipTransform = LaserAlignDX.Model.Coords.V36.QMicroChipTransform;
 using TravellerTransforms = LaserAlignDX.Model.Coords.V36.TravellerTransforms;
 #else
