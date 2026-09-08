@@ -328,6 +328,7 @@
             this.groupBox3.Size = new System.Drawing.Size(671, 138);
             this.groupBox3.TabIndex = 78;
             this.groupBox3.TabStop = false;
+            this.groupBox3.Visible = false;
             // 
             // chkShowFilterResult
             // 

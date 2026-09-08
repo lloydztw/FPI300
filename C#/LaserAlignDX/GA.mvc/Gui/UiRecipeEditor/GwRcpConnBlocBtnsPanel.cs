@@ -13,17 +13,10 @@ namespace LaserAlignDX.GA.mvc.Gui.UiRecipeEditor
         #region PRIVATE_FUNCTIONS
         void autoLayout()
         {
+            alignCenterV(lblDetectRegions);
             alignCenterV(btnAdd);
             alignCenterV(btnDelete);
-            alignCenterV(btnClear);
-
-            //var owner = btnAdd.Parent;
-            //var span = btnClear.Right - btnAdd.Left;
-            //var x0 = (owner.ClientSize.Width - span) / 2;
-            //var dx = x0 - btnAdd.Left;
-            //btnAdd.Left += dx;
-            //btnDelete.Left += dx;
-            //btnClear.Left += dx;
+            alignCenterV(btnClearAll);
         }
         void alignCenterV(Control c)
         {

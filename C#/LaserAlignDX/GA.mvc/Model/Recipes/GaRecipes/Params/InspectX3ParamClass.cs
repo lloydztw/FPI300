@@ -325,24 +325,25 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [CategoryAttribute(_Cat7), DescriptionAttribute("单位pixel")]
         [DisplayName("02 缺陷尺寸X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 10000)]
         [Browsable(true)]
-        public float xCharWidth { get; set; } = 15.1f;
+        public float xCharWidth { get; set; } = 15f;
 
         [CategoryAttribute(_Cat7), DescriptionAttribute("单位pixel")]
         [DisplayName("03 缺陷尺寸Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 10000)]
         [Browsable(true)]
-        public float xCharHeight { get; set; } = 15.1f;
+        public float xCharHeight { get; set; } = 15f;
 
         [CategoryAttribute(_Cat7), DescriptionAttribute("单位pixel")]
         [DisplayName("04 缺陷面积")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
-        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 10000)]
         [Browsable(true)]
-        public float xCharArea { get; set; } = 30.1f;
+        public float xCharArea { get; set; } = 30f;
 
+#if (OPT_NOT_USED)
         [CategoryAttribute(_Cat7), DescriptionAttribute("单位pixel")]
         [DisplayName("05 背景缺陷尺寸X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
@@ -363,17 +364,18 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999, 0.1f, 2)]
         [Browsable(false)]
         public float xBackgroudArea { get; set; } = 30.1f;
+#endif
 
         /// <summary>
         /// Mask Rectangles 的數量
         /// </summary>
         [Browsable(false)]
-        public int RoiCount => rectangles.Count;
+        public int DefectMasksCount => DefectMasksRects.Count;
         /// <summary>
         /// Mask Rectangles
         /// </summary>
         [Browsable(false)]
-        public List<RectangleF> rectangles { get; set; } = new List<RectangleF>();
+        public List<RectangleF> DefectMasksRects { get; set; } = new List<RectangleF>();
         #endregion
 
 
@@ -573,6 +575,42 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
 
+        #region 8_連筋檢測
+        const string _Cat8 = "8. 連筋檢測";
+        [CategoryAttribute(_Cat8)]
+        [DisplayName("01 二值化阈值")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 255)]
+        [Browsable(true)]
+        public int BadConnsThreshold { get; set; } = 128;
+
+        [CategoryAttribute(_Cat8), DescriptionAttribute("单位pixel")]
+        [DisplayName("02 連筋最小X")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(10, 10000)]
+        [Browsable(true)]
+        public int BadConnsMinX { get; set; } = 50;
+
+        [CategoryAttribute(_Cat8), DescriptionAttribute("单位pixel")]
+        [DisplayName("03 連筋最小Y")]
+        [TypeConverter(typeof(NumericUpDownTypeConverter))]
+        [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(10, 10000)]
+        [Browsable(true)]
+        public int BadConnsMinY { get; set; } = 50;
+
+        /// <summary>
+        /// 連筋檢測 Rectangles 的數量
+        /// </summary>
+        [Browsable(false)]
+        public int BadConnsCount => BadConnsRects.Count;
+        /// <summary>
+        /// 連筋檢測 Rectangles
+        /// </summary>
+        [Browsable(false)]
+        public List<RectangleF> BadConnsRects { get; set; } = new List<RectangleF>();
+        #endregion
+
+
         public override void Load(bool eCancel = false)
         {
             xAlgorithm = (MatchAlgorithmEnum)int.Parse(ReadINIValue("Basic", "xAlgorithm", "0", INIFILE));
@@ -591,9 +629,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             xCharWidth = float.Parse(ReadINIValue("Inspect", "xCharWidth", "15.1", INIFILE));
             xCharHeight = float.Parse(ReadINIValue("Inspect", "xCharHeight", "15.1", INIFILE));
             xCharArea = float.Parse(ReadINIValue("Inspect", "xCharArea", "30.1", INIFILE));
-            xBackgroudWidth = float.Parse(ReadINIValue("Inspect", "xBackgroudWidth", "15.1", INIFILE));
-            xBackgroudHeight = float.Parse(ReadINIValue("Inspect", "xBackgroudHeight", "15.1", INIFILE));
-            xBackgroudArea = float.Parse(ReadINIValue("Inspect", "xBackgroudArea", "30.1", INIFILE));
+
+            //xBackgroudWidth = float.Parse(ReadINIValue("Inspect", "xBackgroudWidth", "15.1", INIFILE));
+            //xBackgroudHeight = float.Parse(ReadINIValue("Inspect", "xBackgroudHeight", "15.1", INIFILE));
+            //xBackgroudArea = float.Parse(ReadINIValue("Inspect", "xBackgroudArea", "30.1", INIFILE));
 
             xCarrierBackground = (EdgeBackGroundType)int.Parse(ReadINIValue("Basic", "CarrierBackground", "0", INIFILE));
             xTemplateChipWidth = float.Parse(ReadINIValue("Basic", "xTemplateChipWidth", "0.0", INIFILE));
@@ -613,6 +652,15 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             GrayLimitHi = int.Parse(ReadINIValue("LineBorder", "GrayLimitHi", "255", INIFILE));
             GrayLimitLo = int.Parse(ReadINIValue("LineBorder", "GrayLimitLo", "0", INIFILE));
+            
+            // 暫時停用 GrayLimits, By 強制設定為 255 與 0 !!!
+            GrayLimitHi = 255;
+            GrayLimitLo = 0;
+
+            // 連筋
+            BadConnsThreshold = int.Parse(ReadINIValue("BadConns", "BadConnsThreshold", "128", INIFILE));
+            BadConnsMinX = int.Parse(ReadINIValue("BadConns", "BadConnsMinX", "50", INIFILE));
+            BadConnsMinY = int.Parse(ReadINIValue("BadConns", "BadConnsMinY", "50", INIFILE));
 
             //---------------------------------------------------------------------------------------------------
             // 以下 找邊線參數 目前沒有用到 (AOI 內部根據載台顏色自動設定)
@@ -645,21 +693,8 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             #endregion
             _spec.Load(INIFILE);
 
-            //---------------------------------------------------------------------------------------------------
-            // 以下改由 LoadMaskRects 處理
-            //---------------------------------------------------------------------------------------------------
-            #region REPLACED_BY_LoadMaskRects
-            //RoiCount = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
-            //int i = 0;
-            //rectangles.Clear();
-            //while (i < RoiCount)
-            //{
-            //    RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
-            //    rectangles.Add(rectf);
-            //    i++;
-            //}
-            #endregion
-            LoadMaskRects();
+            LoadDefectMaskRects();
+            LoadBadConnRects();
         }
         public override void Save()
         {
@@ -679,9 +714,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             WriteINIValue("Inspect", "xCharWidth", xCharWidth.ToString(), INIFILE);
             WriteINIValue("Inspect", "xCharHeight", xCharHeight.ToString(), INIFILE);
             WriteINIValue("Inspect", "xCharArea", xCharArea.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xBackgroudWidth", xBackgroudWidth.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xBackgroudHeight", xBackgroudHeight.ToString(), INIFILE);
-            WriteINIValue("Inspect", "xBackgroudArea", xBackgroudArea.ToString(), INIFILE);
+
+            //WriteINIValue("Inspect", "xBackgroudWidth", xBackgroudWidth.ToString(), INIFILE);
+            //WriteINIValue("Inspect", "xBackgroudHeight", xBackgroudHeight.ToString(), INIFILE);
+            //WriteINIValue("Inspect", "xBackgroudArea", xBackgroudArea.ToString(), INIFILE);
 
             WriteINIValue("Basic", "CarrierBackground", ((int)xCarrierBackground).ToString(), INIFILE);
             WriteINIValue("Basic", "xTemplateChipWidth", xTemplateChipWidth.ToString(), INIFILE);
@@ -694,6 +730,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //---------------------------------------------------------------------------------------------------
             WriteINIValue("LineBorder", "GrayLimitHi", GrayLimitHi.ToString(), INIFILE);
             WriteINIValue("LineBorder", "GrayLimitLo", GrayLimitLo.ToString(), INIFILE);
+
+            // 連筋
+            WriteINIValue("BadConns", "BadConnsThreshold", BadConnsThreshold.ToString(), INIFILE);
+            WriteINIValue("BadConns", "BadConnsMinX", BadConnsMinX.ToString(), INIFILE);
+            WriteINIValue("BadConns", "BadConnsMinY", BadConnsMinY.ToString(), INIFILE);
 
             //---------------------------------------------------------------------------------------------------
             // 以下 找邊線參數 目前沒有用到 (AOI 內部根據載台顏色自動設定)
@@ -724,31 +765,75 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             //WriteINIValue("Basic", "XOffset", XOffset.ToString(), INIFILE);
             //WriteINIValue("Basic", "YOffset", YOffset.ToString(), INIFILE);
             #endregion
+
             _spec.Save(INIFILE);
 
             //>>> SaveMaskRects();
         }
 
-        internal void LoadMaskRects()
+        internal void LoadDefectMaskRects()
         {
-            var maskRects = new List<RectangleF>();
-            int count = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
+            //var maskRects = new List<RectangleF>();
+            //int count = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
+            //for (int i = 0; i < count; i++)
+            //{
+            //    RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
+            //    maskRects.Add(rectf);
+            //}
+
+            loadRects("Inspect", "Roi", out var maskRects);
+            this.DefectMasksRects = maskRects;
+        }
+        internal void SaveDefectMaskRects()
+        {
+            //var maskRects = this.DefectMasksRects;
+            //int count = maskRects != null ? maskRects.Count : 0;
+            //WriteINIValue("Inspect", "RoiCount", count.ToString(), INIFILE);
+            //for (int i = 0; i < count; i++)
+            //{
+            //    WriteINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(maskRects[i]), INIFILE);
+            //}
+
+            saveRects("Inspect", "Roi", this.DefectMasksRects);
+        }
+
+        internal void LoadBadConnRects()
+        {
+            loadRects("BadConns", "BadConnRects", out var rects);
+            this.BadConnsRects = rects;
+        }
+        internal void SaveBadConnRects()
+        {
+            saveRects("BadConns", "BadConnRects", this.BadConnsRects);
+        }
+
+
+        #region PRIVATE_INI_FUNCTIONS
+        int loadRects(string sectName, string keyName, out List<RectangleF> rects)
+        {
+            rects = new List<RectangleF>();
+            //>>> int count = int.Parse(ReadINIValue("Inspect", "RoiCount", "0", INIFILE));
+            int count = int.Parse(ReadINIValue(sectName, $"{keyName}Count", "0", INIFILE));
             for (int i = 0; i < count; i++)
             {
-                RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
-                maskRects.Add(rectf);
+                //>>> RectangleF rectf = StringtoRectF(ReadINIValue("Inspect", $"Roi{i}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
+                RectangleF rectf = StringtoRectF(ReadINIValue(sectName, $"{keyName}{i}", RectFtoStringSimple(new RectangleF(0, 0, 10, 10)), INIFILE));
+                rects.Add(rectf);
             }
-            this.rectangles = maskRects;
+            return count;
         }
-        internal void SaveMaskRects()
+        void saveRects(string sectName, string keyName, List<RectangleF> rects)
         {
-            var maskRects = this.rectangles;
-            int count = maskRects != null ? maskRects.Count : 0;
-            WriteINIValue("Inspect", "RoiCount", count.ToString(), INIFILE);
+            //>>> var maskRects = this.DefectMasksRects;
+            int count = rects != null ? rects.Count : 0;
+            //>>> WriteINIValue("Inspect", "RoiCount", count.ToString(), INIFILE);
+            WriteINIValue(sectName, $"{keyName}Count", count.ToString(), INIFILE);
             for (int i = 0; i < count; i++)
             {
-                WriteINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(maskRects[i]), INIFILE);
+                //>>> WriteINIValue("Inspect", $"Roi{i.ToString()}", RectFtoStringSimple(maskRects[i]), INIFILE);
+                WriteINIValue(sectName, $"{keyName}{i}", RectFtoStringSimple(rects[i]), INIFILE);
             }
         }
+        #endregion
     }
 }

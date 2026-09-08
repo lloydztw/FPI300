@@ -238,7 +238,7 @@ namespace LaserAlignDX.Model.Defects.G1
             if (chipData == null) return null;
             var chipCenter = chipData?.ChipQuad2D.Center;
             if (chipCenter == null) return null;
-            if (_xInspect.RoiCount <= 0) return null;
+            if (_xInspect.DefectMasksCount <= 0) return null;
 
             CMvdRectangleF mvdRoi = new CMvdRectangleF(imgTemplate.Width / 2f, imgTemplate.Height / 2f, imgTemplate.Width, imgTemplate.Height);
             bool isException = false;

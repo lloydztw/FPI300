@@ -15,7 +15,6 @@
 
 using JetEazy.Lang;
 using JzDisplay.UISpace;
-using LaserAlignDX.GA.mvc.Gui.UiRecipeEditor;
 using System;
 using System.Windows.Forms;
 using GaTemplateEditCtrl = LaserAlignDX.Mvc.Ctrl.V35.GaTemplateEditCtrl;
@@ -57,26 +56,30 @@ namespace LaserAlignDX.Mvc.Gui.V35
         Button IvTemplateEditorUI.btnRotateGolden => gwRcpTemplateBtnsPanel1.btnRotateGolden;
         Button IvTemplateEditorUI.btnPickGolden => gwRcpTemplateBtnsPanel1.btnPickGolden;
 
-        Button IvTemplateEditorUI.btnAutoLineBorders => gwRcpLineBorderBtnsPanel1.btnAutoLineBorders;
-        Button IvTemplateEditorUI.btnBuildMircoTransform => gwRcpLineBorderBtnsPanel1.btnBuildMircoTrf;
-        NumericUpDown IvTemplateEditorUI.numBorderIndent => gwRcpLineBorderBtnsPanel1.numBorderIndent;
-        NumericUpDown IvTemplateEditorUI.numBorderExtend => gwRcpLineBorderBtnsPanel1.numBorderSize;
-        NumericUpDown IvTemplateEditorUI.numLineSpanPercentage => gwRcpLineBorderBtnsPanel1.numSpanRatio;
+        Button IvTemplLinebordersEditorUI.btnAutoLineBorders => gwRcpLineBorderBtnsPanel1.btnAutoLineBorders;
+        Button IvTemplLinebordersEditorUI.btnBuildMircoTransform => gwRcpLineBorderBtnsPanel1.btnBuildMircoTrf;
+        NumericUpDown IvTemplLinebordersEditorUI.numBorderIndent => gwRcpLineBorderBtnsPanel1.numBorderIndent;
+        NumericUpDown IvTemplLinebordersEditorUI.numBorderExtend => gwRcpLineBorderBtnsPanel1.numBorderSize;
+        NumericUpDown IvTemplLinebordersEditorUI.numLineSpanPercentage => gwRcpLineBorderBtnsPanel1.numSpanRatio;
 
-        NumericUpDown IvTemplateEditorUI.numMeasureDistXs => gwRcpLineBorderBtnsPanel1.numMeasureXs;
-        NumericUpDown IvTemplateEditorUI.numMeasureDistYs => gwRcpLineBorderBtnsPanel1.numMeasureYs;
-        NumericUpDown IvTemplateEditorUI.numMeasureMasks => gwRcpLineBorderBtnsPanel1.numMeasureMasks;
+        NumericUpDown IvTemplLinebordersEditorUI.numMeasureDistXs => gwRcpLineBorderBtnsPanel1.numMeasureXs;
+        NumericUpDown IvTemplLinebordersEditorUI.numMeasureDistYs => gwRcpLineBorderBtnsPanel1.numMeasureYs;
+        NumericUpDown IvTemplLinebordersEditorUI.numMeasureMasks => gwRcpLineBorderBtnsPanel1.numMeasureMasks;
 
-        CheckBox IvTemplateEditorUI.chkShowFilterResult => gwRcpLineBorderBtnsPanel1.chkShowFilterResult;
-        NumericUpDown IvTemplateEditorUI.numGrayLimitHi => gwRcpLineBorderBtnsPanel1.numLbFilter1;
-        NumericUpDown IvTemplateEditorUI.numGrayLimitLo => gwRcpLineBorderBtnsPanel1.numLbFilter2;
+        CheckBox IvTemplLinebordersEditorUI.chkShowFilterResult => gwRcpLineBorderBtnsPanel1.chkShowFilterResult;
+        NumericUpDown IvTemplLinebordersEditorUI.numGrayLimitHi => gwRcpLineBorderBtnsPanel1.numLbFilter1;
+        NumericUpDown IvTemplLinebordersEditorUI.numGrayLimitLo => gwRcpLineBorderBtnsPanel1.numLbFilter2;
 
-        Button IvTemplateEditorUI.btnTryScanQrCode => gwRcpQrCodeBtnsPanel1.btnTryQrCode;
-        Control IvTemplateEditorUI.wndQrCodeResult => gwRcpQrCodeBtnsPanel1.rtbCodeContent;
+        Button IvTemplQrCodeEditorUI.btnTryScanQrCode => gwRcpQrCodeBtnsPanel1.btnTryQrCode;
+        Control IvTemplQrCodeEditorUI.wndQrCodeResult => gwRcpQrCodeBtnsPanel1.rtbCodeContent;
 
-        Button IvTemplateEditorUI.btnDefectRegionAdd => gwRcpDefectBtnsPanel1.btnDefectAdd;
-        Button IvTemplateEditorUI.btnDefectRegionDelete => gwRcpDefectBtnsPanel1.btnDefectDelete;
-        Button IvTemplateEditorUI.btnDefectRegionClearAll => gwRcpDefectBtnsPanel1.btnDefectClear;
+        Button IvTemplDefectsEditorUI.btnDefectRegionAdd => gwRcpDefectBtnsPanel1.btnAdd;
+        Button IvTemplDefectsEditorUI.btnDefectRegionDelete => gwRcpDefectBtnsPanel1.btnDelete;
+        Button IvTemplDefectsEditorUI.btnDefectRegionClearAll => gwRcpDefectBtnsPanel1.btnClearAll;
+
+        Button IvTemplBadConnsEditorUI.btnAddRegion => gwRcpConnBlocBtnsPanel1.btnAdd;
+        Button IvTemplBadConnsEditorUI.btnDeleteRegion => gwRcpConnBlocBtnsPanel1.btnDelete;
+        Button IvTemplBadConnsEditorUI.btnClearAllRegions => gwRcpConnBlocBtnsPanel1.btnClearAll;
 
         Control IvTemplateEditorUI.wndVisionSettingsPanel => propertyGrid1;
         Button IvTemplateEditorUI.btnTrainTemplate => btnTrain;
@@ -116,14 +119,17 @@ namespace LaserAlignDX.Mvc.Gui.V35
                 radioButtonDe, 
                 radioButtonCn 
             };
+
             radioButtonG.Tag = gwRcpTemplateBtnsPanel1;
             radioButtonLn.Tag = gwRcpLineBorderBtnsPanel1;
             radioButtonDe.Tag = gwRcpDefectBtnsPanel1;
             radioButtonCn.Tag = gwRcpConnBlocBtnsPanel1;
             radioButtonQr.Tag = gwRcpQrCodeBtnsPanel1;
+
             foreach (var rdo in rdoBoxSelectors)
             {
                 rdo.CheckedChanged += Rdo_CheckedChanged;
+                (rdo.Tag as Control).Dock = DockStyle.Fill;
             }
 
             //(3) Load Event
@@ -155,7 +161,7 @@ namespace LaserAlignDX.Mvc.Gui.V35
         #region PRIVATE_GUI_FUNCTIONS
         void updateLayout(int activeIndex)
         {
-            bool isDefectsMode = false;
+            Control activePanel = null;
 
             #region 1_切換_BUTTON_PANEL
             int index = 0;
@@ -163,29 +169,42 @@ namespace LaserAlignDX.Mvc.Gui.V35
             {
                 if (rdo.Tag is Control panel)
                 {
-                    bool visible = index == activeIndex;
-                    panel.Visible = visible;
-                    if (visible)
-                    {
-                        panel.Dock = DockStyle.Fill;
-                        isDefectsMode = panel == gwRcpDefectBtnsPanel1;
-                    }
+                    if (index != activeIndex)
+                        panel.Visible = false;
                 }
                 index++;
+            }
+            if(activeIndex < rdoBoxSelectors.Length)
+            {
+                activePanel = rdoBoxSelectors[activeIndex].Tag as Control;
+                if(activePanel!=null)
+                {
+                    activePanel.Dock = DockStyle.Fill;
+                    activePanel.Visible = true;
+                }
             }
             #endregion
 
             #region 2_切換_IMAGE_VIEWERS
-            if (isDefectsMode)
+            float w50 = 50f;
+            // 瑕疵檢測
+            if (activePanel == gwRcpDefectBtnsPanel1)
             {
-                var w1 = tbLayoutImgViews.ColumnStyles[1].Width;
                 tbLayoutImgViews.ColumnStyles[0].Width = 0f;
-                tbLayoutImgViews.ColumnStyles[2].Width = w1;
+                tbLayoutImgViews.ColumnStyles[1].Width = w50;
+                tbLayoutImgViews.ColumnStyles[2].Width = w50;
+            }
+            // 連筋檢測
+            else if(activePanel == gwRcpConnBlocBtnsPanel1)
+            {
+                tbLayoutImgViews.ColumnStyles[0].Width = w50;
+                tbLayoutImgViews.ColumnStyles[1].Width = 0f;
+                tbLayoutImgViews.ColumnStyles[2].Width = w50;
             }
             else
             {
-                var w1 = tbLayoutImgViews.ColumnStyles[1].Width;
-                tbLayoutImgViews.ColumnStyles[0].Width = w1;
+                tbLayoutImgViews.ColumnStyles[0].Width = w50;
+                tbLayoutImgViews.ColumnStyles[1].Width = w50;
                 tbLayoutImgViews.ColumnStyles[2].Width = 0f;
             }
             #endregion

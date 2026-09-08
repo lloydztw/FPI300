@@ -798,7 +798,11 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             {
                 // Defect Inspect Mask  (根據載台號 存入不同對應的設定值)
                 _dtoGoldenMaskTemplate.SetTag(_CARRIER_TAG).Save(INIFILE);
-                this.InspectParams.SaveMaskRects();
+                this.InspectParams.SaveDefectMaskRects();
+            }
+            if (name.Contains("BADCONN"))
+            {
+                this.InspectParams.SaveBadConnRects();
             }
             if (name.Contains("QRCODE"))
             {
@@ -820,6 +824,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         #endregion
 
         #region 子項參數_保存函式_舊接口
+#if( OPT_NOT_USED)
         /// <summary>
         /// 保存 Golden Region, Mask, and QRCode templates
         /// </summary>
@@ -869,6 +874,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             // 邊線框 (根據載台號 存入不同對應的設定值)
             SaveTemplate("LINE_BORDER");
         }
+
         /// <summary>
         /// 保存 LotNo
         /// </summary>
@@ -876,6 +882,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
         {
             //WriteINIValue("Collect", "xLotNoStr", xLotNoStr, INIFILE);
         }
+#endif
         #endregion
 
         #region REDUNDENT_FILES_刪除冗余文件

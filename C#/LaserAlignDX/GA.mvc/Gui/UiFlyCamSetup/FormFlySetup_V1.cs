@@ -631,7 +631,8 @@ namespace LaserAlignDX.FormSpace
 
                 xRecipe.xRectRegionPrintFly = rectf;
                 xRecipe.bmpprintFlytemplate = xRecipe.bmpOrgFly.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-                xRecipe.SavePrintFlyTemplate();
+                //xRecipe.SavePrintFlyTemplate();
+                xRecipe.SaveTemplate("FLY");
 
                 g.DrawRectangles(new Pen(Color.Lime, 3), new RectangleF[] { rectf });
                 g.Dispose();

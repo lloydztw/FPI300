@@ -12,17 +12,10 @@ namespace LaserAlignDX.GA.mvc.Gui.UiRecipeEditor
 
         void autoLayout()
         {
-            alignCenterV(btnDefectAdd);
-            alignCenterV(btnDefectDelete);
-            alignCenterV(btnDefectClear);
-
-            //var owner = btnDefectAdd.Parent;
-            //var span = btnDefectClear.Right - btnDefectAdd.Left;
-            //var x0 = (owner.ClientSize.Width - span) / 2;
-            //var dx = x0 - btnDefectAdd.Left;
-            //btnDefectAdd.Left += dx;
-            //btnDefectDelete.Left += dx;
-            //btnDefectClear.Left += dx;
+            alignCenterV(lblDetectRegions);
+            alignCenterV(btnAdd);
+            alignCenterV(btnDelete);
+            alignCenterV(btnClearAll);
         }
 
         void alignCenterV(Control c)

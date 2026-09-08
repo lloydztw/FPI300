@@ -248,10 +248,10 @@
             // radioButtonCn
             // 
             this.radioButtonCn.AutoSize = true;
-            this.radioButtonCn.Location = new System.Drawing.Point(17, 73);
+            this.radioButtonCn.Location = new System.Drawing.Point(17, 102);
             this.radioButtonCn.Margin = new System.Windows.Forms.Padding(4);
             this.radioButtonCn.Name = "radioButtonCn";
-            this.radioButtonCn.Size = new System.Drawing.Size(88, 19);
+            this.radioButtonCn.Size = new System.Drawing.Size(85, 19);
             this.radioButtonCn.TabIndex = 87;
             this.radioButtonCn.TabStop = true;
             this.radioButtonCn.Text = "連筋檢測";
@@ -260,10 +260,10 @@
             // radioButtonDe
             // 
             this.radioButtonDe.AutoSize = true;
-            this.radioButtonDe.Location = new System.Drawing.Point(17, 102);
+            this.radioButtonDe.Location = new System.Drawing.Point(17, 73);
             this.radioButtonDe.Margin = new System.Windows.Forms.Padding(4);
             this.radioButtonDe.Name = "radioButtonDe";
-            this.radioButtonDe.Size = new System.Drawing.Size(88, 19);
+            this.radioButtonDe.Size = new System.Drawing.Size(85, 19);
             this.radioButtonDe.TabIndex = 86;
             this.radioButtonDe.TabStop = true;
             this.radioButtonDe.Text = "瑕疵檢測";
@@ -275,7 +275,7 @@
             this.radioButtonLn.Location = new System.Drawing.Point(17, 44);
             this.radioButtonLn.Margin = new System.Windows.Forms.Padding(4);
             this.radioButtonLn.Name = "radioButtonLn";
-            this.radioButtonLn.Size = new System.Drawing.Size(88, 19);
+            this.radioButtonLn.Size = new System.Drawing.Size(85, 19);
             this.radioButtonLn.TabIndex = 85;
             this.radioButtonLn.TabStop = true;
             this.radioButtonLn.Text = "邊線檢測";
@@ -288,7 +288,7 @@
             this.radioButtonG.Location = new System.Drawing.Point(17, 15);
             this.radioButtonG.Margin = new System.Windows.Forms.Padding(4);
             this.radioButtonG.Name = "radioButtonG";
-            this.radioButtonG.Size = new System.Drawing.Size(88, 19);
+            this.radioButtonG.Size = new System.Drawing.Size(85, 19);
             this.radioButtonG.TabIndex = 83;
             this.radioButtonG.TabStop = true;
             this.radioButtonG.Text = "晶粒模板";
@@ -300,7 +300,7 @@
             this.radioButtonQr.Location = new System.Drawing.Point(17, 131);
             this.radioButtonQr.Margin = new System.Windows.Forms.Padding(4);
             this.radioButtonQr.Name = "radioButtonQr";
-            this.radioButtonQr.Size = new System.Drawing.Size(73, 19);
+            this.radioButtonQr.Size = new System.Drawing.Size(70, 19);
             this.radioButtonQr.TabIndex = 84;
             this.radioButtonQr.TabStop = true;
             this.radioButtonQr.Text = "二維碼";

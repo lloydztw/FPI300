@@ -37,21 +37,19 @@ using Traveller106;
 
 namespace LaserAlignDX.Mvc.Ctrl.V35
 {
-    public partial class GaRecipeEditCtrl
+    public partial class GaRecipeEditCtrl : GaRcpBaseCtrl
     {
         #region GLOBAL_MESS
         IxLineScanCam IScanCam
         {
             get { return Traveller106.Universal.IxLineScan; }
         }
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
-        IProcessRunFPI _aoiModel => _sysModel.AoiModel;
+        //ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        //IProcessRunFPI _aoiModel => _sysModel.AoiModel;
         #endregion
 
         #region RECIPES
-        RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         RecipeParaGridClass _xParamGrid => RecipeParaGridClass.Instance;
-        //JxRecipeCombo _jxRecipeCombo => _sysModel?.GetCurrentRecipe();
         #endregion
 
         #region INTERACTOR

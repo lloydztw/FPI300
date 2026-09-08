@@ -20,20 +20,21 @@ using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Gui;
-using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using VisionDesigner;
 using CviLineBorderBox = LaserAlignDX.Mvc.Gui.CviLineBorderBox;
 
 namespace LaserAlignDX.Mvc.Ctrl.V35
 {
-    public class GaTemplateLineBorderEditCtrl
+    public class GaTemplLineBorderEditCtrl : GaRcpBaseCtrl
     {
         #region CONSTS
         ///// <summary>
@@ -43,14 +44,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         #endregion
 
         #region GLOBAL_MESS
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
         #endregion
 
         #region RECIPE_PARAMS
-        RecipeFPIX3Class _xRecipe
-        {
-            get { return RecipeFPIX3Class.Instance; }
-        }
         InspectX3ParaClass _xInspectX3
         {
             get { return InspectX3ParaClass.Instance; }
@@ -63,18 +59,19 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
         #region GUI_LINKS
         IvTemplateEditorUI _editorUI;
+        IvTemplLinebordersEditorUI _lineBordersEditorUI => _editorUI;
         JezTransImageViewPanel wndRegionViewer => _editorUI.ImgViewers[0] as JezTransImageViewPanel;
-        NumericUpDown numMeasureDistXs => _editorUI.numMeasureDistXs;
-        NumericUpDown numMeasureDistYs => _editorUI.numMeasureDistYs;
-        NumericUpDown numMeasureMasks => _editorUI.numMeasureMasks;
-        NumericUpDown numBorderIndent => _editorUI.numBorderIndent;
-        NumericUpDown numBorderOutdent => _editorUI.numBorderExtend;
-        NumericUpDown numLineSpanPercentage => _editorUI.numLineSpanPercentage;
-        NumericUpDown numGrayLimitHi => _editorUI.numGrayLimitHi;
-        NumericUpDown numGrayLimitLo => _editorUI.numGrayLimitLo;
-        CheckBox chkAlwaysShowFilterResult => _editorUI.chkShowFilterResult;
-        Button btnAutoLayoutLineBorders => _editorUI.btnAutoLineBorders;
-        Button btnBuildMictroTransform => _editorUI.btnBuildMircoTransform;
+        NumericUpDown numMeasureDistXs => _lineBordersEditorUI.numMeasureDistXs;
+        NumericUpDown numMeasureDistYs => _lineBordersEditorUI.numMeasureDistYs;
+        NumericUpDown numMeasureMasks => _lineBordersEditorUI.numMeasureMasks;
+        NumericUpDown numBorderIndent => _lineBordersEditorUI.numBorderIndent;
+        NumericUpDown numBorderOutdent => _lineBordersEditorUI.numBorderExtend;
+        NumericUpDown numLineSpanPercentage => _lineBordersEditorUI.numLineSpanPercentage;
+        NumericUpDown numGrayLimitHi => _lineBordersEditorUI.numGrayLimitHi;
+        NumericUpDown numGrayLimitLo => _lineBordersEditorUI.numGrayLimitLo;
+        CheckBox chkAlwaysShowFilterResult => _lineBordersEditorUI.chkShowFilterResult;
+        Button btnAutoLayoutLineBorders => _lineBordersEditorUI.btnAutoLineBorders;
+        Button btnBuildMictroTransform => _lineBordersEditorUI.btnBuildMircoTransform;
         Timer _restoreRegionViewTimer;
         #endregion
 
@@ -224,9 +221,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                     updateLineSegmentBoxes(true);
                 };
             }
+
+            if (_editorUI.wndVisionSettingsPanel is PropertyGrid pg)
+                pg.PropertyValueChanged += Pg_PropertyValueChanged;
         }
-
-
         #endregion
 
         #region EVENT_HANDLERS
@@ -274,6 +272,25 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 ApplyLineBorderFilters(autoRestore: false);
             else
                 startRestoreRegionViewTimer(1);
+        }
+        private void Pg_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
+        {
+            string propertyName = e.ChangedItem?.PropertyDescriptor?.Name;
+
+            if (propertyName == "xAlgorithm")
+            {
+                this.UpdateAlgorithmStatus();
+            }
+
+            if (_isEditting)
+            {
+                if (propertyName == "xCarrierBackground")
+                {
+                    //自動刷新 邊線 抓取結果
+                    this.UpdateLineSegmentBoxes(true);
+                    refreshViewer(wndRegionViewer);
+                }
+            }
         }
         #endregion
 

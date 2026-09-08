@@ -375,9 +375,12 @@
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorSafetyChecker.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorZCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaCommonMotorJogCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaRcpBaseCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaRecipeEditCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplateEditCtrl.cs" />
-    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplateLineBorderEditCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplBadConnsEditCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplDefectsEditCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplLineBorderEditCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
