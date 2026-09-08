@@ -22,7 +22,6 @@ using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using System.Threading;
-using VisionDesigner;
 
 using AoiModel_ChipLoc = LaserAlignDX.AoiModel.v31.AoiModel_ChipLoc;
 using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.Combo.AoiModel_ChipMeasure;
@@ -67,6 +66,8 @@ namespace LaserAlignDX.AoiModel.V3
             _aoiChipMeasure = null;
             _aoiChipDefects?.Dispose();
             _aoiChipDefects = null;
+            _aoiBadConnInspector?.Dispose();
+            _aoiBadConnInspector = null;
             _aoiFlyCam?.Dispose();
             _aoiFlyCam = null;
             _mvdQrCodeDecorder?.Dispose();
@@ -111,7 +112,8 @@ namespace LaserAlignDX.AoiModel.V3
         AoiModel_ChipLoc _aoiChipLoc = new AoiModel_ChipLoc();
         AoiModel_ChipMeasure _aoiChipMeasure = new AoiModel_ChipMeasure();
         AoiModel_Defects _aoiChipDefects = new AoiModel_Defects();
-        AoiModel_QrCode _aoiQrCode = new AoiModel_QrCode();
+        AoiModel_BadConnInpector _aoiBadConnInspector = new AoiModel_BadConnInpector();
+        AoiModel_QrCode _aoiQrDecoder = new AoiModel_QrCode();
         AoiModel_FlyCam _aoiFlyCam = new AoiModel_FlyCam();
         Mvd2DReaderClass _mvdQrCodeDecorder = new Mvd2DReaderClass();
         #endregion
@@ -122,8 +124,9 @@ namespace LaserAlignDX.AoiModel.V3
                 _aoiChipLoc, 
                 _aoiChipMeasure.BaseQ,
                 _aoiChipMeasure.BaseN,
-                _aoiChipDefects, 
-                _aoiQrCode, 
+                _aoiChipDefects,
+                _aoiBadConnInspector,
+                _aoiQrDecoder, 
                 _aoiEmptyTray 
             };
             foreach (var subModel in subModels)
@@ -165,13 +168,13 @@ namespace LaserAlignDX.AoiModel.V3
         }
         public bool QrUsed
         {
-            get { return _aoiQrCode.QrUsed; }
-            set { _aoiQrCode.QrUsed = value; }
+            get { return _aoiQrDecoder.QrUsed; }
+            set { _aoiQrDecoder.QrUsed = value; }
         }
         public bool QrJudged
         {
-            get { return _aoiQrCode.QrJudged; }
-            set { _aoiQrCode.QrJudged = value; }
+            get { return _aoiQrDecoder.QrJudged; }
+            set { _aoiQrDecoder.QrJudged = value; }
         }
 
         #region PUBLIC_RESULT_PACKERS_FOR_PLC
@@ -449,39 +452,13 @@ namespace LaserAlignDX.AoiModel.V3
         {
             if (cell == null) return false;
             cell.Reset();
+
             bool ok = _aoiChipLoc.TryLocateOneChip(cell, cellBmp, ref cellRoi);
+
             if (ok && _xRecipe.InspectParams.optChipMeasurement)
                 _aoiChipMeasure.TryMeasureOneChip(cell, cellBmp, ref cellRoi);
+
             return ok;
-        }
-        public bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine)
-        {
-            return _aoiChipMeasure.TryFindLineSegment(eBorder, bmpSrc, roiRect, out resultLine);
-        }
-        public string DecodeQrCode(Bitmap bmp, Rectangle? roi = null)
-        {
-            if (bmp != null && _mvdQrCodeDecorder != null)
-            {
-                RectangleF roiF;
-                if (roi == null)
-                {
-                    roiF = new RectangleF(0, 0, bmp.Width, bmp.Height);
-                }
-                else
-                {
-                    roiF = roi.Value;
-                    GaUtil.Clip(ref roiF, bmp.Width, bmp.Height);
-                }
-                if (roiF.Width < 2 || roiF.Height < 2)
-                    return "";
-
-                _mvdQrCodeDecorder.Run(bmp, roiF);
-                var decodeInfo = _mvdQrCodeDecorder.DCodeInfo;
-                var code = (decodeInfo?.Content) ?? "";
-                return code;
-            }
-
-            return "";
         }
         
         public IAoiChipLocator GetChipLocAoi()
@@ -491,6 +468,18 @@ namespace LaserAlignDX.AoiModel.V3
         public IAoiChipMeasurer GetChipMeasureAoi()
         {
             return _aoiChipMeasure;
+        }
+        public IAoiDefectsDetector GetDefectsAoi()
+        {
+            return _aoiChipDefects;
+        }
+        public IAoiBadConnInspector GetBadConnInspector()
+        {
+            return _aoiBadConnInspector;
+        }
+        public IAoiQrDecoder GetAoiQrDecoder()
+        {
+            return _aoiQrDecoder;
         }
         public IAoiFlyCamMatcher GetFlyCameraAoi()
         {
@@ -597,16 +586,24 @@ namespace LaserAlignDX.AoiModel.V3
                 // QRCODE
                 if (QrUsed || QrJudged)
                 {
-                    _aoiChipDefects.SetCellGroups(cellGroups);
-                    _aoiQrCode.Run();
+                    _aoiQrDecoder.SetCellGroups(cellGroups);
+                    _aoiQrDecoder.Run();
+                }
+
+                // 連筋檢測
+                if (_xRecipe.InspectParams.BadConnsCount > 0)
+                {
+                    _aoiBadConnInspector.SetCellGroups(cellGroups);
+                    _aoiBadConnInspector.Run();
                 }
 
                 // 釋放 多執行續的 CellGroups
                 _aoiChipLoc.DisposeCellGroups();
+
                 // 後處理: 標記不明區塊
                 _aoiChipLoc.PostMarkAmbiguousBlocs();
 
-                bool pass = _CheckChipsTotalPass();
+                bool pass = _CheckChipsTotalPass(out int badConnsCount);
 
                 // 2026-07-09 LETIAN: 泰國要求按照 PASS/NG 分流存檔原圖
                 AsyncSaveOrgImage(bmpOrgBig, pass);
@@ -617,6 +614,22 @@ namespace LaserAlignDX.AoiModel.V3
                     if (_CheckIfAllEmpty())
                     {
                         var errCode = ErrorCodes.ERR_CHIP_LOC_ALL_EMPTY;
+                        string errMsg = GaUtil.GetEnumDescription(errCode);
+                        bool cancel = fire_AoiError(errCode, errMsg, true);
+                        if (cancel)
+                        {
+                            markRunEnd(false);
+                            return;
+                        }
+                    }
+                }
+
+                // 2026-09-08 LETIAN: 檢查是否有連筋
+                if (_xRecipe.InspectParams.BadConnsCount > 0)
+                {
+                    if (badConnsCount > 0)
+                    {
+                        var errCode = ErrorCodes.WARN_EXISTING_BAD_CONNS_BLOBS;
                         string errMsg = GaUtil.GetEnumDescription(errCode);
                         bool cancel = fire_AoiError(errCode, errMsg, true);
                         if (cancel)
@@ -691,13 +704,16 @@ namespace LaserAlignDX.AoiModel.V3
                 base.HandleAoiException(ex, "_RunEmptyTray");
             }
         }
-        private bool _CheckChipsTotalPass()
+        private bool _CheckChipsTotalPass(out int badConnsCount)
         {
             bool optUsePercentage = _xRecipe.InspectParams.optUseTotalNgPercentage && _xRecipe.InspectParams.optChipMeasurement;
 
             int passCount = 0;
             int ngCount = 0;
             int total = 0;
+
+            // 連筋數量統計
+            badConnsCount = 0;
 
             //---------------------------------------------------------------------------------------------
             // 2026-04-04
@@ -708,6 +724,16 @@ namespace LaserAlignDX.AoiModel.V3
             using (var cellsCollection = new RegionCellsDataCollection(_xRecipe.xRegionCells))
             {
                 total = cellsCollection.GetStatistics(out passCount, out ngCount, out int emptyCount, out int unknowns);
+
+                // 連筋數量統計
+                foreach (var cell in cellsCollection.IterFinalCells())
+                {
+                    var badConnRects = cell?.ChipData?.BadConnBlobRects;
+                    if (badConnRects != null && badConnRects.Length > 0)
+                    {
+                        badConnsCount += badConnRects.Length;
+                    }
+                }
             }
 
             bool isPass;
@@ -722,6 +748,7 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 isPass = ngCount == 0;
             }
+
             return isPass;
         }
         private bool _CheckIfAllEmpty()

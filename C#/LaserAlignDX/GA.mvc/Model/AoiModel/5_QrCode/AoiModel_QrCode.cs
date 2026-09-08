@@ -15,6 +15,7 @@
 
 using JetEazy.QMath;
 using JetEazy.QvMath;
+using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -29,7 +30,7 @@ namespace LaserAlignDX.AoiModel.V3
     /// <summary>
     /// QR CODE
     /// </summary>
-    public class AoiModel_QrCode : AoiModelBase
+    public class AoiModel_QrCode : AoiModelBase, IAoiQrDecoder
     {
         #region CONFIG
         static bool N_THREADS_ENABLED => GlobalConfig.N_THREADS_ENABLED;
@@ -96,12 +97,43 @@ namespace LaserAlignDX.AoiModel.V3
             }
         }
 
+#if (OPT_RESERVED)
         /// <summary>
         /// 調試 使用 (一次只測一個 cell)
         /// </summary>
         public void TryRunOneChipDecode(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi)
         {
             DecodeOne(cell, cellBmp, ref cellRoi, 0, true);
+        }
+#endif
+
+        public string TryDecode(Bitmap bmp, Rectangle? roi = null)
+        {
+            if (bmp != null )
+            {
+                prepareDecoder(1);
+                var decoder = _decoders[0];
+
+                RectangleF roiF;
+                if (roi == null)
+                {
+                    roiF = new RectangleF(0, 0, bmp.Width, bmp.Height);
+                }
+                else
+                {
+                    roiF = roi.Value;
+                    GaUtil.Clip(ref roiF, bmp.Width, bmp.Height);
+                }
+                if (roiF.Width < 2 || roiF.Height < 2)
+                    return "";
+
+                decoder.Run(bmp, roiF);
+                var decodeInfo = decoder.DCodeInfo;
+                var code = (decodeInfo?.Content) ?? "";
+                return code;
+            }
+
+            return "";
         }
 
         #region PRIVATE_FUNCTIONS

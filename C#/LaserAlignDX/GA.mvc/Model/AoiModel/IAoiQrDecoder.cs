@@ -14,12 +14,23 @@
 #endregion
 
 using System;
+using System.Drawing;
 
 namespace LaserAlignDX.AoiModel
 {
-    public interface IAoiQRCode : IDisposable
+    public interface IAoiQrDecoder : IDisposable
     {
         bool QrUsed { get; set; }
+
         bool QrJudged { get; set; }
+
+        void SetCellGroups(GaCellsGroup[] cellGroups);
+
+        void Run(Bitmap sceneBmp = null);
+
+        /// <summary>
+        /// Decodes a QR code from the specified bitmap image within the defined region of interest.
+        /// </summary>
+        string TryDecode(Bitmap bmp, Rectangle? roi = null);
     }
 }

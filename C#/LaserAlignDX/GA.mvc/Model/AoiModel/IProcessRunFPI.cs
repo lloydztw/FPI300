@@ -90,19 +90,12 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         bool TryRunOneChip(RegionCellX3Class cell, Bitmap cellBmp, RectangleF cellRoi);
 
-        /// <summary>
-        /// 為 參數調試 所用
-        /// </summary>
-        bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine);
-
-        /// <summary>
-        /// Decodes a QR code from the specified bitmap image within the defined region of interest.
-        /// </summary>
-        string DecodeQrCode(Bitmap bmp, Rectangle? roi = null);
-
         #region CHILD_AOI_MODELS
         IAoiChipLocator GetChipLocAoi();
         IAoiChipMeasurer GetChipMeasureAoi();
+        IAoiDefectsDetector GetDefectsAoi();
+        IAoiBadConnInspector GetBadConnInspector();
+        IAoiQrDecoder GetAoiQrDecoder();
         IAoiFlyCamMatcher GetFlyCameraAoi();
         #endregion
     }

@@ -181,6 +181,8 @@ namespace LaserAlignDX.Model
         /// </summary>
         public QvBox2D[] DefectBlobs { get; set; } = null;
 
+        public Rectangle[] BadConnBlobRects { get; set; } = null;
+
         /// <summary>
         /// 調試用 之 額外資料
         /// </summary>

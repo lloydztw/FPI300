@@ -393,6 +393,7 @@
     </Compile>
     <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiModel_ChipLoc.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_Combo.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\5_BadConnInspect\AoiModel_BadConnInspector.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyAoiResult.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyMetaData.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
@@ -584,9 +585,11 @@
     <Compile Include="GA.mvc\Model\AoiModel\1_EmptyTray\AoiModel_EmptyTray.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\4_DefectDetector\MvdDefectDetector_G1.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IAoiChipLocator.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiPostBadConnInspector.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IAoiFlyCamMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IAoiDefectsDetector.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IAoiChipMeasurer.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiQrDecoder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v30.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaBigImageHolder.cs" />

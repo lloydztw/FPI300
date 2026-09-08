@@ -67,9 +67,9 @@ namespace LaserAlignDX.AoiModel.Combo
             _imp.SetCellGroups(cellGroups);
         }
 
-        public bool TryApplyFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null)
+        public bool TryApplyLineFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null)
         {
-            return _imp.TryApplyFilters(bmpSrc, out bmpResult, backGroundColor);
+            return _imp.TryApplyLineFilters(bmpSrc, out bmpResult, backGroundColor);
         }
 
         public bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine)

@@ -109,7 +109,6 @@ namespace LaserAlignDX.AoiModel.V3
             }
         }
 
-        #region DEBUG
         /// <summary>
         /// 調試 使用 (一次只測一個 cell)
         /// </summary>
@@ -121,9 +120,8 @@ namespace LaserAlignDX.AoiModel.V3
                 return;
             _detectors[0].RunOneChipDefects(cell, cellBmp, ref cellRoi);
         }
-        #endregion
 
-        #region PRIVATE_FUNCTIONS
+        #region PRIVATE_DEFECT_FUNCTIONS
         private void prepareDetectors(int NThreads)
         {
             if (NThreads > _detectors.Length)

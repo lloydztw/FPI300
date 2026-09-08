@@ -670,7 +670,7 @@ namespace LaserAlignDX.FormSpace
             text = decodeInfo != null ? decodeInfo.Content : "";
 #endif
 
-            text = _sysModel?.AoiModel?.DecodeQrCode(srcBmp);
+            text = _sysModel?.AoiModel?.GetAoiQrDecoder()?.TryDecode(srcBmp);
             if (text == null)
                 text = "";
         }

@@ -142,7 +142,7 @@ namespace LaserAlignDX.AoiModel.V35
             return resultLine != null;
         }
 
-        public bool TryApplyFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null)
+        public bool TryApplyLineFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null)
         {
             if (needsToApplyGrayLimits() && bmpSrc != null && bmpSrc.Width > 2 && bmpSrc.Height > 2)
             {
@@ -1132,7 +1132,7 @@ namespace LaserAlignDX.AoiModel.V35
             mvdLineFinder.Background = _xInspect.xCarrierBackground;
 
             //(4) Filters
-            if(!TryApplyFilters(bmp, out Bitmap bmpWork))
+            if(!TryApplyLineFilters(bmp, out Bitmap bmpWork))
                 bmpWork = bmp;
 
             //(5) 執行海康直線尋找

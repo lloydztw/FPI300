@@ -297,6 +297,12 @@ namespace JetEazy.Utils
                 return newBmp;
             }
         }
+        /// <summary>
+        /// 轉換成灰階
+        /// </summary>
+        /// <remarks>
+        /// 如果 src 本身就是 U8, 則直接返回 src
+        /// </remarks>
         public static Mat ToU8(Mat src, bool autoDisposeSrc = false)
         {
             if (src == null || src.Channels()==1)

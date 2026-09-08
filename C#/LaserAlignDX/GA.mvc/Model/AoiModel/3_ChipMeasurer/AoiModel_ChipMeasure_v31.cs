@@ -145,7 +145,7 @@ namespace LaserAlignDX.AoiModel.V31
             return resultLine != null;
         }
 
-        public bool TryApplyFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null)
+        public bool TryApplyLineFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null)
         {
             bmpResult = null;
             return false;

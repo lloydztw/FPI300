@@ -735,7 +735,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
             updateFilterSettings(true);
 
-            if (aoi.TryApplyFilters(_xRecipe.GoldenRegionCellBmp, out Bitmap bmpFilter))
+            if (aoi.TryApplyLineFilters(_xRecipe.GoldenRegionCellBmp, out Bitmap bmpFilter))
             {
                 wndRegionViewer.UpdateImage(bmpFilter, "Region View (Filtered)", true);
 
@@ -1340,8 +1340,15 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 return mvdLine != null;
             }
 #endif
-            var aoiModel = _sysModel.AoiModel;
-            aoiModel.TryFindLineSegment(eBorder, bmpSrc, boxRect, out var line);
+
+            var aoi = _sysModel?.AoiModel?.GetChipMeasureAoi();
+            if (aoi == null)
+            {
+                resultLines = null;
+                return false;
+            }
+
+            aoi.TryFindLineSegment(eBorder, bmpSrc, boxRect, out var line);
             resultLines = new CMvdLineSegmentF[] { line };
             return line != null;
         }

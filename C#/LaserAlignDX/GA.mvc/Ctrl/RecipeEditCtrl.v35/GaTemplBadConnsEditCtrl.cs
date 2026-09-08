@@ -23,6 +23,7 @@ using OpenCvSharp.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace LaserAlignDX.Mvc.Ctrl.V35
@@ -53,6 +54,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         #endregion
 
         #region INTERACTORS
+        Brush _boxBrush => Brushes.OrangeRed;
         List<CviRcpBox> _cviDetectBoxes;
         CviRcpBox _cviActiveBox;
         #endregion
@@ -86,6 +88,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         private void CviDefectionBox_OnChanged(object sender, EventArgs e)
         {
             _cviActiveBox = (sender as CviRcpBox);
+            updateDetectionBoxes(true);
             updateFeatureView(true);
         }
         private void Pg_PropertyValueChanged(object s, PropertyValueChangedEventArgs e)
@@ -144,9 +147,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         internal void UpdateDetectionBoxes(bool editting)
         {
             _isEditting = editting;
+            
             updateDetectionBoxes(false);
+
             if (_isEditting)
                 updateFeatureView(false);
+            
             updateGuiStatus();
         }
 
@@ -163,11 +169,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             // 新增 cviMaskBox
             var count = _cviDetectBoxes.Count;
             var rect = new Rectangle(50 + count * 5, 50 + count * 5, 100, 100);
-            var cviDetectionBox = new CviRcpBox(Brushes.OrangeRed, 1, 3) { Box = rect };
-            cviDetectionBox.OnChanged += CviDefectionBox_OnChanged;
 
-            _cviDetectBoxes.Add(cviDetectionBox);
-            imgViewer.AddInteractor(cviDetectionBox);
+            var cviBox = new CviRcpBox(_boxBrush, 1, 3) { Box = rect };
+            cviBox.OnChanged += CviDefectionBox_OnChanged;
+
+            _cviDetectBoxes.Add(cviBox);
+            imgViewer.AddInteractor(cviBox);
 
             // 恢復 dispUI 運作
             dispUI.Enabled = flag;
@@ -282,7 +289,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                         if (rect == Rectangle.Empty)
                             continue;
 
-                        var cviBox = new CviRcpBox(Brushes.Orange, 1, 3) { Box = rect };
+                        var cviBox = new CviRcpBox(_boxBrush, 1, 3) { Box = rect };
                         cviBox.OnChanged += CviDefectionBox_OnChanged;
 
                         _cviDetectBoxes.Add(cviBox);
@@ -301,9 +308,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
             // 以 GoldenRegionCellBmp 為基礎, 生成 bmpFeature
             aoiCreateFeatureBmp(_xRecipe.GoldenRegionCellBmp, iterCviDetectionBoxes(), out Bitmap bmpDisp);
-            
+
             // 更新 featureBmp 到 GUI
-            if(_isEditting)
+            if (_isEditting && bmpDisp != null)
                 wndFeatureViewer?.UpdateImage(bmpDisp, _Title3, false);
 
             // CleanUp
@@ -345,10 +352,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         {
             try
             {
+#if (false)
+                var threshold = _xInspectParams.BadConnsThreshold;
+
                 // 使用 OpenCvSharp, 製作 mask (8 bpp) 將 maskRects 指定的區域塗成白色
                 using (var bridge = new QxImageBridge(bmpTemplate))
                 using (Mat gray = new Mat(bridge.Image.Size(), MatType.CV_8UC1))
                 using (Mat feature = new Mat(bridge.Image.Size(), MatType.CV_8UC1))
+                using (Mat disp = new Mat(bridge.Image.Size(), MatType.CV_8UC3))
                 {
                     var imgSrc = bridge.Image;
                     switch (imgSrc.Channels())
@@ -361,20 +372,31 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                             throw new Exception("bmpTemplate 格式異常!");
                     }
 
-                    feature.SetTo(Scalar.Black);
+                    //Cv2.CvtColor(gray, disp, ColorConversionCodes.GRAY2BGR);
+                    disp.SetTo(Scalar.Black);
+
                     var bound = new Rect(0, 0, imgSrc.Width, imgSrc.Height);
                     foreach (var rect in rects)
                     {
                         var roi = JetEazy.Qcvt.CV(Rectangle.Round(rect));
                         JetEazy.Qcvt.ClipBoundary(ref roi, ref bound);
+
                         if (roi.Width > 1 && roi.Height > 1)
-                            feature[roi].SetTo(Scalar.White);
+                        {
+                            Cv2.CvtColor(gray[roi], disp[roi], ColorConversionCodes.GRAY2BGR);
+                            Cv2.Threshold(gray[roi], feature[roi], threshold, 255, ThresholdTypes.Binary);
+                            disp[roi].SetTo(Scalar.Red, feature[roi]);
+                        }
                     }
 
-                    //Cv2.BitwiseAnd(gray, feature, gray);
-                    //bmpMask = BitmapConverter.ToBitmap(feature);
-                    bmpDisp = BitmapConverter.ToBitmap(feature);
+                    bmpDisp = BitmapConverter.ToBitmap(disp);
                 }
+#endif
+                bmpDisp = null;
+                var aoi = _sysModel?.AoiModel?.GetBadConnInspector();
+                if (aoi == null)
+                    return;
+                aoi.TryApplyBadConnFilters(bmpTemplate, out bmpDisp, rects);
             }
             catch (Exception ex)
             {

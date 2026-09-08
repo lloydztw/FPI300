@@ -41,7 +41,7 @@ namespace LaserAlignDX.AoiModel
         /// <summary>
         /// 參數調試用
         /// </summary>
-        bool TryApplyFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null);
+        bool TryApplyLineFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null);
 
         /// <summary>
         /// 參數調試用 (保留)
