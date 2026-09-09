@@ -25,6 +25,16 @@ namespace LaserAlignDX
     public static class StringBuilderExt
     {
         public const string DIGIT_FORMAT = "0.000";
+        public static StringBuilder AppendValues(this StringBuilder sb, params double[] values)
+        {
+            for (int i = 0, N = values.Length; i < N; i++)
+            {
+                sb.Append(values[i].ToString(DIGIT_FORMAT));
+                if (i < N - 1)
+                    sb.Append(", ");
+            }
+            return sb;
+        }
         public static StringBuilder AppendValues(this StringBuilder sb, params float[] values)
         {
             for (int i = 0, N = values.Length; i < N; i++)

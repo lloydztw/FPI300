@@ -993,16 +993,21 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                                     }
                                     else
                                     {
+                                        //sb.AppendLine();
+                                        //sb.AppendLine().Append($"LUX = {gaps.LU.X:0.000} mm");
+                                        //sb.AppendLine().Append($"RUX = {gaps.RU.X:0.000} mm");
+                                        //sb.AppendLine().Append($"RDX = {gaps.RD.X:0.000} mm");
+                                        //sb.AppendLine().Append($"LDX = {gaps.LD.X:0.000} mm");
+                                        //sb.AppendLine();
+                                        //sb.AppendLine().Append($"LUY = {gaps.LU.Y:0.000} mm");
+                                        //sb.AppendLine().Append($"RUY = {gaps.RU.Y:0.000} mm");
+                                        //sb.AppendLine().Append($"RDY = {gaps.RD.Y:0.000} mm");
+                                        //sb.AppendLine().Append($"LDY = {gaps.LD.Y:0.000} mm");
                                         sb.AppendLine();
-                                        sb.AppendLine().Append($"LUX = {gaps.LU.X:0.000} mm");
-                                        sb.AppendLine().Append($"RUX = {gaps.RU.X:0.000} mm");
-                                        sb.AppendLine().Append($"RDX = {gaps.RD.X:0.000} mm");
-                                        sb.AppendLine().Append($"LDX = {gaps.LD.X:0.000} mm");
-                                        sb.AppendLine();
-                                        sb.AppendLine().Append($"LUY = {gaps.LU.Y:0.000} mm");
-                                        sb.AppendLine().Append($"RUY = {gaps.RU.Y:0.000} mm");
-                                        sb.AppendLine().Append($"RDY = {gaps.RD.Y:0.000} mm");
-                                        sb.AppendLine().Append($"LDY = {gaps.LD.Y:0.000} mm");
+                                        sb.AppendLine().Append($"LU: (X={gaps.LU.X:0.000}, Y={gaps.LU.Y:0.000}) mm");
+                                        sb.AppendLine().Append($"RU: (X={gaps.RU.X:0.000}, Y={gaps.RU.Y:0.000}) mm");
+                                        sb.AppendLine().Append($"RD: (X={gaps.RD.X:0.000}, Y={gaps.RD.Y:0.000}) mm");
+                                        sb.AppendLine().Append($"LD: (X={gaps.LD.X:0.000}, Y={gaps.LD.Y:0.000}) mm");
                                     }
                                 }
                             }

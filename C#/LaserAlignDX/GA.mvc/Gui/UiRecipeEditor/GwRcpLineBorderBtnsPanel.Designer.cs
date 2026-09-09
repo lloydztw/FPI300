@@ -328,7 +328,6 @@
             this.groupBox3.Size = new System.Drawing.Size(671, 138);
             this.groupBox3.TabIndex = 78;
             this.groupBox3.TabStop = false;
-            this.groupBox3.Visible = false;
             // 
             // chkShowFilterResult
             // 
@@ -336,7 +335,7 @@
             this.chkShowFilterResult.AutoSize = true;
             this.chkShowFilterResult.Location = new System.Drawing.Point(282, 29);
             this.chkShowFilterResult.Name = "chkShowFilterResult";
-            this.chkShowFilterResult.Size = new System.Drawing.Size(118, 24);
+            this.chkShowFilterResult.Size = new System.Drawing.Size(121, 24);
             this.chkShowFilterResult.TabIndex = 75;
             this.chkShowFilterResult.Text = "顯示濾波效果";
             this.chkShowFilterResult.UseVisualStyleBackColor = true;

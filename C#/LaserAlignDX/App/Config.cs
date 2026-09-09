@@ -1,4 +1,18 @@
-﻿
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2025 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2025-08-28 初稿 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
 using System;
 
 namespace LaserAlignDX
@@ -26,7 +40,7 @@ namespace LaserAlignDX
         /// <summary>
         /// 是否採用 平均邊隙 (從8個獨立數值 變成 4個有效數值) 
         /// </summary>
-        public static readonly bool OPT_USING_GAPS_4 = true;
+        public static readonly bool OPT_USING_GAPS_4 = false;
 
         public static readonly int TOTAL_MOTORS_NUMBER = 16;
 

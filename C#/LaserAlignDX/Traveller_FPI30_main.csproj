@@ -363,6 +363,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Config.cs" />
+    <Compile Include="App\Ini\v0\INI.cs" />
     <Compile Include="App\Prompts.cs" />
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
@@ -712,7 +713,6 @@
     <Compile Include="GA\ControlSpace\MachineSpace\NeedleMachineClass.cs" />
     <Compile Include="GA\ControlSpace\MachineSpace\YzBaseMachineClass.cs" />
     <Compile Include="GA\GlobalSpace\Enums.cs" />
-    <Compile Include="GA\GlobalSpace\INI.cs" />
     <Compile Include="GA\GlobalSpace\Universal_lt.cs" />
     <Compile Include="GA\OPSpace\AUFindClass.cs" />
     <Compile Include="GA\OPSpace\CameraConfig.cs" />
@@ -1004,6 +1004,7 @@
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="App\Ini\v1\" />
     <Folder Include="GA.mvc\Model\AoiModel\2_ChipLocator\v35\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

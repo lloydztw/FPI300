@@ -653,9 +653,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             GrayLimitHi = int.Parse(ReadINIValue("LineBorder", "GrayLimitHi", "255", INIFILE));
             GrayLimitLo = int.Parse(ReadINIValue("LineBorder", "GrayLimitLo", "0", INIFILE));
             
-            // 暫時停用 GrayLimits, By 強制設定為 255 與 0 !!!
-            GrayLimitHi = 255;
-            GrayLimitLo = 0;
+            //// 暫時停用 GrayLimits, By 強制設定為 255 與 0 !!!
+            //GrayLimitHi = 255;
+            //GrayLimitLo = 0;
 
             // 連筋
             BadConnsThreshold = int.Parse(ReadINIValue("BadConns", "BadConnsThreshold", "128", INIFILE));
