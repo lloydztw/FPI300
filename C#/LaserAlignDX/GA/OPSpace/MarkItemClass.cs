@@ -20,6 +20,7 @@ using System.IO;
 using Traveller106;
 using Eazy_Project_III;
 using JetEazy.Lang;
+using JetEazy.PropertyGrid;
 
 namespace LaserAlignDX.OPSpace
 {

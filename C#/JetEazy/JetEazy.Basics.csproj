@@ -93,8 +93,6 @@
     <Compile Include="UISpace\JzTransparentPanel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="PropertyGridSpace\UITypeConverters\EnumTypeConverter.cs" />
-    <Compile Include="PropertyGridSpace\UITypeConverters\NumericUpDownTypeConverter.cs" />
     <Compile Include="DBSpace\AccDBClass.cs" />
     <Compile Include="DBSpace\EsssDBClass.cs" />
     <Compile Include="DBSpace\RCPDBClass.cs" />
@@ -119,7 +117,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <None Include="GlobalSpace\Readme.md" />
-    <None Include="PropertyGridSpace\Readme.md" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="FormSpace\AccountForm.resx">
@@ -145,6 +142,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\warning-sign.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JetEazy.PropertyGrid.Utils\JetEazy.PropertyGrid.Utils.csproj">
+      <Project>{29ee6e77-21f6-4d85-9582-892d0cd60f93}</Project>
+      <Name>JetEazy.PropertyGrid.Utils</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

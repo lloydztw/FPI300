@@ -14,7 +14,7 @@ using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Lang;
 using JetEazy.OPSpace;
-using JetEazy.PropertyGridSpace;
+using JetEazy.PropertyGrid;
 using JetEazy.Utils;
 using LaserAlignDX;
 using LaserAlignDX.BasicSpace.ParaSpace;

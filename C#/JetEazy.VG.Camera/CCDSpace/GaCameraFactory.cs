@@ -44,6 +44,9 @@ namespace JetEazy.CCDSpace
                 case "MIND":
                     camera = new Linescan_Mind();
                     break;
+                default:
+                    camera = new Linescan_Sim();
+                    break;
             }
 
             camera?.Init(isDebug, paramStr);

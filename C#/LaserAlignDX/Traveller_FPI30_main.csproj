@@ -364,6 +364,8 @@
   <ItemGroup>
     <Compile Include="App\Config.cs" />
     <Compile Include="App\Ini\v0\INI.cs" />
+    <Compile Include="App\Ini\v1\INI.cs" />
+    <Compile Include="App\Ini\v1\JxAppSettings.cs" />
     <Compile Include="App\Prompts.cs" />
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
@@ -638,7 +640,6 @@
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.LB.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\RecipeParaGridClass.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\CsPropertyReadonlyProvider.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
     <Compile Include="App\ErrorCodes.cs" />
     <Compile Include="GA.mvc\Model\SysModel\ITravellerSysModel.cs" />
@@ -983,6 +984,10 @@
       <Project>{ecf19b8d-be9a-4159-8b94-defc25a59507}</Project>
       <Name>JetEazy.Calib</Name>
     </ProjectReference>
+    <ProjectReference Include="..\JetEazy.PropertyGrid.Utils\JetEazy.PropertyGrid.Utils.csproj">
+      <Project>{29ee6e77-21f6-4d85-9582-892d0cd60f93}</Project>
+      <Name>JetEazy.PropertyGrid.Utils</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JetEazy.VG.Camera\JetEazy.VG.Devices.csproj">
       <Project>{afa9cf55-2235-415d-b437-f4a62da34a0c}</Project>
       <Name>JetEazy.VG.Devices</Name>
@@ -1004,7 +1009,6 @@
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App\Ini\v1\" />
     <Folder Include="GA.mvc\Model\AoiModel\2_ChipLocator\v35\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

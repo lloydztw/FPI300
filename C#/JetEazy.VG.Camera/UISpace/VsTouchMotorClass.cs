@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Drawing;
-using System.Data;
-using System.Windows.Forms;
-
-using ComtactAnglePlus.FromCommon;
-using JetEazy.ControlSpace.MotionSpace;
+﻿using ComtactAnglePlus.FromCommon;
 using JetEazy.BasicSpace;
-using JetEazy.FormSpace;
+using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.Lang;
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace Common
 {

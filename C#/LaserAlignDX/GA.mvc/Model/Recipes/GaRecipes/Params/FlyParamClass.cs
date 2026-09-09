@@ -17,6 +17,7 @@ using Common.RecipeSpace;
 using Eazy_Project_III;
 using JetEazy;
 using JetEazy.Lang;
+using JetEazy.PropertyGrid;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;

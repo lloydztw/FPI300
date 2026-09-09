@@ -1,11 +1,7 @@
-﻿using JetEazy;
-using JetEazy.ControlSpace.MotionSpace;
-using System;
-using System.Collections.Generic;
+﻿using JetEazy.ControlSpace.MotionSpace;
+using JetEazy.PropertyGrid;
 using System.ComponentModel;
 using System.Drawing.Design;
-using System.Linq;
-using System.Text;
 
 namespace ComtactAnglePlus.FromCommon
 {

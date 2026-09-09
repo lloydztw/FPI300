@@ -246,6 +246,10 @@
     <None Include="Readme.md" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JetEazy.PropertyGrid.Utils\JetEazy.PropertyGrid.Utils.csproj">
+      <Project>{29ee6e77-21f6-4d85-9582-892d0cd60f93}</Project>
+      <Name>JetEazy.PropertyGrid.Utils</Name>
+    </ProjectReference>
     <ProjectReference Include="..\JetEazy\JetEazy.Basics.csproj">
       <Project>{a24458c1-b3ac-462a-8b42-dafd1d420e19}</Project>
       <Name>JetEazy.Basics</Name>

@@ -1,6 +1,7 @@
 ﻿using Common.RecipeSpace;
 using JetEazy;
 using JetEazy.BasicSpace;
+using JetEazy.PropertyGrid;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;

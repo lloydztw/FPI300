@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
 
-namespace JetEazy.PropertyGridSpace
+namespace JetEazy.PropertyGrid
 {
     public class MSRItemClass
     {

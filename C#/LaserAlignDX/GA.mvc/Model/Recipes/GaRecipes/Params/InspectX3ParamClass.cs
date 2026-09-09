@@ -17,6 +17,7 @@ using Common.RecipeSpace;
 using Eazy_Project_III;
 using JetEazy;
 using JetEazy.Lang;
+using JetEazy.PropertyGrid;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Mvc.Model.Recipe;
 using System.Collections.Generic;
