@@ -69,7 +69,7 @@ namespace Traveller106
         public float FlyImageResolution
         {
             get => (float)AppSettings.CamSettings.FlyImageRes.Value;
-            private set => AppSettings.CamSettings.FlyImageRes.Value = (decimal)value;
+            set => AppSettings.CamSettings.FlyImageRes.Value = (decimal)value;
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Traveller106
         public int DelayImageTime
         {
             get => AppSettings.CamSettings.LineScanDelayTime.Value;
-            private set => AppSettings.CamSettings.LineScanDelayTime.Value = value;
+            set => AppSettings.CamSettings.LineScanDelayTime.Value = value;
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace Traveller106
         public int GetImageDelayTime
         {
             get => AppSettings.CamSettings.LineScanOverTimeSecs.Value;
-            private set => AppSettings.CamSettings.LineScanDelayTime.Value = value;
+            set => AppSettings.CamSettings.LineScanDelayTime.Value = value;
         }
 
         /// <summary>
@@ -105,7 +105,7 @@ namespace Traveller106
         public int LightDelayTime
         {
             get => AppSettings.CamSettings.LightDelayTime.Value;
-            private set => AppSettings.CamSettings.LightDelayTime.Value = value;
+            set => AppSettings.CamSettings.LightDelayTime.Value = value;
         }
         #endregion
 
@@ -121,7 +121,7 @@ namespace Traveller106
         public string ResultImagePath
         {
             get => AppSettings.ImgSaveSettings.ResultImagePath.Value;
-            private set => AppSettings.ImgSaveSettings.ResultImagePath.Value = value;
+            set => AppSettings.ImgSaveSettings.ResultImagePath.Value = value;
         }
 
         /// <summary>
@@ -159,7 +159,7 @@ namespace Traveller106
         public int ImageQuality
         {
             get => AppSettings.ImgSaveSettings.ImageQuality.Value;
-            private set => AppSettings.ImgSaveSettings.ImageQuality.Value = value;
+            set => AppSettings.ImgSaveSettings.ImageQuality.Value = value;
         }
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace Traveller106
         public bool UseOkNgDiffImageFolders
         {
             get => AppSettings.ImgSaveSettings.UseOkNgDiffImageFolders.Value;
-            private set => AppSettings.ImgSaveSettings.UseOkNgDiffImageFolders.Value = value;
+            set => AppSettings.ImgSaveSettings.UseOkNgDiffImageFolders.Value = value;
         }
         #endregion
 
@@ -256,7 +256,7 @@ namespace Traveller106
         public bool IsResultShowChar 
         { 
             get => AppSettings.MiscSettings.IsResultShowChar.Value;
-            private set => AppSettings.MiscSettings.IsResultShowChar.Value = value;
+            set => AppSettings.MiscSettings.IsResultShowChar.Value = value;
         }
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace Traveller106
         public bool IsAutoDisableZoom
         {
             get => AppSettings.MiscSettings.IsAutoDisableZoom.Value;
-            private set => AppSettings.MiscSettings.IsAutoDisableZoom.Value = value;
+            set => AppSettings.MiscSettings.IsAutoDisableZoom.Value = value;
         }
 
         /// <summary>
@@ -279,8 +279,9 @@ namespace Traveller106
         [Browsable(false)]
         public bool IsCheat
         {
-            get => AppSettings.MiscSettings.IsCheat.Value;
-            private set => AppSettings.MiscSettings.IsCheat.Value = value;
+            get => false;
+            //get => AppSettings.MiscSettings.IsCheat.Value;
+            //private set => AppSettings.MiscSettings.IsCheat.Value = value;
         }
 
         #endregion
@@ -297,7 +298,7 @@ namespace Traveller106
         public bool UsingSingleNgCode
         {
             get => AppSettings.PlcCodeSettings.UsingSingleNgCode.Value;
-            private set => AppSettings.PlcCodeSettings.UsingSingleNgCode.Value = value;
+            set => AppSettings.PlcCodeSettings.UsingSingleNgCode.Value = value;
         }
 
         /// <summary>
@@ -309,17 +310,24 @@ namespace Traveller106
         public int SingleNgCode
         {
             get => AppSettings.PlcCodeSettings.SingleNgCode.Value;
-            private set => AppSettings.PlcCodeSettings.SingleNgCode.Value = value;
+            set => AppSettings.PlcCodeSettings.SingleNgCode.Value = value;
         }
         #endregion
 
         #region DUMMY_MEMBERS_FOR_LEGACY_PROJECTS_其他專案_餘孽
+        [Browsable(false)]
         public int LANGUAGE { get; set; } = 0;
+        [Browsable(false)]
         public LangIndex mLangIndex { get; set; } = 0;
+        [Browsable(false)]
         public string HistoryDataPath = string.Empty;
+        [Browsable(false)]
         public string HistoryDataBarcode = string.Empty;
+        [Browsable(false)]
         public int FactoryNameIndex { get; set; } = 0;
+        [Browsable(false)]
         public int AutoLogoutTime { get; set; } = 30;
+        [Browsable(false)]
         public int LedControlCount { get; set; } = 1;
         public void LoadIniSetup()
         {
@@ -417,9 +425,9 @@ namespace Traveller106
             this.Cal_Bca = old.Cal_Bca;
             this.IsResultShowChar = old.IsResultShowChar;
             this.IsAutoDisableZoom = old.IsAutoDisableZoom;
-            this.IsCheat = old.IsCheat;
             this.UsingSingleNgCode = old.UsingSingleNgCode;
             this.SingleNgCode = old.SingleNgCode;
+            //this.IsCheat = old.IsCheat;
         }
         #endregion
     }
