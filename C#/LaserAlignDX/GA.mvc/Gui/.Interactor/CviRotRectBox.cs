@@ -61,6 +61,15 @@ namespace LaserAlignDX.Mvc.Gui
         {
             SetBox(ref rectF);
         }
+        public CviRotRectBox(Rectangle rect, Color color, float blend = 0) : this(color, blend)
+        {
+            SetBox(ref rect);
+        }
+        public CviRotRectBox(ref Rectangle
+            rect, Color color, float blend = 0) : this(color, blend)
+        {
+            SetBox(ref rect);
+        }
         public object Tag
         {
             get;
@@ -101,7 +110,15 @@ namespace LaserAlignDX.Mvc.Gui
         {
             _quad2D = QvQuad2D.From(rect);
         }
-        
+        public void SetBox(Rectangle rect)
+        {
+            _quad2D = QvQuad2D.From(rect);
+        }
+        public void SetBox(ref Rectangle rect)
+        {
+            _quad2D = QvQuad2D.From(rect);
+        }
+
         public string Text
         {
             get; set;

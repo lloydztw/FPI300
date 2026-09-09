@@ -454,13 +454,12 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             var drawItems = new List<IvDrawItem>();
 
-            var ngRects = _cell?.ChipData?.BadConnBlobRects;
-            if (ngRects != null)
+            var ngQuads = _cell?.ChipData?.BadConnBlocs;
+            if (ngQuads != null)
             {
-                for (int i = 0, N = ngRects.Length; i < N; i++)
+                for (int i = 0, N = ngQuads.Length; i < N; i++)
                 {
-                    var ngBox = QvQuad2D.From(ngRects[i]).ToBox2D();
-                    var item = new CviRotRectBox(ngBox, Color.OrangeRed, blend: 0.5f);
+                    var item = new CviRotRectBox(ngQuads[i], Color.OrangeRed, blend: 0.5f);
                     drawItems.Add(item);
                 }
             }

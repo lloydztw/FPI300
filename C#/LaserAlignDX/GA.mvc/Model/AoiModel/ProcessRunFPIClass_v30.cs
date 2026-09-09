@@ -728,10 +728,10 @@ namespace LaserAlignDX.AoiModel.V3
                 // 連筋數量統計
                 foreach (var cell in cellsCollection.IterFinalCells())
                 {
-                    var badConnRects = cell?.ChipData?.BadConnBlobRects;
-                    if (badConnRects != null && badConnRects.Length > 0)
+                    var badConnBlocs = cell?.ChipData?.BadConnBlocs;
+                    if (badConnBlocs != null && badConnBlocs.Length > 0)
                     {
-                        badConnsCount += badConnRects.Length;
+                        badConnsCount += badConnBlocs.Length;
                     }
                 }
             }

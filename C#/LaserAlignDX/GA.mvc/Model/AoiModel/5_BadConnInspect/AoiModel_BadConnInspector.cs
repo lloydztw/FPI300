@@ -77,7 +77,10 @@ namespace LaserAlignDX.AoiModel.V3
                 markRunStart();
 
                 Bitmap bmpFullfov = LineScanCamImageHolder.PeekBitmap();
-                RunBadConnsInspection(bmpFullfov);
+                using (var bmpWork = CreateMaskedBitmap(bmpFullfov))
+                {
+                    RunBadConnsInspection(bmpWork);
+                }
 
                 markRunEnd(true);
                 fire_AoiEnd();
@@ -93,32 +96,31 @@ namespace LaserAlignDX.AoiModel.V3
         /// <summary>
         /// 參數調試用
         /// </summary>
-        public bool TryApplyBadConnFilters(Bitmap bmpSrc, out Bitmap bmpDisp, IEnumerable<RectangleF> rects)
+        public bool TryApplyBadConnFilters(Bitmap bmpRegionTemplate, out Bitmap bmpDisp, IEnumerable<RectangleF> rects)
         {
             try
             {
-                if (bmpSrc != null)
+                if (bmpRegionTemplate != null)
                 {
-                    using (var bridge = new QxImageBridge(bmpSrc))
+                    using (var bridge = new QxImageBridge(bmpRegionTemplate))
                     {
                         var roiRects = Array.ConvertAll(_xInspect.BadConnsRects.ToArray(),
                                         rc => JetEazy.Qcvt.CV(Rectangle.Round(rc)));
 
                         var imgDisp = applyFilters(bridge.Image, roiRects, out var _, true);
                         bmpDisp = imgDisp?.ToBitmap();
-
                         return true;
                     }
                 }
+                bmpDisp = null;
+                return false;
             }
             catch (Exception ex)
             {
+                _LOG_ERROR(ex, $"{GetType().Name} TryApplyBadConnFilters 異常");
                 bmpDisp = null;
                 throw;
             }
-
-            bmpDisp = null;
-            return false;
         }
 
         #region PRIVATE_INSPECTION_FUNCTIONS
@@ -135,6 +137,30 @@ namespace LaserAlignDX.AoiModel.V3
             //}
             //foreach (var detector in _detectors)
             //    detector?.Init();
+        }
+
+        private Bitmap CreateMaskedBitmap(Bitmap bmpFullfov, int morphs = 16)
+        {
+            Bitmap bmpWork = (Bitmap)bmpFullfov.Clone();
+            using (var bridge = new QxImageBridge(bmpWork))
+            using (var bridgeSrc = new QxImageBridge(bmpFullfov))
+            using (var collections = new RegionCellsDataCollection(_xRecipe.xRegionCells))
+            {
+                var imgWork = bridge.Image;
+                imgWork.SetTo(Scalar.White);
+
+                foreach (var cell in collections.IterFinalCells())
+                {
+                    var quad = cell?.ChipData?.ChipQuad2D;
+                    if (quad == null) continue;
+                    var pts = Array.ConvertAll(quad.Corners, c => new OpenCvSharp.Point((int)c.X, (int)c.Y));
+                    imgWork.FillPoly(new[] { pts }, Scalar.Black);
+                }
+
+                Cv2.Erode(imgWork, imgWork, null, null, morphs);
+                Cv2.BitwiseAnd(bridgeSrc.Image, imgWork, imgWork);
+            }
+            return bmpWork;
         }
 
         /// <summary>
@@ -184,7 +210,7 @@ namespace LaserAlignDX.AoiModel.V3
         }
 
         /// <summary>
-        /// 瑕疵檢測 (數群晶粒) (限用於同一線程內)
+        /// 連襟檢測 (數群晶粒) (限用於同一線程內)
         /// </summary>
         private void RunGroupBadConnectInspectionOneT(int threadIdx, GaCellsGroup cellsGroup)
         {
@@ -219,7 +245,7 @@ namespace LaserAlignDX.AoiModel.V3
         }
 
         /// <summary>
-        /// 量測單一晶粒 (使用海康搜尋直線)
+        /// 連襟檢測 (量測單一晶粒)
         /// </summary>
         private void RunOneBadConnectInspect(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, int threadId)
         {
@@ -229,32 +255,37 @@ namespace LaserAlignDX.AoiModel.V3
                 return;
 
             //(1) Reset
-            chipData.BadConnBlobRects = null;
+            chipData.BadConnBlocs = null;
 
             try
             {
-                //(2) 取得檢測框 runtime detectQuads (Region Coordinates, 以 cellRoi 左上為 (0,0)) 
+                //(2) 取得檢測框 detectQuads (Cell Region Coordinates)
                 var detectQuads = CalcRuntimeDetectQuads(cell, cellRoi, cellBmp);
                 if (detectQuads == null || detectQuads.Length == 0)
                     return;
 
-                //(3) Quad => Rect
+                //(3) 轉換 Quads => Rects (Cell Region Coordinates)
                 var roiRects = Array.ConvertAll(detectQuads, q => JetEazy.Qcvt.CV(Rectangle.Round(q.BoundaryRect)));
 
                 //(4) applyFilters
                 using (var bridge = new QxImageBridge(cellBmp))
                 {
-                    applyFilters(bridge.Image, roiRects, out var ngRects, false);
+                    var cellImg = bridge.Image;
+                    applyFilters(cellImg, roiRects, out var ngQuads, false);
 
-                    // 轉換到 Fullfov Coordinates
-                    if (ngRects != null && ngRects.Count > 0)
+                    // 將 ngRects 從 Cell Region Coordinates 轉換到 Fullfov Coordinates
+                    if (ngQuads != null && ngQuads.Count > 0)
                     {
-                        for (int i = 0, N = ngRects.Count; i < N; i++)
-                            ngRects[i].Offset((int)cellRoi.X, (int)cellRoi.Y);
-
                         // 記入 chipData
-                        chipData.BadConnBlobRects = ngRects?.ToArray();
+                        chipData.BadConnBlocs = ngQuads?.ToArray();
 
+                        // DEBUG
+                        if (_isDumpEnabled)
+                            _DUMP("BadConnBlocs", cell, cellImg, null, chipData.BadConnBlocs);
+
+                        // Offset
+                        foreach(var q in chipData.BadConnBlocs)
+                            q.Offset(cellRoi.X, cellRoi.Y);
                     }
                 }
             }
@@ -264,19 +295,17 @@ namespace LaserAlignDX.AoiModel.V3
                 throw;
             }
         }
-        
+
         /// <summary>
-        /// 計算 選轉 & 平移 後的 檢測框
+        /// 計算 選轉 & 平移 後的 檢測框 (Runtime Cell Region Coordindates)
         /// </summary>
-        QvQuad2D[] CalcRuntimeDetectQuads(RegionCellX3Class cell, RectangleF cellRoi, Bitmap cellBmp = null, bool debug = false)
+        QvQuad2D[] CalcRuntimeDetectQuads(RegionCellX3Class cell, RectangleF cellRoi, Bitmap cellBmp = null)
         {
             int NP = _xInspect.BadConnsCount;
-            var detectQuads = new QvQuad2D[NP];
-
             if (NP == 0)
-                return detectQuads;
+                return null;
 
-            //(1) 取得 上一輪 晶粒定位 的結果 (chipData)
+            //(1) 取得 上一輪 晶粒定位 的結果 (chipData) (runtime)
             var chipData = cell?.ChipData;
 
             //(1.1) 複製 chipQuad (Fullfov Coordinates) (runtime)
@@ -284,36 +313,32 @@ namespace LaserAlignDX.AoiModel.V3
             if (chipQuad == null)
                 return null;
 
-            //(1.2) 複製 goldenQuad (Region Coordinates)
-            var goldenQuad = chipData?.GoldenQuad2D?.Clone();
+            //(1.2) 複製 goldenQuad (Rcp Region Coordinates)
+            var goldenQuad = QvQuad2D.From(_xRecipe.GoldenChipRect);
             if (goldenQuad == null)
                 return null;
 
-
             try
             {
-                //(1) 將 chipQuad 平移到 Region Coordinates
+                //(2) 將 chipQuad 從 Fullfov Coordinates 平移到 Cell Region Coordinates
                 chipQuad.Offset(-cellRoi.X, -cellRoi.Y);
-                _DUMP("RuntimeChipQuad", cell, cellBmp, chipQuad);
 
-                //(2) 投影轉換矩陣
-                var srcPts = Array.ConvertAll(goldenQuad.Corners, c => new Point2f((float)c.X, (float)c.Y));
-                var dstPts = Array.ConvertAll(chipQuad.Corners, c => new Point2f((float)c.X, (float)c.Y));
-                var transMat = Cv2.GetPerspectiveTransform(srcPts, dstPts);
+                //(2.1) 準備 detectQuads (Rcp Region Coordinates)
+                var detectQuads = Array.ConvertAll(_xInspect.BadConnsRects.ToArray(), rect => QvQuad2D.From(rect));
 
-                //(3) 投影轉換所有的 _xInspect.BadConnsRects (Region Coordinates)
+                //(2.2) 相對向量 (Rcp Region Coordinates)
+                var vectors = Array.ConvertAll(detectQuads, q => q.Center - goldenQuad.Center);
+
+                //(2.3) 把 detectQuads 從  (Rcp Region Coordinates) 轉換到 (Cell Region Coorindates)
                 for (int i = 0; i < NP; i++)
                 {
-                    var srcCorners = getCorners(_xInspect.BadConnsRects[i]);
-                    var dstCorners = Cv2.PerspectiveTransform(srcCorners, transMat);
-                    var detectQuad = new QvQuad2D()
-                    {
-                        Corners = Array.ConvertAll(dstCorners, c => new QVector2(c.X, c.Y))
-                    };
-                    detectQuads[i] = detectQuad;
-
-                    _DUMP("DetectQuad", cell, cellBmp, detectQuad);
+                    var pt = chipQuad.Center + vectors[i];
+                    detectQuads[i].SetCenter(pt);
                 }
+
+                //(2.4) DUMP
+                if (_isDumpEnabled)
+                    _DUMP("DetectQuads", cell, cellBmp, chipQuad, detectQuads);
 
                 return detectQuads;
             }
@@ -324,20 +349,23 @@ namespace LaserAlignDX.AoiModel.V3
             }
         }
 
-        Mat applyFilters(Mat imgSrc, Rect[] roiRects, out List<Rectangle> ngBlobRects, bool generateDispImg = false)
+        /// <summary>
+        /// 以 imgSrc 左上為 (0,0)
+        /// </summary>
+        Mat applyFilters(Mat imgSrc, Rect[] roiRects, out List<QvQuad2D> ngBlobQuads, bool generateDispImg = false)
         {
             var gray = GaImageUtil.ToU8(imgSrc);
+
             var imgDisp = generateDispImg ? new Mat(gray.Size(), MatType.CV_8UC3) : null;
             imgDisp?.SetTo(Scalar.Black);
 
             if (_xInspect == null)
             {
-                ngBlobRects = null;
-                if (gray != imgSrc) gray.Dispose();
+                ngBlobQuads = null;
+                if (gray != imgSrc) 
+                    gray.Dispose();
                 return imgDisp;
             }
-
-            ngBlobRects = new List<Rectangle>();
 
             var boundRect = new Rect(0, 0, imgSrc.Width, imgSrc.Height);
             var threshold = _xInspect.BadConnsThreshold;
@@ -348,6 +376,8 @@ namespace LaserAlignDX.AoiModel.V3
             blobFinder.MinSize = new OpenCvSharp.Size(minX, minY);
             blobFinder.OptFillBorder = false;
 
+            // 收集 ngBlobQuads
+            ngBlobQuads = new List<QvQuad2D>();
             for (int i = 0, N = roiRects.Length; i < N; i++)
             {
                 var roi = roiRects[i];
@@ -370,17 +400,21 @@ namespace LaserAlignDX.AoiModel.V3
 
                     // 3. Blobs
                     blobFinder.FindWhiteBlobs(binary, out var blocs);
+
                     if (blocs != null && blocs.Count > 0)
                     {
+                        // 3.1 將異常區塊 塗紅
+                        dispRoi?.SetTo(Scalar.Red, binary);
+
+                        // 3.2 收集 blob
                         foreach (var b in blocs)
                         {
-                            var ngRect = b.Rect;
-                            ngRect.Offset(roi.X, roi.Y);
-                            ngBlobRects.Add(ngRect);
-                        }
+                            var ngQuad = QvQuad2D.From(b.Rect);
 
-                        // 4. 將異常區塊 塗紅
-                        dispRoi?.SetTo(Scalar.Red, binary);
+                            // 從 roi coordinates 轉換到 imgSrc coordinates
+                            ngQuad.Offset(roi.X, roi.Y);
+                            ngBlobQuads.Add(ngQuad);
+                        }
                     }
                 }
             }
@@ -388,39 +422,67 @@ namespace LaserAlignDX.AoiModel.V3
             if (gray != imgSrc)
                 gray.Dispose();
 
-            if (ngBlobRects.Count == 0)
-                ngBlobRects = null;
+            if (ngBlobQuads.Count == 0)
+                ngBlobQuads = null;
 
             return imgDisp;
-        }        
+        }
         #endregion
 
         #region PRIVATE_HELPER_FUNCTIONS
-        Point2d[] getCorners(RectangleF rect)
+        Point2f[] getCorners(RectangleF rect)
         {
-            return new []
+            return new[]
             {
-                new Point2d(rect.Left, rect.Top),
-                new Point2d(rect.Right, rect.Top),
-                new Point2d(rect.Right, rect.Bottom),
-                new Point2d(rect.Left, rect.Bottom),
+                new Point2f(rect.Left, rect.Top),
+                new Point2f(rect.Right, rect.Top),
+                new Point2f(rect.Right, rect.Bottom),
+                new Point2f(rect.Left, rect.Bottom),
             };
         }
         #endregion
 
-        void _DUMP(string tag, RegionCellX3Class cell, Bitmap cellBmp, QvQuad2D regionQuad)
+        #region DEBUG_FUNCTIONS
+        bool _isDumpEnabled = false;
+        void _DUMP(string tag, RegionCellX3Class cell, Bitmap cellBmp, QvQuad2D chipQuad, QvQuad2D[] detectQuads)
         {
-            if(cellBmp!=null)
+            if (cellBmp != null)
             {
-                string fname = $"dump_{tag}@{cell.CellRow}_{cell.CellCol}.png";
                 using (var bridge = new QxImageBridge(cellBmp))
-                using (var canvas = bridge.Image.CvtColor(ColorConversionCodes.GRAY2BGR))
                 {
-                    var rect = JetEazy.Qcvt.CV(Rectangle.Round(regionQuad.BoundaryRect));
-                    canvas.Rectangle(rect, Scalar.Lime);
+                    _DUMP(tag, cell, bridge.Image, chipQuad, detectQuads);
+                }
+            }
+        }
+        void _DUMP(string tag, RegionCellX3Class cell, Mat cellImg, QvQuad2D chipQuad, QvQuad2D[] detectQuads)
+        {
+            if (cellImg != null)
+            {
+                string fname = $"badConn_{tag}@{cell.CellRow}_{cell.CellCol}.png";
+                using (var canvas = cellImg.CvtColor(ColorConversionCodes.GRAY2BGR))
+                {
+                    drawQuads(canvas, Scalar.Lime, chipQuad);
+                    drawQuads(canvas, Scalar.OrangeRed, detectQuads);
                     canvas.SaveImage($"d:\\paso.log\\{fname}");
                 }
             }
         }
+        void drawQuads(Mat canvas, Scalar color, params QvQuad2D[] quads)
+        {
+            if (quads == null || quads.Length == 0)
+                return;
+
+            foreach (var quad in quads)
+            {
+                if (quad == null) continue;
+                var pts = Array.ConvertAll(quad.Corners, c => new OpenCvSharp.Point((int)c.X, (int)c.Y));
+                for (int i = 0, N = pts.Length; i < N; i++)
+                {
+                    int j = (i + 1) % N;
+                    canvas.Line(pts[i], pts[j], color, 5);
+                }
+            }
+        }
+        #endregion
     }
 }

@@ -177,11 +177,14 @@ namespace LaserAlignDX.Model
         public readonly GaPadEdgeGaps PadEdgeGaps = new GaPadEdgeGaps();
 
         ///<summary>
-        /// 瑕疵區塊
+        /// 瑕疵區塊 (Fullfov Coordinates)
         /// </summary>
         public QvBox2D[] DefectBlobs { get; set; } = null;
 
-        public Rectangle[] BadConnBlobRects { get; set; } = null;
+        /// <summary>
+        /// 連筋區塊 (Fullfov Coordinates)
+        /// </summary>
+        public QvQuad2D[] BadConnBlocs { get; set; } = null;
 
         /// <summary>
         /// 調試用 之 額外資料

@@ -96,6 +96,7 @@
 "radioButtonG": [ "Chip Template", "晶粒 匹配模板", "", "" ],
 "radioButtonLn": [ "Edge Lines", "邊線 檢測範圍", "", "" ],
 "radioButtonDe": [ "Defects", "瑕疵檢測", "", "" ],
+"radioButtonCn": [ "Bad Conn.", "連筋檢測", "", "" ],
 "radioButtonQr": [ "QR Code", "二維碼 範圍", "", "" ],
 
 "btnPickGolden" : ["Crop", "擷取模板", "",""],
@@ -112,10 +113,13 @@
 "lblLB9": [ "Threshold", "其他門限", "", "" ],
 "btnAutoLineBorders" : ["Auto Layout", "一鍵框選", "",""],
 "btnBuildMircoTrf" : ["Calc. Dim.", "精算尺寸", "", ""],
+"chkShowFilterResult" : ["Show Filter Result", "顯示濾波效果", "", ""],
 
-"btnDefectDelete" : ["Del Defect Area", "缺陷區域 刪除", "","ลบพื้นที่ข้อบกพร่อง"],
-"btnDefectClear" : ["Clear Defect Area", "缺陷區域 清空", "","ล้างพื้นที่ข้อบกพร่อง"],
-"btnDefectAdd" : ["Add Defect Area", "缺陷區域 添加", "","เพิ่มพื้นที่ข้อบกพร่อง"],
+"lblDetectRegions" : ["Detect Regions", "檢測區塊", "", ""],
+"btnAdd" : ["Add", "添加", "",""],
+"btnDelete" : ["Delete", "刪除", "",""],
+"btnClearAll" : ["Clear", "清空", "",""],
+
 "btnTryQrCode" : ["Scan", "掃碼", "","สแกนโค้ด"],
 "btnSave" : ["Save Recipe", "保存 參數", "","บันทึกพารามิเตอร์"],
 "btnTrain" : ["Train", "訓練 模板", "","เทรนเทมเพลต"],
