@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.DTO;
+using System;
 
 namespace Traveller106.Ini.V1
 {
@@ -30,7 +31,7 @@ namespace Traveller106.Ini.V1
         public string Account = "2.5D-LC";
         public string Password = "LC^tfnm8";
         public string IpAddress = "ftp://10.62.111.34";
-        public string DstFolder = "D6400-5014/线扫/";
+        public string DstFolder = "D6400-5014/";
 
         public override void Load(string iniFile)
         {
@@ -50,7 +51,6 @@ namespace Traveller106.Ini.V1
             Write(iniFile, _sectName, "IpAddress", IpAddress);
             Write(iniFile, _sectName, "DstFolder", DstFolder);
         }
-
         public void Normalize()
         {
             if (string.IsNullOrEmpty(IpAddress) || !IpAddress.ToLower().StartsWith("ftp://"))
@@ -61,6 +61,44 @@ namespace Traveller106.Ini.V1
 
             if(!string.IsNullOrEmpty(IpAddress) && !DstFolder.EndsWith("/"))
                 DstFolder += "/";
+        }
+
+        public string GetSubDstFolder(string subName, string dateTag)
+        {
+            // 1. 基礎目錄格式化 (統一換成 '/' 並去除頭尾斜線)
+            string folder = (DstFolder ?? "").Replace("\\", "/").Trim('/');
+            string cleanSub = (subName ?? "").Replace("\\", "/").Trim('/');
+            string cleanTag = (dateTag ?? "").Replace("\\", "/").Trim('/');
+
+            // 2. 檢查 DstFolder 尾部是否已經包含了 subName，若有則先移除
+            if (!string.IsNullOrEmpty(cleanSub))
+            {
+                // 檢查情境 A: DstFolder 完全等於 subName (例如 "线扫")
+                if (folder.Equals(cleanSub, StringComparison.OrdinalIgnoreCase))
+                {
+                    folder = "";
+                }
+                // 檢查情境 B: DstFolder 結尾為 "/subName" (例如 "D6400-5014/线扫")
+                else if (folder.EndsWith("/" + cleanSub, StringComparison.OrdinalIgnoreCase))
+                {
+                    folder = folder.Substring(0, folder.Length - (cleanSub.Length + 1));
+                }
+            }
+
+            // 3. 安全拼接 subName
+            if (!string.IsNullOrEmpty(cleanSub))
+            {
+                folder = string.IsNullOrEmpty(folder) ? cleanSub : folder + "/" + cleanSub;
+            }
+
+            // 4. 安全拼接 dateTag
+            if (!string.IsNullOrEmpty(cleanTag))
+            {
+                folder = string.IsNullOrEmpty(folder) ? cleanTag : folder + "/" + cleanTag;
+            }
+
+            // 5. 確保 FTP 格式結尾帶有 '/'
+            return string.IsNullOrEmpty(folder) ? "" : folder + "/";
         }
     }
 }

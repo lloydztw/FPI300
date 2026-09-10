@@ -201,7 +201,7 @@ namespace LaserAlignDX.Model
 
                     if (fileNameOrg != null && _ftpUploader.Enabled)
                     {
-                        _ftpUploader.UploadFile(fileNameOrg);
+                        _ftpUploader.UploadFile(fileNameOrg, "线扫", _timeTag);
                     }
                 }
                 catch (Exception ex)
@@ -426,7 +426,7 @@ namespace LaserAlignDX.Model
 
                         if (fileName != null && _ftpUploader.Enabled)
                         {
-                            _ftpUploader.UploadFile(fileName);
+                            _ftpUploader.UploadFile(fileName, "飞拍", _timeTag);
                         }
                     }
                 }

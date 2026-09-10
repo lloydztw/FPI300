@@ -4,8 +4,9 @@
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
- *       2026-09-10 Created FtpUploader (by JetEazy Team)
- *       2026-09-10 Added TestConnection Method (by JetEazy Team)
+ *        2026-09-10 Created FtpUploader (by JetEazy Team)
+ *        2026-09-10 Added TestConnection Method (by JetEazy Team)
+ *        2026-09-10 Optimized Lock Scope & Directory Cache (by JetEazy Team)
  * 
  * http://www.jeteazy.com
  * https://github.com/lloydztw
@@ -15,9 +16,9 @@
 #endregion
 
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using Traveller106.Ini.V1;
 
@@ -27,6 +28,9 @@ namespace JetEazy.Utils
     {
         #region PRIVATE_DATA
         private readonly DtoFtpSettings _settings;
+
+        // 使用記憶體快取已建立過的目錄，大幅提升多執行緒效能
+        private static readonly ConcurrentDictionary<string, bool> _createdDirectories = new ConcurrentDictionary<string, bool>();
         #endregion
 
         #region LOCKS
@@ -34,27 +38,32 @@ namespace JetEazy.Utils
         private readonly object _logLock = new object();
         #endregion
 
+        #region PROPERTIES
         /// <summary>
         /// 日誌輸出委派 (可用於綁定 UI 控制項或 Log 檔案)
         /// </summary>
         public Action<string> OnLog { get; set; }
 
+        public bool Enabled
+        {
+            get => _settings != null && _settings.Enabled;
+        }
+        #endregion
+
+        #region CONSTRUCTOR
         public FtpUploader(DtoFtpSettings settings)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _settings.Normalize();
         }
+        #endregion
 
-        public bool Enabled
-        {
-            get => _settings!=null && _settings.Enabled;
-        }
+        #region PUBLIC_METHODS
 
         /// <summary>
         /// 測試 FTP 伺服器連線與認證是否正常 (同步)
         /// </summary>
         /// <param name="timeoutMs">連線超時時間 (毫秒)，預設 5000ms</param>
-        /// <returns>連線成功返回 true，失敗返回 false</returns>
         public bool TestConnection(int timeoutMs = 5000)
         {
             if (!_settings.Enabled)
@@ -65,7 +74,6 @@ namespace JetEazy.Utils
 
             try
             {
-                // 測試連線至根目錄或指定目標目錄
                 string testUrl = CombineUrl(_settings.IpAddress, _settings.DstFolder);
                 Log($"[連線測試] 開始測試連線至: {testUrl}");
 
@@ -84,7 +92,6 @@ namespace JetEazy.Utils
             }
             catch (WebException ex)
             {
-                // 若目標資料夾不存在 (550)，改嘗試只測試 IP 根目錄
                 if (ex.Response is FtpWebResponse response && response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
                 {
                     Log($"[連線測試提示] 目標目錄不存在，嘗試測試 FTP 根目錄...");
@@ -110,9 +117,9 @@ namespace JetEazy.Utils
         }
 
         /// <summary>
-        /// 同步上傳單一檔案至 FTP 伺服器
+        /// 同步上傳單一檔案至 FTP 伺服器 (Thread-Safe)
         /// </summary>
-        public bool UploadFile(string localFilePath, string remoteFileName = "")
+        public bool UploadFile(string srcFileName, string subName, DateTime time, int timeoutMs = 15000)
         {
             if (!_settings.Enabled)
             {
@@ -120,25 +127,23 @@ namespace JetEazy.Utils
                 return false;
             }
 
-            if (!File.Exists(localFilePath))
+            if (!File.Exists(srcFileName))
             {
-                Log($"[錯誤] 本地檔案不存在: {localFilePath}");
+                Log($"[錯誤] 本地檔案不存在: {srcFileName}");
                 return false;
             }
 
-            if (string.IsNullOrEmpty(remoteFileName))
-            {
-                remoteFileName = Path.GetFileName(localFilePath);
-            }
+            string remoteFileName = Path.GetFileName(srcFileName);
+            string remoteFolder = _settings.GetSubDstFolder(subName, time.ToString("yyyyMMdd"));
 
             try
             {
                 // 1. 確保遠端目標目錄存在
-                EnsureDirectoryExists(_settings.DstFolder);
+                EnsureDirectoryExists(remoteFolder);
 
                 // 2. 組合完整的 FTP 檔案 URI
-                string uploadUrl = CombineUrl(_settings.IpAddress, _settings.DstFolder, remoteFileName);
-                Log($"開始上傳檔案: {localFilePath} -> {uploadUrl}");
+                string uploadUrl = CombineUrl(_settings.IpAddress, remoteFolder, remoteFileName);
+                Log($"開始上傳檔案: {srcFileName} -> {uploadUrl}");
 
                 // 3. 建立 FtpWebRequest 請求
                 FtpWebRequest request = (FtpWebRequest)WebRequest.Create(uploadUrl);
@@ -147,9 +152,11 @@ namespace JetEazy.Utils
                 request.UseBinary = true;
                 request.UsePassive = true;
                 request.KeepAlive = false;
+                request.Timeout = timeoutMs;
+                request.ReadWriteTimeout = timeoutMs;
 
                 // 4. 寫入檔案串流
-                using (FileStream fileStream = File.OpenRead(localFilePath))
+                using (FileStream fileStream = File.OpenRead(srcFileName))
                 using (Stream requestStream = request.GetRequestStream())
                 {
                     fileStream.CopyTo(requestStream);
@@ -171,10 +178,12 @@ namespace JetEazy.Utils
         /// <summary>
         /// 非同步上傳單一檔案至 FTP 伺服器
         /// </summary>
-        public async Task<bool> UploadFileAsync(string localFilePath, string remoteFileName = "")
+        public async Task<bool> UploadFileAsync(string srcFileName, string subName, DateTime time, int timeoutMs = 15000)
         {
-            return await Task.Run(() => UploadFile(localFilePath, remoteFileName));
+            return await Task.Run(() => UploadFile(srcFileName, subName, time, timeoutMs));
         }
+
+        #endregion
 
         #region PRIVATE_METHODS
 
@@ -190,7 +199,7 @@ namespace JetEazy.Utils
                 request.Credentials = new NetworkCredential(_settings.Account, _settings.Password);
                 request.UsePassive = true;
                 request.KeepAlive = false;
-                request.Timeout = timeoutMs;
+                request.Timeout = timeoutMs; // 修正：補上 Timeout 設定
 
                 using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
                 {
@@ -206,65 +215,34 @@ namespace JetEazy.Utils
         }
 
         /// <summary>
-        /// 遞迴確保 FTP 遠端多層資料夾存在，若不存在則自動建立
-        /// </summary>
-        private void EnsureDirectoryExists_000(string remoteFolderPath)
-        {
-            if (string.IsNullOrWhiteSpace(remoteFolderPath))
-                return;
-
-            string[] folders = remoteFolderPath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-            string currentPath = _settings.IpAddress;
-
-            foreach (string folder in folders)
-            {
-                currentPath = CombineUrl(currentPath, folder);
-
-                try
-                {
-                    FtpWebRequest request = (FtpWebRequest)WebRequest.Create(currentPath);
-                    request.Method = WebRequestMethods.Ftp.MakeDirectory;
-                    request.Credentials = new NetworkCredential(_settings.Account, _settings.Password);
-                    request.UsePassive = true;
-                    request.KeepAlive = false;
-
-                    using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
-                    {
-                        Log($"遠端建立目錄成功: {currentPath}");
-                    }
-                }
-                catch (WebException ex)
-                {
-                    if (ex.Response is FtpWebResponse response)
-                    {
-                        // 550 代表目錄已存在，忽略此錯誤繼續推進下一層
-                        if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
-                        {
-                            continue;
-                        }
-                    }
-                    Log($"[提示] 建立目錄流程訊息 ({folder}): {ex.Message}");
-                }
-            }
-        }
-
-        /// <summary>
-        /// 遞迴確保 FTP 遠端多層資料夾存在，若不存在則自動建立
+        /// 遞迴確保 FTP 遠端多層資料夾存在，帶有快取機制與跨執行緒保護
         /// </summary>
         private void EnsureDirectoryExists(string remoteFolderPath)
         {
             if (string.IsNullOrWhiteSpace(remoteFolderPath))
                 return;
 
-            // 2. 目錄建立過程加鎖，確保同一時間只有一個 Thread 在檢查/建立目錄
+            string fullFolderPath = CombineUrl(_settings.IpAddress, remoteFolderPath);
+
+            // 快取命中：若該目錄已經在本次程序生命週期中建立過，直接跳過 (大幅增加併發傳輸效能)
+            if (_createdDirectories.ContainsKey(fullFolderPath))
+                return;
+
             lock (_dirLock)
             {
+                // 二次檢查 (Double-check Locking)
+                if (_createdDirectories.ContainsKey(fullFolderPath))
+                    return;
+
                 string[] folders = remoteFolderPath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
                 string currentPath = _settings.IpAddress;
 
                 foreach (string folder in folders)
                 {
                     currentPath = CombineUrl(currentPath, folder);
+
+                    if (_createdDirectories.ContainsKey(currentPath))
+                        continue;
 
                     try
                     {
@@ -273,6 +251,7 @@ namespace JetEazy.Utils
                         request.Credentials = new NetworkCredential(_settings.Account, _settings.Password);
                         request.UsePassive = true;
                         request.KeepAlive = false;
+                        request.Timeout = 5000;
 
                         using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
                         {
@@ -283,20 +262,22 @@ namespace JetEazy.Utils
                     {
                         if (ex.Response is FtpWebResponse response)
                         {
+                            // 550 代表目錄已存在，屬於正常狀況
                             if (response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
                             {
+                                // 標記已存在，不再重複檢查
+                                _createdDirectories.TryAdd(currentPath, true);
                                 continue;
                             }
                         }
                         Log($"[提示] 建立目錄流程訊息 ({folder}): {ex.Message}");
                     }
+
+                    _createdDirectories.TryAdd(currentPath, true);
                 }
             }
         }
 
-        /// <summary>
-        /// 安全組合 URL 路徑，避免斜線重複或遺漏
-        /// </summary>
         private string CombineUrl(params string[] parts)
         {
             if (parts == null || parts.Length == 0)
@@ -321,7 +302,6 @@ namespace JetEazy.Utils
 
         private void Log(string message)
         {
-            // 3. Log 觸發加鎖，避免多執行緒同時調用 OnLog
             lock (_logLock)
             {
                 OnLog?.Invoke($"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [FtpUploader] {message}");
