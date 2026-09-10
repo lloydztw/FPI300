@@ -1008,8 +1008,6 @@
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="App\Ini\v0\" />
-    <Folder Include="App\Ini\v2\" />
     <Folder Include="GA.mvc\Model\AoiModel\2_ChipLocator\v35\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
