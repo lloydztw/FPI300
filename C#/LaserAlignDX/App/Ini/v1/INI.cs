@@ -45,12 +45,12 @@ namespace Traveller106
         string INI_FILE => System.IO.Path.Combine(Universal.MAINPATH, "config.ini");
         #endregion
 
-        const string X3_Cat1 = "A01.相機設定";
+        const string XCate1 = "A01.相機設定";
         #region FPI30_INI_CATE_1
         /// <summary>
         /// 飞拍图像解析度 (mm/pixel)
         /// </summary>
-        [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位 (mm/pixel)")]
+        [CategoryAttribute(XCate1), DescriptionAttribute("单位 (mm/pixel)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100, 0.1f, 4)]
         [DisplayName("01.飞拍图像解析度")]
@@ -64,7 +64,7 @@ namespace Traveller106
         /// <summary>
         /// 线扫取像延时 (ms)
         /// </summary>
-        [CategoryAttribute(X3_Cat1), DescriptionAttribute("单位(毫秒)")]
+        [CategoryAttribute(XCate1), DescriptionAttribute("单位(毫秒)")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 99999999)]
         [DisplayName("02.取像延时")]
@@ -78,32 +78,32 @@ namespace Traveller106
         /// <summary>
         /// 线扫超时时间 (seconds)
         /// </summary>
-        [CategoryAttribute(X3_Cat1), DescriptionAttribute("")]
+        [CategoryAttribute(XCate1), DescriptionAttribute("")]
         [Browsable(false)]
         public int GetImageDelayTime
         {
             get => _dto.LineScanOverTimeSecs;
-            set => _dto.LineScanDelayTime = value;
+            //set => _dto.LineScanOverTimeSecs = value;
         }
 
         /// <summary>
         /// 灯光延时时间 (ms)
         /// </summary>
-        [CategoryAttribute(X3_Cat1), DescriptionAttribute("")]
+        [CategoryAttribute(XCate1), DescriptionAttribute("")]
         [Browsable(false)]
         public int LightDelayTime
         {
             get => _dto.LightDelayTime;
-            set => _dto.LightDelayTime = value;
+            //set => _dto.LightDelayTime = value;
         }
         #endregion
 
-        const string X3_Cat2 = "A02.圖檔保存設定";
+        const string XCate2 = "A02.圖檔保存設定";
         #region FPI30_INI_CATE_2
         /// <summary>
         /// 结果图路径
         /// </summary>
-        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
+        [CategoryAttribute(XCate2), DescriptionAttribute("")]
         [Editor(typeof(FolderBrowserPropertyEditor), typeof(UITypeEditor))]
         [DisplayName("01.结果图路径")]
         [Browsable(true)]
@@ -116,7 +116,7 @@ namespace Traveller106
         /// <summary>
         /// 存储压缩图片
         /// </summary>
-        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
+        [CategoryAttribute(XCate2), DescriptionAttribute("")]
         [DisplayName("02.存储压缩图片")]
         [Browsable(true)]
         public bool IsSaveDebugBmp
@@ -128,7 +128,7 @@ namespace Traveller106
         /// <summary>
         /// 存储原始图片
         /// </summary>
-        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
+        [CategoryAttribute(XCate2), DescriptionAttribute("")]
         [DisplayName("03.存储原始图片")]
         [Browsable(true)]
         public bool IsSaveDebugOrgBmp
@@ -140,7 +140,7 @@ namespace Traveller106
         /// <summary>
         /// 结果图质量
         /// </summary>
-        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
+        [CategoryAttribute(XCate2), DescriptionAttribute("")]
         [DisplayName("04.结果图质量")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMax(0, 100)]
@@ -154,7 +154,7 @@ namespace Traveller106
         /// <summary>
         /// 保存单颗测试图
         /// </summary>
-        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
+        [CategoryAttribute(XCate2), DescriptionAttribute("")]
         [DisplayName("05.保存单颗测试图")]
         [Browsable(true)]
         public bool IsSaveTestImage
@@ -166,7 +166,7 @@ namespace Traveller106
         /// <summary>
         /// 圖檔分存OK/NG不同資料夾
         /// </summary>
-        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
+        [CategoryAttribute(XCate2), DescriptionAttribute("")]
         [DisplayName("06.圖檔分存OK/NG不同資料夾")]
         [Browsable(true)]
         public bool UseOkNgDiffImageFolders
@@ -176,23 +176,12 @@ namespace Traveller106
         }
         #endregion
 
-        const string X3_Cat3 = "A03.全域補償設定";
+        const string XCate3 = "A03.全域補償設定";
         #region FPI30_INI_CATE_3
-        /// <summary>
-        /// 强制全检
-        /// </summary>
-        [CategoryAttribute(X3_Cat2), DescriptionAttribute("")]
-        [Browsable(false)]
-        public bool IsForceInspect
-        {
-            get => _dto.IsForceInspect;
-            private set => _dto.IsForceInspect = value;
-        }
-
         /// <summary>
         /// 线扫补偿X
         /// </summary>
-        [CategoryAttribute(X3_Cat3), DescriptionAttribute("")]
+        [CategoryAttribute(XCate3), DescriptionAttribute("")]
         [DisplayName("01.线扫补偿X")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMaxAttribute(-100f, 100f, 0.01f, 3)]
@@ -206,7 +195,7 @@ namespace Traveller106
         /// <summary>
         /// 线扫补偿Y
         /// </summary>
-        [CategoryAttribute(X3_Cat3), DescriptionAttribute("")]
+        [CategoryAttribute(XCate3), DescriptionAttribute("")]
         [DisplayName("02.线扫补偿Y")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMaxAttribute(-100f, 100f, 0.01f, 3)]
@@ -220,7 +209,7 @@ namespace Traveller106
         /// <summary>
         /// 线扫补偿角度
         /// </summary>
-        [CategoryAttribute(X3_Cat3), DescriptionAttribute("")]
+        [CategoryAttribute(XCate3), DescriptionAttribute("")]
         [DisplayName("03.线扫补偿角度")]
         [TypeConverter(typeof(NumericUpDownTypeConverter))]
         [Editor(typeof(NumericUpDownTypeEditor), typeof(UITypeEditor)), MinMaxAttribute(-5f, 5f, 0.1f, 2)]
@@ -230,14 +219,48 @@ namespace Traveller106
             get => _dto.Cal_Bca;
             set => _dto.Cal_Bca = value;
         }
+
+        /// <summary>
+        /// 是否使用平均邊隙 (從8個獨立數值 變成 4個有效數值)
+        /// </summary>
+        [CategoryAttribute(XCate3), DescriptionAttribute("true (Gaps 4) / false (Gaps 8)")]
+        [DisplayName("04.使用平均邊隙")]
+        [Browsable(true)]
+        public bool UsingAveGaps4
+        {
+            get => _dto.UsingAveGaps4;
+            set => _dto.UsingAveGaps4 = value;
+        }
+
+        /// <summary>
+        /// 强制全检
+        /// </summary>
+        [CategoryAttribute(XCate3), DescriptionAttribute("")]
+        [Browsable(false)]
+        public bool IsForceInspect
+        {
+            get => _dto.IsForceInspect;
+            private set => _dto.IsForceInspect = value;
+        }
+
+        /// <summary>
+        /// "優化"
+        /// </summary>
+        [CategoryAttribute(XCate3), DescriptionAttribute("")]
+        [Browsable(false)]
+        public bool IsCheat
+        {
+            get => _dto.IsCheat;
+            private set => _dto.IsCheat = value;
+        }
         #endregion
 
-        const string X3_Cat4 = "A04.其他設定";
+        const string XCate4 = "A04.其他GUI設定";
         #region FPI30_INI_CATE_4
         /// <summary>
-        /// 结果显示数据
+        /// 是否使用 ToolTip 顯示結果
         /// </summary>
-        [CategoryAttribute(X3_Cat4), DescriptionAttribute("")]
+        [CategoryAttribute(XCate4), DescriptionAttribute("")]
         [DisplayName("01.结果显示数据")]
         [Browsable(true)]
         public bool IsResultShowChar 
@@ -249,7 +272,7 @@ namespace Traveller106
         /// <summary>
         /// 飛拍自動停止縮放
         /// </summary>
-        [CategoryAttribute(X3_Cat4), DescriptionAttribute("")]
+        [CategoryAttribute(XCate4), DescriptionAttribute("")]
         [DisplayName("02.飛拍自動停止縮放")]
         [Browsable(true)]
         public bool IsAutoDisableZoom
@@ -257,27 +280,14 @@ namespace Traveller106
             get => _dto.IsAutoDisableZoom;
             set => _dto.IsAutoDisableZoom = value;
         }
-
-        /// <summary>
-        /// 增强抓边
-        /// </summary>
-        [CategoryAttribute(X3_Cat4), DescriptionAttribute("")]
-        [DisplayName("03.增强抓边")]
-        [Browsable(false)]
-        public bool IsCheat
-        {
-            get => false;
-            //get => AppSettings.MiscSettings.IsCheat;
-            //private set => AppSettings.MiscSettings.IsCheat = value;
-        }
         #endregion
 
-        const string X3_Cat5 = "A05.PLC 設定";
+        const string XCate5 = "A05.PLC 設定";
         #region FPI30_INI_CATE_5
         /// <summary>
         /// 使用單一NG碼
         /// </summary>
-        [CategoryAttribute(X3_Cat5), DescriptionAttribute("")]
+        [CategoryAttribute(XCate5), DescriptionAttribute("")]
         [DisplayName("01.使用單一NG碼")]
         [Browsable(true)]
         public bool UsingSingleNgCode
@@ -289,7 +299,7 @@ namespace Traveller106
         /// <summary>
         /// 指定NG碼
         /// </summary>
-        [CategoryAttribute(X3_Cat5), DescriptionAttribute("")]
+        [CategoryAttribute(XCate5), DescriptionAttribute("")]
         [DisplayName("02.指定NG碼")]
         [Browsable(true)]
         public int SingleNgCode

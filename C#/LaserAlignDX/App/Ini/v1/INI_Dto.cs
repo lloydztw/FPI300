@@ -14,13 +14,20 @@
 #endregion
 
 using JetEazy.DTO;
+using System.Windows.Forms;
 
 namespace Traveller106.Ini.V1
 {
     internal class DtoINI : DtoBase
     {
+        #region VERSION_TAGS
+        static string APP_VERSION_DATE => LaserAlignDX.GlobalConfig.VersionDate;
+        static string APP_VERSION => Application.ProductVersion;
+        static string INI_VERSION => "v1";
+        #endregion
+
         #region CATE_1_CAMERA_SETTINGS
-#if (OPT_NOT_USED_ANY_MORE)
+#if (OPT_NOT_USED)
         /// <summary>
         /// 图像解析度
         /// </summary>
@@ -91,11 +98,6 @@ namespace Traveller106.Ini.V1
 
         #region CATE_3_COMPENSATION
         /// <summary>
-        /// 强制全检
-        /// </summary>
-        public bool IsForceInspect = false;    
-
-        /// <summary>
         /// 线扫补偿Y
         /// </summary>
         public float Cal_Bcx = 0;
@@ -109,11 +111,26 @@ namespace Traveller106.Ini.V1
         /// 线扫补偿角度
         /// </summary>
         public float Cal_Bca = 0;
+
+        /// <summary>
+        /// 是否使用平均邊隙 (從8個獨立數值 變成 4個有效數值)
+        /// </summary>
+        public bool UsingAveGaps4 = false;
+
+        /// <summary>
+        /// 强制全检
+        /// </summary>
+        public bool IsForceInspect = false;
+
+        /// <summary>
+        /// 增强抓边 (目前 always false)
+        /// </summary>
+        public bool IsCheat = false;
         #endregion
 
-        #region CATE_4_MISC
+        #region CATE_4_GUI_SETTINGS
         /// <summary>
-        /// 结果显示数据
+        /// 是否使用 ToolTip 顯示結果
         /// </summary>
         public bool IsResultShowChar = false;
 
@@ -121,11 +138,6 @@ namespace Traveller106.Ini.V1
         /// 飛拍自動停止縮放
         /// </summary>
         public bool IsAutoDisableZoom = false;
-
-        /// <summary>
-        /// 增强抓边
-        /// </summary>
-        public bool IsCheat = false;
         #endregion
 
         #region CATE_5_PLC_CODE
@@ -142,92 +154,100 @@ namespace Traveller106.Ini.V1
 
         public override void Load(string iniFile)
         {
+            // CATE_1
             //Read(iniFile, "Basic", "ImageResolution", ImageResolution, out ImageResolution);
             //Read(iniFile, "Basic", "ImageResolutionX", ImageResolutionX, out ImageResolutionX);
             //Read(iniFile, "Basic", "ImageResolutionY", ImageResolutionY, out ImageResolutionY);
             Read(iniFile, "Basic", "FlyImageResolution", FlyImageResolution, out FlyImageResolution);
             Read(iniFile, "Basic", "DelayImageTime", LineScanDelayTime, out LineScanDelayTime);
 
-            //IsSaveTestImage = ReadINIValue("Basic", "IsSaveTestImage", (IsSaveTestImage ? "1" : "0"), iniFile) == "1";
-            //IsSaveDebugBmp = ReadINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBmp ? "1" : "0"), iniFile) == "1";
-            //IsSaveDebugOrgBmp = ReadINIValue("Basic", "IsSaveDebugOrgBmp", (IsSaveDebugOrgBmp ? "1" : "0"), iniFile) == "1";
-            //UseOkNgDiffImageFolders = ReadINIValue("Basic", "UseOkNgDiffImageFolders", (UseOkNgDiffImageFolders ? "1" : "0"), iniFile) == "1";
+            // CATE_2
+            Read(iniFile, "Basic", "ResultImagePath", ResultImagePath, out ResultImagePath);
             Read(iniFile, "Basic", "IsSaveTestImage", IsSaveTestImage, out IsSaveTestImage);
             Read(iniFile, "Basic", "IsSaveDebugBMP", IsSaveDebugBmp, out IsSaveDebugBmp);
             Read(iniFile, "Basic", "IsSaveDebugOrgBmp", IsSaveDebugOrgBmp, out IsSaveDebugOrgBmp);
             Read(iniFile, "Basic", "UseOkNgDiffImageFolders", UseOkNgDiffImageFolders, out UseOkNgDiffImageFolders);
+            Read(iniFile, "Basic", "ImageQuality", ImageQuality, out ImageQuality);
 
-            //IsAutoDisableZoom = ReadINIValue("Basic", "IsAutoDisableZoom", (IsAutoDisableZoom ? "1" : "0"), iniFile) == "1";
-            //IsResultShowChar = ReadINIValue("Basic", "IsResultShowChar", (IsResultShowChar ? "1" : "0"), iniFile) == "1";
-            //IsCheat = ReadINIValue("Basic", "IsCheat", (IsCheat ? "1" : "0"), iniFile) == "1";
-            Read(iniFile, "Basic", "IsAutoDisableZoom", IsAutoDisableZoom, out IsAutoDisableZoom);
-            Read(iniFile, "Basic", "IsResultShowChar", IsResultShowChar, out IsResultShowChar);
-            Read(iniFile, "Basic", "IsCheat", false, out IsCheat);
-
-            //Cal_Bcx = float.Parse(ReadINIValue("Basic", "Cal_Bcx", Cal_Bcx.ToString(), iniFile));
-            //Cal_Bcy = float.Parse(ReadINIValue("Basic", "Cal_Bcy", Cal_Bcy.ToString(), iniFile));
-            //Cal_Bca = float.Parse(ReadINIValue("Basic", "Cal_Bca", Cal_Bca.ToString(), iniFile));
+            // CATE_3
             Read(iniFile, "Basic", "Cal_Bcx", Cal_Bcx, out Cal_Bcx);
             Read(iniFile, "Basic", "Cal_Bcy", Cal_Bcy, out Cal_Bcy);
             Read(iniFile, "Basic", "Cal_Bca", Cal_Bcy, out Cal_Bca);
-
-            //ImageQuality = long.Parse(ReadINIValue("Basic", "ImageQuality", ImageQuality.ToString(), iniFile));
-            //ResultImagePath = ReadINIValue("Basic", "ResultImagePath", ResultImagePath.ToString(), iniFile);
-            //IsForceInspect = ReadINIValue("Basic", "IsForceInspect", (IsForceInspect ? "1" : "0"), iniFile) == "1";
-            Read(iniFile, "Basic", "ImageQuality", ImageQuality, out ImageQuality);
-            Read(iniFile, "Basic", "ResultImagePath", ResultImagePath, out ResultImagePath);
+            Read(iniFile, "Basic", "UsingAveGaps4", UsingAveGaps4, out UsingAveGaps4);
             Read(iniFile, "Basic", "IsForceInspect", IsForceInspect, out IsForceInspect);
+            Read(iniFile, "Basic", "Optimization", false, out IsCheat);
 
-            //UsingSingleNgCode = ReadINIValue("Basic", "UsingSingleNgCode", (UsingSingleNgCode ? "1" : "0"), iniFile) == "1";
-            //SingleNgCode = int.Parse(ReadINIValue("Basic", "SingleNgCode", SingleNgCode.ToString(), iniFile));
+            // CATE_4
+            Read(iniFile, "Basic", "IsAutoDisableZoom", IsAutoDisableZoom, out IsAutoDisableZoom);
+            Read(iniFile, "Basic", "IsResultShowChar", IsResultShowChar, out IsResultShowChar);
+
+            // CATE_5
             Read(iniFile, "Basic", "UsingSingleNgCode", UsingSingleNgCode, out UsingSingleNgCode);
             Read(iniFile, "Basic", "SingleNgCode", SingleNgCode, out SingleNgCode);
         }
         public override void Save(string iniFile)
         {
-            //WriteINIValue("Basic", "ImageResolution", ImageResolution.ToString(), INIFILE);
-            //WriteINIValue("Basic", "ImageResolutionX", ImageResolutionX.ToString(), INIFILE);
-            //WriteINIValue("Basic", "ImageResolutionY", ImageResolutionY.ToString(), INIFILE);
+            // Check In Version
+            CheckInVersion(iniFile);
+
+            // CATE_1
             //WriteINIValue("Basic", "FlyImageResolution", FlyImageResolution.ToString(), INIFILE);
             //WriteINIValue("Basic", "DelayImageTime", DelayImageTime.ToString(), INIFILE);
             Write(iniFile, "Basic", "FlyImageResolution", FlyImageResolution);
             Write(iniFile, "Basic", "DelayImageTime", LineScanDelayTime);
-
-            //WriteINIValue("Basic", "IsSaveTestImage", (IsSaveTestImage ? "1" : "0"), INIFILE);
-            //WriteINIValue("Basic", "IsSaveDebugBMP", (IsSaveDebugBmp ? "1" : "0"), INIFILE);
-            //WriteINIValue("Basic", "IsSaveDebugOrgBmp", (IsSaveDebugOrgBmp ? "1" : "0"), INIFILE);
-            //WriteINIValue("Basic", "UseOkNgDiffImageFolders", (UseOkNgDiffImageFolders ? "1" : "0"), INIFILE);
+            
+            // CATE_2
+            Write(iniFile, "Basic", "ResultImagePath", ResultImagePath);
             Write(iniFile, "Basic", "IsSaveTestImage", IsSaveTestImage);
             Write(iniFile, "Basic", "IsSaveDebugBMP", IsSaveDebugBmp);
             Write(iniFile, "Basic", "IsSaveDebugOrgBmp", IsSaveDebugOrgBmp);
             Write(iniFile, "Basic", "UseOkNgDiffImageFolders", UseOkNgDiffImageFolders);
+            Write(iniFile, "Basic", "ImageQuality", ImageQuality);
 
-            //WriteINIValue("Basic", "IsResultShowChar", (IsResultShowChar ? "1" : "0"), INIFILE);
-            //WriteINIValue("Basic", "IsAutoDisableZoom", (IsAutoDisableZoom ? "1" : "0"), INIFILE);
-            //WriteINIValue("Basic", "IsCheat", (IsCheat ? "1" : "0"), INIFILE);
-            Write(iniFile, "Basic", "IsResultShowChar", IsResultShowChar);
-            Write(iniFile, "Basic", "IsAutoDisableZoom", IsAutoDisableZoom);
-            Write(iniFile, "Basic", "IsCheat", IsCheat);
-
-            //WriteINIValue("Basic", "Cal_Bcx", Cal_Bcx.ToString(), INIFILE);
-            //WriteINIValue("Basic", "Cal_Bcy", Cal_Bcy.ToString(), INIFILE);
-            //WriteINIValue("Basic", "Cal_Bca", Cal_Bca.ToString(), INIFILE);
+            // CATE_3
             Write(iniFile, "Basic", "Cal_Bcx", Cal_Bcx);
             Write(iniFile, "Basic", "Cal_Bcy", Cal_Bcy);
             Write(iniFile, "Basic", "Cal_Bca", Cal_Bca);
-
-            //WriteINIValue("Basic", "ImageQuality", ImageQuality.ToString(), INIFILE);
-            //WriteINIValue("Basic", "ResultImagePath", ResultImagePath.ToString(), INIFILE);
-            //WriteINIValue("Basic", "IsForceInspect", (IsForceInspect ? "1" : "0"), INIFILE);
-            Write(iniFile, "Basic", "ImageQuality", ImageQuality);
-            Write(iniFile, "Basic", "ResultImagePath", ResultImagePath);
+            Write(iniFile, "Basic", "UsingAveGaps4", UsingAveGaps4);
             Write(iniFile, "Basic", "IsForceInspect", IsForceInspect);
+            Write(iniFile, "Basic", "Optimization", IsCheat);
 
-            //WriteINIValue("Basic", "UsingSingleNgCode", (UsingSingleNgCode ? "1" : "0"), INIFILE);
-            //WriteINIValue("Basic", "SingleNgCode", SingleNgCode.ToString(), INIFILE);
+            // CATE_4
+            Write(iniFile, "Basic", "IsResultShowChar", IsResultShowChar);
+            Write(iniFile, "Basic", "IsAutoDisableZoom", IsAutoDisableZoom);
+
+            // CATE_5
             Write(iniFile, "Basic", "UsingSingleNgCode", UsingSingleNgCode);
             Write(iniFile, "Basic", "SingleNgCode", SingleNgCode);
         }
+
+        #region PRIVATE_VERSION_FUNCTIONS
+        void CheckInVersion(string iniFile)
+        {
+            // 處理舊版
+            Read(iniFile, "Version", "ini", "", out string ver);
+            if (ver != INI_VERSION)
+                Backup(iniFile, ver);
+
+            // 寫入版本標記
+            Write(iniFile, "Version", "date", APP_VERSION_DATE);
+            Write(iniFile, "Version", "app", APP_VERSION);
+            Write(iniFile, "Version", "ini", INI_VERSION);
+        }
+        void Backup(string iniFile, string tag)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(tag))
+                    tag = "v0";
+                var dstFile = System.IO.Path.ChangeExtension(iniFile, $".{tag}.ini");
+                System.IO.File.Move(iniFile, dstFile);
+            }
+            catch
+            {
+            }
+        }
+        #endregion
     }
 }
 
