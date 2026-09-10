@@ -120,7 +120,7 @@ namespace Traveller106.Ini.V1
         /// <summary>
         /// 是否使用平均邊隙 (從8個獨立數值 變成 4個有效數值)
         /// </summary>
-        public bool UseAveGaps4 = false;
+        public bool UseAveGaps4 = true;
 
         /// <summary>
         /// 强制全检

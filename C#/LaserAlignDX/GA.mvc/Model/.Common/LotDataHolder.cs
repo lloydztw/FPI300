@@ -423,6 +423,11 @@ namespace LaserAlignDX.Model
                         fileName = System.IO.Path.Combine(path, fileName);
 
                         GaImageUtil.SaveBigImage(fileName, bmpBigAsync);
+
+                        if (fileName != null && _ftpUploader.Enabled)
+                        {
+                            _ftpUploader.UploadFile(fileName);
+                        }
                     }
                 }
                 catch (Exception ex)
