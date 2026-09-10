@@ -92,10 +92,10 @@ namespace LaserAlignDX.Mvc.Gui.V35
             //(1) ImgViewers
             ImgViewers = new[]
             {
-                jezTransImageViewPanel1, 
-                jezTransImageViewPanel2, 
+                jezTransImageViewPanel1,
+                jezTransImageViewPanel2,
                 jezTransImageViewPanel3,
-            }; 
+            };
             jezTransImageViewPanel1.lblTitle.Text = "Region View";
             jezTransImageViewPanel2.lblTitle.Text = "Template View";
             jezTransImageViewPanel3.lblTitle.Text = "Defects View";
@@ -112,12 +112,12 @@ namespace LaserAlignDX.Mvc.Gui.V35
             }
 
             //(2) rdoBoxSelectors (順序: Golden, Line Border, QR Code, Defects)
-            rdoBoxSelectors = new[] { 
-                radioButtonG, 
-                radioButtonLn, 
-                radioButtonQr, 
-                radioButtonDe, 
-                radioButtonCn 
+            rdoBoxSelectors = new[] {
+                radioButtonG,
+                radioButtonLn,
+                radioButtonQr,
+                radioButtonDe,
+                radioButtonCn
             };
 
             radioButtonG.Tag = gwRcpTemplateBtnsPanel1;
@@ -129,7 +129,11 @@ namespace LaserAlignDX.Mvc.Gui.V35
             foreach (var rdo in rdoBoxSelectors)
             {
                 rdo.CheckedChanged += Rdo_CheckedChanged;
-                (rdo.Tag as Control).Dock = DockStyle.Fill;
+                if (rdo.Tag is Control panel)
+                {
+                    panel.Visible = false;
+                    panel.Dock = DockStyle.Fill;
+                }
             }
 
             //(3) Load Event
@@ -161,9 +165,11 @@ namespace LaserAlignDX.Mvc.Gui.V35
         #region PRIVATE_GUI_FUNCTIONS
         void updateLayout(int activeIndex)
         {
+            SuspendLayout();
+
             Control activePanel = null;
 
-            #region 1_切換_BUTTON_PANEL
+            #region 1_切換_SUB_PANEL
             int index = 0;
             foreach (var rdo in rdoBoxSelectors)
             {
@@ -208,6 +214,8 @@ namespace LaserAlignDX.Mvc.Gui.V35
                 tbLayoutImgViews.ColumnStyles[2].Width = 0f;
             }
             #endregion
+
+            ResumeLayout(true);
         }
         #endregion
     }

@@ -26,8 +26,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using VisionDesigner;
 using CviLineBorderBox = LaserAlignDX.Mvc.Gui.CviLineBorderBox;
@@ -816,7 +814,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 _restoreRegionViewTimer.Tick += (s, e) =>
                 {
                     _restoreRegionViewTimer.Stop();
-                    wndRegionViewer?.UpdateImage(_xRecipe.GoldenRegionCellBmp, "Region View", false);
+                    if(!chkAlwaysShowFilterResult.Checked)
+                        wndRegionViewer?.UpdateImage(_xRecipe.GoldenRegionCellBmp, "Region View", false);
                 };
             }
             _restoreRegionViewTimer?.Stop();

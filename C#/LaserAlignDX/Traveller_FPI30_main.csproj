@@ -401,6 +401,12 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpConnBlocBtnsPanel.Designer.cs">
       <DependentUpon>GwRcpConnBlocBtnsPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineGapBorderBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineGapBorderBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpLineGapBorderBtnsPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiModel_ChipLoc.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_Combo.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\5_BadConnInspect\AoiModel_BadConnInspector.cs" />
@@ -550,12 +556,6 @@
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpDefectBtnsPanel.Designer.cs">
       <DependentUpon>GwRcpDefectBtnsPanel.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineBorderBtnsPanel.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineBorderBtnsPanel.Designer.cs">
-      <DependentUpon>GwRcpLineBorderBtnsPanel.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpQrCodeBtnsPanel.cs">
       <SubType>UserControl</SubType>
@@ -896,8 +896,8 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpDefectBtnsPanel.resx">
       <DependentUpon>GwRcpDefectBtnsPanel.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineBorderBtnsPanel.resx">
-      <DependentUpon>GwRcpLineBorderBtnsPanel.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineGapBorderBtnsPanel.resx">
+      <DependentUpon>GwRcpLineGapBorderBtnsPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpQrCodeBtnsPanel.resx">
       <DependentUpon>GwRcpQrCodeBtnsPanel.cs</DependentUpon>
