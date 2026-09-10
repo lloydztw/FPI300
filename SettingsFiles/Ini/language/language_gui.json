@@ -149,9 +149,6 @@
 "FormCalibrationTool.tbLayoutMain.tbLayoutDockRight.groupBox1" : ["Recipe Settings", "像測參數", "", "พารามิเตอร์การวัดภาพ"],
 "lblTitleInfo" : ["Info", "說明", "", "คำอธิบาย"],
 
-"__btnCancel" : ["Quit", "退出", "", "ออก"],
-"__btnOK" : ["SaveData", "保存資料", "", "บันทึกข้อมูล"],
-
 "FormLightControl" : ["Light Control", "光源控制窗", "", "หน้าต่างควบคุมแสงสว่าง"],
 "lblLight1" : ["Channel", "光源通道", "", "ช่องสัญญาณไฟ"],
 "lblLight2" : ["Intensity", "設定值", "", "ค่าที่ตั้งไว้"],
@@ -177,6 +174,14 @@
 "FormPadThresholdsEditor.label0" : ["GridPad-Type Chip", "格點型 晶粒", "", ""],
 "FormPadThresholdsEditor.label1" : ["Pad Threshold", "Pad 門限值", "", ""],
 "FormPadThresholdsEditor.label2" : ["De-Scratch Threshold", "去刮痕閥值", "", ""],
+
+"FormFtpSettings" : ["FTP Upload", "FTP 上傳設定", "", ""],
+"lblAccount" : ["Account", "用戶名", "", ""],
+"lblPassword" : ["Password", "密碼", "", ""],
+"lblFtpAddress" : ["Ftp Address", "主機地址", "", ""],
+"lblFtpDstFolder" : ["Ftp Folder", "主機路徑", "", ""],
+"chkFtpUploadEnabled" : ["Ftp Upload Enabled", "啟用上傳", "", ""],
+"btnTestConnection" : ["Test", "測試連線", "", ""],
 
 "是否要關閉系統?" : ["Are you sure to exit?", "是否要關閉系統?", "", ""],
 "是否要登出帳户?" : ["Are you going to log out?", "是否要登出帳户?", "", ""],

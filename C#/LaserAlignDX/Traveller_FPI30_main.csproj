@@ -363,8 +363,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Config.cs" />
+    <Compile Include="App\Ini\v1\UITypeEditors\FormFtpSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="App\Ini\v1\UITypeEditors\FormFtpSettings.Designer.cs">
+      <DependentUpon>FormFtpSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="App\Ini\v1\Dto\DtoFtpSettings.cs" />
+    <Compile Include="App\Ini\v1\UITypeEditors\FtpUITypeEditor.cs" />
     <Compile Include="App\Ini\v1\INI.cs" />
-    <Compile Include="App\Ini\v1\INI_Dto.cs" />
+    <Compile Include="App\Ini\v1\Dto\DtoINI.cs" />
     <Compile Include="App\Prompts.cs" />
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
@@ -628,6 +636,7 @@
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\XReportBuilderProxy.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\ThaiReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\JcetReportBuilder.cs" />
+    <Compile Include="GA.mvc\Model\Ftp\FtpUploader.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3LineBorderParams.cs" />
@@ -719,7 +728,7 @@
     <Compile Include="GA\OPSpace\ChannelBarcodeClass.cs" />
     <Compile Include="GA\OPSpace\MarkItemClass.cs" />
     <Compile Include="GA\OPSpace\ModuleClass.cs" />
-    <Compile Include="GA\OPSpace\RecipeSpace\WinIni.cs" />
+    <Compile Include="App\Ini\common\WinIni_bom_utf8.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeBaseClass.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\GeoResultClass.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\JzBaseResultClass.cs" />
@@ -812,6 +821,9 @@
       <DependentUpon>PosUI.cs</DependentUpon>
     </Compile>
     <Compile Include="LT\UnitTest\UnitTest_ChipMatcher.cs" />
+    <EmbeddedResource Include="App\Ini\v1\UITypeEditors\FormFtpSettings.resx">
+      <DependentUpon>FormFtpSettings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\MainSpace\FormMainDX.resx">
       <DependentUpon>FormMainDX.cs</DependentUpon>
     </EmbeddedResource>

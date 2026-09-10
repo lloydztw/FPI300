@@ -45,6 +45,7 @@ namespace LaserAlignDX.Model
             = new Lazy<LotDataHolder>(() => new LotDataHolder());
         protected LotDataHolder()
         {
+            _ftpUploader.OnLog = msg => GaUtil.LOG(msg);
         }
         #endregion
 
@@ -53,6 +54,10 @@ namespace LaserAlignDX.Model
         #region LOT_DATA
         LotData _lotData = new LotData();
         string _fileBarcodeStr = string.Empty;
+        #endregion
+
+        #region FTP_UPLOADER
+        readonly FtpUploader _ftpUploader = new FtpUploader(_INI.FtpSettings);
         #endregion
 
         public LotData LotData
@@ -177,19 +182,26 @@ namespace LaserAlignDX.Model
                     var cPass = (bool)argvs[1];
                     var cTimeTag = (DateTime)argvs[2];
 
+                    string fileNameOrg = null;
+
                     using (Bitmap bmpBig = (Bitmap)argvs[0])
                     {
                         if (_INI.IsSaveDebugBmp)
                         {
-                            string fileName = GetDebugBmpFileName(cPass, cTimeTag);
+                            var fileName = GetDebugBmpFileName(cPass, cTimeTag);
                             GaImageUtil.SaveImageWithQuality(bmpBig, fileName, _INI.ImageQuality);
                         }
 
                         if (_INI.IsSaveDebugOrgBmp)
                         {
-                            string fileName = GetDebugOrgBmpFileName(cPass, cTimeTag);
-                            GaImageUtil.SaveBigImage(fileName, bmpBig);
+                            fileNameOrg = GetDebugOrgBmpFileName(cPass, cTimeTag);
+                            GaImageUtil.SaveBigImage(fileNameOrg, bmpBig);
                         }
+                    }
+
+                    if (fileNameOrg != null && _ftpUploader.Enabled)
+                    {
+                        _ftpUploader.UploadFile(fileNameOrg);
                     }
                 }
                 catch (Exception ex)

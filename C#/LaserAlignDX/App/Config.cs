@@ -44,7 +44,7 @@ namespace LaserAlignDX
         {
             get
             {
-                return Traveller106.INI.Instance.UsingAveGaps4;
+                return Traveller106.INI.Instance.UseAveGaps4;
             }
         }
 

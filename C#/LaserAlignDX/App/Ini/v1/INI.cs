@@ -174,6 +174,26 @@ namespace Traveller106
             get => _dto.UseOkNgDiffImageFolders;
             set => _dto.UseOkNgDiffImageFolders = value;
         }
+
+        /// <summary>
+        /// FTP上傳設定
+        /// </summary>
+        [CategoryAttribute(XCate2), DescriptionAttribute("")]
+        [DisplayName("07.啟用FTP上傳")]
+        [Editor(typeof(FtpUITypeEditor), typeof(UITypeEditor))]
+        [Browsable(true)]
+        public string UseFtp
+        {
+            get => _dto.FtpSettings.Enabled.ToString();
+            set { }
+        }
+
+        /// <summary>
+        /// FTP上傳設定
+        /// </summary>
+        [CategoryAttribute(XCate2), DescriptionAttribute("")]
+        [Browsable(false)]
+        public DtoFtpSettings FtpSettings => _dto.FtpSettings;
         #endregion
 
         const string XCate3 = "A03.全域補償設定";
@@ -226,10 +246,10 @@ namespace Traveller106
         [CategoryAttribute(XCate3), DescriptionAttribute("true (Gaps 4) / false (Gaps 8)")]
         [DisplayName("04.使用平均邊隙")]
         [Browsable(true)]
-        public bool UsingAveGaps4
+        public bool UseAveGaps4
         {
-            get => _dto.UsingAveGaps4;
-            set => _dto.UsingAveGaps4 = value;
+            get => _dto.UseAveGaps4;
+            set => _dto.UseAveGaps4 = value;
         }
 
         /// <summary>

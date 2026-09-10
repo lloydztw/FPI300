@@ -94,6 +94,11 @@ namespace Traveller106.Ini.V1
         /// 圖檔分存OK/NG不同資料夾
         /// </summary>
         public bool UseOkNgDiffImageFolders = false;
+
+        /// <summary>
+        /// 使用 FTP 上傳設定
+        /// </summary>
+        public readonly DtoFtpSettings FtpSettings = new DtoFtpSettings();
         #endregion
 
         #region CATE_3_COMPENSATION
@@ -115,7 +120,7 @@ namespace Traveller106.Ini.V1
         /// <summary>
         /// 是否使用平均邊隙 (從8個獨立數值 變成 4個有效數值)
         /// </summary>
-        public bool UsingAveGaps4 = false;
+        public bool UseAveGaps4 = false;
 
         /// <summary>
         /// 强制全检
@@ -173,7 +178,7 @@ namespace Traveller106.Ini.V1
             Read(iniFile, "Basic", "Cal_Bcx", Cal_Bcx, out Cal_Bcx);
             Read(iniFile, "Basic", "Cal_Bcy", Cal_Bcy, out Cal_Bcy);
             Read(iniFile, "Basic", "Cal_Bca", Cal_Bcy, out Cal_Bca);
-            Read(iniFile, "Basic", "UsingAveGaps4", UsingAveGaps4, out UsingAveGaps4);
+            Read(iniFile, "Basic", "UseAveGaps4", UseAveGaps4, out UseAveGaps4);
             Read(iniFile, "Basic", "IsForceInspect", IsForceInspect, out IsForceInspect);
             Read(iniFile, "Basic", "Optimization", false, out IsCheat);
 
@@ -184,6 +189,9 @@ namespace Traveller106.Ini.V1
             // CATE_5
             Read(iniFile, "Basic", "UsingSingleNgCode", UsingSingleNgCode, out UsingSingleNgCode);
             Read(iniFile, "Basic", "SingleNgCode", SingleNgCode, out SingleNgCode);
+
+            // FTP
+            FtpSettings.Load(iniFile);
         }
         public override void Save(string iniFile)
         {
@@ -208,7 +216,7 @@ namespace Traveller106.Ini.V1
             Write(iniFile, "Basic", "Cal_Bcx", Cal_Bcx);
             Write(iniFile, "Basic", "Cal_Bcy", Cal_Bcy);
             Write(iniFile, "Basic", "Cal_Bca", Cal_Bca);
-            Write(iniFile, "Basic", "UsingAveGaps4", UsingAveGaps4);
+            Write(iniFile, "Basic", "UseAveGaps4", UseAveGaps4);
             Write(iniFile, "Basic", "IsForceInspect", IsForceInspect);
             Write(iniFile, "Basic", "Optimization", IsCheat);
 
@@ -219,6 +227,9 @@ namespace Traveller106.Ini.V1
             // CATE_5
             Write(iniFile, "Basic", "UsingSingleNgCode", UsingSingleNgCode);
             Write(iniFile, "Basic", "SingleNgCode", SingleNgCode);
+
+            // FTP
+            FtpSettings.Save(iniFile);
         }
 
         #region PRIVATE_VERSION_FUNCTIONS
