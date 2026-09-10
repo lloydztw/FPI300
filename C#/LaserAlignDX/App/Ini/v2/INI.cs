@@ -15,11 +15,11 @@
 
 using Eazy_Project_III;
 using JetEazy.PropertyGrid;
+using LeTian.JxProps;
 using System.ComponentModel;
 using System.Drawing.Design;
-using Traveller106.Ini.V1;
 
-namespace Traveller106
+namespace Traveller106.Ini.V2
 {
     public class INI
     {
@@ -37,16 +37,26 @@ namespace Traveller106
             }
         }
 
-        #region DTO
-        readonly DtoINI _dto = new DtoINI();
+        #region JX
+        public readonly JxAppSettings AppSettings = new JxAppSettings();
+        public static implicit operator JxAppSettings(INI ini)
+        {
+            return ini?.AppSettings;
+        }
+        public static implicit operator JxContainer(INI ini)
+        {
+            return ini?.AppSettings;
+        }
         #endregion
 
         #region PATH_FILES
         string INI_FILE => System.IO.Path.Combine(Universal.MAINPATH, "config.ini");
+        string JSON_FILE => System.IO.Path.Combine(Universal.MAINPATH, "config.json");
         #endregion
 
-        const string X3_Cat1 = "A01.相機設定";
         #region FPI30_INI_CATE_1
+        const string X3_Cat1 = "A01.相機設定";
+
         /// <summary>
         /// 飞拍图像解析度 (mm/pixel)
         /// </summary>
@@ -57,8 +67,8 @@ namespace Traveller106
         [Browsable(true)]
         public float FlyImageResolution
         {
-            get => _dto.FlyImageResolution;
-            set => _dto.FlyImageResolution = value;
+            get => (float)AppSettings.CamSettings.FlyImageRes.Value;
+            set => AppSettings.CamSettings.FlyImageRes.Value = (decimal)value;
         }
 
         /// <summary>
@@ -71,8 +81,8 @@ namespace Traveller106
         [Browsable(true)]
         public int DelayImageTime
         {
-            get => _dto.LineScanDelayTime;
-            set => _dto.LineScanDelayTime = value;
+            get => AppSettings.CamSettings.LineScanDelayTime.Value;
+            set => AppSettings.CamSettings.LineScanDelayTime.Value = value;
         }
 
         /// <summary>
@@ -82,8 +92,8 @@ namespace Traveller106
         [Browsable(false)]
         public int GetImageDelayTime
         {
-            get => _dto.LineScanOverTimeSecs;
-            set => _dto.LineScanDelayTime = value;
+            get => AppSettings.CamSettings.LineScanOverTimeSecs.Value;
+            set => AppSettings.CamSettings.LineScanDelayTime.Value = value;
         }
 
         /// <summary>
@@ -93,13 +103,13 @@ namespace Traveller106
         [Browsable(false)]
         public int LightDelayTime
         {
-            get => _dto.LightDelayTime;
-            set => _dto.LightDelayTime = value;
+            get => AppSettings.CamSettings.LightDelayTime.Value;
+            set => AppSettings.CamSettings.LightDelayTime.Value = value;
         }
         #endregion
 
-        const string X3_Cat2 = "A02.圖檔保存設定";
         #region FPI30_INI_CATE_2
+        const string X3_Cat2 = "A02.圖檔保存設定";
         /// <summary>
         /// 结果图路径
         /// </summary>
@@ -109,8 +119,8 @@ namespace Traveller106
         [Browsable(true)]
         public string ResultImagePath
         {
-            get => _dto.ResultImagePath;
-            set => _dto.ResultImagePath = value;
+            get => AppSettings.ImgSaveSettings.ResultImagePath.Value;
+            set => AppSettings.ImgSaveSettings.ResultImagePath.Value = value;
         }
 
         /// <summary>
@@ -121,8 +131,8 @@ namespace Traveller106
         [Browsable(true)]
         public bool IsSaveDebugBmp
         {
-            get => _dto.IsSaveDebugBmp;
-            set => _dto.IsSaveDebugBmp = value;
+            get => AppSettings.ImgSaveSettings.IsSaveDebugBmp.Value;
+            set => AppSettings.ImgSaveSettings.IsSaveDebugBmp.Value = value;
         }
 
         /// <summary>
@@ -133,8 +143,8 @@ namespace Traveller106
         [Browsable(true)]
         public bool IsSaveDebugOrgBmp
         {
-            get => _dto.IsSaveDebugOrgBmp;
-            set => _dto.IsSaveDebugOrgBmp = value;
+            get => AppSettings.ImgSaveSettings.IsSaveDebugOrgBmp.Value;
+            set => AppSettings.ImgSaveSettings.IsSaveDebugOrgBmp.Value = value;
         }
 
         /// <summary>
@@ -147,8 +157,8 @@ namespace Traveller106
         [Browsable(true)]
         public int ImageQuality
         {
-            get => _dto.ImageQuality;
-            set => _dto.ImageQuality = value;
+            get => AppSettings.ImgSaveSettings.ImageQuality.Value;
+            set => AppSettings.ImgSaveSettings.ImageQuality.Value = value;
         }
 
         /// <summary>
@@ -159,8 +169,8 @@ namespace Traveller106
         [Browsable(true)]
         public bool IsSaveTestImage
         {
-            get => _dto.IsSaveTestImage;
-            set => _dto.IsSaveTestImage = value;
+            get => AppSettings.ImgSaveSettings.IsSaveTestImage.Value;
+            set => AppSettings.ImgSaveSettings.IsSaveTestImage.Value = value;
         }
 
         /// <summary>
@@ -171,13 +181,14 @@ namespace Traveller106
         [Browsable(true)]
         public bool UseOkNgDiffImageFolders
         {
-            get => _dto.UseOkNgDiffImageFolders;
-            set => _dto.UseOkNgDiffImageFolders = value;
+            get => AppSettings.ImgSaveSettings.UseOkNgDiffImageFolders.Value;
+            set => AppSettings.ImgSaveSettings.UseOkNgDiffImageFolders.Value = value;
         }
         #endregion
 
-        const string X3_Cat3 = "A03.全域補償設定";
         #region FPI30_INI_CATE_3
+        const string X3_Cat3 = "A03.全域補償設定";
+
         /// <summary>
         /// 强制全检
         /// </summary>
@@ -185,8 +196,8 @@ namespace Traveller106
         [Browsable(false)]
         public bool IsForceInspect
         {
-            get => _dto.IsForceInspect;
-            private set => _dto.IsForceInspect = value;
+            get => AppSettings.GlobalCompensation.IsForceInspect;
+            private set => AppSettings.GlobalCompensation.IsForceInspect.Value = value;
         }
 
         /// <summary>
@@ -199,8 +210,8 @@ namespace Traveller106
         [Browsable(true)]
         public float Cal_Bcx 
         {
-            get => _dto.Cal_Bcx;
-            set => _dto.Cal_Bcx = value;
+            get => (float)AppSettings.GlobalCompensation.Cal_Bcx.Value;
+            set => AppSettings.GlobalCompensation.Cal_Bcx.Value = (decimal)value;
         }
 
         /// <summary>
@@ -213,8 +224,8 @@ namespace Traveller106
         [Browsable(true)]
         public float Cal_Bcy
         {
-            get => _dto.Cal_Bcy;
-            set => _dto.Cal_Bcy = value;
+            get => (float)AppSettings.GlobalCompensation.Cal_Bcy.Value;
+            set => AppSettings.GlobalCompensation.Cal_Bcy.Value = (decimal)value;
         }
 
         /// <summary>
@@ -227,13 +238,14 @@ namespace Traveller106
         [Browsable(true)]
         public float Cal_Bca
         {
-            get => _dto.Cal_Bca;
-            set => _dto.Cal_Bca = value;
+            get => (float)AppSettings.GlobalCompensation.Cal_Bca.Value;
+            set => AppSettings.GlobalCompensation.Cal_Bca.Value = (decimal)value;
         }
         #endregion
 
-        const string X3_Cat4 = "A04.其他設定";
         #region FPI30_INI_CATE_4
+        const string X3_Cat4 = "A04.其他設定";
+
         /// <summary>
         /// 结果显示数据
         /// </summary>
@@ -242,8 +254,8 @@ namespace Traveller106
         [Browsable(true)]
         public bool IsResultShowChar 
         { 
-            get => _dto.IsResultShowChar;
-            set => _dto.IsResultShowChar = value;
+            get => AppSettings.MiscSettings.IsResultShowChar.Value;
+            set => AppSettings.MiscSettings.IsResultShowChar.Value = value;
         }
 
         /// <summary>
@@ -254,8 +266,8 @@ namespace Traveller106
         [Browsable(true)]
         public bool IsAutoDisableZoom
         {
-            get => _dto.IsAutoDisableZoom;
-            set => _dto.IsAutoDisableZoom = value;
+            get => AppSettings.MiscSettings.IsAutoDisableZoom.Value;
+            set => AppSettings.MiscSettings.IsAutoDisableZoom.Value = value;
         }
 
         /// <summary>
@@ -266,14 +278,15 @@ namespace Traveller106
         [Browsable(false)]
         public bool IsCheat
         {
-            get => false;
-            //get => AppSettings.MiscSettings.IsCheat;
-            //private set => AppSettings.MiscSettings.IsCheat = value;
+            get => AppSettings.MiscSettings.IsCheat.Value;
+            private set => AppSettings.MiscSettings.IsCheat.Value = value;
         }
+
         #endregion
 
-        const string X3_Cat5 = "A05.PLC 設定";
         #region FPI30_INI_CATE_5
+        const string X3_Cat5 = "A05.PLC 設定";
+
         /// <summary>
         /// 使用單一NG碼
         /// </summary>
@@ -282,8 +295,8 @@ namespace Traveller106
         [Browsable(true)]
         public bool UsingSingleNgCode
         {
-            get => _dto.UsingSingleNgCode;
-            set => _dto.UsingSingleNgCode = value;
+            get => AppSettings.PlcCodeSettings.UsingSingleNgCode.Value;
+            set => AppSettings.PlcCodeSettings.UsingSingleNgCode.Value = value;
         }
 
         /// <summary>
@@ -294,8 +307,8 @@ namespace Traveller106
         [Browsable(true)]
         public int SingleNgCode
         {
-            get => _dto.SingleNgCode;
-            set => _dto.SingleNgCode = value;
+            get => AppSettings.PlcCodeSettings.SingleNgCode.Value;
+            set => AppSettings.PlcCodeSettings.SingleNgCode.Value = value;
         }
         #endregion
 
@@ -362,6 +375,7 @@ namespace Traveller106
             //AddProperty(cat2, "BoundaryValue", "BoundaryValue", BoundaryValue, "");
             //AddProperty(cat2, "L3Path", "L3Path", L3Path, "");
             //AddProperty(cat2, "L4Path", "L4Path", L4Path, "");
+
         }
         #endregion
 
@@ -371,11 +385,52 @@ namespace Traveller106
         }
         public void Load()
         {
-            _dto.Load(INI_FILE);
+            string jsonFile = JSON_FILE;
+            if (System.IO.File.Exists(jsonFile))
+            {
+                AppSettings.Load(jsonFile);
+            }
+            else
+            {
+                migrationLoad();
+            }
         }
         public void Save()
         {
-            _dto.Save(INI_FILE);
+            string jsonFile = JSON_FILE;
+            AppSettings.Save(jsonFile);
         }
+
+        #region MIGRATIONS
+        void migrationLoad()
+        {
+            var old = new Traveller106.Ini.V1.DtoINI();
+            old.Load(INI_FILE);
+
+            this.FlyImageResolution = old.FlyImageResolution;
+            this.DelayImageTime = old.LineScanDelayTime;
+            this.GetImageDelayTime = old.LineScanOverTimeSecs;
+            this.LightDelayTime = old.LightDelayTime;
+
+            this.ResultImagePath = old.ResultImagePath;
+            this.IsSaveDebugBmp = old.IsSaveDebugBmp;
+            this.IsSaveDebugOrgBmp = old.IsSaveDebugOrgBmp;
+            this.IsSaveTestImage = old.IsSaveTestImage;
+            this.ImageQuality = (int)old.ImageQuality;
+            this.UseOkNgDiffImageFolders = old.UseOkNgDiffImageFolders;
+
+            this.Cal_Bcx = old.Cal_Bcx;
+            this.Cal_Bcy = old.Cal_Bcy;
+            this.Cal_Bca = old.Cal_Bca;
+
+            this.IsForceInspect = old.IsForceInspect;
+            this.IsResultShowChar = old.IsResultShowChar;
+            this.IsAutoDisableZoom = old.IsAutoDisableZoom;
+
+            this.UsingSingleNgCode = old.UsingSingleNgCode;
+            this.SingleNgCode = old.SingleNgCode;
+            this.IsCheat = old.IsCheat;
+        }
+        #endregion
     }
 }

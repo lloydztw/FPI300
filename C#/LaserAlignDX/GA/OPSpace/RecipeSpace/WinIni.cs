@@ -18,7 +18,6 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
 
-
 namespace JetEazy.Utils
 {
     public class WinIni
@@ -32,25 +31,34 @@ namespace JetEazy.Utils
         private static extern int GetPrivateProfileString(string section, string key, string def, StringBuilder retVal, int size, string filePath);
         #endregion
 
-        public static void WriteINIValue(string section, string key, string value, string filepath)
+        public static void WriteINIValue(string section, string key, string value, string iniFile)
         {
-            WritePrivateProfileString(section, key, value, filepath);
+            WritePrivateProfileString(section, key, value, iniFile);
         }
-        public static string ReadINIValue(string section, string key, string defaultvaluestring, string filepath)
+        public static string ReadINIValue(string section, string key, string defaultValue, string iniFile)
         {
             string retStr = "";
 
             StringBuilder temp = new StringBuilder(4096);
-            int Length = GetPrivateProfileString(section, key, "", temp, 4096, filepath);
+            int Length = GetPrivateProfileString(section, key, "", temp, 4096, iniFile);
 
             retStr = temp.ToString();
 
             if (retStr == "")
-                retStr = defaultvaluestring;
+                retStr = defaultValue;
             //else
             //    retStr = retStr.Split('/')[0]; //把說明排除掉
 
             return retStr;
+        }
+
+        public static void Write(string iniFile, string section, string key, string value)
+        {
+            WriteINIValue(section, key, value, iniFile);
+        }
+        public static void Read(string iniFile, string section, string key, string defaultValue, out string value)
+        {
+            value = ReadINIValue(section, key, defaultValue, iniFile);
         }
 
         public static void Write(string iniFile, string section, string key, bool value)

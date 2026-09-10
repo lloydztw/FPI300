@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.DTO;
 using JetEazy.QvMath;
 using LaserAlignDX.Model;
 using System;

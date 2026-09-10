@@ -13,6 +13,7 @@
  */
 #endregion
 
+using JetEazy.DTO;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
 using System.Drawing;

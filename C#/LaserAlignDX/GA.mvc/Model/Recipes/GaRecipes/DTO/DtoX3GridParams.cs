@@ -14,6 +14,7 @@
 #endregion
 
 using Eazy_Project_III;
+using JetEazy.DTO;
 
 namespace LaserAlignDX.Mvc.Model.Recipe
 {

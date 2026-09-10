@@ -15,7 +15,7 @@
 
 using System.Drawing;
 
-namespace LaserAlignDX.Mvc.Model.Recipe
+namespace JetEazy.DTO
 {
     /// <summary>
     /// DTO (Data Transfer Object) 類別

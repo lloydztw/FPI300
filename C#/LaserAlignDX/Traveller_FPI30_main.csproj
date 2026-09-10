@@ -363,9 +363,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Config.cs" />
-    <Compile Include="App\Ini\v0\INI.cs" />
     <Compile Include="App\Ini\v1\INI.cs" />
-    <Compile Include="App\Ini\v1\JxAppSettings.cs" />
+    <Compile Include="App\Ini\v1\INI_Dto.cs" />
     <Compile Include="App\Prompts.cs" />
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
@@ -1009,6 +1008,8 @@
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="App\Ini\v0\" />
+    <Folder Include="App\Ini\v2\" />
     <Folder Include="GA.mvc\Model\AoiModel\2_ChipLocator\v35\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

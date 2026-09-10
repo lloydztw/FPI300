@@ -13,7 +13,7 @@
  */
 #endregion
 
-
+using JetEazy.DTO;
 using System;
 
 namespace LaserAlignDX.Mvc.Model.Recipe

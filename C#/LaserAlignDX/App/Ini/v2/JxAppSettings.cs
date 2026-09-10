@@ -15,7 +15,7 @@
 
 using LeTian.JxProps;
 
-namespace LaserAlignDX.App
+namespace Traveller106.Ini.V2
 {
     public class JxAppSettings : JxContainer
     {
