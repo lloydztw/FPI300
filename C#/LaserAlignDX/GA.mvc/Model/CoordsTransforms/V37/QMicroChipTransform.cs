@@ -14,7 +14,6 @@
  */
 #endregion
 
-using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
@@ -26,7 +25,6 @@ using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Web.ModelBinding;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 
 namespace LaserAlignDX.Model.Coords.V37

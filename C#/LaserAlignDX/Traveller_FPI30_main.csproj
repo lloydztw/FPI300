@@ -623,10 +623,10 @@
     <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\ITravellerTransforms.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\IMicroChipTransform.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\TravellerTransformFactory.cs" />
-    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\QMicroChipTransform.cs" />
-    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\QWorldGridPoints.cs" />
-    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms.cs" />
-    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms_ini.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\QMicroChipTransform.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\QWorldGridPointsEx.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\TravellerTransforms.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\TravellerTransforms_ini.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V37\QMicroChipTransform.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V37\QWorldGridPointsEx.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V37\TravellerTransforms.cs" />
