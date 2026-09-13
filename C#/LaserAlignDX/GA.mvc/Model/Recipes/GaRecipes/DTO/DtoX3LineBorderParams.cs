@@ -25,9 +25,11 @@ namespace LaserAlignDX.Mvc.Model.Recipe
 {
     /// <summary>
     /// 邊線_手拉框區塊_LINE_BORDER_BOXES
+    /// </summary>
+    /// <remarks>
     /// DTO (Data Transfer Object) 類別
     /// DTO 是標準用詞 請自行查 ChatGPT or DeepSeek
-    /// </summary>
+    /// </remarks>
     public class DtoX3LineBorderParams : DtoBase
     {
         #region DATA
@@ -83,8 +85,11 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         #endregion
 
         /// <summary>
-        /// Runtime Tag
+        /// 載台 Runtime Tag
         /// </summary>
+        /// <remarks>
+        /// 目前只有兩種值: "" 或 "@C2"
+        /// </remarks>
         public string CarrierTag
         {
             get;
@@ -152,13 +157,15 @@ namespace LaserAlignDX.Mvc.Model.Recipe
         #region PRIVATE_SERIALIZATION_FUNCTIONS
         private string _SectName
         {
+            //注意: CarrierTag 目前只有兩種值: "" 或 "@C2"
+            //      這裡多了一個 _ , 將錯就錯.
             get => $"LineBorders_{CarrierTag}";
         }
         private bool loadMeasureKeyNames(string iniFile, string sectName, out string[] keyNames)
         {
             keyNames = null;
 
-            string str = readStr(iniFile, _SectName, "KeyNames");
+            Read(iniFile, _SectName, "KeyNames", "", out string str);
             if (string.IsNullOrEmpty(str))
                 return false;
 
@@ -179,7 +186,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             else
                 str = string.Join(",", keyNames);
 
-            writeStr(iniFile, _SectName, "KeyNames", str);
+            Write(iniFile, _SectName, "KeyNames", str);
         }
         private bool loadBorderPair(string iniFile, string sectName, int index, out LineBorderPair pair)
         {
@@ -208,7 +215,7 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             string key = $"BorderPair_{index}";
             if (pair == null)
             {
-                writeStr(iniFile, sectName, key, "");
+                Write(iniFile, sectName, key, "");
             }
             else
             {
@@ -216,14 +223,6 @@ namespace LaserAlignDX.Mvc.Model.Recipe
                 corners.AddRange(pair.Borders[1].Corners);
                 Write(iniFile, sectName, key, corners.ToArray());
             }
-        }
-        private string readStr(string iniFile, string sectName, string key, string defaultValue = "")
-        {
-            return ReadINIValue(sectName, key, defaultValue, iniFile);
-        }
-        private void writeStr(string iniFile, string sectName, string key, string value)
-        {
-            WriteINIValue(sectName, key, value, iniFile);
         }
         #endregion
     }

@@ -37,13 +37,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 {
     public class GaTemplateEditCtrl : GaRcpBaseCtrl
     {
-        #region CONSTS
-        /// <summary>
-        /// 海康 邊線自動框 最小內縮 
-        /// </summary>
-        const int MIN_INDENT_FOR_MVD = -32;
-        #endregion
-
         #region ENUM
         enum OpSelector : int
         {

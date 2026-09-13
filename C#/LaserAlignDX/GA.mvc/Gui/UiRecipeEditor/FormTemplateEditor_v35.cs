@@ -23,6 +23,14 @@ namespace LaserAlignDX.Mvc.Gui.V35
 {
     public partial class FormTemplateEditor : Form, IvTemplateEditorUI
     {
+        #region EVENTS
+        public event EventHandler<bool> OnGapBorderViewActiveChanged;
+        #endregion
+
+        #region PRIVATE_DATA
+        GaTemplateEditCtrl _ctrl;
+        #endregion
+
         public FormTemplateEditor(params object[] args)
         {
             InitializeComponent();
@@ -32,10 +40,12 @@ namespace LaserAlignDX.Mvc.Gui.V35
 
             initGui();
 
-            var ctrl = new GaTemplateEditCtrl();
-            ctrl.Attach(this);
+            _ctrl = new GaTemplateEditCtrl();
+            _ctrl.Attach(this);
         }
 
+
+        #region GUI_LINKS
         Control IvTemplateEditorUI.Window => this;
         Control IvTemplateEditorUI.lblActiveCarrierID => lblActiveCarrierID;
 
@@ -56,19 +66,24 @@ namespace LaserAlignDX.Mvc.Gui.V35
         Button IvTemplateEditorUI.btnRotateGolden => gwRcpTemplateBtnsPanel1.btnRotateGolden;
         Button IvTemplateEditorUI.btnPickGolden => gwRcpTemplateBtnsPanel1.btnPickGolden;
 
-        Button IvTemplLinebordersEditorUI.btnAutoLineBorders => gwRcpLineBorderBtnsPanel1.btnAutoLineBorders;
-        Button IvTemplLinebordersEditorUI.btnBuildMircoTransform => gwRcpLineBorderBtnsPanel1.btnBuildMircoTrf;
-        NumericUpDown IvTemplLinebordersEditorUI.numBorderIndent => gwRcpLineBorderBtnsPanel1.numBorderIndent;
-        NumericUpDown IvTemplLinebordersEditorUI.numBorderExtend => gwRcpLineBorderBtnsPanel1.numBorderSize;
-        NumericUpDown IvTemplLinebordersEditorUI.numLineSpanPercentage => gwRcpLineBorderBtnsPanel1.numSpanRatio;
+        //Control IvTemplLineBordersEditorUI.Window => gwRcpLineBorderBtnsPanel1;
+        Button IvTemplLineBordersEditorUI.btnAutoLineBorders => gwRcpLineBorderBtnsPanel1.btnAutoLineBorders;
+        Button IvTemplLineBordersEditorUI.btnBuildMircoTransform => gwRcpLineBorderBtnsPanel1.btnBuildMircoTrf;
+        NumericUpDown IvTemplLineBordersEditorUI.numBorderIndent => gwRcpLineBorderBtnsPanel1.numBorderIndent;
+        NumericUpDown IvTemplLineBordersEditorUI.numBorderExtend => gwRcpLineBorderBtnsPanel1.numBorderSize;
+        NumericUpDown IvTemplLineBordersEditorUI.numLineSpanPercentage => gwRcpLineBorderBtnsPanel1.numSpanRatio;
 
-        NumericUpDown IvTemplLinebordersEditorUI.numMeasureDistXs => gwRcpLineBorderBtnsPanel1.numMeasureXs;
-        NumericUpDown IvTemplLinebordersEditorUI.numMeasureDistYs => gwRcpLineBorderBtnsPanel1.numMeasureYs;
-        NumericUpDown IvTemplLinebordersEditorUI.numMeasureMasks => gwRcpLineBorderBtnsPanel1.numMeasureMasks;
+        NumericUpDown IvTemplLineBordersEditorUI.numMeasureDistXs => gwRcpLineBorderBtnsPanel1.numMeasureXs;
+        NumericUpDown IvTemplLineBordersEditorUI.numMeasureDistYs => gwRcpLineBorderBtnsPanel1.numMeasureYs;
+        NumericUpDown IvTemplLineBordersEditorUI.numMeasureMasks => gwRcpLineBorderBtnsPanel1.numMeasureMasks;
 
-        CheckBox IvTemplLinebordersEditorUI.chkShowFilterResult => gwRcpLineBorderBtnsPanel1.chkShowFilterResult;
-        NumericUpDown IvTemplLinebordersEditorUI.numGrayLimitHi => gwRcpLineBorderBtnsPanel1.numLbFilter1;
-        NumericUpDown IvTemplLinebordersEditorUI.numGrayLimitLo => gwRcpLineBorderBtnsPanel1.numLbFilter2;
+        CheckBox IvTemplLineBordersEditorUI.chkShowFilterResult => gwRcpLineBorderBtnsPanel1.chkShowFilterResult;
+        NumericUpDown IvTemplLineBordersEditorUI.numGrayLimitHi => gwRcpLineBorderBtnsPanel1.numLbFilter1;
+        NumericUpDown IvTemplLineBordersEditorUI.numGrayLimitLo => gwRcpLineBorderBtnsPanel1.numLbFilter2;
+
+        //Control IvTemplLineGapBordersEditorUI.Window => gwRcpLineBorderBtnsPanel1;
+        CheckBox IvTemplLineGapBordersEditorUI.chkUseAveGaps4 => gwRcpLineBorderBtnsPanel1.chkUseAveGaps4;
+        Button IvTemplLineGapBordersEditorUI.btnAutoGapBorders => gwRcpLineBorderBtnsPanel1.btnAutoGapBorders;
 
         Button IvTemplQrCodeEditorUI.btnTryScanQrCode => gwRcpQrCodeBtnsPanel1.btnTryQrCode;
         Control IvTemplQrCodeEditorUI.wndQrCodeResult => gwRcpQrCodeBtnsPanel1.rtbCodeContent;
@@ -85,6 +100,7 @@ namespace LaserAlignDX.Mvc.Gui.V35
         Button IvTemplateEditorUI.btnTrainTemplate => btnTrain;
         Button IvTemplateEditorUI.btnSaveAllParams => btnSave;
         Button IvTemplateEditorUI.btnCancel => btnCancel;
+        #endregion
 
         #region INIT_FUNCTIONS
         void initGui()
@@ -126,6 +142,7 @@ namespace LaserAlignDX.Mvc.Gui.V35
             radioButtonCn.Tag = gwRcpConnBlocBtnsPanel1;
             radioButtonQr.Tag = gwRcpQrCodeBtnsPanel1;
 
+            //(3) radioButton's Event
             foreach (var rdo in rdoBoxSelectors)
             {
                 rdo.CheckedChanged += Rdo_CheckedChanged;
@@ -136,7 +153,14 @@ namespace LaserAlignDX.Mvc.Gui.V35
                 }
             }
 
-            //(3) Load Event
+            //(4) Switching between LineBorder and GapBorder
+            gwRcpLineBorderBtnsPanel1.OnActivePageChanged += (s, e) =>
+            {
+                int pageID = gwRcpLineBorderBtnsPanel1.ActivePageID;
+                OnGapBorderViewActiveChanged?.Invoke(this, pageID == 3);
+            };
+
+            //(5) Load Event
             //>>> Load += (s, e) => QMSG.Dump(this, 2000);
             Load += (s, e) => QMSG.Translate(this);
 

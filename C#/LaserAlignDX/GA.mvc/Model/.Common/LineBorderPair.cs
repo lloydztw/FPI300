@@ -96,6 +96,25 @@ namespace LaserAlignDX.Model
                 return offset == 0 ? " ▲" : " ▼";
             }
         }
+        public static string GetPostfix(GapEnum gap)
+        {
+            switch(gap)
+            {
+                case GapEnum.LUX:
+                case GapEnum.LDX:
+                    return " ◀";
+                case GapEnum.RUX:
+                case GapEnum.RDX:
+                    return " ▶";
+                case GapEnum.LUY:
+                case GapEnum.RUY:
+                    return " ▲";
+                case GapEnum.LDY:
+                case GapEnum.RDY:
+                default:
+                    return " ▼";
+            }
+        }
         #endregion
     }
 
@@ -290,7 +309,7 @@ namespace LaserAlignDX.Model
                 var key = kv.Key;
                 var pair = kv.Value;
                 if (pair == null) continue;
-                if (key.StartsWith("X"))
+                if (key.StartsWith("X") || key.EndsWith("X"))
                     numX++;
                 else
                     numY++;

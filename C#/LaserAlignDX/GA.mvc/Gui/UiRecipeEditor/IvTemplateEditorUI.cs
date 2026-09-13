@@ -13,13 +13,15 @@
  */
 #endregion
 
+using System;
 using System.Windows.Forms;
 using DispUI = JzDisplay.UISpace.DispUI;
 
 namespace LaserAlignDX.Mvc.Gui
 {
     public interface IvTemplateEditorUI 
-                    : IvTemplLinebordersEditorUI 
+                    : IvTemplLineBordersEditorUI
+                    , IvTemplLineGapBordersEditorUI
                     , IvTemplDefectsEditorUI 
                     , IvTemplBadConnsEditorUI
                     , IvTemplQrCodeEditorUI
@@ -53,7 +55,7 @@ namespace LaserAlignDX.Mvc.Gui
     }
 
 
-    public interface IvTemplLinebordersEditorUI
+    public interface IvTemplLineBordersEditorUI
     {
         /// <summary>
         /// 尺寸X 量測數量
@@ -101,6 +103,22 @@ namespace LaserAlignDX.Mvc.Gui
         /// 精算尺寸
         /// </summary>
         Button btnBuildMircoTransform { get; }
+    }
+
+
+    public interface IvTemplLineGapBordersEditorUI
+    {
+        event EventHandler<bool> OnGapBorderViewActiveChanged;
+
+        /// <summary>
+        /// 使用平均邊隙
+        /// </summary>
+        CheckBox chkUseAveGaps4 { get; }
+
+        /// <summary>
+        /// 自動使用默認框
+        /// </summary>
+        Button btnAutoGapBorders { get; }
     }
 
 

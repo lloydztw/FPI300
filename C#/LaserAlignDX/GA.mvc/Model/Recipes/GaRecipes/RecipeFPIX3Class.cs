@@ -650,6 +650,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 
             //(LD3) 邊線框 (根據載台號 載入不同對應的設定值)
             LoadLineBorderParams(_CARRIER_TAG);
+            LoadGapBorderParams(_CARRIER_TAG);
 
             if (!eCancel)
             {
@@ -811,9 +812,10 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
             }
             if (name.Contains("LINEBORDER"))
             {
-                // 邊線框 (根據載台號 存入不同對應的設定值)
+                // 邊線框
                 SaveLineBorderParams(_CARRIER_TAG);
-                //InspectParams.Save();
+                // 邊隙框
+                SaveGapBorderParams(_CARRIER_TAG);
             }
             if (name.Contains("FLY"))
             {

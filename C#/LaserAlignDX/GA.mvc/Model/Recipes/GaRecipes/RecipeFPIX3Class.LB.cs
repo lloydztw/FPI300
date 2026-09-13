@@ -54,6 +54,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 #endif
             LineBorderParams.CarrierTag = _CARRIER_TAG;
             LineBorderParams.Load(INIFILE);
+
+            GapBorderParams.CarrierTag = _CARRIER_TAG;
+            GapBorderParams.Load(INIFILE);
         }
         void SaveLineBorderParams(string carrierTag)
         {
@@ -66,6 +69,9 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 #endif
             LineBorderParams.CarrierTag = _CARRIER_TAG;
             LineBorderParams.Save(INIFILE);
+
+            GapBorderParams.CarrierTag = _CARRIER_TAG;
+            GapBorderParams.Save(INIFILE);
         }
         #endregion
     }
