@@ -102,6 +102,10 @@
 "btnPickGolden" : ["Crop", "擷取模板", "",""],
 "btnRotateGolden" : ["Rotate", "轉正", "",""],
 
+"tabPageLB1" : ["1 Filters", "1 濾波", "", ""],
+"tabPageLB2" : ["2 Measurement Number", "2 尺寸量測數量", "", ""],
+"tabPageLB3" : ["3 Line Borders", "3 邊線拉框", "", ""],
+"tabPageLB4" : ["4 Gap Borders", "4 邊隙拉框", "", ""],
 "lblLB1": [ "X Measures", "X量測 數量", "", ""],
 "lblLB2": [ "Y Measures", "Y量測 數量", "", ""],
 "lblLB3": [ "Masks", "遮罩 數量", "", ""],
@@ -114,6 +118,8 @@
 "btnAutoLineBorders" : ["Auto Layout", "一鍵框選", "",""],
 "btnBuildMircoTrf" : ["Calc. Dim.", "精算尺寸", "", ""],
 "chkShowFilterResult" : ["Show Filter Result", "顯示濾波效果", "", ""],
+"btnAutoGapBorders" : ["Auto Layout", "自動框選", "",""],
+"chkUseAveGaps4" : ["Use Ave Gaps 4", "", ""],
 
 "lblDetectRegions" : ["Detect Regions", "檢測區塊", "", ""],
 "btnAdd" : ["Add", "添加", "",""],
