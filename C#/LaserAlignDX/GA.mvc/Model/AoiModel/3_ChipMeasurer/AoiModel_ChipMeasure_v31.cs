@@ -520,6 +520,7 @@ namespace LaserAlignDX.AoiModel.V31
                 //(2) 使用 Micro Transform 計算 尺寸 與 邊隙
                 //    (結果會直接存入 cell.ChipData 內)
                 bool toMeasureGaps = _xInspect.optPadEdgeGapsMeasurement && _xInspect.xAlgorithm == MatchAlgorithmEnum.GridMatch;
+                _microTransform.UseAveGaps4 = _xRecipe.GapBorderParams.UseAveGaps4;
                 var err = _microTransform.CalcChipDimension(out SizeF dimension, lines, chipData, toMeasureGaps);
 
                 //(3) 記入結果

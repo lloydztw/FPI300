@@ -36,6 +36,10 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
         {
             get => XRecipe.Instance;
         }
+        bool _xUseAveGap4
+        {
+            get => _xRecipe.GapBorderParams.UseAveGaps4;
+        }
         bool _withPadGaps = false;
         #endregion
 
@@ -352,7 +356,7 @@ namespace LaserAlignDX.Mvc.Gui.Tooltips
                     var gaps = cell?.ChipData?.PadEdgeGaps;
                     if (gaps != null)
                     {
-                        if (GlobalConfig.OPT_USING_GAPS_4)
+                        if (_xUseAveGap4)
                         {
                             sb.AppendLine();
                             //sb.AppendLine().Append($"邊隙(左) = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");

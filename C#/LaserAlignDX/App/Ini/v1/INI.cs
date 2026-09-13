@@ -241,18 +241,6 @@ namespace Traveller106
         }
 
         /// <summary>
-        /// 是否使用平均邊隙 (從8個獨立數值 變成 4個有效數值)
-        /// </summary>
-        [CategoryAttribute(XCate3), DescriptionAttribute("true (Gaps 4) / false (Gaps 8)")]
-        [DisplayName("04.使用平均邊隙")]
-        [Browsable(true)]
-        public bool UseAveGaps4
-        {
-            get => _dto.UseAveGaps4;
-            set => _dto.UseAveGaps4 = value;
-        }
-
-        /// <summary>
         /// 强制全检
         /// </summary>
         [CategoryAttribute(XCate3), DescriptionAttribute("")]

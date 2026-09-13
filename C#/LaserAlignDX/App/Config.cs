@@ -37,17 +37,6 @@ namespace LaserAlignDX
 
         public static readonly int N_THREADS = 16;
 
-        /// <summary>
-        /// 是否採用 平均邊隙 (從8個獨立數值 變成 4個有效數值) 
-        /// </summary>
-        public static bool OPT_USING_GAPS_4
-        {
-            get
-            {
-                return Traveller106.INI.Instance.UseAveGaps4;
-            }
-        }
-
         public static readonly int TOTAL_MOTORS_NUMBER = 16;
 
         public static void ParseArgs(params string[] args)

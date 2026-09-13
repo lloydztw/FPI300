@@ -118,11 +118,6 @@ namespace Traveller106.Ini.V1
         public float Cal_Bca = 0;
 
         /// <summary>
-        /// 是否使用平均邊隙 (從8個獨立數值 變成 4個有效數值)
-        /// </summary>
-        public bool UseAveGaps4 = true;
-
-        /// <summary>
         /// 强制全检
         /// </summary>
         public bool IsForceInspect = false;
@@ -178,7 +173,7 @@ namespace Traveller106.Ini.V1
             Read(iniFile, "Basic", "Cal_Bcx", Cal_Bcx, out Cal_Bcx);
             Read(iniFile, "Basic", "Cal_Bcy", Cal_Bcy, out Cal_Bcy);
             Read(iniFile, "Basic", "Cal_Bca", Cal_Bcy, out Cal_Bca);
-            Read(iniFile, "Basic", "UseAveGaps4", UseAveGaps4, out UseAveGaps4);
+            //Read(iniFile, "Basic", "UseAveGaps4", UseAveGaps4, out UseAveGaps4);
             Read(iniFile, "Basic", "IsForceInspect", IsForceInspect, out IsForceInspect);
             Read(iniFile, "Basic", "Optimization", false, out IsCheat);
 
@@ -216,7 +211,7 @@ namespace Traveller106.Ini.V1
             Write(iniFile, "Basic", "Cal_Bcx", Cal_Bcx);
             Write(iniFile, "Basic", "Cal_Bcy", Cal_Bcy);
             Write(iniFile, "Basic", "Cal_Bca", Cal_Bca);
-            Write(iniFile, "Basic", "UseAveGaps4", UseAveGaps4);
+            //Write(iniFile, "Basic", "UseAveGaps4", UseAveGaps4);
             Write(iniFile, "Basic", "IsForceInspect", IsForceInspect);
             Write(iniFile, "Basic", "Optimization", IsCheat);
 

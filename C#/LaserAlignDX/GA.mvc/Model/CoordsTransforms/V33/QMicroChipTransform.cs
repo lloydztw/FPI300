@@ -141,6 +141,10 @@ namespace LaserAlignDX.Model.Coords.V33
             return err;
         }
 
+        public bool UseAveGaps4
+        {
+            get; set;
+        }
         public ErrorCodes BuildMicroTransform(SizeF targetDim, EzLSD.LineSegment[] lines, GaChipData chipData)
         {
             int NP = 4;
@@ -646,7 +650,7 @@ namespace LaserAlignDX.Model.Coords.V33
                 chipData.PadEdgeGaps.S7 = Math.Round((tp0 - PC[3]).NormLength, 3);
 
                 // 每一邊線, 取平均值
-                if (GlobalConfig.OPT_USING_GAPS_4)
+                if (this.UseAveGaps4)
                 {
                     MakeAveX(chipData.PadEdgeGaps.LD, chipData.PadEdgeGaps.LU);
                     MakeAveY(chipData.PadEdgeGaps.LU, chipData.PadEdgeGaps.RU);

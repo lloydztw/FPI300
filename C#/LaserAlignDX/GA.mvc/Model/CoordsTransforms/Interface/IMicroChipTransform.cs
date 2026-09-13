@@ -8,6 +8,8 @@ namespace LaserAlignDX.Model.Coords
 {
     public interface IMicroChipTransform : ITransform
     {
+        bool UseAveGaps4 { get; set; }
+
         /// <summary>
         /// lines 單位是 pixels, 與 chipData.ChipQuad2D.Center 相同 參考原點
         /// </summary>

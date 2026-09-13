@@ -18,7 +18,6 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
-using LaserAlignDX.Model;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -40,6 +39,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         XRecipe _xRecipe
         {
             get => XRecipe.Instance;
+        }
+        bool _xUseAveGap4
+        {
+            get => _xRecipe.GapBorderParams.UseAveGaps4;
         }
         #endregion
 
@@ -621,7 +624,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void draw_GapMeasurePoints(CvImageViewer viewer, Graphics gxView, XCell activeCell)
         {
-            if (GlobalConfig.OPT_USING_GAPS_4)
+            if (_xUseAveGap4)
             {
                 draw_GapMeasurePoints_gaps4(viewer, gxView, activeCell);
             }
