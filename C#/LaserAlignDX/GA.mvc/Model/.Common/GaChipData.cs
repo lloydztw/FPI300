@@ -111,12 +111,20 @@ namespace LaserAlignDX.Model
 #endif
 
         /// <summary>
-        /// 邊線拉框 配對
+        /// Runtime 邊線拉框 數據
         /// </summary>
         /// <remarks>
-        /// 單位 pixels (FullFov Cammera Coordinates)
+        /// FullFov Cammera Coordinates (單位 Pixels)
         /// </remarks>
         public readonly LineBorderPairsCollection LineBorderPairs = new LineBorderPairsCollection(false);
+
+        /// <summary>
+        /// Runtime 邊隙拉框 數據
+        /// </summary>
+        /// <remarks>
+        /// FullFov Cammera Coordinates (單位 Pixels)
+        /// </remarks>
+        public readonly LineBorderPairsCollection GapBorderPairs = new LineBorderPairsCollection(false);
 
         /// <summary>
         /// 計算晶粒 尺寸量測 之 邊界多邊形

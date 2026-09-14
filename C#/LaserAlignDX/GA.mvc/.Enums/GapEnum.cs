@@ -13,6 +13,7 @@
  */
 #endregion
 
+using LaserAlignDX.BasicSpace;
 using System.ComponentModel;
 
 namespace LaserAlignDX
@@ -38,5 +39,43 @@ namespace LaserAlignDX
         LDX,
         [Description("左下Y")]
         LDY,
+    }
+
+
+    public static class GapEnumExtension
+    {
+        public static bool IsX(this GapEnum gap)
+        {
+            switch (gap)
+            {
+                case GapEnum.LUX:
+                case GapEnum.RUX:
+                case GapEnum.RDX:
+                case GapEnum.LDX:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        
+        public static EdgeBorder GetBorderID(this GapEnum gap)
+        {
+            switch (gap)
+            {
+                case GapEnum.LUX:
+                case GapEnum.LDX:
+                    return EdgeBorder.Left;
+                case GapEnum.RUX:
+                case GapEnum.RDX:
+                    return EdgeBorder.Right;
+                case GapEnum.LUY:
+                case GapEnum.RUY:
+                    return EdgeBorder.Top;
+                case GapEnum.LDY:
+                case GapEnum.RDY:
+                default:
+                    return EdgeBorder.Bottom;
+            }
+        }
     }
 }

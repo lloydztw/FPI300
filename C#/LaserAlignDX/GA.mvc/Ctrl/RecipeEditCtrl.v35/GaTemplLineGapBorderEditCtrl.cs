@@ -56,41 +56,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         #endregion
 
         #region GUI_DRAWING_OBJECTS
-        bool isX(GapEnum gap)
-        {
-            switch (gap)
-            {
-                case GapEnum.LUX:
-                case GapEnum.RUX:
-                case GapEnum.RDX:
-                case GapEnum.LDX:
-                    return true;
-                default:
-                    return false;
-            }
-        }
         Brush getStockBrush(GapEnum gap)
         {
-            return isX(gap) ? Brushes.Magenta : Brushes.Purple;
-        }
-        EdgeBorder getBorderID(GapEnum gap)
-        {
-            switch (gap)
-            {
-                case GapEnum.LUX:
-                case GapEnum.LDX:
-                    return EdgeBorder.Left;
-                case GapEnum.RUX:
-                case GapEnum.RDX:
-                    return EdgeBorder.Right;
-                case GapEnum.LUY:
-                case GapEnum.RUY:
-                    return EdgeBorder.Top;
-                case GapEnum.LDY:
-                case GapEnum.RDY:
-                default:
-                    return EdgeBorder.Bottom;
-            }
+            return gap.IsX() ? Brushes.Magenta : Brushes.Purple;
         }
         string getDisplayText(GapEnum gap)
         {
@@ -260,7 +228,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                         line.Offset(cellRect.X, cellRect.Y);
 
                     //(4) default gap measure points (FullFov Coordinates)
-                    var err = goldenChipData.CalcGapMeasurePointPairs(edgeLines, out var gapMeasurePointPairs, out var cornerPadCenters);
+                    var err = goldenChipData.CalcDefaultGapMeasurePointPairs(edgeLines, out var gapMeasurePointPairs, out var cornerPadCenters);
                     if (err != ErrorCodes.OK)
                     {
                         QMessageBox.Warning(err);
@@ -287,7 +255,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
 
                         //(6.3) default border
                         var border = padBoxG0.Clone();
-                        border.SetBox(PointF.Empty, isX(gap) ? sizeX : sizeY);
+                        border.SetBox(PointF.Empty, gap.IsX() ? sizeX : sizeY);
                         border.SetCenter((float)P.X, (float)P.Y);
 
                         //(6.4) 存入 Recipe
@@ -509,9 +477,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 // 強制使用 深色背景 找 Pad Gap 邊線
                 _xRecipe.InspectParams.xCarrierBackground = EdgeBackGroundType.Dark;
 
-                EdgeBorder eBorder = getBorderID(gap);
-                
-                aoi.TryFindLineSegment(eBorder, bmpSrc, boxRect, out var mvdLine);
+                aoi.TryFindLineSegment(gap.GetBorderID(), bmpSrc, boxRect, out var mvdLine);
 
                 if (mvdLine != null)
                 {

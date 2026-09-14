@@ -412,6 +412,10 @@
     <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiModel_ChipLoc.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_Combo.cs" />
     <Compile Include="GA.mvc\Model\.Common\GaChipMeasurePointsCalc.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v31.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v35.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v38_New.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v38_Quad.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\5_BadConnInspect\AoiModel_BadConnInspector.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyAoiResult.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyMetaData.cs" />
@@ -590,8 +594,6 @@
     <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\implements\MvdChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\IMvdTemplateMatcher.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\MvdCompositeChipMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v31.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v35.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\AoiModel_FlyCam.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\5_QrCode\AoiModel_QrCode.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\4_DefectDetector\AoiModel_Defects.cs" />

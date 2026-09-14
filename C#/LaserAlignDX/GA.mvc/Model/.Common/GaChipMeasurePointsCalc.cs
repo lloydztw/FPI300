@@ -22,7 +22,6 @@ using LaserAlignDX.Mvc.Model;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace LaserAlignDX.AoiModel
 {
@@ -32,11 +31,12 @@ namespace LaserAlignDX.AoiModel
     public static class GaChipMeasurePointsCalc
     {
         /// <summary>
-        /// 計算 4邊線 上面的 尺寸量測點位 (順序: 左邊線, 上邊線, 右邊線, 下邊線)
+        /// 計算 尺寸量測 基本 4點位 (順序: 左, 上, 右, 下)
         /// </summary>
-        /// <remarks>
-        /// 此函式 座標 都是 Fullfov Camera Coordinates
-        /// </remarks>
+        /// <param name="edgeLines">輸入: Runtime 抓到的 邊線 (順序: 左邊線, 上邊線, 右邊線, 下邊線)</param>
+        /// <param name="measurePoints">輸出: 尺寸量測 所有點位</param>
+        /// <returns>錯誤碼</returns>
+        /// <remarks>此函式座標都是 Fullfov Camera Coordinates</remarks>
         public static ErrorCodes CalcDimMeasurePoints(this GaChipData chipData, EzLSD.LineSegment[] edgeLines, out QVector[] measurePoints)
         {
             measurePoints = null;
@@ -75,12 +75,78 @@ namespace LaserAlignDX.AoiModel
             }
         }
 
+
         /// <summary>
-        /// 計算 具名邊線對 上面的 量測點 (順序由 lineBorderPairs.Keys 決定)
+        /// 計算 尺寸量測 具名點位對
         /// </summary>
-        /// <remarks>
-        /// 邊線 (lineBorderPairs) 與 晶粒外邊 (chipQuad) 都是 Fullfov Camera Coordinates
-        /// </remarks>
+        /// <param name="lineBorderPairs">輸入: Runtime 抓到的 具名 邊線對</param>
+        /// <param name="measurePointPairs">輸出: 尺寸量測 具名點位對</param>
+        /// <returns>錯誤碼</returns>
+        /// <remarks>此函式座標都是 Fullfov Camera Coordinates</remarks>
+        public static ErrorCodes CalcDimNamedMeasurePointPairs(this GaChipData chipData, LineBorderPairsCollection lineBorderPairs, out Dictionary<string, QVector[]> measurePointPairs)
+        {
+            measurePointPairs = new Dictionary<string, QVector[]>();
+
+            try
+            {
+                //(1) chipQuad
+                var chipQuad = chipData?.ChipQuad2D;
+                if (chipQuad == null)
+                    return ErrorCodes.ERR_NO_CHIP_LOCATION;
+
+                var corners = chipQuad.Corners;
+                var L = (corners[0] + corners[3]) / 2.0;
+                var R = (corners[1] + corners[2]) / 2.0;
+                var T = (corners[0] + corners[1]) / 2.0;
+                var B = (corners[3] + corners[2]) / 2.0;
+                var vectH = R - L;
+                var vectV = B - T;
+
+                if (lineBorderPairs != null)
+                {
+                    foreach ((var keyName, var pair) in lineBorderPairs.IterPairs())
+                    {
+                        //var keyName = kvp.Key;
+                        //var pair = kvp.Value;
+
+                        // 防禦：檢查 pair 與 LineSegments 是否完整
+                        if (pair == null || pair.LineSegments == null || pair.LineSegments.Length < 2)
+                            continue;
+
+                        if (pair.LineSegments[0] == null || pair.LineSegments[1] == null)
+                            continue;
+
+                        var line0 = pair.LineSegments[0];
+                        var line1 = pair.LineSegments[1];
+
+                        bool isHoriz = keyName.StartsWith("X");
+                        var vect = isHoriz ? vectH : vectV;
+
+                        var p0 = line0.GetMidPoint();
+                        var lineCross = new EzLSD.LineSegment(p0, p0 + vect);
+                        var p1 = lineCross.CalcIntersectedPoint(line1);
+
+                        measurePointPairs[keyName] = new[] { p0, p1 };
+                    }
+                }
+
+                return ErrorCodes.OK;
+            }
+            catch (Exception ex)
+            {
+                _LOG_ERROR(ex, "CalcDimNamedMeasurePoints 異常");
+                return ErrorCodes.ERR_NO_CHIP_PADS;
+            }
+        }
+
+        /// <summary>
+        /// 計算 尺寸量測 所有點位
+        /// </summary>
+        /// <param name="lineBorderPairs">輸入: Runtime 抓到的 具名 邊線對</param>
+        /// <param name="allMeasurePoints">輸出: 尺寸量測 所有點位</param>
+        /// <param name="keyNames">輸出: 點位 對應的 量測名稱</param>
+        /// <returns>錯誤碼</returns>
+        /// <remarks>此函式座標都是 Fullfov Camera Coordinates</remarks>
         public static ErrorCodes CalcDimNamedMeasurePoints(this GaChipData chipData, LineBorderPairsCollection lineBorderPairs, out QVector[] allMeasurePoints, out string[] keyNames)
         {
             #region OLD_CODE
@@ -139,11 +205,25 @@ namespace LaserAlignDX.AoiModel
             //}
             #endregion
 
-            var err = CalcDimNamedMeasurePoints(chipData, lineBorderPairs, out var allMeasurePointsDict);
+            var err = CalcDimNamedMeasurePointPairs(chipData, lineBorderPairs, out var measurePointPairs);
             if (err == ErrorCodes.OK)
             {
-                allMeasurePoints = allMeasurePointsDict.Keys.ToArray();
-                keyNames = Array.ConvertAll(allMeasurePoints, p => allMeasurePointsDict[p]);
+                var keyNamesList = new List<string>();
+                var measurePtsList = new List<QVector>();
+
+                foreach (var kv in measurePointPairs)
+                {
+                    var keyName = kv.Key;
+                    var pair = kv.Value;
+                    for (int i = 0; i < 2; i++)
+                    {
+                        measurePtsList.Add(pair[i]);
+                        keyNamesList.Add(keyName);
+                    }
+                }
+
+                allMeasurePoints = measurePtsList.ToArray();
+                keyNames = keyNamesList.ToArray();
             }
             else
             {
@@ -153,76 +233,16 @@ namespace LaserAlignDX.AoiModel
             return err;
         }
 
-        /// <summary>
-        /// 計算 具名邊線對 上面的 量測點 (順序由 lineBorderPairs.Keys 決定)
-        /// </summary>
-        /// <remarks>
-        /// 邊線 (lineBorderPairs) 與 晶粒外邊 (chipQuad) 都是 Fullfov Camera Coordinates
-        /// </remarks>
-        public static ErrorCodes CalcDimNamedMeasurePoints(this GaChipData chipData, LineBorderPairsCollection lineBorderPairs, out Dictionary<QVector, string> allMeasurePoints)
-        {
-            allMeasurePoints = new Dictionary<QVector, string>();
-
-            try
-            {
-                //(1) chipQuad
-                var chipQuad = chipData?.ChipQuad2D;
-                if (chipQuad == null)
-                    return ErrorCodes.ERR_NO_CHIP_LOCATION;
-
-                var corners = chipQuad.Corners;
-                var L = (corners[0] + corners[3]) / 2.0;
-                var R = (corners[1] + corners[2]) / 2.0;
-                var T = (corners[0] + corners[1]) / 2.0;
-                var B = (corners[3] + corners[2]) / 2.0;
-                var vectH = R - L;
-                var vectV = B - T;
-
-                if (lineBorderPairs != null)
-                {
-                    foreach ((var keyName, var pair) in lineBorderPairs.IterPairs())
-                    {
-                        //var keyName = kvp.Key;
-                        //var pair = kvp.Value;
-
-                        // 防禦：檢查 pair 與 LineSegments 是否完整
-                        if (pair == null || pair.LineSegments == null || pair.LineSegments.Length < 2)
-                            continue;
-
-                        if (pair.LineSegments[0] == null || pair.LineSegments[1] == null)
-                            continue;
-
-                        var line0 = pair.LineSegments[0];
-                        var line1 = pair.LineSegments[1];
-
-                        bool isHoriz = keyName.StartsWith("X");
-                        var vect = isHoriz ? vectH : vectV;
-
-                        var p0 = line0.GetMidPoint();
-                        var lineCross = new EzLSD.LineSegment(p0, p0 + vect);
-                        var p1 = lineCross.CalcIntersectedPoint(line1);
-
-                        allMeasurePoints[p0] = keyName;
-                        allMeasurePoints[p1] = keyName;
-                    }
-                }
-
-                return ErrorCodes.OK;
-            }
-            catch (Exception ex)
-            {
-                _LOG_ERROR(ex, "CalcDimNamedMeasurePoints 異常");
-                return ErrorCodes.ERR_NO_CHIP_PADS;
-            }
-        }
 
         /// <summary>
-        /// 計算出 邊隙量測 點位 (edgeLines 順序: 左邊線, 上邊線, 右邊線, 下邊線) 
+        /// 計算出 邊隙量測 之 具名點位對
         /// </summary>
-        /// <remarks>
-        /// 此函式 座標 都是 Fullfov Camera Coordinates
-        /// </remarks>
-        public static ErrorCodes CalcGapMeasurePointPairs(this GaChipData chipData, EzLSD.LineSegment[] edgeLines, out Dictionary<GapEnum, QVector[]> gapMeasurePointPairs, out QVector[] cornerPadCenters)
+        /// <param name="edgeLines">輸入: 邊線順序 (左邊線, 上邊線, 右邊線, 下邊線)</param>
+        /// <param name="gapMeasurePointPairs">輸出: 邊隙量測 之 具名點位對</param>
+        /// <param name="cornerPadCenters">輸出: 晶粒四角格點 (左上, 右上, 右下, 左下)</param>
+        /// <returns>錯誤碼</returns>
+        /// <remarks>此函式座標都是 Fullfov Camera Coordinates</remarks>
+        public static ErrorCodes CalcDefaultGapMeasurePointPairs(this GaChipData chipData, EzLSD.LineSegment[] edgeLines, out Dictionary<GapEnum, QVector[]> gapMeasurePointPairs, out QVector[] cornerPadCenters)
         {
             //------------------------------------------------
             //(0) 順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY
@@ -321,6 +341,176 @@ namespace LaserAlignDX.AoiModel
 
             return ErrorCodes.OK;
         }
+
+        /// <summary>
+        /// 計算出 邊隙量測 所有 點位 (順序: LDX(2), LUX(2), LUY(2), RUY(2), RUX(2), RDX(2), RDY(2), LDY(2))
+        /// </summary>
+        /// <param name="chipData"></param>
+        /// <param name="edgeLines">輸入: 邊線順序 (左邊線, 上邊線, 右邊線, 下邊線)</param>
+        /// <param name="measurePoints">輸出: 邊隙量測所有點位</param>
+        /// <param name="cornerPadCenters">輸出: 晶粒四角格點 (左上, 右上, 右下, 左下)</param>
+        /// <returns>錯誤碼</returns>
+        /// <remarks>此函式座標都是 Fullfov Camera Coordinates</remarks>
+        public static ErrorCodes CalcDefaultGapMeasurePoints(this GaChipData chipData, EzLSD.LineSegment[] edgeLines, out QVector[] measurePoints, out QVector[] cornerPadCenters)
+        {
+            var err = CalcDefaultGapMeasurePointPairs(chipData, edgeLines, out var pairs, out cornerPadCenters);
+            if (err != ErrorCodes.OK)
+            {
+                measurePoints = null;
+                return err;
+            }
+
+            //------------------------------------------------
+            //(0) 順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY
+            //------------------------------------------------
+            //      g2    g3
+            //
+            //  g1 [P0]  [P1] g4
+            //
+            //  g0 [P3]  [P2] g5
+            //
+            //      g7    g6
+            //------------------------------------------------
+            var list = new List<QVector>();
+
+            //list.AddRange(pairs[GapEnum.LDX]);
+            //list.AddRange(pairs[GapEnum.LUX]);
+            //list.AddRange(pairs[GapEnum.LUY]);
+            //list.AddRange(pairs[GapEnum.RUY]);
+
+            //list.AddRange(pairs[GapEnum.RUX]);
+            //list.AddRange(pairs[GapEnum.RDX]);
+            //list.AddRange(pairs[GapEnum.RDY]);
+            //list.AddRange(pairs[GapEnum.LDY]);
+
+            foreach (var gap in IterGaps())
+            {
+                list.AddRange(pairs[gap]);
+            }
+
+            measurePoints = list.ToArray();
+            return ErrorCodes.OK;
+        }
+
+        /// <summary>
+        /// 計算出 邊隙量測 所有 點位 (順序: LDX(2), LUX(2), LUY(2), RUY(2), RUX(2), RDX(2), RDY(2), LDY(2))
+        /// </summary>
+        /// <param name="chipData"></param>
+        /// <param name="edgeLines">輸入: 邊線順序 (左邊線, 上邊線, 右邊線, 下邊線)</param>
+        /// <param name="measurePoints">輸出: 邊隙量測所有點位</param>
+        /// <returns>錯誤碼</returns>
+        /// <remarks>此函式座標都是 Fullfov Camera Coordinates</remarks>
+        public static ErrorCodes CalcRuntimeGapMeasurePoints(this GaChipData chipData, EzLSD.LineSegment[] edgeLines, out QVector[] measurePoints, out QVector[] cornerPadCenters)
+        {
+            //------------------------------------------------
+            //(0) 順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY
+            //------------------------------------------------
+            //      g2    g3
+            //
+            //  g1 [P0]  [P1] g4
+            //
+            //  g0 [P3]  [P2] g5
+            //
+            //      g7    g6
+            //------------------------------------------------
+
+            var gapRuntimePairs = chipData.GapBorderPairs;
+            if (gapRuntimePairs == null)
+            {
+                return CalcDefaultGapMeasurePoints(chipData, edgeLines, out measurePoints, out cornerPadCenters);
+            }
+
+            // 計算 P0, P1, P2, P3
+            var err = CalcCornerPadCenters(chipData, out cornerPadCenters);
+            if (err != ErrorCodes.OK)
+            {
+                measurePoints = null;
+                return err;
+            }
+
+            // 計算 LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY
+            var result = new List<QVector>();
+            foreach (var gap in IterGaps())
+            {
+                var padLine = gapRuntimePairs[gap.ToString()].LineSegments[0];
+                var P = padLine?.GetMidPoint();
+
+                var borderId = (int)gap.GetBorderID();
+                var edgeLine = edgeLines[borderId];
+                var G = (P != null && edgeLine != null) ? edgeLine.CalcTheNearestPoint(P) : null;
+
+                result.Add(G);
+                result.Add(P);
+            }
+
+            measurePoints = result.ToArray();
+            return ErrorCodes.OK;
+        }
+
+        /// <summary>
+        /// 計算出 Corner Pad Centers
+        /// </summary>
+        /// <returns>錯誤碼</returns>
+        /// <remarks>此函式座標都是 Fullfov Camera Coordinates</remarks>
+        static ErrorCodes CalcCornerPadCenters(this GaChipData chipData, out QVector[] cornerPadCenters)
+        {
+            //------------------------------------------------
+            //(0) 順序: P0, P1, P2, P3
+            //------------------------------------------------
+            //      g2    g3
+            //
+            //  g1 [P0]  [P1] g4
+            //
+            //  g0 [P3]  [P2] g5
+            //
+            //      g7    g6
+            //------------------------------------------------
+
+            cornerPadCenters = null;
+
+            //(1) PADs GRID (Fullfov Coordinates)
+            var padsGrid = chipData?.PadsGrid;
+            if (padsGrid == null)
+                return ErrorCodes.ERR_NO_CHIP_PADS;
+
+            //(2) PAD CORNERs : 0左上, 1右上, 2右下, 3左下
+            EzBlocsGridAnalyzer.CalcQuad2D(padsGrid, out QvQuad2D padsBoundaryQuad, true);
+            EzBlocsGridAnalyzer.CalcQuad2D(padsGrid, out QvQuad2D padsMidQuad, false);
+
+            //(2.1) 檢查例外狀況
+            int NP = 4;
+            var padsBoundaryCorners = padsBoundaryQuad?.Corners;
+            var padsMidCorners = padsMidQuad?.Corners;
+            if (padsBoundaryCorners == null || padsBoundaryCorners.Length < NP ||
+                padsMidCorners == null || padsMidCorners.Length < NP)
+                return ErrorCodes.ERR_LACK_CHIP_PAD_CORNER;
+            for (int i = 0; i < NP; i++)
+            {
+                if (padsBoundaryCorners[i] == null || padsMidCorners[i] == null)
+                    return ErrorCodes.ERR_LACK_CHIP_PAD_CORNER;
+            }
+            //(2.2) [P0], [P1], [P2], [P3] 中心點
+            cornerPadCenters = Array.ConvertAll(padsMidCorners, c => new QVector(c));
+            
+            return ErrorCodes.OK;
+        }
+
+        /// <summary>
+        /// 順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY
+        /// </summary>
+        static IEnumerable<GapEnum> IterGaps()
+        {
+            yield return GapEnum.LDX;
+            yield return GapEnum.LUX;
+            yield return GapEnum.LUY;
+            yield return GapEnum.RUY;
+
+            yield return GapEnum.RUX;
+            yield return GapEnum.RDX;
+            yield return GapEnum.RDY;
+            yield return GapEnum.LDY;
+        }
+
 
         #region LOG_FUNCTIONS
         static void _LOG_ERROR(Exception ex, string msg)

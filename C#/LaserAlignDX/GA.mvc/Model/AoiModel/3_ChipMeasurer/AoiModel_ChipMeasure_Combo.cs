@@ -20,6 +20,8 @@ using System.Drawing;
 using VisionDesigner;
 using AoiModel_ChipMeasure_New = LaserAlignDX.AoiModel.V35.AoiModel_ChipMeasure;
 using AoiModel_ChipMeasure_Quad = LaserAlignDX.AoiModel.V31.AoiModel_ChipMeasure;
+//using AoiModel_ChipMeasure_New = LaserAlignDX.AoiModel.V38.New.AoiModel_ChipMeasure;
+//using AoiModel_ChipMeasure_Quad = LaserAlignDX.AoiModel.V38.Quad.AoiModel_ChipMeasure;
 
 namespace LaserAlignDX.AoiModel.Combo
 {
