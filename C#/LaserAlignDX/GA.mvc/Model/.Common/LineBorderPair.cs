@@ -63,6 +63,7 @@ namespace LaserAlignDX.Model
             {
                 clone.Borders[i] = this.Borders[i]?.Clone();
                 clone.LineSegments[i] = this.LineSegments[i]?.Clone();
+                clone.TargetDist = this.TargetDist;
             }
             return clone;
         }
@@ -85,7 +86,7 @@ namespace LaserAlignDX.Model
             if (keyName == null)
                 return null;
 
-            if (keyName.StartsWith("X"))
+            if (keyName.StartsWith("X") || keyName.EndsWith("X"))
             {
                 //return offset == 0 ? ".L" : ".R";
                 return offset == 0 ? " ◀" : " ▶";
@@ -137,11 +138,7 @@ namespace LaserAlignDX.Model
         public LineBorderPair this[string key]
         {
             get => _dict.TryGetValue(key, out var pair) ? pair : null;
-            set
-            {
-                if (value != null) 
-                    _dict[key] = value;
-            }
+            set => _dict[key] = value;
         }
         public IEnumerable<string> Keys => _dict.Keys;
         public bool TryGetValue(string key, out LineBorderPair pair)

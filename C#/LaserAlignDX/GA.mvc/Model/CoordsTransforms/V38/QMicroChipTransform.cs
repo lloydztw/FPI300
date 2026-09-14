@@ -510,113 +510,6 @@ namespace LaserAlignDX.Model.Coords.V38
         #endregion
 
         #region PRIVAE_CALC_PAD_EDGE_GAP_FUNCTIONS
-        ErrorCodes CalcPadEdgeGaps_000(EzLSD.LineSegment[] edgeLines, GaChipData chipData, ITransform runtimePadTrf)
-        {
-            try
-            {
-                ErrorCodes err;
-
-                //(0) check
-                err = check(edgeLines, chipData);
-                if (err != ErrorCodes.OK)
-                    return err;
-
-                //(1) 收集量測點 (Fullfov Camera Coordinates) (順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY)
-                err = chipData.CalcDefaultGapMeasurePoints(edgeLines, out var gapMeamurePts, out var cornerPadCenters);
-                if (err != ErrorCodes.OK)
-                    return err;
-
-                //(2) 紀錄量測點 (Fullfov Camera Coordinates) (順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY)
-                chipData.PadEdgeGaps.GapMeasurePoints = Array.ConvertAll(gapMeamurePts, p => new QVector(p));
-
-                //(3) 平移到 LOCAL (以 runtimeChipCenter 當原點)
-                var runtimeChipCenter = chipData.ChipQuad2D.Center;
-                gapMeamurePts = Array.ConvertAll(gapMeamurePts, p => p != null ? p - runtimeChipCenter : runtimeChipCenter);
-                cornerPadCenters = Array.ConvertAll(cornerPadCenters, p => p != null ? p - runtimeChipCenter : runtimeChipCenter);
-
-                //(4) Pad Transform (pix to pix)
-                gapMeamurePts = transform(gapMeamurePts, runtimePadTrf);
-                cornerPadCenters = transform(cornerPadCenters, runtimePadTrf);
-
-                //(5) Local Transform (pix to mm)
-                gapMeamurePts = transform(gapMeamurePts, _localTrf);
-                cornerPadCenters = transform(cornerPadCenters, _localTrf);
-
-                //--------------------------------------------------------
-                //(6) 計算距離 並直接 存入 chipData
-                //    順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY
-                //--------------------------------------------------------
-                //            (S3)   (S1)
-                //            LUY    RUY  
-                //          
-                //  (S4) LUX  [P0]   [P1]  RUX (S2)
-                //
-                //  (S8) LDX  [P3]   [P2]  RDX (S6)
-                //
-                //            LDY    RDY
-                //            (S7)   (S5)  
-                //--------------------------------------------------------
-
-                int idx = 0;
-                var PC = cornerPadCenters;
-                // LDX (S8)
-                var tp0 = gapMeamurePts[idx++];
-                var tp1 = gapMeamurePts[idx++];
-                chipData.PadEdgeGaps.LD.X = Math.Round((tp0 - tp1).NormLength, 3);
-                chipData.PadEdgeGaps.S8 = Math.Round((tp0 - PC[3]).NormLength, 3);
-                // LUX (S4)
-                tp0 = gapMeamurePts[idx++];
-                tp1 = gapMeamurePts[idx++];
-                chipData.PadEdgeGaps.LU.X = Math.Round((tp0 - tp1).NormLength, 3);
-                chipData.PadEdgeGaps.S4 = Math.Round((tp0 - PC[0]).NormLength, 3);
-                // LUY (S3)
-                tp0 = gapMeamurePts[idx++];
-                tp1 = gapMeamurePts[idx++];
-                chipData.PadEdgeGaps.LU.Y = Math.Round((tp0 - tp1).NormLength, 3);
-                chipData.PadEdgeGaps.S3 = Math.Round((tp0 - PC[0]).NormLength, 3);
-                // RUY (S1)
-                tp0 = gapMeamurePts[idx++];
-                tp1 = gapMeamurePts[idx++];
-                chipData.PadEdgeGaps.RU.Y = Math.Round((tp0 - tp1).NormLength, 3);
-                chipData.PadEdgeGaps.S1 = Math.Round((tp0 - PC[1]).NormLength, 3);
-                // RUX (S2)
-                tp0 = gapMeamurePts[idx++];
-                tp1 = gapMeamurePts[idx++];
-                chipData.PadEdgeGaps.RU.X = Math.Round((tp0 - tp1).NormLength, 3);
-                chipData.PadEdgeGaps.S2 = Math.Round((tp0 - PC[1]).NormLength, 3);
-                // RDX (S6)
-                tp0 = gapMeamurePts[idx++];
-                tp1 = gapMeamurePts[idx++];
-                chipData.PadEdgeGaps.RD.X = Math.Round((tp0 - tp1).NormLength, 3);
-                chipData.PadEdgeGaps.S6 = Math.Round((tp0 - PC[2]).NormLength, 3);
-                // RDY (S5)
-                tp0 = gapMeamurePts[idx++];
-                tp1 = gapMeamurePts[idx++];
-                chipData.PadEdgeGaps.RD.Y = Math.Round((tp0 - tp1).NormLength, 3);
-                chipData.PadEdgeGaps.S5 = Math.Round((tp0 - PC[2]).NormLength, 3);
-                // LDY (S7)
-                tp0 = gapMeamurePts[idx++];
-                tp1 = gapMeamurePts[idx++];
-                chipData.PadEdgeGaps.LD.Y = Math.Round((tp0 - tp1).NormLength, 3);
-                chipData.PadEdgeGaps.S7 = Math.Round((tp0 - PC[3]).NormLength, 3);
-
-                // 每一邊線, 取平均值
-                if (this.UseAveGaps4)
-                {
-                    MakeAveX(chipData.PadEdgeGaps.LD, chipData.PadEdgeGaps.LU);
-                    MakeAveY(chipData.PadEdgeGaps.LU, chipData.PadEdgeGaps.RU);
-                    MakeAveX(chipData.PadEdgeGaps.RU, chipData.PadEdgeGaps.RD);
-                    MakeAveY(chipData.PadEdgeGaps.RD, chipData.PadEdgeGaps.LD);
-                }
-
-                return ErrorCodes.OK;
-            }
-            catch (Exception ex)
-            {
-                _LOG_ERROR(ex, "CalcPadEdgeGaps");
-                return ErrorCodes.ERR_EDGE_GAP_CALCULATION;
-            }
-        }
         ErrorCodes CalcPadEdgeGaps(EzLSD.LineSegment[] edgeLines, GaChipData chipData, ITransform runtimePadTrf)
         {
             try
@@ -629,7 +522,7 @@ namespace LaserAlignDX.Model.Coords.V38
                     return err;
 
                 //(1) 收集量測點 (Fullfov Camera Coordinates) (順序: LDX, LUX, LUY, RUY, RUX, RDX, RDY, LDY)
-                //>>> err = chipData.CalcDefaultGapMeasurePoints(edgeLines, out var gapMeamurePts, out var cornerPadCenters);
+                //err = chipData.CalcDefaultGapMeasurePoints(edgeLines, out var gapMeamurePts, out var cornerPadCenters);
                 err = chipData.CalcRuntimeGapMeasurePoints(edgeLines, out var gapMeamurePts, out var cornerPadCenters);
                 if (err != ErrorCodes.OK)
                     return err;

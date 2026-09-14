@@ -13,7 +13,6 @@
  */
 #endregion
 
-using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
@@ -30,10 +29,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Controls;
 using Traveller106;
 using VisionDesigner;
-using ZXing;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using MvdFindLineClass = LaserAlignDX.BasicSpace.MvdFindLineClass;
 
@@ -138,20 +135,44 @@ namespace LaserAlignDX.AoiModel.V38.Quad
 
         public bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine)
         {
-            //--------------------------------------------------------------
-            // 海康邊線 準確度 深受 前景背景 對比 影響
-            //--------------------------------------------------------------
+            ////--------------------------------------------------------------
+            //// 海康邊線 準確度 深受 前景背景 對比 影響
+            ////--------------------------------------------------------------
+            
             prepareMvdLineFinders(N_THREADS);
+
             var lineSegFinder = _mvdLineFinders[0];
             lineSegFinder.Background = _xInspect.xCarrierBackground;
-            resultLine = lineSegFinder.Run(bmpSrc, roiRect, (int)eBorder);
+
+            if (TryApplyLineFilters(bmpSrc, out Bitmap bmpWork))
+            {
+                resultLine = lineSegFinder.Run(bmpWork, roiRect, (int)eBorder);
+                bmpWork.Dispose();
+            }
+            else
+            {
+                resultLine = lineSegFinder.Run(bmpSrc, roiRect, (int)eBorder);
+            }
+
             return resultLine != null;
         }
 
         public bool TryApplyLineFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null)
         {
-            bmpResult = null;
-            return false;
+            //>>> bmpResult = null;
+            //>>> return false;
+
+            if (needsToApplyGrayLimits() && bmpSrc != null && bmpSrc.Width > 2 && bmpSrc.Height > 2)
+            {
+                bmpResult = (Bitmap)bmpSrc.Clone();
+                applyFiltersForGrayLimits(bmpResult, backGroundColor);
+                return true;
+            }
+            else
+            {
+                bmpResult = null;
+                return false;
+            }
         }
 
         public void AnalyzeGoldenData()
@@ -301,12 +322,11 @@ namespace LaserAlignDX.AoiModel.V38.Quad
         /// </summary>
         private void RunOneChipMeasurement(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, int threadId)
         {
-#if (OPT_ORIGINAL_CODE)
+#if (OPT_ORIGINAL_OK)
             // 取得 上一輪 晶粒定位 的結果 (chipData)
             var chipData = cell?.ChipData;
             if (chipData == null || chipData.ChipQuad2D == null)
                 return;
-
 
             #region 邊線處理
             var mvdLineFinder = _mvdLineFinders[threadId % _mvdLineFinders.Length];
@@ -404,6 +424,7 @@ namespace LaserAlignDX.AoiModel.V38.Quad
                 return;
             }
             #endregion
+            return;
 #endif
             // 邊線處理
             bool ok = FetchChipRuntimeLineBorders(cell, cellBmp, ref cellRoi, threadId);
@@ -412,11 +433,11 @@ namespace LaserAlignDX.AoiModel.V38.Quad
             bool includeGaps = _xRecipe.InspectParams.optPadEdgeGapsMeasurement
                              && _xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch;
             if (ok && includeGaps)
-                ok &= FetchChipRuntimeGapBorders(cell, cellBmp, ref cellRoi, threadId);
+                FetchChipRuntimeGapBorders(cell, cellBmp, ref cellRoi, threadId);
 
             // 尺寸X_與_尺寸Y_量測計算
             if (ok)
-                ok &= CalcDimensionXY(cell, cellBmp, ref cellRoi, includeGaps);
+                CalcDimensionXY(cell, cellBmp, ref cellRoi, includeGaps);
         }
         
         private bool FetchChipRuntimeLineBorders(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, int threadId)
@@ -500,7 +521,7 @@ namespace LaserAlignDX.AoiModel.V38.Quad
             }
             #endregion
         }
-        
+
         private bool FetchChipRuntimeGapBorders(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, int threadId)
         {
             // 取得 上一輪 晶粒定位 的結果 (chipData)
@@ -559,10 +580,12 @@ namespace LaserAlignDX.AoiModel.V38.Quad
                     //(5) 記入 cell.GapBorderPairs
                     chipData.GapBorderPairs[key] = runtimePair;
                 }
+
+                return true;
             }
             #endregion
 
-            return false;
+            return true;
         }
 
         private bool CalcDimensionXY(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi, bool includeGaps)
@@ -837,9 +860,9 @@ namespace LaserAlignDX.AoiModel.V38.Quad
 
             try
             {
-                //(2) 將 goldenQuad 平移到 Local (_xRecipe.GoldenRegionCellRect) 坐標系
-                var goldenChipTemplateRoi = _xRecipe.GoldenRegionCellRect;
-                goldenQuad.Offset(goldenChipTemplateRoi.X, goldenChipTemplateRoi.Y);
+                //(2) 將 goldenQuad 平移到 Local Region Coordinate 坐標系
+                var goldenChipBmpRoi = _xRecipe.GoldenChipRect;
+                goldenQuad.Offset(goldenChipBmpRoi.X, goldenChipBmpRoi.Y);
 
                 //(2.1) DEBUG_DUMP
                 #region DEBUG_DUMP
@@ -922,6 +945,100 @@ namespace LaserAlignDX.AoiModel.V38.Quad
         }
         #endregion
 
+        #region FILTER_FUNCTIONS
+        bool needsToApplyGrayLimits()
+        {
+            return _xInspect != null && _xInspect.GrayLimitHi < 255 || _xInspect.GrayLimitLo > 0;
+        }
+        void applyFiltersForGrayLimits(Bitmap bmpWork, Color? backGroundColor = null)
+        {
+            var grayLimitHi = (byte)Math.Max(_xInspect.GrayLimitHi, _xInspect.GrayLimitLo);
+            var grayLimitLo = (byte)Math.Min(_xInspect.GrayLimitHi, _xInspect.GrayLimitLo);
+
+            using (var bridge = new QxImageBridge(bmpWork))
+            using (var mask = createGrayMask(bridge.Image, grayLimitLo, grayLimitHi))
+            {
+                var img = bridge.Image;
+                var fillColor = backGroundColor != null ?
+                    new Scalar(backGroundColor.Value.R, backGroundColor.Value.G, backGroundColor.Value.B) :
+                    sampleBackgroundColor(img);
+                img.SetTo(fillColor, mask);
+            }
+        }
+        Mat createGrayMask(Mat src, byte grayLimitLo, byte grayLimitHi)
+        {
+            Mat srcGray;
+
+            if (src.Type() == MatType.CV_8UC3)
+            {
+                srcGray = new Mat();
+                Cv2.CvtColor(src, srcGray, ColorConversionCodes.BGR2GRAY);
+            }
+            else if (src.Type() == MatType.CV_8UC1)
+            {
+                srcGray = src;
+            }
+            else if (src.Type() == MatType.CV_8UC4)
+            {
+                srcGray = new Mat();
+                Cv2.CvtColor(src, srcGray, ColorConversionCodes.BGRA2GRAY);
+            }
+            else
+            {
+                throw new ArgumentException("輸入影像必須為 CV_8UC1、CV_8UC3 或 CV_8UC4");
+            }
+
+            Mat mask = new Mat();
+
+            // 將像素值在 [grayLimitLo, grayLimitHi] 範圍內的設為 255 (白色)，其餘設為 0 (黑色)
+            Cv2.InRange(
+                srcGray,
+                Scalar.All(grayLimitLo),
+                Scalar.All(grayLimitHi),
+                mask
+            );
+
+            // 反向掩膜，使得在範圍內的像素為 0，範圍外的像素為 255
+            Cv2.BitwiseNot(mask, mask);
+
+            // CleanUp
+            if (srcGray != src)
+                srcGray?.Dispose();
+
+            return mask;
+        }
+        Scalar sampleBackgroundColor(Mat src)
+        {
+            // 取樣區域的大小
+            int wh = Math.Min(src.Width, src.Height);
+            int sampleSize = Math.Max(16, wh / 50);
+            sampleSize = Math.Min(sampleSize, wh / 4);
+            if (sampleSize < 8)
+                return Scalar.Black;
+
+            // 計算取樣區域的 左上角
+            Rect roi = new Rect(0, 0, sampleSize, sampleSize);
+            Scalar mean1 = Cv2.Mean(src[roi]);
+            // 計算取樣區域的 右上角
+            roi = new Rect(src.Width - sampleSize, 0, sampleSize, sampleSize);
+            Scalar mean2 = Cv2.Mean(src[roi]);
+            // 計算取樣區域的 右下角
+            roi = new Rect(src.Width - sampleSize, src.Height - sampleSize, sampleSize, sampleSize);
+            Scalar mean3 = Cv2.Mean(src[roi]);
+            // 計算取樣區域的 左下角
+            roi = new Rect(0, src.Height - sampleSize, sampleSize, sampleSize);
+            Scalar mean4 = Cv2.Mean(src[roi]);
+
+            // 計算四個角落的平均顏色
+            Scalar meanColor = new Scalar(
+                (mean1.Val0 + mean2.Val0 + mean3.Val0 + mean4.Val0) / 4.0,
+                (mean1.Val1 + mean2.Val1 + mean3.Val1 + mean4.Val1) / 4.0,
+                (mean1.Val2 + mean2.Val2 + mean3.Val2 + mean4.Val2) / 4.0
+            );
+            return meanColor;
+        }
+        #endregion
+
         #region MVD_LINE_SEGMENTS_FUNCTIONS
         private void disposeMvdLineFinders()
         {
@@ -946,16 +1063,12 @@ namespace LaserAlignDX.AoiModel.V38.Quad
         /// <summary>
         /// 使用海康套件尋找直線
         /// </summary>
-        CMvdLineSegmentF _RunMvdLineFinder(IMvdLineFinder mvdFindLineClass, int borderIndex, Bitmap bmp, CMvdRectangleF roi, double angleRef = 0, bool forceDarkBackgroud = false)
+        CMvdLineSegmentF _RunMvdLineFinder(IMvdLineFinder mvdLineFinder, int borderIndex, Bitmap bmp, CMvdRectangleF roi, double angleRef = 0, bool forceDarkBackgroud = false)
         {
             int NP = 4;
 
-            //if (mvdFindLineClass == null)
-            //    mvdFindLineClass = new MvdFindLineClass();
-            //borderIndex %= NP;
-            //cMvdLineSegmentFsOut[borderIndex] = null;
-
-            //>>> 根據 angleRef 將 borderIndex 正規化
+            #region (1) 根據 angleRef 將 borderIndex 正規化
+            // 根據 angleRef 將 borderIndex 正規化
             int sideIndex;
             if (angleRef > 70.0)
             {
@@ -969,47 +1082,59 @@ namespace LaserAlignDX.AoiModel.V38.Quad
             {
                 sideIndex = borderIndex;
             }
+            #endregion
 
+            #region (2) 根據 sideIndex 設定 mvdLineFinder 的參數
             // 左
             if (sideIndex == 0)
             {
-                mvdFindLineClass.bPositive = _xInspect.bPositive0;
-                mvdFindLineClass.bFindOrient = true;
-                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity0;
+                mvdLineFinder.bPositive = _xInspect.bPositive0;
+                mvdLineFinder.bFindOrient = true;
+                mvdLineFinder.bEdgePolarity = _xInspect.bEdgePolarity0;
             }
             // 上
             else if (sideIndex == 1)
             {
-                mvdFindLineClass.bPositive = _xInspect.bPositive1;
-                mvdFindLineClass.bFindOrient = false;
-                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity1;
+                mvdLineFinder.bPositive = _xInspect.bPositive1;
+                mvdLineFinder.bFindOrient = false;
+                mvdLineFinder.bEdgePolarity = _xInspect.bEdgePolarity1;
             }
             // 右
             else if (sideIndex == 2)
             {
-                mvdFindLineClass.bPositive = _xInspect.bPositive2;
-                mvdFindLineClass.bFindOrient = true;
-                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity2;
+                mvdLineFinder.bPositive = _xInspect.bPositive2;
+                mvdLineFinder.bFindOrient = true;
+                mvdLineFinder.bEdgePolarity = _xInspect.bEdgePolarity2;
             }
             // 下
             else if (sideIndex == 3)
             {
-                mvdFindLineClass.bPositive = _xInspect.bPositive3;
-                mvdFindLineClass.bFindOrient = false;
-                mvdFindLineClass.bEdgePolarity = _xInspect.bEdgePolarity3;
+                mvdLineFinder.bPositive = _xInspect.bPositive3;
+                mvdLineFinder.bFindOrient = false;
+                mvdLineFinder.bEdgePolarity = _xInspect.bEdgePolarity3;
             }
+            #endregion
 
-            if (forceDarkBackgroud)
-                mvdFindLineClass.Background = EdgeBackGroundType.Dark;
-            else
-                mvdFindLineClass.Background = _xInspect.xCarrierBackground;
+            //(3) 設定背景顏色
+            mvdLineFinder.Background = 
+                forceDarkBackgroud ? 
+                EdgeBackGroundType.Dark :
+                _xInspect.xCarrierBackground ;
 
-            var resultLine = mvdFindLineClass.Run(bmp, roi, sideIndex);
+            //(4) Filters
+            if (!TryApplyLineFilters(bmp, out Bitmap bmpWork))
+                bmpWork = bmp;
 
-            //cMvdLineSegmentFsOut[borderIndex] = resultLine;
+            //(5) 執行海康直線尋找
+            var resultLine = mvdLineFinder.Run(bmpWork, roi, sideIndex);
+
+            //(6) CleanUp
+            if (bmpWork != bmp)
+                bmpWork?.Dispose();
+
             return resultLine;
         }
-        
+
         /// <summary>
         /// 寻找平行线
         /// </summary>

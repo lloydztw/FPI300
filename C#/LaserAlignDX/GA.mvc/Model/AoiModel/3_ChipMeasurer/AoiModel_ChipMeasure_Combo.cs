@@ -18,10 +18,15 @@ using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System.Drawing;
 using VisionDesigner;
+
+#if (OPT_TRANSFORM_V38)
+using AoiModel_ChipMeasure_New = LaserAlignDX.AoiModel.V38.New.AoiModel_ChipMeasure;
+using AoiModel_ChipMeasure_Quad = LaserAlignDX.AoiModel.V38.Quad.AoiModel_ChipMeasure;
+#else
 using AoiModel_ChipMeasure_New = LaserAlignDX.AoiModel.V35.AoiModel_ChipMeasure;
 using AoiModel_ChipMeasure_Quad = LaserAlignDX.AoiModel.V31.AoiModel_ChipMeasure;
-//using AoiModel_ChipMeasure_New = LaserAlignDX.AoiModel.V38.New.AoiModel_ChipMeasure;
-//using AoiModel_ChipMeasure_Quad = LaserAlignDX.AoiModel.V38.Quad.AoiModel_ChipMeasure;
+#endif
+
 
 namespace LaserAlignDX.AoiModel.Combo
 {
