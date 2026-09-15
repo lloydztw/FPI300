@@ -53,12 +53,12 @@ namespace LaserAlignDX.Model.Coords
 
         /// <summary>
         /// 計算 具名尺寸 (不含邊隙)
-        /// (最新版之 計算結果 會同步存入 chipData.Dimension)
+        /// <br/>v38 Combo 之後的版本: 計算結果 會同步存入 chipData.Dimension
         /// </summary>
         /// <param name="results">具名尺寸 量測結果</param>
         /// <param name="lineBorderPairs">實時 晶粒定位 邊線框對 (與 chipData.ChipQuad2D 相同坐標系)</param>
         /// <param name="chipData">實時 晶粒定位 數據</param>
-        /// <param name="globalTrf">可以指定使用外部座標轉換系統, 默認 null</param>
+        /// <param name="globalTrf">保留 可以指定使用外部座標轉換系統, 目前內部強制設定為 null</param>
         /// <returns>錯誤碼</returns>
         /// <remarks>
         /// lineBorderPairs 是 實時 晶粒定位 邊線框對, 使用與 chipData.ChipQuad2D 相同的坐標系.

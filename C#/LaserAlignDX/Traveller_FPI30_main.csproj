@@ -415,6 +415,7 @@
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v31.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v35.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v38_New.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v38_Combo.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v38_Quad.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\5_BadConnInspect\AoiModel_BadConnInspector.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyAoiResult.cs" />

@@ -24,7 +24,7 @@ using System.Drawing;
 using System.Threading;
 
 using AoiModel_ChipLoc = LaserAlignDX.AoiModel.v31.AoiModel_ChipLoc;
-using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.Combo.AoiModel_ChipMeasure;
+using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.V38.Combo.AoiModel_ChipMeasure;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
 using ProcessEventArgs = NeedleX.ProcessSpace.ProcessEventArgs;
 
@@ -121,9 +121,10 @@ namespace LaserAlignDX.AoiModel.V3
         void initSubModels()
         {
             var subModels = new AoiModelBase[] { 
-                _aoiChipLoc, 
-                _aoiChipMeasure.BaseQ,
-                _aoiChipMeasure.BaseN,
+                _aoiChipLoc,
+                _aoiChipMeasure,
+                //_aoiChipMeasure.BaseQ,
+                //_aoiChipMeasure.BaseN,
                 _aoiChipDefects,
                 _aoiBadConnInspector,
                 _aoiQrDecoder, 

@@ -495,6 +495,10 @@ namespace LaserAlignDX.Model.Coords.V38
                     results[name] = (float)Math.Round(dist, 3);
                 }
 
+                //(7) 記入結果 (chipData.ChipDimension)
+                foreach (var key in results.Keys)
+                    chipData.ChipDimension.UpdateMeasurement(key, results[key]);
+
                 return ErrorCodes.OK;
             }
             catch (Exception ex)
