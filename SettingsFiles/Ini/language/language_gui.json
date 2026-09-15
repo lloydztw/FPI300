@@ -119,7 +119,7 @@
 "btnBuildMircoTrf" : ["Calc. Dim.", "精算尺寸", "", ""],
 "chkShowFilterResult" : ["Show Filter Result", "顯示濾波效果", "", ""],
 "btnAutoGapBorders" : ["Auto Layout", "自動框選", "",""],
-"chkUseAveGaps4" : ["Use Ave Gaps 4", "", ""],
+"chkUseAveGaps4" : ["Use Ave Gaps 4", "使用 平均邊隙4", ""],
 
 "lblDetectRegions" : ["Detect Regions", "檢測區塊", "", ""],
 "btnAdd" : ["Add", "添加", "",""],
