@@ -50,13 +50,11 @@ namespace JetEazy.Utils
         }
         #endregion
 
-        #region CONSTRUCTOR
         public FtpUploader(DtoFtpSettings settings)
         {
             _settings = settings ?? throw new ArgumentNullException(nameof(settings));
             _settings.Normalize();
         }
-        #endregion
 
         #region PUBLIC_METHODS
 
@@ -119,7 +117,7 @@ namespace JetEazy.Utils
         /// <summary>
         /// 同步上傳單一檔案至 FTP 伺服器 (Thread-Safe)
         /// </summary>
-        public bool UploadFile(string srcFileName, string subName, DateTime time, int timeoutMs = 15000)
+        public bool UploadFile(string srcFileName, string cateName, DateTime time, string lotID, int timeoutMs = 15000)
         {
             if (!_settings.Enabled)
             {
@@ -134,7 +132,8 @@ namespace JetEazy.Utils
             }
 
             string remoteFileName = Path.GetFileName(srcFileName);
-            string remoteFolder = _settings.GetSubDstFolder(subName, time.ToString("yyyyMMdd"));
+            string remoteSubFolder = $"{time:yyyyMMdd}/{lotID}";
+            string remoteFolder = _settings.GetSubDstFolder(cateName, remoteSubFolder);
 
             try
             {
@@ -178,9 +177,9 @@ namespace JetEazy.Utils
         /// <summary>
         /// 非同步上傳單一檔案至 FTP 伺服器
         /// </summary>
-        public async Task<bool> UploadFileAsync(string srcFileName, string subName, DateTime time, int timeoutMs = 15000)
+        public async Task<bool> UploadFileAsync(string srcFileName, string subName, DateTime time, string lotID, int timeoutMs = 15000)
         {
-            return await Task.Run(() => UploadFile(srcFileName, subName, time, timeoutMs));
+            return await Task.Run(() => UploadFile(srcFileName, subName, time, lotID, timeoutMs));
         }
 
         #endregion
@@ -275,6 +274,79 @@ namespace JetEazy.Utils
 
                     _createdDirectories.TryAdd(currentPath, true);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 遞迴確保 FTP 遠端多層資料夾存在，帶有快取機制與跨執行緒保護
+        /// </summary>
+        private void EnsureDirectoryExists_001(string remoteFolderPath)
+        {
+            if (string.IsNullOrWhiteSpace(remoteFolderPath))
+                return;
+
+            string fullFolderPath = CombineUrl(_settings.IpAddress, remoteFolderPath);
+
+            if (_createdDirectories.ContainsKey(fullFolderPath))
+                return;
+
+            lock (_dirLock)
+            {
+                if (_createdDirectories.ContainsKey(fullFolderPath))
+                    return;
+
+                string[] folders = remoteFolderPath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
+                string currentPath = _settings.IpAddress;
+
+                foreach (string folder in folders)
+                {
+                    currentPath = CombineUrl(currentPath, folder);
+
+                    if (_createdDirectories.ContainsKey(currentPath))
+                        continue;
+
+                    bool isCreatedOrExists = false;
+
+                    try
+                    {
+                        FtpWebRequest request = (FtpWebRequest)WebRequest.Create(currentPath);
+                        request.Method = WebRequestMethods.Ftp.MakeDirectory;
+                        request.Credentials = new NetworkCredential(_settings.Account, _settings.Password);
+                        request.UsePassive = true;
+                        request.KeepAlive = false;
+                        request.Timeout = 5000;
+
+                        using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                        {
+                            Log($"遠端建立目錄成功: {currentPath}");
+                            isCreatedOrExists = true;
+                        }
+                    }
+                    catch (WebException ex)
+                    {
+                        if (ex.Response is FtpWebResponse response &&
+                            response.StatusCode == FtpStatusCode.ActionNotTakenFileUnavailable)
+                        {
+                            // 550 代表目錄已存在
+                            Log($"[提示] 目錄已存在: {currentPath}");
+                            isCreatedOrExists = true;
+                        }
+                        else
+                        {
+                            Log($"[警告] 建立目錄失敗 ({folder}): {ex.Message}");
+                            // 發生其他非預期錯誤時，不應將其加入快取，並可視需求決定是否直接 throw 停止後續動作
+                            break;
+                        }
+                    }
+
+                    if (isCreatedOrExists)
+                    {
+                        _createdDirectories.TryAdd(currentPath, true);
+                    }
+                }
+
+                // 若整條完整路徑都確認成功，把完整路徑也加入快取
+                _createdDirectories.TryAdd(fullFolderPath, true);
             }
         }
 

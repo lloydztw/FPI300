@@ -63,32 +63,32 @@ namespace Traveller106.Ini.V1
                 DstFolder += "/";
         }
 
-        public string GetSubDstFolder(string subName, string dateTag)
+        public string GetSubDstFolder(string cateName, string dateTag)
         {
             // 1. 基礎目錄格式化 (統一換成 '/' 並去除頭尾斜線)
             string folder = (DstFolder ?? "").Replace("\\", "/").Trim('/');
-            string cleanSub = (subName ?? "").Replace("\\", "/").Trim('/');
+            string cleanCate = (cateName ?? "").Replace("\\", "/").Trim('/');
             string cleanTag = (dateTag ?? "").Replace("\\", "/").Trim('/');
 
-            // 2. 檢查 DstFolder 尾部是否已經包含了 subName，若有則先移除
-            if (!string.IsNullOrEmpty(cleanSub))
+            // 2. 檢查 DstFolder 尾部是否已經包含了 cateName，若有則先移除
+            if (!string.IsNullOrEmpty(cleanCate))
             {
-                // 檢查情境 A: DstFolder 完全等於 subName (例如 "线扫")
-                if (folder.Equals(cleanSub, StringComparison.OrdinalIgnoreCase))
+                // 檢查情境 A: DstFolder 完全等於 cateName (例如 "线扫")
+                if (folder.Equals(cleanCate, StringComparison.OrdinalIgnoreCase))
                 {
                     folder = "";
                 }
-                // 檢查情境 B: DstFolder 結尾為 "/subName" (例如 "D6400-5014/线扫")
-                else if (folder.EndsWith("/" + cleanSub, StringComparison.OrdinalIgnoreCase))
+                // 檢查情境 B: DstFolder 結尾為 "/cateName" (例如 "D6400-5014/线扫")
+                else if (folder.EndsWith("/" + cleanCate, StringComparison.OrdinalIgnoreCase))
                 {
-                    folder = folder.Substring(0, folder.Length - (cleanSub.Length + 1));
+                    folder = folder.Substring(0, folder.Length - (cleanCate.Length + 1));
                 }
             }
 
             // 3. 安全拼接 subName
-            if (!string.IsNullOrEmpty(cleanSub))
+            if (!string.IsNullOrEmpty(cleanCate))
             {
-                folder = string.IsNullOrEmpty(folder) ? cleanSub : folder + "/" + cleanSub;
+                folder = string.IsNullOrEmpty(folder) ? cleanCate : folder + "/" + cleanCate;
             }
 
             // 4. 安全拼接 dateTag

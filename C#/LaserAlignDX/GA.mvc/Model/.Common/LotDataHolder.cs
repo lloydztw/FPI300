@@ -171,7 +171,8 @@ namespace LaserAlignDX.Model
             {
                 clonedBmp,
                 pass,
-                taskTimeTag
+                taskTimeTag,
+                LotId,
             };
 
             ThreadPool.QueueUserWorkItem(argv =>
@@ -181,6 +182,7 @@ namespace LaserAlignDX.Model
                     var argvs = (object[])argv;
                     var cPass = (bool)argvs[1];
                     var cTimeTag = (DateTime)argvs[2];
+                    var cLotId = (string)argvs[3];
 
                     string fileNameOrg = null;
 
@@ -201,7 +203,7 @@ namespace LaserAlignDX.Model
 
                     if (fileNameOrg != null && _ftpUploader.Enabled)
                     {
-                        _ftpUploader.UploadFile(fileNameOrg, "线扫", _timeTag);
+                        _ftpUploader.UploadFile(fileNameOrg, "线扫", cTimeTag, cLotId);
                     }
                 }
                 catch (Exception ex)
@@ -398,7 +400,7 @@ namespace LaserAlignDX.Model
                     var cFlyID = (FlyID)argvs[0];
                     var cLotData = (FlyLotData)argvs[2];
                     var cResult = (PlcFlyResultCode)argvs[3];
-                    var tm = (DateTime)argvs[4];
+                    var cTimeTag = (DateTime)argvs[4];
 
                     using (Bitmap bmpBigAsync = (Bitmap)argvs[1])
                     {
@@ -415,18 +417,18 @@ namespace LaserAlignDX.Model
                             if (!isPass) folder += ".NG";
                         }
 
-                        string path = System.IO.Path.Combine(_INI.ResultImagePath, folder, tm.ToString("yyyyMMdd"), stripID);
+                        string path = System.IO.Path.Combine(_INI.ResultImagePath, folder, cTimeTag.ToString("yyyyMMdd"), stripID);
                         if (!Directory.Exists(path))
                             JetEazy.IO.QxPathUtility.InitDirectory(path);
 
-                        string fileName = $"{lotID}-[{flyShowIndex}]-[{code}]-{tm:yyyyMMdd_HHmmssfff}.jpg";
+                        string fileName = $"{lotID}-[{flyShowIndex}]-[{code}]-{cTimeTag:yyyyMMdd_HHmmssfff}.jpg";
                         fileName = System.IO.Path.Combine(path, fileName);
 
                         GaImageUtil.SaveBigImage(fileName, bmpBigAsync);
 
                         if (fileName != null && _ftpUploader.Enabled)
                         {
-                            _ftpUploader.UploadFile(fileName, "飞拍", _timeTag);
+                            _ftpUploader.UploadFile(fileName, "飞拍", _timeTag, lotID);
                         }
                     }
                 }
