@@ -17,7 +17,6 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.BasicSpace;
-using LeTian.AoiLib;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
@@ -175,12 +174,12 @@ namespace LaserAlignDX.Model
         public readonly GaChipCoordindates ChipCoords = new GaChipCoordindates();
 
         /// <summary>
-        /// 量測後之物理尺寸
+        /// 量測後 之 物理尺寸
         /// </summary>
         public readonly GaChipDimension ChipDimension = new GaChipDimension();
 
         /// <summary>
-        /// PAD 邊隙 (單位 mm)
+        /// 量測後 之 PAD 邊隙 (單位 mm)
         /// </summary>
         public readonly GaPadEdgeGaps PadEdgeGaps = new GaPadEdgeGaps();
 

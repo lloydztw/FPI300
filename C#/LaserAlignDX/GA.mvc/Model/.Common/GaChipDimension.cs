@@ -16,10 +16,12 @@
 using JetEazy.QMath;
 using System;
 using System.Collections.Generic;
-using VM.PlatformSDKCS;
 
 namespace LaserAlignDX.Model
 {
+    /// <summary>
+    /// 晶粒所有尺寸量測結果
+    /// </summary>
     public class GaChipDimension
     {
         public class Measurement
@@ -73,21 +75,19 @@ namespace LaserAlignDX.Model
 
         public void Reset(IEnumerable<string> measureKeyNames)
         {
-            bool hasX = false;
-            bool hasY = false;
-            
+            bool hasDimX = false;
+            bool hasDimY = false;
+
             _dict.Clear();
 
             foreach (string key in measureKeyNames)
             {
                 _dict[key] = new Measurement(key);
-                hasX |= key.StartsWith("X");
-                hasY |= key.StartsWith("Y");
+                hasDimX |= key.StartsWith("X");
+                hasDimY |= key.StartsWith("Y");
             }
 
-            //IsSimpleQuad = _dict.Count == 2 && _dict.ContainsKey("X") && _dict.ContainsKey("Y");
-
-            IsSimpleQuad = hasX && hasY;
+            IsSimpleQuad = hasDimX && hasDimY && _dict.Count == 4;
         }
         public void UpdateMeasurement(string key, float value)
         {
