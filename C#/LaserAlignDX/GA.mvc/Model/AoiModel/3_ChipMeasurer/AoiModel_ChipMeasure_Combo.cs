@@ -16,6 +16,7 @@
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using LeTian.AoiLib;
 using System.Drawing;
 using VisionDesigner;
 

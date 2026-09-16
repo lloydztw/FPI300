@@ -69,21 +69,31 @@ namespace LaserAlignDX.AoiModel
         /// </remarks>
         void Run(Bitmap bmpScene = null);
 
-        ///<summary>
-        /// 建立 MicroChipTransform
-        ///</summary>
+        /// <summary>
+        /// 建立 晶粒 微距轉換系統 I
+        /// </summary>
+        /// <param name="targetDim">目標尺寸數據</param>
+        /// <param name="lines">晶粒定位 4邊線</param>
+        /// <param name="regionBmp">Cell 區域截圖</param>
+        /// <param name="regionRoi">Cell 區域矩形</param>
+        /// <param name="isLocalLineCoord">輸入的 lines 是否為 Local Region Coordinates</param>
+        /// <returns>錯誤碼</returns>
         /// <remarks>
-        /// lines 輸入單位為 pixels (FullFov Camera Coordinates)
+        /// lines 由 isLocalLineCoord 指示 是否為 Local Region Coordinates 或是 Fullfov Camera Coordinates.
         /// </remarks>
-        ErrorCodes BuildMicroChipTransform(SizeF targetSize, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi);
+        ErrorCodes BuildMicroChipTransform(SizeF targetDim, EzLSD.LineSegment[] lines, Bitmap regionBmp, RectangleF regionRoi, bool isLocalLineCoord);
 
         /// <summary>
-        /// 為 參數編輯 所用
+        /// 建立 晶粒 微距轉換系統 II
         /// </summary>
+        /// <param name="lineBorderPairs">具名邊線框對</param>
+        /// <param name="regionBmp">Cell 區域截圖</param>
+        /// <param name="regionRoi">Cell 區域矩形</param>
+        /// <returns>錯誤碼</returns>
         /// <remarks>
-        /// lineEdgePairs 單位為 pixels (FullFov Camera Coordinates)
+        /// lineBorderPairs 的坐標系 由 lineBorderPairs.IsLocal 標明為 Local Region Coorindates 或是 Fullfov Coordinates.
         /// </remarks>
-        ErrorCodes BuildMicroChipTransform(LineBorderPairsCollection lineEdgePairs, Bitmap regionBmp, RectangleF regionRoi);
+        ErrorCodes BuildMicroChipTransform(LineBorderPairsCollection lineBorderPairs, Bitmap regionBmp, RectangleF regionRoi);
 
         /// <summary>
         /// 為 參數調試 所用

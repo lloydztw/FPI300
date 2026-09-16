@@ -163,7 +163,7 @@ namespace LaserAlignDX.Model
         public bool IsLocal
         {
             get => _isLocal;
-            set
+            private set
             {
                 _isLocal = value;
                 foreach (var pair in _dict.Values)

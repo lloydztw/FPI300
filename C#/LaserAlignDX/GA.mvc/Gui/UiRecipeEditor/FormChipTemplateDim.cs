@@ -185,43 +185,51 @@ namespace LaserAlignDX.Mvc.Gui
 
         ErrorCodes BuildMicroTransform()
         {
+            // Model
             var aoiModel = _sysModel?.AoiModel;
             if (aoiModel == null)
                 return ErrorCodes.NO_AOI_MODEL;
 
+            // Fullfov Bitmap
             var fullfovBmp = _sysModel?.LineScanImageHolder?.PeekBitmap();
             if (fullfovBmp == null)
                 return ErrorCodes.NO_LINE_SCAN_IMAGE;
 
+            // chipData
             var chipData = ActiveCell?.ChipData;
             if (chipData == null)
                 return ErrorCodes.ERR_NO_CHIP_LOCATION;
 
-            // Region Bitmap
+            // Region Roi
             var regionRoi = Rectangle.Round(chipData.CellRoi);
             GaUtil.Clip(ref regionRoi, fullfovBmp.Size);
             if (regionRoi.Width < 2 || regionRoi.Height < 2)
                 return ErrorCodes.ERR_NO_CHIP_LOCATION;
 
-            using (var regionBmp = fullfovBmp.Clone(Rectangle.Round(regionRoi), System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
+            // Region Bmp
+            using (var regionBmp = fullfovBmp.Clone(regionRoi, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                var goldenW = (float)numChipWidth.Value;
-                var goldenH = (float)numChipHeight.Value;
-                var goldenDim = new SizeF(goldenW, goldenH);
+                var targetW = (float)numChipWidth.Value;
+                var targetH = (float)numChipHeight.Value;
+                var targetDim = new SizeF(targetW, targetH);
 
+                // 實時 邊線框數據 (Fullfov Camera Coordinates) 
                 var lineBorderPairs = chipData.LineBorderPairs;
-                lineBorderPairs.SetTargetDists(goldenDim);
 
+                // 設定目標尺寸 
+                lineBorderPairs.SetTargetDists(targetDim);
+
+                // 是否 使用 簡單四邊線
                 if (_xRecipe.LineBorderParams.IsSimpleQuad)
                 {
-                    // 使用原有的計算方式
-                    var quadLines = lineBorderPairs.GetQuadLineSegments();
-                    var err = aoiModel.BuildMicroChipTransform(goldenDim, quadLines, regionBmp, regionRoi);
+                    // 使用 原有 微距轉換系統 的建構方式
+                    var edgeLines4 = lineBorderPairs.GetQuadLineSegments();
+                    var err = aoiModel.BuildMicroChipTransform(targetDim, edgeLines4, regionBmp, regionRoi, lineBorderPairs.IsLocal);
                     return err;
                 }
                 else
                 {
-                    // 使用新的計算方式
+                    // 使用 新的 微距轉換系統 的建構方式
                     var err = aoiModel.BuildMicroChipTransform(lineBorderPairs, regionBmp, regionRoi);
                     return err;
                 }

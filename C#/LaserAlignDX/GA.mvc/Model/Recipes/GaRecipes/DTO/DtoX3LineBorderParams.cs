@@ -140,7 +140,8 @@ namespace LaserAlignDX.Mvc.Model.Recipe
                 LineBorderPairs["Y"] = pairY;
             }
 
-            LineBorderPairs.IsLocal = true;
+            //>>> LineBorderPairs.IsLocal = true;
+            System.Diagnostics.Debug.Assert(LineBorderPairs.IsLocal==true, "參數設定的 LineBorderPairs 必須是 IsLocal == true!");
         }
 
         public override void Save(string iniFile)

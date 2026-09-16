@@ -15,9 +15,9 @@
 
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace;
+using LeTian.AoiLib;
 using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using VisionDesigner;
 
 namespace LaserAlignDX.AoiModel
@@ -37,7 +37,7 @@ namespace LaserAlignDX.AoiModel
         /// 參數調試用
         /// </summary>
         bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine);
-
+        
         /// <summary>
         /// 參數調試用
         /// </summary>

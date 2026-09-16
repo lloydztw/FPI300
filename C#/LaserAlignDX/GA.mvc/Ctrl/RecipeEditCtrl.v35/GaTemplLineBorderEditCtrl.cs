@@ -20,6 +20,7 @@ using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Gui;
+using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.Mvc.Model.Recipe;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
@@ -36,13 +37,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
     public class GaTemplLineBorderEditCtrl : GaRcpBaseCtrl
     {
         #region RECIPE_PARAMS
-        InspectX3ParaClass _xInspectX3
+        InspectX3ParaClass _xInspectParams
         {
-            get { return InspectX3ParaClass.Instance; }
+            get => _xRecipe.InspectParams;
         }
         MatchAlgorithmEnum _xAlgorithm
         {
-            get => _xInspectX3.xAlgorithm;
+            get => _xInspectParams.xAlgorithm;
         }
         DtoX3LineBorderParams _xLineBorderParams
         {
@@ -50,7 +51,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         }
         LineBorderPairsCollection _xLineBorderPairs
         {
-            get => _xRecipe.LineBorderParams.LineBorderPairs;
+            get => _xLineBorderParams.LineBorderPairs;
         }
         #endregion
 
@@ -1002,93 +1003,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
             }
             else
             {
-#if (OPT_REPLACED_BY_fetchLineSegments)
-                var lineBorderPairs = _xRecipe?.LineBorderParams.LineBorderPairs;
-                if (lineBorderPairs == null)
-                    return;
-
-                foreach(var lineSegBox in _cviLineSegmentBoxes)
-                {
-                    lineSegBox.Attach(null);
-                    lineSegBox.Visible = false;
-                }
-
-                for (int index = 0, N = _cviLineBorderBoxes.Length; index < N; index++)
-                {
-                    var cviBorderBox = _cviLineBorderBoxes[index];
-                    if (cviBorderBox.Tag is Tuple<string, int> tag)
-                    {
-                        var keyName = tag.Item1;
-                        var ib = tag.Item2;
-
-                        if (!lineBorderPairs.ContainsKey(keyName))
-                            continue;
-
-                        var borderRect = cviBorderBox.Box;
-                        var eb = getBorderEnum(keyName, ib);
-                        bool ok = aoiTryRunFindLineSegment(eb, _xRecipe.GoldenRegionCellBmp, borderRect, out var mvdLines);
-                        var linesOut = GaMvdExt.ToCSharpLines(mvdLines);
-
-                        // 更新到 lineSegmentBoxes
-                        _cviLineSegmentBoxes[index].Attach(linesOut);
-                        _cviLineSegmentBoxes[index].Visible = ok && !_isGapBorderBoxActived;
-
-                        // 更新到 lineBorderPairs (recipe)
-                        if (linesOut != null && linesOut.Length > 0)
-                        {
-                            if (!lineBorderPairs.TryGetValue(keyName, out var rcpPair))
-                            {
-                                lineBorderPairs[keyName] = rcpPair = new LineBorderPair(lineBorderPairs.IsLocal);
-                                rcpPair.Borders[ib] = QvQuad2D.From(borderRect).ToBox2D();
-                            }
-                            rcpPair.LineSegments[ib] = new EzLSD.LineSegment(linesOut[0][0], linesOut[0][1]);
-                        }
-                    }
-                }
-#endif
-
-#if (OPT_OLD_CODE)
-                int idx = 0;
-                foreach (var kv in lineBorderPairs)
-                {
-                    var keyName = kv.Key;
-                    var pair = kv.Value;
-                    if (pair == null) continue;
-
-                    for (int ib = 0; ib < 2; ib++)
-                    {
-                        if (idx >= _cviLineBorderBoxes.Length)
-                            break;
-
-                        var borderRect = _cviLineBorderBoxes[idx].Box;
-                        EdgeBorder ebID = getBorderEnum(keyName, ib);
-
-                        bool ok = aoiTryRunFindLineSegment(ebID, _xRecipe.GoldenRegionCellBmp, borderRect, out var mvdLines);
-                        var linesOut = GaMvdExt.ToCSharpLines(mvdLines);
-
-                        // 更新到 model (recipe)
-                        if (linesOut != null && linesOut.Length > 0)
-                        {
-                            var pts = linesOut[0];
-                            pair.LineSegments[ib] = new EzLSD.LineSegment(pts[0], pts[1]);
-                        }
-                        
-                        _cviLineSegmentBoxes[idx].Attach(linesOut);
-                        _cviLineSegmentBoxes[idx].Visible = ok;
-                        idx++;
-                    }
-                }
-
-                for(int i = idx; i < _cviLineSegmentBoxes.Length; i++)
-                    _cviLineSegmentBoxes[i].Visible = false;
-#endif
                 if (_xLineBorderPairs != null)
                 {
+                    // 實時抓取邊線, 並更新到 _xLineBorderPairs 對應欄位
                     fetchLineSegments(show);
 
                     if (calcGoldenDim)
                     {
-                        // NOTE: 這裡會影響 PAD型晶粒的 Golden Template "GRID" !!! 
+                        // 設定 量測尺寸的目標值 並 建立微距轉換系統
+                        // 注意: _xLineBorderPairs 在參數檔內為 Local Region Coordinates !
+                        // 注意: 這裡會影響 PAD型晶粒的 Golden Template "GRID" !!! 
                         aoiCalcGoldenChipDimension(_xLineBorderPairs);
                     }
 
@@ -1098,19 +1022,19 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         }
         void fetchLineSegments(bool show)
         {
-            // 參數
+            // 參數 (邊線手拉框)
             var xLineBorderPairs = _xLineBorderPairs;   
             if (xLineBorderPairs == null)
                 return;
 
-            // 即將顯示抓到的線段
+            // 重置 即將顯示抓到的線段
             foreach (var lineSegBox in _cviLineSegmentBoxes)
             {
                 lineSegBox.Attach(null);
                 lineSegBox.Visible = false;
             }
 
-            // 根據每一個 lineBorderBoxes 來抓取對應 邊線
+            // 根據每一個 _cviLineBorderBoxes 來抓取對應 邊線
             for (int index = 0, N = _cviLineBorderBoxes.Length; index < N; index++)
             {
                 var cviBorderBox = _cviLineBorderBoxes[index];
@@ -1129,22 +1053,20 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                     var eBorder = getBorderEnum(keyName, ib);
 
                     // 調用 aoi (海康) 來抓邊線
-                    bool ok = aoiTryRunFindLineSegments(eBorder, _xRecipe.GoldenRegionCellBmp, borderRect, out var mvdLines);
-                    
-                    // 轉換 LineSegments
-                    var linesOut = GaMvdExt.ToCSharpLines(mvdLines);
+                    bool ok = aoiTryRunFindLineSegments(eBorder, _xRecipe.GoldenRegionCellBmp, borderRect, out var linesOut);
 
-                    // 更新到 lineSegmentBoxes
+                    // 更新到 _cviLineSegmentBoxes
                     _cviLineSegmentBoxes[index].Attach(linesOut);
                     _cviLineSegmentBoxes[index].Visible = ok && show && !_isGapBorderBoxActived;
 
-                    // 更新到 參數 xlineBorderPairs
+                    // 將抓到的 邊線 更新至 參數 xlineBorderPairs 的對應欄位
                     if (linesOut != null && linesOut.Length > 0)
                     {
                         if (!xLineBorderPairs.TryGetValue(keyName, out var rcpPair))
                         {
-                            xLineBorderPairs[keyName] = rcpPair = new LineBorderPair(xLineBorderPairs.IsLocal);
+                            rcpPair = new LineBorderPair(xLineBorderPairs.IsLocal);
                             rcpPair.Borders[ib] = QvQuad2D.From(borderRect).ToBox2D();
+                            xLineBorderPairs[keyName] = rcpPair;
                         }
                         rcpPair.LineSegments[ib] = new EzLSD.LineSegment(linesOut[0][0], linesOut[0][1]);
                     }
@@ -1156,15 +1078,15 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         {
             if (toRecipe)
             {
-                _xInspectX3.GrayLimitHi = (int)numGrayLimitHi.Value;
-                _xInspectX3.GrayLimitLo = (int)numGrayLimitLo.Value;
+                _xInspectParams.GrayLimitHi = (int)numGrayLimitHi.Value;
+                _xInspectParams.GrayLimitLo = (int)numGrayLimitLo.Value;
                 _isModified = true;
             }
             else
             {
                 _bypassWindowEvents = true;
-                GaUtil.SetNum(numGrayLimitHi, _xInspectX3.GrayLimitHi);
-                GaUtil.SetNum(numGrayLimitLo, _xInspectX3.GrayLimitLo);
+                GaUtil.SetNum(numGrayLimitHi, _xInspectParams.GrayLimitHi);
+                GaUtil.SetNum(numGrayLimitLo, _xInspectParams.GrayLimitLo);
                 _bypassWindowEvents = false;
             }
         }
@@ -1228,7 +1150,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         /// <remarks>
         /// 此處函式不牽扯到 GUI, 將來要納入 AOI MODEL
         /// </remarks>
-        bool aoiTryRunFindLineSegments(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF boxRect, out CMvdLineSegmentF[] resultLines)
+        bool aoiTryRunFindLineSegments(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF boxRect, out PointF[][] resultLines)
         {
 #if (OPT_LEGACY_000)
             bool bPositive, bEdgePolarity, bFindOrient;
@@ -1314,44 +1236,67 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 return mvdLine != null;
             }
 #endif
+            resultLines = null;
 
             var aoi = _sysModel?.AoiModel?.GetChipMeasureAoi();
             if (aoi == null)
-            {
-                resultLines = null;
                 return false;
+
+            aoi.TryFindLineSegment(eBorder, bmpSrc, boxRect, out var mvdLine);
+
+            if (mvdLine != null)
+            {
+                // 轉換 mveLines to CSharp Lines
+                resultLines = GaMvdExt.ToCSharpLines(new[] { mvdLine });
             }
 
-            aoi.TryFindLineSegment(eBorder, bmpSrc, boxRect, out var line);
-            resultLines = new CMvdLineSegmentF[] { line };
-            return line != null;
+            return resultLines != null;
         }
 
         /// <summary>
-        /// 計算所有 量測尺寸 的 理想預期值
-        /// (lineBorderPairs 單位 pixels, 必須是 FullFov Camera Coordinates)
+        /// 設定 量測尺寸的目標值 並 建立微距轉換系統
         /// </summary>
         /// <remarks>
-        /// 注意: 這裡會影響 PAD型晶粒的 Golden Template "GRID" !!! 
+        /// 注意: _xLineBorderPairs 在參數檔內 可能為 Local Region Coordinates ! <br/>
+        /// 注意: 這裡會影響 PAD型晶粒的 Golden Template "GRID" !!!  
         /// </remarks>
         void aoiCalcGoldenChipDimension(LineBorderPairsCollection lineBorderPairs)
         {
+            //(0) AoiModel
             var aoiModel = _sysModel?.AoiModel;
 
             if (aoiModel != null && lineBorderPairs != null)
             {
+                //(1) Region Roi 與 Region Bmp
                 var regionRoi = _xRecipe.GoldenRegionCellRect;
                 var regionBmp = _xRecipe.GoldenRegionCellBmp;
                 if (regionBmp == null)
                     return;
 
-                var targetSize = new SizeF(_xInspectX3.xTemplateChipWidth, _xInspectX3.xTemplateChipHeight);
-                lineBorderPairs.SetTargetDists(targetSize);
+                //(2) 設定 目標尺寸
+                var targetW = _xInspectParams.xTemplateChipWidth;
+                var targetH = _xInspectParams.xTemplateChipHeight;
+                var targetDim = new SizeF(targetW, targetH);
+                lineBorderPairs.SetTargetDists(targetDim);
   
-                var err = _xRecipe.LineBorderParams.IsSimpleQuad ?
-                    aoiModel.BuildMicroChipTransform(targetSize, lineBorderPairs.GetQuadLineSegments(), regionBmp, regionRoi):
-                    aoiModel.BuildMicroChipTransform(lineBorderPairs, regionBmp, regionRoi);
+                ErrorCodes err;
 
+                //(3) 是否 使用 簡單四邊線
+                if (_xRecipe.LineBorderParams.IsSimpleQuad)
+                {
+                    //(3.1) 取得 4邊線
+                    var edgeLines4 = lineBorderPairs.GetQuadLineSegments();
+                    
+                    //(3.2) 使用 原有 微距轉換系統 的建構方式
+                    err = aoiModel.BuildMicroChipTransform(targetDim, edgeLines4, regionBmp, regionRoi, lineBorderPairs.IsLocal);
+                }
+                else
+                {
+                    //(3.3) 使用 新的 微距轉換系統 的建構方式
+                    err = aoiModel.BuildMicroChipTransform(lineBorderPairs, regionBmp, regionRoi);
+                }
+
+                //(4) 顯示訊息
                 if (err != Model.ErrorCodes.OK)
                 {
                     string errMsg = "無法建立 Micro Transform:\n\r\n\r" + GaUtil.GetEnumDescription(err);

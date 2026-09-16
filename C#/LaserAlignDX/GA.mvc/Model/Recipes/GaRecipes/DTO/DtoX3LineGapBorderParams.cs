@@ -106,7 +106,8 @@ namespace LaserAlignDX.Mvc.Model.Recipe
             if (count < 8)
                 UseDefaultBorders = true;
 
-            GapBorderPairs.IsLocal = true;
+            //>>> GapBorderPairs.IsLocal = true;
+            System.Diagnostics.Debug.Assert(GapBorderPairs.IsLocal == true, "參數設定的 GapBorderPairs 必須是 IsLocal == true!");
         }
 
         public override void Save(string iniFile)
