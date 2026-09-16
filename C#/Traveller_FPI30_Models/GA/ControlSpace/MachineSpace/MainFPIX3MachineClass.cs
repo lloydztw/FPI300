@@ -1,0 +1,305 @@
+﻿
+using JetEazy.BasicSpace;
+using JetEazy.ControlSpace;
+using JetEazy.ControlSpace.MotionSpace;
+using JetEazy.ControlSpace.PLCSpace;
+using System;
+using VsCommon.ControlSpace.IOSpace;
+
+namespace VsCommon.ControlSpace.MachineSpace
+{
+    public class MainFPIX3MachineClass : GeoMachineClass
+    {
+        const int MSDuriation = 10;
+
+        public IPlcIoFPIX3 PLCIO;
+
+        public MainFPIX3MachineClass(Machine_EA machineea, string opstr, string workpath, bool isnouseplc)
+        {
+            IsNoUseIO = isnouseplc;
+
+            myMachineEA = machineea;
+            //VERSION = version;
+            //OPTION = option;
+
+            WORKPATH = workpath;
+
+            GetOPString(opstr);
+
+            MainProcess = new ProcessClass();
+
+            myJzTimes = new JzTimes();
+            myJzTimes.Cut();
+        }
+        public override void GetOPString(string opstr)
+        {
+            string[] strs = opstr.Split(',');
+
+            PLCCount = int.Parse(strs[0]);
+            MotionCount = int.Parse(strs[1]);
+            LightCount = int.Parse(strs[2]);
+
+            if (PLCCount > 0)
+                PLCCollection = new VsCommPLC[PLCCount];
+
+            if (MotionCount > 0)
+                PLCMOTIONCollection = new PLCMotionClass[MotionCount];
+
+            if (LightCount > 0)
+                LightCollection = new VsLight[LightCount];
+        }
+        public override bool Initial(bool isnouseio, bool isnousemotor)
+        {
+            int i = 0;
+            bool ret = true;
+
+            IsNoUseIO = isnouseio;
+            IsNoUseMotor = isnousemotor;
+
+            //LETIAN: @2025-10-05
+            string iniPath = System.IO.Path.Combine(WORKPATH, myMachineEA.ToString());
+
+            i = 0;
+            while (i < PLCCount)
+            {
+                PLCCollection[i] = new VsCommPLC();
+
+                //>>> ret &= PLCCollection[i].Open(WORKPATH + "\\" + myMachineEA.ToString() + "\\PLCCONTROL" + i.ToString() + ".INI", isnouseio);
+                string iniFileName = System.IO.Path.Combine(iniPath, $"PlcControl{i}.ini");
+                ret &= PLCCollection[i].Open(iniFileName, isnouseio);
+
+                PLCCollection[i].Name = "PLC" + i.ToString();
+                PLCCollection[i].ReadAction += ReadAction;
+
+                i++;
+            }
+
+            i = 0;
+            while (i < MotionCount)
+            {
+                //PLCMOTIONCollection[i] = new PLCMotionClass();
+                ////>>> PLCMOTIONCollection[i].Intial(WORKPATH + "\\" + myMachineEA.ToString(), (MotionEnum)i, PLCCollection, IsNoUseMotor);
+                //PLCMOTIONCollection[i].Intial(iniPath, (MotionEnum)i, PLCCollection, IsNoUseMotor);
+
+                // LETIAN: 2026-04-15 統一由 GaMotorFactory 生成 PLCMotionClass
+                var plcMotor = GaMotorFactory.Instance(iniPath, (MotionEnum)i, PLCCollection, IsNoUseMotor);
+                PLCMOTIONCollection[i] = plcMotor;
+
+                i++;
+            }
+
+            i = 0;
+            while (i < LightCount)
+            {
+                LightCollection[i] = new VsLight();
+                //>>> LightCollection[i].Open(WORKPATH + "\\" + myMachineEA.ToString() + "\\LightCONTROL" + i.ToString() + ".INI", isnouseio);
+                string iniFileName = System.IO.Path.Combine(iniPath, $"LightControl{i}.ini");
+                LightCollection[i].Open(iniFileName, isnouseio);
+
+                i++;
+            }
+
+            // LETIAN: 2025-09-11 加入模擬的 PLCIO
+            if (IsNoUseIO)
+                PLCIO = new MainFPIX3IOSim();
+            else
+                PLCIO = new MainFPIX3IOClass();
+
+            //>>> PLCIO.Initial(WORKPATH + "\\" + myMachineEA.ToString(), PLCCollection);
+            PLCIO.Initial(iniPath, PLCCollection);
+
+            return ret;
+        }
+
+        private void ReadAction(char[] readbuffer, string operationstring, string myname)
+        {
+            switch (myname)
+            {
+                case "PLC0":
+                    PLC0ReadAction(readbuffer, operationstring);
+                    break;
+            }
+        }
+        void PLC0ReadAction(char[] readbuffer, string operationstring)
+        {
+            switch (operationstring)
+            {
+                case "Get All M":
+                    PLC0GetAllMEX(readbuffer);
+                    break;
+                case "Get All X":
+                    PLC0GetAllX(readbuffer);
+                    break;
+                case "Get All Y":
+                    PLC0GetAllY(readbuffer);
+                    break;
+            }
+        }
+        void PLC0GetAllX(char[] readbuffer)
+        {
+            String Str = new string(readbuffer, 6, 10); //X0000
+
+            UInt32 GetInt = HEX32(Str);
+            int i = 0;
+            while (i < 32)
+            {
+                bool ison = ((GetInt >> i) % 2) == 1;
+
+                PLCCollection[0].IOData.SetXBit(0 + i, ison);
+
+                i++;
+            }
+
+            //UInt32 GetInt = HEX32(Str.Substring(0, 4));
+            //int i = 0;
+
+            //while (i < Str.Length)
+            //{
+            //    bool ison = Str.Substring(i, 1) == "1";
+
+            //    PLCCollection[0].IOData.SetXBit(i, ison);
+
+            //    i++;
+            //}
+        }
+        void PLC0GetAllY(char[] readbuffer)
+        {
+            String Str = new string(readbuffer, 6, 10); //Y0000
+            UInt32 GetInt = HEX32(Str);
+            // string Yio = Convert.ToString(GetInt, 2);
+            int i = 0;
+            while (i < 32)
+            {
+                bool ison = ((GetInt >> i) % 2) == 1;
+
+                PLCCollection[0].IOData.SetYBit(0 + i, ison);
+
+                i++;
+            }
+
+            //UInt32 GetInt = HEX32(Str.Substring(0, 4));
+            //int i = 0;
+
+            //while (i < Str.Length)
+            //{
+            //    //bool ison = (GetInt & (1 << i)) == (1 << i);
+            //    bool ison = Str.Substring(i, 1) == "1";
+
+            //    PLCCollection[0].IOData.SetYBit(i, ison);
+
+            //    i++;
+            //}
+        }
+        void PLC0GetAllMEX(char[] readbuffer)
+        {
+            String Str = new string(readbuffer, 6, 8); //M0048
+
+            UInt32 GetInt = HEX32(Str);
+            int i = 0;
+
+            while (i < 32)
+            {
+                bool ison = ((GetInt >> i) % 2) == 1;
+
+                PLCCollection[0].IOData.SetMBit(48 + i, ison);
+
+                i++;
+            }
+
+            //Str = new string(readbuffer, 14, 8); //M00
+            //GetInt = HEX32(Str);
+            //i = 0;
+
+            //while (i < 32)
+            //{
+            //    bool ison = ((GetInt >> i) % 2) == 1;
+
+            //    PLCCollection[0].IOData.SetMBit(1040 + i, ison);
+            //    i++;
+            //}
+
+            //Str = new string(readbuffer, 22, 8); //M1200
+            //GetInt = HEX32(Str);
+            //i = 0;
+
+            //while (i < 32)
+            //{
+            //    bool ison = ((GetInt >> i) % 2) == 1;
+
+            //    PLCCollection[0].IOData.SetMBit(1200 + i, ison);
+            //    i++;
+            //}
+
+        }
+        public override void Tick()
+        {
+            if (myJzTimes.msDuriation < MSDuriation)
+                return;
+
+            CheckEvent();
+
+            myJzTimes.Cut();
+        }
+
+        public override void GoHome()
+        {
+        }
+        public override void CheckEvent()
+        {
+            if (PLCCollection == null)
+                return;
+            foreach (VsCommPLC plc in PLCCollection)
+            {
+                plc.Tick();
+            }
+        }
+        public override void GetStart(bool isdirect, bool isnouseplc)
+        {
+            throw new NotImplementedException();
+        }
+        public override void SetDelayTime()
+        {
+            throw new NotImplementedException();
+        }
+        public override void MainProcessTick()
+        {
+            throw new NotImplementedException();
+        }
+        public void PLCRetry()
+        {
+            foreach (VsCommPLC plc in PLCCollection)
+            {
+                plc.RetryConn();
+            }
+        }
+        public override void Close()
+        {
+            if (PLCCollection != null)
+            {
+                foreach (VsCommPLC plc in PLCCollection)
+                {
+                    plc.Close();
+                }
+            }
+        }
+        public override string PLCFps()
+        {
+            string str = string.Empty;
+            if (PLCCollection != null)
+            {
+                foreach (VsCommPLC plc in PLCCollection)
+                {
+                    str += plc.iCount.ToString() + ",";
+                }
+            }
+            return str;
+        }
+        public override void SetNormalTemp(bool ebTemp)
+        {
+            foreach (VsCommPLC plc in PLCCollection)
+            {
+                plc.SetNormalTemp(ebTemp);
+            }
+        }
+    }
+}

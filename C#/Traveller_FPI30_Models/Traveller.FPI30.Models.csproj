@@ -1,0 +1,603 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\OpenCvSharp4.runtime.win.4.8.0.20230708\build\net48\OpenCvSharp4.runtime.win.props" Condition="Exists('..\packages\OpenCvSharp4.runtime.win.4.8.0.20230708\build\net48\OpenCvSharp4.runtime.win.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{4FE7219A-DC84-4645-92B5-1FFCE646C8E3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>TravellerFPI30.Models</RootNamespace>
+    <AssemblyName>Traveller.FPI30.Models</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>..\..\bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;OPT_CALIB_V5 | OPT_TRANSFORM_V38 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>..\..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE;OPT_CALIB_V5 | OPT_TRANSFORM_V37 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>jx_vision.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;FX3U || XFATEK || OPT_LETIAN_AUTO_LAYOUT</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\..\_BIN_\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;FX3U || XFATEK || OPT_LETIAN_AUTO_LAYOUT</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AForge">
+      <HintPath>..\Dlls\AForge.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge.Imaging">
+      <HintPath>..\Dlls\AForge.Imaging.dll</HintPath>
+    </Reference>
+    <Reference Include="AForge.Math">
+      <HintPath>..\Dlls\AForge.Math.dll</HintPath>
+    </Reference>
+    <Reference Include="AUBaseDotNet, Version=1.0.1609.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\Au\AUBaseDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="AUBlobDotNet, Version=1.0.1609.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\Au\AUBlobDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="AUCalibratorDotNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\Au\AUCalibratorDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="AUFindDotNet, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\Au\AUFindDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="AUImageDotNet, Version=1.0.1609.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\Au\AUImageDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="AUMatchDotNet, Version=1.0.1610.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\Au\AUMatchDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="AUMeasureDotNet, Version=1.0.1704.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\Au\AUMeasureDotNet.dll</HintPath>
+    </Reference>
+    <Reference Include="AUUtility, Version=1.0.1610.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\Au\AUUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="DecodeAllinone, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\DecodeAllinone.dll</HintPath>
+    </Reference>
+    <Reference Include="DecodeMaker, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\DecodeMaker.dll</HintPath>
+    </Reference>
+    <Reference Include="FreeImageNET">
+      <HintPath>..\Dlls\FreeImageNET.dll</HintPath>
+    </Reference>
+    <Reference Include="ImageSourceModuleCs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6a03c4a48a6df5e6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\VisionMaster4.2.0\Development\V4.x\ComControls\Assembly\ImageSourceModuleCs.dll</HintPath>
+    </Reference>
+    <Reference Include="IMVSMarkFindModuCs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f5b7001f1805d7f5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\VisionMaster4.2.0\Development\V4.x\ComControls\Assembly\IMVSMarkFindModuCs.dll</HintPath>
+    </Reference>
+    <Reference Include="IMVSQuadrangleFindModuCs, Version=1.0.0.0, Culture=neutral, PublicKeyToken=9cd04858519c6211, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\VisionMaster4.2.0\Development\V4.x\ComControls\Assembly\IMVSQuadrangleFindModuCs.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.AccountMgr">
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.AccountMgr.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.Camera.Viewer">
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.Camera.Viewer.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.CSharp, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.EzImage.Interface, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.EzImage.Interface.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.EzImages, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.EzImages.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.ImageViewerEx, Version=3.2.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.ImageViewerEx.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.Lang, Version=1.3.0.3, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.Lang.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.OpenCv3, Version=4.8.2.3, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.OpenCv3.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.OpenCv3.Viewer, Version=4.8.2.3, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.OpenCv3.Viewer.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.QUtility, Version=2.5.6.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.QUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.QxCollections, Version=3.0.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.QxCollections.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazyLibEx">
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazyLibEx.dll</HintPath>
+    </Reference>
+    <Reference Include="LeTian.AwFramework, Version=2.0.7.3, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.AwFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="LeTian.JxProps, Version=2.0.2.2, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.JxProps.dll</HintPath>
+    </Reference>
+    <Reference Include="LeTian.JxProps.Gui, Version=2.0.1.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.JxProps.Gui.dll</HintPath>
+    </Reference>
+    <Reference Include="MoveGraphLibrary">
+      <HintPath>..\Dlls\MoveGraphLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDAlmightyPatMatch.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=d1775c00d24b42a0, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDAlmightyPatMatch.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDBlobFind.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=1ddaedcf30433c37, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDBlobFind.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDBoxOverlap.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=266db6fa12428608, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDBoxOverlap.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDCircleFind.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=20e73207c21b5977, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDCircleFind.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDCNNCodeReader.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=f723f1780490d437, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDCNNCodeReader.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDCode2DReader.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=8cf0701c7bb1a732, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDCode2DReader.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDCore.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=1325730a174c0650, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Common\MVDCore.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDGrayPatMatch.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=a8b65b043ba16bb7, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDGrayPatMatch.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDGrayPatMatchV2.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=3f69ec037058254f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDGrayPatMatchV2.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDImage.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=ce2c144a3e6a9a93, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Common\MVDImage.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDImageAffineTransform.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=85794d8c0bf3f2be, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDImageAffineTransform.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDImageArithmetic.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=572f56b863e4ebce, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDImageArithmetic.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDImageBinary.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=c8e52e37b57a53fa, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDImageBinary.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDImageMorph.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=d60fc2b505bf3a6c, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDImageMorph.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDImageRegionCopy.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=7a3e64db8a1b16f5, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDImageRegionCopy.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDL2LMeasure.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=38d351edf25ea0ee, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDL2LMeasure.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDLineFind.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=f53e9becd799eccd, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDLineFind.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDP2PMeasure.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=3150efb7e24e4646, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDP2PMeasure.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDPairLineFind.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=167793acc9680f60, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDPairLineFind.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDPositionFix.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=0dabd5a0cd753dff, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDPositionFix.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVDShape.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=a59215ef735587a6, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Common\MVDShape.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MvRenderActiveX.Net, Version=4.2.1.4, Culture=neutral, PublicKeyToken=da2fd3581884613a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Common\MvRenderActiveX.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.5.3.4\lib\net46\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.Windows.Forms.5.2.3\lib\net35\NLog.Windows.Forms.dll</HintPath>
+    </Reference>
+    <Reference Include="ObjectListView">
+      <HintPath>C:\Program Files\Common Files\JetEazy\ObjectListView.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCvSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCvSharp4.4.8.0.20230708\lib\net48\OpenCvSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCvSharp.Extensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCvSharp4.Extensions.4.8.0.20230708\lib\net48\OpenCvSharp.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCvSharp.WpfExtensions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCvSharp4.WpfExtensions.4.8.0.20230708\lib\net48\OpenCvSharp.WpfExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="opencv_vbase, Version=2.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\opencv_vbase.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="ProjectForAllinone, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\ProjectForAllinone.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing.Common, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Drawing.Common.7.0.0\lib\net462\System.Drawing.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="VM.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=61600122bc9264b9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\VisionMaster4.2.0\Development\V4.x\ComControls\Assembly\VM.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="VM.PlatformSDKCS, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c1484a72052ee3d4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\VisionMaster4.2.0\Development\V4.x\ComControls\Assembly\VM.PlatformSDKCS.dll</HintPath>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="zxing, Version=0.16.8.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\zxing.dll</HintPath>
+    </Reference>
+    <Reference Include="zxing.presentation, Version=0.15.0.0, Culture=neutral, PublicKeyToken=4e88037ac681fe60, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\zxing.presentation.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include=".Global\Config.cs" />
+    <Compile Include=".Global\Ini\v1\UITypeEditors\FormFtpSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include=".Global\Ini\v1\UITypeEditors\FormFtpSettings.Designer.cs">
+      <DependentUpon>FormFtpSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include=".Global\Ini\v1\Dto\DtoFtpSettings.cs" />
+    <Compile Include=".Global\Ini\v1\UITypeEditors\FtpUITypeEditor.cs" />
+    <Compile Include=".Global\Ini\v1\INI.cs" />
+    <Compile Include=".Global\Ini\v1\Dto\DtoINI.cs" />
+    <Compile Include=".Global\Prompts.cs" />
+    <Compile Include="GA.mvc\.Enums\GapEnum.cs" />
+    <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
+    <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiModel_ChipLoc.cs" />
+    <Compile Include="GA.mvc\Model\.Common\GaChipMeasurePointsCalc.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v38_Combo.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\5_BadConnInspect\AoiModel_BadConnInspector.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyAoiResult.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyMetaData.cs" />
+    <Compile Include="GA.mvc\Model\.Common\GaChipDimension.cs" />
+    <Compile Include="GA.mvc\Model\.Common\LineBorderPair.cs" />
+    <Compile Include="GA.mvc\Model\.Common\PixRounder.cs" />
+    <Compile Include="GA.mvc\Model\.Common\LotDataHolder.cs" />
+    <Compile Include="GA.mvc\Model\.Common\XCellBloc.cs" />
+    <Compile Include="GA.mvc\Model\.Common\PlcDataPacker.cs" />
+    <Compile Include="GA.mvc\Model\.Common\GaChipData.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\0_Base\AoiModel_Base.cs" />
+    <Compile Include="GA.mvc\Model\.Common\LotData.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\0_Base\EzLSD.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiLib\EzPadsGridFinder.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiLib\EzRigidBodyGridMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\implements\JezGridPadsChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\implements\MvdChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\IMvdTemplateMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\MvdCompositeChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\AoiModel_FlyCam.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\5_QrCode\AoiModel_QrCode.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\4_DefectDetector\AoiModel_Defects.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\1_EmptyTray\AoiModel_EmptyTray.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\4_DefectDetector\MvdDefectDetector_G1.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiChipLocator.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiPostBadConnInspector.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiFlyCamMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiDefectsDetector.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiChipMeasurer.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiQrDecoder.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v30.cs" />
+    <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\Supports\GaBigImageHolder.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\Supports\GaCellsGroup.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\Supports\GaProgressEventArgs.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\Supports\Zigzag.cs" />
+    <Compile Include="GA.mvc\.Enums\InspectReason.cs" />
+    <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellsDataCollection.cs" />
+    <Compile Include="GA.mvc\Model\AoiRegionCells\RegionCellX3Class.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v25.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v5.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\CalibAoiModel_v3.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\ICalibAoiModel.cs" />
+    <Compile Include="GA.mvc\Model\CalibAoiModel\JxCalibRecipe.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\Support\QRegistable.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\IWorldGridPoints.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\ITravellerTransforms.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\IMicroChipTransform.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\TravellerTransformFactory.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\QMicroChipTransform.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\QWorldGridPointsEx.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\TravellerTransforms.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\TravellerTransforms_ini.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\QMicroChipTransform.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\QWorldGridPointsEx.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\TravellerTransforms.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\TravellerTransforms_ini.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V36\QMicroChipTransform.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V36\QWorldGridPointsEx.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\TrfMigration.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V36\TravellerTransforms.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V36\TravellerTransforms_ini.cs" />
+    <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\XReportBuilderProxy.cs" />
+    <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\ThaiReportBuilder.cs" />
+    <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\JcetReportBuilder.cs" />
+    <Compile Include="GA.mvc\Model\Ftp\FtpUploader.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3LineBorderParams.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3GridParams.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3LineGapBorderParams.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3MeasureSpec.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\FlyParamClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\InspectX3ParamClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.LB.Gap.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.Mvd.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.LB.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\RecipeParaGridClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
+    <Compile Include=".Global\ErrorCodes.cs" />
+    <Compile Include="GA.mvc\Model\SysModel\ITravellerSysModel.cs" />
+    <Compile Include="GA.mvc\Model\SysModel\TravellerSysModel.cs" />
+    <Compile Include="GA.mvc\GaMvcPaths.cs" />
+    <Compile Include="GA.mvc\Model\SysModel\TravellerBigImagesHolder.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
+    <Compile Include="GA.mvc\.Enums\ScanInspectModeEnum.cs" />
+    <Compile Include="GA.mvc\.Enums\CarrierEnum.cs" />
+    <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
+    <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />
+    <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\StringBuilderExt.cs" />
+    <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\IxReportBuilder.cs" />
+    <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\PowerTechReportBuilder.cs" />
+    <Compile Include="GA.mvc\GaMvcConfig.cs" />
+    <Compile Include="GA\BasicSpace\ChipClass.cs" />
+    <Compile Include="GA\BasicSpace\CollectResultClass.cs" />
+    <Compile Include="GA\BasicSpace\FindRectByVM.cs" />
+    <Compile Include="GA\BasicSpace\Mvd2DReaderClass.cs" />
+    <Compile Include="GA\BasicSpace\MvdFindClass.cs" />
+    <Compile Include="GA\BasicSpace\MvdLineFinders\EdgeBorderEnums.cs" />
+    <Compile Include="GA\BasicSpace\MvdLineFinders\IMvdPairLineFinder.cs" />
+    <Compile Include="GA\BasicSpace\MvdLineFinders\IMvdLineFinder.cs" />
+    <Compile Include="GA\BasicSpace\MvdLineFinders\MvdPairLineClass.cs" />
+    <Compile Include="GA\BasicSpace\MvdLineFinders\MvdFindLineClass.cs" />
+    <Compile Include="GA\BasicSpace\MvdLineFinders\V1\MvdFindLineClass_v1.cs" />
+    <Compile Include="GA\BasicSpace\MvdLineFinders\V1\MvdPairLineClass_v1.cs" />
+    <Compile Include="GA\BasicSpace\NozzleCompensationCalculator.cs" />
+    <Compile Include="GA\BasicSpace\ReadBarcode\BarcodeAll_MVD.cs" />
+    <Compile Include="GA\BasicSpace\ReadBarcode\ZXingClass.cs" />
+    <Compile Include="GA\BasicSpace\ShowRectClass.cs" />
+    <Compile Include="GA\BasicSpace\TrayClass.cs" />
+    <Compile Include="GA\BasicSpace\XinliFindLineClass.cs" />
+    <Compile Include=".Global\Ini\common\WinIni_BomUTF8.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\GeoIOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\IPlcIoFPIX3.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\MainFPIX3IOClass.cs" />
+    <Compile Include="GA\ControlSpace\IOSpace\MainFPIX3IOSim.cs" />
+    <Compile Include="GA\ControlSpace\MachineCollectionClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineSpace\GeoMachineClass.cs" />
+    <Compile Include="GA\ControlSpace\MachineSpace\MainFPIX3MachineClass.cs" />
+    <Compile Include="GA\GlobalSpace\Enums.cs" />
+    <Compile Include="GA\GlobalSpace\Universal_lt.cs" />
+    <Compile Include="GA\OPSpace\CameraConfig.cs" />
+    <Compile Include="GA\OPSpace\RecipeSpace\RecipeBaseClass.cs" />
+    <Compile Include="GA\ProcessSpace\AbsProcess.cs" />
+    <Compile Include="GA\ProcessSpace\BaseProcess.cs" />
+    <Compile Include="GA\ProcessSpace\LineScanProcess_LT.cs" />
+    <Compile Include="GA\ProcessSpace\LineScanSingleProcess.cs" />
+    <Compile Include="GA.mvc\Utils\GaMvdConvertor.cs" />
+    <Compile Include="LT\LtAoiFactory.cs" />
+    <Compile Include="GA.mvc\Utils\GaImageUtil.cs" />
+    <Compile Include="GA.mvc\Utils\GaUtil.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include=".Global\Ini\v1\UITypeEditors\FormFtpSettings.resx">
+      <DependentUpon>FormFtpSettings.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include=".Global\Readme.md" />
+    <None Include="GA.mvc\Model\AoiModel\2_ChipLocator\Readme.md" />
+    <None Include="GA.mvc\Model\CustomerModel\Readme.md" />
+    <None Include="GA.mvc\Model\Readme.md" />
+    <None Include="GA.mvc\Readme.md" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EzDisplay\JzDisplayLT\JzDisplayLT.csproj">
+      <Project>{8aa39fb3-6b90-4faa-8183-85a1acfc10b1}</Project>
+      <Name>JzDisplayLT</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\EzMotor.Gui\EzMotor.Gui.csproj">
+      <Project>{455201c9-5e3e-4b92-a305-e6e94816da3d}</Project>
+      <Name>EzMotor.Gui</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\FPI30_Aoi\EzEmptyTrayInspector.Lib\EzAoiEmptyTrayInspector.Lib.csproj">
+      <Project>{a1bcdee4-dd9a-43c2-a127-90b727eb0f04}</Project>
+      <Name>EzAoiEmptyTrayInspector.Lib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JetEazy.Calib.Transform\JetEazy.Transform.csproj">
+      <Project>{a39132cc-9e48-4e8c-90c1-d4a39dbe1933}</Project>
+      <Name>JetEazy.Transform</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JetEazy.Calib\JetEazy.Calib.csproj">
+      <Project>{ecf19b8d-be9a-4159-8b94-defc25a59507}</Project>
+      <Name>JetEazy.Calib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JetEazy.PropertyGrid.Utils\JetEazy.PropertyGrid.Utils.csproj">
+      <Project>{29ee6e77-21f6-4d85-9582-892d0cd60f93}</Project>
+      <Name>JetEazy.PropertyGrid.Utils</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JetEazy.VG.Devices\JetEazy.VG.Devices.csproj">
+      <Project>{afa9cf55-2235-415d-b437-f4a62da34a0c}</Project>
+      <Name>JetEazy.VG.Devices</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JetEazy\JetEazy.Basics.csproj">
+      <Project>{a24458c1-b3ac-462a-8b42-dafd1d420e19}</Project>
+      <Name>JetEazy.Basics</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="GA.mvc\Model\AoiModel\2_ChipLocator\v35\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="jx_vision.ico" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)
+copy $(ProjectDir)NLog.config $(TargetDir)NLog.config
+copy "C:\Program Files\Common Files\JetEazy\JetEazy.Crt.dll" $(TargetDir)JetEazy.Crt.dll</PostBuildEvent>
+  </PropertyGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>此專案參考這部電腦上所缺少的 NuGet 套件。請啟用 NuGet 套件還原，以下載該套件。如需詳細資訊，請參閱 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的檔案是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\OpenCvSharp4.runtime.win.4.8.0.20230708\build\net48\OpenCvSharp4.runtime.win.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\OpenCvSharp4.runtime.win.4.8.0.20230708\build\net48\OpenCvSharp4.runtime.win.props'))" />
+  </Target>
+</Project>
