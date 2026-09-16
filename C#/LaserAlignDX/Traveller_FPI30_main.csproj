@@ -1002,7 +1002,7 @@
       <Project>{29ee6e77-21f6-4d85-9582-892d0cd60f93}</Project>
       <Name>JetEazy.PropertyGrid.Utils</Name>
     </ProjectReference>
-    <ProjectReference Include="..\JetEazy.VG.Camera\JetEazy.VG.Devices.csproj">
+    <ProjectReference Include="..\JetEazy.VG.Devices\JetEazy.VG.Devices.csproj">
       <Project>{afa9cf55-2235-415d-b437-f4a62da34a0c}</Project>
       <Name>JetEazy.VG.Devices</Name>
     </ProjectReference>
