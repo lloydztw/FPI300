@@ -539,48 +539,73 @@ namespace LaserAlignDX.AoiModel.V38.Combo
             if (cell == null)
                 return;
 
-            bool ok = true;
+            bool isAllPass = true;
 
             // 檢查是否有啟用 尺寸量測
             if (_xInspectParams.optChipMeasurement)
             {
-                //(1) 判定 長寬 是否達標
-                var dimResults = new bool[2];
-                ok &= (dimResults[0] = !(cell.RunWidth < _xInspectParams.mWidthStandMin || cell.RunWidth > _xInspectParams.mWidthStandMax));
-                ok &= (dimResults[1] = !(cell.RunHeight < _xInspectParams.mHeightStandMin || cell.RunHeight > _xInspectParams.mHeightStandMax));
-
                 var chipDim = cell.ChipData?.ChipDimension;
-                if (chipDim != null)
-                {
-                    //chipDim.PassNgResults = dimResults;
-                    chipDim.UpdateMeasurement("X", dimResults[0]);
-                    chipDim.UpdateMeasurement("Y", dimResults[1]);
-                }
 
-                if (!ok)
+                //(A) 原有 判定方式 (長寬)
+                if (_xRecipe.LineBorderParams.IsSimpleQuad)
                 {
-                    cell.MarkResult(InspectReason.NG_CUT);
-                }
+                    //(A1) 判定 長寬 是否達標
+                    bool ok_x = !(cell.RunWidth < _xInspectParams.mWidthStandMin || cell.RunWidth > _xInspectParams.mWidthStandMax);
+                    bool ok_y = !(cell.RunHeight < _xInspectParams.mHeightStandMin || cell.RunHeight > _xInspectParams.mHeightStandMax);
 
-                //(2) 判定 邊隙 是否達標
-                if (_needsToMeasureGaps)
-                {
-                    var gaps = cell.ChipData?.PadEdgeGaps;
-                    if (gaps == null)
+                    chipDim?.UpdateMeasurement("X", ok_x);
+                    chipDim?.UpdateMeasurement("Y", ok_y);
+                    isAllPass &= ok_x && ok_y;
+
+                    if (!isAllPass)
                     {
-                        ok = false;
-                    }
-                    else
-                    {
-                        var min = new QVector(_xInspectParams.PadEdgeGapX_Min, _xInspectParams.PadEdgeGapY_Min);
-                        var max = new QVector(_xInspectParams.PadEdgeGapX_Max, _xInspectParams.PadEdgeGapY_Max);
-                        var maxDiff = _xInspectParams.PadEdgeX_Diff_Upper;
-                        gaps.Check(out ok, min, max, maxDiff);
+                        cell.MarkResult(InspectReason.NG_CUT);
                     }
 
-                    if (!ok)
+                    //(A2) 判定 邊隙 是否達標
+                    if (_needsToMeasureGaps)
                     {
-                        cell.MarkResult(InspectReason.NG_EDGE_GAP);
+                        var gaps = cell.ChipData?.PadEdgeGaps;
+                        if (gaps == null)
+                        {
+                            isAllPass = false;
+                        }
+                        else
+                        {
+                            var min = new QVector(_xInspectParams.PadEdgeGapX_Min, _xInspectParams.PadEdgeGapY_Min);
+                            var max = new QVector(_xInspectParams.PadEdgeGapX_Max, _xInspectParams.PadEdgeGapY_Max);
+                            var maxDiff = _xInspectParams.PadEdgeX_Diff_Upper;
+                            gaps.Check(out isAllPass, min, max, maxDiff);
+                        }
+
+                        if (!isAllPass)
+                        {
+                            cell.MarkResult(InspectReason.NG_EDGE_GAP);
+                        }
+                    }
+                }
+
+                //(B) 其他 判定方式 (逐項)
+                else
+                {
+                    foreach (var key in chipDim.Keys)
+                    {
+                        var measurement = chipDim[key];
+                        if (measurement == null) continue;
+
+                        var dist = measurement.Value;
+
+                        bool ok_x = key.StartsWith("X")
+                            ? !(dist < _xInspectParams.mWidthStandMin || dist > _xInspectParams.mWidthStandMax)
+                            : !(dist < _xInspectParams.mHeightStandMin || dist > _xInspectParams.mHeightStandMax);
+
+                        measurement.IsPass = ok_x;
+                        isAllPass &= ok_x;
+                    }
+
+                    if (!isAllPass)
+                    {
+                        cell.MarkResult(InspectReason.NG_CUT);
                     }
                 }
             }
@@ -656,78 +681,11 @@ namespace LaserAlignDX.AoiModel.V38.Combo
                 }
 
                 AsyncDumpLineSegmentsData(cell, ref cellRoi);
-            }
-            catch (Exception ex)
-            {
-                _LOG_ERROR(ex, $"{keyName} 計算邊線異常");
-                throw;
-            }
-
-            EdgeBorder eBorder = EdgeBorder.Left;
-            try
-            {
-                //(3) 計算出 Runtime 邊線框
-                var lineBorderQuads = CalcRuntimeLocalLineBorderQuads(cell, cellRoi, cellBmp);
-                if (lineBorderQuads == null)
-                    return false;
-
-                //(4) 巡訪每一個 EdgeBorder (順序: 左,上,右,下)
-                for (int borderIdx = 0, N = lineBorderQuads.Length; borderIdx < N; borderIdx++)
-                {
-                    //(4.1) enum
-                    eBorder = (EdgeBorder)borderIdx;
-
-                    //(4.2) borderQuad
-                    var borderQuad = lineBorderQuads[borderIdx];
-                    var mvdRoi = borderQuad.ToCMvdRectangleF();
-
-                    //(4.3) 海康線檢 I
-                    CMvdLineSegmentF mvdLine;
-                    if (true)   // if (!_is2ndRun)
-                    {
-                        // 海康線檢
-                        mvdLine = _RunMvdLineFinder(mvdLineFinder, borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
-                    }
-                    //(4.3.*) 海康線檢 II (暫時不使用)
-                    else
-                    {
-                        #region RESERVED_CODE
-                        //using (Bitmap cellBmp2 = (Bitmap)cellBmp.Clone())
-                        //{
-                        //    // 塗掉中段 (1/3) 
-                        //    fill_border_mid_area(cellBmp2, borderQuad, eBorder, Scalar.Black);
-                        //    // 海康線檢(輸出為 cell.cMvdLineSegmentFsOut)
-                        //    mvdLine = _RunMvdLineFinder(mvdLineFinder, borderIdx, cellBmp2, mvdRoi, chipData.ChipQuad2D.Angle);
-                        //}
-
-                        //// 如果塗掉中段 (1/3) 仍然抓不到, 回過頭使用 原來的方法
-                        //if (mvdLine == null)
-                        //{
-                        //    mvdLine = _RunMvdLineFinder(mvdLineFinder, borderIdx, cellBmp, mvdRoi, chipData.ChipQuad2D.Angle);
-                        //}
-                        #endregion
-                    }
-
-                    //(4.4) 將 CMvdLineSegmentF 轉換成 EzLSD.LineSegment
-                    var line = mvdLine?.ToLineSegment();
-
-                    //(5) 將 抓到的線框 轉換至 Fullfov Camera Coorindates
-                    line?.Offset(cellRoi.X, cellRoi.Y);
-                    borderQuad?.Offset(cellRoi.X, cellRoi.Y);
-
-                    //(6) 將 抓到的線框 記入到 cell.ChipData
-                    chipData.LineBorderPairs.Set(eBorder, line);
-                    chipData.LineBorderPairs.Set(eBorder, borderQuad.ToBox2D());
-                }
-
-                //(7) 非同步保存調適數據
-                AsyncDumpLineSegmentsData(cell, ref cellRoi);
                 return true;
             }
             catch (Exception ex)
             {
-                string borderName = JetEazy.QxNums.GetEnumDescription(eBorder);
-                _LOG_ERROR(ex, $"定位異常 @ FetchChipRuntimeLineBorders [{borderName}]");
+                _LOG_ERROR(ex, $"{keyName} 計算邊線異常");
                 throw;
             }
         }
