@@ -13,11 +13,11 @@
  */
 #endregion
 
+using JetEazy.ImageViewerEx;
 using JetEazy.Lang;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 
 namespace LaserAlignDX.Mvc.Ctrl.V35
@@ -29,6 +29,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         protected RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         #endregion
 
+        protected bool AdjustRectToFitViewer(ref Rectangle rect, IvImageViewer viewer)
+        {
+            if (viewer == null) return false;
+            var boundRect = Rectangle.Round(viewer.GetWorldRect());
+            return JetEazy.QUtilities.QUtility.ClipBoundary(ref rect, ref boundRect);
+        }
         protected void HandleException(string funcName, Exception ex)
         {
             var errMsg = $"Error : {GetType().Name}.{funcName}";

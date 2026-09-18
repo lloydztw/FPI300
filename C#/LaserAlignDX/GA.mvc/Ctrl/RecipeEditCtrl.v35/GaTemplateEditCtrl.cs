@@ -391,8 +391,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         {
             _cviGoldenChipBox = new CviGoldenBox(Brushes.Orange, 1, 3) { Visible = false };
             _cviQrCodeBox = new CviRcpBox(Brushes.DeepPink, 1, 3) { Visible = false };
-            //_cviDefectMaskBoxes = new List<CviRcpBox>();
 
+            //_cviDefectMaskBoxes = new List<CviRcpBox>();
             //_cviLineBorderBoxes = new CviRcpBox[4];
             //_cviLineSegmentBoxes = new CviLineSegmentsBox[4];
             //for (int i = 0, N = _cviLineBorderBoxes.Length; i < N; i++)
@@ -739,11 +739,13 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                 var rect = Rectangle.Round(this._xGoldenChipRect);
                 if (rect == RectangleF.Empty)
                     rect = new Rectangle(50, 50, 100, 100);
+                AdjustRectToFitViewer(ref rect, wndRegionViewer.ImgViewer);
                 _cviGoldenChipBox.Box = rect;
 
                 rect = Rectangle.Round(this._xQrCodeRect);
                 if (rect == RectangleF.Empty)
                     rect = _cviGoldenChipBox.Box;
+                AdjustRectToFitViewer(ref rect, wndRegionViewer.ImgViewer);
                 _cviQrCodeBox.Box = rect;
             }
         }

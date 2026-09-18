@@ -289,6 +289,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
                         if (rect == Rectangle.Empty)
                             continue;
 
+                        AdjustRectToFitViewer(ref rect, imgViewer);
+
                         var cviBox = new CviRcpBox(_boxBrush, 1, 3) { Box = rect };
                         cviBox.OnChanged += CviDefectionBox_OnChanged;
 
