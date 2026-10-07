@@ -74,13 +74,14 @@
             // 
             // pnlBottom
             // 
+            this.pnlBottom.BackColor = System.Drawing.Color.LightSteelBlue;
             this.pnlBottom.Controls.Add(this.btnOK);
             this.pnlBottom.Controls.Add(this.btnCancel);
             this.pnlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlBottom.Location = new System.Drawing.Point(0, 1054);
-            this.pnlBottom.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.pnlBottom.Location = new System.Drawing.Point(0, 878);
+            this.pnlBottom.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pnlBottom.Name = "pnlBottom";
-            this.pnlBottom.Size = new System.Drawing.Size(1431, 134);
+            this.pnlBottom.Size = new System.Drawing.Size(1272, 112);
             this.pnlBottom.TabIndex = 12;
             // 
             // btnOK
@@ -88,10 +89,10 @@
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnOK.Location = new System.Drawing.Point(1033, 31);
-            this.btnOK.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnOK.Location = new System.Drawing.Point(918, 26);
+            this.btnOK.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(158, 74);
+            this.btnOK.Size = new System.Drawing.Size(140, 62);
             this.btnOK.TabIndex = 15;
             this.btnOK.Text = "確定";
             this.btnOK.UseVisualStyleBackColor = false;
@@ -101,10 +102,10 @@
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.btnCancel.Location = new System.Drawing.Point(1199, 31);
-            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnCancel.Location = new System.Drawing.Point(1066, 26);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(158, 74);
+            this.btnCancel.Size = new System.Drawing.Size(140, 62);
             this.btnCancel.TabIndex = 16;
             this.btnCancel.Text = "取消";
             this.btnCancel.UseVisualStyleBackColor = false;
@@ -127,19 +128,19 @@
             this.pnlTop.Controls.Add(this.buttonFly3);
             this.pnlTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTop.Location = new System.Drawing.Point(0, 0);
-            this.pnlTop.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.pnlTop.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.pnlTop.Name = "pnlTop";
-            this.pnlTop.Size = new System.Drawing.Size(1431, 187);
+            this.pnlTop.Size = new System.Drawing.Size(1272, 156);
             this.pnlTop.TabIndex = 11;
             // 
             // buttonFly9
             // 
             this.buttonFly9.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(224)))), ((int)(((byte)(192)))));
             this.buttonFly9.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.buttonFly9.Location = new System.Drawing.Point(692, 122);
-            this.buttonFly9.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.buttonFly9.Location = new System.Drawing.Point(615, 102);
+            this.buttonFly9.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonFly9.Name = "buttonFly9";
-            this.buttonFly9.Size = new System.Drawing.Size(226, 37);
+            this.buttonFly9.Size = new System.Drawing.Size(201, 31);
             this.buttonFly9.TabIndex = 49;
             this.buttonFly9.Text = "馬達控制";
             this.buttonFly9.UseVisualStyleBackColor = false;
@@ -151,11 +152,11 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBox1.BackColor = System.Drawing.Color.WhiteSmoke;
             this.richTextBox1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.richTextBox1.Location = new System.Drawing.Point(975, 28);
-            this.richTextBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.richTextBox1.Location = new System.Drawing.Point(867, 23);
+            this.richTextBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(440, 131);
+            this.richTextBox1.Size = new System.Drawing.Size(392, 110);
             this.richTextBox1.TabIndex = 48;
             this.richTextBox1.Text = "2D CODE";
             // 
@@ -163,10 +164,10 @@
             // 
             this.buttonFly5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.buttonFly5.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.buttonFly5.Location = new System.Drawing.Point(408, 75);
-            this.buttonFly5.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.buttonFly5.Location = new System.Drawing.Point(363, 62);
+            this.buttonFly5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonFly5.Name = "buttonFly5";
-            this.buttonFly5.Size = new System.Drawing.Size(150, 38);
+            this.buttonFly5.Size = new System.Drawing.Size(133, 32);
             this.buttonFly5.TabIndex = 47;
             this.buttonFly5.Text = "读码测试";
             this.buttonFly5.UseVisualStyleBackColor = false;
@@ -176,10 +177,10 @@
             this.label3.BackColor = System.Drawing.Color.Black;
             this.label3.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label3.ForeColor = System.Drawing.Color.White;
-            this.label3.Location = new System.Drawing.Point(692, 77);
+            this.label3.Location = new System.Drawing.Point(615, 64);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(226, 35);
+            this.label3.Size = new System.Drawing.Size(201, 29);
             this.label3.TabIndex = 46;
             this.label3.Text = "10.00dB";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -187,10 +188,10 @@
             // labelFly2
             // 
             this.labelFly2.AutoSize = true;
-            this.labelFly2.Location = new System.Drawing.Point(604, 85);
+            this.labelFly2.Location = new System.Drawing.Point(537, 71);
             this.labelFly2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelFly2.Name = "labelFly2";
-            this.labelFly2.Size = new System.Drawing.Size(62, 18);
+            this.labelFly2.Size = new System.Drawing.Size(52, 15);
             this.labelFly2.TabIndex = 45;
             this.labelFly2.Text = "增益值";
             // 
@@ -199,10 +200,10 @@
             this.label2.BackColor = System.Drawing.Color.Black;
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             this.label2.ForeColor = System.Drawing.Color.White;
-            this.label2.Location = new System.Drawing.Point(692, 30);
+            this.label2.Location = new System.Drawing.Point(615, 25);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(226, 35);
+            this.label2.Size = new System.Drawing.Size(201, 29);
             this.label2.TabIndex = 44;
             this.label2.Text = "100.00us";
             this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -210,10 +211,10 @@
             // labelFly1
             // 
             this.labelFly1.AutoSize = true;
-            this.labelFly1.Location = new System.Drawing.Point(604, 38);
+            this.labelFly1.Location = new System.Drawing.Point(537, 32);
             this.labelFly1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.labelFly1.Name = "labelFly1";
-            this.labelFly1.Size = new System.Drawing.Size(80, 18);
+            this.labelFly1.Size = new System.Drawing.Size(67, 15);
             this.labelFly1.TabIndex = 43;
             this.labelFly1.Text = "曝光時間";
             // 
@@ -221,10 +222,10 @@
             // 
             this.buttonFly6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.buttonFly6.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.buttonFly6.Location = new System.Drawing.Point(408, 121);
-            this.buttonFly6.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.buttonFly6.Location = new System.Drawing.Point(363, 101);
+            this.buttonFly6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonFly6.Name = "buttonFly6";
-            this.buttonFly6.Size = new System.Drawing.Size(150, 38);
+            this.buttonFly6.Size = new System.Drawing.Size(133, 32);
             this.buttonFly6.TabIndex = 37;
             this.buttonFly6.Text = "双头计算";
             this.buttonFly6.UseVisualStyleBackColor = false;
@@ -233,10 +234,10 @@
             // 
             this.buttonFly2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.buttonFly2.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.buttonFly2.Location = new System.Drawing.Point(246, 75);
-            this.buttonFly2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.buttonFly2.Location = new System.Drawing.Point(219, 62);
+            this.buttonFly2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonFly2.Name = "buttonFly2";
-            this.buttonFly2.Size = new System.Drawing.Size(150, 38);
+            this.buttonFly2.Size = new System.Drawing.Size(133, 32);
             this.buttonFly2.TabIndex = 36;
             this.buttonFly2.Text = "单次触发";
             this.buttonFly2.UseVisualStyleBackColor = false;
@@ -245,10 +246,10 @@
             // 
             this.buttonFly1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.buttonFly1.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.buttonFly1.Location = new System.Drawing.Point(246, 28);
-            this.buttonFly1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.buttonFly1.Location = new System.Drawing.Point(219, 23);
+            this.buttonFly1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonFly1.Name = "buttonFly1";
-            this.buttonFly1.Size = new System.Drawing.Size(150, 38);
+            this.buttonFly1.Size = new System.Drawing.Size(133, 32);
             this.buttonFly1.TabIndex = 35;
             this.buttonFly1.Text = "实时画面";
             this.buttonFly1.UseVisualStyleBackColor = false;
@@ -257,10 +258,10 @@
             // 
             this.buttonFly4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(255)))));
             this.buttonFly4.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.buttonFly4.Location = new System.Drawing.Point(408, 28);
-            this.buttonFly4.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.buttonFly4.Location = new System.Drawing.Point(363, 23);
+            this.buttonFly4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonFly4.Name = "buttonFly4";
-            this.buttonFly4.Size = new System.Drawing.Size(150, 38);
+            this.buttonFly4.Size = new System.Drawing.Size(133, 32);
             this.buttonFly4.TabIndex = 34;
             this.buttonFly4.Text = "框选特征";
             this.buttonFly4.UseVisualStyleBackColor = false;
@@ -269,11 +270,11 @@
             // 
             this.groupBox1.Controls.Add(this.radioButton2);
             this.groupBox1.Controls.Add(this.radioButton1);
-            this.groupBox1.Location = new System.Drawing.Point(15, 16);
-            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.groupBox1.Location = new System.Drawing.Point(13, 13);
+            this.groupBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.groupBox1.Size = new System.Drawing.Size(211, 150);
+            this.groupBox1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.groupBox1.Size = new System.Drawing.Size(188, 125);
             this.groupBox1.TabIndex = 33;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "飞拍模式";
@@ -281,10 +282,10 @@
             // radioButton2
             // 
             this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(36, 80);
-            this.radioButton2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.radioButton2.Location = new System.Drawing.Point(32, 67);
+            this.radioButton2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(141, 22);
+            this.radioButton2.Size = new System.Drawing.Size(118, 19);
             this.radioButton2.TabIndex = 1;
             this.radioButton2.Text = "一键飞拍测试";
             this.radioButton2.UseVisualStyleBackColor = true;
@@ -294,10 +295,10 @@
             // 
             this.radioButton1.AutoSize = true;
             this.radioButton1.Checked = true;
-            this.radioButton1.Location = new System.Drawing.Point(36, 48);
-            this.radioButton1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.radioButton1.Location = new System.Drawing.Point(32, 40);
+            this.radioButton1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(141, 22);
+            this.radioButton1.Size = new System.Drawing.Size(118, 19);
             this.radioButton1.TabIndex = 0;
             this.radioButton1.TabStop = true;
             this.radioButton1.Text = "一键飞拍取像";
@@ -307,10 +308,10 @@
             // 
             this.buttonFly3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.buttonFly3.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.buttonFly3.Location = new System.Drawing.Point(246, 121);
-            this.buttonFly3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.buttonFly3.Location = new System.Drawing.Point(219, 101);
+            this.buttonFly3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonFly3.Name = "buttonFly3";
-            this.buttonFly3.Size = new System.Drawing.Size(150, 38);
+            this.buttonFly3.Size = new System.Drawing.Size(133, 32);
             this.buttonFly3.TabIndex = 22;
             this.buttonFly3.Text = "加载图片";
             this.buttonFly3.UseVisualStyleBackColor = false;
@@ -318,10 +319,10 @@
             // propertyGrid1
             // 
             this.propertyGrid1.Dock = System.Windows.Forms.DockStyle.Right;
-            this.propertyGrid1.Location = new System.Drawing.Point(963, 187);
-            this.propertyGrid1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.propertyGrid1.Location = new System.Drawing.Point(856, 156);
+            this.propertyGrid1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.propertyGrid1.Name = "propertyGrid1";
-            this.propertyGrid1.Size = new System.Drawing.Size(468, 867);
+            this.propertyGrid1.Size = new System.Drawing.Size(416, 722);
             this.propertyGrid1.TabIndex = 10;
             // 
             // tabControl2
@@ -332,11 +333,11 @@
             this.tabControl2.Controls.Add(this.tabPage4);
             this.tabControl2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl2.ImageList = this.imageList1;
-            this.tabControl2.Location = new System.Drawing.Point(0, 187);
-            this.tabControl2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabControl2.Location = new System.Drawing.Point(0, 156);
+            this.tabControl2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabControl2.Name = "tabControl2";
             this.tabControl2.SelectedIndex = 0;
-            this.tabControl2.Size = new System.Drawing.Size(963, 867);
+            this.tabControl2.Size = new System.Drawing.Size(856, 722);
             this.tabControl2.TabIndex = 13;
             // 
             // tabPage3
@@ -344,9 +345,9 @@
             this.tabPage3.Controls.Add(this.DS1);
             this.tabPage3.ImageIndex = 0;
             this.tabPage3.Location = new System.Drawing.Point(4, 29);
-            this.tabPage3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabPage3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(955, 834);
+            this.tabPage3.Size = new System.Drawing.Size(848, 689);
             this.tabPage3.TabIndex = 0;
             this.tabPage3.Text = "原始图片";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -356,9 +357,9 @@
             this.DS1.Cursor = System.Windows.Forms.Cursors.Default;
             this.DS1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.DS1.Location = new System.Drawing.Point(0, 0);
-            this.DS1.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.DS1.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.DS1.Name = "DS1";
-            this.DS1.Size = new System.Drawing.Size(955, 834);
+            this.DS1.Size = new System.Drawing.Size(848, 689);
             this.DS1.TabIndex = 8;
             // 
             // tabPage2
@@ -366,9 +367,9 @@
             this.tabPage2.Controls.Add(this.DS2);
             this.tabPage2.ImageIndex = 0;
             this.tabPage2.Location = new System.Drawing.Point(4, 29);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(955, 834);
+            this.tabPage2.Size = new System.Drawing.Size(848, 689);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "测试图片";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -378,9 +379,9 @@
             this.DS2.Cursor = System.Windows.Forms.Cursors.Default;
             this.DS2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.DS2.Location = new System.Drawing.Point(0, 0);
-            this.DS2.Margin = new System.Windows.Forms.Padding(6, 5, 6, 5);
+            this.DS2.Margin = new System.Windows.Forms.Padding(5, 4, 5, 4);
             this.DS2.Name = "DS2";
-            this.DS2.Size = new System.Drawing.Size(955, 834);
+            this.DS2.Size = new System.Drawing.Size(848, 689);
             this.DS2.TabIndex = 7;
             // 
             // tabPage1
@@ -388,9 +389,9 @@
             this.tabPage1.Controls.Add(this.flyOffsetUI1);
             this.tabPage1.ImageIndex = 1;
             this.tabPage1.Location = new System.Drawing.Point(4, 29);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Size = new System.Drawing.Size(955, 834);
+            this.tabPage1.Size = new System.Drawing.Size(848, 689);
             this.tabPage1.TabIndex = 2;
             this.tabPage1.Text = "载台一补偿";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -399,9 +400,9 @@
             // 
             this.flyOffsetUI1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flyOffsetUI1.Location = new System.Drawing.Point(0, 0);
-            this.flyOffsetUI1.Margin = new System.Windows.Forms.Padding(6);
+            this.flyOffsetUI1.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.flyOffsetUI1.Name = "flyOffsetUI1";
-            this.flyOffsetUI1.Size = new System.Drawing.Size(955, 834);
+            this.flyOffsetUI1.Size = new System.Drawing.Size(848, 689);
             this.flyOffsetUI1.TabIndex = 0;
             // 
             // tabPage4
@@ -409,9 +410,9 @@
             this.tabPage4.Controls.Add(this.flyOffsetUI2);
             this.tabPage4.ImageIndex = 1;
             this.tabPage4.Location = new System.Drawing.Point(4, 29);
-            this.tabPage4.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.tabPage4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(955, 834);
+            this.tabPage4.Size = new System.Drawing.Size(848, 689);
             this.tabPage4.TabIndex = 3;
             this.tabPage4.Text = "载台二补偿";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -420,9 +421,9 @@
             // 
             this.flyOffsetUI2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flyOffsetUI2.Location = new System.Drawing.Point(0, 0);
-            this.flyOffsetUI2.Margin = new System.Windows.Forms.Padding(6);
+            this.flyOffsetUI2.Margin = new System.Windows.Forms.Padding(5, 5, 5, 5);
             this.flyOffsetUI2.Name = "flyOffsetUI2";
-            this.flyOffsetUI2.Size = new System.Drawing.Size(955, 834);
+            this.flyOffsetUI2.Size = new System.Drawing.Size(848, 689);
             this.flyOffsetUI2.TabIndex = 1;
             // 
             // imageList1
@@ -434,16 +435,16 @@
             // 
             // FormFlySetup
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.ClientSize = new System.Drawing.Size(1431, 1188);
+            this.BackColor = System.Drawing.Color.Silver;
+            this.ClientSize = new System.Drawing.Size(1272, 990);
             this.Controls.Add(this.tabControl2);
             this.Controls.Add(this.propertyGrid1);
             this.Controls.Add(this.pnlBottom);
             this.Controls.Add(this.pnlTop);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.MinimizeBox = false;
             this.Name = "FormFlySetup";
             this.Text = "frmFlySetup";

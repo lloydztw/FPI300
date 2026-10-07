@@ -650,7 +650,7 @@ namespace LaserAlignDX.FormSpace
         }
         #endregion
 
-        #region TOOLS
+        #region AOI_AND_CAMERA_FUNCTIONS
         //----------------------------------------------------------------------------
         // 此處函式不牽扯到 GUI, 將來要納入 AOI MODEL
         //----------------------------------------------------------------------------
@@ -679,7 +679,6 @@ namespace LaserAlignDX.FormSpace
             if (text == null)
                 text = "";
         }
-
         void getCamDevParaAndUpdateUI()
         {
             lblExpo.Text = $"{IxFlyAreaCam.GetExposure()} us";
@@ -703,16 +702,9 @@ namespace LaserAlignDX.FormSpace
                 CommonLogClass.Instance.LogError($"無法設定 曝光時間與增益!");
             }
         }
-        void BoundRect(ref Rectangle InnerRect, Size BoundSize)
-        {
-            InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
-            InnerRect.Y = Math.Min(Math.Max(InnerRect.Y, 0), (BoundSize.Height - InnerRect.Height < 0 ? 0 : BoundSize.Height - InnerRect.Height));
+        #endregion
 
-            if (BoundSize.Width <= InnerRect.X + InnerRect.Width)
-                InnerRect.Width = BoundValue(InnerRect.Width, BoundSize.Width - InnerRect.X, 1);
-            if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
-                InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
-        }
+        #region UTIL_FUNCTIONS
         void BoundRect(ref RectangleF InnerRect, Size BoundSize)
         {
             InnerRect.X = Math.Min(Math.Max(InnerRect.X, 0), (BoundSize.Width - InnerRect.Width < 0 ? 0 : BoundSize.Width - InnerRect.Width));
@@ -723,125 +715,12 @@ namespace LaserAlignDX.FormSpace
             if (BoundSize.Height <= InnerRect.Height + InnerRect.Height)
                 InnerRect.Height = BoundValue(InnerRect.Height, BoundSize.Height - InnerRect.Y, 1);
         }
-        int BoundValue(int Value, int Max, int Min)
-        {
-            return Math.Max(Math.Min(Value, Max), Min);
-
-        }
         float BoundValue(float Value, float Max, float Min)
         {
             return Math.Max(Math.Min(Value, Max), Min);
 
         }
-
-        Bitmap Convert32bppTo8bpp(Bitmap original)
-        {
-            // 创建一个新的8bpp位图
-            Bitmap newBitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format8bppIndexed);
-
-            // 设置调色板（这里使用灰度调色板）
-            ColorPalette palette = newBitmap.Palette;
-            for (int i = 0; i < 256; i++)
-            {
-                palette.Entries[i] = Color.FromArgb(i, i, i);
-            }
-            newBitmap.Palette = palette;
-
-            // 锁定位图数据
-            BitmapData originalData = original.LockBits(
-                new Rectangle(0, 0, original.Width, original.Height),
-                ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-
-            BitmapData newData = newBitmap.LockBits(
-                new Rectangle(0, 0, newBitmap.Width, newBitmap.Height),
-                ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
-
-            // 转换像素数据
-            unsafe
-            {
-                byte* originalPtr = (byte*)originalData.Scan0;
-                byte* newPtr = (byte*)newData.Scan0;
-
-                for (int y = 0; y < original.Height; y++)
-                {
-                    for (int x = 0; x < original.Width; x++)
-                    {
-                        // 获取32bpp像素值
-                        byte b = originalPtr[y * originalData.Stride + x * 4];
-                        byte g = originalPtr[y * originalData.Stride + x * 4 + 1];
-                        byte r = originalPtr[y * originalData.Stride + x * 4 + 2];
-                        byte a = originalPtr[y * originalData.Stride + x * 4 + 3];
-
-                        // 转换为灰度值（8bpp）
-                        byte gray = (byte)((r * 0.299 + g * 0.587 + b * 0.114) * (a / 255.0));
-
-                        // 写入8bpp位图
-                        newPtr[y * newData.Stride + x] = gray;
-                    }
-                }
-            }
-
-            // 解锁位图
-            original.UnlockBits(originalData);
-            newBitmap.UnlockBits(newData);
-
-            return newBitmap;
-        }
-        Bitmap Convert24bppTo8bpp(Bitmap original)
-        {
-            //if (original.PixelFormat != PixelFormat.Format24bppRgb)
-            //    throw new ArgumentException("源图像必须是24位位图");
-
-            // 创建新的8位位图
-            Bitmap newBitmap = new Bitmap(original.Width, original.Height, PixelFormat.Format8bppIndexed);
-
-            // 设置灰度调色板
-            ColorPalette palette = newBitmap.Palette;
-            for (int i = 0; i < 256; i++)
-            {
-                palette.Entries[i] = Color.FromArgb(i, i, i);
-            }
-            newBitmap.Palette = palette;
-
-            // 锁定位图数据进行操作
-            BitmapData originalData = original.LockBits(
-                new Rectangle(0, 0, original.Width, original.Height),
-                ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
-
-            BitmapData newData = newBitmap.LockBits(
-                new Rectangle(0, 0, newBitmap.Width, newBitmap.Height),
-                ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
-
-            unsafe
-            {
-                byte* originalPtr = (byte*)originalData.Scan0;
-                byte* newPtr = (byte*)newData.Scan0;
-
-                for (int y = 0; y < original.Height; y++)
-                {
-                    for (int x = 0; x < original.Width; x++)
-                    {
-                        // 获取24bpp像素值
-                        byte b = originalPtr[y * originalData.Stride + x * 3];
-                        byte g = originalPtr[y * originalData.Stride + x * 3 + 1];
-                        byte r = originalPtr[y * originalData.Stride + x * 3 + 2];
-
-                        // 转换为灰度值（8bpp）
-                        byte gray = (byte)(r * 0.299 + g * 0.587 + b * 0.114);
-
-                        // 写入8bpp位图
-                        newPtr[y * newData.Stride + x] = gray;
-                    }
-                }
-            }
-
-            // 解锁位图
-            original.UnlockBits(originalData);
-            newBitmap.UnlockBits(newData);
-
-            return newBitmap;
-        }
-        private Bitmap ConvertFromMONO(byte[] rgbaData, int width, int height)
+        Bitmap ConvertFromMONO(byte[] rgbaData, int width, int height)
         {
             var pixelFormat = System.Drawing.Imaging.PixelFormat.Format8bppIndexed;
             Bitmap bitmap = new Bitmap(width, height, pixelFormat);
@@ -864,7 +743,6 @@ namespace LaserAlignDX.FormSpace
 
             return bitmap;
         }
-
         #endregion
     }
 }
