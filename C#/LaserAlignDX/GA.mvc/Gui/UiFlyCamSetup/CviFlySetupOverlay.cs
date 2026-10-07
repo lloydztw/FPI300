@@ -85,7 +85,7 @@ namespace LaserAlignDX.FormSpace
             {
                 if (!wasWorld)
                     viewer.SwitchToWorldCoordinate(graphics);
-                var pen = viewer.GetOnePixelPen(Color.Lime);
+                var pen = viewer.GetOnePixelPen(Color.Orange);
                 var roi = SelectionRectangle;
                 graphics.DrawRectangle(pen, roi.X, roi.Y, roi.Width, roi.Height);
             }
