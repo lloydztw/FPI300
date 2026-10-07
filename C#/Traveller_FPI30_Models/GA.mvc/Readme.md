@@ -19,9 +19,9 @@
 	Aoi4: QrCode
 
 # PLC 觸發狀態 (IPlcIoFPIX3.iScanStatus)
-	0 (pss0) : 執行次序為 Aoi1 -> Aoi2 -> Aoi3  
-	1 (pss1) : 執行次序為 Aoi1 -> Aoi2 -> Aoi4
-	2 (pss2) : 執行次序為 Aoi0
+	0,1 : (ScanInspectMode.MEASUREAOI) : 執行次序為 Aoi1 -> Aoi2 -> Aoi3  
+	2   : (ScanInspectMode.QRCODE)	   : 執行次序為 Aoi1 -> Aoi2 -> Aoi4
+	3   : (ScanInspectMode.NOTRAY)	   : 執行次序為 Aoi0
 
 # PLC 自動傳遞/設定 Recipe
 	目前寫在兩處 GUI

@@ -34,7 +34,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;OPT_CALIB_V5 | OPT_TRANSFORM_V37 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <DefineConstants>TRACE;OPT_CALIB_V5 | OPT_TRANSFORM_V38 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -46,7 +46,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x64\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FX3U || XFATEK || OPT_LETIAN_AUTO_LAYOUT</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPT_TRANSFORM_V38;FX3U || XFATEK || OPT_LETIAN_AUTO_LAYOUT</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -55,7 +55,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>..\..\_BIN_\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;FX3U || XFATEK || OPT_LETIAN_AUTO_LAYOUT</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;OPT_TRANSFORM_V38;FX3U || XFATEK || OPT_LETIAN_AUTO_LAYOUT</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>

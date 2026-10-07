@@ -461,7 +461,7 @@ namespace LaserAlignDX.AoiModel.V3
             {
                 throw new Exception(QMSG.Text(err1));
             }
-            if (err1 != ErrorCodes.OK)
+            if (err2 != ErrorCodes.OK)
             {
                 throw new Exception(QMSG.Text(err2));
             }
