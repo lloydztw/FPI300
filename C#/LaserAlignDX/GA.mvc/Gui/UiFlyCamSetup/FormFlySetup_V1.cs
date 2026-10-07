@@ -583,6 +583,10 @@ namespace LaserAlignDX.FormSpace
         #region IMAGE_DISPLAY
         void init_Display()
         {
+            // Hidden controls do not occupy their AutoSize title rows.
+            DS1.TitleBar.Visible = false;
+            DS2.TitleBar.Visible = false;
+
             _flyOverlay = new CviFlySetupOverlay(DS1);
             _flyOverlay.RegionSelected += DS_CaptureAction;
             _resultOverlay = new CviFlySetupOverlay(DS2);
