@@ -9,7 +9,6 @@ using JetEazy.Lang;
 using JetEazy.UISpace;
 using JetEazy.Utils;
 using LaserAlignDX;
-//using JzDisplay;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace;
 using LeTian.AoiLib;

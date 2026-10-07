@@ -17,6 +17,7 @@ using AwFramework;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.ImageViewerEx;
 using JetEazy.OpenCV.Viewer;
+using OpenCvSharp;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -42,18 +43,28 @@ namespace EzAoiEmptyTrayInspector.Gui.Panels
             internal set;
         }
 
-        //Form IView.frmOwner => FindForm();
         Control IView.Window => this;
-
-        CvzQuickImageViewPanel IvSingleMatchView.quickImageViewPanel => null;
+        CvMatViewer MatViewer => cvMatViewer1;
         IvImageViewer IvSingleMatchView.ImageViewer => cvMatViewer1;
+        
+        public void UpdateImage(Mat srcImg, string srcName, bool disposeSrc)
+        {
+            if (InvokeRequired)
+            {
+                Invoke((Action<Mat, string, bool>)UpdateImage, srcImg, srcName, disposeSrc);
+            }
+            else
+            {
+                lblTitle.Text = srcName;
 
-        //Button IvSingleMatchView.btnOpenFile => btnOpen;
-        //Button IvSingleMatchView.btnRunMatch => btnMatch;
-        //Button IvSingleMatchView.btnResetClear => btnClear;
-        //Button IvSingleMatchView.btnPickGolden => btnCatchGolden;
-        //Button IvSingleMatchView.btnCombine => btnCombine;
-
+                if (srcImg != null)
+                {
+                    MatViewer.CopyFrom(srcImg);
+                    if (disposeSrc)
+                        srcImg.Dispose();
+                }
+            }
+        }
         void IvSingleMatchView.UpdateMatchState(object state)
         {
             if (state != null)

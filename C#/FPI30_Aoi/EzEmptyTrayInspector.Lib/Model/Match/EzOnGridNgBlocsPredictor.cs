@@ -161,6 +161,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
             var settings = new JxTempMatchSettings();
             settings.ScoreThres.Value = 0.2m;
             matcher.SetRecipe(settings);
+            matcher.SetMaskRecipe(_recipe.VisionSettings.TemplateMasks);
 
             // SEARCHING points
             var bestBloc = matcher.FindBestBloc(srcImg, lggTemplate, iterate_possible_offsets(goldenGrid, inputGrid), externFilter: filter);

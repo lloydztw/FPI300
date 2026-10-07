@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.ImageViewerEx;
+using NLog.Time;
 using System.Drawing;
 
 namespace LaserAlignDX.Mvc.Gui
@@ -23,15 +24,19 @@ namespace LaserAlignDX.Mvc.Gui
         #region PRIVATE_DATA
         PointF[][] _lines;
         Color _color;
+        Brush _midPointBrush;
+        float _midPointRadius;
         #endregion
 
         #region GUI_MEMBERS
+#if (OPT_RESERVED)
         static StringFormat _strFormat = new StringFormat()
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center,
         };
         Font _font = null;
+#endif
         #endregion
 
         public CviLineSegmentsBox(Color color, params PointF[][] lines)
@@ -42,6 +47,11 @@ namespace LaserAlignDX.Mvc.Gui
         public void Attach(params PointF[][] lines)
         {
             _lines = lines;
+        }
+        public void EnableMidPoint(Brush br, float radius)
+        {
+            _midPointBrush = br;
+            _midPointRadius = radius;
         }
         public object Tag
         {
@@ -70,10 +80,20 @@ namespace LaserAlignDX.Mvc.Gui
         void Draw_Contents(CvImageViewer viewer, Graphics gxView)
         {
             var pen = viewer.GetOnePixelPen(_color);
+
             foreach (var pts in _lines)
             {
-                if (pts.Length >= 2)
-                    gxView.DrawLine(pen, pts[0], pts[1]);
+                if (pts.Length < 2) continue;
+
+                gxView.DrawLine(pen, pts[0], pts[1]);
+
+                if (_midPointRadius > 0f && _midPointBrush != null)
+                {
+                    var x = (pts[0].X + pts[1].X) / 2f - _midPointRadius;
+                    var y = (pts[0].Y + pts[1].Y) / 2f - _midPointRadius;
+                    var d = _midPointRadius * 2f;
+                    gxView.FillEllipse(_midPointBrush, x, y, d, d);
+                }
             }
         }
         #endregion

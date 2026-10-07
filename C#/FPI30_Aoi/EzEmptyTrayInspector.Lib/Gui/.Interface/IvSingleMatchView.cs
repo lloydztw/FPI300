@@ -22,15 +22,8 @@ namespace EzAoiEmptyTrayInspector.Gui
 {
     public interface IvSingleMatchView : IView
     {
-        CvzQuickImageViewPanel quickImageViewPanel { get; }
         IvImageViewer ImageViewer { get; }
-
-        //Button btnOpenFile { get; }
-        //Button btnRunMatch { get; }
-        //Button btnResetClear { get; }
-        //Button btnPickGolden { get; }
-        //Button btnCombine { get; }
-
+        
         void UpdateImageSrcName(string srcName);
         void UpdateMatchState(object state);
         void UpdateStatusInfo(string msg);

@@ -87,6 +87,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             get => XRecipe.Instance;
         }
+        bool _xUseAveGap4
+        {
+            get => _xRecipe.GapBorderParams.UseAveGaps4;
+        }
         bool _withPadGaps = false;
         #endregion
 
@@ -632,10 +636,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                         bool isFetched = false;
 
                         //(2) iterate MEASURE Points
-                        var measurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
-                        if (measurePts != null)
+                        var chipDim = cell?.ChipData.ChipDimension;
+                        if (chipDim != null)
                         {
-                            foreach (var pt in measurePts)
+                            foreach (var pt in chipDim.IterMeasureCamPoints())
                             {
                                 if (pt == null) continue;
                                 var pseudoBloc = createPseudoBloc(pt, bloc);
@@ -700,6 +704,9 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void syncRegionBox(EzBloc cursorBloc)
         {
+            if (_cviRegionBox == null)
+                return;
+
             //>>> var cursorBloc = GetCursorBloc(0);
             var cellBloc = cursorBloc is CellBloc cb ? cb : cursorBloc?.Tag as CellBloc;
             var activeCell = cellBloc?.Cell;
@@ -934,74 +941,111 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                     if (_xRecipe.InspectParams.optChipMeasurement)
                     {
-                        var tag1 = QMSG.T("晶粒.尺寸X");
-                        var tag2 = QMSG.T("晶粒.尺寸Y");
-
-                        #region 尺寸量測結果
-                        var cW = _xRecipe.InspectParams.mWidthStand;
-                        var cH = _xRecipe.InspectParams.mHeightStand;
-                        var dx = Math.Round(cell.RunWidth - cW, 3);
-                        var dy = Math.Round(cell.RunHeight - cH, 3);
-                        sb.AppendLine().Append($"{tag1} = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
-                        sb.AppendLine().Append($"{tag2} = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
-                        #endregion
-
-                        #region 尺寸量測詳細點位
-                        var chipDim = cell?.ChipData?.ChipDimension;
-                        if (chipDim != null && chipDim.GetPixelSize(out double dpX, out double dpY))
+                        if (_xRecipe.LineBorderParams.IsSimpleQuad)
                         {
-                            sb.AppendLine();
-                            sb.AppendLine().Append($"{tag1} = {dpX:0.0} pix");
-                            sb.AppendLine().Append($"{tag2} = {dpY:0.0} pix");
-                        }
-                        #endregion
+                            var tag1 = QMSG.T("晶粒.尺寸X");
+                            var tag2 = QMSG.T("晶粒.尺寸Y");
 
-                        #region 晶粒_PAD_跨距
-                        if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch)
-                        {
-                            var padsGrid = cell?.ChipData?.PadsGrid;
-                            if (getChapPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
+                            #region 尺寸量測結果
+                            var cW = _xRecipe.InspectParams.mWidthStand;
+                            var cH = _xRecipe.InspectParams.mHeightStand;
+                            var dx = Math.Round(cell.RunWidth - cW, 3);
+                            var dy = Math.Round(cell.RunHeight - cH, 3);
+                            sb.AppendLine().Append($"{tag1} = {cell.RunWidth:0.000} mm").Append($" (Δ = {dx:0.000} mm)");
+                            sb.AppendLine().Append($"{tag2} = {cell.RunHeight:0.000} mm").Append($" (Δ = {dy:0.000} mm)");
+                            #endregion
+
+                            #region 尺寸量測詳細點位
+                            var chipDim = cell?.ChipData?.ChipDimension;
+                            if (chipDim != null && chipDim.GetPixelSize(out double dpX, out double dpY))
                             {
-                                tag1 = QMSG.T("PAD.跨距.尺寸X");
-                                tag2 = QMSG.T("PAD.跨距.尺寸Y");
                                 sb.AppendLine();
-                                sb.AppendLine().Append($"{tag1} = {padSpanW:0.0} pix");
-                                sb.AppendLine().Append($"{tag2} = {padSpanH:0.0} pix");
+                                sb.AppendLine().Append($"{tag1} = {dpX:0.0} pix");
+                                sb.AppendLine().Append($"{tag2} = {dpY:0.0} pix");
                             }
-                        }
-                        #endregion
+                            #endregion
 
-                        #region PAD_邊隙
-                        if (_withPadGaps)
-                        {
-                            var gaps = cell?.ChipData?.PadEdgeGaps;
-                            if (gaps != null)
+                            #region 晶粒_PAD_跨距
+                            if (_xRecipe.InspectParams.xAlgorithm == MatchAlgorithmEnum.GridMatch)
                             {
-                                if (GlobalConfig.OPT_USING_GAPS_4)
+                                var padsGrid = cell?.ChipData?.PadsGrid;
+                                if (getChapPadsSpan(padsGrid, out double padSpanW, out double padSpanH))
                                 {
+                                    tag1 = QMSG.T("PAD.跨距.尺寸X");
+                                    tag2 = QMSG.T("PAD.跨距.尺寸Y");
                                     sb.AppendLine();
-                                    sb.AppendLine().Append(QMSG.T("邊隙(左)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");
-                                    sb.AppendLine().Append(QMSG.T("邊隙(上)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Top):0.000} mm");
-                                    sb.AppendLine().Append(QMSG.T("邊隙(右)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Right):0.000} mm");
-                                    sb.AppendLine().Append(QMSG.T("邊隙(下)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Bottom):0.000} mm");
-                                    sb.AppendLine().Append(QMSG.T("邊隙差值(左右)")).Append($" = {gaps.GetAveGapDiff():0.000} mm");
+                                    sb.AppendLine().Append($"{tag1} = {padSpanW:0.0} pix");
+                                    sb.AppendLine().Append($"{tag2} = {padSpanH:0.0} pix");
                                 }
-                                else
+                            }
+                            #endregion
+
+                            #region PAD_邊隙
+                            if (_withPadGaps)
+                            {
+                                var gaps = cell?.ChipData?.PadEdgeGaps;
+                                if (gaps != null)
                                 {
-                                    sb.AppendLine();
-                                    sb.AppendLine().Append($"LUX = {gaps.LU.X:0.000} mm");
-                                    sb.AppendLine().Append($"RUX = {gaps.RU.X:0.000} mm");
-                                    sb.AppendLine().Append($"RDX = {gaps.RD.X:0.000} mm");
-                                    sb.AppendLine().Append($"LDX = {gaps.LD.X:0.000} mm");
-                                    sb.AppendLine();
-                                    sb.AppendLine().Append($"LUY = {gaps.LU.Y:0.000} mm");
-                                    sb.AppendLine().Append($"RUY = {gaps.RU.Y:0.000} mm");
-                                    sb.AppendLine().Append($"RDY = {gaps.RD.Y:0.000} mm");
-                                    sb.AppendLine().Append($"LDY = {gaps.LD.Y:0.000} mm");
+                                    if (_xUseAveGap4)
+                                    {
+                                        sb.AppendLine();
+                                        sb.AppendLine().Append(QMSG.T("邊隙(左)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Left):0.000} mm");
+                                        sb.AppendLine().Append(QMSG.T("邊隙(上)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Top):0.000} mm");
+                                        sb.AppendLine().Append(QMSG.T("邊隙(右)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Right):0.000} mm");
+                                        sb.AppendLine().Append(QMSG.T("邊隙(下)")).Append($" = {gaps.GetAveGap(BasicSpace.EdgeBorder.Bottom):0.000} mm");
+                                        sb.AppendLine().Append(QMSG.T("邊隙差值(左右)")).Append($" = {gaps.GetAveGapDiff():0.000} mm");
+                                    }
+                                    else
+                                    {
+                                        //sb.AppendLine();
+                                        //sb.AppendLine().Append($"LUX = {gaps.LU.X:0.000} mm");
+                                        //sb.AppendLine().Append($"RUX = {gaps.RU.X:0.000} mm");
+                                        //sb.AppendLine().Append($"RDX = {gaps.RD.X:0.000} mm");
+                                        //sb.AppendLine().Append($"LDX = {gaps.LD.X:0.000} mm");
+                                        //sb.AppendLine();
+                                        //sb.AppendLine().Append($"LUY = {gaps.LU.Y:0.000} mm");
+                                        //sb.AppendLine().Append($"RUY = {gaps.RU.Y:0.000} mm");
+                                        //sb.AppendLine().Append($"RDY = {gaps.RD.Y:0.000} mm");
+                                        //sb.AppendLine().Append($"LDY = {gaps.LD.Y:0.000} mm");
+                                        sb.AppendLine();
+                                        sb.AppendLine().Append($"LU: (X={gaps.LU.X:0.000}, Y={gaps.LU.Y:0.000}) mm");
+                                        sb.AppendLine().Append($"RU: (X={gaps.RU.X:0.000}, Y={gaps.RU.Y:0.000}) mm");
+                                        sb.AppendLine().Append($"RD: (X={gaps.RD.X:0.000}, Y={gaps.RD.Y:0.000}) mm");
+                                        sb.AppendLine().Append($"LD: (X={gaps.LD.X:0.000}, Y={gaps.LD.Y:0.000}) mm");
+                                    }
+                                }
+                            }
+                            #endregion
+                        }
+                        else
+                        {
+                            var chipDim = cell?.ChipData?.ChipDimension;
+                            if (chipDim != null)
+                            {
+                                var tag = QMSG.T("晶粒.尺寸X").Trim('X');
+                                foreach (var key in chipDim.Keys)
+                                {
+                                    #region 尺寸量測結果_(mm)
+                                    var dist = chipDim[key].Value;
+                                    var target = key.StartsWith("X")
+                                                ? _xRecipe.InspectParams.mWidthStand
+                                                : _xRecipe.InspectParams.mHeightStand;
+                                    var delta = Math.Round(target - dist, 3);
+                                    sb.AppendLine().Append($"{tag}{key} = {dist:0.000} mm").Append($" (Δ = {delta:0.000} mm)");
+                                    #endregion
+
+                                    #region 尺寸量測詳細點位_(pixels)
+                                    ////var chipDim = cell?.ChipData?.ChipDimension;
+                                    //if (chipDim != null && chipDim.GetPixelSize(out double dpX, out double dpY))
+                                    //{
+                                    //    sb.AppendLine();
+                                    //    sb.AppendLine().Append($"{tag1} = {dpX:0.0} pix");
+                                    //    sb.AppendLine().Append($"{tag2} = {dpY:0.0} pix");
+                                    //}
+                                    #endregion
                                 }
                             }
                         }
-                        #endregion
                     }
                 }
             }

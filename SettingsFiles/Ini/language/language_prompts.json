@@ -152,6 +152,8 @@
 "WARN_CAN_NOT_FETCH_QUAD_2D" : ["Unable to find GoldenQuad2D!", "無法找到 GoldenQuad2D!", "", "ไม่สามารถค้นหา GoldenQuad2D ได้!"],
 "WARN_CAN_NOT_FETCH_INKS" : ["Unable to automatically fetch INK alignment points!\n\rPlease check if parameters are matched.", "無法自動抓到 INK 定位點!\n\r請確認 參數 是否適配?", "", "ไม่สามารถจับจุดตำแหน่ง INK อัตโนมัติได้!\n\rกรุณาตรวจสอบว่าพารามิเตอร์เหมาะสมหรือไม่"],
 "ERR_CHIP_LOC_ALL_EMPTY" : ["Exception: Alignment result is [All Empty Tray]!\n\rPlease check equipment status and parameter matching.", "異常: 定位結果為【全空盤】!\n\r請檢查設備狀態與參數是否適配.", "", "ผิดปกติ: ผลลัพธ์การระบุตำแหน่งคือ [ถาดเปล่าทั้งหมด]!\n\rกรุณาตรวจสอบสถานะอุปกรณ์และความเหมาะสมของพารามิเตอร์"],
+"WARN_EXISTING_BAD_CONNS_BLOBS" : ["Warning: Bad Connection Blobs are detected!", "警告: 偵測到 連筋 存在!", "", "คำเตือน: ตรวจพบคราบเชื่อมติดผิดปกติ (Bad Connection Blobs)!"],
+
 "ERR_AUTO_GENERATE_ARRAY_EXCEPTION" : ["Auto-generate array exception!", "自動生成陣列異常", "", "เกิดข้อผิดพลาดในการสร้างอาเรย์อัตโนมัติ!"],
 
 "__空盤檢測訊息__" : ["Remark", "不用翻譯","",""],

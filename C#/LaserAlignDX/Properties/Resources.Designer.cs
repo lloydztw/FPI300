@@ -123,6 +123,16 @@ namespace LaserAlignDX.Properties {
         /// <summary>
         ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
         /// </summary>
+        internal static System.Drawing.Bitmap debug_purple {
+            get {
+                object obj = ResourceManager.GetObject("debug_purple", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
         internal static System.Drawing.Bitmap file_bmp_icon {
             get {
                 object obj = ResourceManager.GetObject("file_bmp_icon", resourceCulture);
@@ -136,6 +146,16 @@ namespace LaserAlignDX.Properties {
         internal static System.Drawing.Bitmap file_png_icon {
             get {
                 object obj = ResourceManager.GetObject("file_png_icon", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查詢類型 System.Drawing.Bitmap 的當地語系化資源。
+        /// </summary>
+        internal static System.Drawing.Bitmap golden_star {
+            get {
+                object obj = ResourceManager.GetObject("golden_star", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

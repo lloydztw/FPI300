@@ -124,9 +124,6 @@
   <data name="banner_traveller_106" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\banner_traveller_106.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="debug_orange" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\debug_orange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ActiveCarrier" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\next.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -148,10 +145,19 @@
   <data name="sysSettings" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\sysSettings.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="recipe_edit" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\recipe_edit.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="undo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\undo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="golden_star" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\golden_star.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="debug_purple" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\debug_purple.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="debug_orange" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\debug_orange.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="recipe_edit" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\recipe_edit.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

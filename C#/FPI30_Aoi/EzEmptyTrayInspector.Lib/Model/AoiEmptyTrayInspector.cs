@@ -749,6 +749,8 @@ namespace EzAoiEmptyTrayInspector.Model
 
                     var matcher = new EzTemplateMatcher(EzAoiBaseUtil.GetShrinkFactor(srcImg.Width, srcImg.Height));
                     matcher.SetRecipe(matchSettings);
+                    matcher.SetMaskRecipe(_recipe?.VisionSettings?.TemplateMasks);
+
                     matcher.DumpPath = dumpPath;
                     matcher.OnProgress += (s, e) => _LOG.Info("[{0}] {1}", sideId, e.Message);
 

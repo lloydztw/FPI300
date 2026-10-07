@@ -14,15 +14,14 @@
 #endregion
 
 using JetEazy.ImageViewerEx;
-using JetEazy.ImageViewerEx.Interactors;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-
+using CviSelectionBox = JetEazy.ImageViewerEx.Interactors.CviSelectionBox;
 
 namespace LaserAlignDX.Mvc.Gui
 {
-    public class CviGoldenPickingBox : CvImageViewerSelectionBox
+    public class CviGoldenPickingBox : CviSelectionBox
     {
         public event EventHandler OnBoxSelected;
 
@@ -30,7 +29,7 @@ namespace LaserAlignDX.Mvc.Gui
         bool _isPicking = false;
         #endregion
 
-        public CviGoldenPickingBox(Brush brush) : base(brush, 1, 0)
+        public CviGoldenPickingBox(Brush brush) : base(brush)
         {
             Visible = false;
         }

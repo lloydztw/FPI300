@@ -14,6 +14,7 @@
 #endregion
 
 using JetEazy.Lang;
+using JetEazy.OpenCV.Viewer;
 using LaserAlignDX.Mvc.Ctrl;
 using System.Windows.Forms;
 using DispUI = JzDisplay.UISpace.DispUI;
@@ -30,6 +31,7 @@ namespace LaserAlignDX.Mvc.Gui
                 return;
 
             DispViewers = new[] { DS1, DS2, DS3 };
+
             rdoBoxSelectors = new[] { radioButtonG, radioButtonLn, radioButtonQr };
             SizeChanged += (s, e) => autoLayout();
             autoLayout();
@@ -49,18 +51,28 @@ namespace LaserAlignDX.Mvc.Gui
         {
             get; private set;
         }
+        public Control[] ImgViewers
+        {
+            get;
+            private set;
+        }
         public RadioButton[] rdoBoxSelectors
         {
             get; private set;
         }
 
+        Button IvTemplateEditorUI.btnRotateGolden => btnPickGolden;
         Button IvTemplateEditorUI.btnPickGolden => btnPickGolden;
+
         Button IvTemplateEditorUI.btnAutoLineBorders => btnAutoLineBorders;
         Button IvTemplateEditorUI.btnBuildMircoTransform => btnBuildMircoTrf;
-
         NumericUpDown IvTemplateEditorUI.numBorderIndent => numBorderIndent;
         NumericUpDown IvTemplateEditorUI.numBorderExtend => numBorderSize;
         NumericUpDown IvTemplateEditorUI.numLineSpanPercentage => numSpanRatio;
+
+        NumericUpDown IvTemplateEditorUI.numMeasureDistXs => null;
+        NumericUpDown IvTemplateEditorUI.numMeasureDistYs => null;
+        NumericUpDown IvTemplateEditorUI.numMeasureMasks => null;
 
         Button IvTemplateEditorUI.btnTryScanQrCode => btnTryQrCode;
         Control IvTemplateEditorUI.wndQrCodeResult => rtbCodeContent;

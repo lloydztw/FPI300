@@ -13,36 +13,134 @@
  */
 #endregion
 
+using System;
 using System.Windows.Forms;
 using DispUI = JzDisplay.UISpace.DispUI;
 
 namespace LaserAlignDX.Mvc.Gui
 {
-    public interface IvTemplateEditorUI
+    public interface IvTemplateEditorUI 
+                    : IvTemplLineBordersEditorUI
+                    , IvTemplLineGapBordersEditorUI
+                    , IvTemplDefectsEditorUI 
+                    , IvTemplBadConnsEditorUI
+                    , IvTemplQrCodeEditorUI
     {
         Control Window { get; }
-        DispUI[] DispViewers { get; }
+        
+        //DispUI[] DispViewers { get; }   // 準備廢除, 全面改用 ImvViewers
+        Control[] ImgViewers { get; }
+        
+        Control wndVisionSettingsPanel { get; }
 
         Control lblActiveCarrierID { get; }
+
         RadioButton[] rdoBoxSelectors { get; }
 
-        Button btnPickGolden {  get; }
-        Button btnAutoLineBorders { get; }
-        Button btnBuildMircoTransform { get; }
-        NumericUpDown numBorderIndent { get; }
-        NumericUpDown numBorderExtend { get; }
-        NumericUpDown numLineSpanPercentage { get; }
+        /// <summary>
+        /// 轉正模板
+        /// </summary>
+        Button btnRotateGolden { get; }
 
-        Button btnTryScanQrCode { get; }
-        Control wndQrCodeResult { get; }
-
-        Control wndVisionSettingsPanel { get; }
-        Button btnDefectRegionAdd { get; }  
-        Button btnDefectRegionDelete {  get; }  
-        Button btnDefectRegionClearAll { get; }
+        /// <summary>
+        /// 擷取模板
+        /// </summary>
+        Button btnPickGolden { get; }
 
         Button btnTrainTemplate { get; }
+
         Button btnSaveAllParams { get; }
+
         Button btnCancel { get; }
+    }
+
+
+    public interface IvTemplLineBordersEditorUI
+    {
+        /// <summary>
+        /// 尺寸X 量測數量
+        /// </summary>
+        NumericUpDown numMeasureDistXs { get; }
+        /// <summary>
+        /// 尺寸Y 量測數量
+        /// </summary>
+        NumericUpDown numMeasureDistYs { get; }
+        /// <summary>
+        /// 遮罩數量
+        /// </summary>
+        NumericUpDown numMeasureMasks { get; }
+        /// <summary>
+        /// 內緣
+        /// </summary>
+        NumericUpDown numBorderIndent { get; }
+        /// <summary>
+        /// 外緣
+        /// </summary>
+        NumericUpDown numBorderExtend { get; }
+        /// <summary>
+        /// 跨距
+        /// </summary>
+        NumericUpDown numLineSpanPercentage { get; }
+
+        /// <summary>
+        /// 顯示 邊線前置濾波 效果
+        /// </summary>
+        CheckBox chkShowFilterResult { get; }
+        /// <summary>
+        /// 邊線前置濾波: 灰階上限
+        /// </summary>
+        NumericUpDown numGrayLimitHi { get; }
+        /// <summary>
+        /// 邊線前置濾波: 灰階下限
+        /// </summary>
+        NumericUpDown numGrayLimitLo { get; }
+
+        /// <summary>
+        /// 一鍵自動框
+        /// </summary>
+        Button btnAutoLineBorders { get; }
+        /// <summary>
+        /// 精算尺寸
+        /// </summary>
+        Button btnBuildMircoTransform { get; }
+    }
+
+
+    public interface IvTemplLineGapBordersEditorUI
+    {
+        event EventHandler<bool> OnGapBorderViewActiveChanged;
+
+        /// <summary>
+        /// 使用平均邊隙
+        /// </summary>
+        CheckBox chkUseAveGaps4 { get; }
+
+        /// <summary>
+        /// 自動使用默認框
+        /// </summary>
+        Button btnAutoGapBorders { get; }
+    }
+
+
+    public interface IvTemplDefectsEditorUI
+    {
+        Button btnDefectRegionAdd { get; }
+        Button btnDefectRegionDelete { get; }
+        Button btnDefectRegionClearAll { get; }
+    }
+
+
+    public interface IvTemplBadConnsEditorUI
+    {
+        Button btnAddRegion { get; }
+        Button btnDeleteRegion { get; }
+        Button btnClearAllRegions { get; }
+    }
+
+
+    public interface IvTemplQrCodeEditorUI
+    {
+        Button btnTryScanQrCode { get; }
+        Control wndQrCodeResult { get; }
     }
 }

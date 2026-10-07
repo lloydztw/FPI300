@@ -19,10 +19,9 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-
 namespace LaserAlignDX.Mvc.Gui
 {
-    public class CviRcpBox : CvImageViewerRectBox
+    public class CviRcpBox : CviRect
     {
         public event EventHandler OnChanged;
 

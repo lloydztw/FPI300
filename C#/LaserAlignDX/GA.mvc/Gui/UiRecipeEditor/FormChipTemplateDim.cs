@@ -19,6 +19,7 @@ using JetEazy.Utils;
 using LaserAlignDX.Mvc.Model;
 using System;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using ErrorCodes = LaserAlignDX.Mvc.Model.ErrorCodes;
@@ -79,23 +80,57 @@ namespace LaserAlignDX.Mvc.Gui
                 lblInfo.Text = "";
                 return;
             }
+
             var sb = new StringBuilder();
             int row = cell.CellRow;
             int col = cell.CellCol;
             sb.Append(QMSG.T("格點")).Append(": [").Append(row).Append(",").Append(col).Append("]");
 
             #region 尺寸量測詳細點位
-            var meansurePts = cell?.ChipData.ChipDimension.DimMeasurePoints;
-            if (meansurePts != null && meansurePts.Length >= 4 &&
-                meansurePts[0] != null && meansurePts[1] != null &&
-                meansurePts[2] != null && meansurePts[3] != null)
+            bool isConditionOK = false;
+            var chipDim = cell?.ChipData.ChipDimension;
+            if (chipDim != null)
             {
-                var dpX = (meansurePts[0] - meansurePts[2]).NormLength;
-                var dpY = (meansurePts[1] - meansurePts[3]).NormLength;
-                sb.AppendLine().Append(QMSG.T("晶粒.尺寸X")).Append($" = {dpX:0.0} pix");
-                sb.AppendLine().Append(QMSG.T("晶粒.尺寸Y")).Append($" = {dpY:0.0} pix");
+                if (_xRecipe.LineBorderParams.IsSimpleQuad)
+                {
+                    var measureX = chipDim?["X"];
+                    var measureY = chipDim?["Y"];
+                    var meansurePts = new[]
+                    {
+                        measureX?.CamMeasurePts[0],     //  LEFT
+                        measureY?.CamMeasurePts[0],     //  TOP
+                        measureX?.CamMeasurePts[1],     //  RIGHT
+                        measureY?.CamMeasurePts[1],     //  BOTTOM
+                    };
+
+                    if (meansurePts[0] != null && meansurePts[1] != null &&
+                        meansurePts[2] != null && meansurePts[3] != null)
+                    {
+                        var dpX = (meansurePts[0] - meansurePts[2]).NormLength;
+                        var dpY = (meansurePts[1] - meansurePts[3]).NormLength;
+                        sb.AppendLine().Append(QMSG.T("晶粒.尺寸X")).Append($" = {dpX:0.0} pix");
+                        sb.AppendLine().Append(QMSG.T("晶粒.尺寸Y")).Append($" = {dpY:0.0} pix");
+                        isConditionOK = true;
+                    }
+                }
+                else
+                {
+                    string tagName = QMSG.T("晶粒.尺寸X").Replace("X", "");
+                    foreach (var key in chipDim.Keys)
+                    {
+                        var meansure = chipDim[key];
+                        if (meansure == null) continue;
+                        var pts = meansure.CamMeasurePts;
+                        if (pts[0] != null && pts[1] != null)
+                        {
+                            var dist = (pts[0] - pts[1]).NormLength;
+                            sb.AppendLine().Append(tagName).Append(key).Append($" = {dist:0.0} pix");
+                            isConditionOK = true;
+                        }
+                    }
+                }
             }
-            else
+            if (!isConditionOK)
             {
                 sb.AppendLine().AppendLine(QMSG.T("沒有 完整邊線, 無法建構 有效量測點位!"));
                 numChipWidth.Enabled = false;
@@ -150,32 +185,54 @@ namespace LaserAlignDX.Mvc.Gui
 
         ErrorCodes BuildMicroTransform()
         {
+            // Model
             var aoiModel = _sysModel?.AoiModel;
             if (aoiModel == null)
                 return ErrorCodes.NO_AOI_MODEL;
 
+            // Fullfov Bitmap
             var fullfovBmp = _sysModel?.LineScanImageHolder?.PeekBitmap();
             if (fullfovBmp == null)
                 return ErrorCodes.NO_LINE_SCAN_IMAGE;
 
+            // chipData
             var chipData = ActiveCell?.ChipData;
             if (chipData == null)
                 return ErrorCodes.ERR_NO_CHIP_LOCATION;
 
-            var goldenW = (float)numChipWidth.Value;
-            var goldenH = (float)numChipHeight.Value;
-            var goldenDim = new SizeF(goldenW, goldenH);
-
-            // Region Bitmap
+            // Region Roi
             var regionRoi = Rectangle.Round(chipData.CellRoi);
             GaUtil.Clip(ref regionRoi, fullfovBmp.Size);
             if (regionRoi.Width < 2 || regionRoi.Height < 2)
                 return ErrorCodes.ERR_NO_CHIP_LOCATION;
 
-            using (var regionBmp = fullfovBmp.Clone(Rectangle.Round(regionRoi), System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
+            // Region Bmp
+            using (var regionBmp = fullfovBmp.Clone(regionRoi, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                var err = aoiModel.BuildMicroChipTransform(goldenDim, chipData.LineSegments, regionBmp, regionRoi);
-                return err;
+                var targetW = (float)numChipWidth.Value;
+                var targetH = (float)numChipHeight.Value;
+                var targetDim = new SizeF(targetW, targetH);
+
+                // 實時 邊線框數據 (Fullfov Camera Coordinates) 
+                var lineBorderPairs = chipData.LineBorderPairs;
+
+                // 設定目標尺寸 
+                lineBorderPairs.SetTargetDists(targetDim);
+
+                // 是否 使用 簡單四邊線
+                if (_xRecipe.LineBorderParams.IsSimpleQuad)
+                {
+                    // 使用 原有 微距轉換系統 的建構方式
+                    var edgeLines4 = lineBorderPairs.GetQuadLineSegments();
+                    var err = aoiModel.BuildMicroChipTransform(targetDim, edgeLines4, regionBmp, regionRoi, lineBorderPairs.IsLocal);
+                    return err;
+                }
+                else
+                {
+                    // 使用 新的 微距轉換系統 的建構方式
+                    var err = aoiModel.BuildMicroChipTransform(lineBorderPairs, regionBmp, regionRoi);
+                    return err;
+                }
             }
         }
     }

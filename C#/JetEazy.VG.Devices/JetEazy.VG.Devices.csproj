@@ -1,0 +1,259 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{AFA9CF55-2235-415D-B437-F4A62DA34A0C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>JetEazy</RootNamespace>
+    <AssemblyName>JetEazy.VG.Devices</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;OPT_LETIAN_AUTO_LAYOUT | xFX3U | xFATEK | CIP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;OPT_LETIAN_AUTO_LAYOUT | xFX3U | xFATEK | CIP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG;OPT_LETIAN_AUTO_LAYOUT</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE;OPT_LETIAN_AUTO_LAYOUT</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CIPCompolet64">
+      <HintPath>..\Dlls\Omron\CIPCompolet64.dll</HintPath>
+    </Reference>
+    <Reference Include="CIPCompoletProxyLib">
+      <HintPath>..\Dlls\Omron\CIPCompoletProxyLib.dll</HintPath>
+    </Reference>
+    <Reference Include="CIPCompoletProxyServer">
+      <HintPath>..\Dlls\Omron\CIPCompoletProxyServer.exe</HintPath>
+    </Reference>
+    <Reference Include="CLIDelegate">
+      <HintPath>..\DLLS\CLIDelegate.dll</HintPath>
+    </Reference>
+    <Reference Include="DVPCameraCS64">
+      <HintPath>..\DLLS\Dvp2\DVPCameraCS64.dll</HintPath>
+    </Reference>
+    <Reference Include="FreeImageNET">
+      <HintPath>..\DLLS\FreeImageNET.dll</HintPath>
+    </Reference>
+    <Reference Include="HslCommunication">
+      <HintPath>..\DLLS\HslCommunication.dll</HintPath>
+    </Reference>
+    <Reference Include="IKapBoardClassLibrary">
+      <HintPath>..\Dlls\ITK\IKapBoardClassLibrary.dll</HintPath>
+    </Reference>
+    <Reference Include="IKapC.NET">
+      <HintPath>..\Dlls\ITK\IKapC.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.Lang">
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.Lang.dll</HintPath>
+    </Reference>
+    <Reference Include="JetEazy.QUtility, Version=1.0.9.10, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Common Files\JetEazy\JetEazy.QUtility.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="MvCameraControl.Net">
+      <HintPath>..\DLLS\MvCameraControl.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="MVSDK">
+      <HintPath>..\DLLS\MVSDK.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data, Version=8.0.33.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Dlls\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NModbus4">
+      <HintPath>..\DLLS\NModbus4.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCvSharp, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCvSharp4.4.8.0.20230708\lib\net48\OpenCvSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="OpenCvSharp.Extensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=6adad1e807fea099, processorArchitecture=MSIL">
+      <HintPath>..\packages\OpenCvSharp4.Extensions.4.8.0.20230708\lib\net48\OpenCvSharp.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Common, Version=7.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Drawing.Common.7.0.0\lib\net462\System.Drawing.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="ThridLibray">
+      <HintPath>..\DLLS\ThridLibray.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BasicSpace\JzTCPClass.cs" />
+    <Compile Include="CCDSpace\CAMERAClass.cs" />
+    <Compile Include="CCDSpace\CamLinkDriver\Linescan_Dvp2.cs" />
+    <Compile Include="CCDSpace\CamLinkDriver\LINESCAN_HUARUI.cs" />
+    <Compile Include="CCDSpace\CamLinkDriver\Euresys\MultiCam.cs" />
+    <Compile Include="CCDSpace\CamLinkDriver\Linescan_Mind.cs" />
+    <Compile Include="CCDSpace\CamLinkDriver\Linescan_Sim.cs" />
+    <Compile Include="CCDSpace\CAM_DAHUA.cs" />
+    <Compile Include="CCDSpace\CAM_HIKVISION.cs" />
+    <Compile Include="CCDSpace\Dvp2Class.cs" />
+    <Compile Include="CCDSpace\CamLinkDriver\Linescan_iTK.cs" />
+    <Compile Include="CCDSpace\GaCameraFactory.cs" />
+    <Compile Include="ControlSpace\Factory\GaMotorFactory.cs" />
+    <Compile Include="ControlSpace\MotionSpace\PLCMotionClass_Sim.cs" />
+    <Compile Include="ControlSpace\MotionSpace\PLCMotionClass.cs" />
+    <Compile Include="ControlSpace\PLCSpace\CipCompoletClass.cs" />
+    <Compile Include="ControlSpace\Light\CstLightClass.cs" />
+    <Compile Include="ControlSpace\PLCSpace\EzBarcodeM3DHelper.cs" />
+    <Compile Include="ControlSpace\PLCSpace\Mitsubishi_FX3UClass.cs" />
+    <Compile Include="ControlSpace\PLCSpace\ModbusTcpFromNNModbus4.cs" />
+    <Compile Include=".Interface\IAxis.cs" />
+    <Compile Include=".Interface\IxLineScanCam.cs" />
+    <Compile Include=".Interface\IxTickable.cs" />
+    <Compile Include=".Interface\ICam.cs" />
+    <Compile Include="ControlSpace\CCDClass.cs" />
+    <Compile Include="ControlSpace\COMClass.cs" />
+    <Compile Include="ControlSpace\EventClass.cs" />
+    <Compile Include="ControlSpace\MotionSpace\CanMotionClass.cs" />
+    <Compile Include="ControlSpace\MotionSpace\GeoMotionClass.cs" />
+    <Compile Include="ControlSpace\MotoCanSpace\CanDeviceCore.cs" />
+    <Compile Include="ControlSpace\MotoCanSpace\CanDeviceMotor.cs" />
+    <Compile Include="ControlSpace\MotoCanSpace\CanMotoControl.cs" />
+    <Compile Include="ControlSpace\MotoCanSpace\SocketCan.cs" />
+    <Compile Include="ControlSpace\MotoCanSpace\UsbCan.cs" />
+    <Compile Include="ControlSpace\AddressClass.cs" />
+    <Compile Include="ControlSpace\AlarmsClass.cs" />
+    <Compile Include="ControlSpace\PLCAlarmsClass.cs" />
+    <Compile Include="ControlSpace\PLCSpace\FatekClass.cs" />
+    <Compile Include="ControlSpace\PLCSpace\ModbusRTUClass.cs" />
+    <Compile Include="ControlSpace\PLCSpace\Modbus_From_HSL.cs" />
+    <Compile Include="ControlSpace\PLCSpace\PLCComm.cs" />
+    <Compile Include="GlobalSpace\Enums\MiscEnums.cs" />
+    <Compile Include="GlobalSpace\Enums\MachineEnums.cs" />
+    <Compile Include="GlobalSpace\Enums\CameraEnums.cs" />
+    <Compile Include="GlobalSpace\Enums\ProjectEnums.cs" />
+    <Compile Include="GlobalSpace\Universal.cs" />
+    <Compile Include="OPSpace\CalibrationPlateClass.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="PropertyGridSpace\PropGrid_CaliClass.cs" />
+    <Compile Include="UISpace\EssUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UISpace\EssUI.designer.cs">
+      <DependentUpon>EssUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UISpace\VsHandleMotorUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UISpace\VsHandleMotorUI.Designer.cs">
+      <DependentUpon>VsHandleMotorUI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UISpace\VsMotorParasClass.cs" />
+    <Compile Include="UISpace\VsTouchMotorClass.cs" />
+    <Compile Include="UISpace\VsTouchMotorUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UISpace\VsTouchMotorUI.Designer.cs">
+      <DependentUpon>VsTouchMotorUI.cs</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UISpace\EssUI.resx">
+      <DependentUpon>EssUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UISpace\VsHandleMotorUI.resx">
+      <DependentUpon>VsHandleMotorUI.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UISpace\VsTouchMotorUI.resx">
+      <DependentUpon>VsTouchMotorUI.cs</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="GlobalSpace\Readme.md" />
+    <None Include="packages.config" />
+    <None Include="Readme.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JetEazy.PropertyGrid.Utils\JetEazy.PropertyGrid.Utils.csproj">
+      <Project>{29ee6e77-21f6-4d85-9582-892d0cd60f93}</Project>
+      <Name>JetEazy.PropertyGrid.Utils</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JetEazy\JetEazy.Basics.csproj">
+      <Project>{a24458c1-b3ac-462a-8b42-dafd1d420e19}</Project>
+      <Name>JetEazy.Basics</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

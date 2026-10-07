@@ -22,7 +22,6 @@ using System.Drawing;
 using System.Linq;
 using CvPoint = OpenCvSharp.Point;
 
-
 namespace EzAoiEmptyTrayInspector.Model.Aoi
 {
     /// <summary>
@@ -55,6 +54,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
         #region RECIPE_PARAMS
         JxTempMatchSettings _recipe;
+        JxTempMatchMasks _masksRecipe;
         bool _usingBlur = true;
         bool _usingLocMax = true;
         int _iterations => _recipe != null ? Math.Max(_recipe.Iterations.Value, 1) : 1;
@@ -68,7 +68,6 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
         int _goldenHeight;
         #endregion
 
-
         /// <summary>
         /// 建構式 (shrinkFactor > 1 可以縮小圖, 來加速計算)
         /// </summary>
@@ -80,6 +79,11 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
         public void SetRecipe(JxTempMatchSettings settings)
         {
             _recipe = settings;
+        }
+
+        public void SetMaskRecipe(JxTempMatchMasks masksSettings)
+        {
+            _masksRecipe = masksSettings;
         }
 
         public int ShrinkFactor
@@ -101,26 +105,38 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
         public List<EzBloc> FindBlocs(Mat image, Mat golden)
         {
+            FirstOrgBestScore = 0;
+
             using (var simularity = new Mat())
             {
                 _goldenWidth = golden.Width;
                 _goldenHeight = golden.Height;
 
                 var garbagesCan = new List<Mat>();
-                
+
+                if (golden.Channels() == 1)
+                    image = ToU8(image, garbagesCan);
+
                 normalizeGolden(golden, image, out golden, garbagesCan);
+                createMask(golden, out Mat mask, garbagesCan);
 
                 apply_shrink(golden, image, out golden, out image, garbagesCan);
-
                 apply_filters(golden, image, out golden, out image, garbagesCan);
+                if (mask != null && mask.Size() != golden.Size())
+                {
+                    mask = mask.Resize(golden.Size());
+                    garbagesCan.Add(mask);
+                }
 
                 // Match
                 _NOTIFY("Matching I");
-                Cv2.MatchTemplate(image, golden, simularity, TemplateMatchModes.CCoeffNormed);
+                Cv2.MatchTemplate(image, golden, simularity, TemplateMatchModes.CCoeffNormed, mask);
 
                 // Runtime Golden
                 using (var bestGolden = find_best_runtime_golden(image, golden, simularity, out double scoreG))
                 {
+                    FirstOrgBestScore = (scoreG + 1) / 2.0;
+
                     _NOTIFY($"Matching I : low score = {scoreG:0.00}");
                     if (scoreG < _thresholdLow)
                     {
@@ -130,7 +146,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                     // Match again
                     _NOTIFY($"Matching II");
                     _DUMP_RUNTIME_GOLDEN(bestGolden);
-                    Cv2.MatchTemplate(image, bestGolden, simularity, TemplateMatchModes.CCoeffNormed);
+                    Cv2.MatchTemplate(image, bestGolden, simularity, TemplateMatchModes.CCoeffNormed, mask);
                 }
 
                 _DUMP_SIMULARITY(simularity);
@@ -157,10 +173,18 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 _goldenHeight = golden.Height;
 
                 var garbagesCan = new List<Mat>();
+                
+                if (golden.Channels() == 1)
+                    image = ToU8(image, garbagesCan);
 
                 normalizeGolden(golden, image, out golden, garbagesCan);
-
+                createMask(golden, out Mat mask, garbagesCan);
                 apply_shrink(golden, image, out golden, out image, garbagesCan);
+                if (mask != null && mask.Size() != golden.Size())
+                {
+                    mask = mask.Resize(golden.Size());
+                    garbagesCan.Add(mask);
+                }
 
                 // Filter
                 if (externFilter != null)
@@ -179,7 +203,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
                 // Match
                 _NOTIFY("Matching (bestBloc)");
-                Cv2.MatchTemplate(image, golden, simularity, TemplateMatchModes.CCoeffNormed);
+                Cv2.MatchTemplate(image, golden, simularity, TemplateMatchModes.CCoeffNormed, mask);
 
                 // Dump simularity
                 _DUMP_SIMULARITY(simularity);
@@ -207,6 +231,12 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 _NOTIFY("Matched (bestBloc)");
                 return bestBloc;
             }
+        }
+
+        public double FirstOrgBestScore
+        {
+            get;
+            private set;
         }
 
         void MinMaxLoc(Mat simularity, out double minVal, out double maxVal, out CvPoint minLoc, out CvPoint maxLoc, IEnumerable<CvPoint> anchorsLeftTop)
@@ -255,6 +285,23 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
         }
 
         #region PRIVATE_FUNCTIONS
+        Mat ToU8(Mat image, List<Mat> garbagesCan)
+        {
+            switch (image.Channels())
+            {
+                case 4:
+                    garbagesCan.Add(image);
+                    return image.CvtColor(ColorConversionCodes.RGBA2GRAY);
+                case 3:
+                    garbagesCan.Add(image);
+                    return image.CvtColor(ColorConversionCodes.RGB2GRAY);
+                case 2:
+                    garbagesCan.Add(image);
+                    return image.CvtColor(ColorConversionCodes.BGR5652GRAY);
+                default:
+                    return image;
+            }
+        }
         void normalizeGolden(Mat golden, Mat image, out Mat newGolden, List<Mat> garbagesCan)
         {
             // 注意: 使用 CvtColor 會影響比對 !!!
@@ -275,6 +322,33 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
 
             if (newGolden.Channels() != image.Channels())
                 throw new Exception("golden 與 image 格式不一致!");
+        }
+        void createMask(Mat golden, out Mat mask, List<Mat> garbagesCan)
+        {
+            mask = null;
+
+            if (golden == null)
+                return;
+
+            var jxMasks = _masksRecipe?.MasksList;
+            if (jxMasks == null || jxMasks.Count == 0)
+                return;
+
+            Rect goldRect = JetEazy.Qcvt.CV(_recipe.GoldenBox.Value);
+            mask = new Mat(golden.Size(), MatType.CV_8UC1, Scalar.White);
+
+            foreach(var jxMask in jxMasks)
+            {
+                Rect roi = JetEazy.Qcvt.CV(jxMask.Value);
+                JetEazy.Qcvt.ClipBoundary(ref roi, ref goldRect);
+                if (roi.Width < 1 || roi.Height < 1)
+                    continue;
+                roi.X -= goldRect.X;
+                roi.Y -= goldRect.Y;
+                mask[roi].SetTo(Scalar.Black);
+            }
+
+            garbagesCan.Add(mask);
         }
         void apply_shrink(Mat golden, Mat image, out Mat newGolden, out Mat newImage, List<Mat> garbagesCan)
         {
@@ -318,7 +392,7 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
                 newImage = apply_filters(image);
                 garbagesCan.Add(newGolden);
                 garbagesCan.Add(newImage);
-                _DUMP_FILTERED(image, golden);
+                _DUMP_FILTERED(newImage, newGolden);
             }
             else
             {
@@ -328,10 +402,30 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
         }
         Mat apply_filters(Mat src)
         {
-            //return src.MedianBlur(7);
-            var sz = new OpenCvSharp.Size(3, 3);
-            //return src.GaussianBlur(sz, 1.0);
-            return src.Blur(sz);
+            ////return src.MedianBlur(7);
+            ////return src.GaussianBlur(sz, 1.0);
+
+            //Mat buf1 = new Mat();
+            //Mat buf2 = new Mat();
+
+            //// 1. 對比度增強 (CLAHE)：解決低對比度關鍵
+            //using (var clahe = Cv2.CreateCLAHE(clipLimit: 3.0, tileGridSize: new OpenCvSharp.Size(8, 8)))
+            //{
+            //    clahe.Apply(src, buf1);
+            //}
+
+            //// 2. 高斯模糊降躁
+            //Cv2.GaussianBlur(buf1, buf2, new OpenCvSharp.Size(5, 5), 0);
+
+            //// 3. Canny 邊緣檢測
+            //Cv2.Canny(buf2, buf1, 20, 60);
+
+            //buf2.Dispose();
+            //return buf1;
+
+            var blurSize = new OpenCvSharp.Size(3, 3);
+            var imgBlur = src.Blur(blurSize);
+            return imgBlur;
         }
         Mat find_best_runtime_golden(Mat image, Mat golden, Mat simularity, out double score)
         {
@@ -469,6 +563,8 @@ namespace EzAoiEmptyTrayInspector.Model.Aoi
         {
             _dumpPath = pathStem;
             _isDumpEnabled = pathStem != null;
+            //_dumpPath = "D:\\paso.log\\match";
+            //_isDumpEnabled = true;
         }
         void _DUMP_SHRINK(Mat image, Mat golden)
         {

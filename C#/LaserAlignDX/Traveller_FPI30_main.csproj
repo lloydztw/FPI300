@@ -23,7 +23,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;OPT_CALIB_V5 | OPT_TRANSFORM_V36 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;OPT_CALIB_V5 | OPT_TRANSFORM_V38 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -34,7 +34,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\bin\Release\</OutputPath>
-    <DefineConstants>TRACE;OPT_CALIB_V5 | OPT_TRANSFORM_V36 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
+    <DefineConstants>TRACE;OPT_CALIB_V5 | OPT_TRANSFORM_V37 | OPT_LETIAN_AUTO_LAYOUT | xFX3U | FATEK | xOPT_USE_AI</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -363,7 +363,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Config.cs" />
+    <Compile Include="App\Ini\v1\UITypeEditors\FormFtpSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="App\Ini\v1\UITypeEditors\FormFtpSettings.Designer.cs">
+      <DependentUpon>FormFtpSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="App\Ini\v1\Dto\DtoFtpSettings.cs" />
+    <Compile Include="App\Ini\v1\UITypeEditors\FtpUITypeEditor.cs" />
+    <Compile Include="App\Ini\v1\INI.cs" />
+    <Compile Include="App\Ini\v1\Dto\DtoINI.cs" />
     <Compile Include="App\Prompts.cs" />
+    <Compile Include="GA.mvc\.Enums\GapEnum.cs" />
     <Compile Include="GA.mvc\.Enums\MatchAlgorithmEnum.cs" />
     <Compile Include="GA.mvc\.Enums\PlcResultCode.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v25.cs" />
@@ -375,16 +386,37 @@
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorSafetyChecker.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaMotorZCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MotorCtrl\GaCommonMotorJogCtrl.cs" />
-    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl_v25.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaRcpBaseCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaRecipeEditCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplateEditCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplBadConnsEditCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplDefectsEditCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplLineGapBorderEditCtrl.cs" />
+    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl.v35\GaTemplLineBorderEditCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\SelfTestCtrl\GaContinousSelfTestCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaAutoDisableZoomCtrl.cs" />
     <Compile Include="GA.mvc\Ctrl\MainCtrl\GaMainCtrl_v3.cs" />
     <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\GaPlcFlyCameraCtrl_v35.cs" />
-    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyAoiResult.cs" />
-    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\Supports\FlyMetaData.cs" />
-    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaTemplateEditCtrl.cs" />
-    <Compile Include="GA.mvc\Ctrl\RecipeEditCtrl\GaRecipeEditCtrl.cs" />
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpConnBlocBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpConnBlocBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpConnBlocBtnsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineGapBorderBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineGapBorderBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpLineGapBorderBtnsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiModel_ChipLoc.cs" />
+    <Compile Include="GA.mvc\Model\.Common\GaChipMeasurePointsCalc.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\3_ChipMeasurer\AoiModel_ChipMeasure_v38_Combo.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\5_BadConnInspect\AoiModel_BadConnInspector.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyAoiResult.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\FlyMetaData.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviAbsTooltipBox.cs" />
+    <Compile Include="GA.mvc\Gui\.Interactor\CviLineBorderBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\TooltipProvider.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviCalibResultBox.cs" />
     <Compile Include="GA.mvc\Gui\.Interactor\CviChipResultBox.cs" />
@@ -498,29 +530,23 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormChipTemplateDim.Designer.cs">
       <DependentUpon>FormChipTemplateDim.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.Designer.cs">
-      <DependentUpon>FormRecipeEditor.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.Designer.cs">
       <DependentUpon>FormLightControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.cs">
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v35.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.Designer.cs">
-      <DependentUpon>FormRecipeEditor_v25.cs</DependentUpon>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v35.Designer.cs">
+      <DependentUpon>FormTemplateEditor_v35.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.cs">
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v35.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.Designer.cs">
-      <DependentUpon>FormTemplateEditor.cs</DependentUpon>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v35.Designer.cs">
+      <DependentUpon>FormRecipeEditor_v35.cs</DependentUpon>
     </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.cs">
       <SubType>UserControl</SubType>
@@ -528,22 +554,53 @@
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.Designer.cs">
       <DependentUpon>GvRecipeBtnsPanel.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpDefectBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpDefectBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpDefectBtnsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpQrCodeBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpQrCodeBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpQrCodeBtnsPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpTemplateBtnsPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GA.mvc\Gui\UiRecipeEditor\GwRcpTemplateBtnsPanel.Designer.cs">
+      <DependentUpon>GwRcpTemplateBtnsPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvTemplateEditorUI.cs" />
     <Compile Include="GA.mvc\Gui\UiRecipeEditor\IvRecipeEditorUI.cs" />
+    <Compile Include="GA.mvc\Model\.Common\GaChipDimension.cs" />
+    <Compile Include="GA.mvc\Model\.Common\LineBorderPair.cs" />
     <Compile Include="GA.mvc\Model\.Common\PixRounder.cs" />
     <Compile Include="GA.mvc\Model\.Common\LotDataHolder.cs" />
     <Compile Include="GA.mvc\Model\.Common\XCellBloc.cs" />
     <Compile Include="GA.mvc\Model\.Common\PlcDataPacker.cs" />
     <Compile Include="GA.mvc\Model\.Common\GaChipData.cs" />
-    <Compile Include="GA.mvc\Model\AI\AiDataCropper.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_Base.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\0_Base\AoiModel_Base.cs" />
     <Compile Include="GA.mvc\Model\.Common\LotData.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzLSD.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_ChipMeasure.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_ChipLoc.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_Defects.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\AoiModel_EmptyTray.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\DefectDetector\MvdDefectDetector_G1.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\0_Base\EzLSD.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiLib\EzPadsGridFinder.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\AoiLib\EzRigidBodyGridMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\implements\JezGridPadsChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\implements\MvdChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\IMvdTemplateMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\2_ChipLocator\v31\Matchers\MvdCompositeChipMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\6_FlyCam\AoiModel_FlyCam.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\5_QrCode\AoiModel_QrCode.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\4_DefectDetector\AoiModel_Defects.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\1_EmptyTray\AoiModel_EmptyTray.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\4_DefectDetector\MvdDefectDetector_G1.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiChipLocator.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiPostBadConnInspector.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiFlyCamMatcher.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiDefectsDetector.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiChipMeasurer.cs" />
+    <Compile Include="GA.mvc\Model\AoiModel\IAoiQrDecoder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\ProcessRunFPIClass_v30.cs" />
     <Compile Include="GA.mvc\.Enums\LightChannelEnum.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\Supports\GaBigImageHolder.cs" />
@@ -564,10 +621,14 @@
     <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\ITravellerTransforms.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\Interface\IMicroChipTransform.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\TravellerTransformFactory.cs" />
-    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\QMicroChipTransform.cs" />
-    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\QWorldGridPoints.cs" />
-    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms.cs" />
-    <Compile Include="GA.mvc\Model\CoordsTransforms\V33\TravellerTransforms_ini.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\QMicroChipTransform.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\QWorldGridPointsEx.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\TravellerTransforms.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V38\TravellerTransforms_ini.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\QMicroChipTransform.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\QWorldGridPointsEx.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\TravellerTransforms.cs" />
+    <Compile Include="GA.mvc\Model\CoordsTransforms\V37\TravellerTransforms_ini.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V36\QMicroChipTransform.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\V36\QWorldGridPointsEx.cs" />
     <Compile Include="GA.mvc\Model\CoordsTransforms\TrfMigration.cs" />
@@ -576,16 +637,21 @@
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\XReportBuilderProxy.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\ThaiReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\JcetReportBuilder.cs" />
+    <Compile Include="GA.mvc\Model\Ftp\FtpUploader.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3LineBorderParams.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3GridParams.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3LineGapBorderParams.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\DTO\DtoX3MeasureSpec.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\LineScanCalibrateClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\FlyParamClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\InspectX3ParamClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.LB.Gap.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.Mvd.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.LB.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeFPIX3Class.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\RecipeParaGridClass.cs" />
+    <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Params\RecipeParaGridClass.cs" />
     <Compile Include="GA.mvc\Model\Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyReadonlyProvider.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\JxMetadataUtil.cs" />
-    <Compile Include="GA.mvc\Model\Recipes\JxRecipes\Supports\CsPropertyMetadataUtil.cs" />
     <Compile Include="App\ErrorCodes.cs" />
     <Compile Include="GA.mvc\Model\SysModel\ITravellerSysModel.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerSysModel.cs" />
@@ -610,15 +676,9 @@
     <Compile Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.Designer.cs">
       <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzPadsGridFinder.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\AoiLib\EzRigidBodyGridMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\Implements\MvdChipMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\Implements\JezGridPadsChipMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\IMvdTemplateMatcher.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ChipLocator\MvdCompositeChipMatcher.cs" />
     <Compile Include="GA.mvc\Model\SysModel\TravellerBigImagesHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
-    <Compile Include="GA.mvc\Model\AoiModel\ScanInspectModeEnum.cs" />
+    <Compile Include="GA.mvc\.Enums\ScanInspectModeEnum.cs" />
     <Compile Include="GA.mvc\.Enums\CarrierEnum.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />
@@ -665,14 +725,13 @@
     <Compile Include="GA\ControlSpace\MachineSpace\NeedleMachineClass.cs" />
     <Compile Include="GA\ControlSpace\MachineSpace\YzBaseMachineClass.cs" />
     <Compile Include="GA\GlobalSpace\Enums.cs" />
-    <Compile Include="GA\GlobalSpace\INI.cs" />
     <Compile Include="GA\GlobalSpace\Universal_lt.cs" />
     <Compile Include="GA\OPSpace\AUFindClass.cs" />
     <Compile Include="GA\OPSpace\CameraConfig.cs" />
     <Compile Include="GA\OPSpace\ChannelBarcodeClass.cs" />
     <Compile Include="GA\OPSpace\MarkItemClass.cs" />
     <Compile Include="GA\OPSpace\ModuleClass.cs" />
-    <Compile Include="GA\OPSpace\RecipeSpace\WinIni.cs" />
+    <Compile Include="App\Ini\common\WinIni_bom_utf8.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeBaseClass.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\GeoResultClass.cs" />
     <Compile Include="GA\OPSpace\ResultSpace\JzBaseResultClass.cs" />
@@ -765,6 +824,9 @@
       <DependentUpon>PosUI.cs</DependentUpon>
     </Compile>
     <Compile Include="LT\UnitTest\UnitTest_ChipMatcher.cs" />
+    <EmbeddedResource Include="App\Ini\v1\UITypeEditors\FormFtpSettings.resx">
+      <DependentUpon>FormFtpSettings.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\MainSpace\FormMainDX.resx">
       <DependentUpon>FormMainDX.cs</DependentUpon>
     </EmbeddedResource>
@@ -819,20 +881,32 @@
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormChipTemplateDim.resx">
       <DependentUpon>FormChipTemplateDim.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor.resx">
-      <DependentUpon>FormRecipeEditor.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormLightControl.resx">
       <DependentUpon>FormLightControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v25.resx">
-      <DependentUpon>FormRecipeEditor_v25.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor_v35.resx">
+      <DependentUpon>FormTemplateEditor_v35.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormTemplateEditor.resx">
-      <DependentUpon>FormTemplateEditor.cs</DependentUpon>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\FormRecipeEditor_v35.resx">
+      <DependentUpon>FormRecipeEditor_v35.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GvRecipeBtnsPanel.resx">
       <DependentUpon>GvRecipeBtnsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpConnBlocBtnsPanel.resx">
+      <DependentUpon>GwRcpConnBlocBtnsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpDefectBtnsPanel.resx">
+      <DependentUpon>GwRcpDefectBtnsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpLineGapBorderBtnsPanel.resx">
+      <DependentUpon>GwRcpLineGapBorderBtnsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpQrCodeBtnsPanel.resx">
+      <DependentUpon>GwRcpQrCodeBtnsPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="GA.mvc\Gui\UiRecipeEditor\GwRcpTemplateBtnsPanel.resx">
+      <DependentUpon>GwRcpTemplateBtnsPanel.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="GA.mvc\Gui\UiTransImageViewer\JezTransImageViewPanel.resx">
       <DependentUpon>JezTransImageViewPanel.cs</DependentUpon>
@@ -883,10 +957,9 @@
     <None Include="App\Readme.md" />
     <None Include="GA.mvc\Ctrl\Readme.md" />
     <None Include="GA.mvc\Gui\Readme.md" />
-    <None Include="GA.mvc\Model\AI\Readme.md" />
+    <None Include="GA.mvc\Model\AoiModel\2_ChipLocator\Readme.md" />
     <None Include="GA.mvc\Model\CustomerModel\Readme.md" />
     <None Include="GA.mvc\Model\Readme.md" />
-    <None Include="GA.mvc\Model\Recipes\JxRecipes\Readme.md" />
     <None Include="GA.mvc\Readme.md" />
     <None Include="LT\UnitTest\Readme.md" />
     <None Include="NLog.config" />
@@ -925,7 +998,11 @@
       <Project>{ecf19b8d-be9a-4159-8b94-defc25a59507}</Project>
       <Name>JetEazy.Calib</Name>
     </ProjectReference>
-    <ProjectReference Include="..\JetEazy.VG.Camera\JetEazy.VG.Devices.csproj">
+    <ProjectReference Include="..\JetEazy.PropertyGrid.Utils\JetEazy.PropertyGrid.Utils.csproj">
+      <Project>{29ee6e77-21f6-4d85-9582-892d0cd60f93}</Project>
+      <Name>JetEazy.PropertyGrid.Utils</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JetEazy.VG.Devices\JetEazy.VG.Devices.csproj">
       <Project>{afa9cf55-2235-415d-b437-f4a62da34a0c}</Project>
       <Name>JetEazy.VG.Devices</Name>
     </ProjectReference>
@@ -945,7 +1022,9 @@
     <None Include="Resources\next.png" />
     <None Include="Resources\banner.bmp" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="GA.mvc\Model\AoiModel\2_ChipLocator\v35\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>rem copy $(SolutionDir)Dlls\FreeImage.dll $(OutDir)

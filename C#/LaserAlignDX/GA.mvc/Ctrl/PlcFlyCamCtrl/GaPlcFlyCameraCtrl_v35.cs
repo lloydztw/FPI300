@@ -26,17 +26,14 @@ using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
 using System;
 using System.Drawing;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using Traveller106;
 using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace.MachineSpace;
 using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
 using PlcFlyResultCode = LaserAlignDX.PlcResultCode;
-
 
 namespace LaserAlignDX.Mvc.Ctrl.V3
 {
@@ -58,19 +55,24 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         #region MACHINE
         MainFPIX3MachineClass MACHINE
         {
-            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
+            get => (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE;
         }
         #endregion
 
-        #region GLOBAL_MESS
+        #region MODELS
         ITravelerModel _sysModel => GaMvcConfig.SysModel;
-        RecipeFPIX3Class xRecipe
+        IAoiFlyCamMatcher _flyAoi => _sysModel?.AoiModel?.GetFlyCameraAoi();
+        #endregion
+
+        #region GLOBAL_MESS_RECIPES
+        RecipeFPIX3Class _xRecipe
         {
-            get { return RecipeFPIX3Class.Instance; }
+            get => RecipeFPIX3Class.Instance;
         }
-        FlyParaClass xFlyPara
+        FlyParaClass _xFlyAoiParams
         {
-            get { return FlyParaClass.Instance; }
+            //get { return FlyParaClass.Instance; }
+            get => _xRecipe.FlyAoiParams;
         }
         bool IsBusy()
         {
@@ -379,7 +381,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                 //return carrierID == CarrierEnum.C1 ? xFlyPara.ptsOffset : xFlyPara.ptsOffset2;
                 var plcIO = MACHINE?.PLCIO;
                 var stageNo = plcIO != null ? plcIO.iScanStage : 1;
-                return stageNo == 1 ? xFlyPara.ptsOffset : xFlyPara.ptsOffset2;
+                return stageNo == 1 ? _xFlyAoiParams.ptsOffset : _xFlyAoiParams.ptsOffset2;
             }
         }
         #endregion
@@ -508,7 +510,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             try
             {
-                if (xFlyPara.xIsOpenMuit)   // 一般都是 false
+                if (_xFlyAoiParams.xIsOpenMuit)   // 一般都是 false
                     flyProcessProSpecial(flyID, bmpFly);
                 else
                     flyProcessPro(flyID, bmpFly);
@@ -549,27 +551,37 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
             #endregion
 
-            RectangleF roiRect = xRecipe.xRectRegionPrintFly;
+            RectangleF roiRect = _xRecipe.xRectRegionPrintFly;
             PointF centerOrg = JetEazy.Qcvt.Center(ref roiRect);
             PointF centerRun = centerOrg;
 
-            roiRect.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
+            roiRect.Inflate(_xFlyAoiParams.xExtendx, _xFlyAoiParams.xExtendy);
             GaUtil.Clip(ref roiRect, bmpFly.Size);
 
             using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                int err = xRecipe.PrintTempFlyRun(bmpCrop);
+                //int err = xRecipe.PrintTempFlyRun(bmpCrop);
+                //aoiResult.Code = err == 0 ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
+                //var mvdRects = xRecipe.mvdprintFlytemp_Find.xMvdResultRects;
 
-                aoiResult.Code = err == 0 ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
+                var flyAoi = _sysModel.AoiModel.GetFlyCameraAoi();
+                
+                flyAoi?.Run(bmpCrop);
+
+                var mvdRects = flyAoi?.MatchResultRects;
+                var matchAngle = flyAoi != null ? flyAoi.MatchResultAngle : 0f;
+
+                bool ok = mvdRects != null;
+
+                aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
 
                 // 記入 GUI 畫圖所需要的數據
                 // 注意: mvdRects.Count 有可能為 0 !!!
-                var mvdRects = xRecipe.mvdprintFlytemp_Find.xMvdResultRects;
-                if (mvdRects.Count > 0)
+                if (mvdRects != null && mvdRects.Count > 0)
                 {
                     aoiMetaData.xResultBox2D = mvdRects[0]?.ToBox2D();
                     //定位的角度 直接给plc
-                    aoiResult.OffsetAngle = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
+                    aoiResult.OffsetAngle = matchAngle; // xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
                 }
                 else
                 {
@@ -581,14 +593,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                 aoiResult.CodeStr = string.Empty;
                 //读码 目前先使用定位的裁图读码 后续可以单独增加一个读码的ROI区域
-                if (xFlyPara.bOpenCodeReader)
+                if (_xFlyAoiParams.bOpenCodeReader)
                 {
                     aoiDecodeCode(bmpCrop, out string text);
                     aoiResult.CodeStr = text;
                 }
                 _lotData.CodeStr = aoiResult.CodeStr;
 
-                aoiMetaData.xTemplateRect = xRecipe.xRectRegionPrintFly;
+                aoiMetaData.xTemplateRect = _xRecipe.xRectRegionPrintFly;
                 aoiMetaData.xBlobs = null;
                 aoiMetaData.roiRect = roiRect;
                 aoiMetaData.bmpFly = bmpFly;
@@ -794,13 +806,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             //    xRecipe.xRectRegionPrintFly.Height);
             #endregion
 
-            RectangleF roiRect = xRecipe.xRectRegionPrintFly;
-            roiRect.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
+            RectangleF roiRect = _xRecipe.xRectRegionPrintFly;
+            roiRect.Inflate(_xFlyAoiParams.xExtendx, _xFlyAoiParams.xExtendy);
             GaUtil.Clip(ref roiRect, bmpFly.Size);
 
             using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
             {
-                bool ok = xRecipe.CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
+                //bool ok = xRecipe.CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
+                bool ok = _flyAoi.CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
                 aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
                 aoiResult.OffsetAngle = ok ? angle : 0f;
 
@@ -934,6 +947,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         //----------------------------------------------------------------------------
         void aoiDecodeCode(Bitmap srcBmp, out string text)
         {
+#if (OPT_OLD_CODE)
             if (srcBmp == null)
             {
                 text = "";
@@ -950,6 +964,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
             var decodeInfo = aoiTool.DCodeInfo;
             text = decodeInfo != null ? decodeInfo.Content : "";
+#endif
+
+            text = _sysModel?.AoiModel?.GetAoiQrDecoder()?.TryDecode(srcBmp);
+            if (text == null)
+                text = "";
         }
 
         /// <summary>

@@ -40,6 +40,10 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         {
             get => XRecipe.Instance;
         }
+        bool _xUseAveGap4
+        {
+            get => _xRecipe.GapBorderParams.UseAveGaps4;
+        }
         #endregion
 
         #region PRIVATE_CELL_DATA
@@ -52,6 +56,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         List<IvDrawItem> _drawItemsDetails = new List<IvDrawItem>();
         List<IvDrawItem> _drawItemsNgGapCorners = new List<IvDrawItem>();
         List<IvDrawItem> _drawItemsDefectBlobs = new List<IvDrawItem>();
+        List<IvDrawItem> _drawItemsBadConnBlobs = new List<IvDrawItem>();
         Font _font = null;
         #endregion
 
@@ -72,10 +77,11 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         public void Reset()
         {
             _cell = null;
-            _drawItems.Clear();
-            _drawItemsDetails.Clear();
-            _drawItemsNgGapCorners.Clear();
-            _drawItemsDefectBlobs.Clear();
+            _drawItems?.Clear();
+            _drawItemsDetails?.Clear();
+            _drawItemsNgGapCorners?.Clear();
+            _drawItemsDefectBlobs?.Clear();
+            _drawItemsBadConnBlobs?.Clear();
             _bypassNg = false;
         }
         public void UpdateResult(XCell cell, bool bypassNg)
@@ -104,6 +110,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 draw_ChipsLoc(viewer, gxView);
                 draw_ChipDetails(viewer, gxView);
                 draw_DefectBlobs(viewer, gxView);
+                draw_BadConnBlobs(viewer, gxView);
                 draw_QrCode_One(viewer, gxView, _cell);
 
                 if (!isWorld)
@@ -193,6 +200,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         #region UPDATE_DRAW_ITEMS_FUNCTIONS
         void updateBoundaryPolygon()
         {
+#if (OPT_ORIGINAL)
             _boundaryPolygon = null;
 
             if (_cell != null)
@@ -201,6 +209,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                 {
                     var mpts = new List<QVector>();
                     var lines = _cell.ChipData?.LineSegments;
+
                     if (lines != null && lines.Length >= 4)
                     {
                         for (int i = 0, NP = lines.Length; i < NP; i++)
@@ -230,12 +239,19 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
                     _boundaryPolygon = Array.ConvertAll(chipQuad.Corners, p => new OpenCvSharp.Point2f((float)p.X, (float)p.Y));
                 }
             }
+#endif
+            _boundaryPolygon = null;
+            if (_xRecipe.InspectParams.optChipMeasurement)
+            {
+                _cell?.ChipData?.CalcChipBoundaryPolygon(out _boundaryPolygon);
+            }
         }
         void updateDrawItems()
         {
             updateDrawItems_For_ChipLocate();
             updateDrawItems_For_ChipMeasure();
             updateDrawItems_For_DefectBlobs();
+            updateDrawItems_For_BadConnBlobs();
             updateDrawItems_For_AiTrainCorners();
         }
         void updateDrawItems_For_ChipLocate()
@@ -330,7 +346,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             #region 邊線
             // 繪件: 邊線 (左上右下)
-            foreach (var lineSeg in chipData.LineSegments)
+            foreach (var lineSeg in chipData.LineBorderPairs.IterLineSegments())
             {
                 if (lineSeg != null)
                     drawItemsOfLineSegments.Add(new CviLineSegmentsBox(Color.Cyan, lineSeg.ToCSharpLine()) { Tag = cell });
@@ -339,15 +355,16 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
             #region 邊線拉框
             // 繪件: 邊線手拉框
-            int borderIdx = 0;
-            foreach (var borderBox in chipData.LineBorderBoxes)
+            //int borderIdx = 0;
+            //foreach (var borderBox in chipData.LineBorderBoxes)
+            foreach (var borderBox in chipData.LineBorderPairs.IterLineBorderBoxes())
             {
                 if (borderBox != null)
                 {
                     //drawItemsOfBorderBoxes.Add(new CviRotRectBox(borderBox, Color.DarkBlue) { Tag = cell, Text = $"{borderIdx}" });
                     drawItemsOfBorderBoxes.Add(new CviRotRectBox(borderBox, Color.DarkBlue) { Tag = cell });
                 }
-                borderIdx++;
+                //borderIdx++;
             }
             #endregion
 
@@ -435,6 +452,22 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             }
 
             _drawItemsDefectBlobs= drawItems;
+        }
+        void updateDrawItems_For_BadConnBlobs()
+        {
+            var drawItems = new List<IvDrawItem>();
+
+            var ngQuads = _cell?.ChipData?.BadConnBlocs;
+            if (ngQuads != null)
+            {
+                for (int i = 0, N = ngQuads.Length; i < N; i++)
+                {
+                    var item = new CviRotRectBox(ngQuads[i], Color.OrangeRed, blend: 0.5f);
+                    drawItems.Add(item);
+                }
+            }
+
+            _drawItemsBadConnBlobs = drawItems;
         }
         void updateDrawItems_For_AiTrainCorners()
         {
@@ -591,7 +624,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
         }
         void draw_GapMeasurePoints(CvImageViewer viewer, Graphics gxView, XCell activeCell)
         {
-            if (GlobalConfig.OPT_USING_GAPS_4)
+            if (_xUseAveGap4)
             {
                 draw_GapMeasurePoints_gaps4(viewer, gxView, activeCell);
             }
@@ -605,6 +638,7 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             if (!_xRecipe.InspectParams.optChipMeasurement)
                 return;
 
+#if (false)
             var measurePts = activeCell?.ChipData?.ChipDimension?.DimMeasurePoints;
             if (measurePts != null)
             {
@@ -637,6 +671,45 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
 
                 draw_MeasureLine(viewer, gxView, measurePts[0], measurePts[2], Color.Yellow);
                 draw_MeasureLine(viewer, gxView, measurePts[1], measurePts[3], Color.Yellow);
+            }
+#endif
+
+            var chipDim = activeCell?.ChipData?.ChipDimension;
+            if (chipDim != null)
+            {
+                #region DRAW_POINTS
+                foreach (var key in chipDim.Keys)
+                {
+                    var measurement = chipDim[key];
+                    var camPts = measurement?.CamMeasurePts;
+                    if (camPts == null)
+                        continue;
+                    
+                    // LINE
+                    draw_MeasureLine(viewer, gxView, camPts, Color.Yellow);
+
+                    // POINTS
+                    foreach (var pt in camPts)
+                        draw_MeasurePoint(viewer, gxView, pt, measurement.IsPass);
+                }
+                #endregion
+
+                #region DRAW_TEXT
+                if (viewer.GetZoomScale() > 0.35)
+                {
+                    int idx = 0;
+                    var offset = new QVector(25, -25);
+                    foreach (var pt in chipDim.IterMeasureCamPoints())
+                    {
+                        if (pt != null)
+                        {
+                            var loc = pt + offset;
+                            gxView.DrawString($"{idx}", _font, Brushes.Orange, (float)loc.X, (float)loc.Y);
+                        }
+                        idx++;
+                    }
+                }
+                #endregion
             }
         }
         void draw_MeasurePoint(CvImageViewer viewer, Graphics gxView, QVector pt, bool isPass)
@@ -674,16 +747,29 @@ namespace LaserAlignDX.Mvc.Gui.ChipCellsViewer
             var cy2 = (float)pt2.Y;
             gxView.DrawLine(pen, cx, cy, cx2, cy2);
         }
+        void draw_MeasureLine(CvImageViewer viewer, Graphics gxView, QVector[] pts, Color color)
+        {
+            if (pts != null && pts.Length > 1)
+                draw_MeasureLine(viewer, gxView, pts[0], pts[1], color);
+        }
         #endregion
 
         #region DRAW_QRCODE_FUNCTIONS
         void draw_DefectBlobs(CvImageViewer viewer, Graphics gxView)
         {
-            if (_drawItemsDefectBlobs == null)
-                return;
-
-            foreach (var item in _drawItemsDefectBlobs)
-                item?.OnDraw(viewer, gxView);
+            if (_drawItemsDefectBlobs != null)
+            {
+                foreach (var item in _drawItemsDefectBlobs)
+                    item?.OnDraw(viewer, gxView);
+            }
+        }
+        void draw_BadConnBlobs(CvImageViewer viewer, Graphics gxView)
+        {
+            if (_drawItemsBadConnBlobs != null)
+            {
+                foreach (var item in _drawItemsBadConnBlobs)
+                    item?.OnDraw(viewer, gxView);
+            }
         }
         void draw_QrCode_One(CvImageViewer viewer, Graphics gxView, XCell cell)
         {

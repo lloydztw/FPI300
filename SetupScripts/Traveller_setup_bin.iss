@@ -6,7 +6,7 @@
 [Setup]
 AppPublisher=JetEazy System Co., Ltd.
 AppPublisherURL=http://www.jeteazy.com
-AppVersion=3.3.7.9
+AppVersion=3.3.9.17
 AppCopyright=Copyright (C) 2026 JetEazy System Co., Ltd.
 ;WizardImageFile=JetEazySetup.bmp
 
@@ -16,7 +16,7 @@ DefaultGroupName=JetEazy FPI30
 Compression=lzma
 SolidCompression=yes
 OutputDir=.\bin
-OutputBaseFileName=Traveller_Setup_3.3.7.9
+OutputBaseFileName=Traveller_Setup_3.3.9.17
 
 [Files]
 ; BIN & DLL
@@ -29,15 +29,15 @@ Source: "..\C#\FPI30_Aoi\bin\Debug\EzAoiEmptyTrayInspector.App.exe";            
 Source: "..\bin\Debug\dll\x64\*.dll";                                             DestDir: "{app}\_BIN_\dll\x64"; Flags: ignoreversion
 
 ; Omron dlls and exe
-Source: "..\C#\Dlls\Omron\*.*";     DestDir: "{app}\_BIN_";                        Flags: ignoreversion
-Source: "..\C#\Dlls\Omron\ja\*.*";  DestDir: "{app}\_BIN_\ja";                     Flags: ignoreversion
+Source: "..\C#\Dlls\Omron\*.*";     DestDir: "{app}\_BIN_";                       Flags: ignoreversion
+Source: "..\C#\Dlls\Omron\ja\*.*";  DestDir: "{app}\_BIN_\ja";                    Flags: ignoreversion
 
 ; *.cmd
-Source: ".\*.cmd";                  DestDir: "{app}\_BIN_";                        Flags: ignoreversion  
+Source: ".\*.cmd";                  DestDir: "{app}\_BIN_";                       Flags: ignoreversion  
 
 ; INI & DB 
 ; (these files must be kept existing even after uninstall!)
-Source: "..\SettingsFiles\Ini\language\*.json"; DestDir: "{app}\Ini\language";  Flags: ignoreversion uninsneveruninstall           
+Source: "..\SettingsFiles\Ini\language\*.json"; DestDir: "{app}\Ini\language";    Flags: ignoreversion uninsneveruninstall           
 Source: "..\SettingsFiles\LASER-MAIN_FPIX3\*.*"; \
           DestDir: "{app}\_V03_\LASER-MAIN_FPIX3"; \
           Flags: recursesubdirs onlyifdoesntexist uninsneveruninstall      
