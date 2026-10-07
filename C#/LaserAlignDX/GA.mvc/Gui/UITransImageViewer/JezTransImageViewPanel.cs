@@ -46,14 +46,13 @@ namespace LaserAlignDX.Mvc.Gui
             _cviCoordInfo.Visible = true;
             picIcon.Click += PicIcon_Click;
             //HandleCreated += (s, e) => PostInitLaguage();
-            HandleDestroyed += (s, e) => cleanUp();
         }
         void cleanUp()
         {
             try
             {
                 var old = cvMatViewer.Image;
-                //cvMatViewer.Image = null;
+                cvMatViewer.Image = null;
                 old?.Dispose();
             }
             catch(Exception ex) 

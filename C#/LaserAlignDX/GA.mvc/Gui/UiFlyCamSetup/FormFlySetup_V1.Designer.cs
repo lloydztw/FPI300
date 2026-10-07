@@ -13,6 +13,8 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            if (disposing)
+                disposeDisplayInteractions();
             if (disposing && (components != null))
             {
                 components.Dispose();
@@ -52,9 +54,9 @@
             this.propertyGrid1 = new System.Windows.Forms.PropertyGrid();
             this.tabControl2 = new System.Windows.Forms.TabControl();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.DS1 = new JzDisplay.UISpace.DispUI();
+            this.DS1 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.DS2 = new JzDisplay.UISpace.DispUI();
+            this.DS2 = new LaserAlignDX.Mvc.Gui.JezTransImageViewPanel();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.flyOffsetUI1 = new LaserAlignDX.GA.FormSpace.FPI30Form.FlyOffsetUI();
             this.tabPage4 = new System.Windows.Forms.TabPage();
@@ -469,9 +471,9 @@
         private System.Windows.Forms.PropertyGrid propertyGrid1;
         private System.Windows.Forms.TabControl tabControl2;
         private System.Windows.Forms.TabPage tabPage3;
-        private JzDisplay.UISpace.DispUI DS1;
+        private LaserAlignDX.Mvc.Gui.JezTransImageViewPanel DS1;
         private System.Windows.Forms.TabPage tabPage2;
-        private JzDisplay.UISpace.DispUI DS2;
+        private LaserAlignDX.Mvc.Gui.JezTransImageViewPanel DS2;
         private System.Windows.Forms.Button buttonFly4;
         private System.Windows.Forms.Button buttonFly1;
         private System.Windows.Forms.Button buttonFly2;

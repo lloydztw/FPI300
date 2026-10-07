@@ -428,20 +428,6 @@ namespace LaserAlignDX.Mvc.Ctrl
             //DS2.ClearStaticMover();
             //xMovers.Clear();
 
-            //int i = 0;
-            //while (i < xRecipe.xRegionCells.Count)
-            //{
-            //    var cell = xRecipe.xRegionCells[i];
-            //    //EzBloc bloc = grid.Get(cell.CellRow, cell.CellCol);
-            //    //if (bloc != null)
-            //    //{
-            //    //    JetEazy.Qcvt.SetCenter(ref cell.viewRectF, bloc.CenterX, bloc.CenterY);
-            //    //}
-            //    JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), cell.viewRectF);
-            //    _rect.RelateLevel = 2;
-            //    _rect.RelateNo = i;
-            //    _rect.RelatePosition = 0;
-            //    xMovers.Add(_rect);
 
             //    i++;
             //}

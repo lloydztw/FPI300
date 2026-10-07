@@ -186,9 +186,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files\Common Files\JetEazy\LeTian.JxProps.Gui.dll</HintPath>
     </Reference>
-    <Reference Include="MoveGraphLibrary">
-      <HintPath>..\Dlls\MoveGraphLibrary.dll</HintPath>
-    </Reference>
     <Reference Include="MVDAlmightyPatMatch.NET, Version=4.2.1.4, Culture=neutral, PublicKeyToken=d1775c00d24b42a0, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\MVDAlgorithmSDK\ReferencedAssemblies\Algorithms\MVDAlmightyPatMatch.NET.dll</HintPath>
@@ -485,6 +482,7 @@
     <Compile Include="GA.mvc\Gui\UiFlyCamSetup\FlyOffsetUI.Designer.cs">
       <DependentUpon>FlyOffsetUI.cs</DependentUpon>
     </Compile>
+    <Compile Include="GA.mvc\Gui\UiFlyCamSetup\CviFlySetupOverlay.cs" />
     <Compile Include="GA.mvc\Gui\UiFlyCamSetup\FormFlySetup_V1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -978,10 +976,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\EzDisplay\JzDisplayLT\JzDisplayLT.csproj">
-      <Project>{8aa39fb3-6b90-4faa-8183-85a1acfc10b1}</Project>
-      <Name>JzDisplayLT</Name>
-    </ProjectReference>
     <ProjectReference Include="..\EzMotor.Gui\EzMotor.Gui.csproj">
       <Project>{455201c9-5e3e-4b92-a305-e6e94816da3d}</Project>
       <Name>EzMotor.Gui</Name>

@@ -15,6 +15,8 @@
         /// <param name="disposing">如果應該處置受控資源則為 true，否則為 false。</param>
         protected override void Dispose(bool disposing)
         {
+            if (disposing && !IsDisposed)
+                cleanUp();
             if (disposing && (components != null))
             {
                 components.Dispose();

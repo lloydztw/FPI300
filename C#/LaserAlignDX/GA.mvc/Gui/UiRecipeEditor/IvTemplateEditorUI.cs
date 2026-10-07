@@ -15,7 +15,6 @@
 
 using System;
 using System.Windows.Forms;
-using DispUI = JzDisplay.UISpace.DispUI;
 
 namespace LaserAlignDX.Mvc.Gui
 {
@@ -28,7 +27,6 @@ namespace LaserAlignDX.Mvc.Gui
     {
         Control Window { get; }
         
-        //DispUI[] DispViewers { get; }   // 準備廢除, 全面改用 ImvViewers
         Control[] ImgViewers { get; }
         
         Control wndVisionSettingsPanel { get; }

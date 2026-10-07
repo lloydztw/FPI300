@@ -13,7 +13,6 @@ using JetEazy.PropertyGridSpace;
 using JetEazy.QMath;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.OPSpace;
-using MoveGraphLibrary;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

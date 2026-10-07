@@ -157,24 +157,6 @@ namespace Traveller106
             BannerForm.ShowBanner();
             GaUtil.SetCursor(this, Cursors.AppStarting);
 
-#if (false)
-            //(0.1) MYDECODE
-            JetEazy.Universal.MYDECODE = Universal.MAINPATH + @"\WORK\";
-
-            //(1) 初始化 JzDisplay
-            //---------------------------------------------------------------------
-            // 注意:
-            //  使用 dispUI = new DispUI() 動態生成
-            //  必須將其加入 ower form 的 Controls 內,
-            //  ower form closed 的時候,
-            //  才會自動調用 dispUI.Dispose() 
-            //---------------------------------------------------------------------
-            JzDisplay.UISpace.DispUI dispUI = new JzDisplay.UISpace.DispUI();
-            this.Controls.Add(dispUI); // Gaara 原來的代碼, 少寫此行 !!!!!
-            bool bOK = dispUI.DispUIload(this);
-            _TRACE("[初始化] JzDisplay");
-#endif
-
             //(2) 初始化 本專案
             bool bOK = Init();
 

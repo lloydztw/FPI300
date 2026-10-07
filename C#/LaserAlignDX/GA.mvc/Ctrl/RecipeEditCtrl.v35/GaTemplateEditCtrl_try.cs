@@ -866,12 +866,6 @@ namespace LaserAlignDX.Mvc.Ctrl.V35.Try
         List<RectangleF> getDefectMaskRectsFromInteractors()
         {
             var maskRects = new List<RectangleF>();
-            //for (int i = 0, N = _xMovers.Count; i < N; i++)
-            //{
-            //    GraphicalObject grobj = _xMovers[i].Source;
-            //    RectangleF rectF = (grobj as JzRectEAG).GetRectF;
-            //    maskRects.Add(rectF);
-            //}
             foreach (var cviBox in _cviDefectMaskBoxes)
             {
                 maskRects.Add(cviBox.Box);

@@ -14,7 +14,6 @@
 #endregion
 
 using JetEazy.Lang;
-using JzDisplay.UISpace;
 using System;
 using System.Windows.Forms;
 using GaTemplateEditCtrl = LaserAlignDX.Mvc.Ctrl.V35.GaTemplateEditCtrl;
@@ -49,10 +48,6 @@ namespace LaserAlignDX.Mvc.Gui.V35
         Control IvTemplateEditorUI.Window => this;
         Control IvTemplateEditorUI.lblActiveCarrierID => lblActiveCarrierID;
 
-        public DispUI[] DispViewers
-        {
-            get; private set;
-        }
         public Control[] ImgViewers
         {
             get;

@@ -16,16 +16,13 @@
 using Eazy_Project_III;
 using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
-using JetEazy.ImageViewerEx.Interactors;
 using JetEazy.Interface;
 using JetEazy.Lang;
 using JetEazy.Utils;
-using JzDisplay;
 using LaserAlignDX.GA.FormSpace.FPI30Form;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using MoveGraphLibrary;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -35,7 +32,6 @@ using System.Windows.Forms;
 using Traveller106;
 using VisionDesigner.BlobFind;
 using VsCommon.ControlSpace.MachineSpace;
-using WorldOfMoveableObjects;
 
 using Timer = System.Windows.Forms.Timer;
 using VsLight = JetEazy.ControlSpace.PLCSpace.VsLight;
@@ -45,8 +41,8 @@ namespace LaserAlignDX.FormSpace
     public partial class FormFlySetup : Form
     {
         #region INTERACTORS
-        CviCross _cviCross = new CviCross(Color.Yellow);
-        Mover xMovers = new Mover();
+        CviFlySetupOverlay _flyOverlay;
+        CviFlySetupOverlay _resultOverlay;
         #endregion
 
         #region GLOBAL_MESS
@@ -179,7 +175,7 @@ namespace LaserAlignDX.FormSpace
             btnCodetest.Click += BtnCodetest_Click;
             btnOpenMotorJogWindow.Click += (s, ev) => OpenMotorJogWindow();
 
-            DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
+            showFlyImage(xRecipe.bmpOrgFly);
 
             IxFlyAreaCam.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
             
@@ -242,33 +238,20 @@ namespace LaserAlignDX.FormSpace
 
                     if (bOK)
                     {
-                        DS2.ClearStaticMover();
-                        xMovers.Clear();
-                        DS2.ReplaceDisplayImage(xRecipe.bmpOrgFly);
+                        _resultOverlay.ClearResults();
+                        showImage(DS2, xRecipe.bmpOrgFly, "Angle Result");
 
                         foreach (CBlobInfo cBlob in list)
                         {
-                            RectangleF x = new RectangleF(cBlob.RectInfo.CenterX - cBlob.RectInfo.Width / 2 + rectf.X,
-                                cBlob.RectInfo.CenterY - cBlob.RectInfo.Height / 2 + rectf.Y,
-                                cBlob.RectInfo.Width,
-                                cBlob.RectInfo.Height);
-
-                            JzRectEAG _rect = new JzRectEAG(Color.FromArgb(0, Color.Blue), x);
-                            _rect.RelateLevel = 2;
-                            _rect.RelatePosition = 0;
-                            _rect.SetAngle(-cBlob.BoxInfo.Angle + 90);
-                            xMovers.Add(_rect);
+                            // Use the detected rotated rectangle and the existing MVD conversion.
+                            // Blob coordinates are local to bmpG; move the center to the full image.
+                            var box = GaMvdExt.ToBox2D(cBlob.BoxInfo);
+                            if (box == null)
+                                continue;
+                            box.SetCenter(cBlob.BoxInfo.CenterX + rectf.X,
+                                cBlob.BoxInfo.CenterY + rectf.Y);
+                            _resultOverlay.AddResultBox(box);
                         }
-
-                        //CviLabel cviLabel = new CviLabel();
-                        //cviLabel.Text = $"计算角度:{angle}";
-                        //cviLabel.Location = new Point((int)Center.X, (int)Center.Y);
-                        //cviLabel.Visible = true;
-                        //DS2.ImageViewer.AddInteractor(cviLabel);
-
-                        DS2.SetStaticMover(xMovers);
-                        DS2.RefreshDisplayShape();
-                        DS2.MappingSelect();
 
                         update_Display(false);
 
@@ -293,6 +276,8 @@ namespace LaserAlignDX.FormSpace
         private void BtnSelectRegion_Click(object sender, EventArgs e)
         {
             _bSelectRegion = !_bSelectRegion;
+            _flyOverlay.SelectionEnabled = _bSelectRegion;
+            updateGuiStatus();
         }
         private void BtnCancel_Click(object sender, EventArgs e)
         {
@@ -338,7 +323,7 @@ namespace LaserAlignDX.FormSpace
                     //xRecipe.bmpOrg.Dispose();
                     //xRecipe.bmpOrg = b1.Clone(new Rectangle(0, 0, b1.Width, b1.Height), PixelFormat.Format8bppIndexed);
                     //b1.Dispose();
-                    DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
+                    showFlyImage(xRecipe.bmpOrgFly);
                 }
                 else if (freeImageBitmap.PixelFormat == PixelFormat.Format24bppRgb)
                 {
@@ -346,14 +331,14 @@ namespace LaserAlignDX.FormSpace
                     xRecipe.bmpOrgFly.Dispose();
                     xRecipe.bmpOrgFly = b1.Clone(new Rectangle(0, 0, b1.Width, b1.Height), PixelFormat.Format8bppIndexed);
                     b1.Dispose();
-                    DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
+                    showFlyImage(xRecipe.bmpOrgFly);
                 }
                 else if (freeImageBitmap.PixelFormat == PixelFormat.Format8bppIndexed)
                 {
                     xRecipe.bmpOrgFly.Dispose();
                     xRecipe.bmpOrgFly = freeImageBitmap.ToBitmap();
 
-                    DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
+                    showFlyImage(xRecipe.bmpOrgFly);
                 }
                 else
                 {
@@ -372,7 +357,7 @@ namespace LaserAlignDX.FormSpace
                 //            //xRecipe.bmpOrg.Dispose();
                 //            //xRecipe.bmpOrg = b1.Clone(new Rectangle(0, 0, b1.Width, b1.Height), PixelFormat.Format8bppIndexed);
                 //            //b1.Dispose();
-                //            DS1.ReplaceDisplayImage(xRecipe.bmpOrg);
+                //            showFlyImage(xRecipe.bmpOrg);
                 //        }
                 //        else if (freeImageBitmap.PixelFormat == PixelFormat.Format24bppRgb)
                 //        {
@@ -380,14 +365,14 @@ namespace LaserAlignDX.FormSpace
                 //            xRecipe.bmpOrg.Dispose();
                 //            xRecipe.bmpOrg = b1.Clone(new Rectangle(0, 0, b1.Width, b1.Height), PixelFormat.Format8bppIndexed);
                 //            b1.Dispose();
-                //            DS1.ReplaceDisplayImage(xRecipe.bmpOrg);
+                //            showFlyImage(xRecipe.bmpOrg);
                 //        }
                 //        else if (freeImageBitmap.PixelFormat == PixelFormat.Format8bppIndexed)
                 //        {
                 //            xRecipe.bmpOrg.Dispose();
                 //            xRecipe.bmpOrg = freeImageBitmap.ToBitmap();
 
-                //            DS1.ReplaceDisplayImage(xRecipe.bmpOrg);
+                //            showFlyImage(xRecipe.bmpOrg);
                 //        }
                 //        else
                 //        {
@@ -438,7 +423,7 @@ namespace LaserAlignDX.FormSpace
                     // 統一由 GaImageUtil.LoadBigImage 載入大圖檔 (自動轉成 8-bbp, 而且速度比 FreeBitmap 快)
                     xRecipe.bmpOrgFly.Dispose();
                     xRecipe.bmpOrgFly = GaImageUtil.LoadBigImage(filename);
-                    DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
+                    showFlyImage(xRecipe.bmpOrgFly);
                 }
                 catch (Exception ex)
                 {
@@ -470,8 +455,8 @@ namespace LaserAlignDX.FormSpace
             {
                 xRecipe.bmpOrgFly?.Dispose();
                 xRecipe.bmpOrgFly = ConvertFromMONO(bmpBytes, iw, ih);
-                //DS1.ReplaceDisplayImage(xRecipe.bmpOrgFly);
-                Invoke((Action<Bitmap>)DS1.ReplaceDisplayImage, xRecipe.bmpOrgFly);
+                //showFlyImage(xRecipe.bmpOrgFly);
+                Invoke((Action<Bitmap>)showFlyImage, xRecipe.bmpOrgFly);
                 _isFlyCameraOneshotCaptureMode = false;
                 return;
             }
@@ -479,12 +464,10 @@ namespace LaserAlignDX.FormSpace
             //(2) 連續實時影像 模式
             if (_isFlyCameraLiveMode)
             {
-                Bitmap bmpNew = ConvertFromMONO(bmpBytes, iw, ih);
-                Invoke(new Action<Bitmap>((bmp) =>
+                using (Bitmap bmpNew = ConvertFromMONO(bmpBytes, iw, ih))
                 {
-                    DS1.ReplaceDisplayImage(bmp);
-                    bmp?.Dispose();
-                }), bmpNew);
+                    Invoke((Action<Bitmap>)showFlyImage, bmpNew);
+                }
 
                 if (_isFlyCameraLiveMode)
                 {
@@ -562,6 +545,11 @@ namespace LaserAlignDX.FormSpace
                 tabMainPages.SelectedIndex = 0;
 
             bool isBusy = _isFlyCameraOneshotCaptureMode || _isFlyCameraLiveMode;
+            if (isBusy && _flyOverlay != null)
+            {
+                _bSelectRegion = false;
+                _flyOverlay.SelectionEnabled = false;
+            }
             btnLightTrigger.Enabled = !isBusy;
             btnGetLocalImage.Enabled = !isBusy;
             btnSelectRegion.Enabled = !isBusy;
@@ -592,56 +580,69 @@ namespace LaserAlignDX.FormSpace
         }
         #endregion
 
-        #region JzDisplay_FUNCTIONS
+        #region IMAGE_DISPLAY
         void init_Display()
         {
-            //DS = dispUI1;
-            DS1.Initial(100, 0.01f);
-            DS1.SetDisplayType(DisplayTypeEnum.NORMAL);
-            DS1.CaptureAction += DS_CaptureAction;
-            //m_DispUI.MoverAction += M_DispUI_MoverAction;
-            //m_DispUI.AdjustAction += M_DispUI_AdjustAction;
-            DS1.ImageViewer.AddInteractor(_cviCross);
-            _cviCross.Visible = true;
-            DS2.Initial(100, 0.01f);
-            DS2.SetDisplayType(DisplayTypeEnum.NORMAL);
-            DS2.ImageViewer.AddInteractor(_cviCross);
-            _cviCross.Visible = true;
-            //DS2.CaptureAction += DS_CaptureAction2;
+            _flyOverlay = new CviFlySetupOverlay(DS1);
+            _flyOverlay.RegionSelected += DS_CaptureAction;
+            _resultOverlay = new CviFlySetupOverlay(DS2);
+        }
+        void disposeDisplayInteractions()
+        {
+            _flyOverlay?.Dispose();
+            _resultOverlay?.Dispose();
+            _flyOverlay = null;
+            _resultOverlay = null;
+        }
+        void showFlyImage(Bitmap image)
+        {
+            showImage(DS1, image, "Fly Camera");
+        }
+        static void showImage(JezTransImageViewPanel panel, Bitmap image, string title)
+        {
+            bool firstImage = panel.Image == null;
+            // UpdateImage clones into an owned Mat; the caller retains the Bitmap.
+            panel.UpdateImage(image, title, false);
+            if (firstImage && panel.Image != null)
+                panel.MatViewer.RebuildViewport();
+            panel.MatViewer.Invalidate();
         }
         void update_Display(bool eChangeToDefault = true)
         {
-            DS1.Refresh();
             if (eChangeToDefault)
-                DS1.DefaultView();
-
-            DS2.Refresh();
-            if (eChangeToDefault)
-                DS2.DefaultView();
+            {
+                DS1.MatViewer.RebuildViewport();
+                DS2.MatViewer.RebuildViewport();
+            }
+            DS1.MatViewer.Invalidate();
+            DS2.MatViewer.Invalidate();
         }
         private void DS_CaptureAction(RectangleF rectf)
         {
             if (!_bSelectRegion)
                 return;
-            BoundRect(ref rectf, xRecipe.bmpOrgFly.Size);
+            _bSelectRegion = false;
+            _flyOverlay.SelectionEnabled = false;
+            updateGuiStatus();
+            if (xRecipe.bmpOrgFly == null)
+                return;
+
+            // Clamp in image coordinates, including drags outside the image.
+            rectf = RectangleF.Intersect(rectf, new RectangleF(PointF.Empty, xRecipe.bmpOrgFly.Size));
             if (rectf.Width > 1 && rectf.Height > 1)
             {
-                Bitmap bmpx = new Bitmap(xRecipe.bmpOrgFly);
-                Graphics g = Graphics.FromImage(bmpx);
-
                 xRecipe.xRectRegionPrintFly = rectf;
-                xRecipe.bmpprintFlytemplate = xRecipe.bmpOrgFly.Clone(rectf, System.Drawing.Imaging.PixelFormat.Format8bppIndexed);
-                //xRecipe.SavePrintFlyTemplate();
+                xRecipe.bmpprintFlytemplate = xRecipe.bmpOrgFly.Clone(rectf, PixelFormat.Format8bppIndexed);
                 xRecipe.SaveTemplate("FLY");
 
-                g.DrawRectangles(new Pen(Color.Lime, 3), new RectangleF[] { rectf });
-                g.Dispose();
-                DS1.ReplaceDisplayImage(bmpx);
-                bmpx.Dispose();
-
-                //xRecipe.SaveBase();
+                using (var bitmap = new Bitmap(xRecipe.bmpOrgFly))
+                using (var graphics = Graphics.FromImage(bitmap))
+                using (var pen = new Pen(Color.Lime, 3))
+                {
+                    graphics.DrawRectangle(pen, rectf.X, rectf.Y, rectf.Width, rectf.Height);
+                    showFlyImage(bitmap);
+                }
             }
-            _bSelectRegion = false;
         }
         #endregion
 
