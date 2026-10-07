@@ -73,9 +73,9 @@
       <Project>{a39132cc-9e48-4e8c-90c1-d4a39dbe1933}</Project>
       <Name>JetEazy.Transform</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\LaserAlignDX\NewFPI30AOIX3.csproj">
+    <ProjectReference Include="..\..\LaserAlignDX\Traveller_FPI30_main.csproj">
       <Project>{268ec7ef-0e73-4d58-88c9-5ed04e8b8645}</Project>
-      <Name>NewFPI30AOIX3</Name>
+      <Name>Traveller_FPI30_main</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
