@@ -4,7 +4,7 @@
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  *
  * REVISION:
- *      2026-10-08 使用 ChatGPT Codex  重整
+ *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
  *      2026-04-13 LeTian Chang, Creation
  *
  * http://www.jeteazy.com

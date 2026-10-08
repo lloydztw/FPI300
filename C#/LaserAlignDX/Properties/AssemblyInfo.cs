@@ -4,7 +4,7 @@
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  *
  * REVISION:
- *      2026-10-08 使用 ChatGPT Codex  重整
+ *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
  *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
@@ -47,5 +47,5 @@ using System.Runtime.InteropServices;
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("3.3.10.0")]
-[assembly: AssemblyFileVersion("3.3.10.0")]
+[assembly: AssemblyVersion("3.4.0.0")]
+[assembly: AssemblyFileVersion("3.4.0.0")]

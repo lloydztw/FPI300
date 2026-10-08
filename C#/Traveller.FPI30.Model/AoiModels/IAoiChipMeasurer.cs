@@ -1,0 +1,52 @@
+﻿#region AUTHOR
+/*
+ * 
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ * 
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
+ *      2026-08-10 把 Aoi Models 從 Recipe 分離 (by LeTian Chang)
+ * 
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ * 
+ */
+#endregion
+
+using LaserAlignDX.BasicSpace;
+using LaserAlignDX.OPSpace;
+using LeTian.AoiLib;
+using System;
+using System.Drawing;
+using VisionDesigner;
+
+namespace LaserAlignDX.AoiModel
+{
+    public interface IAoiChipMeasurer : IDisposable
+    {
+        void SetCellGroups(GaCellsGroup[] cellGroups);
+
+        void Run(Bitmap sceneBmp = null);
+
+        /// <summary>
+        /// 參數調試用
+        /// </summary>
+        void TryMeasureOneChip(RegionCellX3Class cell, Bitmap cellBmp, ref RectangleF cellRoi);
+
+        /// <summary>
+        /// 參數調試用
+        /// </summary>
+        bool TryFindLineSegment(EdgeBorder eBorder, Bitmap bmpSrc, RectangleF roiRect, out CMvdLineSegmentF resultLine);
+        
+        /// <summary>
+        /// 參數調試用
+        /// </summary>
+        bool TryApplyLineFilters(Bitmap bmpSrc, out Bitmap bmpResult, Color? backGroundColor = null);
+
+        /// <summary>
+        /// 參數調試用 (保留)
+        /// </summary>
+        void AnalyzeGoldenData();
+    }
+}

@@ -4,7 +4,7 @@
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  *
  * REVISION:
- *      2026-10-08 使用 ChatGPT Codex  重整
+ *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
  *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
@@ -17,7 +17,6 @@
 //#define FATEK
 //#define FX3U
 
-using System.IO;
 using Eazy_Project_III;
 using JetEazy;
 using JetEazy.BasicSpace;
@@ -29,11 +28,10 @@ using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Lang;
 using JetEazy.OPSpace;
-using JetEazy.PropertyGrid;
 using JetEazy.Utils;
 using LaserAlignDX;
-using LaserAlignDX.BasicSpace.ParaSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
+using System.IO;
 using TravellerMINIX6.OPSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
@@ -382,8 +380,8 @@ namespace Traveller106
             RecipeFPIX3Class.Instance.Load();
             //CaliClass.FromingStr(INI.Instance.cali_paras);
 
-            MvdFindCircleClass.Instance.Initial(WORKPATH, 0, $"CalibrateForm_default_info.ini");
-            MvdFindCircleClass.Instance.Load();
+            //MvdFindCircleClass.Instance.Initial(WORKPATH, 0, $"CalibrateForm_default_info.ini");
+            //MvdFindCircleClass.Instance.Load();
 
             //LineScanCalibrateClass.Instance.Initial(WORKPATH, 0, "Calibrate_default_info.ini");
             //LineScanCalibrateClass.Instance.Load();

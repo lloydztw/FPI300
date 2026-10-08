@@ -1,10 +1,10 @@
-#region AUTHOR
+﻿#region AUTHOR
 /*
  *
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  *
  * REVISION:
- *      2026-10-08 使用 ChatGPT Codex  重整
+ *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
  *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
@@ -61,6 +61,18 @@ namespace LaserAlignDX
             _system = new Lazy<TravellerSysModel>(CreateSystemModel);
             _controller = new Lazy<MainControllerImpl>(() => new MainControllerImpl(SystemModel));
             _dialogs = new AppDialogService(() => SystemModel);
+
+            var dataBinding = new AppDataServices().Bind(() => SystemModel.ActiveCarrierID);
+            _resources.Add(dataBinding.Dispose);
+
+            // Bind lazy application adapters before any AOI is constructed; unbind last.
+            var aoiBinding = new AppAoiServices(() => SystemModel).Bind();
+            _resources.Add(aoiBinding.Dispose);
+
+            var modelBindings = new AppModelBindings(
+                () => SystemModel.AoiModel?.Train(),
+                carrier => SystemModel.TransformsModel.GetCalibCamGrid(carrier));
+            _resources.Add(modelBindings.Dispose);
 
             // Registration is reversed on shutdown: controller, hardware, AOI, system, recipe.
             _resources.Add(() =>
@@ -127,7 +139,10 @@ namespace LaserAlignDX
         TravellerSysModel CreateSystemModel()
         {
             var aoi = Aoi;
-            try { return new TravellerSysModel(aoi, CreateCalibAoiModel); }
+            try
+            {
+                return new TravellerSysModel(aoi, CreateCalibAoiModel, new AppSystemModelEnvironment(), new AppCoordinateWriter());
+            }
             catch (Exception creationError)
             {
                 // Transform factories can allocate shared objects in field initializers,

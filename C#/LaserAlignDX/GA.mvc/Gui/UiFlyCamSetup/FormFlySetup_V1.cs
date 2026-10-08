@@ -4,7 +4,7 @@
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
  *
  * REVISION:
- *      2026-10-08 使用 ChatGPT Codex  重整
+ *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
  *      2026-06-17 重整萬子的飛拍相機控制 以防止 GUI thread 的時間被吃掉造成卡機 (by LeTian Chang)
  *
  * http://www.jeteazy.com
