@@ -354,7 +354,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App\Config.cs" />
     <Compile Include="App\AppBootstrapper.cs" />
     <Compile Include="App\AppSystemModelEnvironment.cs" />
     <Compile Include="App\AppCoordinateWriter.cs" />
@@ -376,7 +375,6 @@
     <Compile Include="App\Ini\v1\UITypeEditors\FtpUITypeEditor.cs" />
     <Compile Include="App\Ini\v1\INI.cs" />
     <Compile Include="App\Ini\v1\Dto\DtoINI.cs" />
-    <Compile Include="App\Prompts.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v25.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v5.cs" />
     <Compile Include="GA.mvc\Ctrl\CalibCtrl\GaCalibCtrl_v3.cs" />

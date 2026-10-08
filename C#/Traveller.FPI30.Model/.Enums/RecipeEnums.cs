@@ -10,6 +10,7 @@
 #endregion
 
 using System.ComponentModel;
+
 namespace Eazy_Project_III
 {
     public enum BlobMode : int
@@ -25,6 +26,7 @@ namespace Eazy_Project_III
         [Description("找黑斑")]
         Black = 1,
     }
+    
     public enum MeasureFindLineType : int
     {
         [Description("V1-找直线")]
@@ -32,6 +34,7 @@ namespace Eazy_Project_III
         [Description("V2-找平行线")]
         FindLineType_v2 = 1,
     }
+    
     public enum StageNumber : int
     {
         [Description("载台一")]

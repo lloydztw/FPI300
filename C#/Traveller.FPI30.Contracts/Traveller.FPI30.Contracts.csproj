@@ -31,9 +31,12 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CarrierEnum.cs" />
-    <Compile Include="IPlcIoFPIX3.cs" />
-    <Compile Include="IFpix3Machine.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="ErrorCodes.cs" />
+    <Compile Include="Prompts.cs" />
+    <Compile Include="Enums\CarrierEnum.cs" />
+    <Compile Include="Interfaces\IPlcIoFPIX3.cs" />
+    <Compile Include="Interfaces\IFpix3Machine.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

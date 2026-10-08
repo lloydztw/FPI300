@@ -229,7 +229,6 @@
     <Compile Include="Recipes\GaRecipes\RecipeFPIX3Class.cs" />
     <Compile Include="Recipes\GaRecipes\Params\RecipeParaGridClass.cs" />
     <Compile Include="Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
-    <Compile Include=".Enums\ErrorCodes.cs" />
     <Compile Include=".Enums\ScanInspectModeEnum.cs" />
     <Compile Include="Recipes\RecipeBaseClass.cs" />
     <Compile Include="Utils\WinIni_bom_utf8.cs" />
