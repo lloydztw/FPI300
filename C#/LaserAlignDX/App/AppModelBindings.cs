@@ -17,7 +17,10 @@ using Traveller.FPI30.Model;
 
 namespace LaserAlignDX
 {
-    /// <summary>Connects the reusable model to application training, grids and notifications.</summary>
+    /// <summary>
+    /// Connects the reusable model to application 
+    /// training, grids and notifications.
+    /// </summary>
     internal sealed class AppModelBindings : IDisposable
     {
         #region PRIVATE_DATA

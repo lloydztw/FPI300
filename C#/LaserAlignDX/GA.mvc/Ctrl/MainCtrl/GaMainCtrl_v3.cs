@@ -15,11 +15,6 @@
  */
 #endregion
 
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
-using System.Windows.Forms;
 using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
 using JetEazy.FormSpace;
@@ -32,6 +27,11 @@ using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
 using OpenCvSharp.Extensions;
+using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
+using System.Windows.Forms;
 using Traveller106;
 using VsCommon.ControlSpace.IOSpace;
 using BaseProcess = NeedleX.ProcessSpace.BaseProcess;

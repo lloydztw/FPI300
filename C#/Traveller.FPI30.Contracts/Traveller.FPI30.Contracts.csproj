@@ -37,6 +37,8 @@
     <Compile Include="Enums\CarrierEnum.cs" />
     <Compile Include="Interfaces\IPlcIoFPIX3.cs" />
     <Compile Include="Interfaces\IFpix3Machine.cs" />
+    <Compile Include="Utils\WinIni\DtoBase.cs" />
+    <Compile Include="Utils\WinIni\WinIni_bom_utf8.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

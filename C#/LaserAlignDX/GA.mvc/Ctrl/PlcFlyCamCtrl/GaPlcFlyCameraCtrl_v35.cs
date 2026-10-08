@@ -14,22 +14,21 @@
  */
 #endregion
 
-using System;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Windows.Forms;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
-
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Windows.Forms;
 using Traveller106;
 using TravellerMINIX6.ProcessSpace;
 using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;

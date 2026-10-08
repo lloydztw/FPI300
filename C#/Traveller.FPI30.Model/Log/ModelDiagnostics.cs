@@ -38,6 +38,7 @@ namespace Traveller.FPI30.Model
         }
     }
 
+
     internal static class ModelUtilities
     {
         internal static bool Clip(ref OpenCvSharp.Rect rect, int width, int height)

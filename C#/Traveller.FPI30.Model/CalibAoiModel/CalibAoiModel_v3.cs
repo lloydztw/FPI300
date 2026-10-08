@@ -21,13 +21,13 @@ using JetEazy.Match;
 using JetEazy.QMath;
 using JetEazy.QvMath;
 using JetEazy.Utils;
-using GaUtil = Traveller.FPI30.Model.ModelUtilities;
 using LaserAlignDX.Model;
 using LeTian.AoiLib;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using GaUtil = Traveller.FPI30.Model.ModelUtilities;
 
 namespace LaserAlignDX.AoiModel.Calib.V3
 {

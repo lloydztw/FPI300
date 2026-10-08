@@ -13,10 +13,6 @@
  */
 #endregion
 
-using System;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
 using Eazy_Project_III.UISpace;
@@ -33,6 +29,10 @@ using LaserAlignDX.UISpace;
 using LeTian.AoiLib;
 using NeedleX.ProcessSpace;
 using PhotoMachine.UISpace;
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using TravellerMINIX6.ProcessSpace;
 
 namespace Traveller106

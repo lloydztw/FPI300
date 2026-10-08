@@ -215,7 +215,6 @@
     <Compile Include="CoordsTransforms\TrfMigration.cs" />
     <Compile Include="CoordsTransforms\V36\TravellerTransforms.cs" />
     <Compile Include="CoordsTransforms\V36\TravellerTransforms_ini.cs" />
-    <Compile Include="Recipes\GaRecipes\DTO\DtoBase.cs" />
     <Compile Include="Recipes\GaRecipes\DTO\DtoBmpTemplate.cs" />
     <Compile Include="Recipes\GaRecipes\DTO\DtoX3LineBorderParams.cs" />
     <Compile Include="Recipes\GaRecipes\DTO\DtoX3GridParams.cs" />
@@ -231,7 +230,6 @@
     <Compile Include="Recipes\GaRecipes\Supports\RcpBmpHolder.cs" />
     <Compile Include=".Enums\ScanInspectModeEnum.cs" />
     <Compile Include="Recipes\RecipeBaseClass.cs" />
-    <Compile Include="Utils\WinIni_bom_utf8.cs" />
     <Compile Include=".Enums\EdgeBorderEnums.cs" />
     <Compile Include=".Enums\RecipeEnums.cs" />
     <Compile Include="Log\ModelDiagnostics.cs" />
@@ -288,6 +286,7 @@
     <Compile Include="SysModel\ISystemModelEnvironment.cs" />
     <Compile Include="Data\LotDataHolder.cs" />
     <Compile Include="Data\PlcDataPacker.cs" />
+    <Compile Include="Utils\GaUtil.cs" />
     <Compile Include="Utils\StringBuilderExt.cs" />
     <Compile Include="AoiModels\IAoiFlyCamRunner.cs" />
     <Compile Include="AoiModels\6_FlyCam\FlyAoiRunOptions.cs" />

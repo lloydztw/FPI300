@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 
-
 namespace LaserAlignDX.OPSpace
 {
     public class RegionCellX3Class : IDisposable

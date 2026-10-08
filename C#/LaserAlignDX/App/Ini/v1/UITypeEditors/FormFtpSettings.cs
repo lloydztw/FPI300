@@ -15,9 +15,7 @@
 
 using JetEazy.Lang;
 using JetEazy.Utils;
-using LeTian.JxProps;
 using System;
-using System.Security.Principal;
 using System.Windows.Forms;
 using Traveller106.Ini.V1;
 

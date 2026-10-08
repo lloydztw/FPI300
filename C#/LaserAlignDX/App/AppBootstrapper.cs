@@ -34,7 +34,8 @@ namespace LaserAlignDX
 {
     /// <summary>
     /// Application composition root. Shared services remain lazy to preserve the existing
-    /// INI / hardware / UI initialization order. GaMvcConfig is only a compatibility facade.
+    /// INI / hardware / UI initialization order. 
+    /// GaMvcConfig is only a compatibility facade.
     /// </summary>
     internal sealed class AppBootstrapper : IDisposable
     {

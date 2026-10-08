@@ -20,7 +20,6 @@ using LaserAlignDX.AoiModel.Calib;
 using OpenCvSharp;
 using System;
 
-
 namespace LaserAlignDX.AoiModel
 {
     public interface ICalibAoiModel : IDisposable

@@ -14,7 +14,6 @@
  */
 #endregion
 
-
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.QMath;
@@ -24,7 +23,6 @@ using System;
 using System.Drawing;
 using JxPointF = LeTian.JxProps.JxBase<System.Drawing.PointF>;
 using JxRect = LeTian.JxProps.JxBase<System.Drawing.Rectangle>;
-
 
 namespace LaserAlignDX.AoiModel.Calib
 {

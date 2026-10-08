@@ -16,14 +16,14 @@
 
 using JetEazy.Match;
 using JetEazy.QMath;
-using GaUtil = Traveller.FPI30.Model.ModelUtilities;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 using CellBloc = LaserAlignDX.Model.XCellBloc;
+using GaUtil = Traveller.FPI30.Model.ModelUtilities;
+using XCell = LaserAlignDX.OPSpace.RegionCellX3Class;
 
 namespace LaserAlignDX.AoiModel
 {

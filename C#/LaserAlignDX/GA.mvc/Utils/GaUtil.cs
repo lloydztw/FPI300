@@ -21,11 +21,13 @@ using JetEazy.BasicSpace;
 using JetEazy.Lang;
 using LeTian.AoiLib;
 
-
 namespace JetEazy.Utils
 {
-    public class GaUtil
+    public class GaUtil : GaClipUtil
     {
+
+#if (false)
+
         // 動詞使用 Clip 比 Bound 合適
         public static bool Clip(ref Rectangle rect, int boundWidth, int boundHeight)
         {
@@ -135,18 +137,6 @@ namespace JetEazy.Utils
             Clip(ref rect, boundSize);
         }
 
-#if (OPT_LEGACY)
-        public static int BoundValue(int Value, int Max, int Min)
-        {
-            return Math.Max(Math.Min(Value, Max), Min);
-
-        }
-        public static float BoundValue(float Value, float Max, float Min)
-        {
-            return Math.Max(Math.Min(Value, Max), Min);
-        }
-#endif
-
         public static void SaveData(string DataStr, string fileName)
         {
             System.IO.StreamWriter stm = null;
@@ -190,6 +180,8 @@ namespace JetEazy.Utils
             //}
             return QMSG.Text(enumSubitem);
         }
+
+#endif
 
         public static string BrowseImageFile()
         {
@@ -308,6 +300,7 @@ namespace JetEazy.Utils
             //else
             //    GdxGlobal.LOG.Debug(msg);
         }
+
         public static void LOG_ERROR(Exception ex, string msg)
         {
             LtDebug.LOG.Error(ex, msg);
