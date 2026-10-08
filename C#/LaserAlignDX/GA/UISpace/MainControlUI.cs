@@ -38,7 +38,7 @@ namespace Eazy_Project_III.UISpace
             InitializeComponent();
         }
 
-        public void Initial(VersionEnum version, OptionEnum option, Traveller.FPI30.Contracts.IFpix3Machine machine)
+        public void Initial(VersionEnum version, OptionEnum option, Traveller.FPI30.Config.IFpix3Machine machine)
         {
             //-------------------------------------------------------------------
             // 把所有 MainXxUI 抽出共通 Interface, 並把生成的代碼集中至此,

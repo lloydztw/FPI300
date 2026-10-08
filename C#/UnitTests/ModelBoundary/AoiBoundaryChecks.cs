@@ -169,7 +169,7 @@ namespace Traveller106
     }
     internal static class Universal
     {
-        public static Traveller.FPI30.Contracts.IFpix3Machine Machine => throw new InvalidOperationException("Unexpected machine access.");
+        public static Traveller.FPI30.Config.IFpix3Machine Machine => throw new InvalidOperationException("Unexpected machine access.");
         public static int N_THREADS = 1;
         public static bool N_THREADS_ENABLED = false;
     }

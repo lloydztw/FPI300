@@ -52,7 +52,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         public event EventHandler OnFlyDone;
 
         #region MACHINE
-        Traveller.FPI30.Contracts.IFpix3Machine MACHINE
+        Traveller.FPI30.Config.IFpix3Machine MACHINE
         {
             get => Traveller106.Universal.Machine;
         }

@@ -19,7 +19,7 @@ using JetEazy.BasicSpace;
 using JetEazy.ControlSpace;
 using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.ControlSpace.PLCSpace;
-using Traveller.FPI30.Contracts;
+using Traveller.FPI30.Config;
 using VsCommon.ControlSpace.IOSpace;
 
 namespace VsCommon.ControlSpace.MachineSpace

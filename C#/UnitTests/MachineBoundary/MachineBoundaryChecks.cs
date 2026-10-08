@@ -1,4 +1,4 @@
-#region AUTHOR
+﻿#region AUTHOR
 /*
  *
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
@@ -17,7 +17,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using LaserAlignDX;
-using Traveller.FPI30.Contracts;
+using Traveller.FPI30.Config;
 using Traveller.FPI30.Machine;
 using VsCommon.ControlSpace.IOSpace;
 using VsCommon.ControlSpace.MachineSpace;
@@ -36,7 +36,7 @@ internal static class MachineBoundaryChecks
             CheckCancelledSimulation();
             Check(!AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "FPI30AOIX3"),
                 "The checks loaded the main application.");
-            Console.WriteLine("PASS standalone Machine / Contracts boundary and simulation handshake");
+            Console.WriteLine("PASS standalone Machine / Config boundary and simulation handshake");
             return 0;
         }
         catch (Exception ex)
@@ -49,11 +49,11 @@ internal static class MachineBoundaryChecks
     static void CheckAssemblyBoundary()
     {
         var contracts = typeof(IPlcIoFPIX3).Assembly;
-        Check(contracts.GetName().Name == "Traveller.FPI30.Contracts", "IO contract is in the wrong assembly.");
+        Check(contracts.GetName().Name == "Traveller.FPI30.Config", "IO contract is in the wrong assembly.");
         var allowed = new[] { "mscorlib", "System", "System.Core", "System.Drawing" };
         Check(contracts.GetReferencedAssemblies().All(a => allowed.Contains(a.Name)),
-            "Contracts depends on a driver or application assembly.");
-        Check(typeof(IPlcIoFPIX3).GetMethod("Initial") == null, "Driver initialization leaked into Contracts.");
+            "Config depends on a driver or application assembly.");
+        Check(typeof(IPlcIoFPIX3).GetMethod("Initial") == null, "Driver initialization leaked into Config.");
         Check(typeof(CarrierEnum).Assembly == contracts && typeof(SuckerRowEnum).Assembly == contracts,
             "Shared enum ownership is incorrect.");
         Check((int)CarrierEnum.C1 == 0 && (int)CarrierEnum.C2 == 1 &&
@@ -61,7 +61,7 @@ internal static class MachineBoundaryChecks
             "Persisted enum values changed.");
         var machine = typeof(MainFPIX3MachineClass).Assembly;
         Check(machine.GetName().Name == "Traveller.FPI30.Machine", "Machine is in the wrong assembly.");
-        var machineAllowed = allowed.Concat(new[] { "Traveller.FPI30.Contracts", "JetEazy.Basics", "JetEazy.VG.Devices" });
+        var machineAllowed = allowed.Concat(new[] { "Traveller.FPI30.Config", "JetEazy.Basics", "JetEazy.VG.Devices" });
         Check(machine.GetReferencedAssemblies().All(a => machineAllowed.Contains(a.Name)),
             "Machine directly depends on an unexpected assembly.");
     }

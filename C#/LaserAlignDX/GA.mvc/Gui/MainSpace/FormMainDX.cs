@@ -113,7 +113,7 @@ namespace Traveller106
         #endregion
 
         #region MACHINE
-        protected Traveller.FPI30.Contracts.IFpix3Machine MACHINE
+        protected Traveller.FPI30.Config.IFpix3Machine MACHINE
         {
             get { return Traveller106.Universal.Machine; }
         }

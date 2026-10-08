@@ -77,7 +77,7 @@ namespace PhotoMachine.UISpace
                 return plc;
             }
         }
-        Traveller.FPI30.Contracts.IFpix3Machine MACHINE
+        Traveller.FPI30.Config.IFpix3Machine MACHINE
         {
             get { return Traveller106.Universal.Machine; }
         }

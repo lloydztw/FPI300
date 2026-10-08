@@ -35,7 +35,7 @@ namespace PhotoMachine.UISpace
             }
         }
 
-        public void Initial(VersionEnum version, OptionEnum option, Traveller.FPI30.Contracts.IFpix3Machine machine)
+        public void Initial(VersionEnum version, OptionEnum option, Traveller.FPI30.Config.IFpix3Machine machine)
         {
 
             _ioPanel = IoPanelFactory.CreateIoPanelUI(version, option, machine);

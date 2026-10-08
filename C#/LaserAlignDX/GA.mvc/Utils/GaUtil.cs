@@ -14,12 +14,11 @@
  */
 #endregion
 
+using JetEazy.BasicSpace;
+using LeTian.AoiLib;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using JetEazy.BasicSpace;
-using JetEazy.Lang;
-using LeTian.AoiLib;
 
 namespace JetEazy.Utils
 {

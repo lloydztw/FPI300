@@ -58,7 +58,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
 
         #region MACHINE
-        Traveller.FPI30.Contracts.IFpix3Machine MACHINE
+        Traveller.FPI30.Config.IFpix3Machine MACHINE
         {
             get { return Traveller106.Universal.Machine; }
         }

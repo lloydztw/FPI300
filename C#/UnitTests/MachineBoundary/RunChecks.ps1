@@ -1,4 +1,4 @@
-param(
+﻿param(
     [ValidateSet('Debug', 'Release')][string]$Configuration = 'Debug',
     [string]$MSBuildPath
 )
@@ -17,7 +17,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Independent Machine build failed.' }
 $output = Join-Path $sourceRoot "Traveller.FPI30.Machine\bin\$Configuration"
 $compiler = Join-Path (Split-Path $MSBuildPath) 'Roslyn\csc.exe'
 $program = Join-Path $output 'MachineBoundaryChecks.exe'
-& $compiler /nologo /langversion:7.3 /target:exe "/out:$program" /reference:System.Drawing.dll "/reference:$(Join-Path $output 'Traveller.FPI30.Contracts.dll')" "/reference:$(Join-Path $output 'Traveller.FPI30.Machine.dll')" "/reference:$(Join-Path $output 'JetEazy.Basics.dll')" "/reference:$(Join-Path $output 'JetEazy.VG.Devices.dll')" (Join-Path $PSScriptRoot 'MachineBoundaryChecks.cs')
+& $compiler /nologo /langversion:7.3 /target:exe "/out:$program" /reference:System.Drawing.dll "/reference:$(Join-Path $output 'Traveller.FPI30.Config.dll')" "/reference:$(Join-Path $output 'Traveller.FPI30.Machine.dll')" "/reference:$(Join-Path $output 'JetEazy.Basics.dll')" "/reference:$(Join-Path $output 'JetEazy.VG.Devices.dll')" (Join-Path $PSScriptRoot 'MachineBoundaryChecks.cs')
 if ($LASTEXITCODE -ne 0) { throw 'Machine boundary check compilation failed.' }
 & $program
 if ($LASTEXITCODE -ne 0) { throw 'Machine boundary checks failed.' }

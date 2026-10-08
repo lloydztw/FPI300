@@ -26,7 +26,7 @@ namespace LaserAlignDX.UISpace
         /// version + option 的 switch case 在此寫一次就好,
         /// 不要凌亂的散落各處.
         /// </summary>
-        public static IMainUI CreateMainUI(VersionEnum version, OptionEnum option, Traveller.FPI30.Contracts.IFpix3Machine machine)
+        public static IMainUI CreateMainUI(VersionEnum version, OptionEnum option, Traveller.FPI30.Config.IFpix3Machine machine)
         {
             return new LaserAlignDX.UISpace.MainSpace.MainX3UI();
 

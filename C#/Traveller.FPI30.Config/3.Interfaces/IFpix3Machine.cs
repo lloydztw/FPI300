@@ -1,4 +1,4 @@
-#region AUTHOR
+﻿#region AUTHOR
 /*
  *
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
@@ -15,7 +15,7 @@
 
 using VsCommon.ControlSpace.IOSpace;
 
-namespace Traveller.FPI30.Contracts
+namespace Traveller.FPI30.Config
 {
     /// <summary>
     /// Driver-independent access to an FPIX3 machine. The host owns initialization,

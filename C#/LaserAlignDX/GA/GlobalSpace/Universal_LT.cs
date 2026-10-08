@@ -214,7 +214,7 @@ namespace Traveller106
             get;
             private set;
         }
-        public static Traveller.FPI30.Contracts.IFpix3Machine Machine
+        public static Traveller.FPI30.Config.IFpix3Machine Machine
         {
             get;
             private set;

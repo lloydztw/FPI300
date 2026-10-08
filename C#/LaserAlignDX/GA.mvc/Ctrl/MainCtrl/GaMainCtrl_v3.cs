@@ -48,7 +48,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     public partial class GaMainCtrl : Abs.GaMainCtrl, IxTickable
     {
         #region MACHINE
-        Traveller.FPI30.Contracts.IFpix3Machine MACHINE
+        Traveller.FPI30.Config.IFpix3Machine MACHINE
         {
             get { return Traveller106.Universal.Machine; }
         }

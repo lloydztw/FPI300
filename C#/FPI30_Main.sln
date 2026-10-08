@@ -50,7 +50,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Traveller FPI30 Tools", "Tr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JetEazy.PropertyGrid.Utils", "JetEazy.PropertyGrid.Utils\JetEazy.PropertyGrid.Utils.csproj", "{29EE6E77-21F6-4D85-9582-892D0CD60F93}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traveller.FPI30.Contracts", "Traveller.FPI30.Contracts\Traveller.FPI30.Contracts.csproj", "{85BA7435-10AC-4B73-A583-7F84FC81C452}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traveller.FPI30.Config", "Traveller.FPI30.Config\Traveller.FPI30.Config.csproj", "{85BA7435-10AC-4B73-A583-7F84FC81C452}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Traveller.FPI30.Machine", "Traveller.FPI30.Machine\Traveller.FPI30.Machine.csproj", "{23CA9248-953D-4324-8519-E2AB34B8BD52}"
 EndProject

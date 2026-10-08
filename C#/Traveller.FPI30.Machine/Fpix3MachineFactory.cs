@@ -1,4 +1,4 @@
-#region AUTHOR
+﻿#region AUTHOR
 /*
  *
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
@@ -14,7 +14,7 @@
 #endregion
 
 using System;
-using Traveller.FPI30.Contracts;
+using Traveller.FPI30.Config;
 using VsCommon.ControlSpace.MachineSpace;
 
 namespace Traveller.FPI30.Machine

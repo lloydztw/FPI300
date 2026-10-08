@@ -23,7 +23,7 @@ internal static class FlyRunnerChecks
 {
     public static void Run()
     {
-        Check(typeof(IFLyCameraAoiRunner).IsAssignableFrom(typeof(AoiModel_FlyCam)), "Fly model does not implement runner.");
+        Check(typeof(IAoiFlyCamRunner).IsAssignableFrom(typeof(AoiModel_FlyCam)), "Fly model does not implement runner.");
         Check(typeof(IAoiFlyCamMatcher).IsAssignableFrom(typeof(AoiModel_FlyCam)), "Legacy matcher interface was lost.");
         var matcher = new Matcher();
         var decoder = new Decoder();

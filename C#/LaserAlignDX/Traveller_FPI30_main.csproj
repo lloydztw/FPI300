@@ -807,9 +807,9 @@
       <Project>{16FA6A54-6653-42D3-8383-9DACAC40BF61}</Project>
       <Name>Traveller.FPI30.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Traveller.FPI30.Contracts\Traveller.FPI30.Contracts.csproj">
+    <ProjectReference Include="..\Traveller.FPI30.Config\Traveller.FPI30.Config.csproj">
       <Project>{85BA7435-10AC-4B73-A583-7F84FC81C452}</Project>
-      <Name>Traveller.FPI30.Contracts</Name>
+      <Name>Traveller.FPI30.Config</Name>
     </ProjectReference>
     <ProjectReference Include="..\Traveller.FPI30.Machine\Traveller.FPI30.Machine.csproj">
       <Project>{23CA9248-953D-4324-8519-E2AB34B8BD52}</Project>

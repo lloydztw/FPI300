@@ -163,9 +163,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Traveller.FPI30.Contracts\Traveller.FPI30.Contracts.csproj">
+    <ProjectReference Include="..\Traveller.FPI30.Config\Traveller.FPI30.Config.csproj">
       <Project>{85BA7435-10AC-4B73-A583-7F84FC81C452}</Project>
-      <Name>Traveller.FPI30.Contracts</Name>
+      <Name>Traveller.FPI30.Config</Name>
     </ProjectReference>
     <ProjectReference Include="..\FPI30_Aoi\EzEmptyTrayInspector.Lib\EzAoiEmptyTrayInspector.Lib.csproj">
       <Project>{a1bcdee4-dd9a-43c2-a127-90b727eb0f04}</Project>

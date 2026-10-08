@@ -106,7 +106,7 @@ Runner 測試對實際 DLL 的執行核心提供替代 matcher／decoder，驗�
 
 需要既有 JetEazy／OpenCV／VisionDesigner 等 SDK，以及專案使用的 NuGet packages。
 AOI 另使用原主程式的 MVD 演算法組件與 AUFindDotNet 結果型別；實際執行演算法仍需相符的原生 SDK 與授權。
-直接專案參考包含 Contracts、JetEazy.Transform、JetEazy.PropertyGrid.Utils 與 EzAoiEmptyTrayInspector.Lib。
+直接專案參考包含 Config、JetEazy.Transform、JetEazy.PropertyGrid.Utils 與 EzAoiEmptyTrayInspector.Lib。
 既有 PropertyGrid 編輯器 metadata 與 SDK 相依仍存在，這不是完全只依賴 .NET 基礎類別庫的資料 DLL。
 四個 EzAoiEmptyTrayInspector csproj 未修改。
 

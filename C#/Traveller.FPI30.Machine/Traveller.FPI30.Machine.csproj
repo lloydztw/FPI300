@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -31,9 +31,9 @@
     <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Traveller.FPI30.Contracts\Traveller.FPI30.Contracts.csproj">
+    <ProjectReference Include="..\Traveller.FPI30.Config\Traveller.FPI30.Config.csproj">
       <Project>{85BA7435-10AC-4B73-A583-7F84FC81C452}</Project>
-      <Name>Traveller.FPI30.Contracts</Name>
+      <Name>Traveller.FPI30.Config</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
