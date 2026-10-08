@@ -33,7 +33,7 @@ internal static class SystemModelChecks
     public static void Run()
     {
         var assembly = typeof(RecipeFPIX3Class).Assembly;
-        foreach (var type in new[] { typeof(TravellerSysModel), typeof(ITravelerModel), typeof(TravellerBigImagesHolder),
+        foreach (var type in new[] { typeof(TravellerSysModel), typeof(ITravellerSysModel), typeof(TravellerBigImagesHolder),
             typeof(ICalibAoiModel), typeof(JxCalibRecipe), typeof(CalibV5),
             typeof(LaserAlignDX.AoiModel.Calib.V3.CalibAoiModel), typeof(LaserAlignDX.AoiModel.Calib.V25.CalibAoiModel) })
             Check(type.Assembly == assembly, "Model ownership mismatch: " + type);
@@ -76,7 +76,7 @@ internal static class SystemModelChecks
                 "An invalid world grid wrote coordinates.");
 
             ConfigureTransforms(model.TransformsModel);
-            ITravelerModel api = model;
+            ITravellerSysModel api = model;
             Check(model.WriteAllCoordsToPlc(out var success) && success == "OK" && plc.Calls.Count == 4,
                 "Complete coordinate output failed.");
             CheckRoute(plc.Calls[0], "SetStage1", SuckerRowEnum.S1, new PointF(180, 280));

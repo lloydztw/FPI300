@@ -44,8 +44,8 @@ namespace LaserAlignDX.AoiModel.V38.Combo
     public class AoiModel_ChipMeasure : AoiModelBase, IAoiChipMeasurer
     {
         #region CONFIG
-        static bool N_THREADS_ENABLED => AoiRuntime.Services.Settings.ThreadsEnabled;
-        static int N_THREADS => AoiRuntime.Services.Settings.ThreadCount;
+        static bool N_THREADS_ENABLED => AoiRuntime.SystemModel.Settings.ThreadsEnabled;
+        static int N_THREADS => AoiRuntime.SystemModel.Settings.ThreadCount;
         #endregion
 
         #region RECIPE_PARAMS
@@ -202,7 +202,7 @@ namespace LaserAlignDX.AoiModel.V38.Combo
             var groups = _cellGroups != null ? _cellGroups : GaCellsGroup.CollectGroups(N_GROUPS, _xRecipe, bmpFullfov);
             #endregion
 
-            prepareMvdLineFinders(AoiRuntime.Services.Settings.ThreadCount);
+            prepareMvdLineFinders(AoiRuntime.SystemModel.Settings.ThreadCount);
 
             if (groups == null || groups.Length == 0)
                 return;
@@ -248,7 +248,7 @@ namespace LaserAlignDX.AoiModel.V38.Combo
 
             //_TM.RESET_ACCUM();
 
-            bool usingMultiThread = AoiRuntime.Services.Settings.ThreadsEnabled;
+            bool usingMultiThread = AoiRuntime.SystemModel.Settings.ThreadsEnabled;
 
             #region 準備_CELL_GROUPS
             int N = _cellGroups != null ? _cellGroups.Length : MvdCompositeChipMatcher.N_CHANNLS;
@@ -1326,7 +1326,7 @@ namespace LaserAlignDX.AoiModel.V38.Combo
                                 cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
                                 cL2LMeasureToolObj.Run();
                                 var cL2LMeasureRes = cL2LMeasureToolObj.Result;
-                                DisLeft = cL2LMeasureRes.VerticalAbsDist * AoiRuntime.Services.Settings.ImageResolutionX;
+                                DisLeft = cL2LMeasureRes.VerticalAbsDist * AoiRuntime.SystemModel.Settings.ImageResolutionX;
                             }
                         }
                     }
@@ -1376,7 +1376,7 @@ namespace LaserAlignDX.AoiModel.V38.Combo
                                 cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
                                 cL2LMeasureToolObj.Run();
                                 var cL2LMeasureRes = cL2LMeasureToolObj.Result;
-                                DisTop = cL2LMeasureRes.VerticalAbsDist * AoiRuntime.Services.Settings.ImageResolutionY;
+                                DisTop = cL2LMeasureRes.VerticalAbsDist * AoiRuntime.SystemModel.Settings.ImageResolutionY;
                             }
                         }
                     }
@@ -1425,7 +1425,7 @@ namespace LaserAlignDX.AoiModel.V38.Combo
                                 cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
                                 cL2LMeasureToolObj.Run();
                                 var cL2LMeasureRes = cL2LMeasureToolObj.Result;
-                                DisRight = cL2LMeasureRes.VerticalAbsDist * AoiRuntime.Services.Settings.ImageResolutionX;
+                                DisRight = cL2LMeasureRes.VerticalAbsDist * AoiRuntime.SystemModel.Settings.ImageResolutionX;
                             }
                         }
                     }
@@ -1474,7 +1474,7 @@ namespace LaserAlignDX.AoiModel.V38.Combo
                                 cL2LMeasureToolObj.BasicParam.Line2 = cPairLineFindResult.Line1;
                                 cL2LMeasureToolObj.Run();
                                 var cL2LMeasureRes = cL2LMeasureToolObj.Result;
-                                DisBottom = cL2LMeasureRes.VerticalAbsDist * AoiRuntime.Services.Settings.ImageResolutionY;
+                                DisBottom = cL2LMeasureRes.VerticalAbsDist * AoiRuntime.SystemModel.Settings.ImageResolutionY;
                             }
                         }
                     }

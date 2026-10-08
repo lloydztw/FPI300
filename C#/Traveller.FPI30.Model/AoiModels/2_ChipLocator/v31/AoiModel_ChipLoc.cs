@@ -39,8 +39,8 @@ namespace LaserAlignDX.AoiModel.v31
     public class AoiModel_ChipLoc : AoiModelBase, IAoiChipLocator
     {
         #region CONFIG
-        static bool N_THREADS_ENABLED => AoiRuntime.Services.Settings.ThreadsEnabled;
-        static int N_THREADS => AoiRuntime.Services.Settings.ThreadCount;
+        static bool N_THREADS_ENABLED => AoiRuntime.SystemModel.Settings.ThreadsEnabled;
+        static int N_THREADS => AoiRuntime.SystemModel.Settings.ThreadCount;
         #endregion
 
         #region MVD_COMPONENTS
@@ -120,12 +120,12 @@ namespace LaserAlignDX.AoiModel.v31
                 //(2) 準備資料夾
                 string imgLogPath;
                 #region PREPARE_PATH
-                //if (AoiRuntime.Services.Settings.IsSaveTestImage)
+                //if (AoiRuntime.SystemModel.Settings.IsSaveTestImage)
                 //{
                 //    if (!Directory.Exists(imgLogPath))
                 //        Directory.CreateDirectory(imgLogPath);
                 //}
-                imgLogPath = AoiRuntime.Services.Settings.IsSaveTestImage ? GetLogPath(this.FileBarcodeStr) : null;
+                imgLogPath = AoiRuntime.SystemModel.Settings.IsSaveTestImage ? GetLogPath(this.FileBarcodeStr) : null;
                 #endregion
 
                 //(3) 取得座標轉換
@@ -217,7 +217,7 @@ namespace LaserAlignDX.AoiModel.v31
             if (_preEmptyTrayResult == null)
                 return;
 
-            foreach (var cell in AoiRuntime.Services.Results.IterFinalResultCells())
+            foreach (var cell in LaserAlignDX.Model.PlcDataPacker.IterFinalResultCells())
             {
                 if (cell == null) continue;
                 //if (cell.IsResultPass()) continue;
@@ -421,7 +421,7 @@ namespace LaserAlignDX.AoiModel.v31
                 }
 
                 //(2) 蒐集 GaCellsGroups (使用 x2 倍 Extendx, Extendy)
-                bool usingMultiThread = AoiRuntime.Services.Settings.ThreadsEnabled;
+                bool usingMultiThread = AoiRuntime.SystemModel.Settings.ThreadsEnabled;
                 var inflate = new System.Drawing.Size(_xRecipe.xExtendx * 2, _xRecipe.xExtendy * 2);
                 var boundaryGrps = GaCellsGroup.CollectGroups_simple(MvdCompositeChipMatcher.N_CHANNLS, collects, bmpFullfov2, inflate);
                 if (boundaryGrps.Length == 0)
@@ -728,7 +728,7 @@ namespace LaserAlignDX.AoiModel.v31
                 //>>> cell.Reset();
 
                 //(2) 異步保存 Cell 圖像檔案
-                //if (AoiRuntime.Services.Settings.IsSaveTestImage && imgPath != null)
+                //if (AoiRuntime.SystemModel.Settings.IsSaveTestImage && imgPath != null)
                 //{
                 //    cell.IsSaveDebugPicture = true;
                 //    cell.SaveDebugPath = imgPath;
@@ -795,9 +795,9 @@ namespace LaserAlignDX.AoiModel.v31
                             double angle = _CalcAngle(chipData);
 
                             //(6.2) 記入 Runtime (Gaara) 所需要的數據
-                            cell.RunAngle = (float)Math.Round((angle + AoiRuntime.Services.Settings.Cal_Bca), 3);
-                            cell.RunX = (float)Math.Round((motorDelta.X + AoiRuntime.Services.Settings.Cal_Bcx), 3);
-                            cell.RunY = (float)Math.Round((motorDelta.Y + AoiRuntime.Services.Settings.Cal_Bcy), 3);
+                            cell.RunAngle = (float)Math.Round((angle + AoiRuntime.SystemModel.Settings.Cal_Bca), 3);
+                            cell.RunX = (float)Math.Round((motorDelta.X + AoiRuntime.SystemModel.Settings.Cal_Bcx), 3);
+                            cell.RunY = (float)Math.Round((motorDelta.Y + AoiRuntime.SystemModel.Settings.Cal_Bcy), 3);
 
                             //(6.3) 記入 Gaara Sur1 與 Sur2
                             if (_transCS1 != null)
@@ -899,7 +899,7 @@ namespace LaserAlignDX.AoiModel.v31
 
             _TM.RESET_ACCUM();
 
-            bool usingMultiThread = AoiRuntime.Services.Settings.ThreadsEnabled;
+            bool usingMultiThread = AoiRuntime.SystemModel.Settings.ThreadsEnabled;
             var N_GROUPS = _cellGroups.Length;
             var groups = _cellGroups;
 
@@ -1180,7 +1180,7 @@ namespace LaserAlignDX.AoiModel.v31
             if (bmpFullfov == null)
                 return;
 
-            if (!AoiRuntime.Services.Settings.IsSaveTestImage && !AoiRuntime.Services.Settings.IsSaveDebugBMP && !AoiRuntime.Services.Settings.IsSaveDebugOrgBmp)
+            if (!AoiRuntime.SystemModel.Settings.IsSaveTestImage && !AoiRuntime.SystemModel.Settings.IsSaveDebugBMP && !AoiRuntime.SystemModel.Settings.IsSaveDebugOrgBmp)
                 return;
 
             ThreadPool.QueueUserWorkItem(arg =>
@@ -1190,7 +1190,7 @@ namespace LaserAlignDX.AoiModel.v31
                     using (Bitmap bmpBig = (Bitmap)arg)
                     {
                     //(1) SAVE debugCellCenterStr
-                    if (AoiRuntime.Services.Settings.IsSaveTestImage && debugDumpPath != null && debugCellCenterStr != null)
+                    if (AoiRuntime.SystemModel.Settings.IsSaveTestImage && debugDumpPath != null && debugCellCenterStr != null)
                     {
                             //>>> GaUtil.SaveData(debugCellCenterStr, debugDumpPath + $"\\PositionFix\\DEBUG_{DateTime.Now.ToString("yyyyMMddHHmmss")}.txt");
 
@@ -1203,15 +1203,15 @@ namespace LaserAlignDX.AoiModel.v31
 
 #if (OPT_REPLACED_BY_PARENT)
                         //(2) SAVE debug Bmp
-                        if (AoiRuntime.Services.Settings.IsSaveDebugBMP)
+                        if (AoiRuntime.SystemModel.Settings.IsSaveDebugBMP)
                         {
-                            //>>> GaImageUtil.SaveImageWithQuality(ezImage.Bitmap, $"{m_PicResultPath}\\{m_FileName}", AoiRuntime.Services.Settings.ImageQuality);
+                            //>>> GaImageUtil.SaveImageWithQuality(ezImage.Bitmap, $"{m_PicResultPath}\\{m_FileName}", AoiRuntime.SystemModel.Settings.ImageQuality);
                             string fileName = GetDebugBmpFileName();
-                            GaImageUtil.SaveImageWithQuality(bmpBig, fileName, AoiRuntime.Services.Settings.ImageQuality);
+                            GaImageUtil.SaveImageWithQuality(bmpBig, fileName, AoiRuntime.SystemModel.Settings.ImageQuality);
                 }
 
                         //(3) SAVE debug OrgBmp
-                        if (AoiRuntime.Services.Settings.IsSaveDebugOrgBmp)
+                        if (AoiRuntime.SystemModel.Settings.IsSaveDebugOrgBmp)
                         {
                             //>>> ezImage.Save($"{m_PicResultOrgPath}\\{m_FileName}");
                             string fileName = GetDebugOrgBmpFileName();

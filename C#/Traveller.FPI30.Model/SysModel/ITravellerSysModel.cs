@@ -23,9 +23,11 @@ using System.Drawing;
 
 namespace LaserAlignDX.Mvc.Model
 {
-    public interface ITravelerModel : IDisposable
+    public interface ITravellerSysModel : IDisposable
     {
         event EventHandler<ProcessEventArgs> OnError;
+
+        IAoiEnvironment Settings { get; }
 
         /// <summary>
         /// 主要的 AoiModel

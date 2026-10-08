@@ -16,12 +16,17 @@ using Traveller106;
 
 namespace LaserAlignDX
 {
-    /// <summary>Supplies live application paths/settings and the existing FTP transport.</summary>
+    /// <summary>
+    /// Supplies live application paths/settings and the existing FTP transport.
+    /// </summary>
     internal sealed class AppDataServices : IDataOutputSettings, IImageUploadService
     {
         #region PRIVATE_DATA
         readonly Lazy<FtpUploader> _uploader = new Lazy<FtpUploader>(() =>
-            new FtpUploader(INI.Instance.FtpSettings) { OnLog = text => GaUtil.LOG(text) });
+            new FtpUploader(INI.Instance.FtpSettings)
+            {
+                OnLog = text => GaUtil.LOG(text)
+            });
         #endregion
 
         public IDisposable Bind(Func<CarrierEnum> activeCarrier) =>

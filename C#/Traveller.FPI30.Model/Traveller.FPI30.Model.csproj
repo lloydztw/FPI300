@@ -272,7 +272,9 @@
     <Compile Include="AoiModels\7_MvdTools\MvdLineFinders\MvdPairLineClass.cs" />
     <Compile Include="AoiModels\7_MvdTools\MvdLineFinders\V1\MvdFindLineClass_v1.cs" />
     <Compile Include="AoiModels\7_MvdTools\MvdLineFinders\V1\MvdPairLineClass_v1.cs" />
-    <Compile Include="AoiModels\Hosting\AoiServices.cs" />
+    <Compile Include="AoiRuntime.cs" />
+    <Compile Include=".Environment\IAoiEnvironment.cs" />
+    <Compile Include="TravellerModelFactory.cs" />
     <Compile Include="AoiModels\Supports\ProcessEventArgs.cs" />
     <Compile Include="AoiModels\Supports\AoiResourceScope.cs" />
     <Compile Include="CalibAoiModel\CalibAoiModel_v25.cs" />
@@ -283,7 +285,7 @@
     <Compile Include="SysModel\ITravellerSysModel.cs" />
     <Compile Include="SysModel\TravellerBigImagesHolder.cs" />
     <Compile Include="SysModel\TravellerSysModel.cs" />
-    <Compile Include="SysModel\ISystemModelEnvironment.cs" />
+    <Compile Include=".Environment\ISysModelEnvironment.cs" />
     <Compile Include="Data\LotDataHolder.cs" />
     <Compile Include="Data\PlcDataPacker.cs" />
     <Compile Include="Utils\GaUtil.cs" />

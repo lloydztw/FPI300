@@ -26,7 +26,7 @@ namespace LaserAlignDX.AoiModel
 {
     public class MvdCompositeChipMatcher : IMvdTemplateMatcher
     {
-        public static int N_CHANNLS => AoiRuntime.Services.Settings.ThreadCount;
+        public static int N_CHANNLS => AoiRuntime.SystemModel.Settings.ThreadCount;
 
         #region GLOBAL_RECIPE_MESS
         InspectX3ParaClass _recipeParams => InspectX3ParaClass.Instance;

@@ -66,7 +66,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         #region GLOBAL_MESS_RECIPES
         RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        ITravellerSysModel _sysModel => GaMvcConfig.SysModel;
         IProcessRunFPI _aoiModel => _sysModel?.AoiModel;
         #endregion
 

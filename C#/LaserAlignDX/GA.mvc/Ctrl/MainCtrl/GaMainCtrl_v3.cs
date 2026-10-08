@@ -86,7 +86,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         #endregion
 
         #region GLOBAL_MODELS
-        readonly ITravelerModel _sysModel;
+        readonly ITravellerSysModel _sysModel;
         IProcessRunFPI _aoiModel => _sysModel.AoiModel;
         GaBigImageHolder _lineScanImageHolder => _sysModel.LineScanImageHolder;
         bool IsBusy()
@@ -126,7 +126,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         bool _attached;
         #endregion
 
-        public GaMainCtrl(ITravelerModel systemModel)
+        public GaMainCtrl(ITravellerSysModel systemModel)
         {
             _sysModel = systemModel ?? throw new ArgumentNullException(nameof(systemModel));
             _flyCtrl = new GaPlcFlyCameraCtrl(systemModel);

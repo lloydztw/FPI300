@@ -13,8 +13,10 @@ using System.Drawing;
 
 namespace LaserAlignDX.Mvc.Model
 {
-    /// <summary>Live recipe selection and file locations supplied by the host.</summary>
-    public interface ISystemModelEnvironment
+    /// <summary>
+    /// Live recipe selection and file locations supplied by the host.
+    /// </summary>
+    public interface ISysModelEnvironment
     {
         string ActiveRecipeName { get; }
         string CommonBaseTransformsFile { get; }
@@ -23,7 +25,10 @@ namespace LaserAlignDX.Mvc.Model
         string GetEmptyTrayRecipeFile(string recipeName, CarrierEnum carrier);
     }
 
-    /// <summary>Host-owned coordinate output; the model does not own the PLC connection.</summary>
+    /// <summary>
+    /// Host-owned coordinate output; 
+    /// the model does not own the PLC connection.
+    /// </summary>
     public interface ICoordinateWriter
     {
         bool IsAvailable { get; }

@@ -172,7 +172,7 @@ namespace LaserAlignDX.AoiModel.V3
         private void AsyncSaveDebugData(Bitmap bmpFullFov)
         {
 #if (OPT_REPLACED_BY_PARENT)
-            if (!AoiRuntime.Services.Settings.IsSaveDebugBmp || bmpFullFov == null)
+            if (!AoiRuntime.SystemModel.Settings.IsSaveDebugBmp || bmpFullFov == null)
                 return;
                 
             ThreadPool.QueueUserWorkItem(arg =>
@@ -181,15 +181,15 @@ namespace LaserAlignDX.AoiModel.V3
                 {
                     using (Bitmap bmpBig = (Bitmap)arg)
                     {
-                        if (AoiRuntime.Services.Settings.IsSaveDebugBmp)
+                        if (AoiRuntime.SystemModel.Settings.IsSaveDebugBmp)
                         {
                             //GaImageUtil.SaveImageWithQuality(bmpBig,
-                            //    $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", AoiRuntime.Services.Settings.ImageQuality);
+                            //    $"{m_PicResultPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg", AoiRuntime.SystemModel.Settings.ImageQuality);
                             string fileName = GetDebugBmpFileName();
-                            GaImageUtil.SaveImageWithQuality(bmpBig, fileName, AoiRuntime.Services.Settings.ImageQuality);
+                            GaImageUtil.SaveImageWithQuality(bmpBig, fileName, AoiRuntime.SystemModel.Settings.ImageQuality);
                         }
 
-                        if (AoiRuntime.Services.Settings.IsSaveDebugOrgBmp)
+                        if (AoiRuntime.SystemModel.Settings.IsSaveDebugOrgBmp)
                         {
                             //ezImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg");
                             //bmpInputImage.Save($"{m_PicResultOrgPath}\\{LotId}-{DateTime.Now.ToString("yyyyMMddHHmmss")}.jpg",

@@ -51,7 +51,7 @@ namespace LaserAlignDX.AoiModel.V3
                 if (_instance == null)
                 {
                     // Fail before allocating SDK resources when no host has been bound.
-                    var services = AoiRuntime.Services;
+                    var services = AoiRuntime.SystemModel;
                     _instance = new ProcessRunFPIClass();
                     try { _instance.initSubModels(); }
                     catch
@@ -110,7 +110,7 @@ namespace LaserAlignDX.AoiModel.V3
         ///// <summary>
         ///// SystemModel
         ///// </summary>
-        //IAoiContext _sysModel => AoiRuntime.Services.Context;
+        //ITravellerSysModel _sysModel => AoiRuntime.SystemModel;
         ///// <summary>
         ///// 當下的載台
         ///// </summary>
@@ -247,7 +247,7 @@ namespace LaserAlignDX.AoiModel.V3
             bool optUsePercentage = _xRecipe.InspectParams.optUseTotalNgPercentage && _xRecipe.InspectParams.optChipMeasurement;
             bool forceAllPass = (optUsePercentage && xScanInspectMode != ScanInspectMode.NOTRAY && this.IsPass);
 
-            return AoiRuntime.Services.Results.GetSingleResult(forceAllPass);
+            return LaserAlignDX.Model.PlcDataPacker.GetSingleResult(forceAllPass);
         }
         /// <summary>
         /// 单颗产品的读码比对结果(预留300个) 视觉软件需要将读码结果保存在本地或服务器
@@ -277,7 +277,7 @@ namespace LaserAlignDX.AoiModel.V3
             //return states;
             #endregion
 
-            return AoiRuntime.Services.Results.GetQrResult();
+            return LaserAlignDX.Model.PlcDataPacker.GetQrResult();
         }
         /// <summary>
         /// 单颗产品的偏移值([0]-X,[1]-Y,[2]-R，[3]-X,[4]-Y,[5]-R…依次共300个) 线扫引导功能启用时PLC需要用到这些值
@@ -318,7 +318,7 @@ namespace LaserAlignDX.AoiModel.V3
             //return states;
             #endregion
 
-            return AoiRuntime.Services.Results.GetScanOffset();
+            return LaserAlignDX.Model.PlcDataPacker.GetScanOffset();
         }
         #endregion
 
@@ -497,17 +497,17 @@ namespace LaserAlignDX.AoiModel.V3
         public override void Run(Bitmap sceneBmp = null)
         {
             #region DIRECTORIES_可以搬到後面處理_才不會有遲滯感覺
-            //if (AoiRuntime.Services.Settings.IsSaveDebugBMP)
+            //if (AoiRuntime.SystemModel.Settings.IsSaveDebugBMP)
             //{
-            //    m_PicResultPath = $"{AoiRuntime.Services.Settings.ResultImagePath}\\linescanImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
+            //    m_PicResultPath = $"{AoiRuntime.SystemModel.Settings.ResultImagePath}\\linescanImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
             //    if (!System.IO.Directory.Exists(m_PicResultPath))
             //    {
             //        System.IO.Directory.CreateDirectory(m_PicResultPath);
             //    }
             //}
-            //if (AoiRuntime.Services.Settings.IsSaveDebugOrgBmp)
+            //if (AoiRuntime.SystemModel.Settings.IsSaveDebugOrgBmp)
             //{
-            //    m_PicResultOrgPath = $"{AoiRuntime.Services.Settings.ResultImagePath}\\linescanImageOrg\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
+            //    m_PicResultOrgPath = $"{AoiRuntime.SystemModel.Settings.ResultImagePath}\\linescanImageOrg\\{DateTime.Now.ToString("yyyyMMdd")}\\{StripId}";
             //    if (!System.IO.Directory.Exists(m_PicResultOrgPath))
             //    {
             //        System.IO.Directory.CreateDirectory(m_PicResultOrgPath);
@@ -777,7 +777,7 @@ namespace LaserAlignDX.AoiModel.V3
             if (bmpFullfov == null)
                 return;
 
-            if (!AoiRuntime.Services.Settings.IsSaveDebugBmp && !AoiRuntime.Services.Settings.IsSaveDebugOrgBmp)
+            if (!AoiRuntime.SystemModel.Settings.IsSaveDebugBmp && !AoiRuntime.SystemModel.Settings.IsSaveDebugOrgBmp)
                 return;
 
             var args = new object[]
@@ -796,14 +796,14 @@ namespace LaserAlignDX.AoiModel.V3
                     using (Bitmap bmpBig = (Bitmap)argvs[0])
                     {
                         //(1) 保存壓縮圖檔 (IsSaveDebugBMP)
-                        if (AoiRuntime.Services.Settings.IsSaveDebugBmp)
+                        if (AoiRuntime.SystemModel.Settings.IsSaveDebugBmp)
                         {
                             string fileName = GetDebugBmpFileName(cPass);
-                            GaImageUtil.SaveImageWithQuality(bmpBig, fileName, AoiRuntime.Services.Settings.ImageQuality);
+                            GaImageUtil.SaveImageWithQuality(bmpBig, fileName, AoiRuntime.SystemModel.Settings.ImageQuality);
                         }
 
                         //(2) 保存原始圖檔 (IsSaveDebugOrgBmp)
-                        if (AoiRuntime.Services.Settings.IsSaveDebugOrgBmp)
+                        if (AoiRuntime.SystemModel.Settings.IsSaveDebugOrgBmp)
                         {
                             string fileName = GetDebugOrgBmpFileName(cPass);
                             GaImageUtil.SaveBigImage(fileName, bmpBig);

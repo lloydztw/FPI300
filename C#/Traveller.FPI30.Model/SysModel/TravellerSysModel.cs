@@ -21,6 +21,7 @@ using JetEazy.QMath;
 using JetEazy.QvMath;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
+using LaserAlignDX.Model;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
@@ -34,31 +35,54 @@ using GaUtil = Traveller.FPI30.Model.ModelUtilities;
 
 namespace LaserAlignDX.Mvc.Model
 {
-    public partial class TravellerSysModel : ITravelerModel
+    public partial class TravellerSysModel : ITravellerSysModel
     {
         public event EventHandler<ProcessEventArgs> OnError;
 
-        #region LIFETIME
+        #region PRIVATE_LIFETIME
         readonly Func<ICalibAoiModel> _createCalibModel;
-        readonly ISystemModelEnvironment _environment;
+        readonly ISysModelEnvironment _environment;
         readonly ICoordinateWriter _coordinateWriter;
+        readonly Action<IProcessRunFPI> _disposeAoi;
+        IDisposable _runtimeBinding;
         bool _disposed;
-        public TravellerSysModel(IProcessRunFPI aoiModel, Func<ICalibAoiModel> createCalibModel,
-            ISystemModelEnvironment environment, ICoordinateWriter coordinateWriter)
+        #endregion
+
+        internal TravellerSysModel(
+            Func<IProcessRunFPI> createAoiModel, 
+            Func<ICalibAoiModel> createCalibModel,
+            ISysModelEnvironment environment, 
+            ICoordinateWriter coordinateWriter, 
+            Action<IProcessRunFPI> disposeAoi)
         {
-            _aoiModel = aoiModel ?? throw new ArgumentNullException(nameof(aoiModel));
+            if (createAoiModel == null) throw new ArgumentNullException(nameof(createAoiModel));
+            _aoiModel = new Lazy<IProcessRunFPI>(() => createAoiModel() ?? throw new InvalidOperationException("AOI factory returned null."));
             _createCalibModel = createCalibModel ?? throw new ArgumentNullException(nameof(createCalibModel));
             _environment = environment ?? throw new ArgumentNullException(nameof(environment));
             _coordinateWriter = coordinateWriter ?? throw new ArgumentNullException(nameof(coordinateWriter));
+            _disposeAoi = disposeAoi;
         }
-        #endregion
+
+        public IAoiEnvironment Settings
+        {
+            get; private set;
+        }
+
+        //public IAoiLotDataHolder LotDataHolder => LaserAlignDX.Model.LotDataHolder.Instance;
+
+        internal void ConfigureServices(IAoiEnvironment settings)
+        {
+            Settings = settings;
+        }
+
+        internal void AttachRuntime(IDisposable binding) { _runtimeBinding = binding; }
 
         #region GLOBAL_MESS
         RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         #endregion
 
         #region KERNAL_MODELS
-        IProcessRunFPI _aoiModel;
+        Lazy<IProcessRunFPI> _aoiModel;
         ICalibAoiModel _calibModel;
         ITravellerTransforms _transformsModel = TravellerTransformFactory.CommonBase;
         IMicroChipTransform[] _microTransforms = new[]
@@ -72,20 +96,29 @@ namespace LaserAlignDX.Mvc.Model
         {
             if (_disposed) return;
             _disposed = true;
-            // The application owns the shared AOI model; this model only borrows it.
-            _aoiModel = null;
-
-            using (var resources = new AoiResourceScope())
+            try
             {
-                resources.Add(DisposeSharedResources);
-                var calibModel = _calibModel;
+                using (var resources = new AoiResourceScope())
+                {
+                    // Reverse order: AOI, calibration, shared images/transforms, then binding.
+                    resources.Add(() => _runtimeBinding?.Dispose());
+                    resources.Add(DisposeSharedResources);
+                    resources.Add(() => _calibModel?.Dispose());
+                    resources.Add(() =>
+                    {
+                        if (_disposeAoi != null && _aoiModel.IsValueCreated) _disposeAoi(_aoiModel.Value);
+                    });
+                }
+            }
+            finally
+            {
+                _aoiModel = null;
                 _calibModel = null;
                 _transformsModel = null;
                 _microTransforms = null;
-                resources.Add(() => calibModel?.Dispose());
+                _runtimeBinding = null;
             }
         }
-
         public static void DisposeSharedResources()
         {
             using (var resources = new AoiResourceScope())
@@ -98,7 +131,11 @@ namespace LaserAlignDX.Mvc.Model
 
         public IProcessRunFPI AoiModel
         {
-            get => _aoiModel;
+            get
+            {
+                if (_disposed) throw new ObjectDisposedException(nameof(TravellerSysModel));
+                return _aoiModel.Value;
+            }
         }
         public ICalibAoiModel CalibAoiModel
         {
@@ -762,7 +799,7 @@ namespace LaserAlignDX.Mvc.Model
         }
         #endregion
 
-        bool ITravelerModel.WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camPt, out PointF suckerMotorPt, out string errMsg)
+        bool ITravellerSysModel.WriteCoordsToPlc(CarrierEnum carrierID, SuckerRowEnum suckerRowID, out PointF camPt, out PointF suckerMotorPt, out string errMsg)
         {
             var trfModel = _transformsModel;
 

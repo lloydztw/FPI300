@@ -59,7 +59,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         #endregion
 
         #region MODELS
-        readonly ITravelerModel _sysModel;
+        readonly ITravellerSysModel _sysModel;
         readonly AppResourceScope _resources = new AppResourceScope();
         volatile bool _disposed;
         IAoiFlyCamRunner _flyRunner => _sysModel.AoiModel.GetFlyCameraAoiRunner();
@@ -130,7 +130,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         string _flyCamSnTag;
         #endregion
 
-        public GaPlcFlyCameraCtrl(ITravelerModel systemModel)
+        public GaPlcFlyCameraCtrl(ITravellerSysModel systemModel)
         {
             _sysModel = systemModel ?? throw new ArgumentNullException(nameof(systemModel));
         }

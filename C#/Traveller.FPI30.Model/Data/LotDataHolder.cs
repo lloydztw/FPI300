@@ -15,7 +15,6 @@
 #endregion
 
 using JetEazy.Utils;
-using GaUtil = Traveller.FPI30.Model.ModelUtilities;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
@@ -24,6 +23,7 @@ using System.Drawing;
 using System.IO;
 using System.Threading;
 using VisionDesigner;
+using GaUtil = Traveller.FPI30.Model.ModelUtilities;
 using PlcFlyResultCode = LaserAlignDX.PlcResultCode;
 
 namespace LaserAlignDX.Model

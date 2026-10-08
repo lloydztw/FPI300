@@ -14,7 +14,7 @@ using Traveller106;
 
 namespace LaserAlignDX
 {
-    internal sealed class AppSystemModelEnvironment : ISystemModelEnvironment
+    internal sealed class AppSysModelEnvironment : ISysModelEnvironment
     {
         public string ActiveRecipeName => LtAoiFactory.GetActiveRecipeNameAtFPI30();
         public string CommonBaseTransformsFile => GaMvcPaths.COMMON_BASE_TRANSFORMS_INI_FILE;

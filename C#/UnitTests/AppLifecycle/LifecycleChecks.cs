@@ -62,7 +62,7 @@ internal static class Probe
             {
                 // Each scenario runs in a separate process, just like an application session.
                 var app = AppBootstrapper.Instance;
-                Check(AppAoiServices.IsBound, "AOI host services were not bound.");
+                Check(!LaserAlignDX.Mvc.Model.TravellerModelFactory.IsBound, "Unused root eagerly created a model.");
                 Check(AppDataServices.IsBound, "Model data services were not bound.");
                 Equal(""); // Creating the root must not initialize models or hardware.
                 if (Scenario == "unused")
@@ -81,7 +81,7 @@ internal static class Probe
                     app.InitializeMachine(0);
                     Throws<InvalidOperationException>(() => { var system = app.SystemModel; });
                     app.Dispose();
-                    Equal("hardware.init,aoi.create,system.create,system.shared.dispose,hardware.dispose,aoi.dispose,recipe.dispose");
+                    Equal("hardware.init,system.create,system.shared.dispose,hardware.dispose,recipe.dispose");
                 }
                 else
                 {
@@ -96,10 +96,10 @@ internal static class Probe
                         Throws<AggregateException>(app.Dispose);
                     else
                         app.Dispose();
-                    Equal("hardware.init,aoi.create,system.create,controller.create,controller.dispose,hardware.dispose,aoi.dispose,system.dispose,recipe.dispose");
+                    Equal("hardware.init,system.create,controller.create,aoi.create,controller.dispose,hardware.dispose,aoi.dispose,system.dispose,recipe.dispose");
                 }
                 var before = string.Join(",", Events);
-                Check(!AppAoiServices.IsBound, "AOI host services were retained after shutdown.");
+                Check(!LaserAlignDX.Mvc.Model.TravellerModelFactory.IsBound, "AOI host services were retained after shutdown.");
                 Check(!AppDataServices.IsBound, "Model data services were retained after shutdown.");
                 app.Dispose();
                 AppBootstrapper.Shutdown();
@@ -148,7 +148,7 @@ namespace LaserAlignDX.AoiModel.V3
         public static void DisposeAll() { _instance.Dispose(); _instance = null; }
         public void Dispose()
         {
-            Probe.Check(LaserAlignDX.AppAoiServices.IsBound, "AOI services unbound before AOI disposal.");
+            Probe.Check(LaserAlignDX.Mvc.Model.TravellerModelFactory.IsBound, "AOI services unbound before AOI disposal.");
             Probe.Check(LaserAlignDX.AppDataServices.IsBound, "Data services unbound before AOI disposal.");
             Probe.Events.Add("aoi.dispose");
         }
@@ -166,26 +166,42 @@ namespace LaserAlignDX.Model
 }
 namespace LaserAlignDX.Mvc.Model
 {
-    public interface ITravelerModel : IDisposable
+    public interface ITravellerSysModel : IDisposable
     {
         int ActiveCarrierID { get; }
         AoiModel.IProcessRunFPI AoiModel { get; }
         StubTransforms TransformsModel { get; }
     }
     public sealed class StubTransforms { public object GetCalibCamGrid(int carrier) => null; }
-    public sealed class TravellerSysModel : ITravelerModel
+    public static class TravellerModelFactory
     {
+        public static bool IsBound { get; internal set; }
+        public static ITravellerSysModel Create(object settings, object environment, object writer, Func<AoiModel.ICalibAoiModel> calib)
+        {
+            try { var model = new TravellerSysModel(); IsBound = true; return model; }
+            catch { TravellerSysModel.DisposeSharedResources(); throw; }
+        }
+    }
+    public sealed class TravellerSysModel : ITravellerSysModel
+    {
+        #region PRIVATE_DATA
+        readonly Lazy<AoiModel.IProcessRunFPI> _aoi = new Lazy<AoiModel.IProcessRunFPI>(() => global::LaserAlignDX.AoiModel.V3.ProcessRunFPIClass.Instance);
+        #endregion
         public int ActiveCarrierID => 0;
-        internal readonly AoiModel.IProcessRunFPI Aoi;
+        internal AoiModel.IProcessRunFPI Aoi => _aoi.Value;
         public AoiModel.IProcessRunFPI AoiModel => Aoi;
         public StubTransforms TransformsModel { get; } = new StubTransforms();
-        public TravellerSysModel(AoiModel.IProcessRunFPI aoi, Func<AoiModel.ICalibAoiModel> factory, object environment, object coordinateWriter)
+        public TravellerSysModel()
         {
             Probe.Events.Add("system.create");
             if (Probe.Scenario == "system-failure") throw new InvalidOperationException();
-            Aoi = aoi;
         }
-        public void Dispose() { Probe.Events.Add("system.dispose"); }
+        public void Dispose()
+        {
+            if (_aoi.IsValueCreated) global::LaserAlignDX.AoiModel.V3.ProcessRunFPIClass.DisposeAll();
+            Probe.Events.Add("system.dispose");
+            TravellerModelFactory.IsBound = false;
+        }
         internal static void DisposeSharedResources() { Probe.Events.Add("system.shared.dispose"); }
     }
 }
@@ -197,7 +213,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 {
     public sealed class GaMainCtrl : Abs.GaMainCtrl
     {
-        public GaMainCtrl(Model.ITravelerModel model) { Probe.Events.Add("controller.create"); }
+        public GaMainCtrl(Model.ITravellerSysModel model) { Probe.Events.Add("controller.create"); }
         public override void Dispose()
         {
             Probe.Events.Add("controller.dispose");
@@ -211,7 +227,7 @@ namespace LaserAlignDX.OPSpace.RecipeSpace
 }
 namespace LaserAlignDX
 {
-    internal sealed class AppDialogService { internal AppDialogService(Func<Mvc.Model.ITravelerModel> factory) { } }
+    internal sealed class AppDialogService { internal AppDialogService(Func<Mvc.Model.ITravellerSysModel> factory) { } }
     internal sealed class AppSystemModelEnvironment { }
     internal sealed class AppDataServices : IDisposable
     {
@@ -220,13 +236,7 @@ namespace LaserAlignDX
         public void Dispose() { IsBound = false; }
     }
     internal sealed class AppCoordinateWriter { }
-    internal sealed class AppAoiServices : IDisposable
-    {
-        public static bool IsBound { get; private set; }
-        public AppAoiServices(Func<Mvc.Model.ITravelerModel> factory) { }
-        public IDisposable Bind() { IsBound = true; return this; }
-        public void Dispose() { IsBound = false; }
-    }
+    internal sealed class AppAoiSettings { }
     internal sealed class AppModelBindings : IDisposable
     {
         public AppModelBindings(Action train, Func<int, object> grids) { }

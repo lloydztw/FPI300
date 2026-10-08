@@ -29,7 +29,8 @@ namespace LaserAlignDX
     public static class GaMvcConfig
     {
         public static int TOTAL_FLY_FRAMES_COUNT => 4;
-        public static ITravelerModel SysModel => AppBootstrapper.Instance.SystemModel;
+
+        public static ITravellerSysModel SysModel => AppBootstrapper.Instance.SystemModel;
         public static IProcessRunFPI InstanceAoiModel() => AppBootstrapper.Instance.Aoi;
         public static ICalibAoiModel CreateCalibAoiModel() => AppBootstrapper.Instance.CreateCalibAoiModel();
         public static IxReportBuilder CreateReportBuilder() => AppBootstrapper.Instance.CreateReportBuilder();

@@ -41,7 +41,7 @@ namespace LaserAlignDX.Model.Defects.G1
         #region GLOBAL_MESS
         RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         InspectX3ParaClass _xInspect => _xRecipe.InspectParams;
-        IAoiSettings _ini => AoiRuntime.Services.Settings;
+        IAoiEnvironment _ini => AoiRuntime.SystemModel.Settings;
         #endregion
 
         #region MVD_TOOLS
@@ -362,7 +362,7 @@ namespace LaserAlignDX.Model.Defects.G1
             //_cBlobFindTool?.RegionImage?.SaveImage(fileStem + "_MaskRegion.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
             //cBlobFindRes?.BlobImage?.SaveImage(fileStem + "_BlobResult.bmp", MVD_FILE_FORMAT.MVD_FILE_BMP);
 
-            var dumper = AoiRuntime.Services.LotData;
+            var dumper = LotDataHolder.Instance;
             dumper.DumpImage(cell, _cImageArithmeticTool?.InputImage1, "Defects", "Template");
             dumper.DumpImage(cell, _cImageArithmeticTool?.InputImage2, "Defects", "Scene");
             dumper.DumpImage(cell, _cImageBinaryTool?.Result?.OutputImage, "Defects", "Diff-Binary");

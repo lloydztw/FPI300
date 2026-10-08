@@ -19,7 +19,6 @@ using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using AoiEngine = LaserAlignDX.AoiModel.V3.ProcessRunFPIClass;
 using MainControllerImpl = LaserAlignDX.Mvc.Ctrl.V3.GaMainCtrl;
 
 #if OPT_CALIB_V5 || OPT_CALIB_V4
@@ -45,8 +44,7 @@ namespace LaserAlignDX
             new Lazy<AppBootstrapper>(() => new AppBootstrapper());
 
         readonly AppResourceScope _resources = new AppResourceScope();
-        readonly Lazy<IProcessRunFPI> _aoi;
-        readonly Lazy<TravellerSysModel> _system;
+        readonly Lazy<ITravellerSysModel> _system;
         readonly Lazy<MainControllerImpl> _controller;
         readonly AppDialogService _dialogs;
         bool _initializationAttempted;
@@ -58,30 +56,24 @@ namespace LaserAlignDX
 
         AppBootstrapper()
         {
-            _aoi = new Lazy<IProcessRunFPI>(() => AoiEngine.Instance);
-            _system = new Lazy<TravellerSysModel>(CreateSystemModel);
+            _system = new Lazy<ITravellerSysModel>(CreateSystemModel);
             _controller = new Lazy<MainControllerImpl>(() => new MainControllerImpl(SystemModel));
             _dialogs = new AppDialogService(() => SystemModel);
 
             var dataBinding = new AppDataServices().Bind(() => SystemModel.ActiveCarrierID);
             _resources.Add(dataBinding.Dispose);
 
-            // Bind lazy application adapters before any AOI is constructed; unbind last.
-            var aoiBinding = new AppAoiServices(() => SystemModel).Bind();
-            _resources.Add(aoiBinding.Dispose);
-
             var modelBindings = new AppModelBindings(
                 () => SystemModel.AoiModel?.Train(),
                 carrier => SystemModel.TransformsModel.GetCalibCamGrid(carrier));
             _resources.Add(modelBindings.Dispose);
 
-            // Registration is reversed on shutdown: controller, hardware, AOI, system, recipe.
+            // Registration is reversed on shutdown: controller, hardware, system (owns AOI), recipe.
             _resources.Add(() =>
             {
-                if (_initializationAttempted || _aoi.IsValueCreated) RecipeFPIX3Class.DisposeAll();
+                if (_initializationAttempted || _system.IsValueCreated) RecipeFPIX3Class.DisposeAll();
             });
             _resources.Add(() => { if (_system.IsValueCreated) _system.Value.Dispose(); });
-            _resources.Add(() => { if (_aoi.IsValueCreated) AoiEngine.DisposeAll(); });
             _resources.Add(() => { if (_initializationAttempted) Traveller106.Universal.DisposeHardware(); });
             _resources.Add(() => { if (_controller.IsValueCreated) _controller.Value.Dispose(); });
         }
@@ -90,8 +82,8 @@ namespace LaserAlignDX
 
         public static AppBootstrapper Instance => _instance.Value;
 
-        public ITravelerModel SystemModel { get { ThrowIfDisposed(); return _system.Value; } }
-        public IProcessRunFPI Aoi { get { ThrowIfDisposed(); return _aoi.Value; } }
+        public ITravellerSysModel SystemModel { get { ThrowIfDisposed(); return _system.Value; } }
+        public IProcessRunFPI Aoi { get { ThrowIfDisposed(); return SystemModel.AoiModel; } }
         public Mvc.Ctrl.Abs.GaMainCtrl MainController { get { ThrowIfDisposed(); return _controller.Value; } }
         public AppDialogService Dialogs { get { ThrowIfDisposed(); return _dialogs; } }
 
@@ -137,23 +129,14 @@ namespace LaserAlignDX
 
         #region PRIVATE_METHODS
 
-        TravellerSysModel CreateSystemModel()
+        ITravellerSysModel CreateSystemModel()
         {
-            var aoi = Aoi;
-            try
-            {
-                return new TravellerSysModel(aoi, CreateCalibAoiModel, new AppSystemModelEnvironment(), new AppCoordinateWriter());
-            }
-            catch (Exception creationError)
-            {
-                // Transform factories can allocate shared objects in field initializers,
-                // before the system model constructor has returned to its owner.
-                try { TravellerSysModel.DisposeSharedResources(); }
-                catch (Exception cleanupError) { throw new AggregateException(creationError, cleanupError); }
-                throw;
-            }
+            return TravellerModelFactory.Create(
+                new AppAoiSettings(), 
+                new AppSysModelEnvironment(),
+                new AppCoordinateWriter(), 
+                CreateCalibAoiModel);
         }
-
         void ThrowIfDisposed()
         {
             if (_disposed) throw new ObjectDisposedException(nameof(AppBootstrapper));

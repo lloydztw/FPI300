@@ -9,6 +9,7 @@
  */
 #endregion
 
+using JetEazy.Utils;
 using System;
 using System.Diagnostics;
 
@@ -39,8 +40,9 @@ namespace Traveller.FPI30.Model
     }
 
 
-    internal static class ModelUtilities
+    internal class ModelUtilities : GaClipUtil
     {
+#if(false)
         internal static bool Clip(ref OpenCvSharp.Rect rect, int width, int height)
         {
             if (!(rect.X < 0 || rect.Y < 0 || rect.Right > width || rect.Bottom > height)) return false;
@@ -80,7 +82,10 @@ namespace Traveller.FPI30.Model
         }
 
         internal static string GetEnumDescription(Enum value) => JetEazy.Lang.QMSG.Text(value);
+#endif
+
         internal static void LOG(string message, params object[] args) => ModelDiagnostics.Log(message, args);
+        
         internal static void LOG_ERROR(Exception exception, string message) => ModelDiagnostics.LogError(exception, message);
     }
 }

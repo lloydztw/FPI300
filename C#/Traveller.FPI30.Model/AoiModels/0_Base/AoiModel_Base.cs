@@ -14,8 +14,6 @@
  */
 #endregion
 
-using JetEazy.Utils;
-using GaUtil = Traveller.FPI30.Model.ModelUtilities;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace;
@@ -26,6 +24,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
+using GaUtil = Traveller.FPI30.Model.ModelUtilities;
 
 namespace LaserAlignDX.AoiModel
 {
@@ -57,7 +56,7 @@ namespace LaserAlignDX.AoiModel
         /// <summary>
         /// SystemModel
         /// </summary>
-        protected IAoiContext _sysModel => AoiRuntime.Services.Context;
+        protected ITravellerSysModel _sysModel => AoiRuntime.SystemModel;
         /// <summary>
         /// 當下的載台
         /// </summary>
@@ -105,7 +104,7 @@ namespace LaserAlignDX.AoiModel
         }
 
         #region LOT_DATA
-        protected IAoiLotData _lotDataHolder => AoiRuntime.Services.LotData;
+        protected LotDataHolder _lotDataHolder => LotDataHolder.Instance;
         #endregion
 
         public LotData LotData
@@ -178,7 +177,7 @@ namespace LaserAlignDX.AoiModel
         protected string GetDebugBmpFileName(bool pass)
         {
             string folder = "LineScanImage";
-            if(AoiRuntime.Services.Settings.UseOkNgDiffImageFolders)
+            if(AoiRuntime.SystemModel.Settings.UseOkNgDiffImageFolders)
             {
                 if (!pass) folder += ".NG";
             }
@@ -191,7 +190,7 @@ namespace LaserAlignDX.AoiModel
         protected string GetDebugOrgBmpFileName(bool pass)
         {
             string folder = "LineScanImageOrg";
-            if (AoiRuntime.Services.Settings.UseOkNgDiffImageFolders)
+            if (AoiRuntime.SystemModel.Settings.UseOkNgDiffImageFolders)
             {
                 if (!pass) folder += ".NG";
             }
@@ -199,7 +198,7 @@ namespace LaserAlignDX.AoiModel
         }
 
         /// <summary>
-        /// 檔案 AoiRuntime.Services.Settings.ResultImagePath
+        /// 檔案 AoiRuntime.SystemModel.Settings.ResultImagePath
         ///         \ subFolder
         ///         \ yyyyMMdd
         ///         \ stripID
@@ -207,7 +206,7 @@ namespace LaserAlignDX.AoiModel
         /// </summary>
         protected string GetDebugImgSaveFileName(string subFolder, string stripID, string lotID, bool autoCreateDir = true)
         {
-            //string path = System.IO.Path.Combine(AoiRuntime.Services.Settings.ResultImagePath, subFolder, _timeTag.ToString("yyyyMMdd"), stripID);
+            //string path = System.IO.Path.Combine(AoiRuntime.SystemModel.Settings.ResultImagePath, subFolder, _timeTag.ToString("yyyyMMdd"), stripID);
             string path = _lotDataHolder.GetLogPath(lotID);
             if (autoCreateDir && !System.IO.Directory.Exists(path))
             {

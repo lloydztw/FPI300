@@ -6,11 +6,12 @@
 ## MVC 第一階段：應用程式物件生命週期
 
 - `AppBootstrapper` 是主程式的物件組裝入口。`Program.Main` 以 `using` 持有它，讓正常退出、初始化失敗及主視窗建立失敗都走相同的釋放流程。
-- 共用 AOI、`TravellerSysModel` 與主控制器維持延遲建立，以保留既有 INI、設備、GUI 的初始化次序。系統 Model 注入 AOI 與校正模型工廠；主控制器與飛拍控制器注入同一個系統 Model。
+- `AppBootstrapper` 延遲透過 Model DLL 的 `TravellerModelFactory.Create()` 取得 `ITravellerSysModel`，再由系統模型延遲建立 AOI／校正模型。主控制器與飛拍控制器注入同一個系統 Model，AOI 及子模型透過 `IProcessRunFPI`／`IAoiXXX` 介面使用。
+- `AppAoiSettings` 僅轉接 INI／Universal 設定。原有 `AppAoiServices` 已移除；系統狀態直接由 `ITravellerSysModel` 提供，LotDataHolder 直接實作 `IAoiLotData`，結果格式由 Model 內的 PlcDataPacker 負責。
 - `GaMvcConfig` 保留既有方法作為相容入口，轉交 `AppBootstrapper`／`AppDialogService`；不再自行保管 Model 或 Controller。
 - `AppDialogService` 負責既有編輯視窗的開啟。校正模型與報表工廠回傳的臨時物件仍由呼叫端保管；系統 Model 保管自己延遲建立的校正模型。
 - `Universal.Initial`／`Dispose` 轉交組裝入口；設備實際初始化與關閉保留於 `InitializeCore`／`DisposeHardware`。
-- 關閉順序為：解除控制器訂閱並釋放 Timer → 關閉设备 → 釋放 AOI → 釋放系統 Model 與共用影像／座標資料 → 釋放 Recipe。
+- 關閉順序為：解除控制器訂閱並釋放 Timer → 關閉設備 → 釋放系統 Model（內含 AOI、校正、共用影像／座標資料及 runtime 綁定）→ 釋放 Recipe → 解除 Model 事件及資料服務綁定。主程式不再單獨釋放 AOI。
 - `AppResourceScope` 反序執行已登記的清理工作；某項清理失敗仍繼續處理其他項目，最後彙總例外。重複關閉不重複清理；關閉後禁止重新取得服務。
 
 此階段保留既有 PLC／相機流程、AOI 演算法、全域 Recipe 與 Model 內部的相容存取。它們的資料介面與執行緒調度留待後續分層處理。尚未接軌的 `Traveller_FPI30_Models` 沒有同步搬移，避免混入兩份原始碼的演算法差異。

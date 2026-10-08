@@ -36,8 +36,8 @@ namespace LaserAlignDX.AoiModel.V3
     public class AoiModel_BadConnInpector : AoiModelBase, IAoiBadConnInspector
     {
         #region CONFIG
-        static bool N_THREADS_ENABLED => AoiRuntime.Services.Settings.ThreadsEnabled;
-        static int N_THREADS => AoiRuntime.Services.Settings.ThreadCount;
+        static bool N_THREADS_ENABLED => AoiRuntime.SystemModel.Settings.ThreadsEnabled;
+        static int N_THREADS => AoiRuntime.SystemModel.Settings.ThreadCount;
         #endregion
 
         #region GLOBAL_MESS
@@ -229,7 +229,7 @@ namespace LaserAlignDX.AoiModel.V3
                 bool go = cell.ChipData?.ChipQuad2D != null;
 
                 //(2.2) 條件: 是否為 Bypass
-                if (cell.ByPass && !AoiRuntime.Services.Settings.IsForceInspect)
+                if (cell.ByPass && !AoiRuntime.SystemModel.Settings.IsForceInspect)
                     go = false;
 
                 //(2.3) 條件: 是否為 空白 或錯 誤區塊

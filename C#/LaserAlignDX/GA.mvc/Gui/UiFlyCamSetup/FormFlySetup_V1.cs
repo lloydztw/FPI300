@@ -47,7 +47,7 @@ namespace LaserAlignDX.FormSpace
         #endregion
 
         #region GLOBAL_MESS
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        ITravellerSysModel _sysModel => GaMvcConfig.SysModel;
         RecipeFPIX3Class xRecipe => RecipeFPIX3Class.Instance;
         #endregion
 

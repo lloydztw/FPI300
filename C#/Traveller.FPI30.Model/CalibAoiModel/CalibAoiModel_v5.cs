@@ -834,7 +834,7 @@ namespace LaserAlignDX.AoiModel.Calib.V5
             //var grid = matchResult?.Grid;
             if (grid == null)
             {
-                var aoi = AoiRuntime.Services.Context.EmptyTrayAoiModel;
+                var aoi = AoiRuntime.SystemModel.EmptyTrayAoiModel;
                 var result = FetchGridNodes(aoi, C, srcFullfovImg, false);
                 grid = result?.Grid;
                 if (grid == null)

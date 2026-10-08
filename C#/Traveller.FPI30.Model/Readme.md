@@ -13,7 +13,7 @@ FPI30 Model 與 AOI 檢測程式庫，目標為 .NET Framework 4.8／C# 7.3。
 - 原 `GA.mvc/Model/AoiModel` 全部程式：AOI 介面、基底、ProcessRunFPIClass、空盤、定位、量測、瑕疵、連錫、讀碼、飛拍與支援類別，位於 `AoiModels`。
 - AOI 需要的 MVD 比對、讀碼與找線工具，以及共用的 ProcessEventArgs。
 - CalibAoiModel：校正介面、V25／V3／V5 校正演算法與 JxCalibRecipe。
-- SysModel：ITravelerModel、TravellerSysModel 與 TravellerBigImagesHolder。
+- SysModel：TravellerModelFactory、ITravellerSysModel、TravellerSysModel 與 TravellerBigImagesHolder。
 - LotDataHolder：批次資料、檔名、線掃／飛拍／格位影像存檔；PlcDataPacker：結果編碼、蛇形排列與診斷輸出。
 
 原有 namespace 與參數檔格式保留。工廠由 `OPT_TRANSFORM_V38` 選用 V38；
@@ -39,31 +39,44 @@ FPI30 Model 與 AOI 檢測程式庫，目標為 .NET Framework 4.8／C# 7.3。
 
 ### AOI 執行環境
 
-`AppBootstrapper` 透過 `AppAoiServices` 建立 `AoiRuntime.Bind(...)` 綁定，提供四組介面：
+由 DLL 的 `TravellerModelFactory.Create(...)` 對外產生 `ITravellerSysModel`：
 
-- `IAoiContext`：當前載台、座標轉換、巨圖與空盤檢測服務；不包含 PLC 寫入或校正控制。
-- `IAoiSettings`：檢測、執行緒、補償與影像儲存設定，每次讀取目前的主程式設定。
-- `IAoiLotData`：批次資料、檔名及診斷影像輸出，轉接 Model DLL 的 LotDataHolder。
-- `IAoiResultFormatter`：轉接 Model DLL 的 PlcDataPacker，維持結果排列與格式轉換；Model 不連線或寫入 PLC。
+```csharp
+ITravellerSysModel model = TravellerModelFactory.Create(
+    settings, environment, coordinateWriter, createCalibModel);
+IProcessRunFPI aoi = model.AoiModel; // 第一次取用才建立 AOI
+IAoiFlyCamRunner flyRunner = aoi.GetFlyCameraAoiRunner();
+// 停止所有檢測、相機回呼與背景工作後：
+model.Dispose();
+```
 
-其他應用可實作這些介面，以 `new AoiServices(context, settings, lotData, results)` 綁定後使用 AOI。
-綁定時不呼叫系統模型的建立函式，避免 SystemModel 與 AOI 延遲初始化互相遞迴。
-未綁定時，ProcessRunFPIClass.Instance 在分配 SDK 資源前明確拋出例外。
-目前仍沿用單一 AOI／Recipe 的 singleton 設計，同一行程只允許一個有效綁定；不支援執行中切換 host。
-呼叫端須先停止所有檢測／背景工作，再釋放 AOI，最後 Dispose 綁定。綁定不擁有或釋放 host 提供的影像、轉換及服務。
-主程式由 AppBootstrapper 管理上述次序。
+- `ITravellerSysModel` 直接提供載台、座標轉換、巨圖、空盤與校正模型，取代重複的 `IAoiContext`。
+- `IProcessRunFPI` 與既有 `IAoiXXX` 介面提供 AOI 管線及子模型。
+- `IAoiSettings` 保留為 host 設定邊界；主程式的 `AppAoiSettings` 即時讀取 INI／Universal。
+- `IAoiLotData` 由 `LotDataHolder` 直接實作，Factory 預設使用 `LotDataHolder.Instance`，也可傳入替代實作。
+- 結果排列直接呼叫 DLL 內的 `PlcDataPacker`，移除只轉送相同方法的 `IAoiResultFormatter`。
+
+`AoiServices` 與 `AppAoiServices` 已移除。`AoiRuntime` 僅為 DLL 內部銜接既有 singleton AOI 的橋接，
+綁定／解除由 Factory 及回傳模型管理；主程式不再操作 runtime。
+Factory 建立系統模型後才允許延遲建立 AOI，避免兩者初始化互相遞迴。
+尚未建立系統模型時，ProcessRunFPIClass.Instance 在分配 SDK 資源前明確拋出例外。
+目前仍沿用共用 AOI／Recipe／轉換登錄，同一行程只允許一個有效模型；重複 Create 在分配資源前拋出例外。
+呼叫端須先停止所有檢測／背景工作，再 Dispose 模型；此變更沒有新增停止或等待背景工作的機制。
 
 ### 系統模型與校正
 
-`TravellerSysModel` 由呼叫端透過建構子提供 AOI、校正物件工廠、`ISystemModelEnvironment` 與 `ICoordinateWriter`。
+`AppBootstrapper` 透過 Factory 傳入設定、校正物件工廠、`ISystemModelEnvironment` 與 `ICoordinateWriter`，並持有 `ITravellerSysModel`。
 主程式的 `AppSystemModelEnvironment` 轉接目前參數名稱與參數／座標轉換檔路徑；`AppCoordinateWriter` 將座標送到 FPIX3 的載台及吸嘴排。
 Model DLL 不查詢 Universal.Machine、GaMvcPaths 或 LtAoiFactory，也不建立 PLC 連線。
 原有 WriteCoordsToPlc／WriteAllCoordsToPlc 呼叫介面保留；座標計算留在 Model，實際 I/O 由呼叫端提供。
 原有無 PLC 行為也保留：批次寫入回傳失敗；單筆流程仍依座標計算結果回傳，由主程式 writer 在 PLC 不存在時略過寫入。
 
-校正物件仍延遲建立，由系統模型釋放；傳入的 AOI 與 host 服務為借用，不由系統模型釋放。
-系統模型仍會釋放共用的座標轉換、空盤檢測與巨圖登錄，因此目前不支援多個獨立系統模型同時存活。
-`DisposeSharedResources()` 供主程式在建構失敗時清理已建立的共用資源。
+Factory 回傳的模型擁有延遲建立的 AOI、校正物件、共用座標轉換、空盤檢測及巨圖登錄；host 設定、環境、writer 與批次資料均為借用。
+`createAoiModel` 選用參數可替換 AOI 建立方式；其回傳物件的釋放責任交給模型。
+釋放順序為 AOI、校正、共用資源，最後解除 runtime；某項釋放失敗仍繼續清理，其後以 AggregateException 回報。
+未取用的 AOI／校正不會為了關閉而建立；重複 Dispose 不會重複釋放。
+Factory 也負責系統模型建構失敗時的共用資源清理。
+舊的公開建構子保留借用 AOI 的相容行為，但不建立 runtime 綁定；應用整合請統一使用 Factory。
 V25／V3／V5 類別及 namespace 均保留，由主程式既有的組態選擇校正版本。
 
 ### 批次資料與結果輸出
@@ -76,13 +89,13 @@ V25／V3／V5 類別及 namespace 均保留，由主程式既有的組態選擇�
 - `Func<CarrierEnum>`：模擬檢查使用的當前載台。
 
 主程式由 `AppDataServices` 轉接 INI／Universal，延遲建立原有 FtpUploader，保留 FTP 設定與傳輸實作在主程式。
-AppBootstrapper 先綁定資料服務，再綁定 AOI；釋放時資料服務最後解除。
+AppBootstrapper 先綁定資料服務，再延遲透過 Factory 建立系統模型；釋放時資料服務最後解除。
 這組服務不需要 AOI 綁定即可使用；未綁定時會明確拋出例外。仍保留 LotDataHolder singleton，只允許一組有效資料服務。
 呼叫端須先停止並完成所有背景存檔／上傳工作，才可釋放綁定。此次搬移未增加背景工作等待機制，也未改變既有非同步存檔行為。
 
 ### 飛拍 AOI Runner
 
-`IFLyCameraAoiRunner` 由既有 `AoiModel_FlyCam` 實作，完整單張流程位於 `AoiModel_FlyCam.Runner.cs`。
+`IAoiFlyCamRunner` 由既有 `AoiModel_FlyCam` 實作，完整單張流程位於 `AoiModel_FlyCam.Runner.cs`。
 `IProcessRunFPI.GetFlyCameraAoiRunner()` 與 `GetFlyCameraAoi()` 回傳同一個子模型的不同介面；不額外建立 matcher 或 singleton。
 `Run(FlyID, Bitmap, FlyAoiRunOptions)` 負責 ROI 裁切、一般／特殊角度模式、選用讀碼、補償與 FlyAoiResult／FlyMetaData。
 ROI、延伸量、模式、解析度及已選好的位置補償由 Controller 傳入；底層 matcher 門檻及訓練仍沿用 Recipe。
@@ -130,7 +143,8 @@ msbuild C#\Traveller.FPI30.Model\Traveller.FPI30.Model.csproj /t:Build /p:Config
 測試直接使用 Model DLL，檢查不載入主程式／Machine DLL、中文 INI 與 Recipe 存取、
 V38 選用、格點座標、轉換登錄釋放、訓練回呼及主程式服務解除訂閱。
 格位集合另驗證蛇形走訪、缺格補位、PASS／NG／空料／不明區塊統計，以及 Attach／TakeOver 的資料釋放責任。
-AOI 邊界測試使用真正的 AppAoiServices 搭配測試 host，驗證延遲初始化、設定即時更新、批次資料共用、借用影像不被釋放、錯誤取消事件、結果轉送及 forceAllPass 判斷。
+AOI 邊界測試使用真正的 Factory、AppAoiSettings 與測試 host，驗證延遲初始化、設定即時更新、批次資料共用、借用影像不被 AOI 釋放、錯誤取消事件、結果格式及 forceAllPass 判斷。
+Factory 另驗證重複建立遭拒、未使用模型的關閉、AOI 建立失敗、正常／異常釋放、重複 Dispose 及重新建立模型。
 系統／校正測試使用合成圓點影像驗證 V25／V3／V5 格點與邊界裁切，再以 V38 計算已知座標。
 測試使用真正的 AppCoordinateWriter 與替代 PLC 介面，檢查四組載台／吸嘴排對應、缺少 PLC、無效格點及正常／異常釋放的資源責任。
 資料輸出測試使用真正的 LotDataHolder／PlcDataPacker，驗證結果碼、蛇形偏移、統一 NG 碼、替代格位及診斷 CSV，並以合成影像檢查線掃／格位存檔與上傳回呼；不連線 FTP。

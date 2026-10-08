@@ -34,28 +34,30 @@ internal static class AoiBoundaryChecks
             typeof(GaBigImageHolder), typeof(ProcessEventArgs), typeof(LaserAlignDX.BasicSpace.Mvd2DReaderClass) })
             Check(type.Assembly == assembly, "AOI type not supplied by the model DLL: " + type);
 
-        Throws<InvalidOperationException>(() => { var services = AoiRuntime.Services; });
+        Throws<InvalidOperationException>(() => { var context = new ProbeAoi().Context; });
         Throws<InvalidOperationException>(() => { var aoi = ProcessRunFPIClass.Instance; });
-        Throws<ArgumentNullException>(() => AoiRuntime.Bind(null));
-        var system = new TestSystem();
+        var settings = new AppAoiSettings();
         int requested = 0;
-        var adapter = new AppAoiServices(() => { requested++; return system; });
-        var binding = adapter.Bind();
+        Func<ITravellerSysModel> createSystem = () => TravellerModelFactory.Create(settings,
+            new TestEnvironment(), new TestWriter(), () => { throw new InvalidOperationException("Unexpected calibration creation."); },
+            () => { requested++; return new ProbeAoi(); });
+        var system = createSystem();
+        var binding = system;
         try
         {
             Check(requested == 0, "Binding eagerly created the system (would recurse during startup).");
-            Throws<InvalidOperationException>(() => adapter.Bind());
-            using (var aoi = new ProbeAoi())
+            Throws<InvalidOperationException>(() => createSystem());
+            using (var aoi = (ProbeAoi)system.AoiModel)
             {
-                Check(requested == 0, "AOI constructor eagerly accessed the system.");
+                Check(requested == 1 && ReferenceEquals(aoi, system.AoiModel) && ReferenceEquals(aoi.Context, system), "Factory did not share its lazy AOI/system.");
                 Check(aoi.Carrier == CarrierEnum.C1, "Wrong carrier.");
                 system.ActiveCarrierID = CarrierEnum.C2;
                 Check(aoi.Carrier == CarrierEnum.C2, "Carrier was captured instead of read live.");
                 Traveller106.Universal.N_THREADS = 3;
-                Check(AoiRuntime.Services.Settings.ThreadCount == 3, "Thread count not forwarded.");
+                Check(system.Settings.ThreadCount == 3, "Thread count not forwarded.");
                 Traveller106.Universal.N_THREADS = 5;
                 Traveller106.INI.Instance.IsForceInspect = true;
-                Check(AoiRuntime.Services.Settings.ThreadCount == 5 && AoiRuntime.Services.Settings.IsForceInspect,
+                Check(system.Settings.ThreadCount == 5 && system.Settings.IsForceInspect,
                     "Settings changes were lost.");
                 aoi.LotData = new LotData();
                 aoi.LotId = "LOT";
@@ -99,20 +101,58 @@ internal static class AoiBoundaryChecks
         }
         finally
         {
-            system.LineScanImageHolder.Dispose();
+
             RecipeFPIX3Class.DisposeAll();
             binding.Dispose();
         }
-        Throws<InvalidOperationException>(() => { var services = AoiRuntime.Services; });
-        using (var rebound = adapter.Bind())
+        Throws<InvalidOperationException>(() => { var context = new ProbeAoi().Context; });
+        using (var rebound = createSystem())
         {
             binding.Dispose();
-            Check(AoiRuntime.Services != null, "An old binding cleared a new host binding.");
+            Check(ReferenceEquals(new ProbeAoi().Context, rebound), "An old model cleared the new runtime binding.");
         }
+        CheckFactoryFailures(settings);
         Console.WriteLine("PASS AOI assembly ownership, host binding/laziness, live settings, borrowed images, lot sharing, error cancellation and result forwarding");
     }
 
     #region PRIVATE_METHODS
+    static void CheckFactoryFailures(IAoiSettings settings)
+    {
+        var environment = new TestEnvironment();
+        var writer = new TestWriter();
+        Func<ICalibAoiModel> calib = () => { throw new InvalidOperationException("Unexpected calibration creation"); };
+        Throws<ArgumentNullException>(() => TravellerModelFactory.Create(null, environment, writer, calib));
+        int attempts = 0;
+        Func<IProcessRunFPI> failCreate = () => { attempts++; throw new InvalidOperationException("AOI creation failure"); };
+        using (var unused = TravellerModelFactory.Create(settings, environment, writer, calib, failCreate))
+            Check(ReferenceEquals(unused.LotData, LotDataHolder.Instance), "Lot data was wrapped by the host.");
+        Check(attempts == 0, "Unused model created AOI during disposal.");
+        var ownedAoi = new OwnedAoi();
+        var owned = TravellerModelFactory.Create(settings, environment, writer, calib, () => ownedAoi);
+        Check(ReferenceEquals(owned.AoiModel, ownedAoi), "Factory replaced the supplied AOI.");
+        var ownedImages = owned.LineScanImageHolder;
+        ownedImages.TakeOver(new Bitmap(2, 2));
+        owned.Dispose();
+        owned.Dispose();
+        Check(ownedAoi.DisposeCount == 1 && ownedImages.IsEmpty(), "Model did not release its AOI/images exactly once.");
+        using (var failed = TravellerModelFactory.Create(settings, environment, writer, calib, failCreate))
+        {
+            Throws<InvalidOperationException>(() => { var aoi = failed.AoiModel; });
+            Throws<InvalidOperationException>(() => { var aoi = failed.AoiModel; });
+            Check(attempts == 1, "Failed lazy initialization retried unexpectedly.");
+        }
+        var failing = TravellerModelFactory.Create(settings, environment, writer, calib, () => new FailingDisposeAoi());
+        var forced = failing.AoiModel;
+        var holder = failing.LineScanImageHolder;
+        holder.TakeOver(new Bitmap(2, 2));
+        Throws<AggregateException>(failing.Dispose);
+        Check(holder.IsEmpty(), "AOI disposal failure prevented shared image cleanup.");
+        failing.Dispose();
+        Throws<ObjectDisposedException>(() => { var aoi = failing.AoiModel; });
+        using (var next = TravellerModelFactory.Create(settings, environment, writer, calib, failCreate))
+            Check(ReferenceEquals(next.Settings, settings), "Settings were duplicated instead of borrowed.");
+        Console.WriteLine("PASS factory lazy ownership, duplicate-session rejection, creation/disposal failures and rebinding");
+    }
     static void Check(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }
     static void Throws<T>(Action action) where T : Exception
     {
@@ -126,31 +166,46 @@ internal static class AoiBoundaryChecks
     // Exercise the real pipeline's data/event APIs without allocating licensed MVD algorithms.
     sealed class ProbeAoi : ProcessRunFPIClass
     {
+        public ITravellerSysModel Context => _sysModel;
         public CarrierEnum Carrier => getActiveCarrierID();
         public bool ReportError() => fire_AoiError(ErrorCodes.EXCEPTION_AT_AOI_RUN, "probe");
         public void SetPass(bool pass) => markRunEnd(pass);
     }
-    sealed class TestSystem : ITravelerModel
+    sealed class TestEnvironment : ISystemModelEnvironment
     {
-        public event EventHandler<ProcessEventArgs> OnError { add { } remove { } }
-        public IProcessRunFPI AoiModel => throw new InvalidOperationException("Unexpected AOI access.");
-        public ICalibAoiModel CalibAoiModel => throw new InvalidOperationException("Unexpected calibration access.");
-        public object GetCurrentRecipe() => throw new InvalidOperationException("Unexpected recipe access.");
-        public void ApplyRecipe(params object[] args) => throw new InvalidOperationException("Unexpected recipe access.");
-        public bool AutoBuildRegionCells(CarrierEnum carrier, Bitmap image, bool migrate, out MatchResult result) => throw new InvalidOperationException("Unexpected calibration access.");
-        public bool WriteCoordsToPlc(CarrierEnum carrier, SuckerRowEnum row, out PointF camera, out PointF motor, out string message) => throw new InvalidOperationException("Unexpected PLC access.");
-        public bool WriteAllCoordsToPlc(out string message) => throw new InvalidOperationException("Unexpected PLC access.");
-        public void Dispose() => LineScanImageHolder.Dispose();
-        public CarrierEnum ActiveCarrierID { get; set; } = CarrierEnum.C1;
-        public GaBigImageHolder LineScanImageHolder { get; } = new GaBigImageHolder();
-        public ITravellerTransforms TransformsModel => throw new InvalidOperationException("Unexpected transform access.");
-        public IxEmptyTrayInspector EmptyTrayAoiModel => throw new InvalidOperationException("Unexpected inspector access.");
-        public IMicroChipTransform GetMicroTransform(CarrierEnum carrier) => throw new InvalidOperationException("Unexpected transform access.");
+        public string ActiveRecipeName => throw new InvalidOperationException("Unexpected environment access.");
+        public string CommonBaseTransformsFile => throw new InvalidOperationException("Unexpected environment access.");
+        public string GetTransformsFile(string file) => throw new InvalidOperationException("Unexpected environment access.");
+        public string GetEmptyTrayModelName(string name, CarrierEnum carrier) => throw new InvalidOperationException("Unexpected environment access.");
+        public string GetEmptyTrayRecipeFile(string name, CarrierEnum carrier) => throw new InvalidOperationException("Unexpected environment access.");
+    }
+    sealed class TestWriter : ICoordinateWriter
+    {
+        public bool IsAvailable => throw new InvalidOperationException("Unexpected PLC access.");
+        public void Write(CarrierEnum carrier, SuckerRowEnum row, PointF point) => throw new InvalidOperationException("Unexpected PLC access.");
+    }
+    sealed class FailingDisposeAoi : ProcessRunFPIClass
+    {
+        public override void Dispose()
+        {
+            Check(_sysModel != null, "Runtime was unbound before AOI disposal.");
+            throw new InvalidOperationException("AOI disposal failure");
+        }
+    }
+    sealed class OwnedAoi : ProcessRunFPIClass
+    {
+        public int DisposeCount { get; private set; }
+        public override void Dispose()
+        {
+            Check(_sysModel != null, "Runtime was unbound before owned AOI disposal.");
+            DisposeCount++;
+            base.Dispose();
+        }
     }
     #endregion
 }
 
-// The real AppAoiServices adapter is compiled against these host stand-ins.
+// The real AppAoiSettings adapter is compiled against these host stand-ins.
 // No executable, machine implementation, PLC connection or production path is used.
 namespace Traveller106
 {

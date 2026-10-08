@@ -355,10 +355,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\AppBootstrapper.cs" />
-    <Compile Include="App\AppSystemModelEnvironment.cs" />
+    <Compile Include="App\AppSysModelEnvironment.cs" />
     <Compile Include="App\AppCoordinateWriter.cs" />
     <Compile Include="App\AppDataServices.cs" />
-    <Compile Include="App\AppAoiServices.cs" />
+    <Compile Include="App\AppAoiSettings.cs" />
     <Compile Include="App\AppModelBindings.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\FormMainDX.UiRecording.cs">
       <SubType>Form</SubType>

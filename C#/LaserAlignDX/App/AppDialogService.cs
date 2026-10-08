@@ -43,22 +43,24 @@ using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V25.FormRecipeEditor;
 
 namespace LaserAlignDX
 {
-    /// <summary>Owns modal editor creation; shared services are supplied by the application.</summary>
+    /// <summary>
+    /// Owns modal editor creation; shared services are supplied by the application.
+    /// </summary>
     internal sealed class AppDialogService
     {
         #region PRIVATE_DATA
 
-        readonly Func<ITravelerModel> _getSystemModel;
+        readonly Func<ITravellerSysModel> _getSystemModel;
 
         #endregion
 
         #region PRIVATE_PROPERTIES
 
-        ITravelerModel _sysModel => _getSystemModel();
+        ITravellerSysModel _sysModel => _getSystemModel();
 
         #endregion
 
-        internal AppDialogService(Func<ITravelerModel> getSystemModel)
+        internal AppDialogService(Func<ITravellerSysModel> getSystemModel)
         {
             _getSystemModel = getSystemModel ?? throw new ArgumentNullException(nameof(getSystemModel));
         }

@@ -4,6 +4,7 @@
  * Copyright (c) 2025 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
  *      2025-09-09 重新設計校正架構 (by LeTian Chang)
  * 
  * http://www.jeteazy.com
@@ -25,7 +26,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
     public abstract class GaRcpBaseCtrl
     {
         #region GLOBAL_MESS
-        protected ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        protected ITravellerSysModel _sysModel => GaMvcConfig.SysModel;
         protected RecipeFPIX3Class _xRecipe => RecipeFPIX3Class.Instance;
         #endregion
 

@@ -4,6 +4,7 @@
  * Copyright (c) 2025 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
  *      2025-09-09 重新設計校正架構 (by LeTian Chang)
  * 
  * http://www.jeteazy.com
@@ -43,7 +44,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V35
         {
             get { return Traveller106.Universal.IxLineScan; }
         }
-        //ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        //ITravellerSysModel _sysModel => GaMvcConfig.SysModel;
         //IProcessRunFPI _aoiModel => _sysModel.AoiModel;
         #endregion
 

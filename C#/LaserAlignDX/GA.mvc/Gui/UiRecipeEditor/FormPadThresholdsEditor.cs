@@ -4,6 +4,7 @@
  * Copyright (c) 2025 JetEazy Corp. All rights reserved.
  * 
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
  *      2025-10-08 初稿 (by LeTian Chang)
  * 
  * http://www.jeteazy.com
@@ -31,7 +32,7 @@ namespace LaserAlignDX.Mvc.Gui
     {
         #region GLOBAL_MESS
         XRecipe _xRecipe => XRecipe.Instance;
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        ITravellerSysModel _sysModel => GaMvcConfig.SysModel;
         #endregion
 
         #region PRIVATE_RUNTIME_DATA
