@@ -1,25 +1,26 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2026-04-13 LeTian Chang, Creation
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
+using System;
+using System.Windows.Forms;
 using JetEazy.ControlSpace.MotionSpace;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Lang;
 using JetEazy.Utils;
-using System;
-using System.Windows.Forms;
 using VsCommon.ControlSpace.IOSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
@@ -30,7 +31,7 @@ namespace LaserAlignDX.Mvc.Ctrl
         #region GLOBAL_MESS
         static MainFPIX3MachineClass MACHINE
         {
-            get => (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE;
+            get => (MainFPIX3MachineClass)Traveller106.Universal.Machine;
         }
         public static IPlcIoFPIX3 PLCIO => MACHINE?.PLCIO;
         #endregion

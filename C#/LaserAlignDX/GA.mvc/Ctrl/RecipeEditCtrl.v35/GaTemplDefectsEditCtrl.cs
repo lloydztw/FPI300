@@ -1,28 +1,29 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2025-09-19 重新設計校正架構 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
 using JetEazy.Lang;
 using JetEazy.OpenCV;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Windows.Forms;
 
 namespace LaserAlignDX.Mvc.Ctrl.V35
 {

@@ -1,9 +1,10 @@
 ﻿#region AUTHOR
 /*
- * 
+ *
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
- * 
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2026-06-29 在沒有更改邏輯的狀況下, 使用 #region #endregion
  *                 重新收納整理 萬子 散亂放置的代碼 
  *                 (by LeTian Chang)
@@ -15,6 +16,9 @@
  */
 #endregion
 
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.DBSpace;
@@ -23,12 +27,8 @@ using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX;
 using NeedleX.ProcessSpace;
-using System;
-using System.Drawing;
-using System.Windows.Forms;
 using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace.IOSpace;
-using VsCommon.ControlSpace.MachineSpace;
 
 namespace PhotoMachine.UISpace
 {
@@ -77,9 +77,9 @@ namespace PhotoMachine.UISpace
                 return plc;
             }
         }
-        MainFPIX3MachineClass MACHINE
+        Traveller.FPI30.Contracts.IFpix3Machine MACHINE
         {
-            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
+            get { return Traveller106.Universal.Machine; }
         }
         #endregion
 

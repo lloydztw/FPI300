@@ -1,15 +1,16 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2025-09-19 重新設計校正架構 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 

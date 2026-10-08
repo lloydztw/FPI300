@@ -1,18 +1,22 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2025-08-28 初稿 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
+using System;
+using System.Collections.Generic;
+using System.Drawing;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.OpenCV;
@@ -25,11 +29,7 @@ using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
 using Traveller106;
-using VsCommon.ControlSpace.MachineSpace;
 using EmptyTrayAoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
 
 namespace LaserAlignDX.Mvc.Model
@@ -38,10 +38,13 @@ namespace LaserAlignDX.Mvc.Model
     {
         public event EventHandler<ProcessEventArgs> OnError;
 
-        #region SINGLETON
-        static TravellerSysModel _instance;
-        TravellerSysModel()
+        #region LIFETIME
+        readonly Func<ICalibAoiModel> _createCalibModel;
+        bool _disposed;
+        internal TravellerSysModel(IProcessRunFPI aoiModel, Func<ICalibAoiModel> createCalibModel)
         {
+            _aoiModel = aoiModel ?? throw new ArgumentNullException(nameof(aoiModel));
+            _createCalibModel = createCalibModel ?? throw new ArgumentNullException(nameof(createCalibModel));
         }
         #endregion
 
@@ -60,36 +63,32 @@ namespace LaserAlignDX.Mvc.Model
         };
         #endregion
 
-        internal static TravellerSysModel Instance(IProcessRunFPI aoiModel)
-        {
-            if (_instance == null)
-            {
-                _instance = new TravellerSysModel();
-            }
-            _instance._aoiModel = aoiModel;
-            return _instance;
-        }
-        internal static void DisposeAll()
-        {
-            _instance?.Dispose();
-            _instance = null;
-        }
         public void Dispose()
         {
-            _aoiModel?.Dispose();
+            if (_disposed) return;
+            _disposed = true;
+            // The application owns the shared AOI model; this model only borrows it.
             _aoiModel = null;
 
-            _calibModel?.Dispose();
-            _calibModel = null;
+            using (var resources = new AppResourceScope())
+            {
+                resources.Add(DisposeSharedResources);
+                var calibModel = _calibModel;
+                _calibModel = null;
+                _transformsModel = null;
+                _microTransforms = null;
+                resources.Add(() => calibModel?.Dispose());
+            }
+        }
 
-            TravellerBigImagesHolder.DisposeAll();
-            EmptyTrayAoiFactory.DisposeAll();
-
-            TravellerTransformFactory.DisposeAll();
-            _transformsModel = null;
-            _microTransforms = null;
-
-            _instance = null;
+        internal static void DisposeSharedResources()
+        {
+            using (var resources = new AppResourceScope())
+            {
+                resources.Add(TravellerTransformFactory.DisposeAll);
+                resources.Add(EmptyTrayAoiFactory.DisposeAll);
+                resources.Add(TravellerBigImagesHolder.DisposeAll);
+            }
         }
 
         public IProcessRunFPI AoiModel
@@ -100,8 +99,9 @@ namespace LaserAlignDX.Mvc.Model
         {
             get
             {
+                if (_disposed) throw new ObjectDisposedException(nameof(TravellerSysModel));
                 if (_calibModel == null)
-                    _calibModel = GaMvcConfig.CreateCalibAoiModel();
+                    _calibModel = _createCalibModel();
                 return _calibModel;
             }
         }
@@ -783,7 +783,7 @@ namespace LaserAlignDX.Mvc.Model
             PointF _P(QVector v) { return v == null ? PointF.Empty : new PointF((float)v.X, (float)v.Y); }
 
             //(0) PlcIO
-            var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
+            var plcIO = Traveller106.Universal.Machine?.PLCIO;
             if (plcIO == null)
             {
                 //msg = "Machine.PLCIO 還沒配置!";
@@ -822,7 +822,7 @@ namespace LaserAlignDX.Mvc.Model
         #region PRIVATE_PLC_FUNCTIONS
         void mxWriteToPlc(CarrierEnum C, SuckerRowEnum S, PointF suckerCoord)
         {
-            var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
+            var plcIO = Traveller106.Universal.Machine?.PLCIO;
 
             var _na = PointF.Empty;
 

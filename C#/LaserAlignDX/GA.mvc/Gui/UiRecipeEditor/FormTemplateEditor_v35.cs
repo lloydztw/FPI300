@@ -1,21 +1,22 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2023 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2025-09-09 重整 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
-using JetEazy.Lang;
 using System;
 using System.Windows.Forms;
+using JetEazy.Lang;
 using GaTemplateEditCtrl = LaserAlignDX.Mvc.Ctrl.V35.GaTemplateEditCtrl;
 
 namespace LaserAlignDX.Mvc.Gui.V35

@@ -1,188 +1,48 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
- *      2025-09-02 初稿 (by LeTian Chang)
- * 
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
-using EzAoiEmptyTrayInspector;
-using JetEazy.EzImage;
-using JetEazy.OpenCV;
+using System.Drawing;
+using System.Windows.Forms;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
-using System;
-using System.Drawing;
-using System.Windows.Forms;
-using Traveller106;
-
 using GaMainCtrl = LaserAlignDX.Mvc.Ctrl.Abs.GaMainCtrl;
-
-#if (OPT_CALIB_V5)
-using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V35.FormRecipeEditor;
-using FormTemplateEditor = LaserAlignDX.Mvc.Gui.V35.FormTemplateEditor;
-using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V5.FormCalibrationTool;
-using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
-#elif (OPT_CALIB_V4)
-using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V25.FormRecipeEditor;
-using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V5.FormCalibrationTool;
-using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V5.CalibAoiModel;
-#elif (OPT_CALIB_V3)
-using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V25.FormRecipeEditor;
-using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V3.FormCalibrationTool;
-using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V3.CalibAoiModel;
-#else
-using FormRcpEditorTool = LaserAlignDX.Mvc.Gui.V25.FormRecipeEditor;
-using FormCalibrationTool = LaserAlignDX.Mvc.Gui.Calib.V25.FormCalibrationTool;
-using CalibAoiModel = LaserAlignDX.AoiModel.Calib.V25.CalibAoiModel;
-#endif
-
 
 namespace LaserAlignDX
 {
     /// <summary>
-    /// 由此控制 所使用的 優化階段 的 版本
-    /// 達到最終優化階段後
-    /// 只會留一個版本
+    /// Compatibility facade. AppBootstrapper owns shared services;
+    /// AppDialogService owns modal editor creation.
     /// </summary>
     public static class GaMvcConfig
     {
-        #region CONFIG
         public static int TOTAL_FLY_FRAMES_COUNT => 4;
-        #endregion
+        public static ITravelerModel SysModel => AppBootstrapper.Instance.SystemModel;
+        public static IProcessRunFPI InstanceAoiModel() => AppBootstrapper.Instance.Aoi;
+        public static ICalibAoiModel CreateCalibAoiModel() => AppBootstrapper.Instance.CreateCalibAoiModel();
+        public static IxReportBuilder CreateReportBuilder() => AppBootstrapper.Instance.CreateReportBuilder();
+        public static GaMainCtrl InstanceMainCtrl() => AppBootstrapper.Instance.MainController;
 
-        #region PRIVATE_DATA
-        static TravellerSysModel _sysModel;
-        static GaMainCtrl _mainCtrl;
-        #endregion
-
-        // MODEL ----------------------------------------------------
-        public static ITravelerModel SysModel
-        {
-            get
-            {
-                if (_sysModel == null)
-                {
-                    var aoiModel = InstanceAoiModel();
-                    _sysModel = TravellerSysModel.Instance(aoiModel);
-                }
-                return _sysModel;
-            }
-        }
-        public static IProcessRunFPI InstanceAoiModel()
-        {
-            // AoiModel 使用 V3
-            return AoiModel.V3.ProcessRunFPIClass.Instance;
-        }
-        public static ICalibAoiModel CreateCalibAoiModel()
-        {
-            return new CalibAoiModel();
-        }
-        public static IxReportBuilder CreateReportBuilder()
-        {
-            return new XReportBuilderProxy();
-        }
-
-        // CTRL ----------------------------------------------------
-        public static GaMainCtrl InstanceMainCtrl()
-        {
-            // GaMainCtrl 使用 V3
-            if (_mainCtrl == null)
-                _mainCtrl = new global::LaserAlignDX.Mvc.Ctrl.V3.GaMainCtrl();
-            return _mainCtrl;
-        }
-
-        // VIEW ----------------------------------------------------
-        public static void OpenRecipeEditor()
-        {
-            try
-            {
-                var backID = _sysModel.ActiveCarrierID;
-                using (var dlg = new FormRcpEditorTool())
-                {
-                    dlg.ShowDialog();
-                }
-                //為安全起見, 重新再次載入 Recipe
-                _sysModel.ActiveCarrierID = backID;
-                _sysModel.ApplyRecipe();
-            }
-            catch(Exception ex)
-            {
-                //LtDebug.LOG.Error(ex, "[OpenRecipeEditor] 異常");
-            }
-        }
-        public static void OpenTamplateEditor(CarrierEnum C)
-        {
-            using (var dlg = new FormTemplateEditor(C))
-            {
-                dlg.WindowState = FormWindowState.Maximized;
-                dlg.ShowDialog();
-            }
-        }
-        public static void OpenCalibrationTool()
-        {
-            var backID = _sysModel.ActiveCarrierID;
-
-            using (var dlg = new FormCalibrationTool())
-            {
-                dlg.WindowState = FormWindowState.Maximized;
-                dlg.ShowDialog();
-            }
-
-            //為安全起見, 重新再次載入 Recipe
-            _sysModel.ActiveCarrierID = backID;
-            _sysModel.ApplyRecipe();
-        }
+        public static void OpenRecipeEditor() => AppBootstrapper.Instance.Dialogs.OpenRecipeEditor();
+        public static void OpenTamplateEditor(CarrierEnum carrier) => AppBootstrapper.Instance.Dialogs.OpenTamplateEditor(carrier);
+        public static void OpenCalibrationTool() => AppBootstrapper.Instance.Dialogs.OpenCalibrationTool();
         public static void OpenEmptyTrayInspectTool(Form owner, string recipeName = null, Bitmap bmpToShow = null)
-        {
-            if (recipeName == null)
-                recipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
-
-            var emptyAoiRecipeName = LtAoiFactory.RcpStemName(recipeName, GaMvcConfig.SysModel.ActiveCarrierID);
-            var frm = AoiFactory.OpenEmptyTrayInspectorTool(owner, emptyAoiRecipeName);
-            if (frm == null)
-                return;
-
-            if (bmpToShow != null)
-            {
-                frm.Load += (s, e) =>
-                {
-                    new Action(() =>
-                    {
-                        System.Threading.Thread.Sleep(2000);
-                        PushBitmapToEmptyTrayTool(bmpToShow, $"[Recipe] {recipeName} (bmpOrg)");
-                    }).BeginInvoke(null, null);
-                };
-            }
-
-            frm.ShowDialog(owner);
-
-            // RESERVED 重新再次載入 RecipeCombo
-            //_sysModel.ApplyRecipe();
-        }
+            => AppBootstrapper.Instance.Dialogs.OpenEmptyTrayInspectTool(owner, recipeName, bmpToShow);
         public static void PushBitmapToEmptyTrayTool(Bitmap bmp, string name)
-        {
-            using (var bridge = new QxImageBridge(bmp))
-            {
-                var qImg = new EzQuickImage(bridge.Image, true);
-                AoiFactory.PushImage(qImg, name);
-            }
-        }
+            => AppBootstrapper.Instance.Dialogs.PushBitmapToEmptyTrayTool(bmp, name);
 
-        // Dispose -------------------------------------------------
-        public static void DisposeAll()
-        {
-            _sysModel?.Dispose();
-            _sysModel = null;
-            _mainCtrl = null;
-        }
+        public static void DisposeAll() => AppBootstrapper.Shutdown();
     }
 }

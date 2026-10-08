@@ -1,9 +1,24 @@
-﻿
+﻿#region AUTHOR
+/*
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ *
+ */
+#endregion
+
+
 //#define FATEK
 //#define FX3U
 
+using System.IO;
 using Eazy_Project_III;
-using EzAoiEmptyTrayInspector.Model;
 using JetEazy;
 using JetEazy.BasicSpace;
 using JetEazy.CCDSpace;
@@ -18,11 +33,8 @@ using JetEazy.PropertyGrid;
 using JetEazy.Utils;
 using LaserAlignDX;
 using LaserAlignDX.BasicSpace.ParaSpace;
-using LaserAlignDX.ControlSpace.MachineSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using System.IO;
 using TravellerMINIX6.OPSpace;
-using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
 
@@ -204,7 +216,7 @@ namespace Traveller106
             get;
             private set;
         }
-        public static MachineCollectionClass MACHINECollection
+        public static Traveller.FPI30.Contracts.IFpix3Machine Machine
         {
             get;
             private set;
@@ -215,9 +227,6 @@ namespace Traveller106
         /// 线扫相机
         /// </summary>
         public static IxLineScanCam IxLineScan = null;
-        public static ModuleClass[] Modules = null;
-        //public static ModuleClass ModulesLinescanEx = null;
-        public static ChannelBarcodeClass[] ChannelBarcode = null;
 
 #if (OPT_GA_RESERVED)
         public static FreeImageAPI.FreeImageBitmap bmpGlobalFreeImage = new FreeImageAPI.FreeImageBitmap(1, 1);
@@ -242,7 +251,7 @@ namespace Traveller106
 
         public static PLCMotionClass GetMotor(int axisID)
         {
-            var machineX3 = (MainFPIX3MachineClass)Universal.MACHINECollection?.MACHINE;
+            var machineX3 = (MainFPIX3MachineClass)Universal.Machine;
             var plcMotions = machineX3?.PLCMOTIONCollection;
             if (plcMotions == null || axisID >= plcMotions.Length || axisID < 0)
                 return null;
@@ -310,6 +319,11 @@ namespace Traveller106
         public static ClientSocket X6_HANDLE_CLIENT = null;     //>>> FPI30 沒用到
 
         public static bool Initial(int langIndex)
+        {
+            return AppBootstrapper.Instance.InitializeMachine(langIndex);
+        }
+
+        internal static bool InitializeCore(int langIndex)
         {
             //int[] ints = new int[2] { 2, 2 };
             //string str = new List<int>(ints).ToString();
@@ -395,7 +409,7 @@ namespace Traveller106
             }
 #endif
 
-            ret &= InitialMachineCollection();
+            ret &= InitialMachine();
 
             if (!ret)
             {
@@ -430,70 +444,13 @@ namespace Traveller106
         }
 #endif
 
-        static bool InitialMachineCollection()
+        static bool InitialMachine()
         {
-            bool ret = true;
-
-            string opstr = "";
-
-            switch (VERSION)
-            {
-                case VersionEnum.LASER:
-
-                    switch (OPTION)
-                    {
-                        case OptionEnum.MAIN_X1:
-                            opstr += "1,";  //1個 PLC  
-                            opstr += "0,";   //14個軸
-                            opstr += $"{INI.Instance.LedControlCount},";   //0 Projector
-                            opstr += "0,";   //4 barcode sacn
-
-                            MainX1MachineClass machine = new MainX1MachineClass(Machine_EA.MAIN_X1, opstr, WORKPATH, IsNoUseIO);
-                            ret = machine.Initial(IsNoUseIO, IsNoUseMotor);
-
-                            MACHINECollection = new MachineCollectionClass();
-                            MACHINECollection.Intial(VERSION, OPTION, machine);
-                            break;
-
-                        case OptionEnum.MAIN_FPIX3:
-                            opstr += $"1,{TOTAL_MOTORS_NUMBER},";      //1個PLC , N個馬達軸
-                            opstr += "2,";      //0 Projector
-                            opstr += "0,";      //4 barcode sacn
-
-                            MainFPIX3MachineClass machineFPIX3 = new MainFPIX3MachineClass(Machine_EA.MAIN_FPIX3, opstr, WORKPATH, IsNoUseIO);
-                            ret = machineFPIX3.Initial(IsNoUseIO, IsNoUseMotor);
-
-                            MACHINECollection = new MachineCollectionClass();
-                            MACHINECollection.Intial(VERSION, OPTION, machineFPIX3);
-
-                            break;
-                    }
-                    break;
-                case VersionEnum.AOI:
-                    switch (OPTION)
-                    {
-                        case OptionEnum.MAIN_X2:
-
-                            opstr += "1,";  //1個 PLC  
-                            opstr += "0,";   //14個軸
-                            opstr += $"0,";   //0 Projector
-                            opstr += "0,";   //4 barcode sacn
-
-                            MainX2MachineClass machine = new MainX2MachineClass(Machine_EA.MAIN_X2, opstr, WORKPATH, IsNoUseIO);
-                            ret = machine.Initial(IsNoUseIO, IsNoUseMotor);
-
-                            MACHINECollection = new MachineCollectionClass();
-                            MACHINECollection.Intial(VERSION, OPTION, machine);
-
-
-                            break;
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            return ret;
+            var machine = Traveller.FPI30.Machine.Fpix3MachineFactory.Create(
+                WORKPATH, motionCount: TOTAL_MOTORS_NUMBER);
+            Machine = machine;
+            // Register ownership before initialization so failed startup can close partial connections.
+            return machine.Initial(IsNoUseIO, IsNoUseMotor);
         }
 
 #if (OPT_GA_DISPENSING_點膠機)
@@ -732,22 +689,30 @@ namespace Traveller106
 
         public static void Dispose()
         {
-            // Traveller160 沒有用到 JzCheckRepeatClass
-            JzCheckRepeatClass.Instance.CloseDB();
-            
-            MACHINECollection?.Close();
-            MACHINECollection = null;
+            AppBootstrapper.Shutdown();
+        }
 
-            IxLineScan?.Close();
-            //IxLineScan?.Dispose();
-            IxLineScan = null;
-
-            IxFlyAreaCam?.Close();
-            //IxFlyAreaCam?.Dispose();
-            IxFlyAreaCam = null;
-
-            RecipeFPIX3Class.DisposeAll();
-            LtAoiFactory.DisposeAll();
+        internal static void DisposeHardware()
+        {
+            using (var resources = new AppResourceScope())
+            {
+                resources.Add(() =>
+                {
+                    try { IxFlyAreaCam?.Close(); }
+                    finally { IxFlyAreaCam = null; }
+                });
+                resources.Add(() =>
+                {
+                    try { IxLineScan?.Close(); }
+                    finally { IxLineScan = null; }
+                });
+                resources.Add(() =>
+                {
+                    try { Machine?.Close(); }
+                    finally { Machine = null; }
+                });
+                resources.Add(() => JzCheckRepeatClass.Instance.CloseDB());
+            }
         }
         public static void Close()
         {

@@ -1,4 +1,19 @@
-﻿namespace LaserAlignDX.Mvc.Gui
+﻿#region AUTHOR
+/*
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ *
+ */
+#endregion
+
+namespace LaserAlignDX.Mvc.Gui
 {
     using GvImageViewerClassT = JetEazy.OpenCV.Viewer.CvMatViewer;
 

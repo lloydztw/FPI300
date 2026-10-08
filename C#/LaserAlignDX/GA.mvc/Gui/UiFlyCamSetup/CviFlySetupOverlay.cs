@@ -1,11 +1,26 @@
-using JetEazy.ImageViewerEx;
-using JetEazy.ImageViewerEx.Interactors;
-using JetEazy.QvMath;
-using LaserAlignDX.Mvc.Gui;
+#region AUTHOR
+/*
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ *
+ */
+#endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using JetEazy.ImageViewerEx;
+using JetEazy.ImageViewerEx.Interactors;
+using JetEazy.QvMath;
+using LaserAlignDX.Mvc.Gui;
 
 namespace LaserAlignDX.FormSpace
 {
@@ -15,6 +30,8 @@ namespace LaserAlignDX.FormSpace
     /// </summary>
     internal sealed class CviFlySetupOverlay : CvImageViewerInteractor, IDisposable
     {
+        #region PRIVATE_DATA
+
         private readonly JezTransImageViewPanel _panel;
         private readonly List<CviRotRectBox> _resultBoxes = new List<CviRotRectBox>();
         private readonly CviCross _cross = new CviCross(Color.Yellow);
@@ -23,6 +40,8 @@ namespace LaserAlignDX.FormSpace
         private bool _disposed;
         private PointF _start;
         private PointF _end;
+
+        #endregion
 
         public CviFlySetupOverlay(JezTransImageViewPanel panel)
         {
@@ -131,9 +150,15 @@ namespace LaserAlignDX.FormSpace
             return true;
         }
 
+        #region PRIVATE_PROPERTIES
+
         private RectangleF SelectionRectangle => RectangleF.FromLTRB(
             Math.Min(_start.X, _end.X), Math.Min(_start.Y, _end.Y),
             Math.Max(_start.X, _end.X), Math.Max(_start.Y, _end.Y));
+
+        #endregion
+
+        #region PRIVATE_METHODS
 
         private static PointF ToImagePoint(CvImageViewer viewer, MouseEventArgs e)
         {
@@ -163,6 +188,8 @@ namespace LaserAlignDX.FormSpace
             if (!SelectionEnabled && e.Button == MouseButtons.Left)
                 _panel.MatViewer.RebuildViewport();
         }
+
+        #endregion
 
         public void Dispose()
         {

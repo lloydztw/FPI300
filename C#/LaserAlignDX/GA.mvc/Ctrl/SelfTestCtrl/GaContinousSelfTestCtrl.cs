@@ -1,31 +1,31 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2025-09-11 開始適用於 2.6.x.x 以後的版本
  *      2025-08-29 開始準備重整 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
 
+using System;
+using System.Windows.Forms;
 using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using System;
-using System.Windows.Forms;
 using TravellerMINIX6.ProcessSpace;
 using VsCommon.ControlSpace.IOSpace;
-using VsCommon.ControlSpace.MachineSpace;
 
 namespace LaserAlignDX.Mvc.Ctrl
 {
@@ -58,9 +58,9 @@ namespace LaserAlignDX.Mvc.Ctrl
         }
 
         #region MACHINE
-        MainFPIX3MachineClass MACHINE
+        Traveller.FPI30.Contracts.IFpix3Machine MACHINE
         {
-            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
+            get { return Traveller106.Universal.Machine; }
         }
         #endregion
 

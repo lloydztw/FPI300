@@ -1,23 +1,24 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2023 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2025-09-13 重整 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
+using System;
+using System.Windows.Forms;
 using JetEazy.ControlSpace.PLCSpace;
 using JetEazy.Lang;
 using JetEazy.Utils;
-using System;
-using System.Windows.Forms;
 using Traveller106;
 using VsCommon.ControlSpace.MachineSpace;
 
@@ -30,8 +31,7 @@ namespace LaserAlignDX.Mvc.Gui
         {
             get
             {
-                var machineCollections = Universal.MACHINECollection;
-                var machine = machineCollections?.MACHINE as MainFPIX3MachineClass;
+                var machine = Universal.Machine as MainFPIX3MachineClass;
                 return machine?.LightCollection;
             }
         }

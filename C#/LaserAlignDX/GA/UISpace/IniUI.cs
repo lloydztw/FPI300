@@ -1,21 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿#region AUTHOR
+/*
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ *
+ */
+#endregion
+
+using System;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 
 using JetEazy;
 using JetEazy.BasicSpace;
 //using Allinone.UISpace;
-using JetEazy.ControlSpace;
-using Traveller106;
-using VsCommon.ControlSpace;
 using Eazy_Project_III;
-using LaserAlignDX;
 using JetEazy.Lang;
+using Traveller106;
 
 namespace PhotoMachine.UISpace
 {
@@ -252,17 +259,10 @@ namespace PhotoMachine.UISpace
             propertyGrid.SelectedObject = INI.Instance;
         }
 
-        //MachineCollectionClass MACHINECollection
-        //{
-        //    get
-        //    {
-        //        return Eazy_Project_III.Universal.MACHINECollection;
-        //    }
-        //}
 
         //Eazy_Project_III.ControlSpace.MachineSpace.DispensingX1MachineClass machineX1
         //{
-        //    get { return (Eazy_Project_III.ControlSpace.MachineSpace.DispensingX1MachineClass)Eazy_Project_III.Universal.MACHINECollection.MACHINE; }
+        //    get { return (Eazy_Project_III.ControlSpace.MachineSpace.DispensingX1MachineClass)Eazy_Project_III.Universal.Machine; }
         //}
 
         //void writeX1()
@@ -299,12 +299,12 @@ namespace PhotoMachine.UISpace
 
         //Eazy_Project_III.ControlSpace.MachineSpace.DispensingMachineClass machineX3
         //{
-        //    get { return (Eazy_Project_III.ControlSpace.MachineSpace.DispensingMachineClass)Eazy_Project_III.Universal.MACHINECollection.MACHINE; }
+        //    get { return (Eazy_Project_III.ControlSpace.MachineSpace.DispensingMachineClass)Eazy_Project_III.Universal.Machine; }
         //}
 
         //void writeX3()
         //{
-        //    Eazy_Project_III.Universal.MACHINECollection.SetIniPara();
+        //    Eazy_Project_III.Universal.Machine.SetIniPara();
         //}
 
         DBStatusEnum myDBStatus = DBStatusEnum.NONE;

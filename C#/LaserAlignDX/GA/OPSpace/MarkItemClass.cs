@@ -1,25 +1,30 @@
-﻿using AUVision;
-using JetEazy;
-using JetEazy.BasicSpace;
-using OpenCvSharp;
+﻿#region AUTHOR
+/*
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ *
+ */
+#endregion
+
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using VisionDesigner.AlmightyPatMatch;
-using VisionDesigner;
 using System.Runtime.InteropServices;
-using System.IO;
-using Traveller106;
-using Eazy_Project_III;
+using AUVision;
+using JetEazy.BasicSpace;
 using JetEazy.Lang;
 using JetEazy.PropertyGrid;
+using VisionDesigner;
+using VisionDesigner.AlmightyPatMatch;
 
 namespace LaserAlignDX.OPSpace
 {

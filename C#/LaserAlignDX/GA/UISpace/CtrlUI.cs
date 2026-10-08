@@ -1,20 +1,27 @@
-﻿using JetEazy;
-using LaserAlignDX.UISpace.CtrlSpace;
+﻿#region AUTHOR
+/*
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ *
+ */
+#endregion
+
 using System.Drawing;
 using System.Windows.Forms;
-using VsCommon.ControlSpace.MachineSpace;
+using JetEazy;
+using LaserAlignDX.UISpace.CtrlSpace;
 
 namespace PhotoMachine.UISpace
 {
     public partial class CtrlUI : UserControl
     {
-#if (OPT_OLD_MESS)
-        VersionEnum VERSION;
-        OptionEnum OPTION;
-        LaserAlignDX.UISpace.CtrlSpace.MainX1Ctrl mainX1;
-        LaserAlignDX.UISpace.CtrlSpace.MainX2Ctrl mainX2;
-        LaserAlignDX.UISpace.CtrlSpace.MainFPIX3Ctrl mainX3;
-#endif
 
         IoPanelUI _ioPanel;
 
@@ -28,47 +35,8 @@ namespace PhotoMachine.UISpace
             }
         }
 
-        public void Initial(VersionEnum version, OptionEnum option, GeoMachineClass machine)
+        public void Initial(VersionEnum version, OptionEnum option, Traveller.FPI30.Contracts.IFpix3Machine machine)
         {
-#if (OPT_OLD_MESS)
-            VERSION = version;
-            OPTION = option;
-
-            switch (VERSION)
-            {
-                case VersionEnum.LASER:
-                    switch (OPTION)
-                    {
-                        case OptionEnum.MAIN_X1:
-                            mainX1 = new LaserAlignDX.UISpace.CtrlSpace.MainX1Ctrl();
-                            mainX1.Initial(VERSION, OPTION, (MainX1MachineClass)machine);
-                            mainX1.Location = new Point(0, 0);
-                            this.Controls.Add(mainX1);
-                            mainX1.Dock = DockStyle.Fill;
-                            break;
-                        case OptionEnum.MAIN_FPIX3:
-                            mainX3 = new LaserAlignDX.UISpace.CtrlSpace.MainFPIX3Ctrl();
-                            mainX3.Initial(VERSION, OPTION, (MainFPIX3MachineClass)machine);
-                            mainX3.Location = new Point(0, 0);
-                            this.Controls.Add(mainX3);
-                            mainX3.Dock = DockStyle.Fill;
-                            break;
-                    }
-                    break;
-                case VersionEnum.AOI:
-                    switch (OPTION)
-                    {
-                        case OptionEnum.MAIN_X2:
-                            mainX2 = new LaserAlignDX.UISpace.CtrlSpace.MainX2Ctrl();
-                            mainX2.Initial(VERSION, OPTION, (MainX2MachineClass)machine);
-                            mainX2.Location = new Point(0, 0);
-                            this.Controls.Add(mainX2);
-                            mainX2.Dock = DockStyle.Fill;
-                            break;
-                    }
-                    break;
-            }
-#endif
 
             _ioPanel = IoPanelFactory.CreateIoPanelUI(version, option, machine);
             if (_ioPanel != null)
@@ -81,82 +49,17 @@ namespace PhotoMachine.UISpace
         }
         public void Tick()
         {
-#if (OPT_OLD_MESS)
-            switch (VERSION)
-            {
-                case VersionEnum.LASER:
-                    switch (OPTION)
-                    {
-                        case OptionEnum.MAIN_X1:
-                            mainX1.Tick();
-                            break;
-                        case OptionEnum.MAIN_FPIX3:
-                            mainX3.Tick();
-                            break;
-                    }
-                    break;
-                case VersionEnum.AOI:
-                    switch (OPTION)
-                    {
-                        case OptionEnum.MAIN_X2:
-                            mainX2.Tick();
-                            break;
-                    }
-                    break;
-            }
-#endif
             _ioPanel?.Tick();
         }
         public void SetEnable(bool isenable)
         {
-#if (OPT_OLD_MESS)
-            switch (VERSION)
-            {
-                case VersionEnum.LASER:
-                    switch (OPTION)
-                    {
-                        case OptionEnum.MAIN_X1:
-                            mainX1.SetEnable(isenable);
-                            break;
-                        case OptionEnum.MAIN_FPIX3:
-                            mainX3.SetEnable(isenable);
-                            break;
-                    }
-                    break;
-                case VersionEnum.AOI:
-                    switch (OPTION)
-                    {
-                        case OptionEnum.MAIN_X2:
-                            mainX2.SetEnable(isenable);
-                            break;
-                    }
-                    break;
-            }
-#endif
             _ioPanel?.SetEnable(isenable);
         }
         public void MyDispose()
         {
-#if (OPT_OLD_MESS)
-            switch (VERSION)
-            {
-                case VersionEnum.AOI:
-                    switch (OPTION)
-                    {
-                        case OptionEnum.MAIN_X2:
-                            mainX2.MyDispose();
-                            break;
-                        case OptionEnum.MAIN_FPIX3:
-                            mainX3.MyDispose();
-                            break;
-                    }
-                    break;
-            }
-#endif
 
             //------------------------------------------------------------------
             // 註:
-            // mainX2.MyDispose()
             // mainX3.MyDispose()
             // 改在 自己在 HandleDestroyed 的 EventHandler 中, 自己釋放資源
             //------------------------------------------------------------------

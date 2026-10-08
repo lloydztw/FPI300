@@ -1,18 +1,24 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2025-09-23 重整 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Windows.Forms;
 using JetEazy.FormSpace;
 using JetEazy.Interface;
 using JetEazy.Lang;
@@ -24,14 +30,8 @@ using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LeTian.AoiLib;
-using System;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Windows.Forms;
 using Traveller106;
 using TravellerMINIX6.ProcessSpace;
-using VsCommon.ControlSpace.MachineSpace;
 using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
 using PlcFlyResultCode = LaserAlignDX.PlcResultCode;
 
@@ -43,7 +43,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     /// ToDO: 
     /// 需要把 flyProcessPro 與 flyProcessProSpecial 的 AOI 部分 抽離到 AoiModel 模塊內
     /// </summary>
-    public class GaPlcFlyCameraCtrl : IxTickable
+    public class GaPlcFlyCameraCtrl : IxTickable, IDisposable
     {
         #region CONFIG
         static int TOTAL_FLY_FRAMES_COUNT => GaMvcConfig.TOTAL_FLY_FRAMES_COUNT;
@@ -53,14 +53,16 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         public event EventHandler OnFlyDone;
 
         #region MACHINE
-        MainFPIX3MachineClass MACHINE
+        Traveller.FPI30.Contracts.IFpix3Machine MACHINE
         {
-            get => (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE;
+            get => Traveller106.Universal.Machine;
         }
         #endregion
 
         #region MODELS
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        readonly ITravelerModel _sysModel;
+        readonly AppResourceScope _resources = new AppResourceScope();
+        volatile bool _disposed;
         IAoiFlyCamMatcher _flyAoi => _sysModel?.AoiModel?.GetFlyCameraAoi();
         #endregion
 
@@ -129,20 +131,49 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         string _flyCamSnTag;
         #endregion
 
+        public GaPlcFlyCameraCtrl(ITravelerModel systemModel)
+        {
+            _sysModel = systemModel ?? throw new ArgumentNullException(nameof(systemModel));
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            try { _resources.Dispose(); }
+            finally
+            {
+                OnFlyStarted = null;
+                OnFlyDone = null;
+            }
+        }
+
         public void Attach(Control[] DsFlys, Control lblFlyCameraSerialNo)
         {
             _wndOwner = DsFlys[0].Parent;
             AttachDispUIs(DsFlys);
             lblSerialNumber = lblFlyCameraSerialNo;
-            lblSerialNumber.DoubleClick += (s, e) => resetOnTheFlyFrameCount();
-            FlyCamera.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
-            _sysModel.EmptyTrayAoiModel.OnFinalResulted += (s, e) => updateFlyCameraSerialNumber(-1);
+            EventHandler resetFrames = (s, e) => resetOnTheFlyFrameCount();
+            _resources.Add(() => lblSerialNumber.DoubleClick -= resetFrames);
+            lblSerialNumber.DoubleClick += resetFrames;
+            var camera = FlyCamera;
+            _resources.Add(() => camera.LineTriggerAction -= IxFlyAreaCam_LineTriggerAction);
+            camera.LineTriggerAction += IxFlyAreaCam_LineTriggerAction;
+            var emptyTray = _sysModel.EmptyTrayAoiModel;
+            EventHandler<EzAoiEmptyTrayInspector.Model.AoiResultEventArgs> finalResult =
+                (s, e) => updateFlyCameraSerialNumber(-1);
+            _resources.Add(() => emptyTray.OnFinalResulted -= finalResult);
+            emptyTray.OnFinalResulted += finalResult;
 
-            QMSG.Lang("gui").LanguageChanged += (s, e) => updateFlyCameraSerialNumberTag();
+            var language = QMSG.Lang("gui");
+            EventHandler languageChanged = (s, e) => { if (!_disposed) updateFlyCameraSerialNumberTag(); };
+            _resources.Add(() => language.LanguageChanged -= languageChanged);
+            language.LanguageChanged += languageChanged;
             updateFlyCameraSerialNumberTag();
         }
         public void Tick()
         {
+            if (_disposed) return;
             TickPlc();
         }
 
@@ -174,8 +205,10 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         void updateFlyCameraSerialNumber(int serialNumber)
         {
+            if (_disposed) return;
             _wndOwner?.Invoke(new Action(() =>
             {
+                if (_disposed) return;
                 var color = (serialNumber < 0 || Traveller106.Universal.IsOpenFlyForm) ? Color.Transparent : Color.Lime;
                 //var text = "飛拍序號";
                 //if (serialNumber > 0) text += $" : {serialNumber}";
@@ -192,6 +225,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         /// </summary>
         void IxFlyAreaCam_LineTriggerAction(JetEazy.CCDSpace.CameraFrame camFrameInfo, IntPtr pBuffer)
         {
+            if (_disposed) return;
             // 如果 Recipe 編輯窗被打開, 則跳過此 event handler
             // (不是很好的設計!)
             if (IsBypassFlyCameraTriggers)

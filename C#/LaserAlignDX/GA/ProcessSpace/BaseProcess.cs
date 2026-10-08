@@ -1,15 +1,27 @@
-﻿using Eazy_Project_III;
+﻿#region AUTHOR
+/*
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ *
+ */
+#endregion
+
+using System;
+using System.Drawing;
+using System.Threading;
 using JetEazy.BasicSpace;
 using JetEazy.Interface;
 using LaserAlignDX;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using System;
-using System.Drawing;
-using System.Threading;
 using Traveller106;
-using TravellerMINIX6.OPSpace;
-using VsCommon.ControlSpace;
 using VsCommon.ControlSpace.MachineSpace;
 
 namespace NeedleX.ProcessSpace
@@ -28,7 +40,6 @@ namespace NeedleX.ProcessSpace
             // 300 ms
             // NextDurtimeTmp = 300;
             _initPlcEventHandlers();
-            _initChannelBarcode();
         }
 
         #region COMMON_ACCESS_TO_THE_GLOBAL_COMPONENTS
@@ -42,14 +53,6 @@ namespace NeedleX.ProcessSpace
         }
 
         #region NOT_USED
-        //protected ClientSocket X6_HANDLE_CLIENT
-        //{
-        //    get { return Universal.X6_HANDLE_CLIENT; }
-        //}
-        //protected RecipeMiniX6Class myRecipe
-        //{
-        //    get { return RecipeMiniX6Class.Instance; }
-        //}
         //protected ProcessRunClass pRun
         //{
         //    get { return ProcessRunClass.Instance; }
@@ -63,10 +66,6 @@ namespace NeedleX.ProcessSpace
         {
             get { return GaMvcConfig.SysModel.AoiModel; }
         }
-        //protected RecipeMainX2Class xRecipe
-        //{
-        //    get { return RecipeMainX2Class.Instance; }
-        //}
         protected RecipeFPIX3Class xRecipe
         {
             get { return RecipeFPIX3Class.Instance; }
@@ -75,36 +74,9 @@ namespace NeedleX.ProcessSpace
         //{
         //    return Universal.CAMERAS[camID];
         //}
-        //protected IAxis GetAxis(int axisID)
-        //{
-        //    return ((MiniX6MachineClass)MACHINECollection.MACHINE).PLCMOTIONCollection[axisID];
-        //}
-        protected MachineCollectionClass MACHINECollection
-        {
-            get
-            {
-                return Universal.MACHINECollection;
-            }
-        }
-        //protected MainX1MachineClass MACHINE
-        //{
-        //    get { return (MainX1MachineClass)Universal.MACHINECollection.MACHINE; }
-        //}
-        //protected MainX2MachineClass MACHINEx2
-        //{
-        //    get { return (MainX2MachineClass)Universal.MACHINECollection.MACHINE; }
-        //}
         protected MainFPIX3MachineClass MACHINEx3
         {
-            get { return (MainFPIX3MachineClass)Universal.MACHINECollection.MACHINE; }
-        }
-        //protected MiniX6MachineClass MACHINE
-        //{
-        //    get { return (MiniX6MachineClass)Universal.MACHINECollection.MACHINE; }
-        //}
-        protected ChannelBarcodeClass BarcodeClass
-        {
-            get { return Universal.ChannelBarcode[(int)TrackArea.TrackINSPECT]; }
+            get { return (MainFPIX3MachineClass)Universal.Machine; }
         }
         protected string StripID
         {
@@ -292,38 +264,16 @@ namespace NeedleX.ProcessSpace
         private int m_plcScanCount = 0;
         private void _initPlcEventHandlers()
         {
-            if (MACHINECollection.MACHINE.PLCCollection == null)
+            if (MACHINEx3.PLCCollection == null)
                 return;
-            var plc = MACHINECollection.MACHINE.PLCCollection[0];
+            var plc = MACHINEx3.PLCCollection[0];
             plc.OnScanned += new EventHandler((sender, e) =>
             {
                 OnPlcScanned(sender, e);
             });
         }
-        private string m_barcodetemp = string.Empty;
-        public string BarcodeStr
-        {
-            get { return m_barcodetemp; }
-            set { m_barcodetemp = value; }
-        }
-        private void _initChannelBarcode()
-        {
-            //BarcodeClass.OnChangeState += BarcodeClass_OnChangeState;
-        }
         #endregion
 
-        private void BarcodeClass_OnChangeState(string statusstr)
-        {
-            string[] vs = statusstr.Split('$');
-            switch (vs[0])
-            {
-                case "1":
-                    m_barcodetemp = vs[1].Trim();
-                    break;
-                case "2":
-                    break;
-            }
-        }
         protected virtual void OnPlcScanned(object sender, EventArgs e)
         {
             m_plcScanEv.Set();

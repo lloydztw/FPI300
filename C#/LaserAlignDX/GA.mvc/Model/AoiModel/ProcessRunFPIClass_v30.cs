@@ -1,27 +1,28 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2025-08-01 開始重整 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
+using System;
+using System.Drawing;
+using System.Threading;
 using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model;
 using LaserAlignDX.OPSpace;
 using LeTian.AoiLib;
-using System;
-using System.Drawing;
-using System.Threading;
 
 using AoiModel_ChipLoc = LaserAlignDX.AoiModel.v31.AoiModel_ChipLoc;
 using AoiModel_ChipMeasure = LaserAlignDX.AoiModel.V38.Combo.AoiModel_ChipMeasure;
@@ -38,6 +39,7 @@ namespace LaserAlignDX.AoiModel.V3
 
         }
         private static ProcessRunFPIClass _instance = null;
+        bool _disposed;
         #endregion
 
         public static ProcessRunFPIClass Instance
@@ -47,31 +49,38 @@ namespace LaserAlignDX.AoiModel.V3
                 if (_instance == null)
                 {
                     _instance = new ProcessRunFPIClass();
-                    _instance.initSubModels();
+                    try { _instance.initSubModels(); }
+                    catch
+                    {
+                        DisposeAll();
+                        throw;
+                    }
                 }
                 return _instance;
             }
         }
         public static void DisposeAll()
         {
-            _instance?.Dispose();
+            var instance = _instance;
             _instance = null;
+            instance?.Dispose();
         }
         public override void Dispose()
         {
-            // 請把自己清乾淨
-            _aoiChipLoc?.Dispose();
-            _aoiChipLoc = null;            
-            _aoiChipMeasure?.Dispose();
-            _aoiChipMeasure = null;
-            _aoiChipDefects?.Dispose();
-            _aoiChipDefects = null;
-            _aoiBadConnInspector?.Dispose();
-            _aoiBadConnInspector = null;
-            _aoiFlyCam?.Dispose();
-            _aoiFlyCam = null;
-            _mvdQrCodeDecorder?.Dispose();
-            _mvdQrCodeDecorder = null;
+            if (_disposed) return;
+            _disposed = true;
+            using (var resources = new AppResourceScope())
+            {
+                resources.Add(() => base.Dispose());
+                resources.Add(() => _mvdQrCodeDecorder?.Dispose());
+                resources.Add(() => _aoiQrDecoder?.Dispose());
+                resources.Add(() => _aoiEmptyTray?.Dispose());
+                resources.Add(() => _aoiFlyCam?.Dispose());
+                resources.Add(() => _aoiBadConnInspector?.Dispose());
+                resources.Add(() => _aoiChipDefects?.Dispose());
+                resources.Add(() => _aoiChipMeasure?.Dispose());
+                resources.Add(() => _aoiChipLoc?.Dispose());
+            }
         }
 
         #region GLOBAL_MESS
@@ -108,18 +117,28 @@ namespace LaserAlignDX.AoiModel.V3
         #endregion
 
         #region SUB_MODELS
-        AoiModel_EmptyTray _aoiEmptyTray = new AoiModel_EmptyTray();
-        AoiModel_ChipLoc _aoiChipLoc = new AoiModel_ChipLoc();
-        AoiModel_ChipMeasure _aoiChipMeasure = new AoiModel_ChipMeasure();
-        AoiModel_Defects _aoiChipDefects = new AoiModel_Defects();
-        AoiModel_BadConnInpector _aoiBadConnInspector = new AoiModel_BadConnInpector();
-        AoiModel_QrCode _aoiQrDecoder = new AoiModel_QrCode();
-        AoiModel_FlyCam _aoiFlyCam = new AoiModel_FlyCam();
-        Mvd2DReaderClass _mvdQrCodeDecorder = new Mvd2DReaderClass();
+        AoiModel_EmptyTray _aoiEmptyTray;
+        AoiModel_ChipLoc _aoiChipLoc;
+        AoiModel_ChipMeasure _aoiChipMeasure;
+        AoiModel_Defects _aoiChipDefects;
+        AoiModel_BadConnInpector _aoiBadConnInspector;
+        AoiModel_QrCode _aoiQrDecoder;
+        AoiModel_FlyCam _aoiFlyCam;
+        Mvd2DReaderClass _mvdQrCodeDecorder;
         #endregion
 
         void initSubModels()
         {
+            // Assign each child before creating the next, so Instance can unwind partial setup.
+            _aoiEmptyTray = new AoiModel_EmptyTray();
+            _aoiChipLoc = new AoiModel_ChipLoc();
+            _aoiChipMeasure = new AoiModel_ChipMeasure();
+            _aoiChipDefects = new AoiModel_Defects();
+            _aoiBadConnInspector = new AoiModel_BadConnInpector();
+            _aoiQrDecoder = new AoiModel_QrCode();
+            _aoiFlyCam = new AoiModel_FlyCam();
+            _mvdQrCodeDecorder = new Mvd2DReaderClass();
+
             var subModels = new AoiModelBase[] { 
                 _aoiChipLoc,
                 _aoiChipMeasure,

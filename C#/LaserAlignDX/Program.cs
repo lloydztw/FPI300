@@ -1,9 +1,24 @@
-﻿using JetEazy.Lang;
-using JetEazy.Utils;
+﻿#region AUTHOR
+/*
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ *
+ */
+#endregion
+
 using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Windows.Forms;
+using JetEazy.Lang;
+using JetEazy.Utils;
 using Traveller106;
 
 namespace LaserAlignDX
@@ -24,28 +39,31 @@ namespace LaserAlignDX
             //通用的 Title
             QMSG.Title = GlobalConfig.TITLE;
 
-            // 解析引數 (args)
-            bool go = parse_args(args);
-            if (!go)
-                return;
-
-
-            if (AppInstance())
+            using (var app = AppBootstrapper.Instance)
             {
-                var msg = GaUtil.GetEnumDescription(Prompts.ReEntry);
-                MessageBox.Show(msg, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
+                // 解析引數 (args)
+                bool go = parse_args(args);
+                if (!go)
+                    return;
+
+                if (AppInstance())
+                {
+                    var msg = GaUtil.GetEnumDescription(Prompts.ReEntry);
+                    MessageBox.Show(msg, Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                LtAoiFactory.Migrate();
+
+                using (Form frm = app.CreateMainForm())
+                {
+                    #region DEBUG_CODE
+                    _DEBUG(frm);
+                    #endregion
+
+                    Application.Run(frm);
+                }
             }
-
-            LtAoiFactory.Migrate();
-
-            Form frm = new Traveller106.FormMainDX();
-
-            #region DEBUG_CODE
-            _DEBUG(frm);
-            #endregion
-
-            Application.Run(frm);
         }
 
         static bool AppInstance()

@@ -1,24 +1,24 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2026-04-13 LeTian Chang, Creation
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
+using System;
+using System.Collections.Generic;
 using JetEazy.Interface;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel.Calib;
-using System;
-using System.Collections.Generic;
-using VsCommon.ControlSpace.MachineSpace;
 using Universal = Traveller106.Universal;
 
 namespace LaserAlignDX.Mvc.Ctrl
@@ -36,7 +36,7 @@ namespace LaserAlignDX.Mvc.Ctrl
 
         public GaMotorSafetyChecker()
         {
-            var plcIO = ((MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE)?.PLCIO;
+            var plcIO = Traveller106.Universal.Machine?.PLCIO;
             foreach (SuckerRowEnum S in Enum.GetValues(typeof(SuckerRowEnum)))
             {
                 _suckerCurrentZs.Add(S, new double[N_MOTORS_PER_ROW]);

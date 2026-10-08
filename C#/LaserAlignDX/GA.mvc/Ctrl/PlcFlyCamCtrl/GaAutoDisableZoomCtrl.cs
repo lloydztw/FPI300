@@ -1,16 +1,17 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2025-09-11 開始適用於 2.6.x.x 以後的版本
  *      2025-08-29 開始準備重整 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
@@ -23,7 +24,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     /// <summary>
     /// 飛拍過程中, 自動關閉 Zoom In Out
     /// </summary>
-    public partial class GaAutoDisableZoomCtrl
+    public partial class GaAutoDisableZoomCtrl : IDisposable
     {
         #region CONFIG
         const int TIME_INTERVAL_SECONDS = 5;
@@ -35,13 +36,32 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         Control[] _viewers;
         Timer _timerPolling = new Timer();
         int _pollingCountDown = 0;
+        readonly AppResourceScope _resources = new AppResourceScope();
+        bool _disposed;
         #endregion
+
+        public GaAutoDisableZoomCtrl()
+        {
+            _resources.Add(_timerPolling.Dispose);
+        }
+
+        public void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            _resources.Dispose();
+        }
 
         public void Attach(GaPlcFlyCameraCtrl flyCtrl, params Control[] viewers)
         {
             _wndOwner = viewers[0].Parent;
             _viewers = viewers;
 
+            _resources.Add(() =>
+            {
+                flyCtrl.OnFlyStarted -= _flyCtrl_OnFlyStarted;
+                flyCtrl.OnFlyDone -= _flyCtrl_OnFlyDone;
+            });
             flyCtrl.OnFlyStarted += _flyCtrl_OnFlyStarted;
             flyCtrl.OnFlyDone += _flyCtrl_OnFlyDone;
             _timerPolling.Tick += _timPolling_FlyStartOff;
@@ -49,17 +69,12 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             _timerPolling.Interval = 1000;
             _pollingCountDown = 1000;
 
-            _wndOwner.HandleDestroyed += (s, e) =>
-            {
-                _timerPolling?.Stop();
-                _timerPolling?.Dispose();
-                _timerPolling = null;
-            };
         }
 
         #region EVENT_HANDLERS
         private void _flyCtrl_OnFlyStarted(object sender, EventArgs e)
         {
+            if (_disposed) return;
             if (!IS_AUTO_DISABLE)
                 return;
 
@@ -81,6 +96,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         private void _flyCtrl_OnFlyDone(object sender, EventArgs e)
         {
+            if (_disposed) return;
             if (!IS_AUTO_DISABLE)
                 return;
 
@@ -99,6 +115,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         private void _timPolling_FlyStartOff(object sender, EventArgs e)
         {
+            if (_disposed) return;
             if (!IS_AUTO_DISABLE)
                 return;
 

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <ProjectGuid>{23CA9248-953D-4324-8519-E2AB34B8BD52}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Traveller.FPI30.Machine</RootNamespace>
+    <AssemblyName>Traveller.FPI30.Machine</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>7.3</LangVersion>
+    <Deterministic>true</Deterministic>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Traveller.FPI30.Contracts\Traveller.FPI30.Contracts.csproj">
+      <Project>{85BA7435-10AC-4B73-A583-7F84FC81C452}</Project>
+      <Name>Traveller.FPI30.Contracts</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\JetEazy\JetEazy.Basics.csproj">
+      <Project>{A24458C1-B3AC-462A-8B42-DAFD1D420E19}</Project>
+      <Name>JetEazy.Basics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\JetEazy.VG.Devices\JetEazy.VG.Devices.csproj">
+      <Project>{AFA9CF55-2235-415D-B437-F4A62DA34A0C}</Project>
+      <Name>JetEazy.VG.Devices</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Readme.md" />
+    <Compile Include="Fpix3MachineFactory.cs" />
+    <Compile Include="IOSpace\IInitializableFpix3Io.cs" />
+    <Compile Include="IOSpace\GeoIOClass.cs" />
+    <Compile Include="IOSpace\MainFPIX3IOClass.cs" />
+    <Compile Include="IOSpace\MainFPIX3IOSim.cs" />
+    <Compile Include="MachineSpace\GeoMachineClass.cs" />
+    <Compile Include="MachineSpace\MainFPIX3MachineClass.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

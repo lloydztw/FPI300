@@ -1,18 +1,25 @@
 ﻿#region AUTHOR
 /*
- * 
+ *
  * Copyright (c) 2026 JetEazy Corp. All rights reserved.
- * 
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2026-06-17 重整萬子的飛拍相機控制 以防止 GUI thread 的時間被吃掉造成卡機 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using Eazy_Project_III;
 using JetEazy.BasicSpace;
 using JetEazy.FormSpace;
@@ -23,12 +30,6 @@ using LaserAlignDX.GA.FormSpace.FPI30Form;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using Traveller106;
 using VisionDesigner.BlobFind;
 using VsCommon.ControlSpace.MachineSpace;
@@ -53,7 +54,7 @@ namespace LaserAlignDX.FormSpace
         #region GLOBAL_MESS_MACHINE
         protected MainFPIX3MachineClass MACHINEx3
         {
-            get { return (MainFPIX3MachineClass)Universal.MACHINECollection.MACHINE; }
+            get { return (MainFPIX3MachineClass)Universal.Machine; }
         }
         protected VsLight LightCtrl
         {

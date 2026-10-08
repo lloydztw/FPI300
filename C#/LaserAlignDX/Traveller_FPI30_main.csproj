@@ -355,6 +355,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App\Config.cs" />
+    <Compile Include="App\AppBootstrapper.cs" />
+    <Compile Include="GA.mvc\Gui\MainSpace\FormMainDX.UiRecording.cs" />
+    <Compile Include="App\AppResourceScope.cs" />
+    <Compile Include="App\AppDialogService.cs" />
     <Compile Include="App\Ini\v1\UITypeEditors\FormFtpSettings.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -672,16 +676,12 @@
     <Compile Include="GA.mvc\Model\SysModel\TravellerBigImagesHolder.cs" />
     <Compile Include="GA.mvc\Model\AoiModel\IProcessRunFPI.cs" />
     <Compile Include="GA.mvc\.Enums\ScanInspectModeEnum.cs" />
-    <Compile Include="GA.mvc\.Enums\CarrierEnum.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\IxDispTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\LogTextFormatter.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\DisplayTextFormatter\StringBuilderExt.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\IxReportBuilder.cs" />
     <Compile Include="GA.mvc\Model\CustomerModel\ReportBuilder\PowerTechReportBuilder.cs" />
     <Compile Include="GA.mvc\GaMvcConfig.cs" />
-    <Compile Include="GA\BasicSpace\ChipClass.cs" />
-    <Compile Include="GA\BasicSpace\CollectResultClass.cs" />
-    <Compile Include="GA\BasicSpace\FindRectByVM.cs" />
     <Compile Include="GA\BasicSpace\Mvd2DReaderClass.cs" />
     <Compile Include="GA\BasicSpace\MvdFindClass.cs" />
     <Compile Include="GA\BasicSpace\MvdLineFinders\EdgeBorderEnums.cs" />
@@ -693,57 +693,25 @@
     <Compile Include="GA\BasicSpace\MvdLineFinders\V1\MvdPairLineClass_v1.cs" />
     <Compile Include="GA\BasicSpace\NozzleCompensationCalculator.cs" />
     <Compile Include="GA\BasicSpace\ParaSpace\MvdFindCircleClass.cs" />
-    <Compile Include="GA\BasicSpace\ReadBarcode\BarcodeAll_MVD.cs" />
-    <Compile Include="GA\BasicSpace\ReadBarcode\ZXingClass.cs" />
-    <Compile Include="GA\BasicSpace\ShowRectClass.cs" />
-    <Compile Include="GA\BasicSpace\TrayClass.cs" />
-    <Compile Include="GA\BasicSpace\XinliFindLineClass.cs" />
-    <Compile Include="GA\ControlSpace\IOSpace\GeoIOClass.cs" />
-    <Compile Include="GA\ControlSpace\IOSpace\IPlcIoFPIX3.cs" />
-    <Compile Include="GA\ControlSpace\IOSpace\MainFPIX3IOClass.cs" />
-    <Compile Include="GA\ControlSpace\IOSpace\MainFPIX3IOSim.cs" />
-    <Compile Include="GA\ControlSpace\IOSpace\MainLSIOClass.cs" />
-    <Compile Include="GA\ControlSpace\IOSpace\MainX1IOClass.cs" />
-    <Compile Include="GA\ControlSpace\IOSpace\MainX2IOClass.cs" />
-    <Compile Include="GA\ControlSpace\IOSpace\MiniX6IOClass.cs" />
-    <Compile Include="GA\ControlSpace\IOSpace\NeedleIOClass.cs" />
-    <Compile Include="GA\ControlSpace\IOSpace\YzBaseIOClass.cs" />
-    <Compile Include="GA\ControlSpace\MachineCollectionClass.cs" />
-    <Compile Include="GA\ControlSpace\MachineSpace\GeoMachineClass.cs" />
-    <Compile Include="GA\ControlSpace\MachineSpace\MainFPIX3MachineClass.cs" />
-    <Compile Include="GA\ControlSpace\MachineSpace\MainLSMachineClass.cs" />
-    <Compile Include="GA\ControlSpace\MachineSpace\MainX1MachineClass.cs" />
-    <Compile Include="GA\ControlSpace\MachineSpace\MainX2MachineClass.cs" />
-    <Compile Include="GA\ControlSpace\MachineSpace\MiniX6MachineClass.cs" />
-    <Compile Include="GA\ControlSpace\MachineSpace\NeedleMachineClass.cs" />
-    <Compile Include="GA\ControlSpace\MachineSpace\YzBaseMachineClass.cs" />
     <Compile Include="GA\GlobalSpace\Enums.cs" />
     <Compile Include="GA\GlobalSpace\Universal_lt.cs" />
     <Compile Include="GA\OPSpace\AUFindClass.cs" />
     <Compile Include="GA\OPSpace\CameraConfig.cs" />
-    <Compile Include="GA\OPSpace\ChannelBarcodeClass.cs" />
     <Compile Include="GA\OPSpace\MarkItemClass.cs" />
-    <Compile Include="GA\OPSpace\ModuleClass.cs" />
     <Compile Include="App\Ini\common\WinIni_bom_utf8.cs" />
     <Compile Include="GA\OPSpace\RecipeSpace\RecipeBaseClass.cs" />
-    <Compile Include="GA\OPSpace\ResultSpace\GeoResultClass.cs" />
-    <Compile Include="GA\OPSpace\ResultSpace\JzBaseResultClass.cs" />
     <Compile Include="GA\ProcessSpace\AbsProcess.cs" />
     <Compile Include="GA\ProcessSpace\BaseProcess.cs" />
-    <Compile Include="GA\ProcessSpace\BuzzerProcess.cs" />
-    <Compile Include="GA\ProcessSpace\FocusProcess.cs" />
     <Compile Include="GA\ProcessSpace\LineScanProcess_LT.cs" />
     <Compile Include="GA\ProcessSpace\LineScanSingleProcess.cs" />
-    <Compile Include="GA\ProcessSpace\MainProcess.cs" />
-    <Compile Include="GA\ProcessSpace\ResetProcess.cs" />
     <Compile Include="GA\UISpace\CtrlSpace\IoPanelUI.cs" />
     <Compile Include="GA\UISpace\CtrlSpace\IoPanelFactory.cs" />
     <Compile Include="GA\UISpace\MainSpace\MainUiFactory.cs" />
     <Compile Include="GA\UISpace\MainSpace\IMainUI.cs" />
-    <Compile Include="GA\Utils\GaMvdConvertor.cs" />
+    <Compile Include="GA.mvc\Utils\GaMvdConvertor.cs" />
     <Compile Include="LT\LtAoiFactory.cs" />
-    <Compile Include="GA\Utils\GaImageUtil.cs" />
-    <Compile Include="GA\Utils\GaUtil.cs" />
+    <Compile Include="GA.mvc\Utils\GaImageUtil.cs" />
+    <Compile Include="GA.mvc\Utils\GaUtil.cs" />
     <Compile Include="LT\UnitTest\Gui\FormOmronPlcViewer.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -772,19 +740,6 @@
     <Compile Include="GA\UISpace\IniUI.Designer.cs">
       <DependentUpon>IniUI.cs</DependentUpon>
     </Compile>
-    <Compile Include="GA\UISpace\IOSpace\LSIOUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\IOSpace\LSIOUI.Designer.cs">
-      <DependentUpon>LSIOUI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\IOSpace\LSItemClass.cs" />
-    <Compile Include="GA\UISpace\LSDirUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\LSDirUI.Designer.cs">
-      <DependentUpon>LSDirUI.cs</DependentUpon>
-    </Compile>
     <Compile Include="GA\UISpace\MainControlUI.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -802,19 +757,6 @@
     </Compile>
     <Compile Include="GA\UISpace\RunUI.Designer.cs">
       <DependentUpon>RunUI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\UIMVC\Controler\CtlPosClass.cs" />
-    <Compile Include="GA\UISpace\UIMVC\MVSUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\UIMVC\MVSUI.Designer.cs">
-      <DependentUpon>MVSUI.cs</DependentUpon>
-    </Compile>
-    <Compile Include="GA\UISpace\UIMVC\View\PosUI.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="GA\UISpace\UIMVC\View\PosUI.Designer.cs">
-      <DependentUpon>PosUI.cs</DependentUpon>
     </Compile>
     <Compile Include="LT\UnitTest\UnitTest_ChipMatcher.cs" />
     <EmbeddedResource Include="App\Ini\v1\UITypeEditors\FormFtpSettings.resx">
@@ -926,12 +868,6 @@
     <EmbeddedResource Include="GA\UISpace\IniUI.resx">
       <DependentUpon>IniUI.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\IOSpace\LSIOUI.resx">
-      <DependentUpon>LSIOUI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\LSDirUI.resx">
-      <DependentUpon>LSDirUI.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="GA\UISpace\MainControlUI.resx">
       <DependentUpon>MainControlUI.cs</DependentUpon>
     </EmbeddedResource>
@@ -940,12 +876,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="GA\UISpace\RunUI.resx">
       <DependentUpon>RunUI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\UIMVC\MVSUI.resx">
-      <DependentUpon>MVSUI.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="GA\UISpace\UIMVC\View\PosUI.resx">
-      <DependentUpon>PosUI.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="App\Readme.md" />
     <None Include="GA.mvc\Ctrl\Readme.md" />
@@ -971,6 +901,18 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\JetEazy.WinForms.Recording\JetEazy.WinForms.Recording.csproj">
+      <Project>{C18F676D-12C7-4C27-B8DA-FD506AAAD912}</Project>
+      <Name>JetEazy.WinForms.Recording</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Traveller.FPI30.Contracts\Traveller.FPI30.Contracts.csproj">
+      <Project>{85BA7435-10AC-4B73-A583-7F84FC81C452}</Project>
+      <Name>Traveller.FPI30.Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Traveller.FPI30.Machine\Traveller.FPI30.Machine.csproj">
+      <Project>{23CA9248-953D-4324-8519-E2AB34B8BD52}</Project>
+      <Name>Traveller.FPI30.Machine</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EzMotor.Gui\EzMotor.Gui.csproj">
       <Project>{455201c9-5e3e-4b92-a305-e6e94816da3d}</Project>
       <Name>EzMotor.Gui</Name>

@@ -1,4 +1,23 @@
-﻿using Eazy_Project_III;
+﻿#region AUTHOR
+/*
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ *
+ */
+#endregion
+
+using System;
+using System.Drawing;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
+using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
 using Eazy_Project_III.UISpace;
 using JetEazy;
@@ -14,13 +33,7 @@ using LaserAlignDX.UISpace;
 using LeTian.AoiLib;
 using NeedleX.ProcessSpace;
 using PhotoMachine.UISpace;
-using System;
-using System.Drawing;
-using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using TravellerMINIX6.ProcessSpace;
-using VsCommon.ControlSpace;
-using VsCommon.ControlSpace.MachineSpace;
 
 namespace Traveller106
 {
@@ -100,16 +113,9 @@ namespace Traveller106
         #endregion
 
         #region MACHINE
-        MachineCollectionClass MACHINECollection
+        protected Traveller.FPI30.Contracts.IFpix3Machine MACHINE
         {
-            get
-            {
-                return Universal.MACHINECollection;
-            }
-        }
-        protected MainFPIX3MachineClass MACHINE
-        {
-            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection.MACHINE; }
+            get { return Traveller106.Universal.Machine; }
         }
         #endregion
 
@@ -184,9 +190,11 @@ namespace Traveller106
 
             //(6) 語系
             _post_translate();
+            InitializeUiRecording();
         }
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
+            DisposeUiRecording();
             switch (VERSION)
             {
                 case VersionEnum.PROJECT:
@@ -845,12 +853,12 @@ namespace Traveller106
         void InitialCTRLUI()
         {
             CTRLUI.BackColor = SystemColors.Control;
-            CTRLUI.Initial(VERSION, OPTION, MACHINECollection.MACHINE);
+            CTRLUI.Initial(VERSION, OPTION, MACHINE);
         }
         void InitialMAINUI()
         {
             MAINUI.BackColor = SystemColors.Control;
-            MAINUI.Initial(VERSION, OPTION, MACHINECollection.MACHINE);
+            MAINUI.Initial(VERSION, OPTION, MACHINE);
             MAINUI.OnStateChanged += MAINUI_OnChangeState;
         }
 
@@ -1203,7 +1211,7 @@ namespace Traveller106
             JzScanTimeMS = JzMainScanTime.msDuriation;
             JzMainScanTime.Cut();
 
-            //MACHINECollection.Tick();
+            //MACHINE.Tick();
 
             tcp_TriggerAct();
             tcp_HandleTriggerAct();
@@ -1228,12 +1236,12 @@ namespace Traveller106
              ESSUI.ShowPLC_RxTime(Universal.VersionDate + "_" +
                                  Universal.OPTION.ToString() + "B " +
                                  JzScanTimeMS.ToString() + "ms " +
-                                 MACHINECollection.PLCFps());
+                                 MACHINE.PLCFps());
 #else
             ESSUI.ShowPLC_RxTime(Universal.VersionDate + "_" +
                                  Universal.OPTION.ToString() + " " +
                                  JzScanTimeMS.ToString() + "ms " +
-                                 MACHINECollection.PLCFps());
+                                 MACHINE.PLCFps());
 #endif
 
         }

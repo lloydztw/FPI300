@@ -1,19 +1,25 @@
 ﻿#region AUTHOR
 /*
- * 
- * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
  * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
  *      2025-09-11 開始適用於 2.6.x.x 以後的版本
  *      2025-08-29 開始準備重整 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
+using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
+using System.Windows.Forms;
 using Eazy_Project_III;
 using Eazy_Project_III.FormSpace;
 using JetEazy.FormSpace;
@@ -26,14 +32,8 @@ using LaserAlignDX.Mvc.Model;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using LaserAlignDX.UISpace.ChipCellsViewer;
 using OpenCvSharp.Extensions;
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
-using System.Windows.Forms;
 using Traveller106;
 using VsCommon.ControlSpace.IOSpace;
-using VsCommon.ControlSpace.MachineSpace;
 using BaseProcess = NeedleX.ProcessSpace.BaseProcess;
 using LineScanProcess = TravellerMINIX6.ProcessSpace.LineScanProcess;
 using LineScanSingleProcess = TravellerMINIX6.ProcessSpace.LineScanSingleProcess;
@@ -48,9 +48,9 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     public partial class GaMainCtrl : Abs.GaMainCtrl, IxTickable
     {
         #region MACHINE
-        MainFPIX3MachineClass MACHINE
+        Traveller.FPI30.Contracts.IFpix3Machine MACHINE
         {
-            get { return (MainFPIX3MachineClass)Traveller106.Universal.MACHINECollection?.MACHINE; }
+            get { return Traveller106.Universal.Machine; }
         }
         void mxReadPlcStageID(out CarrierEnum carrierID)
         {
@@ -86,7 +86,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         #endregion
 
         #region GLOBAL_MODELS
-        ITravelerModel _sysModel => GaMvcConfig.SysModel;
+        readonly ITravelerModel _sysModel;
         IProcessRunFPI _aoiModel => _sysModel.AoiModel;
         GaBigImageHolder _lineScanImageHolder => _sysModel.LineScanImageHolder;
         bool IsBusy()
@@ -119,11 +119,40 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         #endregion
 
         #region FLY_CTRL
-        GaPlcFlyCameraCtrl _flyCtrl = new GaPlcFlyCameraCtrl();
+        readonly GaPlcFlyCameraCtrl _flyCtrl;
+        readonly GaAutoDisableZoomCtrl _zoomCtrl;
+        readonly AppResourceScope _resources = new AppResourceScope();
+        volatile bool _disposed;
+        bool _attached;
         #endregion
+
+        public GaMainCtrl(ITravelerModel systemModel)
+        {
+            _sysModel = systemModel ?? throw new ArgumentNullException(nameof(systemModel));
+            _flyCtrl = new GaPlcFlyCameraCtrl(systemModel);
+            _zoomCtrl = new GaAutoDisableZoomCtrl();
+            _resources.Add(_flyCtrl.Dispose);
+            _resources.Add(_zoomCtrl.Dispose);
+        }
+
+        public override void Dispose()
+        {
+            if (_disposed) return;
+            _disposed = true;
+            try { _resources.Dispose(); }
+            finally
+            {
+                _frmAoiProgressing?.Dispose();
+                _frmAoiProgressing = null;
+                base.Dispose();
+            }
+        }
 
         public override void Attach(Control[] DsMains, Control[] DsFlys, Control lblFlyCameraSerialNo, Control lblMemoryUsage)
         {
+            if (_disposed) throw new ObjectDisposedException(nameof(GaMainCtrl));
+            if (_attached) throw new InvalidOperationException("Main controller is already attached.");
+            _attached = true;
             // CHIP_CELLS_VIEWERS
             _DSMains = new[]
             {
@@ -138,22 +167,24 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             // GUI 
             _lblMemoryUsage = lblMemoryUsage;
             _timerMemoryUsage = new Timer();
+            _resources.Add(_timerMemoryUsage.Dispose);
             _timerMemoryUsage.Interval = 1000 * 60;     //每分鐘一次
 
             // FLY CAMERA Display UI
             _flyCtrl.Attach(DsFlys, lblFlyCameraSerialNo);
 
             // 自動關閉 ZoomInOut
-            new GaAutoDisableZoomCtrl().Attach(_flyCtrl, _DSMains[0].Window, _DSMains[1].Window);
+            _zoomCtrl.Attach(_flyCtrl, _DSMains[0].Window, _DSMains[1].Window);
 
             // Even tHandlers
             InitEventHandlers();
 
             // 延遲顯示初始設定
-            _wndOwner.HandleCreated += (s, e) =>
+            EventHandler handleCreated = (s, e) =>
             {
                 _wndOwner.BeginInvoke(new Action(() =>
                 {
+                    if (_disposed) return;
                     _LOG("GaMailCtrl [V3]", Color.Blue);
                     _LOG($"參數資料夾 = {Traveller106.Universal.MAINPATH}", Color.Blue);
                     _sysModel.ApplyRecipe();
@@ -161,6 +192,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                     GaUtil.SetCursor(_wndOwner, Cursors.Default);
                 }));
             };
+            _resources.Add(() => _wndOwner.HandleCreated -= handleCreated);
+            _wndOwner.HandleCreated += handleCreated;
         }
 
         IvChipCellsViewer buildChipCellsViewer(Control panel, CarrierEnum carrierID)
@@ -202,6 +235,24 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         void InitEventHandlers()
         {
+            // Capture event publishers now; cleanup must not resolve disposed global services.
+            var imageHolder = _lineScanImageHolder;
+            var lineScan = m_LineScanProcess;
+            var singleScan = m_SingleProcess;
+            var aoi = _aoiModel;
+            _resources.Add(() =>
+            {
+                imageHolder.OnImageChanged -= LineScanImageHolder_OnImageChanged;
+                lineScan.OnStarted -= OnAoiProcess_Started;
+                lineScan.OnCompleted -= OnAoiProcess_Completed;
+                singleScan.OnStarted -= OnAoiProcess_Started;
+                singleScan.OnCompleted -= OnAoiProcess_Completed;
+                aoi.OnAoiProgressing -= AoiEngine_OnAoiProgressing;
+                aoi.OnAoiBegin -= AoiEngine_OnAoiBegin;
+                aoi.OnAoiEnd -= AoiEngine_OnAoiEnd;
+                aoi.OnError -= SysModel_OnError;
+                _sysModel.OnError -= SysModel_OnError;
+            });
             _lineScanImageHolder.OnImageChanged += LineScanImageHolder_OnImageChanged;
             m_LineScanProcess.OnStarted += OnAoiProcess_Started;
             m_LineScanProcess.OnCompleted += OnAoiProcess_Completed;
@@ -212,21 +263,18 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             _aoiModel.OnAoiEnd += AoiEngine_OnAoiEnd;
             _aoiModel.OnError += SysModel_OnError;
             _sysModel.OnError += SysModel_OnError;
-            _timerMemoryUsage.Tick += (s, e) => updateMemoryUsage();
-            _flyCtrl.OnFlyDone += (s, e) => updateMemoryUsage();
+            EventHandler updateMemory = (s, e) => { if (!_disposed) updateMemoryUsage(); };
+            _timerMemoryUsage.Tick += updateMemory;
+            _flyCtrl.OnFlyDone += updateMemory;
+            _resources.Add(() => _flyCtrl.OnFlyDone -= updateMemory);
 
-            _wndOwner.HandleDestroyed += (s, e) =>
-            {
-                _flyCtrl = null;
-                _timerMemoryUsage?.Dispose();
-                _timerMemoryUsage = null;
-            };
 
             // SIMULATION
             var plcIO = MACHINE?.PLCIO;
             if (plcIO is IPlcIoFPIX3Sim sim)
             {
                 sim.sRecipeName = LtAoiFactory.GetActiveRecipeNameAtFPI30();
+                _resources.Add(() => sim.OnRequestSimLineScan -= Sim_OnRequestSimLineScan);
                 sim.OnRequestSimLineScan += Sim_OnRequestSimLineScan;
             }
         }
@@ -239,6 +287,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         #region EVENT_HANDLERS
         private void SysModel_OnError(object sender, ProcessEventArgs e)
         {
+            if (_disposed) { e.Cancel = true; return; }
             if (_wndOwner.InvokeRequired)
             {
                 //_wndOwner.BeginInvoke((EventHandler<ProcessEventArgs>)SysModel_OnError, sender, e);
@@ -269,12 +318,14 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         private void OnAoiProcess_Started(object sender, ProcessEventArgs e)
         {
+            if (_disposed) return;
             FireChangeState(MainS1State.LS_START);
             ActiveViewer.Reset();
             updateMemoryUsage();
         }
         private void OnAoiProcess_Completed(object sender, ProcessEventArgs e)
         {
+            if (_disposed) return;
             FireChangeState(MainS1State.LS_STOP);
             update_AoiResult(e);
             CGOperate();
@@ -282,6 +333,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         private void LineScanImageHolder_OnImageChanged(object sender, EventArgs e)
         {
+            if (_disposed) return;
             if (_wndOwner.InvokeRequired)
             {
                 _wndOwner.Invoke((EventHandler)LineScanImageHolder_OnImageChanged, sender, e);
@@ -294,6 +346,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         private void Sim_OnRequestSimLineScan(object sender, DoWorkEventArgs e)
         {
+            if (_disposed) { e.Cancel = true; return; }
             if(_wndOwner.InvokeRequired)
             {
                 _wndOwner.Invoke((DoWorkEventHandler)Sim_OnRequestSimLineScan, sender, e);
@@ -363,6 +416,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         FormProgressing _frmAoiProgressing = null;
         private void AoiEngine_OnAoiProgressing(object sender, GaProgressEventArgs e)
         {
+            if (_disposed) return;
             if (_wndOwner.InvokeRequired)
             {
                 _wndOwner.BeginInvoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiProgressing, sender, e);
@@ -374,6 +428,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         private void AoiEngine_OnAoiBegin(object sender, GaProgressEventArgs e)
         {
+            if (_disposed) return;
             if (_wndOwner.InvokeRequired)
             {
                 _wndOwner.Invoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiBegin, sender, e);
@@ -396,6 +451,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         }
         private void AoiEngine_OnAoiEnd(object sender, GaProgressEventArgs e)
         {
+            if (_disposed) return;
             if (_wndOwner.InvokeRequired)
             {
                 _wndOwner.Invoke((EventHandler<GaProgressEventArgs>)AoiEngine_OnAoiEnd, sender, e);
@@ -414,6 +470,15 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         {
             if (dsMain is JezChipCellsViewPanel ccvPanel)
             {
+                _resources.Add(() =>
+                {
+                    ccvPanel.contextMenuStrip1.VisibleChanged -= ContextMenuStrip1_VisibleChanged;
+                    ccvPanel.menuLoadImage.Click -= MenuLoadImage_Click;
+                    ccvPanel.menuTestChipInspect.Click -= MenuTestChipInspect_Click;
+                    ccvPanel.menuTestEmptyTrayInspect.Click -= MenuTestEmptyTrayInspect_Click;
+                    ccvPanel.menuTestQRCode.Click -= MenuTestQRCode_Click;
+                    ccvPanel.menuClearResults.Click -= MenuClearResults_Click;
+                });
                 ccvPanel.contextMenuStrip1.VisibleChanged += ContextMenuStrip1_VisibleChanged;
                 ccvPanel.menuLoadImage.Click += MenuLoadImage_Click;
                 ccvPanel.menuTestChipInspect.Click += MenuTestChipInspect_Click;
@@ -643,6 +708,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
         public override void Tick()
         {
+            if (_disposed) return;
             _flyCtrl?.Tick();
 
             TickAllProcesses();

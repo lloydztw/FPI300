@@ -1,9 +1,23 @@
-﻿using JetEazy;
-using LaserAlignDX.UISpace;
+﻿#region AUTHOR
+/*
+ *
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ *
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整
+ *
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ *
+ */
+#endregion
+
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using VsCommon.ControlSpace.MachineSpace;
+using JetEazy;
+using LaserAlignDX.UISpace;
 
 namespace Eazy_Project_III.UISpace
 {
@@ -24,7 +38,7 @@ namespace Eazy_Project_III.UISpace
             InitializeComponent();
         }
 
-        public void Initial(VersionEnum version, OptionEnum option, GeoMachineClass machine)
+        public void Initial(VersionEnum version, OptionEnum option, Traveller.FPI30.Contracts.IFpix3Machine machine)
         {
             //-------------------------------------------------------------------
             // 把所有 MainXxUI 抽出共通 Interface, 並把生成的代碼集中至此,
