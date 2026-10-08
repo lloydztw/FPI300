@@ -361,7 +361,6 @@
     <Compile Include="App\AppDataServices.cs" />
     <Compile Include="App\AppAoiServices.cs" />
     <Compile Include="App\AppModelBindings.cs" />
-    <Compile Include="GA.mvc\Ctrl\PlcFlyCamCtrl\NozzleCompensationCalculator.cs" />
     <Compile Include="GA.mvc\Gui\MainSpace\FormMainDX.UiRecording.cs">
       <SubType>Form</SubType>
     </Compile>

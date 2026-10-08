@@ -1,4 +1,4 @@
-# Traveller.FPI30.Model
+﻿# Traveller.FPI30.Model
 
 FPI30 Model 與 AOI 檢測程式庫，目標為 .NET Framework 4.8／C# 7.3。
 主程式以 ProjectReference 使用此 DLL；此專案不參考 FPI30AOIX3 或 Traveller.FPI30.Machine。
@@ -79,6 +79,28 @@ V25／V3／V5 類別及 namespace 均保留，由主程式既有的組態選擇�
 AppBootstrapper 先綁定資料服務，再綁定 AOI；釋放時資料服務最後解除。
 這組服務不需要 AOI 綁定即可使用；未綁定時會明確拋出例外。仍保留 LotDataHolder singleton，只允許一組有效資料服務。
 呼叫端須先停止並完成所有背景存檔／上傳工作，才可釋放綁定。此次搬移未增加背景工作等待機制，也未改變既有非同步存檔行為。
+
+### 飛拍 AOI Runner
+
+`IFLyCameraAoiRunner` 由既有 `AoiModel_FlyCam` 實作，完整單張流程位於 `AoiModel_FlyCam.Runner.cs`。
+`IProcessRunFPI.GetFlyCameraAoiRunner()` 與 `GetFlyCameraAoi()` 回傳同一個子模型的不同介面；不額外建立 matcher 或 singleton。
+`Run(FlyID, Bitmap, FlyAoiRunOptions)` 負責 ROI 裁切、一般／特殊角度模式、選用讀碼、補償與 FlyAoiResult／FlyMetaData。
+ROI、延伸量、模式、解析度及已選好的位置補償由 Controller 傳入；底層 matcher 門檻及訓練仍沿用 Recipe。
+主 AOI 建立飛拍模型時注入原本的 IAoiQrDecoder，因此讀碼來源不變；Runner 借用它，不負責釋放。
+無參數建構子保留供既有比對／訓練用途；若沒有注入 decoder 而要求完整 Runner 讀碼，會明確拋出例外。
+
+Controller 保留四張影像反向順序、PLC 握手／結果陣列、載台補償選擇、UI 與 LotDataHolder 存檔。
+輸入 Bitmap 與回傳 MetaData.bmpFly 均由 caller 擁有；同步 UI 更新及非同步存檔完成複製後，caller 才釋放影像。
+完整執行、飛拍 matcher 訓練與釋放使用同一個鎖；主程式仍須避免其他 AOI 同時使用共用 QR decoder，並在釋放模型前停止相機回呼。
+補償保留最後採用的 TranslateThenRotate 公式、超過 ±90° 的 XY 反向及原角度輸出。
+一般比對也保留「集合非 null 即 OK」的既有判斷，並未順便改成要求集合非空。
+
+此次整理另明確處理：單張 AOI 例外回報 NG／零補償，避免沿用上一張結果；相機 busy 旗標由 finally 清除。
+離線四個顯示窗使用第一批的四個位置（FlyID(1, index)），不再把顯示窗 index 當成批次號產生無效的第 3／4 批。
+特殊模式／例外的讀碼欄位為空字串，避免存檔沿用前一張條碼。
+
+Runner 測試對實際 DLL 的執行核心提供替代 matcher／decoder，驗證 ROI、讀碼、補償邊界、特殊模式及影像所有權；
+未執行需授權的 MVD 比對或實體飛拍，現場仍需使用原影像與設備確認。
 
 ## 相依與建置
 

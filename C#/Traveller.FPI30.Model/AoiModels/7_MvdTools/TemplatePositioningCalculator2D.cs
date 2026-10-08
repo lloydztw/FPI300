@@ -1,4 +1,15 @@
-﻿using System;
+﻿#region AUTHOR
+/*
+ * Copyright (c) 2026 JetEazy Corp. All rights reserved.
+ * REVISION:
+ *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
+ * http://www.jeteazy.com
+ * https://github.com/lloydztw
+ * https://lloydztw.github.io/mysite/
+ */
+#endregion
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -151,6 +162,7 @@ namespace LaserAlignDX.GA.BasicSpace
         /// <summary>
         /// 调整平移补偿值（考虑旋转后的坐标系）
         /// </summary>
+        #region PRIVATE_FUNCTIONS
         private static Vector2 AdjustTranslationForRotation(Vector2 translation, float rotationAngle)
         {
             // 将旋转角度转换为弧度
@@ -185,6 +197,7 @@ namespace LaserAlignDX.GA.BasicSpace
         /// <summary>
         /// 应用补偿到当前物体
         /// </summary>
+        #endregion
         public static TransformData ApplyCompensation(TransformData currentObject, CompensationResult compensation)
         {
             Vector2 newPosition = currentObject.Position;
@@ -255,76 +268,4 @@ namespace LaserAlignDX.GA.BasicSpace
         }
     }
 
-    /// <summary>
-    /// 测试用例和示例
-    /// </summary>
-    public class PositioningTest
-    {
-        public static void RunAllTests()
-        {
-            Console.WriteLine("=== 二维定位补偿测试（支持两种应用顺序）===\n");
-
-            // 测试两种顺序的对比
-            TestBothOrders("基本情况",
-                new TemplatePositioningCalculator2D.Vector2(10, 5), 45f,
-                new TemplatePositioningCalculator2D.Vector2(8, 6), 30f);
-
-            TestBothOrders("有旋转的情况",
-                new TemplatePositioningCalculator2D.Vector2(10, 5), 90f,
-                new TemplatePositioningCalculator2D.Vector2(8, 6), 30f);
-
-            TestBothOrders("大角度差",
-                new TemplatePositioningCalculator2D.Vector2(10, 5), 10f,
-                new TemplatePositioningCalculator2D.Vector2(8, 6), 200f);
-
-            TestBothOrders("零角度",
-                new TemplatePositioningCalculator2D.Vector2(10, 5), 0f,
-                new TemplatePositioningCalculator2D.Vector2(8, 6), 0f);
-        }
-
-        private static void TestBothOrders(string testName,
-            TemplatePositioningCalculator2D.Vector2 templatePos, float templateAng,
-            TemplatePositioningCalculator2D.Vector2 currentPos, float currentAng)
-        {
-            Console.WriteLine($"\n--- {testName} ---");
-            Console.WriteLine($"模板: 位置{templatePos}, 角度{templateAng}°");
-            Console.WriteLine($"当前: 位置{currentPos}, 角度{currentAng}°");
-
-            // 测试先平移后旋转
-            Console.WriteLine($"\n[先平移后旋转]");
-            var (compensation1, result1) = TemplatePositioningCalculator2D.PerformCompletePositioning(
-                templatePos, templateAng, currentPos, currentAng,
-                TemplatePositioningCalculator2D.ApplyOrder.TranslateThenRotate);
-
-            // 测试先旋转后平移
-            Console.WriteLine($"\n[先旋转后平移]");
-            var (compensation2, result2) = TemplatePositioningCalculator2D.PerformCompletePositioning(
-                templatePos, templateAng, currentPos, currentAng,
-                TemplatePositioningCalculator2D.ApplyOrder.RotateThenTranslate);
-
-            // 验证两种方法结果是否一致
-            bool positionMatch = IsVectorEqual(result1.Position, result2.Position, 0.001f);
-            bool angleMatch = IsAngleEqual(result1.Rotation, result2.Rotation, 0.001f);
-
-            Console.WriteLine($"\n两种顺序对比: 位置{(positionMatch ? "一致" : "不一致")}, 角度{(angleMatch ? "一致" : "不一致")}");
-
-            // 验证最终是否匹配模板
-            bool finalPositionMatch = IsVectorEqual(result1.Position, templatePos, 0.001f);
-            bool finalAngleMatch = IsAngleEqual(result1.Rotation, templateAng, 0.001f);
-            Console.WriteLine($"最终验证: 位置{(finalPositionMatch ? "匹配" : "不匹配")}, 角度{(finalAngleMatch ? "匹配" : "不匹配")}");
-        }
-
-        private static bool IsVectorEqual(TemplatePositioningCalculator2D.Vector2 a,
-                                        TemplatePositioningCalculator2D.Vector2 b, float tolerance)
-        {
-            return Math.Abs(a.X - b.X) < tolerance && Math.Abs(a.Y - b.Y) < tolerance;
-        }
-
-        private static bool IsAngleEqual(float a, float b, float tolerance)
-        {
-            float diff = TemplatePositioningCalculator2D.NormalizeAngle(a - b);
-            if (diff > 180f) diff = 360f - diff;
-            return diff < tolerance;
-        }
-    }
 }

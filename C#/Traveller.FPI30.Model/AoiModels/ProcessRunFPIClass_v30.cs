@@ -140,18 +140,18 @@ namespace LaserAlignDX.AoiModel.V3
             _aoiChipDefects = new AoiModel_Defects();
             _aoiBadConnInspector = new AoiModel_BadConnInpector();
             _aoiQrDecoder = new AoiModel_QrCode();
-            _aoiFlyCam = new AoiModel_FlyCam();
+            _aoiFlyCam = new AoiModel_FlyCam(_aoiQrDecoder);
             _mvdQrCodeDecorder = new Mvd2DReaderClass();
 
-            var subModels = new AoiModelBase[] { 
+            var subModels = new AoiModelBase[] {
                 _aoiChipLoc,
                 _aoiChipMeasure,
                 //_aoiChipMeasure.BaseQ,
                 //_aoiChipMeasure.BaseN,
                 _aoiChipDefects,
                 _aoiBadConnInspector,
-                _aoiQrDecoder, 
-                _aoiEmptyTray 
+                _aoiQrDecoder,
+                _aoiEmptyTray
             };
             foreach (var subModel in subModels)
             {
@@ -387,7 +387,7 @@ namespace LaserAlignDX.AoiModel.V3
 
                 using (var workBmp = (Bitmap)regionBmp.Clone())
                 {
-                    //(2.*) 晶粒定位 
+                    //(2.*) 晶粒定位
                     bool ok = _aoiChipLoc.LocateOneChip(workBmp, ref regionRoi, out var chipData);
                     if (!ok || chipData == null)
                         return ErrorCodes.ERR_NO_CHIP_LOCATION;
@@ -437,7 +437,7 @@ namespace LaserAlignDX.AoiModel.V3
 
             return ok;
         }
-        
+
         public IAoiChipLocator GetChipLocAoi()
         {
             return _aoiChipLoc;
@@ -457,6 +457,10 @@ namespace LaserAlignDX.AoiModel.V3
         public IAoiQrDecoder GetAoiQrDecoder()
         {
             return _aoiQrDecoder;
+        }
+        public IAoiFlyCamRunner GetFlyCameraAoiRunner()
+        {
+            return _aoiFlyCam;
         }
         public IAoiFlyCamMatcher GetFlyCameraAoi()
         {
@@ -639,7 +643,7 @@ namespace LaserAlignDX.AoiModel.V3
             finally
             {
                 // 以後如果 其他內部 IDisposable 物件生命週期管理 優化完成
-                // 可以 移除 GC 
+                // 可以 移除 GC
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
                 GC.Collect();

@@ -24,7 +24,7 @@ using JetEazy.Interface;
 using JetEazy.Lang;
 using JetEazy.Utils;
 using LaserAlignDX.AoiModel;
-using LaserAlignDX.GA.BasicSpace;
+
 using LaserAlignDX.Model;
 using LaserAlignDX.Mvc.Gui;
 using LaserAlignDX.Mvc.Model;
@@ -40,8 +40,8 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
     /// <summary>
     /// 重整 MainX3UI 飛拍
     /// 將飛拍控制拉出來到 GaPlcFlyCameraCtrl
-    /// ToDO: 
-    /// 需要把 flyProcessPro 與 flyProcessProSpecial 的 AOI 部分 抽離到 AoiModel 模塊內
+    /// AOI runs through IFLyCameraAoiRunner.
+    /// PLC handshake, image ownership and UI remain in this controller.
     /// </summary>
     public class GaPlcFlyCameraCtrl : IxTickable, IDisposable
     {
@@ -63,7 +63,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
         readonly ITravelerModel _sysModel;
         readonly AppResourceScope _resources = new AppResourceScope();
         volatile bool _disposed;
-        IAoiFlyCamMatcher _flyAoi => _sysModel?.AoiModel?.GetFlyCameraAoi();
+        IAoiFlyCamRunner _flyRunner => _sysModel.AoiModel.GetFlyCameraAoiRunner();
         #endregion
 
         #region GLOBAL_MESS_RECIPES
@@ -250,71 +250,74 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
                 // 設定 線程保護 旗標
                 m_isOnTheFlyFrameBusy = true;
-
-                // 複製 Data Bytes
-                byte[] dataBytes = new byte[camFrameInfo.uBytes];
-                Marshal.Copy(pBuffer, dataBytes, 0, dataBytes.Length);
-
-                // 存入 OnTheFlyFrameBuffers
-                // 快取 累加前的 m_onTheFlyFrameCount (防止線程效應)
-                int frameIdx = m_onTheFlyFrameCount++;
-                frameIdx %= TOTAL_FLY_FRAMES_COUNT;
-                m_onTheFlyFrameBuffers[frameIdx] = dataBytes;
-
-                // 更新 GUI (frameCount 就是 Gaara 的飛拍序號)
-                updateFlyCameraSerialNumber(serialNumber: m_onTheFlyFrameCount);
-
-                // 集滿 所有 4次 飛拍 圖像
-                if (m_onTheFlyFrameCount >= TOTAL_FLY_FRAMES_COUNT)
+                try
                 {
-                    // 清除 PLC 旗標 bFlyReady
-                    plcIO.bFlyReady = false;
 
-                    // 讀取 PLC iFlyStart
-                    int flyStartIndex = plcIO.iFlyStart;
+                    // 複製 Data Bytes
+                    byte[] dataBytes = new byte[camFrameInfo.uBytes];
+                    Marshal.Copy(pBuffer, dataBytes, 0, dataBytes.Length);
 
-                    // 把收集到的 frame buffers 進行 飛拍 像測
-                    this.RunAoiAll(flyStartIndex, m_onTheFlyFrameBuffers, camFrameInfo.iWidth, camFrameInfo.iHeight);
-                    this.GetAoiAllResults(out var flyResults, out var flyOffsets);
+                    // 存入 OnTheFlyFrameBuffers
+                    // 快取 累加前的 m_onTheFlyFrameCount (防止線程效應)
+                    int frameIdx = m_onTheFlyFrameCount++;
+                    frameIdx %= TOTAL_FLY_FRAMES_COUNT;
+                    m_onTheFlyFrameBuffers[frameIdx] = dataBytes;
 
-                    // 回寫飛拍結果給 PLC
-                    plcIO.iFlyResult(flyResults);
-                    plcIO.rOffset(flyOffsets);
+                    // 更新 GUI (frameCount 就是 Gaara 的飛拍序號)
+                    updateFlyCameraSerialNumber(serialNumber: m_onTheFlyFrameCount);
 
-                    #region LOG
-                    //int[] ints0 = m_iFlyResult;
-                    //float[] floats0 = m_iFlyOffset;
-                    //StringBuilder sb = new StringBuilder();
-                    //foreach (var ix in ints0)
-                    //{
-                    //    sb.Append(ix.ToString() + ",");
-                    //}
-                    //_LOG("iFlyResult:" + sb.ToString(), Color.Black);
-                    //StringBuilder sb1 = new StringBuilder();
-                    //foreach (var ix in floats0)
-                    //{
-                    //    sb1.Append(ix.ToString() + ",");
-                    //}
-                    //_LOG("iFlyOffset:" + sb1.ToString(), Color.Black);
-                    _LOG_FLY_RESULTS(flyResults, flyOffsets);
-                    #endregion
+                    // 集滿 所有 4次 飛拍 圖像
+                    if (m_onTheFlyFrameCount >= TOTAL_FLY_FRAMES_COUNT)
+                    {
+                        // 清除 PLC 旗標 bFlyReady
+                        plcIO.bFlyReady = false;
 
-                    // 重置 m_onTheFlyFrameCount
-                    resetOnTheFlyFrameCount();
-                    // 暫停 OnTheFlyFrameBuf
-                    m_isOnTheFlyFrameEnabled = false;
+                        // 讀取 PLC iFlyStart
+                        int flyStartIndex = plcIO.iFlyStart;
 
-                    // 設定 PLC 旗標 bFlyDone
-                    plcIO.bFlyDone = true;
+                        // 把收集到的 frame buffers 進行 飛拍 像測
+                        this.RunAoiAll(flyStartIndex, m_onTheFlyFrameBuffers, camFrameInfo.iWidth, camFrameInfo.iHeight);
+                        this.GetAoiAllResults(out var flyResults, out var flyOffsets);
 
-                    // 設定 PLC 旗標 bFlyReady
-                    plcIO.bFlyReady = true;
+                        // 回寫飛拍結果給 PLC
+                        plcIO.iFlyResult(flyResults);
+                        plcIO.rOffset(flyOffsets);
 
-                    OnFlyDone?.Invoke(this, null);
-                }
+                        #region LOG
+                        //int[] ints0 = m_iFlyResult;
+                        //float[] floats0 = m_iFlyOffset;
+                        //StringBuilder sb = new StringBuilder();
+                        //foreach (var ix in ints0)
+                        //{
+                        //    sb.Append(ix.ToString() + ",");
+                        //}
+                        //_LOG("iFlyResult:" + sb.ToString(), Color.Black);
+                        //StringBuilder sb1 = new StringBuilder();
+                        //foreach (var ix in floats0)
+                        //{
+                        //    sb1.Append(ix.ToString() + ",");
+                        //}
+                        //_LOG("iFlyOffset:" + sb1.ToString(), Color.Black);
+                        _LOG_FLY_RESULTS(flyResults, flyOffsets);
+                        #endregion
+
+                        // 重置 m_onTheFlyFrameCount
+                        resetOnTheFlyFrameCount();
+                        // 暫停 OnTheFlyFrameBuf
+                        m_isOnTheFlyFrameEnabled = false;
+
+                        // 設定 PLC 旗標 bFlyDone
+                        plcIO.bFlyDone = true;
+
+                        // 設定 PLC 旗標 bFlyReady
+                        plcIO.bFlyReady = true;
+
+                        OnFlyDone?.Invoke(this, null);
+                    }
 
                 // 清除 線程保護 旗標
-                m_isOnTheFlyFrameBusy = false;
+                }
+                finally { m_isOnTheFlyFrameBusy = false; }
             }
         }
         void TickPlc()
@@ -502,7 +505,7 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
                         var oldCursor = GaUtil.SetCursor(_wndOwner, Cursors.WaitCursor);
                         using (Bitmap bmpFly = GaImageUtil.LoadBigImage(fileName, autoSaveJpg:true))
                         {
-                            var flyID = new FlyID(idx + 1, idx);
+                            var flyID = new FlyID(1, idx);
                             flyRunAoiOne(flyID, bmpFly);
                         }
                         GaUtil.SetCursor(_wndOwner, oldCursor);
@@ -542,388 +545,39 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
 
         void flyRunAoiOne(FlyID flyID, Bitmap bmpFly)
         {
+            FlyAoiResult result;
             try
             {
-                if (_xFlyAoiParams.xIsOpenMuit)   // 一般都是 false
-                    flyProcessProSpecial(flyID, bmpFly);
-                else
-                    flyProcessPro(flyID, bmpFly);
+                var parameters = _xFlyAoiParams;
+                var options = new FlyAoiRunOptions
+                {
+                    TemplateRegion = _xRecipe.xRectRegionPrintFly,
+                    ExtendX = parameters.xExtendx,
+                    ExtendY = parameters.xExtendy,
+                    UseSpecialAngle = parameters.xIsOpenMuit,
+                    DecodeCode = parameters.bOpenCodeReader,
+                    ImageResolution = INI.Instance.FlyImageResolution,
+                    PositionOffset = parameters.xIsOpenMuit ? PointF.Empty : FlyOffsetUseStage[flyID.ShowID - 1]
+                };
+                result = _flyRunner.Run(flyID, bmpFly, options);
             }
             catch (Exception ex)
             {
-                LtDebug.LOG.Error(ex, "flyProcessProXxx");
+                _LOG_ERROR(ex, "FlyCameraAoiRunner.Run");
+                // Never send a previous frame's result after an AOI failure.
+                result = new FlyAoiResult
+                {
+                    Code = PlcFlyResultCode.NG, CodeStr = string.Empty,
+                    MetaData = new FlyMetaData { flyID = flyID, bmpFly = bmpFly, AlgorithmName = "AOI_Error" }
+                };
+                result.MetaData.flyAoiResult = result;
             }
-
-            //saveFlyCamImage(flyID, bmpFly, _lotData);
+            updateOneResult(flyID, result);
+            _lotData.CodeStr = result.CodeStr ?? string.Empty;
+            // Save and display while the caller-owned image is still alive.
             AsyncSaveFlyCameraImage(flyID, bmpFly, _lotData);
+            _DispUIs[flyID.flyIndex].Update(result);
         }
-        void flyProcessPro(FlyID flyID, Bitmap bmpFly)
-        {
-            var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_TemplateMatch" };
-            var aoiResult = new FlyAoiResult() { MetaData = aoiMetaData };
-            //var flystopwatch = new Stopwatch();
-            //flystopwatch.Restart();
-
-            #region OLD_CODE
-            //bmpFlyOperate.Dispose();
-            //bmpFlyOperate = bmpInput;
-            //RectangleF _rectF = new RectangleF(
-            //    xRecipe.xRectRegionPrintFly.X,
-            //    xRecipe.xRectRegionPrintFly.Y,
-            //    xRecipe.xRectRegionPrintFly.Width,
-            //    xRecipe.xRectRegionPrintFly.Height);
-            //_rectF.Inflate(xFlyPara.xExtendx, xFlyPara.xExtendy);
-            //BoundRect(ref _rectF, bmpFlyOperate.Size);
-            #endregion
-
-            #region OLD_CODE_FOR_CENTER_POINTS
-            //PointF centerOrg = new PointF(
-            //    xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-            //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
-            //PointF centerRun = new PointF(
-            //    xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-            //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
-            #endregion
-
-            RectangleF roiRect = _xRecipe.xRectRegionPrintFly;
-            PointF centerOrg = JetEazy.Qcvt.Center(ref roiRect);
-            PointF centerRun = centerOrg;
-
-            roiRect.Inflate(_xFlyAoiParams.xExtendx, _xFlyAoiParams.xExtendy);
-            GaUtil.Clip(ref roiRect, bmpFly.Size);
-
-            using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
-            {
-                //int err = xRecipe.PrintTempFlyRun(bmpCrop);
-                //aoiResult.Code = err == 0 ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
-                //var mvdRects = xRecipe.mvdprintFlytemp_Find.xMvdResultRects;
-
-                var flyAoi = _sysModel.AoiModel.GetFlyCameraAoi();
-                
-                flyAoi?.Run(bmpCrop);
-
-                var mvdRects = flyAoi?.MatchResultRects;
-                var matchAngle = flyAoi != null ? flyAoi.MatchResultAngle : 0f;
-
-                bool ok = mvdRects != null;
-
-                aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
-
-                // 記入 GUI 畫圖所需要的數據
-                // 注意: mvdRects.Count 有可能為 0 !!!
-                if (mvdRects != null && mvdRects.Count > 0)
-                {
-                    aoiMetaData.xResultBox2D = mvdRects[0]?.ToBox2D();
-                    //定位的角度 直接给plc
-                    aoiResult.OffsetAngle = matchAngle; // xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
-                }
-                else
-                {
-                    aoiMetaData.xResultBox2D = null;
-                    aoiResult.OffsetAngle = 0;
-                }
-                FlyMetaData.Offset(aoiMetaData.xResultBox2D, roiRect.X, roiRect.Y);
-
-
-                aoiResult.CodeStr = string.Empty;
-                //读码 目前先使用定位的裁图读码 后续可以单独增加一个读码的ROI区域
-                if (_xFlyAoiParams.bOpenCodeReader)
-                {
-                    aoiDecodeCode(bmpCrop, out string text);
-                    aoiResult.CodeStr = text;
-                }
-                _lotData.CodeStr = aoiResult.CodeStr;
-
-                aoiMetaData.xTemplateRect = _xRecipe.xRectRegionPrintFly;
-                aoiMetaData.xBlobs = null;
-                aoiMetaData.roiRect = roiRect;
-                aoiMetaData.bmpFly = bmpFly;
-                aoiMetaData.flyID = flyID;
-                aoiMetaData.flyAoiResult = aoiResult;
-            }
-
-            #region OLD_CODE
-            //PointF centerOrg = new PointF(
-            //    xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-            //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
-            //PointF centerRun = new PointF(
-            //    xRecipe.xRectRegionPrintFly.X + xRecipe.xRectRegionPrintFly.Width / 2,
-            //    xRecipe.xRectRegionPrintFly.Y + xRecipe.xRectRegionPrintFly.Height / 2);
-            #endregion
-
-            #region OLD_CODE
-            //int flyShowIndex = flyIndex + 1;
-            //switch (flyStart)
-            //{
-            //    case 1:
-            //        flyShowIndex = flyIndex + 1;
-            //        break;
-            //    case 2:
-            //        flyShowIndex = flyIndex + 1 + 4;
-            //        break;
-            //}
-            #endregion
-
-            #region OLD_CODE
-            //float _resolutionFly = INI.Instance.FlyImageResolution;
-            //switch (flyStart)
-            //{
-            //    case 1:
-            //        iFlyResult[flyIndex] = (err == 0 ? 1 : 2);
-            //        if (err == 0)
-            //        {
-            //            //centerRun = new PointF(
-            //            //        xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterX + _rectF.X,
-            //            //        xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + _rectF.Y);
-            //            ////算出的pix需加入解析度
-            //            //iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
-            //            //iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
-            //            //iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
-
-            //            centerRun.X = foundResult.fCenterX + roiRect.X;
-            //            centerRun.Y = foundResult.fCenterY + roiRect.Y;
-
-            //            //算出的pix需加入解析度
-            //            offsetX = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
-            //            offsetY = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
-            //            offsetAngle = foundResult.fAngle;
-
-            //            iFlyOffset[flyIndex * 3 + 0] = offsetX;
-            //            iFlyOffset[flyIndex * 3 + 1] = offsetY;
-            //            iFlyOffset[flyIndex * 3 + 2] = offsetAngle;
-            //        }
-            //        else
-            //        {
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = 0;
-            //        }
-            //        break;
-
-            //    case 2:
-            //        iFlyResult[flyIndex] = (err == 0 ? 1 : 2);
-            //        if (err == 0)
-            //        {
-            //            //centerRun = new PointF(
-            //            //    xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterX + roiRect.X,
-            //            //    xRecipe.mvdprintFlytemp_Find.xResults[0].fCenterY + roiRect.Y);
-
-            //            ////算出的pix需加入解析度
-            //            //iFlyOffset[flyIndex * 3 + 0] = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
-            //            //iFlyOffset[flyIndex * 3 + 1] = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
-            //            //iFlyOffset[flyIndex * 3 + 2] = xRecipe.mvdprintFlytemp_Find.xResults[0].fAngle;
-
-            //            centerRun.X = foundResult.fCenterX + roiRect.X;
-            //            centerRun.Y = foundResult.fCenterY + roiRect.Y;
-
-            //            //算出的 pix 需加入解析度
-            //            offsetX = -(centerRun.X - centerOrg.X) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].X;
-            //            offsetY = -(centerRun.Y - centerOrg.Y) * _resolutionFly + FlyOffsetUseStage[flyShowIndex - 1].Y;
-            //            offsetAngle = foundResult.fAngle;
-
-            //            iFlyOffset[flyIndex * 3 + 0] = offsetX;
-            //            iFlyOffset[flyIndex * 3 + 1] = offsetY;
-            //            iFlyOffset[flyIndex * 3 + 2] = offsetAngle;
-            //        }
-            //        else
-            //        {
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = 0;
-            //        }
-            //        break;
-            //}
-            #endregion
-
-            int flyStart = flyID.flyStart;
-            if (flyStart == 1 || flyStart == 2)
-            {
-                if (aoiResult.Code == PlcFlyResultCode.OK)
-                {
-                    //centerRun.X = foundResult.fCenterX + roiRect.X;
-                    //centerRun.Y = foundResult.fCenterY + roiRect.Y;
-                    centerRun = aoiMetaData.xCentroid;
-
-                    // 算出的 pix 需加入解析度
-                    float flyCamResolution = INI.Instance.FlyImageResolution;
-                    int flyShowID1 = flyID.ShowID;
-                    float angle = aoiResult.OffsetAngle;
-
-                    //aoiResult.OffsetX = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
-                    //aoiResult.OffsetY = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
-                    //aoiResult.OffsetAngle = (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
-
-                    double oldx = -(centerRun.X - centerOrg.X) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
-                    double oldy = -(centerRun.Y - centerOrg.Y) * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
-
-                    System.Diagnostics.Debug.WriteLine($"Angle {angle}");
-                    System.Diagnostics.Debug.WriteLine($"Old x{oldx},y{oldy}");
-                    _LOG($"Angle {angle}", Color.Black);
-                    _LOG($"Old x{oldx},y{oldy}", Color.Black);
-                    //float _angle = aoiResult.OffsetAngle;// (aoiMetaData.xResultBox2D != null) ? (float)(aoiMetaData.xResultBox2D.Theta * 180 / Math.PI) : 0f;
-
-                    // 根据应用场景选择顺序
-                    var template = new TemplatePositioningCalculator2D.TemplateData(
-                        new TemplatePositioningCalculator2D.Vector2(centerOrg.X, centerOrg.Y), 0);
-
-                    var current = new TemplatePositioningCalculator2D.TemplateData(
-                        new TemplatePositioningCalculator2D.Vector2(centerRun.X, centerRun.Y), angle);
-
-                    // 场景1：机械臂控制 - 通常先旋转后平移
-                    //System.Diagnostics.Debug.WriteLine($"机械臂控制（推荐先旋转后平移）:");
-                    var comp1 = TemplatePositioningCalculator2D.CalculateCompensation(
-                        template, current, TemplatePositioningCalculator2D.ApplyOrder.RotateThenTranslate);
-                    //comp1.PrintResult();
-
-                    oldx = comp1.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
-                    oldy = comp1.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
-                    //aoiResult.OffsetAngle = comp1.AngleCompensation;
-                    System.Diagnostics.Debug.WriteLine($"Comp1 x{oldx},y{oldy}");
-                    _LOG($"Comp1 x{oldx},y{oldy}", Color.Black);
-                    //_LOG($"FlyID[{flyID.ShowID}] {comp1.ResultString(flyCamResolution)}", Color.Blue);
-
-                    //原先的计算结果 以下代码
-                    //// 场景2：UI元素定位 - 通常先平移后旋转
-                    //Console.WriteLine($"UI元素定位（推荐先平移后旋转）:");
-                    var comp2 = TemplatePositioningCalculator2D.CalculateCompensation(
-                        template, current, TemplatePositioningCalculator2D.ApplyOrder.TranslateThenRotate);
-                    //comp2.PrintResult();
-
-                    //20251024 小于-90 或者 大于90 时 先补偿再反向<===需要验证
-                    //第二种先反向再补偿<===这个算出来比较接近先旋转再平移的结果 但是现场放不进去 不知为何
-                    if (angle < -90 || angle > 90)
-                    {
-                        oldx = -(comp2.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X);
-                        oldy = -(comp2.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y);
-                    }
-                    else
-                    {
-                        oldx = comp2.Translation.X * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].X;
-                        oldy = comp2.Translation.Y * flyCamResolution + FlyOffsetUseStage[flyShowID1 - 1].Y;
-                    }
-                    //aoiResult.OffsetAngle = comp1.AngleCompensation;
-                    System.Diagnostics.Debug.WriteLine($"Comp2 x{oldx},y{oldy}");
-                    _LOG($"Comp2 x{oldx},y{oldy}", Color.Black);
-                    //_LOG($"FlyID[{flyID.ShowID}] {comp2.ResultString(flyCamResolution)}", Color.Blue);
-
-                    aoiResult.OffsetX = (float)oldx;
-                    aoiResult.OffsetY = (float)oldy;
-
-                }
-                updateOneResult(flyID, aoiResult);
-            }
-
-            //flystopwatch.Stop();
-
-            // 更新 GUI (暫時沿用原來的 逆行 調用處)
-            _DispUIs[flyID.flyIndex].Update(aoiResult);
-        }
-        void flyProcessProSpecial(FlyID flyID, Bitmap bmpFly)
-        {
-            var aoiMetaData = new FlyMetaData() { AlgorithmName = "MVD_CheckSpecialAngle" };
-            var aoiResult = new FlyAoiResult() { MetaData = aoiMetaData };
-            //var flystopwatch = new Stopwatch();
-            //flystopwatch.Restart();
-
-            #region OLD_CODE
-            //////转换图像
-            ////byte[] bmpbytes = new byte[cameraFrame.uBytes];
-            ////Marshal.Copy(pBuffer, bmpbytes, 0, bmpbytes.Length);
-            //int iw = cameraFrame.iWidth;
-            //int ih = cameraFrame.iHeight;
-            //bmpFlyOperate.Dispose();
-            //bmpFlyOperate = ConvertFromMONO(eBytes, iw, ih);
-            //RectangleF _rectF = new RectangleF(
-            //    xRecipe.xRectRegionPrintFly.X,
-            //    xRecipe.xRectRegionPrintFly.Y,
-            //    xRecipe.xRectRegionPrintFly.Width,
-            //    xRecipe.xRectRegionPrintFly.Height);
-            #endregion
-
-            RectangleF roiRect = _xRecipe.xRectRegionPrintFly;
-            roiRect.Inflate(_xFlyAoiParams.xExtendx, _xFlyAoiParams.xExtendy);
-            GaUtil.Clip(ref roiRect, bmpFly.Size);
-
-            using (Bitmap bmpCrop = bmpFly.Clone(roiRect, System.Drawing.Imaging.PixelFormat.Format8bppIndexed))
-            {
-                //bool ok = xRecipe.CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
-                bool ok = _flyAoi.CheckSpecialAngle(bmpCrop, out var mvdBlobs, out float angle, out PointF centerPt);
-                aoiResult.Code = ok ? PlcFlyResultCode.OK : PlcFlyResultCode.NG;
-                aoiResult.OffsetAngle = ok ? angle : 0f;
-
-                // 記入 GUI 畫圖所需要的數據
-                aoiMetaData.xBlobs = mvdBlobs != null ? Array.ConvertAll(mvdBlobs.ToArray(), bi => bi.RectInfo.ToBox2D()) : null;
-                FlyMetaData.Offset(aoiMetaData.xBlobs, roiRect.X, roiRect.Y);
-
-                aoiMetaData.roiRect = roiRect;
-                aoiMetaData.bmpFly = bmpFly;
-                aoiMetaData.flyID = flyID;
-                aoiMetaData.flyAoiResult = aoiResult;
-            }
-
-            #region OLD_CODE
-            //int flyShowIndex = flyIndex + 1;
-            //switch (flyStart)
-            //{
-            //    case 1:
-            //        flyShowIndex = flyIndex + 1;
-            //        break;
-            //    case 2:
-            //        flyShowIndex = flyIndex + 1 + 4;
-            //        break;
-            //}
-            #endregion
-
-            #region OLD_CODE
-            //switch (flyStart)
-            //{
-            //    case 1:
-            //        iFlyResult[flyIndex] = (bOK ? 1 : 2);
-            //        if (bOK)
-            //        {
-            //            //算出的pix需加入解析度
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = angle;
-            //        }
-            //        else
-            //        {
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = 0;
-            //        }
-            //        break;
-            //    case 2:
-            //        iFlyResult[flyIndex] = (bOK ? 1 : 2);
-            //        if (bOK)
-            //        {
-            //            //算出的pix需加入解析度
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = angle;
-            //        }
-            //        else
-            //        {
-            //            iFlyOffset[flyIndex * 3 + 0] = 0;
-            //            iFlyOffset[flyIndex * 3 + 1] = 0;
-            //            iFlyOffset[flyIndex * 3 + 2] = 0;
-            //        }
-            //        break;
-            //}
-            #endregion
-
-            int flyStart = flyID.flyStart;
-            if (flyStart == 1 || flyStart == 2)
-            {
-                updateOneResult(flyID, aoiResult);
-            }
-
-            //flystopwatch.Stop();
-
-            // 更新 GUI (暫時沿用原來的 逆行 調用處)
-            _DispUIs[flyID.flyIndex].Update(aoiResult);
-        }
-
         void updateOneResult(FlyID flyID, FlyAoiResult oneResult)
         {
             int flyIndex = flyID.flyIndex;
@@ -943,138 +597,11 @@ namespace LaserAlignDX.Mvc.Ctrl.V3
             }
         }
 
-#if (OPT_REPLACED_BY_ASYNC_SAVE_FLY_CAMERA_IMAGE)
-        void saveFlyCamImage(FlyID flyID, Bitmap bmpFly, FlyLotData lotData)
-        {
-            if (INI.Instance.IsSaveDebugOrgBmp)
-            {
-                try
-                {
-                    var tm = DateTime.Now;
-
-                    int flyShowIndex = flyID.ShowID;
-                    string stripID = lotData.StripID;
-                    string lotID = lotData.LotID;
-                    string code = lotData.CodeStr;
-
-                    //>>> string path = $"{INI.Instance.ResultImagePath}\\flyImage\\{DateTime.Now.ToString("yyyyMMdd")}\\{stripID}";
-                    string path = System.IO.Path.Combine(INI.Instance.ResultImagePath, "flyImage", tm.ToString("yyyyMMdd"), stripID);
-                    if (!Directory.Exists(path))
-                        Directory.CreateDirectory(path);
-
-                    string fileName = $"{lotID}-[{flyShowIndex}]-[{code}]-{tm:yyyyMMdd_HHmmssfff}.jpg";
-                    fileName = System.IO.Path.Combine(path, fileName);
-
-                    //>>> cMvdImage.SaveImage(flypath + "\\" + flyname, MVD_FILE_FORMAT.MVD_FILE_JPEG);
-                    GaImageUtil.SaveBigImage(fileName, bmpFly);
-                }
-                catch (Exception ex)
-                {
-                    LtDebug.LOG.Error(ex, "GaPlcFlyCameraCtrl.saveFlyCameraImage");
-                }
-            }
-        }
-#endif
-
-        //----------------------------------------------------------------------------
-        // 此處函式不牽扯到 GUI, 將來要納入 AOI MODEL
-        //----------------------------------------------------------------------------
-        void aoiDecodeCode(Bitmap srcBmp, out string text)
-        {
-#if (OPT_OLD_CODE)
-            if (srcBmp == null)
-            {
-                text = "";
-                return;
-            }
-
-            //>>> xRecipe.mvd2DReader.Run(xRecipe.bmpcodetemplate,
-            //>>>       new RectangleF(0, 0, xRecipe.bmpcodetemplate.Width, xRecipe.bmpcodetemplate.Height));
-
-            var aoiTool = xRecipe.fly2DReader;
-            var roi = new RectangleF(0, 0, srcBmp.Width, srcBmp.Height);
-
-            aoiTool.Run(srcBmp, roi);
-
-            var decodeInfo = aoiTool.DCodeInfo;
-            text = decodeInfo != null ? decodeInfo.Content : "";
-#endif
-
-            text = _sysModel?.AoiModel?.GetAoiQrDecoder()?.TryDecode(srcBmp);
-            if (text == null)
-                text = "";
-        }
-
         /// <summary>
         /// 非同步保存 原圖 (caller 負責 bmpFullfov 生命)
         /// </summary>
         void AsyncSaveFlyCameraImage(FlyID flyID, Bitmap bmpFly, FlyLotData lotData)
         {
-#if (OPT_LEGACY)
-            if (bmpFly == null)
-                return;
-
-            if (!INI.Instance.IsSaveDebugBmp && !INI.Instance.IsSaveDebugOrgBmp)
-                return;
-
-            var result = m_iFlyResult!=null && flyID.flyIndex < m_iFlyResult.Length 
-                       ? (PlcFlyResultCode)m_iFlyResult[flyID.flyIndex] 
-                       : PlcFlyResultCode.NG_EMPTY;
-
-            var args = new object[]
-            {
-                flyID,
-                bmpFly.Clone(), 
-                lotData.Clone(),
-                result,
-                DateTime.Now,
-            };
-
-            ThreadPool.QueueUserWorkItem(argv =>
-            {
-                try
-                {
-                    var argvs = (object[])argv;
-                    var cFlyID = (FlyID)argvs[0];
-                    var cLotData = (FlyLotData)argvs[2];
-                    var cResult = (PlcFlyResultCode)argvs[3];
-                    var tm = (DateTime)argvs[4];
-
-                    using (Bitmap bmpBigAsync = (Bitmap)argvs[1])
-                    {
-                        int flyShowIndex = flyID.ShowID;
-                        string stripID = lotData.StripID;
-                        string lotID = lotData.LotID;
-                        string code = lotData.CodeStr;
-
-                        // 2026-07-09 泰國版要求分流保存圖檔
-                        string folder = "flyImage";
-                        if(INI.Instance.UseOkNgDiffImageFolders)
-                        {
-                            bool isPass = cResult == PlcFlyResultCode.OK || cResult == PlcFlyResultCode.NG_EMPTY;
-                            if (!isPass) folder += ".NG";
-                        }
-
-                        string path = System.IO.Path.Combine(INI.Instance.ResultImagePath, folder, tm.ToString("yyyyMMdd"), stripID);
-                        if (!Directory.Exists(path))
-                            JetEazy.IO.QxPathUtility.InitDirectory(path);
-
-                        string fileName = $"{lotID}-[{flyShowIndex}]-[{code}]-{tm:yyyyMMdd_HHmmssfff}.jpg";
-                        fileName = System.IO.Path.Combine(path, fileName);
-
-                        GaImageUtil.SaveBigImage(fileName, bmpBigAsync);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    //_LOG($"异常捕获:{ex.Message}", Color.Red);
-                    _LOG_ERROR(ex, $"{GetType().Name}.saveDumpImageAsync");
-                    //GaUtil.LOG()
-                }
-            },
-                args
-            );
-#endif
             var dumper = LotDataHolder.Instance;
             dumper.AsyncSaveFlyCameraImage(flyID, bmpFly, lotData, m_iFlyResult);
         }

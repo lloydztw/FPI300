@@ -14,24 +14,23 @@
  */
 #endregion
 
-using System;
-using Traveller.FPI30.Model;
-using System.Collections.Generic;
-using System.Drawing;
 using EzAoiEmptyTrayInspector.Model;
 using JetEazy.Match;
 using JetEazy.OpenCV;
 using JetEazy.QMath;
 using JetEazy.QvMath;
-using JetEazy.Utils;
-using GaUtil = Traveller.FPI30.Model.ModelUtilities;
 using LaserAlignDX.AoiModel;
 using LaserAlignDX.BasicSpace;
 using LaserAlignDX.Model.Coords;
 using LaserAlignDX.OPSpace;
 using LaserAlignDX.OPSpace.RecipeSpace;
 using NeedleX.ProcessSpace;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using Traveller.FPI30.Model;
 using EmptyTrayAoiFactory = EzAoiEmptyTrayInspector.AoiFactory;
+using GaUtil = Traveller.FPI30.Model.ModelUtilities;
 
 namespace LaserAlignDX.Mvc.Model
 {

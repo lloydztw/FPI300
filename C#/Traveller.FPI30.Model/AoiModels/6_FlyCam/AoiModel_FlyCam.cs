@@ -1,16 +1,16 @@
 ﻿#region AUTHOR
 /*
- * 
+ *
  * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
  * REVISION:
  *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
  *      2025-08-01 開始重整 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
@@ -27,7 +27,7 @@ namespace LaserAlignDX.AoiModel.V3
     /// <summary>
     /// Fly Camera AOI
     /// </summary>
-    public class AoiModel_FlyCam : AoiModelBase, IAoiFlyCamMatcher
+    public partial class AoiModel_FlyCam : AoiModelBase, IAoiFlyCamMatcher
     {
         #region GLOBAL_MESS
         FlyParaClass _xFlyAoiParams => _xRecipe.FlyAoiParams;
@@ -43,11 +43,22 @@ namespace LaserAlignDX.AoiModel.V3
 
         public override void Dispose()
         {
+            lock (_flyRunGate)
+                DisposeCore();
+        }
+
+        #region PRIVATE_DISPOSAL
+        void DisposeCore()
+        {
+            if (_flyDisposed) return;
+            _flyDisposed = true;
             _flyTemplateMatcher?.Dispose();
             _flyTemplateMatcher = null;
             _qrDecoder?.Dispose();
             _qrDecoder = null;
         }
+
+        #endregion
 
 #if (OPT_RESERVED)
         public MvdFindClass GetTemplateMatcher()
@@ -63,6 +74,12 @@ namespace LaserAlignDX.AoiModel.V3
 
         public override bool Train(Bitmap goldenImage, params object[] args)
         {
+            lock (_flyRunGate) return TrainCore(goldenImage, args);
+        }
+
+        #region PRIVATE_TRAINING
+        bool TrainCore(Bitmap goldenImage, params object[] args)
+        {
             if (_flyTemplateMatcher == null)
                 return false;
 
@@ -75,11 +92,14 @@ namespace LaserAlignDX.AoiModel.V3
             return ok;
         }
 
+        #endregion
+
         public override void Run(Bitmap sceneBmp)
         {
-            RunTemplateMatch(sceneBmp);
+            lock (_flyRunGate) RunTemplateMatch(sceneBmp);
         }
 
+        #region PRIVATE_MATCHING
         bool RunTemplateMatch(Bitmap bmpScene)
         {
             this.MatchResultRects = null;
@@ -87,10 +107,10 @@ namespace LaserAlignDX.AoiModel.V3
 
             if (bmpScene == null || _flyTemplateMatcher == null)
                 return false;
-            
+
             _flyTemplateMatcher.xMvdAngle = _xFlyAoiParams.xAngle;
             _flyTemplateMatcher.xMvdTolerance = (1 - _xFlyAoiParams.xTolerance);  //<<<=这里把数据反过来不知为什么明明越大越严但是实际是反过来的
-            
+
             _flyTemplateMatcher.bmpRun_Image?.Dispose();
             _flyTemplateMatcher.bmpRun_Image = (Bitmap)bmpScene.Clone();
 
@@ -107,6 +127,8 @@ namespace LaserAlignDX.AoiModel.V3
             return ok;
         }
 
+        #endregion
+
         public List<CMvdRectangleF> MatchResultRects
         {
             get;
@@ -120,6 +142,16 @@ namespace LaserAlignDX.AoiModel.V3
         }
 
         public bool CheckSpecialAngle(Bitmap bmpScene, out List<CBlobInfo> retBlobs, out float retAngle, out PointF retCenter)
+        {
+            lock (_flyRunGate)
+            {
+                if (_flyDisposed) throw new System.ObjectDisposedException(nameof(AoiModel_FlyCam));
+                return CheckSpecialAngleCore(bmpScene, out retBlobs, out retAngle, out retCenter);
+            }
+        }
+
+        #region PRIVATE_SPECIAL_ANGLE
+        bool CheckSpecialAngleCore(Bitmap bmpScene, out List<CBlobInfo> retBlobs, out float retAngle, out PointF retCenter)
         {
             bool bOK = false;
 
@@ -154,7 +186,7 @@ namespace LaserAlignDX.AoiModel.V3
                 {
                     foreach (var blob in mvdBlobFindTool.Result.BlobInfo)
                     {
-                        if (blob.AreaF >= _xFlyAoiParams.xBlobAreaMin && 
+                        if (blob.AreaF >= _xFlyAoiParams.xBlobAreaMin &&
                             blob.AreaF <= _xFlyAoiParams.xBlobAreaMax)
                         {
                             retBlobs.Add(blob);
@@ -223,5 +255,6 @@ namespace LaserAlignDX.AoiModel.V3
 
             return bOK;
         }
+        #endregion
     }
 }

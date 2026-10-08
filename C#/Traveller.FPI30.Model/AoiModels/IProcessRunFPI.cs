@@ -1,16 +1,16 @@
 ﻿#region AUTHOR
 /*
- * 
+ *
  * Copyright (c) 2025 JetEazy Corp. All rights reserved.
- * 
+ *
  * REVISION:
  *      2026-10-08 使用 ChatGPT Codex  重整 (by LeTian Chang)
  *      2025-08-01 開始重整 (by LeTian Chang)
- * 
+ *
  * http://www.jeteazy.com
  * https://github.com/lloydztw
  * https://lloydztw.github.io/mysite/
- * 
+ *
  */
 #endregion
 
@@ -108,6 +108,7 @@ namespace LaserAlignDX.AoiModel
         IAoiBadConnInspector GetBadConnInspector();
         IAoiQrDecoder GetAoiQrDecoder();
         IAoiFlyCamMatcher GetFlyCameraAoi();
+        IAoiFlyCamRunner GetFlyCameraAoiRunner();
         #endregion
     }
 }

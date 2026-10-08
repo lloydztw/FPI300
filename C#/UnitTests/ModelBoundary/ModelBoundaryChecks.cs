@@ -168,6 +168,7 @@ internal static class ModelBoundaryChecks
                 AoiBoundaryChecks.Run();
                 SystemModelChecks.Run();
                 DataModelChecks.Run(output);
+                FlyRunnerChecks.Run();
             }
             Check(!AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "FPI30AOIX3" || a.GetName().Name == "Traveller.FPI30.Machine"), "Test loaded the host or hardware DLL.");
             Console.WriteLine("PASS model DLL boundary, Unicode INI, V38 coordinates, region cells/traversal/statistics/ownership, recipe round-trip, training callbacks and host disposal");

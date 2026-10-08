@@ -238,8 +238,8 @@
     <Compile Include="Log\ModelDiagnostics.cs" />
     <Compile Include="Utils\GaImageUtil.cs" />
     <Compile Include="Utils\GaMvdConvertor.cs" />
-    <Compile Include="Data\FlyAoiResult.cs" />
-    <Compile Include="Data\FlyMetaData.cs" />
+    <Compile Include="AoiModels\6_FlyCam\FlyAoiResult.cs" />
+    <Compile Include="AoiModels\6_FlyCam\FlyMetaData.cs" />
     <Compile Include="AoiModels\IAoiChipLocator.cs" />
     <Compile Include="AoiModels\IAoiChipMeasurer.cs" />
     <Compile Include="AoiModels\IAoiDefectsDetector.cs" />
@@ -290,6 +290,10 @@
     <Compile Include="Data\LotDataHolder.cs" />
     <Compile Include="Data\PlcDataPacker.cs" />
     <Compile Include="Utils\StringBuilderExt.cs" />
+    <Compile Include="AoiModels\IAoiFlyCamRunner.cs" />
+    <Compile Include="AoiModels\6_FlyCam\FlyAoiRunOptions.cs" />
+    <Compile Include="AoiModels\6_FlyCam\AoiModel_FlyCam.Runner.cs" />
+    <Compile Include="AoiModels\7_MvdTools\TemplatePositioningCalculator2D.cs" />
     <Compile Include="Data\ModelDataServices.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
