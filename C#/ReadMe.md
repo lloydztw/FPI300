@@ -67,12 +67,14 @@
 # 3. ToDo Lists (待完成事項)
 
 ## 3.1 大陣列 Grid Builder 失準
-- To be continued
 
-## 3.2 使用選轉拉框 來框選 Golden
-- To be continued
-
-## 3.3 語言
-- GaUtil.LOG
-- ToChangeLanguage
-- MenuContextStrip
+- (1) 泰國版
+	使用 2_ChipLocator/v35 的 EzPadsGridFinder
+	- 但某些小料 pad 會抓錯 !!!	
+	- 2026-07-09 已修正參數設定, 並重新校正大陣列 Grid Builder, 現在已經正常.
+	- 待驗證
+	
+- (2) 長電 
+	使用 2_ChipLocator/v31 的 EzPadsGridFinder
+	- 2026-07-08 長電版大陣列 Grid Builder 失準
+	- 待驗證
